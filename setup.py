@@ -31,7 +31,7 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Stuff :: Stuff",
         "License :: OSI Approved :: BSD-3-Clause",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3",
     ],
 
     keywords=["plasma", "physics", "solar wind", "measurements"]
