@@ -8,7 +8,7 @@ Python data analysis tools for solar wind measurements.
 
 ## License
 
-
+SolarWindPy is licensed under a standard 3-clause BSD license. See [``LICENSE.md``](LICENSE.md).
 
 ## Acknowledging and Citing SolarWindPy
 
