@@ -15,7 +15,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="solarwindpy",
-    version="0.0.1",
+    version="0.0.1.dev",
     description="Python data analysis tools for solar wind measurements.",
     long_description=long_description,
     long_description_content_type="text/markdown",
