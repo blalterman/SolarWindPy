@@ -1,4 +1,6 @@
 # SolarWindPy
+[![Build Status](https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master)](https://travis-ci.com/blalterman/SolarWindPy)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](./LICENSE.md)
 
 Python data analysis tools for solar wind measurements.
 
