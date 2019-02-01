@@ -39,7 +39,7 @@ setup(
     #packages=find_packages(exclude=["contrib", "docs", "tests"]),  # Required
     
     python_requires=">=3.5, <4",
-    install_requires=["numpy", "scipy", "pandas", "numexpr", "bottleneck", 
+    install_requires=["numpy", "scipy", "pandas", "h5py", "numexpr", "bottleneck", 
         "yaml", "pyyaml", "unittest"],  # Optional
 
     },
