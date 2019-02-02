@@ -4,6 +4,24 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+ 
+ notifications:
+    email:
+        recipients:
+            - balterma@umich.edu
+        on_success: change  # always|never|change
+        on_failure: always
+
+ 
+# command to install dependencies
+# script: python tests/test_all_of_the_units.py
+branches:
+  only:
+    - master
+
+# after_success:
+#     - codecov
+
 # # command to install dependencies
 # install:
 #   - pip install -r requirements.txt
@@ -97,13 +115,3 @@ matrix:
 
 # script:
 #    - $MAIN_CMD $SETUP_CMD
-
-after_success:
-    - codecov
-
-notifications:
-    email:
-        recipients:
-            - balterma@umich.edu
-        on_success: change  # always|never|change
-        on_failure: always
