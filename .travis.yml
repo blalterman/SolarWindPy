@@ -13,8 +13,8 @@ python:
         on_failure: always
 
  
-# command to install dependencies
-# script: python tests/test_all_of_the_units.py
+# command to install dependenciespy
+script: python solarwindpy/run_tests.py
 branches:
   only:
     - master
