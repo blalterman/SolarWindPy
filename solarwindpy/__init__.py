@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+r"""Package for solar wind data analysis."""
+
 import pdb
 import logging
 from pkg_resources import get_distribution, DistributionNotFound
