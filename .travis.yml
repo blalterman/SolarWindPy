@@ -12,11 +12,11 @@ python:
         on_failure: always
 
  
-# command to install dependenciespy
-script: python solarwindpy/run_tests.py
-branches:
-  only:
-    - master
+# # command to install dependenciespy
+# script: python solarwindpy/run_tests.py
+# branches:
+#   only:
+#     - master
 
 # after_success:
 #     - codecov
@@ -48,10 +48,10 @@ branches:
 #         # - FLAKE8_OPT='--ignore=E501'
 #         - FLAKE8_OPT=""
 
-matrix:
+# matrix:
 
-    # Don't wait for allowed failures
-    fast_finish: true
+#     # Don't wait for allowed failures
+#     fast_finish: true
 
 #     include:
 #         # Try MacOS X
