@@ -2,4 +2,4 @@
 
 from setuputils import setup
 
-setup()
+setup(use_scm_version=True)
