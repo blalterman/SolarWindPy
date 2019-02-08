@@ -1,1 +1,13 @@
--e .
+# The following was taken from (https://caremad.io/posts/2013/07/setup-vs-requirement/)
+# but failed, so I'll try explicitly listing the versions I need. (20190207)
+# -e .
+
+Bottleneck==1.2.1
+numexpr==2.6.9
+numpy==1.16.1
+pandas==0.24.0
+pkginfo==1.5.0.1
+pycodestyle==2.5.0
+pydocstyle==3.0.0
+PyYAML==3.13
+scipy==1.2.0
