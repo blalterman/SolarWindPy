@@ -2,6 +2,9 @@
 # but failed, so I'll try explicitly listing the versions I need. (20190207)
 # -e .
 
+# To learn more about requirements files, see 
+# (https://pip.readthedocs.io/en/1.1/requirements.html)
+
 Bottleneck==1.2.1
 numexpr==2.6.9
 numpy==1.16.1
