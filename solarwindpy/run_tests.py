@@ -44,8 +44,10 @@ if __name__ == "__main__":
 
 #     try:
     verbose = 0
-    testsuite = load_plasma_and_related_tests()
-    unittest.TextTestRunner(verbosity=verbose).run(testsuite)
+#     testsuite = load_plasma_and_related_tests()
+#     unittest.TextTestRunner(verbosity=verbose).run(testsuite)
+    test_loader = unittest.TestLoader().discover(".", pattern="test_*.py")
+    unittest.main(verbosity=verbose, testLoader=test_loader)
 
 #     except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
 #         import sys
