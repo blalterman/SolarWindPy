@@ -24,18 +24,27 @@ from __future__ import division
 
 import pdb
 import unittest
+import os
+import sys
 
+# def load_all_tests():
+#     return unittest.TestLoader().discover(".", pattern="test_*.py")
+# def load_plasma_and_related_tests():
+#     suites = [unittest.TestLoader().discover(".", pattern="test_%s.py" % m)
+#         for m in ["base", "quantities", "ions", "plasma", "alfvenic_turbulence"]]
+#     testsuite = unittest.TestSuite(suites)
+#     return testsuite
 
-def load_all_tests():
-    return unittest.TestLoader().discover(".", pattern="test_*.py")
-def load_plasma_and_related_tests():
-    suites = [unittest.TestLoader().discover(".", pattern="test_%s.py" % m)
-        for m in ["base", "quantities", "ions", "plasma", "alfvenic_turbulence"]]
-    testsuite = unittest.TestSuite(suites)
-    return testsuite
+# See https://docs.python.org/3/library/unittest.html#load-tests-protocol
+# for source.
+def load_tests(loader, standard_tests, pattern):
+    # top level directory cached on loader instance
+    this_dir = os.path.dirname(__file__)
+    package_tests = loader.discover(start_dir=this_dir, pattern="test_*.py")
+    standard_tests.addTests(package_tests)
+    return standard_tests
 
 if __name__ == "__main__":
-    import sys
 
     # Just make recursion stacks smaller in Terminal.
     # Comment this line if it causes problems with other
@@ -43,11 +52,14 @@ if __name__ == "__main__":
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
 #     try:
-    verbose = 0
+    verbose = 1
 #     testsuite = load_plasma_and_related_tests()
 #     unittest.TextTestRunner(verbosity=verbose).run(testsuite)
-    test_loader = unittest.TestLoader().discover(".", pattern="test_*.py")
-    unittest.main(verbosity=verbose, testLoader=test_loader)
+#     test_loader = unittest.TestLoader().discover(".", pattern="test_*.py")
+    #pdb.set_trace()
+    unittest.main(verbosity=verbose,
+            #testLoader=test_loader
+            )
 
 #     except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
 #         import sys
