@@ -42,15 +42,15 @@ if __name__ == "__main__":
     # tests or decrease the denominator.
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
-    try:
-        verbose = 0
-        testsuite = load_plasma_and_related_tests()
-        unittest.TextTestRunner(verbosity=verbose).run(testsuite)
+#     try:
+    verbose = 0
+    testsuite = load_plasma_and_related_tests()
+    unittest.TextTestRunner(verbosity=verbose).run(testsuite)
 
-    except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
-        import sys
-        import traceback as tb
+#     except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
+#         import sys
+#         import traceback as tb
 
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])
+#         exc_info = sys.exc_info()
+#         tb.print_exception(*exc_info)
+#         pdb.post_mortem(exc_info[-1])
