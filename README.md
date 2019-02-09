@@ -22,7 +22,9 @@ TODO
     >>> python setup.py develop
     ```
 4) Verify the current tests pass.
-  ```>>> python -m solarwindpy.tests.run_tests```
+  ```
+  >>> python -m solarwindpy.tests.run_tests
+  ```
   
 
 ## License
