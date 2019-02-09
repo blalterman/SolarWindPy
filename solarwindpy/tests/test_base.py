@@ -17,7 +17,7 @@ Notes
 -
 
 """
-
+print(__file__)
 import pdb
 
 import re as re
@@ -39,8 +39,6 @@ from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
-
-# from plasma import Plasma, Ion, BField
 
 pd.set_option("mode.chained_assignment", "raise")
 

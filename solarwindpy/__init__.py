@@ -10,6 +10,8 @@ __all__ = ["plasma", "ions", "tensor", "vector", "base", "units_constants"]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
 
+__name__ = "solarwindpy"
+
 try:
     __version__ = get_distribution(__name__).version
 except DistributionNotFound:

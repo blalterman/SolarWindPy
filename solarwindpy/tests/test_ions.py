@@ -17,7 +17,7 @@ Notes
 -
 
 """
-
+print(__file__)
 import pdb
 
 import re as re
@@ -40,13 +40,15 @@ from unittest import TestCase
 from scipy import constants
 from scipy.constants import physical_constants
 
-
-import vector
-import tensor
-import ions
-# from plasma import Plasma, Ion, BField
-
 import test_base as base
+
+print("starting context imports")
+
+from solarwindpy import vector
+from solarwindpy import tensor
+from solarwindpy import ions
+
+print("done context imports")
 
 pd.set_option("mode.chained_assignment", "raise")
 
