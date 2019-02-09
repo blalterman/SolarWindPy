@@ -17,8 +17,6 @@ Notes
 -
 
 """
-print(__file__)
-
 import pdb
 import unittest
 import os

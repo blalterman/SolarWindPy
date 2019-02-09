@@ -18,7 +18,6 @@ Notes
 -
 
 """
-print(__file__)
 import pdb
 
 import re as re
@@ -43,14 +42,11 @@ from scipy.constants import physical_constants
 
 import test_base as base
 
-print("starting context imports")
-
 from solarwindpy import vector
 from solarwindpy import ions
 from solarwindpy import plasma
 #import alfvenic_turbulence
 
-print("done context imports")
 
 pd.set_option("mode.chained_assignment", "raise")
 

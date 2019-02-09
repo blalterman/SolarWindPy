@@ -17,7 +17,6 @@ Notes
 -
 
 """
-print(__file__)
 import pdb
 
 import re as re
