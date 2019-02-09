@@ -3,7 +3,7 @@ python:
     - "3.5"
     - "3.6"
 #     - "3.7"
- 
+
 notifications:
     email:
         recipients:
@@ -11,9 +11,9 @@ notifications:
         on_success: change  # always|never|change
         on_failure: always
 
- 
+
 # command to install dependenciespy
-script: python solarwindpy/run_tests.py
+script: python solarwindpy/tests/run_tests.py
 branches:
     only:
         - master
@@ -66,7 +66,7 @@ branches:
 #         # the Numpy developers have taken care of testing Numpy with different
 #         # versions of Python, we can vary Python and Numpy versions at the same
 #         # time.
-        
+
 #         - os: linux
 #           env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.13
 #         - os: linux
