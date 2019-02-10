@@ -11,12 +11,15 @@ notifications:
         on_success: change  # always|never|change
         on_failure: always
 
-
-# command to install dependenciespy
 install:
   - pip install -r requirements.txt
   - pip install .
+
 script: python solarwindpy/tests/run_tests.py
+# TODO: Figure out how to get `pydocstyle` and `pycodestyle` to run
+#     pycodestyle solarwindpy
+#     pydocstyle solarwindpy
+    
 branches:
     only:
         - master
