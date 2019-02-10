@@ -4,7 +4,7 @@ import pdb
 import logging
 from pkg_resources import get_distribution, DistributionNotFound
 
-from . import units_constants, base, vector, tensor, ions, plasma
+from .core import units_constants, base, vector, tensor, ions, plasma
 from . import plotting
 pp = plotting
 
