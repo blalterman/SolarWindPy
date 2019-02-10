@@ -5,8 +5,12 @@ import logging
 from pkg_resources import get_distribution, DistributionNotFound
 
 from . import units_constants, base, vector, tensor, ions, plasma
+from . import plotting
+pp = plotting
 
-__all__ = ["plasma", "ions", "tensor", "vector", "base", "units_constants"]
+__all__ = ["plasma", "ions", "tensor", "vector", "base", "units_constants",
+           "plotting", "pp",
+          ]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
 
