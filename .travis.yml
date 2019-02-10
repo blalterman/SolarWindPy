@@ -15,10 +15,10 @@ install:
   - pip install -r requirements.txt
   - pip install .
 
-script: 
-    python solarwindpy/tests/run_tests.py
-    pycodestyle solarwindpy
-    pydocstyle solarwindpy
+script: python solarwindpy/tests/run_tests.py
+# TODO: Figure out how to get `pydocstyle` and `pycodestyle` to run
+#     pycodestyle solarwindpy
+#     pydocstyle solarwindpy
     
 branches:
     only:
