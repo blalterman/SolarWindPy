@@ -23,21 +23,19 @@ Notes
 
 """
 
-import pdb
+import pdb  # noqa: F401
 import logging
 
-import re         as re
-import numpy      as np
-import pandas     as pd
+# import re as re
+import numpy as np
+import pandas as pd
 import matplotlib as mpl
 
-from pathlib     import Path
-from matplotlib  import pyplot as plt
-from numbers     import Number
+from pathlib import Path
+from matplotlib import pyplot as plt
+from numbers import Number
 from collections import namedtuple
-from abc         import (ABC,
-                         abstractclassmethod, abstractmethod, abstractproperty,
-                         abstractstaticmethod)
+from abc import ABC, abstractmethod, abstractproperty
 
 try:
     from astropy.stats import knuth_bin_width
@@ -47,7 +45,8 @@ except ModuleNotFoundError:
 from . import tools
 
 LogAxes = namedtuple("LogAxes", "x,y")
-Labels  = namedtuple("Labels", "x,y,z", defaults=(None,))
+Labels = namedtuple("Labels", "x,y,z", defaults=(None,))
+
 
 class AggPlot(ABC):
     @abstractmethod
@@ -60,6 +59,7 @@ class AggPlot(ABC):
     @property
     def logger(self):
         return self._logger
+
     def _init_logger(self):
         logger = logging.getLogger(name="analysis.%s" % self.__class__.__name__)
         self._logger = logger
@@ -67,27 +67,35 @@ class AggPlot(ABC):
     @property
     def data(self):
         return self._data
+
     @property
     def bins(self):
         return self._bins
+
     @property
     def clip(self):
         return self._clip
+
     @property
     def cut(self):
         return self._cut
+
     @property
     def logx(self):
         return self._logx
+
     @property
     def xlabel(self):
         return self._xlabel
+
     @property
     def ylabel(self):
         return self._ylabel
+
     @property
     def clim(self):
         return self._clim
+
     @property
     def other_axis(self):
         tko = [c for c in self.data.columns if c not in self._agg_axes]
@@ -119,7 +127,9 @@ class AggPlot(ABC):
         bins = {}
 
         for k in self._agg_axes:
-            d = data.loc[:, k].dropna() # Numpy and Astropy don't like NaNs when calculating bins.
+            d = data.loc[
+                :, k
+            ].dropna()  # Numpy and Astropy don't like NaNs when calculating bins.
 
             if isinstance(nbins, str):
                 nbins = nbins.lower()
@@ -142,10 +152,10 @@ class AggPlot(ABC):
                 except AttributeError:
                     c, b = np.histogram(d, nbins)
 
-#             elif hasattr(nbins, "__iter__"):
-#                 b = nbins
-#             else:
-#                 raise ValueError("Unrecognized `nbins`\nnbins: %s" % (nbins))
+            #             elif hasattr(nbins, "__iter__"):
+            #                 b = nbins
+            #             else:
+            #                 raise ValueError("Unrecognized `nbins`\nnbins: %s" % (nbins))
 
             assert np.unique(b).size == b.size
             assert not np.isnan(b).any()
@@ -161,13 +171,13 @@ class AggPlot(ABC):
 
         cut = {}
         for k in self._agg_axes:
-            d      = data.loc[:, k]
-            b      = bins.loc[:, k]
+            d = data.loc[:, k]
+            b = bins.loc[:, k]
 
             if self.clip:
                 d = self.clip_data(d, b, self.clip)
 
-            c      = pd.cut(d, b)
+            c = pd.cut(d, b)
             cut[k] = c
 
         cut = pd.DataFrame.from_dict(cut, orient="columns")
@@ -181,7 +191,7 @@ class AggPlot(ABC):
 
         other = self.data.loc[:, tko]
         joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
-        gb    = joint.groupby(list(self._agg_axes))
+        gb = joint.groupby(list(self._agg_axes))
 
         if other.dropna().unique().size == 1:
             fcn = "count"
@@ -193,11 +203,11 @@ class AggPlot(ABC):
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
             cnt = gb.agg("count").loc[:, tko]
-            tk  = pd.Series(True, index=agg.index)
-#             tk  = pd.DataFrame(True,
-#                                index=agg.index,
-#                                columns=agg.columns
-#                               )
+            tk = pd.Series(True, index=agg.index)
+            #             tk  = pd.DataFrame(True,
+            #                                index=agg.index,
+            #                                columns=agg.columns
+            #                               )
             if c0 is not None:
                 tk = tk & (cnt >= c0)
             if c1 is not None:
@@ -208,28 +218,28 @@ class AggPlot(ABC):
         return agg
 
     # Old version that cuts at percentiles.
-#     @staticmethod
-#     def clip_data(data, clip):
-#         q0 = 0.001
-#         q1 = 0.999
-#         pct = data.quantile([q0, q1])
-#         lo  = pct.loc[q0]
-#         up  = pct.loc[q1]
-#         if isinstance(clip, str) and clip.lower()[0] == "l":
-#             data = data.clip_lower(lo, axis=1)
-#         elif isinstance(clip, str) and clip.lower()[0] == "u":
-#             data = data.clip_upper(up, axis=1)
-#         else:
-#             data = data.clip(lo, up, axis=1)
-#         return data
+    #     @staticmethod
+    #     def clip_data(data, clip):
+    #         q0 = 0.001
+    #         q1 = 0.999
+    #         pct = data.quantile([q0, q1])
+    #         lo  = pct.loc[q0]
+    #         up  = pct.loc[q1]
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo, axis=1)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up, axis=1)
+    #         else:
+    #             data = data.clip(lo, up, axis=1)
+    #         return data
     # New version that uses binning to cut.
     @staticmethod
     def clip_data(data, bins, clip):
-#         q0 = 0.001
-#         q1 = 0.999
-#         pct = data.quantile([q0, q1])
-#         lo  = pct.loc[q0]
-#         up  = pct.loc[q1]
+        #         q0 = 0.001
+        #         q1 = 0.999
+        #         pct = data.quantile([q0, q1])
+        #         lo  = pct.loc[q0]
+        #         up  = pct.loc[q1]
         lo = bins.iloc[0]
         up = bins.iloc[-1]
         if isinstance(clip, str) and clip.lower()[0] == "l":
@@ -243,36 +253,34 @@ class AggPlot(ABC):
     @abstractmethod
     def set_ylabel(self, ylbl):
         pass
+
     @abstractproperty
     def path(self):
         pass
+
     @abstractproperty
     def _agg_axes(self):
         pass
+
     @abstractmethod
     def set_path(self, new):
         pass
+
     @abstractmethod
     def set_data(self, x, y, logx, clip):
         pass
-    @abstractmethod
-    def set_ylabel(self, ylbl):
-        pass
+
     @abstractmethod
     def _format_axis(self, ax):
         pass
+
     @abstractmethod
     def make_plot(self):
         pass
 
 
 class Hist1D(AggPlot):
-    def __init__(self, x,
-                 y=None,
-                 logx=False,
-                 clip_data=True,
-                 nbins=101
-                ):
+    def __init__(self, x, y=None, logx=False, clip_data=True, nbins=101):
         self.set_data(x, y, logx, clip_data)
         self.calc_bins(nbins=nbins)
         self.make_cut()
@@ -324,11 +332,10 @@ class Hist1D(AggPlot):
 
     def set_data(self, x, y, logx, clip):
         logx = bool(logx)
-        data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x,
-                            })
+        data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
 
-#         if clip:
-#             data = self.clip_data(data, clip)
+        #         if clip:
+        #             data = self.clip_data(data, clip)
 
         if y is None:
             y = pd.Series(1, index=x.index)
@@ -359,15 +366,15 @@ class Hist1D(AggPlot):
 
     def make_plot(self, ax=None, **kwargs):
         agg = self.agg()
-        tko = self.other_axis
-        x   = pd.IntervalIndex(agg.index).mid
-        y   = agg
+        #         tko = self.other_axis
+        x = pd.IntervalIndex(agg.index).mid
+        y = agg
 
         if ax is None:
             fig, ax = plt.subplots()
 
         if self.logx:
-            x = 10.0**x
+            x = 10.0 ** x
 
         ax.plot(x, y, **kwargs)
 
@@ -424,14 +431,18 @@ class Hist2D(AggPlot):
     make_plot:
         Make a 2D plot of the data with an optional color bar.
     """
-    def __init__(self, x, y,
-                 z=None,
-                 axnorm=None,
-                 logx=False,
-                 logy=False,
-                 clip_data=False,
-                 nbins=101,
-                ):
+
+    def __init__(
+        self,
+        x,
+        y,
+        z=None,
+        axnorm=None,
+        logx=False,
+        logy=False,
+        clip_data=False,
+        nbins=101,
+    ):
         self._init_logger()
         self.set_data(x, y, z, logx, logy, clip_data)
         self.set_axnorm(axnorm)
@@ -446,15 +457,19 @@ class Hist2D(AggPlot):
     @property
     def _agg_axes(self):
         return ("x", "y")
+
     @property
     def logy(self):
         return self._logy
+
     @property
     def zlabel(self):
         return self._zlabel
+
     @property
     def axnorm(self):
         return self._axnorm
+
     @property
     def path(self):
         path = self._path
@@ -466,16 +481,16 @@ class Hist2D(AggPlot):
         if axnorm:
             z = axnorm.capitalize() + "norm"
 
-        scale_info = "-".join(["logX" if self.logx else "linX",
-                               "logX" if self.logy else "linY",
-                               z
-                              ]).strip("-")
+        scale_info = "-".join(
+            ["logX" if self.logx else "linX", "logX" if self.logy else "linY", z]
+        ).strip("-")
 
         out = path / scale_info
         return out
 
     def set_ylabel(self, ylbl):
         self._ylabel = ylbl
+
     def set_zlabel(self, zlbl):
         # BUG: path's won't auto create if they are strings.
         axnorm = self.axnorm
@@ -506,11 +521,11 @@ class Hist2D(AggPlot):
         path = Path("")
         if new == "auto":
             path = path / self.xlabel.path / self.ylabel.path
-#             for c in (self.xlabel, self.ylabel, self.zlabel):
-#                 try:
-#                     path = path / c.path
-#                 except AttributeError:
-#                     pass
+            #             for c in (self.xlabel, self.ylabel, self.zlabel):
+            #                 try:
+            #                     path = path / c.path
+            #                 except AttributeError:
+            #                     pass
 
             try:
                 path = path / self.zlabel.path
@@ -527,21 +542,18 @@ class Hist2D(AggPlot):
 
         self._path = path
 
-    def set_axnorm(self, new):
-        if new is not None:
-            new = new.lower()[0]
-            assert new in ("c", "r", "t", "d")
-        self._axnorm = new
-
     def set_data(self, x, y, z, logx, logy, clip):
         logx = bool(logx)
         logy = bool(logy)
-        data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x,
-                             "y": np.log10(np.abs(y)) if logy else y,
-                            })
+        data = pd.DataFrame(
+            {
+                "x": np.log10(np.abs(x)) if logx else x,
+                "y": np.log10(np.abs(y)) if logy else y,
+            }
+        )
 
-#         if clip:
-#             data = self.clip_data(data, clip)
+        #         if clip:
+        #             data = self.clip_data(data, clip)
 
         if z is None:
             z = pd.Series(1, index=x.index)
@@ -590,16 +602,16 @@ class Hist2D(AggPlot):
             dx = x.right - x.left
             dy = y.right - y.left
             if self.logx:
-                dx = 10.0**dx
+                dx = 10.0 ** dx
             if self.logy:
-                dy = 10.0**dy
+                dy = 10.0 ** dy
             agg = agg.divide(dx, axis=1).divide(dy, axis=0).divide(N)
 
         else:
             raise ValueError("Unrecognized axnorm: %s" % axnorm)
 
         agg.columns = pd.IntervalIndex(agg.columns)
-        agg.index   = pd.IntervalIndex(agg.index)
+        agg.index = pd.IntervalIndex(agg.index)
 
         return agg
 
@@ -621,12 +633,12 @@ class Hist2D(AggPlot):
 
     def _make_cbar(self, mappable, ax, **kwargs):
         label = kwargs.pop("label", self.zlabel)
-#         if label is None and self.data.loc[:, "z"].unique().size == 1:
-#             label = r"$\mathrm{Count} \; [\#]$"
+        #         if label is None and self.data.loc[:, "z"].unique().size == 1:
+        #             label = r"$\mathrm{Count} \; [\#]$"
 
-#         fig = ax.figure
-#         if isinstance(kwargs["cax"], mpl.axes.Axes):
-#             ax = None
+        #         fig = ax.figure
+        #         if isinstance(kwargs["cax"], mpl.axes.Axes):
+        #             ax = None
         cbar = ax.figure.colorbar(mappable, ax=ax, label=label, **kwargs)
         return cbar
 
@@ -636,29 +648,33 @@ class Hist2D(AggPlot):
             return None
 
         pct = self.data.loc[:, "z"].quantile([0.01, 0.99])
-        v0  = pct.loc[0.01]
-        v1  = pct.loc[0.99]
+        v0 = pct.loc[0.01]
+        v1 = pct.loc[0.99]
         if norm.vmin is None:
             norm.vmin = v0
         if norm.vmax is None:
             norm.vmax = v1
         norm.clip = True
 
-    def make_plot(self, ax=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs):
+    def make_plot(
+        self, ax=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs
+    ):
         agg = self.agg()
-        x   = pd.IntervalIndex(agg.columns).mid
-        y   = pd.IntervalIndex(agg.index).mid
+        x = pd.IntervalIndex(agg.columns).mid
+        y = pd.IntervalIndex(agg.index).mid
 
         if ax is None:
             fig, ax = plt.subplots()
 
         if self.logx:
-            x = 10.0**x
+            x = 10.0 ** x
         if self.logy:
-            y = 10.0**y
+            y = 10.0 ** y
 
         axnorm = self.axnorm
-        norm = kwargs.pop("norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None)
+        norm = kwargs.pop(
+            "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
+        )
 
         if limit_color_norm:
             self._limit_color_norm(norm)
@@ -675,7 +691,6 @@ class Hist2D(AggPlot):
         self._format_axis(ax)
 
         return ax, cbar
-
 
 
 class GridHist2D(object):
@@ -722,6 +737,7 @@ class GridHist2D(object):
     make_plots:
         Make the `Hist2D` plots.
     """
+
     def __init__(self, x, y, cat, z=None):
         r"""Create 2D heatmaps of x, y, and optional z data in a grid for which
         each unique element in `cat` specifies one plot.
@@ -739,23 +755,28 @@ class GridHist2D(object):
         self.set_axnorm(None)
         self.set_log(x=False, y=False)
         self.set_data(x, y, cat, z)
-        self._labels = Labels("x", "y") # Unsure how else to set defaults.
+        self._labels = Labels("x", "y")  # Unsure how else to set defaults.
         self.set_cnorms(None)
-#         self._init_fig(use_gs)
+
+    #         self._init_fig(use_gs)
 
     @property
     def data(self):
         return self._data
+
     @property
     def axnorm(self):
         r"""Axis normalization."""
         return self._axnorm
+
     @property
     def log(self):
         return self._log
+
     @property
     def nbins(self):
         return self._nbins
+
     @property
     def labels(self):
         return self._labels
@@ -763,6 +784,7 @@ class GridHist2D(object):
     @property
     def grouped(self):
         return self.data.groupby("cat")
+
     @property
     def hist2ds(self):
         try:
@@ -776,19 +798,23 @@ class GridHist2D(object):
             return self._fig
         except AttributeError:
             return self._init_fig()[0]
+
     @property
     def axes(self):
         try:
             return self._axes
         except AttributeError:
             return self._init_fig()[1]
+
     @property
     def cbars(self):
         return self._cbars
+
     @property
     def cnorms(self):
         r"""Color normalization (mpl.colors.Normalize instance)."""
         return self._cnorms
+
     @property
     def use_gs(self):
         return self._use_gs
@@ -799,10 +825,13 @@ class GridHist2D(object):
 
     def set_nbins(self, new):
         self._nbins = new
+
     def set_axnorm(self, new):
         self._axnorm = new
+
     def set_cnorms(self, new):
         self._cnorms = new
+
     def set_log(self, x=None, y=None):
         if x is None:
             x = self.log.x
@@ -810,15 +839,14 @@ class GridHist2D(object):
             y = self.log.y
         log = LogAxes(x, y)
         self._log = log
+
     def set_data(self, x, y, cat, z):
-        data = {"x"  : x,
-                "y"  : y,
-                "cat": cat
-               }
+        data = {"x": x, "y": y, "cat": cat}
         if z is not None:
             data["z"] = z
         data = pd.concat(data, axis=1)
         self._data = data
+
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels. Any label not specified in kwargs
         is propagated from `self.labels.<x, y, or z>`.
@@ -840,14 +868,17 @@ class GridHist2D(object):
             raise NotImplementedError("Unsure how to consistently store single cax.")
             fig = plt.figure(figsize=np.array([8, 6]) * scale)
 
-            gs = mpl.gridspec.GridSpec(3, 5,
-                                       width_ratios=[1, 1, 1, 1, 0.1],
-                                       height_ratios=[1, 1, 1],
-                                       hspace=0, wspace=0,
-                                       figure=fig,
-                                      )
+            gs = mpl.gridspec.GridSpec(
+                3,
+                5,
+                width_ratios=[1, 1, 1, 1, 0.1],
+                height_ratios=[1, 1, 1],
+                hspace=0,
+                wspace=0,
+                figure=fig,
+            )
 
-            axes = np.array(12*[np.nan], dtype=object).reshape(3, 4)
+            axes = np.array(12 * [np.nan], dtype=object).reshape(3, 4)
             sharer = None
             for i in np.arange(0, 3):
                 for j in np.arange(0, 4):
@@ -877,22 +908,21 @@ class GridHist2D(object):
                 ax.tick_params(which="y", labelleft=False)
                 ax.yaxis.label.set_visible(False)
 
-            cax = plt.subplot(gs[:, -1])
+        #             cax = plt.subplot(gs[:, -1])
 
         else:
-            fig, axes = tools.subplots(nrows=3,
-                                       ncols=4,
-                                       scale_width=scale,
-                                       scale_height=scale)
-            cax = None
+            fig, axes = tools.subplots(
+                nrows=3, ncols=4, scale_width=scale, scale_height=scale
+            )
+        #             cax = None
 
         keys = sorted(self.grouped.groups.keys())
         axes = pd.Series(axes.ravel(), index=pd.CategoricalIndex(keys))
 
-        self._fig    = fig
-        self._axes   = axes
+        self._fig = fig
+        self._axes = axes
         self._use_gs = False
-        return fig, axes#, cax
+        return fig, axes  # , cax
 
     def make_h2ds(self):
         grouped = self.grouped
@@ -906,12 +936,15 @@ class GridHist2D(object):
             except KeyError:
                 z = None
 
-            h2d = Hist2D(x, y,
-                         z=z,
-                         logx=self.log.x, logy=self.log.y,
-                         clip_data=False,
-                         nbins=self.nbins
-                        )
+            h2d = Hist2D(
+                x,
+                y,
+                z=z,
+                logx=self.log.x,
+                logy=self.log.y,
+                clip_data=False,
+                nbins=self.nbins,
+            )
             h2d.set_axnorm(self.axnorm)
             h2d.set_xlabel(self.labels.x)
             h2d.set_ylabel(self.labels.y)
@@ -928,7 +961,14 @@ class GridHist2D(object):
         axes = self.axes
         for k, ax in axes.items():
             lbl = r"$v_\mathrm{sw} = %.0f$" % k.mid
-            ax.text(0.025, 0.95, lbl, transform=ax.transAxes, va="top", fontdict={"color": "k"})
+            ax.text(
+                0.025,
+                0.95,
+                lbl,
+                transform=ax.transAxes,
+                va="top",
+                fontdict={"color": "k"},
+            )
 
         ax.set_xlim(-1, 1)
         ax.set_ylim(-1, 1)
@@ -946,13 +986,13 @@ class GridHist2D(object):
                 cnorm = cnorms.loc[k]
 
             ax = axes.loc[k]
-            ax, cbar = h2d.make_plot(ax=ax,
-                                     norm=cnorm,
-                                     **kwargs)
+            ax, cbar = h2d.make_plot(ax=ax, norm=cnorm, **kwargs)
             if not self.use_gs:
                 cbars[k] = cbar
             else:
-                raise NotImplementedError("Unsure how to handle `use_gs == True` for color bars.")
+                raise NotImplementedError(
+                    "Unsure how to handle `use_gs == True` for color bars."
+                )
         cbars = pd.Series(cbars)
 
         self._format_axes()

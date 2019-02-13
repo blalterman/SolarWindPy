@@ -33,22 +33,25 @@ Notes
 -
 
 """
-import pdb
-import logging
+import pdb  # noqa: F401
 
-import re         as re
-import numpy      as np
-import pandas     as pd
-import warnings
+# import logging
+
+# import re as re
+import numpy as np
+import pandas as pd
+
+# import warnings
 import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# from numbers import Number
+# from pandas import MultiIndex as MI
 
-from abc import ABC, abstractmethod, abstractproperty
+# from abc import ABC, abstractmethod, abstractproperty
 
 from scipy import constants
-from scipy.constants import physical_constants
+
+# from scipy.constants import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -58,18 +61,20 @@ pd.set_option("mode.chained_assignment", "raise")
 try:
     from . import base
     from . import vector
-    from . import tensor
+
+    #     from . import tensor
     from . import ions
 #    from . import alfvenic_turbulence as alf_turb
 except ImportError:
     import base
     import vector
-    import tensor
+
+    #     import tensor
     import ions
 #    import alfvenic_turbulence as alf_turb
 
-class Plasma(base.Base):
 
+class Plasma(base.Base):
     def __init__(self, data, *species):
         r"""
         Instantiate a plasma.
@@ -98,11 +103,19 @@ class Plasma(base.Base):
             return self._auxiliary_data
         except AttributeError:
             raise AttributeError("No auxiliary data set.")
+
     @property
     def aux(self):
         return self.auxiliary_data
 
-    def save(self, fname, dkey="FC", akey="FC_AUX", data_modifier_fcn=None, aux_modifier_fcn=None):
+    def save(
+        self,
+        fname,
+        dkey="FC",
+        akey="FC_AUX",
+        data_modifier_fcn=None,
+        aux_modifier_fcn=None,
+    ):
         r"""
         Save the plasma's underlying data and aux DataFrame to an HDF5 file at `fname`.
 
@@ -129,39 +142,49 @@ class Plasma(base.Base):
             `data_modifier_fcn` for syntax.
         """
         fname = str(fname)
-        data  = self.data
-        aux   = self.aux
+        data = self.data
+        aux = self.aux
 
         if data_modifier_fcn is not None:
             from types import FunctionType
+
             if not isinstance(data_modifier_fcn, FunctionType):
-                msg = ("`modifier_fcn` must be a FunctionType. "
-                       "You passes '%s`.") % type(data_modifier_fcn)
+                msg = (
+                    "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+                ) % type(data_modifier_fcn)
                 raise TypeError(msg)
             data = data_modifier_fcn(data)
 
         if aux_modifier_fcn is not None:
             from types import FunctionType
+
             if not isinstance(aux_modifier_fcn, FunctionType):
-                msg = ("`modifier_fcn` must be a FunctionType. "
-                       "You passes '%s`.") % type(aux_modifier_fcn)
+                msg = (
+                    "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+                ) % type(aux_modifier_fcn)
                 raise TypeError(msg)
             aux = aux_modifier_fcn(aux)
 
         # Recalculate "w_scalar" on load, so no need to save.
         data.drop("scalar", axis=1, level="C").to_hdf(fname, key=dkey)
-        self.logger.info("data saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format("file", "dkey", "shape"),
-                         fname,
-                         dkey,
-                         data.shape
-                        )
+        self.logger.info(
+            "data saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
+                "file", "dkey", "shape"
+            ),
+            fname,
+            dkey,
+            data.shape,
+        )
 
         aux.to_hdf(fname, key=akey)
-        self.logger.info("aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format("file", "akey", "shape"),
-                         fname,
-                         akey,
-                         aux.shape
-                        )
+        self.logger.info(
+            "aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
+                "file", "akey", "shape"
+            ),
+            fname,
+            akey,
+            aux.shape,
+        )
 
     @classmethod
     def load_from_file(cls, fname, *species, dkey="FC", akey="FC_AUX", **kwargs):
@@ -190,22 +213,30 @@ class Plasma(base.Base):
             species = [s for s in data.columns.get_level_values("S").unique() if s]
         s_chk = [isinstance(s, str) for s in species]
         if not np.all(s_chk):
-            msg = "Only string species are allowed. Default or passed species: {}.".format(s_chk)
+            msg = "Only string species allowed. Default or passed species: {}.".format(
+                s_chk
+            )
             raise ValueError(msg)
 
         plasma = cls(data, *species, **kwargs)
-        plasma.logger.info("Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey)
+        plasma.logger.info(
+            "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
+        )
 
         if akey:
             aux = pd.read_hdf(fname, key=akey)
             aux.columns.names = ["M", "C", "S"]
 
             if not plasma.data.index.equals(aux.index):
-                msg = "You cannot load auxiliary data with an index that does not equal the plasma index."
+                msg = "Auxiliary data index must equal the plasma index."
                 raise ValueError(msg)
 
             plasma._auxiliary_data = aux
-            plasma.logger.info("Loaded auxiliary_data from file\nFile:  %s\nakey:  %s", str(fname), akey)
+            plasma.logger.info(
+                "Loaded auxiliary_data from file\nFile:  %s\nakey:  %s",
+                str(fname),
+                akey,
+            )
 
         # Put a try-except statement here to log when no auxiliary data is loaded.
 
@@ -218,7 +249,7 @@ class Plasma(base.Base):
         """
         species = self._clean_species_for_setting(*species)
         self._species = species
-        self.logger.debug("%s init with species %s", self.__class__.__name__,  (species))
+        self.logger.debug("%s init with species %s", self.__class__.__name__, (species))
 
     def _chk_species(self, *species):
         r"""
@@ -229,13 +260,13 @@ class Plasma(base.Base):
         minimal_species = np.unique([*itertools.chain(minimal_species)])
         minimal_species = pd.Index(minimal_species)
 
-#        print("",
-#              "<_chk_species>",
-#              "<conformed>: {}".format(species),
-#              "<minimal>: {}".format(minimal_species),
-#              "<available>: {}".format(self.ions.index),
-#              sep="\n",
-#              end="\n\n")
+        #        print("",
+        #              "<_chk_species>",
+        #              "<conformed>: {}".format(species),
+        #              "<minimal>: {}".format(minimal_species),
+        #              "<available>: {}".format(self.ions.index),
+        #              sep="\n",
+        #              end="\n\n")
 
         unavailable = minimal_species.difference(self.ions.index)
 
@@ -243,10 +274,12 @@ class Plasma(base.Base):
             requested = ", ".join(sorted(species))
             available = ", ".join(sorted(self.ions.index.values))
             unavailable = ", ".join(unavailable.values)
-            msg = ("Requested species unavailable.\n"
-                   "Requested: %s\n"
-                   "Available: %s\n"
-                   "Unavailable: %s")
+            msg = (
+                "Requested species unavailable.\n"
+                "Requested: %s\n"
+                "Available: %s\n"
+                "Unavailable: %s"
+            )
             # print(msg % (requested, available, unavailable), flush=True, end="\n")
             raise ValueError(msg % (requested, available, unavailable))
         return species
@@ -254,19 +287,22 @@ class Plasma(base.Base):
     @property
     def species(self):
         return self._species
+
     @property
     def ions(self):
         return self._ions
+
     def _set_ions(self):
         species = self.species
         if len(species) == 1:
             species = species[0].split(",")
-        assert np.all(["+" not in s for s in species]), \
-            "Plasma.species can't contain '+'."
+        assert np.all(
+            ["+" not in s for s in species]
+        ), "Plasma.species can't contain '+'."
         species = tuple(species)
 
-        ions_         = pd.Series({s: ions.Ion(self.data, s) for s in species})
-        self._ions    = ions_
+        ions_ = pd.Series({s: ions.Ion(self.data, s) for s in species})
+        self._ions = ions_
         self._species = species
 
     def set_data(self, new):
@@ -276,35 +312,36 @@ class Plasma(base.Base):
         assert new.columns.names == ["M", "C", "S"]
 
         # These are the only quantities we want in plasma.
-        tk_plasma = pd.IndexSlice[["year", "fdoy", "gse", "b", "n", "v", "w"],
-                                  ["", "x", "y", "z", "per", "par", "lat", "lon", "theta_rms", "mag_rms"],
-                                  list(self.species) + [""],
-                                 ]
+        tk_plasma = pd.IndexSlice[
+            ["year", "fdoy", "gse", "b", "n", "v", "w"],
+            ["", "x", "y", "z", "per", "par", "lat", "lon", "theta_rms", "mag_rms"],
+            list(self.species) + [""],
+        ]
 
         data = new.loc[:, tk_plasma].sort_index(axis=1)
         # We'll store this data in a secondary container.
-        aux  = new.drop(data.columns, axis=1).sort_index(axis=1)
+        aux = new.drop(data.columns, axis=1).sort_index(axis=1)
 
-#        drop_species = new.columns.get_level_values("S").unique()
-#        drop_species = [x for x in drop_species if x not in
-#                        self.species and x != ""]
-#        new = new.drop(drop_species, axis=1, level="S")
-#
-#        drop_errors = [k for k in new.columns if "err" in k[0]]
-#        new = new.drop(drop_errors, axis=1)
+        #        drop_species = new.columns.get_level_values("S").unique()
+        #        drop_species = [x for x in drop_species if x not in
+        #                        self.species and x != ""]
+        #        new = new.drop(drop_species, axis=1, level="S")
+        #
+        #        drop_errors = [k for k in new.columns if "err" in k[0]]
+        #        new = new.drop(drop_errors, axis=1)
 
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
-        w    = data.w.drop("scalar",
-                           axis=1,
-                           level="C").pow(2).multiply(coeff,
-                                                      axis=1,
-                                                      level="C")
+        w = (
+            data.w.drop("scalar", axis=1, level="C")
+            .pow(2)
+            .multiply(coeff, axis=1, level="C")
+        )
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #          where there is none.
         w = w.sum(axis=1, level="S", skipna=False).pipe(np.sqrt)
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
-        data = pd.concat([data,w,], axis=1)
+        data = pd.concat([data, w], axis=1)
 
         data.columns = self.mi_tuples(data.columns)
         data = data.sort_index(axis=1)
@@ -316,55 +353,73 @@ class Plasma(base.Base):
         self._data = data
         self.logger.debug("plasma shape: %s", data.shape)
         self._auxiliary_data = aux
-        self.logger.debug("auxiliary data added to plasma\nshape: %s\ncolumns: %s",
-                          aux.shape,
-                          "\n    ".join([""] + [str(x) for x in aux.columns.values])
-                          )
+        self.logger.debug(
+            "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
+            aux.shape,
+            "\n    ".join([""] + [str(x) for x in aux.columns.values]),
+        )
 
         self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
         # self._gse = GSE(new)
 
         nan_frame = data.isna()
-        nan_info  = pd.DataFrame({"count": nan_frame.sum(axis=0),
-                                  "mean": nan_frame.mean(axis=0)})
+        nan_info = pd.DataFrame(
+            {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
+        )
         # Log to DEBUG if no NaNs. Otherwise log to INFO.
         if nan_info.any().any():
-            self.logger.info("%.0f spectra contain at least one NaN",
-                              nan_info.any(axis=1).sum())
-#             self.logger.log(10 * int(1 + nan_info.any().any()),
-#                             "plasma NaN info\n%s", nan_info.to_string())
+            self.logger.info(
+                "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
+            )
+            #             self.logger.log(10 * int(1 + nan_info.any().any()),
+            #                             "plasma NaN info\n%s", nan_info.to_string())
             self.logger.debug("plasma NaN info\n%s", nan_info.to_string())
         else:
             self.logger.debug("plasma does not contain NaNs")
 
         pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-        stats = pd.concat({"lin": data.describe(percentiles=pct),
-                           "log": data.pipe(np.log10).describe(percentiles=pct)},
-                          axis=0).unstack(level=0).sort_index(axis=0).sort_index(axis=1).T
-        self.logger.debug("plasma stats\n%s\n%s",
-                           stats.loc[:, ["count", "mean", "std"]].to_string(),
-                           stats.drop(["count", "mean", "std"], axis=1).to_string())
+        stats = (
+            pd.concat(
+                {
+                    "lin": data.describe(percentiles=pct),
+                    "log": data.pipe(np.log10).describe(percentiles=pct),
+                },
+                axis=0,
+            )
+            .unstack(level=0)
+            .sort_index(axis=0)
+            .sort_index(axis=1)
+            .T
+        )
+        self.logger.debug(
+            "plasma stats\n%s\n%s",
+            stats.loc[:, ["count", "mean", "std"]].to_string(),
+            stats.drop(["count", "mean", "std"], axis=1).to_string(),
+        )
 
     @property
     def gse(self):
         return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
+
     @property
     def bfield(self):
         return self._bfield
-        #return vector.Vector(self.data.b.xs("", axis=1, level="S"))
+        # return vector.Vector(self.data.b.xs("", axis=1, level="S"))
+
     @property
     def b(self):
         r"""
         Shortcut for `bfield`.
         """
         return self.bfield
+
     def number_density(self, *species):
         r"""
         Get the ion number densities.
         """
         slist = self._chk_species(*species)
         n = self.data.n
-        #print("<Module>",
+        # print("<Module>",
         #      "<n>",
         #      type(n),
         #      n,
@@ -372,7 +427,7 @@ class Plasma(base.Base):
         if "C" in n.columns.names:
             n = n.xs("", axis=1, level="C")
         out = n.loc[:, slist[0] if len(slist) == 1 else slist]
-        #print(
+        # print(
         #      "<xs(c)>",
         #      type(n),
         #      n,
@@ -381,6 +436,7 @@ class Plasma(base.Base):
         #      out,
         #      "", sep="\n")
         return out
+
     def n(self, *species):
         r"""
         Shortcut to `number_density`.
@@ -413,6 +469,7 @@ class Plasma(base.Base):
             rho = rho.sum(axis=1)
             rho.name = species[0]
         return rho
+
     def rho(self, *species):
         r"""
         Shortcut to `mass_density` method.
@@ -437,7 +494,7 @@ class Plasma(base.Base):
             See Parameters for more info.
         """
         slist = self._chk_species(*species)
-        include_dynamic=False
+        include_dynamic = False
         if include_dynamic:
             raise NotImplementedError
 
@@ -516,23 +573,24 @@ class Plasma(base.Base):
 
             $\beta = w^2 / C_A^2$,
 
-        which is independent of dimensional constants. Given I define $p_{th} = \rho w^2/2$ and
-        $C_A^2 = B^2/\mu_0 \rho$ in SI units, I can rewrite $\beta$
+        which is independent of dimensional constants. Given I define
+        $p_{th} = \rho w^2/2$ and $C_A^2 = B^2/\mu_0 \rho$ in SI units, I can
+        rewrite $\beta$
 
             $\beta = (2 p_{th} / \rho) (\mu_0 \rho / B^2) = 2 \mu_0 p_{th}/B^2$.
         """
-        slist = self._chk_species(*species)
-        include_dynamic=False
+        slist = self._chk_species(*species)  # noqa: F841
+        include_dynamic = False
         if include_dynamic:
             raise NotImplementedError
 
-        pth  = self.pth(*species)
-        bsq  = self.bfield.mag.pow(2)
+        pth = self.pth(*species)
+        bsq = self.bfield.mag.pow(2)
         beta = pth.divide(bsq, axis=0)
 
-        units  = self.units.pth / (self.units.b**2.0)
-        coeff  = (2.0 * self.constants.misc.mu0 * units)
-        beta  *= coeff
+        units = self.units.pth / (self.units.b ** 2.0)
+        coeff = 2.0 * self.constants.misc.mu0 * units
+        beta *= coeff
         return beta
 
     def anisotropy(self, *species):
@@ -552,7 +610,7 @@ class Plasma(base.Base):
         temperature: pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        include_dynamic=False
+        include_dynamic = False
         if include_dynamic:
             raise NotImplementedError
 
@@ -560,7 +618,7 @@ class Plasma(base.Base):
         exp = pd.Series({"par": -1, "per": 1})
 
         if len(species) > 1:
-        # if "S" in pth.columns.names:
+            # if "S" in pth.columns.names:
             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
         else:
             ani = pth.pow(exp, axis=1).product(axis=1)
@@ -596,13 +654,15 @@ class Plasma(base.Base):
             v = self.ions.loc[list(stuple)].apply(lambda x: x.velocity)
             if len(species) == 1:
                 rhos = self.mass_density(*stuple)
-                v = pd.concat(v.apply(lambda x: x.cartesian).to_dict(),
-                              axis=1, names=["S"])
+                v = pd.concat(
+                    v.apply(lambda x: x.cartesian).to_dict(), axis=1, names=["S"]
+                )
                 rv = v.multiply(rhos, axis=1, level="S").sum(axis=1, level="C")
-                v = rv.divide(rhos.sum(axis=1),axis=0)
+                v = rv.divide(rhos.sum(axis=1), axis=0)
                 v = vector.Vector(v)
 
         return v
+
     def v(self, *species):
         r"""
         Shortcut to `velocity`.
@@ -628,8 +688,10 @@ class Plasma(base.Base):
         vector.Vector
         """
         if s0 == s1:
-            msg = ("The differential flow between a species and itself "
-                   "is identically zero.\ns0: %s\ns1: %s")
+            msg = (
+                "The differential flow between a species and itself "
+                "is identically zero.\ns0: %s\ns1: %s"
+            )
             raise NotImplementedError(msg % (s0, s1))
 
         v0 = self.velocity(s0)
@@ -662,44 +724,45 @@ class Plasma(base.Base):
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        #pdb.set_trace()
+        # pdb.set_trace()
 
-        scom       = "+".join(species)
-        const      = 0.5 * self.units.rho * (self.units.dv**2.0) / self.units.pth
-        rho_i      = self.mass_density(*stuple)
-        dv_i       = pd.concat({s: self.dv(s, scom).cartesian for s in stuple},
-                               axis=1, names="S")
-        dvsq_i     = dv_i.pow(2.0).sum(axis=1, level="S")
+        scom = "+".join(species)
+        const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
+        rho_i = self.mass_density(*stuple)
+        dv_i = pd.concat(
+            {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
+        )
+        dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
         dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-        pdv        = dvsq_rho_i.sum(axis=1).multiply(const)
+        pdv = dvsq_rho_i.sum(axis=1).multiply(const)
         pdv.name = "pdynamic"
 
-#        print("",
-#              "<Module>",
-#              "<stuple>: {}".format(stuple),
-#              "<scom> %s" % scom,
-#              "<const> %s" % const,
-#              "<rho_i>", type(rho_i), rho_i,
-#              "<dv_i>", type(dv_i), dv_i,
-#              "<dvsq_i>", type(dvsq_i), dvsq_i,
-#              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
-#              "<pdv>", type(pdv), pdv,
-#              sep="\n",
-#              end="\n\n")
+        #        print("",
+        #              "<Module>",
+        #              "<stuple>: {}".format(stuple),
+        #              "<scom> %s" % scom,
+        #              "<const> %s" % const,
+        #              "<rho_i>", type(rho_i), rho_i,
+        #              "<dv_i>", type(dv_i), dv_i,
+        #              "<dvsq_i>", type(dvsq_i), dvsq_i,
+        #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
+        #              "<pdv>", type(pdv), pdv,
+        #              sep="\n",
+        #              end="\n\n")
 
-#        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-#        pdv        = dvsq_rho_i.sum(axis=1).multiply(const)
-        #pdv = const * dv_i.pow(2.0).sum(axis=1,
+        #        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
+        #        pdv        = dvsq_rho_i.sum(axis=1).multiply(const)
+        # pdv = const * dv_i.pow(2.0).sum(axis=1,
         #                                level="S").multiply(rhi_i,
         #                                                    axis=1,
         #                                                    level="S").sum(axis=1)
         pdv.name = "pdynamic"
 
-#        print(
-#              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
-#              "<pdv>", type(pdv), pdv,
-#              sep="\n",
-#              end="\n\n")
+        #        print(
+        #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
+        #              "<pdv>", type(pdv), pdv,
+        #              sep="\n",
+        #              end="\n\n")
 
         return pdv
 
@@ -725,14 +788,14 @@ class Plasma(base.Base):
         -------
         ca: pd.DataFrame or pd.Series depending on `species` inputs.
         """
-        stuple = self._chk_species(*species)
+        stuple = self._chk_species(*species)  # noqa: F841
 
         rho = self.mass_density(*species)
         b = self.bfield.mag
 
         units = self.units
         mu0 = self.constants.misc.mu0
-        coeff =  units.b / (np.sqrt(units.rho * mu0) * units.ca)
+        coeff = units.b / (np.sqrt(units.rho * mu0) * units.ca)
         ca = rho.pow(-0.5).multiply(b, axis=0) * coeff
 
         if len(species) == 1:
@@ -751,8 +814,7 @@ class Plasma(base.Base):
         return ca
 
     def afsq(self, *species, pdynamic=False):
-        r"""
-        Calculate the square of anisotropy factor:
+        r"""Calculate the square of anisotropy factor.
 
             $AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)$
 
@@ -777,8 +839,10 @@ class Plasma(base.Base):
         afsq: pd.Series or pd.DataFrame depending on the len(species).
         """
         if pdynamic:
-            raise NotImplementedError("Youngest beams analysis shows "
-                "that dynamic pressure is probably not useful.")
+            raise NotImplementedError(
+                "Youngest beams analysis shows "
+                "that dynamic pressure is probably not useful."
+            )
 
         # The following is used to specifiy whether column levels
         # need to be aligned when multiple species are present.
@@ -798,23 +862,23 @@ class Plasma(base.Base):
         dp = dp.sum(axis=1, level="S" if multi_species else None)
 
         mu0 = self.constants.misc.mu0
-        coeff = mu0 * self.units.pth / (self.units.b**2.0)
+        coeff = mu0 * self.units.pth / (self.units.b ** 2.0)
 
-        afsq = 1.0 + ( dp.divide(bsq, axis=0) * coeff )
+        afsq = 1.0 + (dp.divide(bsq, axis=0) * coeff)
 
         if len(species) == 1:
             afsq.name = species[0]
 
-#        print(""
-#              "<Module>",
-#              "<species>: {}".format(species),
-#              "<bsq>", type(bsq), bsq,
-#              "<coeff>", type(coeff), coeff,
-#              "<pth>", type(pth), pth,
-#              "<dp>", type(dp), dp,
-#              "<afsq>", type(afsq), afsq,
-#              "",
-#              sep="\n")
+        #        print(""
+        #              "<Module>",
+        #              "<species>: {}".format(species),
+        #              "<bsq>", type(bsq), bsq,
+        #              "<coeff>", type(coeff), coeff,
+        #              "<pth>", type(pth), pth,
+        #              "<dp>", type(dp), dp,
+        #              "<afsq>", type(afsq), afsq,
+        #              "",
+        #              sep="\n")
 
         return afsq
 
@@ -891,8 +955,10 @@ mass densities in Ca and AFSQ, the latter via pth.
         s1 = self._chk_species(s1)
 
         if len(s0) > 1 or len(s1) > 1:
-            msg = ("`lnlambda` can only calculate with individual s0 and "
-                "s1 species.\ns0: %s\ns1: %s")
+            msg = (
+                "`lnlambda` can only calculate with individual s0 and "
+                "s1 species.\ns0: %s\ns1: %s"
+            )
             raise ValueError(msg % (s0, s1))
 
         s0 = s0[0]
@@ -908,25 +974,29 @@ mass densities in Ca and AFSQ, the latter via pth.
         a0 = constants.m_amu.loc[s0]
         a1 = constants.m_amu.loc[s1]
 
-        fcn = lambda x: x.n#.xs("", axis=1, level="C")
-        n = pd.concat({s: self.ions.loc[s].n for s
-                         in (s0, s1)}, axis=1, names=["S"]) * units.n
+        #         fcn = lambda x: x.n  # .xs("", axis=1, level="C")
+        n = (
+            pd.concat({s: self.ions.loc[s].n for s in (s0, s1)}, axis=1, names=["S"])
+            * units.n
+        )
 
-        T   = pd.concat({s: self.ions.loc[s].temperature.scalar for s
-                         in (s0, s1)}, axis=1, names=["S"])
+        T = pd.concat(
+            {s: self.ions.loc[s].temperature.scalar for s in (s0, s1)},
+            axis=1,
+            names=["S"],
+        )
         TeV = T * units.temperature * constants.kb.eV
 
         kwargs = dict(axis=1, level="S")
-        nZsqOTeV = n.multiply(z.pow(2.0), **kwargs).multiply(TeV.pow(-1.0),
-            **kwargs)
+        nZsqOTeV = n.multiply(z.pow(2.0), **kwargs).multiply(TeV.pow(-1.0), **kwargs)
         right = nZsqOTeV.sum(axis=1).pipe(np.sqrt)
 
         T0 = TeV.loc[:, s0]
         T1 = TeV.loc[:, s1]
-        left = z0 * z1 * ( a0 + a1 ) / (a0 * T1).add(a1 * T0, axis=0)
+        left = z0 * z1 * (a0 + a1) / (a0 * T1).add(a1 * T0, axis=0)
 
-        lnlambda = ( 29.9 - np.log( left * right ) ) / units.lnlambda
-        lnlambda.name = "%s,%s" % ( s0, s1 )
+        lnlambda = (29.9 - np.log(left * right)) / units.lnlambda
+        lnlambda.name = "%s,%s" % (s0, s1)
 
         # print("",
         #       "<Module>",
@@ -982,8 +1052,10 @@ mass densities in Ca and AFSQ, the latter via pth.
         sb = self._chk_species(sb)
 
         if len(sa) > 1 or len(sb) > 1:
-            msg = ("`nuc` can only calculate with individual `sa` and "
-                "`sb` species.\nsa: %s\nsb: %s")
+            msg = (
+                "`nuc` can only calculate with individual `sa` and "
+                "`sb` species.\nsa: %s\nsb: %s"
+            )
             raise ValueError(msg % (sa, sb))
 
         sa, sb = sa[0], sb[0]
@@ -994,14 +1066,13 @@ mass densities in Ca and AFSQ, the latter via pth.
         qabsq = constants.charges.loc[[sa, sb]].pow(2).product()
         ma = constants.m.loc[sa]
         masses = constants.m.loc[[sa, sb]]
-        mu = masses.product()/masses.sum()
-        coeff = qabsq / (4.0 * np.pi * constants.misc.e0**2.0 * ma * mu)
+        mu = masses.product() / masses.sum()
+        coeff = qabsq / (4.0 * np.pi * constants.misc.e0 ** 2.0 * ma * mu)
 
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]},
-                      axis=1)
+        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]}, axis=1)
         wab = w.pow(2.0).sum(axis=1).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).magnitude * units.dv
@@ -1009,12 +1080,12 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         # longitudinal diffusion rate.
         ldr1 = erf(dvw)
-        ldr2 = dvw.multiply((2.0/np.sqrt(np.pi)) * np.exp(-1*dvw.pow(2.0)), axis=0)
+        ldr2 = dvw.multiply((2.0 / np.sqrt(np.pi)) * np.exp(-1 * dvw.pow(2.0)), axis=0)
         ldr = dvw.pow(-3.0).multiply(ldr1.subtract(ldr2, axis=0), axis=0)
 
-        nuab = coeff * nb.multiply(lnlambda,
-                                   axis=0).multiply(ldr,
-                                   axis=0).multiply(wab.pow(-3.0), axis=0)
+        nuab = coeff * nb.multiply(lnlambda, axis=0).multiply(ldr, axis=0).multiply(
+            wab.pow(-3.0), axis=0
+        )
         nuab /= units.nuc
 
         # print("",
@@ -1041,8 +1112,7 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         if both_species:
             exp = pd.Series({sa: 1.0, sb: -1.0})
-            rho_ratio = pd.concat({s: self.mass_density(s) for s in [sa, sb]},
-                                  axis=1)
+            rho_ratio = pd.concat({s: self.mass_density(s) for s in [sa, sb]}, axis=1)
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
@@ -1061,9 +1131,7 @@ mass densities in Ca and AFSQ, the latter via pth.
         #       "",
         #       sep="\n")
 
-
         return nu
-
 
     def nc(self, sa, sb, both_species=True):
         r"""
@@ -1090,8 +1158,10 @@ mass densities in Ca and AFSQ, the latter via pth.
         sb = self._chk_species(sb)
 
         if len(sa) > 1 or len(sb) > 1:
-            msg = ("`nc` can only calculate with individual `sa` and "
-                "`sb` species.\nsa: %s\nsb: %s")
+            msg = (
+                "`nc` can only calculate with individual `sa` and "
+                "`sb` species.\nsa: %s\nsb: %s"
+            )
             raise ValueError(msg % (sa, sb))
 
         sa, sb = sa[0], sb[0]
@@ -1167,31 +1237,32 @@ mass densities in Ca and AFSQ, the latter via pth.
         w2_per = w.per.p2
 
         if beam == "a":
-#             msg = "Based on a conversation with Justin, I'm not sure if we want to use this cut, so it's disabled."
+            #             msg = "Based on a conversation with Justin, I'm not sure if we want to use this cut, so it's disabled."
             raise NotImplementedError
 
         # We calculate at the peak beam velocity, so we only need one dv.
         dv2 = self.dv(beam, core).project(self.b)
 
-        # We're using a Bimaxwellian, so this should be sufficient.
-        dv2_par = dv2.par
-        dv2_per = dv2.per
+        #         # We're using a Bimaxwellian, so this should be sufficient.
+        #         dv2_par = dv2.par
+        #         dv2_per = dv2.per
 
         if beam == "p2":
             # BUG?
             # If Mike's code didn't properly subtract the y-GSE component
             # of the proton beam velocity due to the Earth's orbital motion
             # around the sun.
-#             dvw = dv2_par.divide(w1_par, axis=0).pow(2)
+            #             dvw = dv2_par.divide(w1_par, axis=0).pow(2)
             dvw = dv2.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
         elif beam == "a":
-            w1.columns = w1.columns.get_level_values("Component")
-            dvw = dv2.divide(w1, axis=1, level="C").pow(2).sum(axis=1)
+            raise NotImplementedError
+        #             w1.columns = w1.columns.get_level_values("Component")
+        #             dvw = dv2.divide(w1, axis=1, level="C").pow(2).sum(axis=1)
         else:
             msg = "Unrecognizez beam: %s" % beam
             raise ValueError(msg)
 
-        f2f1 = dvw#.pipe(np.exp)
+        f2f1 = dvw  # .pipe(np.exp)
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par) * (w1_per / w2_per).pow(2)
@@ -1215,6 +1286,7 @@ mass densities in Ca and AFSQ, the latter via pth.
             return self._ts
         except AttributeError:
             return self.calc_dt2ts()
+
     def calc_dt2ts(self):
         self.logger.debug("Calculating dt2ts")
 
@@ -1228,7 +1300,7 @@ mass densities in Ca and AFSQ, the latter via pth.
         ts = yy.add(dt, axis=0)
         ts.name = "timestamp"
 
-        #print("<Module>",
+        # print("<Module>",
         #      "<year>", type(year), year,
         #      "<fody>", type(fdoy), fdoy,
         #      "<dt>", type(dt), dt,
@@ -1251,6 +1323,7 @@ mass densities in Ca and AFSQ, the latter via pth.
             return self._jd
         except AttributeError:
             return self.calc_dt2jd()
+
     def calc_dt2jd(self):
         self.logger.debug("Calculating dt2jd")
         yy = pd.to_datetime(self.data.year.astype(int), format="%Y", errors="raise")
@@ -1265,29 +1338,38 @@ mass densities in Ca and AFSQ, the latter via pth.
 
     def estimate_electrons(self, inplace=False):
         r"""
-        Estimate the electron parameters.
+        Estimate the electron parameters with a scalar temperature.
+
+        Assume temperature is the same as proton scalar temerature.
         """
 
         species = self.species
 
         if "e" in species:
-            msg = (r"Estimating electrons when there are e- in the data has been disabled because I've screwed it up and estimated them as zero b/c of various strange things. I need to disable `inplace` when `e` in speces and do some ther things for this to work.")
+            msg = (
+                r"Estimating electrons when there are e- in the data has been "
+                r"disabled because I've screwed it up and estimated them as zero b/c "
+                r"of various strange things. I need to disable `inplace` when `e` in "
+                r"speces and do some ther things for this to work."
+            )
             raise NotImplementedError(msg)
 
         if "p" not in species and "p1" not in species:
-            msg = ("Plasma must contain (core) protons to estimate electrons.\n"
-                   "Available species: {}".format(species))
+            msg = (
+                "Plasma must contain (core) protons to estimate electrons.\n"
+                "Available species: {}".format(species)
+            )
             raise ValueError(msg)
         elif "p" in species and "p1" in species:
-            msg = ("Plasma cannot contain protons (p) and core protons (p1).\n"
-                   "Available species: {}".format(species))
+            msg = (
+                "Plasma cannot contain protons (p) and core protons (p1).\n"
+                "Available species: {}".format(species)
+            )
             raise ValueError(msg)
         elif "p" in species and "p1" not in species:
             tkw = "p"
-            exp = pd.Series({"p": 1.0, "e": -1.0})
         elif "p" not in species and "p1" in species:
             tkw = "p1"
-            exp = pd.Series({"p1": 1.0, "e": -1.0})
         else:
             msg = "Unrecognized species: {}".format(species)
             raise ValueError(species)
@@ -1310,63 +1392,55 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         ve = niqivi.divide(ne, axis=0)
 
-        wp   = self.w.scalar.loc[:, tkw]
+        wp = self.w.scalar.loc[:, tkw]
         nrat = self.number_density(tkw).divide(ne, axis=0)
-        mpme = self.constants.m_in_mp["e"]**-1
-        we   = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
-        we   = pd.concat([we, we], axis=1, keys=["par", "per"])
+        mpme = self.constants.m_in_mp["e"] ** -1
+        we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
+        we = pd.concat([we, we], axis=1, keys=["par", "per"])
 
         ne.name = ""
-        electrons = pd.concat([ne, ve, we], axis=1,
-                                            keys=["n", "v", "w"],
-                                            names=["M", "C"])
+        electrons = pd.concat(
+            [ne, ve, we], axis=1, keys=["n", "v", "w"], names=["M", "C"]
+        )
         mask = ~ne.astype(bool)
         electrons = electrons.mask(mask, axis=0)
 
         electrons = ions.Ion(electrons, "e")
 
         if inplace:
-#             raise NotImplementedError("After adding `aux` to Plasma, this was not updated to account for it.")
-
             cols = electrons.data.columns
             cols = [x + ("e",) for x in cols.values]
             cols = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
             electrons.data.columns = cols
 
             data = self.data
-#             data.update(electrons.data, join="outer")
-#             if not data.columns.intersection(electrons.data.columns).size:
-#                 species = sorted(self.species + ("e",))
-#                 self.__set_species(*species)
-#                 self._set_ions()
-
             if data.columns.intersection(electrons.data.columns).size:
                 data.update(electrons.data)
             else:
-                data = pd.concat([data,
-                                  electrons.data,
-                                  self.auxiliary_data], axis=1).sort_index(axis=1)
+                data = pd.concat(
+                    [data, electrons.data, self.auxiliary_data], axis=1
+                ).sort_index(axis=1)
                 species = sorted(self.species + ("e",))
                 self._set_species(*species)
                 self.set_data(data)
                 self._set_ions()
 
-#        print("<Module>",
-#              "<species>: {}".format(species),
-#              "<qi>", type(qi), qi,
-#              "<ni>", type(ni), ni,
-#              "<vi>", type(vi), vi,
-#              "<wp>", type(wp), wp,
-#              "<niqi>", type(niqi), niqi,
-#              "<niqivi>", type(niqivi), niqivi,
-#              "<ne>", type(ne), ne,
-#              "<ve>", type(ve), ve,
-#              "<we>", type(we), we,
-#              "<electrons>", type(electrons), electrons, electrons.data,
-#              "<plasma.species>: {}".format(self.species),
-#              "<plasma.ions>", type(self.ions), self.ions,
-#              "<plasma.data>", type(self.data), self.data.T,
-#              "", sep="\n")
+        #        print("<Module>",
+        #              "<species>: {}".format(species),
+        #              "<qi>", type(qi), qi,
+        #              "<ni>", type(ni), ni,
+        #              "<vi>", type(vi), vi,
+        #              "<wp>", type(wp), wp,
+        #              "<niqi>", type(niqi), niqi,
+        #              "<niqivi>", type(niqivi), niqivi,
+        #              "<ne>", type(ne), ne,
+        #              "<ve>", type(ve), ve,
+        #              "<we>", type(we), we,
+        #              "<electrons>", type(electrons), electrons, electrons.data,
+        #              "<plasma.species>: {}".format(self.species),
+        #              "<plasma.ions>", type(self.ions), self.ions,
+        #              "<plasma.data>", type(self.data), self.data.T,
+        #              "", sep="\n")
 
         return electrons
 
@@ -1390,32 +1464,32 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         slist = self._chk_species(*species)
         rho = self.mass_density(*slist)
-        v   = {s: self.v(s).project(self.b).par for s in slist}
-        v   = pd.concat(v, axis=1, names=["S"]).sort_index(axis=1)
+        v = {s: self.v(s).project(self.b).par for s in slist}
+        v = pd.concat(v, axis=1, names=["S"]).sort_index(axis=1)
         v.columns.name = "S"
-        w   = self.data.w.par.loc[:, slist]
+        w = self.data.w.par.loc[:, slist]
 
         qa = v.pow(3)
         qb = v.multiply(w.pow(2), axis=1, level="S")
 
-#        print("<Module>",
-#              "<species> {}".format(species),
-#              "<rho>", type(rho), rho,
-#              "<v>", type(v), v,
-#              "<w>", type(w), w,
-#              "<qa>", type(qa), qa,
-#              "<qb>", type(qb), qb,
-#              sep="\n")
+        #        print("<Module>",
+        #              "<species> {}".format(species),
+        #              "<rho>", type(rho), rho,
+        #              "<v>", type(v), v,
+        #              "<w>", type(w), w,
+        #              "<qa>", type(qa), qa,
+        #              "<qb>", type(qb), qb,
+        #              sep="\n")
 
-        qs = qa.add( (3./2.) * qb, axis=1, level="S").multiply(rho, axis=0)
+        qs = qa.add((3.0 / 2.0) * qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
             qs = qs.sum(axis=1)
             qs.name = "+".join(species)
 
-#        print("<qpar>", type(qs), qs,
-#              sep="\n")
+        #        print("<qpar>", type(qs), qs,
+        #              sep="\n")
 
-        coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
+        coeff = self.units.rho * (self.units.v ** 3.0) / self.units.qpar
         q = coeff * qs
         return q
 
@@ -1454,7 +1528,7 @@ mass densities in Ca and AFSQ, the latter via pth.
         b = self.bfield.cartesian
 
         if len(species_) == 1:
-            slist = self._chk_species(species_[0])
+            slist = self._chk_species(species_[0])  # noqa: F841
             v = self.velocity(species)
             r = self.mass_density(species)
 
@@ -1465,37 +1539,14 @@ mass densities in Ca and AFSQ, the latter via pth.
             s0 = "+".join(slist0)
             s1 = "+".join(slist1)
             v = self.dv(s0, s1)
-            r  = self.mass_density(s1)
+            r = self.mass_density(s1)
 
         else:
             msg = "`species` can only contain at most 1 comma\nspecies: %s"
             raise ValueError(msg % species)
 
-
-        turb = alf_turb.AlfvenicTurbulence(v, b, r, species,
-                                           auto_reindex=auto_reindex)
-
+        turb = alf_turb.AlfvenicTurbulence(  # noqa: F821
+            v, b, r, species, auto_reindex=auto_reindex
+        )
 
         return turb
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -18,22 +18,24 @@ Notes
 
 """
 
-import pdb
-import logging
+import pdb  # noqa: F401
 
-import re as re
-import numpy as np
+# import logging
+#
+# import re as re
+# import numpy as np
 import pandas as pd
-import warnings
-import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# import warnings
+# import itertools
 
-from abc import ABC, abstractmethod, abstractproperty
+# from numbers import Number
+# from pandas import MultiIndex as MI
 
-from scipy import constants
-from scipy.constants import physical_constants
+# from abc import ABC, abstractmethod, abstractproperty
+
+# from scipy import constants
+# from scipy.constants import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -48,6 +50,7 @@ except ImportError:
     import base
     import vector
     import tensor
+
 
 class Ion(base.Base):
     def __init__(self, data, species):
@@ -65,9 +68,9 @@ class Ion(base.Base):
             return False
         else:
             try:
-                eq_data = (self.data == other.data)
+                eq_data = self.data == other.data
             except ValueError as e:
-                #print(dir(e), flush=True)
+                # print(dir(e), flush=True)
                 msg = "Can only compare identically-labeled DataFrame objects"
                 if msg in str(e):
                     return False
@@ -100,50 +103,65 @@ class Ion(base.Base):
             msg = "Unrecognized data column names: %s" % (data.columns.names)
             raise ValueError(msg)
 
-        chk = [("n", ""),
-               ("v", "x"), ("v", "y"), ("v", "z"),
-               ("w", "par"), ("w", "per")]
+        chk = [
+            ("n", ""),
+            ("v", "x"),
+            ("v", "y"),
+            ("v", "z"),
+            ("w", "par"),
+            ("w", "per"),
+        ]
         assert pd.Index(chk).isin(data.columns).all()
         self._data = data
 
     @property
     def data(self):
         return self._data
+
     @property
     def species(self):
         return self._species
+
     @property
     def velocity(self):
         return vector.Vector(self.data.v)
+
     @property
     def v(self):
         r"""
         Shortcut to `velocity` property.
         """
         return self.velocity
+
     @property
     def thermal_speed(self):
         return tensor.Tensor(self.data.w)
+
     @property
     def w(self):
         return self.thermal_speed
+
     @property
     def n(self):
         return self.data.n
+
     @property
     def number_density(self):
         return self.n
+
     @property
     def mass_density(self):
         out = self.n * self.constants.m_in_mp.loc[self.species]
         out.name = "rho"
         return out
+
     @property
     def rho(self):
         r"""
         Shortcut to `mass_density` property.
         """
         return self.mass_density
+
     @property
     def anisotropy(self):
         exp = pd.Series({"par": -1, "per": 1})
@@ -154,6 +172,7 @@ class Ion(base.Base):
         ani = pth.pow(exp, axis=1, level="C").product(axis=1, skipna=False)
         ani.name = "RT"
         return ani
+
     @property
     def temperature(self):
         m = self.constants.m.loc[self.species]
@@ -163,6 +182,7 @@ class Ion(base.Base):
         temp = coeff * w.pow(2)
         temp.name = "T"
         return temp
+
     @property
     def pth(self):
         rho = self.rho * self.units.rho

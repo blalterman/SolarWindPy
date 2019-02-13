@@ -17,22 +17,24 @@ Notes
 -
 
 """
-import pdb
-import logging
+import pdb  # noqa: F401
 
-import re as re
+# import logging
+
+# import re as re
 import numpy as np
 import pandas as pd
-import warnings
-import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# import warnings
+# import itertools
 
-from abc import ABC, abstractmethod, abstractproperty
+# from numbers import Number
+# from pandas import MultiIndex as MI
 
-from scipy import constants
-from scipy.constants import physical_constants
+# from abc import ABC, abstractmethod, abstractproperty
+
+# from scipy import constants
+# from scipy.constants import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -44,13 +46,16 @@ try:
 except ImportError:
     import base
 
+
 class Vector(base.Base):
     def __init__(self, data):
         # print("Vector.__init__", data)
         super(Vector, self).__init__(data)
+
     def __call__(self, component):
         assert isinstance(component, str)
-        return self.__getattr__(component)#getattr(self, component)
+        return self.__getattr__(component)  # getattr(self, component)
+
     def set_data(self, new):
         # print("Vector.set_data", new)
         super(Vector, self).set_data(new)
@@ -61,6 +66,7 @@ class Vector(base.Base):
             msg = msg % (chk, new.columns)
             raise ValueError(msg)
         self._data = new
+
     @property
     def mag(self):
         mag = self.data.loc[:, ["x", "y", "z"]]
@@ -70,12 +76,14 @@ class Vector(base.Base):
         mag = mag.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
         mag.name = "mag"
         return mag
+
     @property
     def magnitude(self):
         r"""
         Alias for `mag`.
         """
         return self.mag
+
     @property
     def rho(self):
         rho = self.data.loc[:, ["x", "y"]]
@@ -84,22 +92,26 @@ class Vector(base.Base):
         rho = rho.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
         rho.name = "rho"
         return rho
+
     @property
     def colat(self):
         colat = np.rad2deg(np.arctan2(self.data.z, self.rho))
         colat.name = "colat"
         return colat
+
     @property
     def longitude(self):
         lon = np.rad2deg(np.arctan2(self.data.y, self.data.x))
         lon.name = "longitude"
         return lon
+
     @property
     def lon(self):
         r"""
         Sortcut for `self.longitude`.
         """
         return self.longitude
+
     @property
     def r(self):
         r"""
@@ -111,12 +123,14 @@ class Vector(base.Base):
         r = self.mag
         r.name = "r"
         return r
+
     @property
     def cartesian(self):
         r"""
         Cartesian coordinates: (x, y, z).
         """
         return self.data.loc[:, ["x", "y", "z"]]
+
     @property
     def unit_vector(self):
         r"""
@@ -127,12 +141,14 @@ class Vector(base.Base):
         uv = v.divide(m, axis=0)
         uv.name = "uv"
         return Vector(uv)
+
     @property
     def uv(self):
         r"""
         Shortcut to `unit_vector` property.
         """
         return self.unit_vector
+
     def project(self, other):
         r"""
         Project self onto `other`.
@@ -145,10 +161,13 @@ class Vector(base.Base):
 
         cart = self.cartesian
         par = cart.multiply(other, axis=1).sum(axis=1)
-        per = cart.subtract(other.multiply(par, axis=0),
-                            axis=1).pow(2).sum(axis=1).pipe(np.sqrt)
-        out = pd.concat([par, per], axis=1,
-                        keys=("par", "per")).sort_index(axis=1)
+        per = (
+            cart.subtract(other.multiply(par, axis=0), axis=1)
+            .pow(2)
+            .sum(axis=1)
+            .pipe(np.sqrt)
+        )
+        out = pd.concat([par, per], axis=1, keys=("par", "per")).sort_index(axis=1)
 
         # print("",
         #       "<Module>",
@@ -159,6 +178,7 @@ class Vector(base.Base):
         #       sep="\n")
 
         return out
+
     def cos_theta(self, other):
         r"""
         Project self onto `other`.
@@ -169,7 +189,7 @@ class Vector(base.Base):
             msg = "`project` method needs algo development to use a `%s`."
             raise NotImplementedError(msg % type(other))
 
-        uv  = self.uv
+        uv = self.uv
         out = uv.multiply(other, axis=1).sum(axis=1)
 
         # print("",
@@ -182,19 +202,19 @@ class Vector(base.Base):
 
         return out
 
+
 class BField(Vector):
     @property
     def pressure(self):
         r"""
         Magnetic pressure or energy density in same units as thermal pressure.
         """
-        bsq   = self.mag.pow(2.0)
-        const = self.units.b**2.0 / (2.0 *
-                                     self.constants.misc.mu0 *
-                                     self.units.pth)
-        pb    = bsq * const
+        bsq = self.mag.pow(2.0)
+        const = self.units.b ** 2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
+        pb = bsq * const
         pb.name = "pb"
         return pb
+
     @property
     def pb(self):
         r"""
