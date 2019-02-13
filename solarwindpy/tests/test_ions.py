@@ -19,24 +19,26 @@ Notes
 """
 import pdb
 
-import re as re
+# import re as re
 import numpy as np
 import pandas as pd
 import unittest
-import sys
-import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# import sys
+# import itertools
 
-import numpy.testing as npt
+# from numbers import Number
+# from pandas import MultiIndex as MI
+
+# import numpy.testing as npt
 import pandas.util.testing as pdt
 
 from abc import ABC, abstractproperty
-from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
-from unittest import TestCase
 
-from scipy import constants
+# from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
+# from unittest import TestCase
+
+# from scipy import constants
 from scipy.constants import physical_constants
 
 import test_base as base
@@ -46,6 +48,7 @@ from solarwindpy import tensor
 from solarwindpy import ions
 
 pd.set_option("mode.chained_assignment", "raise")
+
 
 class IonTestBase(ABC):
     @classmethod
@@ -66,6 +69,7 @@ class IonTestBase(ABC):
         cls.object_testing = ion
         cls.data = data
         # print("Done with", cls.__class__, flush=True)
+
     @abstractproperty
     def species(self):
         pass
@@ -73,26 +77,33 @@ class IonTestBase(ABC):
     @classmethod
     def ion(cls):
         return cls._ion
+
     @property
     def mass(self):
-        trans = {"a": "alpha particle",
-                 "p": "proton",
-                 "p1": "proton",
-                 "p2": "proton",
-                 "e": "electron"}
+        trans = {
+            "a": "alpha particle",
+            "p": "proton",
+            "p1": "proton",
+            "p2": "proton",
+            "e": "electron",
+        }
         m = physical_constants["%s mass" % trans[self.species]][0]
         return m
+
     @property
     def mass_in_mp(self):
-        trans = {"a": physical_constants["alpha particle-proton mass ratio"][0],
-                 "p": 1,
-                 "p1": 1,
-                 "p2": 1,
-                 "e": physical_constants["electron-proton mass ratio"][0]}
+        trans = {
+            "a": physical_constants["alpha particle-proton mass ratio"][0],
+            "p": 1,
+            "p1": 1,
+            "p2": 1,
+            "e": physical_constants["electron-proton mass ratio"][0],
+        }
         return trans[self.species]
 
     def test_species(self):
         self.assertEqual(self.species, self.object_testing.species)
+
     def test_n(self):
         n = self.data.loc[:, ("n", "")]
         if not isinstance(n, pd.Series):
@@ -103,6 +114,7 @@ class IonTestBase(ABC):
         pdt.assert_series_equal(n, ot.n)
         pdt.assert_series_equal(n, ot.number_density)
         pdt.assert_series_equal(ot.number_density, ot.n)
+
     def test_mass_density(self):
         mmp = self.mass_in_mp
         rho = self.data.loc[:, pd.IndexSlice["n", ""]] * mmp
@@ -112,28 +124,31 @@ class IonTestBase(ABC):
             rho = rho.iloc[:, 0]
         rho.name = "rho"
         ot = self.object_testing
-        pdt.assert_series_equal(self.object_testing.rho, self.object_testing.mass_density)
-        pdt.assert_series_equal(rho, self.object_testing.rho)
-        pdt.assert_series_equal(rho, self.object_testing.mass_density)
+        pdt.assert_series_equal(ot.rho, ot.mass_density)
+        pdt.assert_series_equal(rho, ot.rho)
+        pdt.assert_series_equal(rho, ot.mass_density)
+
     def test_v(self):
         v = vector.Vector(self.data.v)
         ot = self.object_testing
-        self.assertEqual(v, self.object_testing.velocity)
-        self.assertEqual(v, self.object_testing.v)
-        self.assertEqual(self.object_testing.velocity, self.object_testing.v)
+        self.assertEqual(v, ot.velocity)
+        self.assertEqual(v, ot.v)
+        self.assertEqual(ot.velocity, ot.v)
+
     def test_w(self):
         w = tensor.Tensor(self.data.w)
         ot = self.object_testing
-        self.assertEqual(w, self.object_testing.thermal_speed)
-        self.assertEqual(w, self.object_testing.w)
-        self.assertEqual(self.object_testing.w,
-                         self.object_testing.thermal_speed)
+        self.assertEqual(w, ot.thermal_speed)
+        self.assertEqual(w, ot.w)
+        self.assertEqual(ot.w, ot.thermal_speed)
+
     def test_anisotropy(self):
         w = self.data.w
         ani = (w.per / w.par).pow(2)
         ani.name = "RT"
         ot = self.object_testing
-        pdt.assert_series_equal(ani, self.object_testing.anisotropy)
+        pdt.assert_series_equal(ani, ot.anisotropy)
+
     def test_pth(self):
         # pth = nkT = 0.5 * n * m * w^2
         n = self.data.n * 1e6
@@ -141,6 +156,7 @@ class IonTestBase(ABC):
         m = self.mass
         p = w.pow(2).multiply(0.5 * n * m, axis=0) / 1e-12
         pdt.assert_frame_equal(p, self.object_testing.pth)
+
     def test_temperature(self):
         # 0.5 mw^2 = kT
         # T = 0.5 mw^2 / k
@@ -150,12 +166,18 @@ class IonTestBase(ABC):
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.temperature)
 
+
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
     pass
+
+
 class TestIonP1(base.P1Test, IonTestBase, base.SWEData):
     pass
+
+
 class TestIonP2(base.P2Test, IonTestBase, base.SWEData):
     pass
+
 
 class TestIonSpecificsOptions(base.TestData):
     @classmethod
@@ -170,27 +192,27 @@ class TestIonSpecificsOptions(base.TestData):
         # print(cls.data.columns.values)
         cls.data = cls.data.xs("", axis=1, level="N")
 
-    def test_init_with_species(self):
-        species = "a"
-        data = self.data.xs(species, axis=1, level="S", drop_level=False)
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
-
-        species = "p1"
-        data = self.data.xs(species, axis=1, level="S", drop_level=False)
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
-
-        species = "p1"
-        data = self.data.xs(species, axis=1, level="S", drop_level=False)
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
+    #     def test_init_with_species(self):
+    #         species = "a"
+    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
+    #         ion = ions.Ion(data, species)
+    #         self.assertIsInstance(ion, ions.Ion)
+    #         self.assertEqual(species, ion.species)
+    #         pdt.assert_frame_equal(data, ion.data)
+    #
+    #         species = "p1"
+    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
+    #         ion = ions.Ion(data, species)
+    #         self.assertIsInstance(ion, ions.Ion)
+    #         self.assertEqual(species, ion.species)
+    #         pdt.assert_frame_equal(data, ion.data)
+    #
+    #         species = "p1"
+    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
+    #         ion = ions.Ion(data, species)
+    #         self.assertIsInstance(ion, ions.Ion)
+    #         self.assertEqual(species, ion.species)
+    #         pdt.assert_frame_equal(data, ion.data)
 
     def test_init_with_species(self):
         species = "a"
@@ -216,28 +238,22 @@ class TestIonSpecificsOptions(base.TestData):
 
     def test_init_version_comparison(self):
         species = "a"
-        data_with_species = self.data.xs(species,
-                                         axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species,
-                                         axis=1, level="S")
+        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
+        data_without_species = self.data.xs(species, axis=1, level="S")
         ion_with_species = ions.Ion(data_with_species, species)
         ion_without_species = ions.Ion(data_without_species, species)
         self.assertEqual(ion_with_species, ion_without_species)
 
         species = "p1"
-        data_with_species = self.data.xs(species,
-                                         axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species,
-                                         axis=1, level="S")
+        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
+        data_without_species = self.data.xs(species, axis=1, level="S")
         ion_with_species = ions.Ion(data_with_species, species)
         ion_without_species = ions.Ion(data_without_species, species)
         self.assertEqual(ion_with_species, ion_without_species)
 
         species = "p2"
-        data_with_species = self.data.xs(species,
-                                         axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species,
-                                         axis=1, level="S")
+        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
+        data_without_species = self.data.xs(species, axis=1, level="S")
         ion_with_species = ions.Ion(data_with_species, species)
         ion_without_species = ions.Ion(data_without_species, species)
         self.assertEqual(ion_with_species, ion_without_species)
@@ -285,9 +301,8 @@ class TestIonSpecificsOptions(base.TestData):
         i1 = ions.Ion(self.data, s1)
         self.assertNotEqual(i0, i1)
 
-if __name__ == "__main__":
-    import sys
 
+if __name__ == "__main__":
     # Just make recursion stacks smaller in Terminal.
     # Comment this line if it causes problems with other
     # tests or decrease the denominator.
@@ -296,7 +311,13 @@ if __name__ == "__main__":
     try:
         unittest.main(verbosity=2)
 
-    except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
+    except (  # noqa: F841
+        AssertionError,
+        AttributeError,
+        ValueError,
+        TypeError,
+        IndexError,
+    ) as e:
         import sys
         import traceback as tb
 

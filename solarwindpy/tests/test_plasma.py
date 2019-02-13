@@ -20,22 +20,22 @@ Notes
 """
 import pdb
 
-import re as re
+# import re as re
 import numpy as np
 import pandas as pd
 import unittest
 import sys
 import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# from numbers import Number
+# from pandas import MultiIndex as MI
 
-import numpy.testing as npt
+# import numpy.testing as npt
 import pandas.util.testing as pdt
 
-from abc import ABC, abstractproperty
-from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
-from unittest import TestCase
+from abc import ABC, abstractproperty, abstractmethod
+
+# from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
@@ -45,10 +45,12 @@ import test_base as base
 from solarwindpy import vector
 from solarwindpy import ions
 from solarwindpy import plasma
-#import alfvenic_turbulence
+
+# import alfvenic_turbulence
 
 
 pd.set_option("mode.chained_assignment", "raise")
+
 
 class PlasmaTestBase(ABC):
     @classmethod
@@ -60,21 +62,23 @@ class PlasmaTestBase(ABC):
 
         par = data.w.par.pow(2)
         per = data.w.per.pow(2)
-        scalar = ((2.0 * per) + par).multiply(1.0/3.0).pipe(np.sqrt)
-        fcn = lambda x: ("w", "scalar", x)
-        cols = scalar.columns.to_series().apply(fcn)
+        scalar = ((2.0 * per) + par).multiply(1.0 / 3.0).pipe(np.sqrt)
+        cols = scalar.columns.to_series().apply(lambda x: ("w", "scalar", x))
         scalar.columns = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
         data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
 
         cls.object_testing = plas
         cls.data = data
         # print("Done with", cls.__class__, flush=True)
+
     @abstractproperty
     def species(self):
         pass
+
     @property
     def stuple(self):
         return tuple(self.species.split("+"))
+
     @property
     def species_combinations(self):
         r"""
@@ -82,6 +86,7 @@ class PlasmaTestBase(ABC):
         Plasma methods.
         """
         from itertools import combinations, chain
+
         stuple = self.stuple
         ncombinations = np.arange(start=1, stop=len(stuple) + 1)
         if ncombinations.any():
@@ -94,57 +99,59 @@ class PlasmaTestBase(ABC):
         #     for n in ncombinations:
         #         combos = itertools.combinations(stuple, n)
         #         # for combo in combos:
-                #     s = "+".join(combo)
-                #     print(combo, s, sep="\n")
+        #     s = "+".join(combo)
+        #     print(combo, s, sep="\n")
+
     @property
     def mass(self):
-        trans = {"a": "alpha particle",
-                 "p": "proton",
-                 "p1": "proton",
-                 "p2": "proton",
-                 "e": "electron"}
-        m = {s: physical_constants["%s mass" % trans[s]][0] for
-             s in self.stuple}
+        trans = {
+            "a": "alpha particle",
+            "p": "proton",
+            "p1": "proton",
+            "p2": "proton",
+            "e": "electron",
+        }
+        m = {s: physical_constants["%s mass" % trans[s]][0] for s in self.stuple}
         return pd.Series(m)
+
     @property
     def mass_in_mp(self):
-        trans = {"a": physical_constants["alpha particle-proton mass ratio"][0],
-                 "p": 1,
-                 "p1": 1,
-                 "p2": 1,
-                 "e": physical_constants["electron-proton mass ratio"][0]}
+        trans = {
+            "a": physical_constants["alpha particle-proton mass ratio"][0],
+            "p": 1,
+            "p1": 1,
+            "p2": 1,
+            "e": physical_constants["electron-proton mass ratio"][0],
+        }
         return pd.Series({s: trans[s] for s in self.stuple})
+
     @property
     def m_amu(self):
         r"""
         Masses in amu.
         """
-        a = physical_constants['alpha particle mass in u'][0]
-        p =  physical_constants['proton mass in u'][0]
+        a = physical_constants["alpha particle mass in u"][0]
+        p = physical_constants["proton mass in u"][0]
         e = physical_constants["electron mass in u"][0]
-        out = {
-                "a":  a,
-                "p":  p,
-                "p1": p,
-                "p2": p,
-                "e":  e}
+        out = {"a": a, "p": p, "p1": p, "p2": p, "e": e}
         return pd.Series({s: out[s] for s in self.stuple})
+
     @property
     def charges(self):
         out = {
-          "e" : -constants.e,
-          "p" : constants.e, "p1" : constants.e, "p2" : constants.e,
-          "a" : 2*constants.e,
-          }
+            "e": -constants.e,
+            "p": constants.e,
+            "p1": constants.e,
+            "p2": constants.e,
+            "a": 2 * constants.e,
+        }
         return pd.Series({s: out[s] for s in self.stuple})
+
     @property
     def charge_states(self):
-        out = {
-                "e" : -1.0,
-                "p" :  1.0, "p1" :  1.0, "p2" :  1.0,
-                "a" :  2.0,
-                }
+        out = {"e": -1.0, "p": 1.0, "p1": 1.0, "p2": 1.0, "a": 2.0}
         return pd.Series({s: out[s] for s in self.stuple})
+
     def test_ions(self):
         ions_ = pd.Series({s: ions.Ion(self.data, s) for s in self.stuple})
         # print_inline_debug_info = False
@@ -168,25 +175,51 @@ class PlasmaTestBase(ABC):
         #                 "Unequal ion lists.\nIons: %s\nPlasma: %s\n" % (ions,
         #                                             self.object_testing.ions))
         for k, i in ions_.iteritems():
-            pdt.assert_frame_equal(i.data, self.object_testing.ions.loc[k].data,
-                                   "Unequal data for ion: %s" % k)
+            pdt.assert_frame_equal(
+                i.data,
+                self.object_testing.ions.loc[k].data,
+                "Unequal data for ion: %s" % k,
+            )
         # self.assertTrue( (ions_ == self.object_testing.ions).all(), msg)
         # pdt.assert_series_equal(ions, self.object_testing.ions)
+
     def test_conform_species(self):
         r"""
         Just test that the species is a valid input.
         """
-        slist = ("a", "e", "p1", "p2",
-                 "a+p1", "p1+p2", "a+p2", "a+p1+p2",
-                 "a+p1+e", "p1+p2+e", "a+p2+e", "a+p1+p2+e")
-         # Check that the exception isn't raised.
+        slist = (
+            "a",
+            "e",
+            "p1",
+            "p2",
+            "a+p1",
+            "p1+p2",
+            "a+p2",
+            "a+p1+p2",
+            "a+p1+e",
+            "p1+p2+e",
+            "a+p2+e",
+            "a+p1+p2+e",
+        )
+        # Check that the exception isn't raised.
         for s in slist:
-            self.assertEqual(self.object_testing._conform_species(s),
-                            tuple(sorted(s.split("+"))))
+            self.assertEqual(
+                self.object_testing._conform_species(s), tuple(sorted(s.split("+")))
+            )
 
-        slist = ("a,p1", "p1,p2", "a,p2", "a,p1,p2",
-                 "a,p1,e", "p1,p2,e", "a,p2,e", "a,p1,p2,e",
-                 "a,p1+p2", "a,p1+e", "a+e,p1,p2")
+        slist = (
+            "a,p1",
+            "p1,p2",
+            "a,p2",
+            "a,p1,p2",
+            "a,p1,e",
+            "p1,p2,e",
+            "a,p2,e",
+            "a,p1,p2,e",
+            "a,p1+p2",
+            "a,p1+e",
+            "a+e,p1,p2",
+        )
         for s in slist:
             with self.assertRaisesRegex(ValueError, "Invalid species"):
                 self.object_testing._conform_species(s)
@@ -200,8 +233,7 @@ class PlasmaTestBase(ABC):
     # @unittest.skip
     def test_chk_species_success(self):
         # print(self.slist)
-        self.assertEqual(self.stuple,
-                                 self.object_testing._chk_species(*self.stuple))
+        self.assertEqual(self.stuple, self.object_testing._chk_species(*self.stuple))
 
         # Ensure exception isn't raised for plasma's individual species.
         for s in self.stuple:
@@ -221,8 +253,7 @@ class PlasmaTestBase(ABC):
             self.object_testing._chk_species("+".join(combo))
             bad_species = ",".join(combo)
             if "," in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            bad_species_msg):
+                with self.assertRaisesRegex(ValueError, bad_species_msg):
                     self.object_testing._chk_species(bad_species)
 
     @abstractmethod
@@ -238,7 +269,8 @@ class PlasmaTestBase(ABC):
                     self.object_testing._chk_species(*s)
         """
         pass
-            # # print(s, end="\n", flush=True)
+        # # print(s, end="\n", flush=True)
+
     # @unittest.skip
     # def test_conform_species(self):
     #     # Test species combinations that I think are ok.
@@ -262,26 +294,31 @@ class PlasmaTestBase(ABC):
     # @unittest.skip
     def test_species(self):
         self.assertEqual(self.object_testing.species, self.stuple)
+
     def test__set_species(self):
-        with self.assertRaisesRegex(ValueError,
-                        "You must specify a species to instantiate a Plasma."):
+        with self.assertRaisesRegex(
+            ValueError, "You must specify a species to instantiate a Plasma."
+        ):
             plasma.Plasma(self.object_testing.data)
+
     # @unittest.skip
     def test_gse(self):
         self.assertEqual(
             vector.Vector(self.data.gse.xs("", axis=1, level="S")),
-            self.object_testing.gse)
+            self.object_testing.gse,
+        )
+
     # @unittest.skip
     def test_bfield(self):
         self.assertEqual(
             vector.BField(self.data.b.xs("", axis=1, level="S")),
-            self.object_testing.bfield)
+            self.object_testing.bfield,
+        )
         self.assertEqual(
-            vector.BField(self.data.b.xs("", axis=1, level="S")),
-            self.object_testing.b)
-        self.assertEqual(
-            self.object_testing.b,
-            self.object_testing.bfield)
+            vector.BField(self.data.b.xs("", axis=1, level="S")), self.object_testing.b
+        )
+        self.assertEqual(self.object_testing.b, self.object_testing.bfield)
+
     def test_number_density(self):
         # print_inline_debug_info = False
 
@@ -305,24 +342,31 @@ class PlasmaTestBase(ABC):
 
             fcn(n, self.object_testing.number_density(*combo))
             fcn(n, self.object_testing.n(*combo))
-            fcn(self.object_testing.number_density(*combo), self.object_testing.n(*combo))
+            fcn(
+                self.object_testing.number_density(*combo),
+                self.object_testing.n(*combo),
+            )
 
     # @unittest.skip
     def test_mass_density(self):
         # print_inline_debug_info = False
-        ions_ = pd.concat({s: self.object_testing.ions[s].mass_density for s
-
-                          in self.stuple}, axis=1, names=["S"])
+        ions_ = pd.concat(
+            {s: self.object_testing.ions[s].mass_density for s in self.stuple},
+            axis=1,
+            names=["S"],
+        )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
         sum_species = self.species
 
-        pdt.assert_series_equal(total_ions,
-                                self.object_testing.mass_density(sum_species))
-        pdt.assert_series_equal(total_ions,
-                                self.object_testing.rho(sum_species))
-        pdt.assert_series_equal(self.object_testing.rho(sum_species),
-                                self.object_testing.mass_density(sum_species))
+        pdt.assert_series_equal(
+            total_ions, self.object_testing.mass_density(sum_species)
+        )
+        pdt.assert_series_equal(total_ions, self.object_testing.rho(sum_species))
+        pdt.assert_series_equal(
+            self.object_testing.rho(sum_species),
+            self.object_testing.mass_density(sum_species),
+        )
 
         # print("", *self.species_combinations, sep="\n")
         # Check that plasma returns each ion species independently.
@@ -341,25 +385,22 @@ class PlasmaTestBase(ABC):
             else:
                 fcn = pdt.assert_frame_equal
 
-            fcn(this_ion,
-                self.object_testing.mass_density(*s))
-            fcn(this_ion,
-                self.object_testing.rho(*s))
-            fcn(self.object_testing.rho(*s),
-                self.object_testing.mass_density(*s))
+            fcn(this_ion, self.object_testing.mass_density(*s))
+            fcn(this_ion, self.object_testing.rho(*s))
+            fcn(self.object_testing.rho(*s), self.object_testing.mass_density(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1)
                 this_ion.name = "+".join(sorted(s))
                 pdt.assert_series_equal(
-                    this_ion,
-                    self.object_testing.mass_density("+".join(s)))
-                pdt.assert_series_equal(
-                    this_ion,
-                    self.object_testing.rho("+".join(s)))
+                    this_ion, self.object_testing.mass_density("+".join(s))
+                )
+                pdt.assert_series_equal(this_ion, self.object_testing.rho("+".join(s)))
                 pdt.assert_series_equal(
                     self.object_testing.mass_density("+".join(s)),
-                    self.object_testing.rho("+".join(s)))
+                    self.object_testing.rho("+".join(s)),
+                )
+
     # @unittest.skip
     def test_pth(self):
         # print_inline_debug_info = False
@@ -372,7 +413,7 @@ class PlasmaTestBase(ABC):
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
             tk_species = pd.IndexSlice[:, s[0] if len(s) == 1 else s]
-            this_ion   = ions_.loc[:, tk_species]
+            this_ion = ions_.loc[:, tk_species]
             if len(s) == 1:
                 this_ion = this_ion.xs(s[0], axis=1, level="S")
 
@@ -391,9 +432,8 @@ class PlasmaTestBase(ABC):
                 #     print("<Summed Ion>", this_ion,
                 #           "<Plasma sum>", self.object_testing.pth("+".join(s)),
                 #           sep="\n")
-                pdt.assert_frame_equal(
-                    this_ion,
-                    self.object_testing.pth("+".join(s)))
+                pdt.assert_frame_equal(this_ion, self.object_testing.pth("+".join(s)))
+
     # @unittest.skip
     def test_temperature(self):
         # print_inline_debug_info = False
@@ -406,7 +446,7 @@ class PlasmaTestBase(ABC):
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
             tk_species = pd.IndexSlice[:, s[0] if len(s) == 1 else s]
-            this_ion   = ions_.loc[:, tk_species]
+            this_ion = ions_.loc[:, tk_species]
             if len(s) == 1:
                 this_ion = this_ion.xs(s[0], axis=1, level="S")
 
@@ -417,8 +457,7 @@ class PlasmaTestBase(ABC):
             #     print("<Plasma>", type(self.object_testing.temperature(*s)))
             #     print(self.object_testing.temperature(*s))
 
-            pdt.assert_frame_equal(this_ion,
-                                   self.object_testing.temperature(*s))
+            pdt.assert_frame_equal(this_ion, self.object_testing.temperature(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1, level="C")
@@ -428,26 +467,27 @@ class PlasmaTestBase(ABC):
                 #           self.object_testing.temperature("+".join(s)),
                 #           sep="\n")
                 pdt.assert_frame_equal(
-                    this_ion,
-                    self.object_testing.temperature("+".join(s)))
+                    this_ion, self.object_testing.temperature("+".join(s))
+                )
+
     # @unittest.skip
     def test_beta(self):
-        pth  = {s: self.object_testing.ions[s].pth for s in self.stuple}
-        pth  = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
-        pth  = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+        pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
+        pth = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
+        pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         bsq = self.data.loc[:, pd.IndexSlice["b", ["x", "y", "z"], ""]]
         bsq = bsq.pow(2).sum(axis=1)
 
         ions_ = pth.divide(bsq, axis=0)
 
-        coeff  = 2.0 * constants.mu_0 * 1e-12 / (1e-9**2.0)
+        coeff = 2.0 * constants.mu_0 * 1e-12 / (1e-9 ** 2.0)
         ions_ *= coeff
 
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
             tk_species = pd.IndexSlice[:, s[0] if len(s) == 1 else s]
-            this_ion   = ions_.loc[:, tk_species]
+            this_ion = ions_.loc[:, tk_species]
             if len(s) == 1:
                 this_ion = this_ion.xs(s[0], axis=1, level="S")
 
@@ -467,8 +507,7 @@ class PlasmaTestBase(ABC):
             #           self.object_testing.beta(*s),
             #           sep="\n")
 
-            pdt.assert_frame_equal(this_ion,
-                                   self.object_testing.beta(*s))
+            pdt.assert_frame_equal(this_ion, self.object_testing.beta(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1, level="C")
@@ -477,9 +516,8 @@ class PlasmaTestBase(ABC):
                 #           "<Plasma sum>",
                 #           self.object_testing.beta("+".join(s)),
                 #           sep="\n")
-                pdt.assert_frame_equal(
-                    this_ion,
-                    self.object_testing.beta("+".join(s)))
+                pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
+
     # @unittest.skip
     def test_anisotropy(self):
 
@@ -504,20 +542,17 @@ class PlasmaTestBase(ABC):
                 # pdt.assert_series_equal(ani, right)
             else:
                 # Test list of and sums of sums of species.
-                pth = {sprime: self.object_testing.ions.loc[sprime].pth for
-                       sprime in s}
+                pth = {sprime: self.object_testing.ions.loc[sprime].pth for sprime in s}
                 pth = pd.concat(pth, axis=1, names=["S"])
                 pth = pth.drop("scalar", axis=1, level="C")
 
                 coeff = pd.Series({"par": -1, "per": 1})
-                ani_s = pth.pow(coeff,
-                                axis=1,
-                                level="C").product(axis=1,
-                                                   level="S")
-                ani_sum = pth.sum(axis=1,
-                                  level="C").pow(coeff,
-                                                 axis=1,
-                                                 level="C").product(axis=1)
+                ani_s = pth.pow(coeff, axis=1, level="C").product(axis=1, level="S")
+                ani_sum = (
+                    pth.sum(axis=1, level="C")
+                    .pow(coeff, axis=1, level="C")
+                    .product(axis=1)
+                )
                 ani_sum.name = "+".join(sorted(s))
 
                 # print_inline_debug_info = False
@@ -532,68 +567,68 @@ class PlasmaTestBase(ABC):
                 #           "<summed>",
                 #           self.object_testing.anisotropy("+".join(s)),
                 #           sep="\n")
-                pdt.assert_frame_equal(ani_s,
-                               self.object_testing.anisotropy(*s))
-                pdt.assert_series_equal(ani_sum,
-                                self.object_testing.anisotropy("+".join(s)))
+                pdt.assert_frame_equal(ani_s, self.object_testing.anisotropy(*s))
+                pdt.assert_series_equal(
+                    ani_sum, self.object_testing.anisotropy("+".join(s))
+                )
+
     # @unittest.skip
     def test_velocity(self):
         for s in self.species_combinations:
             if len(s) == 1:
-                self.assertEqual(self.object_testing.ions.loc[s[0]].velocity,
-                                 self.object_testing.velocity(*s))
-                self.assertEqual(self.object_testing.ions.loc[s[0]].velocity,
-                                 self.object_testing.v(*s))
-                self.assertEqual(self.object_testing.velocity(*s),
-                                 self.object_testing.v(*s))
+                self.assertEqual(
+                    self.object_testing.ions.loc[s[0]].velocity,
+                    self.object_testing.velocity(*s),
+                )
+                self.assertEqual(
+                    self.object_testing.ions.loc[s[0]].velocity,
+                    self.object_testing.v(*s),
+                )
+                self.assertEqual(
+                    self.object_testing.velocity(*s), self.object_testing.v(*s)
+                )
             else:
                 # Test species = (s0, s1, ..., sn)
-                fcn   = lambda x: x.v
-                ions_ = self.object_testing.ions.loc[list(s)].apply(fcn)
+                ot = self.object_testing
+                ions_ = self.object_testing.ions.loc[list(s)].apply(lambda x: x.v)
 
-                pdt.assert_series_equal(ions_,
-                                        self.object_testing.velocity(*s))
-                pdt.assert_series_equal(ions_,
-                                        self.object_testing.v(*s))
-                pdt.assert_series_equal(self.object_testing.velocity(*s),
-                                        self.object_testing.v(*s))
+                pdt.assert_series_equal(ions_, ot.velocity(*s))
+                pdt.assert_series_equal(ions_, ot.v(*s))
+                pdt.assert_series_equal(self.object_testing.velocity(*s), ot.v(*s))
 
                 # Test species = "s0+s1+...+sn"
-                rhos  = self.object_testing.rho(*s)
-                ions_ = pd.concat(ions_.apply(lambda x: x.cartesian).to_dict(),
-                                  axis=1, names=["S"])
+                rhos = ot.rho(*s)
+                ions_ = pd.concat(
+                    ions_.apply(lambda x: x.cartesian).to_dict(), axis=1, names=["S"]
+                )
                 # print("", "<Ions>", ions, "<rhos>", rhos, sep="\n")
                 ions_ = ions_.multiply(rhos, axis=1, level="S")
-                ions_ = ions_.sum(axis=1,
-                                level="C").divide(rhos.sum(axis=1),
-                                                  axis=0)
+                ions_ = ions_.sum(axis=1, level="C").divide(rhos.sum(axis=1), axis=0)
                 # print("<vcom>", ions, sep="\n")
                 ions_ = vector.Vector(ions_)
 
-                self.assertEqual(ions_,
-                                 self.object_testing.v("+".join(s)))
-                self.assertEqual(ions_,
-                                 self.object_testing.velocity("+".join(s)))
+                self.assertEqual(ions_, ot.v("+".join(s)))
+                self.assertEqual(ions_, ot.velocity("+".join(s)))
 
     def test_dv(self):
+        # print_inline_debug_info = False
 
         msg = "identically zero"
         for s in self.stuple:
             with self.assertRaisesRegex(NotImplementedError, msg):
                 self.object_testing.dv(s, s)
-        with self.assertRaisesRegex(NotImplementedError,  msg):
-                s = "+".join(self.stuple)
-                self.object_testing.dv(s, s)
+        with self.assertRaisesRegex(NotImplementedError, msg):
+            s = "+".join(self.stuple)
+            self.object_testing.dv(s, s)
 
         if len(self.stuple) == 1:
             # A multi-species plasma is necessary to calculate a dv.
             return None
 
-        # print_inline_debug_info = False
-
         combos2 = [x for x in self.species_combinations if len(x) == 2]
         # print(*combos2)
 
+        ot = self.object_testing
         for combo in combos2:
             # Calculate individual species dv.
             sb, sc = combo
@@ -601,8 +636,8 @@ class PlasmaTestBase(ABC):
             v1 = self.data.v.xs(sc, axis=1, level="S")
             dv = v0.subtract(v1, axis=1)
             vector_dv = vector.Vector(dv)
-            pdt.assert_frame_equal(dv, self.object_testing.dv(sb, sc).data)
-            self.assertEqual(vector_dv, self.object_testing.dv(sb, sc))
+            pdt.assert_frame_equal(dv, ot.dv(sb, sc).data)
+            self.assertEqual(vector_dv, ot.dv(sb, sc))
 
             # Calculate dv for v_s - v_com.
             ssum = "+".join(combo)
@@ -613,11 +648,11 @@ class PlasmaTestBase(ABC):
                 m = self.mass_in_mp.loc[list(combo)]
                 rhos = ns.multiply(m, axis=1, level="S")
                 rho_total = rhos.sum(axis=1)
-                vcom = vs.multiply(rhos,
-                                   axis=1,
-                                   level="S").sum(axis=1,
-                                                  level="C").divide(rho_total,
-                                                                    axis=0)
+                vcom = (
+                    vs.multiply(rhos, axis=1, level="S")
+                    .sum(axis=1, level="C")
+                    .divide(rho_total, axis=0)
+                )
 
                 v = self.data.v.xs(s, axis=1, level="S")
                 dv = v.subtract(vcom, axis=1, level="C")
@@ -634,11 +669,8 @@ class PlasmaTestBase(ABC):
                 #           "",
                 #           sep="\n")
 
-                pdt.assert_frame_equal(dv,
-                                       self.object_testing.dv(s, ssum).data)
-                self.assertEqual(vector.Vector(dv),
-                                 self.object_testing.dv(s, ssum))
-
+                pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
+                self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
         if len(self.stuple) > 2:
             # Calculate dv for v_si - v_com for each s in stuple.
@@ -650,8 +682,11 @@ class PlasmaTestBase(ABC):
             m = self.mass_in_mp.loc[list(self.stuple)]
             rhos = ns.multiply(m, axis=1, level="S")
             rho_total = rhos.sum(axis=1)
-            vcom = vs.multiply(rhos, axis=1, level="S").sum(axis=1,
-                               level="C").divide(rho_total, axis=0)
+            vcom = (
+                vs.multiply(rhos, axis=1, level="S")
+                .sum(axis=1, level="C")
+                .divide(rho_total, axis=0)
+            )
 
             # if print_inline_debug_info:
             #     print(
@@ -680,10 +715,8 @@ class PlasmaTestBase(ABC):
                 #           "",
                 #           sep="\n")
 
-                pdt.assert_frame_equal(dv,
-                                       self.object_testing.dv(s, ssum).data)
-                self.assertEqual(vector.Vector(dv),
-                                 self.object_testing.dv(s, ssum))
+                pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
+                self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
             for combo in combos2:
                 # Calculate dv for v_{s0+s1} - v_com for each s in stuple.
@@ -694,8 +727,9 @@ class PlasmaTestBase(ABC):
 
                 rho_s0s1 = n_s0s1.multiply(m_s0s1, axis=1, level="S")
                 rho_total_s0s1 = rho_s0s1.sum(axis=1)
-                rv_s0s1 = vs.multiply(rho_s0s1, axis=1, level="S").sum(axis=1,
-                                                                  level="C")
+                rv_s0s1 = v_s0s1.multiply(rho_s0s1, axis=1, level="S").sum(
+                    axis=1, level="C"
+                )
                 vcom_s0s1 = rv_s0s1.divide(rho_total_s0s1, axis=0)
 
                 dv_s0s1 = vcom_s0s1.subtract(vcom, axis=1, level="C")
@@ -719,17 +753,17 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(dv_s0s1, right.data)
                 self.assertEqual(vector.Vector(dv_s0s1), right)
 
-
     def test_ca(self):
         tk = ["x", "y", "z"]
         b = self.data.b.loc[:, tk].pow(2).sum(axis=1).pipe(np.sqrt) * 1e-9
         n = self.data.n.loc[:, ""].loc[:, self.stuple] * 1e6
         m = self.mass
-        rho = n*m
+        rho = n * m
 
         combos = [x for x in self.species_combinations if len(x) > 1]
-        total_masses = pd.DataFrame({"+".join(s): rho.loc[:, s].sum(axis=1) for
-                                     s in combos})
+        total_masses = pd.DataFrame(
+            {"+".join(s): rho.loc[:, s].sum(axis=1) for s in combos}
+        )
         rho = pd.concat([rho, total_masses], axis=1).sort_index(axis=1)
 
         ions_ = (constants.mu_0 * rho).pow(-0.5).multiply(b, axis=0) / 1e3
@@ -750,18 +784,19 @@ class PlasmaTestBase(ABC):
 
         for s in self.species_combinations:
             if len(s) == 1:
-                pdt.assert_series_equal(ions_.xs(*s, axis=1),
-                                        self.object_testing.ca(*s))
+                pdt.assert_series_equal(
+                    ions_.xs(*s, axis=1), self.object_testing.ca(*s)
+                )
             else:
                 # Check individual species.
-                pdt.assert_frame_equal(ions_.loc[:, s],
-                                       self.object_testing.ca(*s))
+                pdt.assert_frame_equal(ions_.loc[:, s], self.object_testing.ca(*s))
                 # Check total plasma.
-                pdt.assert_series_equal(ions_.loc[:, "+".join(s)],
-                                        self.object_testing.ca("+".join(s)))
+                pdt.assert_series_equal(
+                    ions_.loc[:, "+".join(s)], self.object_testing.ca("+".join(s))
+                )
 
     def test_afsq(self):
-#        print_inline_debug_info = True
+        #        print_inline_debug_info = True
 
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
@@ -775,29 +810,31 @@ class PlasmaTestBase(ABC):
         bsq = (self.data.b.loc[:, tk] * 1e-9).pow(2.0).sum(axis=1)
 
         # NOTE: Factor of 2 to get proper betas would go here.
-        beta  = pth.divide(bsq, axis=0) * constants.mu_0 #* 2.0
+        beta = pth.divide(bsq, axis=0) * constants.mu_0  # * 2.0
         dbeta = beta.per - beta.par
         ions_ = dbeta + 1.0
 
-#        if print_inline_debug_info:
-#            print("",
-#                  "<Test>",
-#                  "<species>: {}".format(list(self.species_combinations)),
-#                  "<tk>: {}".format(tk),
-#                  "<w>", type(w), w,
-#                  "<n>", type(n), n,
-#                  "<m>", type(m), m,
-#                  "<rho>", type(rho), rho,
-#                  "<pth>", type(pth), pth,
-#                  "<bsq>", type(bsq), bsq,
-#                  "<''beta''>", type(beta), beta,
-#                  "<''dbeta''>", type(dbeta), dbeta,
-#                  "<Ions>", type(ions), ions,
-#                  "",
-#                  sep="\n")
+        #        if print_inline_debug_info:
+        #            print("",
+        #                  "<Test>",
+        #                  "<species>: {}".format(list(self.species_combinations)),
+        #                  "<tk>: {}".format(tk),
+        #                  "<w>", type(w), w,
+        #                  "<n>", type(n), n,
+        #                  "<m>", type(m), m,
+        #                  "<rho>", type(rho), rho,
+        #                  "<pth>", type(pth), pth,
+        #                  "<bsq>", type(bsq), bsq,
+        #                  "<''beta''>", type(beta), beta,
+        #                  "<''dbeta''>", type(dbeta), dbeta,
+        #                  "<Ions>", type(ions), ions,
+        #                  "",
+        #                  sep="\n")
 
-        msg = ("Youngest beams analysis shows that dynamic pressure is "
-               "probably not useful.")
+        msg = (
+            "Youngest beams analysis shows that dynamic pressure is "
+            "probably not useful."
+        )
         # for s in self.stuple:
         #     pdt.assert_series_equal(ions.loc[:, s],
         #                            self.object_testing.afsq(s, pdynamic=False))
@@ -808,21 +845,23 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(NotImplementedError, msg):
                 self.object_testing.afsq(*combo, pdynamic=True)
             if len(combo) == 1:
-#                print("<Series>")
-                pdt.assert_series_equal(ions_.loc[:, combo[0]],
-                                        self.object_testing.afsq(*combo, pdynamic=False))
+                #                print("<Series>")
+                pdt.assert_series_equal(
+                    ions_.loc[:, combo[0]],
+                    self.object_testing.afsq(*combo, pdynamic=False),
+                )
             else:
-#                if print_inline_debug_info:
-#                    print("<Frame>", ions.loc[:, combo], "", sep="\n")
-                pdt.assert_frame_equal(ions_.loc[:, combo],
-                            self.object_testing.afsq(*combo))
+                #                if print_inline_debug_info:
+                #                    print("<Frame>", ions.loc[:, combo], "", sep="\n")
+                pdt.assert_frame_equal(
+                    ions_.loc[:, combo], self.object_testing.afsq(*combo)
+                )
 
                 # So that we don't overcount the $1 +$ in AFSQ, we
                 # do the following before taking the sum.
                 left = 1 + (ions_.loc[:, combo] - 1).sum(axis=1)
                 left.name = "+".join(combo)
-                pdt.assert_series_equal(left,
-                            self.object_testing.afsq("+".join(combo)))
+                pdt.assert_series_equal(left, self.object_testing.afsq("+".join(combo)))
 
     def test_caani(self):
         # print_inline_debug_info = False
@@ -830,7 +869,10 @@ class PlasmaTestBase(ABC):
         combos = [x for x in self.species_combinations]
         masses = self.mass
         n = self.data.n.xs("", axis=1, level="C") * 1e6
-        rhos = {"+".join(x): n.loc[:, list(x)].multiply(masses.loc[list(x)]).sum(axis=1) for x in combos}
+        rhos = {
+            "+".join(x): n.loc[:, list(x)].multiply(masses.loc[list(x)]).sum(axis=1)
+            for x in combos
+        }
         rhos = pd.concat(rhos, axis=1, names=["S"])
 
         tk = pd.IndexSlice[["x", "y", "z"], ""]
@@ -863,8 +905,10 @@ class PlasmaTestBase(ABC):
         #           "<beta*>", type(beta_ish), beta_ish,
         #           sep="\n")
 
-        regex_msg = ("Youngest beams analysis shows that "
-                               "dynamic pressure is probably not useful.")
+        regex_msg = (
+            "Youngest beams analysis shows that "
+            "dynamic pressure is probably not useful."
+        )
         for combo in combos:
             this_ca = ca.loc[:, "+".join(combo)]
             afsq = 1.0 + beta_ish.loc[:, list(combo)].sum(axis=1)
@@ -878,12 +922,14 @@ class PlasmaTestBase(ABC):
             #           "<caani>", type(this_caani), this_caani,
             #           sep="\n")
 
-            pdt.assert_series_equal(this_caani,
-                                    self.object_testing.caani(*combo))
-            pdt.assert_series_equal(this_caani,
-                                    self.object_testing.caani("+".join(combo)))
-            pdt.assert_series_equal(self.object_testing.caani(*combo),
-                                    self.object_testing.caani("+".join(combo)))
+            pdt.assert_series_equal(this_caani, self.object_testing.caani(*combo))
+            pdt.assert_series_equal(
+                this_caani, self.object_testing.caani("+".join(combo))
+            )
+            pdt.assert_series_equal(
+                self.object_testing.caani(*combo),
+                self.object_testing.caani("+".join(combo)),
+            )
             with self.assertRaisesRegex(NotImplementedError, regex_msg):
                 self.object_testing.caani(*combo, pdynamic=True)
             with self.assertRaisesRegex(NotImplementedError, regex_msg):
@@ -901,7 +947,7 @@ class PlasmaTestBase(ABC):
 
         amu = self.m_amu
         charge_states = self.charge_states
-        n   = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
+        n = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
         m = self.mass
         # rho = n.multiply(m, axis=1, level="S")
         w = self.data.w.scalar.loc[:, self.stuple] * 1e3
@@ -909,8 +955,9 @@ class PlasmaTestBase(ABC):
         Tkelvin = 0.5 * w.pow(2.0).multiply(m, axis=1, level="S") / kb_J[0]
         TeV = Tkelvin * kb_eV[0]
 
-        nZsqOTeV = n.multiply(charge_states.pow(2),
-            axis=1, level="S").divide(TeV, axis=1, level="S")
+        nZsqOTeV = n.multiply(charge_states.pow(2), axis=1, level="S").divide(
+            TeV, axis=1, level="S"
+        )
 
         # if print_inline_debug_info:
         #     print("",
@@ -930,8 +977,9 @@ class PlasmaTestBase(ABC):
         #           "",
         #           sep="\n")
 
-        regex_msg = ("`lnlambda` can only calculate with individual s0 "
-            "and s1 species.")
+        regex_msg = (
+            "`lnlambda` can only calculate with individual s0 " "and s1 species."
+        )
         invalid = "Invalid species"
         combos2 = [x for x in self.species_combinations if len(x) == 2]
         for combo in combos2:
@@ -943,7 +991,7 @@ class PlasmaTestBase(ABC):
             ti = TeV.loc[:, si]
             tj = TeV.loc[:, sj]
 
-            left = ( zi * zj * (ai + aj) ) / ((ai * tj) + (aj * ti))
+            left = (zi * zj * (ai + aj)) / ((ai * tj) + (aj * ti))
             right = nZsqOTeV.loc[:, list(combo)].sum(axis=1).pipe(np.sqrt)
             ln = np.log(left * right)
             lnlambda = 29.9 - ln
@@ -962,15 +1010,18 @@ class PlasmaTestBase(ABC):
             #           "",
             #           sep="\n")
 
-            pdt.assert_series_equal(lnlambda,
-                self.object_testing.lnlambda(combo[0], combo[1]))
-            pdt.assert_series_equal(lnlambda,
+            pdt.assert_series_equal(
+                lnlambda, self.object_testing.lnlambda(combo[0], combo[1])
+            )
+            pdt.assert_series_equal(
+                lnlambda,
                 self.object_testing.lnlambda(combo[1], combo[0]),
-                check_names=False)
+                check_names=False,
+            )
 
             # NOTE: The following various Invalid Species tests are excessive
             #       and should be reduced.
-            s0s1 = "+".join(combo) #("+".join(combo), combo):
+            s0s1 = "+".join(combo)  # ("+".join(combo), combo):
             with self.assertRaisesRegex(ValueError, regex_msg):
                 self.object_testing.lnlambda(combo[0], s0s1)
             with self.assertRaisesRegex(ValueError, regex_msg):
@@ -1009,6 +1060,7 @@ class PlasmaTestBase(ABC):
         """
         from scipy.special import erf
         from scipy import constants
+
         # print_inline_debug_info = False
 
         if len(self.stuple) == 1:
@@ -1016,8 +1068,8 @@ class PlasmaTestBase(ABC):
             return None
 
         slist = list(self.stuple)
-        coeff = (4.0 * np.pi * constants.epsilon_0**2.0)
-        qsq = self.charges**2.0
+        coeff = 4.0 * np.pi * constants.epsilon_0 ** 2.0
+        qsq = self.charges ** 2.0
         m = self.mass
         w = self.data.w.par.loc[:, slist] * 1e3
         wsq = w.pow(2.0)
@@ -1060,14 +1112,14 @@ class PlasmaTestBase(ABC):
 
             va = v.xs(sa, axis=1, level="S")
             vb = v.xs(sb, axis=1, level="S")
-            dvvec = (va - vb)
+            dvvec = va - vb
             dv = dvvec.pow(2).sum(axis=1).pipe(np.sqrt)
             dvw = dv.divide(wab, axis=0)
 
             gauss_coeff = dvw.multiply(2.0 / np.sqrt(np.pi))
             # ldr = longitudinal diffusion rate $\hat{\nu}_L$.
             erf_dvw = erf(dvw)
-            gaussian_term = gauss_coeff * np.exp(-(dvw**2.0))
+            gaussian_term = gauss_coeff * np.exp(-(dvw ** 2.0))
             ldr = dvw.pow(-3.0) * (erf_dvw - gaussian_term)
 
             nuab = all_coeff * (nb * lnlambda / wab.pow(3.0)) * ldr / 1e-7
@@ -1105,23 +1157,21 @@ class PlasmaTestBase(ABC):
             #           sep="\n")
 
             pdt.assert_series_equal(
-                        nuab,
-                        self.object_testing.nuc(sa, sb, both_species=False))
+                nuab, self.object_testing.nuc(sa, sb, both_species=False)
+            )
             pdt.assert_series_equal(
-                        nuba,
-                        self.object_testing.nuc(sb, sa, both_species=False))
-            pdt.assert_series_equal(nuc,
-                        self.object_testing.nuc(sa, sb))
+                nuba, self.object_testing.nuc(sb, sa, both_species=False)
+            )
+            pdt.assert_series_equal(nuc, self.object_testing.nuc(sa, sb))
 
             nuc.name = "%s+%s" % (sb, sa)
-            pdt.assert_series_equal(nuc,
-                        self.object_testing.nuc(sb, sa))
+            pdt.assert_series_equal(nuc, self.object_testing.nuc(sb, sa))
 
             pdt.assert_series_equal(
-                        self.object_testing.nuc(sa, sb),
-                        self.object_testing.nuc(sb, sa),
-                        check_names=False)
-
+                self.object_testing.nuc(sa, sb),
+                self.object_testing.nuc(sb, sa),
+                check_names=False,
+            )
 
     # @unittest.skip
     def test_nc(self):
@@ -1133,22 +1183,24 @@ class PlasmaTestBase(ABC):
         slist = list(self.stuple)
 
         v = self.data.v
-        v = pd.concat({s: v.xs(s, axis=1, level="S") for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        v = pd.concat(
+            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass
         n = self.data.n.xs("", axis=1, level="C")
-        n = pd.concat({s: n.xs(s, axis=1) for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        n = pd.concat(
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
         rho = n.multiply(m, axis=1, level="S")
 
-        vcom = v.multiply(rho,
-                         axis=1,
-                         level="S").sum(axis=1,
-                                        level="C").divide(rho.sum(axis=1),
-                                                          axis=0)
+        vcom = (
+            v.multiply(rho, axis=1, level="S")
+            .sum(axis=1, level="C")
+            .divide(rho.sum(axis=1), axis=0)
+        )
         vsw = vcom.pow(2.0).sum(axis=1).pipe(np.sqrt) * 1e3
 
         # Re = 6378.1e3.
@@ -1168,20 +1220,18 @@ class PlasmaTestBase(ABC):
         #       "<tau_exp>", type(tau_exp), tau_exp,
         #       sep="\n")
 
-        individual_msg = ("`nc` can only calculate with individual"
-                          " `sa` and `sb` species.")
+        individual_msg = (
+            "`nc` can only calculate with individual" " `sa` and `sb` species."
+        )
         invalid_msg = "Invalid species"
 
         combos2 = [x for x in self.species_combinations if len(x) == 2]
         for combo in combos2:
             sa, sb = combo
 
-            nuab = self.object_testing.nuc(sa, sb,
-                                           both_species=False)
-            nuba = self.object_testing.nuc(sb, sa,
-                                           both_species=False)
-            nuc = self.object_testing.nuc(sa, sb,
-                                           both_species=True)
+            nuab = self.object_testing.nuc(sa, sb, both_species=False)
+            nuba = self.object_testing.nuc(sb, sa, both_species=False)
+            nuc = self.object_testing.nuc(sa, sb, both_species=True)
 
             ncab = nuab.multiply(tau_exp, axis=0) * 1e-7
             ncab.name = "%s-%s" % (sa, sb)
@@ -1202,19 +1252,23 @@ class PlasmaTestBase(ABC):
             #       "",
             #       sep="\n")
 
-            pdt.assert_series_equal(ncab,
-                            self.object_testing.nc(sa, sb, both_species=False))
-            pdt.assert_series_equal(ncba,
-                            self.object_testing.nc(sb, sa, both_species=False))
-            pdt.assert_series_equal(nc,
-                            self.object_testing.nc(sa, sb, both_species=True))
-            pdt.assert_series_equal(nc,
-                            self.object_testing.nc(sb, sa, both_species=True),
-                            check_names=False)
             pdt.assert_series_equal(
-                            self.object_testing.nc(sa, sb, both_species=True),
-                            self.object_testing.nc(sb, sa, both_species=True),
-                            check_names=False)
+                ncab, self.object_testing.nc(sa, sb, both_species=False)
+            )
+            pdt.assert_series_equal(
+                ncba, self.object_testing.nc(sb, sa, both_species=False)
+            )
+            pdt.assert_series_equal(
+                nc, self.object_testing.nc(sa, sb, both_species=True)
+            )
+            pdt.assert_series_equal(
+                nc, self.object_testing.nc(sb, sa, both_species=True), check_names=False
+            )
+            pdt.assert_series_equal(
+                self.object_testing.nc(sa, sb, both_species=True),
+                self.object_testing.nc(sb, sa, both_species=True),
+                check_names=False,
+            )
 
         with self.assertRaisesRegex(ValueError, individual_msg):
             self.object_testing.nc("+".join(combo), sa)
@@ -1239,46 +1293,65 @@ class PlasmaTestBase(ABC):
         year = self.data.year
         fdoy = self.data.fdoy
 
-        pdt.assert_series_equal(year, pd.Series((1994.0, 2005.0, 2016.0), name="year"),
-            "Year values have changed from initial test write. They won't pass.")
-        pdt.assert_series_equal(fdoy, pd.Series((12.5, 309.1, 61.75), name="fdoy"),
-            "Year values have changed from initial test write. They won't pass.")
-        test_against = [pd.datetime(1994, 1, 12, 12),
-                        pd.datetime(2005, 11, 5, 2, 24),
-                        pd.datetime(2016, 3, 1, 18)]
+        pdt.assert_series_equal(
+            year,
+            pd.Series((1994.0, 2005.0, 2016.0), name="year"),
+            "Year values have changed from initial test write. They won't pass.",
+        )
+        pdt.assert_series_equal(
+            fdoy,
+            pd.Series((12.5, 309.1, 61.75), name="fdoy"),
+            "Year values have changed from initial test write. They won't pass.",
+        )
+        test_against = [
+            pd.datetime(1994, 1, 12, 12),
+            pd.datetime(2005, 11, 5, 2, 24),
+            pd.datetime(2016, 3, 1, 18),
+        ]
         test_against = pd.Series(test_against, name="timestamp")
 
         if print_inline_debug:
-            print("<Test>",
-                  "<year>", type(year), year,
-                  "<fdoy>", type(fdoy), fdoy,
-                  "<test_against>", type(test_against), test_against,
-                  "", sep="\n")
+            print(
+                "<Test>",
+                "<year>",
+                type(year),
+                year,
+                "<fdoy>",
+                type(fdoy),
+                fdoy,
+                "<test_against>",
+                type(test_against),
+                test_against,
+                "",
+                sep="\n",
+            )
         pdt.assert_series_equal(test_against, self.object_testing.dt2ts)
 
     def test_estimate_electrons(self):
-#        print_inline_debug_info = True
+        #        print_inline_debug_info = True
 
         stuple = self.stuple
 
         if "p" not in self.stuple and "p1" not in self.stuple:
-            with self.assertRaisesRegex(ValueError,
-                    # Match this sentence at start of string.
-                    "^Plasma must contain \(core\) protons to estimate electrons."):
+            with self.assertRaisesRegex(
+                ValueError,
+                # Match this sentence at start of string.
+                "^Plasma must contain \(core\) protons to estimate electrons.",  # noqa: W605
+            ):
                 self.object_testing.estimate_electrons()
 
         else:
 
-            qi      = self.charge_states
-            ni      = self.data.n.xs("", axis=1, level="C").loc[:, list(stuple)]
-            niqi    = ni.multiply(qi, axis=1, level="S")
-            vi      = self.data.v.loc[:, pd.IndexSlice[:, list(stuple)]]
-            niqivi  = vi.multiply(niqi, axis=1, level="S")
-            nqv     = niqivi.sum(axis=1, level="C")
+            qi = self.charge_states
+            ni = self.data.n.xs("", axis=1, level="C").loc[:, list(stuple)]
+            niqi = ni.multiply(qi, axis=1, level="S")
+            vi = self.data.v.loc[:, pd.IndexSlice[:, list(stuple)]]
+            niqivi = vi.multiply(niqi, axis=1, level="S")
+            nqv = niqivi.sum(axis=1, level="C")
             # Signs in -1 * niqi / qe cancel to give positive definite ne.
-            ne      = niqi.sum(axis=1)
+            ne = niqi.sum(axis=1)
             # Signs in -1 * niqivi / neqe cancel. The charge state of e- is -1.
-            ve      = nqv.divide(ne, axis=0)
+            ve = nqv.divide(ne, axis=0)
 
             if "p" in self.stuple:
                 tkw = pd.IndexSlice["scalar", "p"]
@@ -1289,56 +1362,57 @@ class PlasmaTestBase(ABC):
                 tkn = "p1"
                 exp = pd.Series({"p1": 1.0, "e": -1.0})
 
-            wp   = self.data.w.loc[:, tkw]
+            wp = self.data.w.loc[:, tkw]
             npne = self.data.n.xs("", axis=1, level="C").loc[:, tkn]
             npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"])
             nrat = npne.pow(exp, axis=1, level="S").product(axis=1)
-            mpme = physical_constants["electron-proton mass ratio"][0]**-1.0
-            we   = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
+            mpme = physical_constants["electron-proton mass ratio"][0] ** -1.0
+            we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
 
-            tmp     = pd.concat([we, we], axis=1, keys=["par", "per"])
+            tmp = pd.concat([we, we], axis=1, keys=["par", "per"])
             ne.name = ""
-            electrons = pd.concat([ne, ve, tmp],
-                                  axis=1,
-                                  keys=["n", "v", "w"],
-                                  names=["M", "C"])
+            electrons = pd.concat(
+                [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"]
+            )
 
             electrons = ions.Ion(electrons, "e")
 
-#            if print_inline_debug_info:
-#                print("<Test>",
-#                      "<species>: {}".format(stuple),
-#                      "<charges>", type(qi), qi,
-#                      "<n>", type(ni), ni,
-#                      "<niqi>", type(niqi), niqi,
-#                      "<ne>", type(ne), ne,
-#                      "<vi>", type(vi), vi,
-#                      "<niqivi>", type(niqivi), niqivi,
-#                      "<nqv>", type(nqv), nqv,
-#                      "<ve>", type(ve), ve,
-#                      "<w proton>", type(wp), wp,
-#                      "<npne>", type(npne), npne,
-#                      "<nrat>", type(nrat), nrat,
-#                      "<mpme>: %s" % mpme,
-#                      "<we>", type(we), we,
-#                      "<electrons>", type(electrons), electrons, electrons.data,
-#                      "", sep="\n")
+            #            if print_inline_debug_info:
+            #                print("<Test>",
+            #                      "<species>: {}".format(stuple),
+            #                      "<charges>", type(qi), qi,
+            #                      "<n>", type(ni), ni,
+            #                      "<niqi>", type(niqi), niqi,
+            #                      "<ne>", type(ne), ne,
+            #                      "<vi>", type(vi), vi,
+            #                      "<niqivi>", type(niqivi), niqivi,
+            #                      "<nqv>", type(nqv), nqv,
+            #                      "<ve>", type(ve), ve,
+            #                      "<w proton>", type(wp), wp,
+            #                      "<npne>", type(npne), npne,
+            #                      "<nrat>", type(nrat), nrat,
+            #                      "<mpme>: %s" % mpme,
+            #                      "<we>", type(we), we,
+            #                      "<electrons>", type(electrons), electrons, electrons.data,
+            #                      "", sep="\n")
 
             # Check electrons are properly calculated.
-            pdt.assert_frame_equal(electrons.data,
-                                   self.object_testing.estimate_electrons().data)
-            self.assertEqual(electrons,
-                             self.object_testing.estimate_electrons())
+            ot = self.object_testing
+            pdt.assert_frame_equal(electrons.data, ot.estimate_electrons().data)
+            self.assertEqual(electrons, ot.estimate_electrons())
 
             # Check that electrons aren't stored in plasma.
-            self.assertFalse("e" in self.object_testing.species)
-            comp_data = pd.concat({"e": electrons.data},
-                                  axis=1,
-                                  names=["S", "M", "C"]).reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
+            self.assertFalse("e" in ot.species)
+            comp_data = (
+                pd.concat({"e": electrons.data}, axis=1, names=["S", "M", "C"])
+                .reorder_levels(["M", "C", "S"], axis=1)
+                .sort_index(axis=1)
+            )
 
-            self.assertFalse(comp_data.isin(self.object_testing.data).any().any(),
-                             "There should not be e- data in plasma data.")
-
+            self.assertFalse(
+                comp_data.isin(ot.data).any().any(),
+                "There should not be e- data in plasma data.",
+            )
 
             # # Check that electrons are still returned when `inplace=True`.
             # self.assertEqual(electrons,
@@ -1362,7 +1436,7 @@ class PlasmaTestBase(ABC):
             # self.object_testing._Plasma__set_species(*species)
             # self.object_testing._Plasma__set_ions()
 
-    #@unittest.skip("Bug w/ `_chk_species` is preventing tests from passing.")
+    # @unittest.skip("Bug w/ `_chk_species` is preventing tests from passing.")
     def test_pdynamic(self):
         print_inline_debug_info = False
 
@@ -1371,86 +1445,126 @@ class PlasmaTestBase(ABC):
         if len(slist) == 1:
             msg = "Must have >1 species to calculate dynamic pressure."
             with self.assertRaisesRegex(ValueError, msg):
-               self.object_testing.pdynamic(*slist)
-            return None # Exit test.
+                self.object_testing.pdynamic(*slist)
+            return None  # Exit test.
 
         v = self.data.v
-        v = pd.concat({s: v.xs(s, axis=1, level="S") for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        v = pd.concat(
+            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
-        n = pd.concat({s: n.xs(s, axis=1) for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        n = pd.concat(
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
         rho = n.multiply(m, axis=1, level="S")
 
         if print_inline_debug_info:
-            print("",
-                   "<Test>",
-                   "<species>: {}".format(self.stuple),
-                   "<v>", type(v), v,
-                   "<m>", type(m), m,
-                   "<n>", type(n), n,
-                   "<rho>", type(rho), rho,
-                   sep="\n")
+            print(
+                "",
+                "<Test>",
+                "<species>: {}".format(self.stuple),
+                "<v>",
+                type(v),
+                v,
+                "<m>",
+                type(m),
+                m,
+                "<n>",
+                type(n),
+                n,
+                "<rho>",
+                type(rho),
+                rho,
+                sep="\n",
+            )
 
         for combo in self.species_combinations:
 
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
-                   self.object_testing.pdynamic(*combo)
-                continue # Skip this test case.
+                    self.object_testing.pdynamic(*combo)
+                continue  # Skip this test case.
 
             scom = "+".join(combo)
 
             rho_i = rho.loc[:, list(combo)]
             rho_t = rho_i.sum(axis=1)
-            v_i   = v.loc[:, list(combo)]
-            vcom  = v_i.multiply(rho_i,
-                                 axis=1,
-                                 level="S").sum(axis=1,
-                                                level="C").divide(rho_t,
-                                                                  axis=0)
-            dv_i        = v_i.subtract(vcom, axis=1, level="C")
-            dvsq_i      = dv_i.pow(2.0).sum(axis=1, level="S")
-            dvsq_rho_i  = dvsq_i.multiply(rho_i, axis=1, level="S")
-            dvsq_rho    = dvsq_rho_i.sum(axis=1)
+            v_i = v.loc[:, list(combo)]
+            vcom = (
+                v_i.multiply(rho_i, axis=1, level="S")
+                .sum(axis=1, level="C")
+                .divide(rho_t, axis=0)
+            )
+            dv_i = v_i.subtract(vcom, axis=1, level="C")
+            dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
+            dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
+            dvsq_rho = dvsq_rho_i.sum(axis=1)
 
-            const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12 # [m_p] * [n] * [dv]**2 / [p]
-            pdv   = dvsq_rho.multiply(const)
+            const = (
+                0.5 * constants.m_p * 1e6 * 1e6 / 1e-12
+            )  # [m_p] * [n] * [dv]**2 / [p]
+            pdv = dvsq_rho.multiply(const)
 
             if print_inline_debug_info:
-                print("",
-                      "<combo>: {}".format(combo),
-                      "<scom>: %s" % scom,
-                      "<rho_i>", type(rho_i), rho_i,
-                      "<rho_t>", type(rho_t), rho_t,
-                      "<v_i>", type(v_i), v_i,
-                      "<vcom>", type(vcom), vcom,
-                      "<dv_i>", type(dv_i), dv_i,
-                      "<dvsq_i>", type(dvsq_i), dvsq_i,
-                      "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
-                      "<dvsq_rho>", type(dvsq_rho), dvsq_rho,
-                      "<const> %s" % const,
-                      "<pdv>", type(pdv), pdv,
-                      sep="\n",
-                      end="\n\n")
+                print(
+                    "",
+                    "<combo>: {}".format(combo),
+                    "<scom>: %s" % scom,
+                    "<rho_i>",
+                    type(rho_i),
+                    rho_i,
+                    "<rho_t>",
+                    type(rho_t),
+                    rho_t,
+                    "<v_i>",
+                    type(v_i),
+                    v_i,
+                    "<vcom>",
+                    type(vcom),
+                    vcom,
+                    "<dv_i>",
+                    type(dv_i),
+                    dv_i,
+                    "<dvsq_i>",
+                    type(dvsq_i),
+                    dvsq_i,
+                    "<dvsq_rho_i>",
+                    type(dvsq_rho_i),
+                    dvsq_rho_i,
+                    "<dvsq_rho>",
+                    type(dvsq_rho),
+                    dvsq_rho,
+                    "<const> %s" % const,
+                    "<pdv>",
+                    type(pdv),
+                    pdv,
+                    sep="\n",
+                    end="\n\n",
+                )
 
             pdv.name = "pdynamic"
             pdt.assert_series_equal(pdv, self.object_testing.pdynamic(*combo))
             pdt.assert_series_equal(pdv, self.object_testing.pdv(*combo))
-            pdt.assert_series_equal(self.object_testing.pdynamic(*combo),
-                                    self.object_testing.pdv(*combo))
-            pdt.assert_series_equal(self.object_testing.pdv(*combo),
-                                    self.object_testing.pdynamic(*combo))
+            pdt.assert_series_equal(
+                self.object_testing.pdynamic(*combo), self.object_testing.pdv(*combo)
+            )
+            pdt.assert_series_equal(
+                self.object_testing.pdv(*combo), self.object_testing.pdynamic(*combo)
+            )
             pdt.assert_series_equal(self.object_testing.pdynamic(*combo), pdv)
-            pdt.assert_series_equal(self.object_testing.pdynamic(*combo),
-                                    self.object_testing.pdynamic(*combo))
-            pdt.assert_series_equal(self.object_testing.pdynamic(*combo),
-                                    self.object_testing.pdynamic(*combo[::-1]))
+            pdt.assert_series_equal(
+                self.object_testing.pdynamic(*combo),
+                self.object_testing.pdynamic(*combo),
+            )
+            pdt.assert_series_equal(
+                self.object_testing.pdynamic(*combo),
+                self.object_testing.pdynamic(*combo[::-1]),
+            )
 
             invalid_msg = "Invalid species"
             # dynamic pressure shouldn't work with a comma separated list or sub-list.
@@ -1465,12 +1579,11 @@ class PlasmaTestBase(ABC):
             # that includes a sum.
             pdt.assert_series_equal(pdv, self.object_testing.pdynamic(scom))
 
-#            print("<combo[0], scom>: {}, {}".format(combo[0], scom), end="\n\n")
+            #            print("<combo[0], scom>: {}, {}".format(combo[0], scom), end="\n\n")
             with self.assertRaisesRegex(ValueError, invalid_msg):
                 self.object_testing.pdynamic(combo[0], scom)
             with self.assertRaisesRegex(ValueError, invalid_msg):
                 self.object_testing.pdynamic(scom, combo[0])
-
 
     def test_heatflux(self):
         print_inline_debug_info = False
@@ -1482,12 +1595,13 @@ class PlasmaTestBase(ABC):
             msg = "Must have >1 species to calculate dynamic pressure."
             with self.assertRaisesRegex(ValueError, msg):
                 self.object_testing.pdynamic(*slist)
-            return None # Exit test.
+            return None  # Exit test.
 
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
-        n = pd.concat({s: n.xs(s, axis=1) for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        n = pd.concat(
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
         rho = n.multiply(m, axis=1, level="S")
         rho.columns.names = ["S"]
 
@@ -1497,32 +1611,59 @@ class PlasmaTestBase(ABC):
         bhat = b.divide(b.pow(2).sum(axis=1).pipe(np.sqrt), axis=0)
 
         v = self.data.v
-        v = pd.concat({s: v.xs(s, axis=1, level="S") for s in slist},
-                      axis=1, names=["S"]).sort_index(axis=1)
+        v = pd.concat(
+            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
         vpar = v.multiply(bhat, axis=0).sum(axis=1, level="S")
         qa = vpar.pow(3)
         qb = vpar.multiply(w.pow(2), axis=1, level="S")
-        qc = rho.multiply(qa.add( (3./2.) * qb, axis=1, level="S"), axis=1, level="S")
+        qc = rho.multiply(
+            qa.add((3.0 / 2.0) * qb, axis=1, level="S"), axis=1, level="S"
+        )
 
-        coeff = constants.m_p * 1e6 * 1e9 / 1e-4 # [m_p] [n] [v]^3 / [q]
+        coeff = constants.m_p * 1e6 * 1e9 / 1e-4  # [m_p] [n] [v]^3 / [q]
         q = qc.multiply(coeff)
 
         if print_inline_debug_info:
-            print("",
-                   "<Test>",
-                   "<species>: {}".format(self.stuple),
-                   "<m>", type(m), m,
-                   "<n>", type(n), n,
-                   "<rho>", type(rho), rho,
-                   "<b>", type(b), b,
-                   "<bhat>", type(bhat), bhat,
-                   "<v>", type(v), v,
-                   "<vpar>", type(vpar), vpar,
-                   "<qa>", type(qa), qa,
-                   "<qb>", type(qb), qb,
-                   "<qc>", type(qc), qc,
-                   "<q>", type(q), q,
-                   sep="\n")
+            print(
+                "",
+                "<Test>",
+                "<species>: {}".format(self.stuple),
+                "<m>",
+                type(m),
+                m,
+                "<n>",
+                type(n),
+                n,
+                "<rho>",
+                type(rho),
+                rho,
+                "<b>",
+                type(b),
+                b,
+                "<bhat>",
+                type(bhat),
+                bhat,
+                "<v>",
+                type(v),
+                v,
+                "<vpar>",
+                type(vpar),
+                vpar,
+                "<qa>",
+                type(qa),
+                qa,
+                "<qb>",
+                type(qb),
+                qb,
+                "<qc>",
+                type(qc),
+                qc,
+                "<q>",
+                type(q),
+                q,
+                sep="\n",
+            )
 
         for s in self.species_combinations:
             if len(s) == 1:
@@ -1533,38 +1674,35 @@ class PlasmaTestBase(ABC):
                 qi = q.loc[:, list(s)]
 
                 if print_inline_debug_info:
-                   print("<qi>", type(qi), qi,
-                          sep="\n")
+                    print("<qi>", type(qi), qi, sep="\n")
 
                 # Check the list input case first.
-                pdt.assert_frame_equal(qi,
-                                       self.object_testing.heat_flux(*s))
-                pdt.assert_frame_equal(qi,
-                                       self.object_testing.qpar(*s))
-                pdt.assert_frame_equal(self.object_testing.heat_flux(*s),
-                                       self.object_testing.qpar(*s))
+                pdt.assert_frame_equal(qi, self.object_testing.heat_flux(*s))
+                pdt.assert_frame_equal(qi, self.object_testing.qpar(*s))
+                pdt.assert_frame_equal(
+                    self.object_testing.heat_flux(*s), self.object_testing.qpar(*s)
+                )
                 # Then sum `qi` to check the sum case.
                 qi = qi.sum(axis=1)
                 qi.name = "+".join(sorted(list(s)))
 
             if print_inline_debug_info:
-                print("<qi>", type(qi), qi,
-                      sep="\n")
+                print("<qi>", type(qi), qi, sep="\n")
 
             # Check the sum case.
-            pdt.assert_series_equal(qi,
-                                    self.object_testing.heat_flux("+".join(s)))
-            pdt.assert_series_equal(qi,
-                                    self.object_testing.qpar("+".join(s)))
-            pdt.assert_series_equal(self.object_testing.heat_flux("+".join(s)),
-                                    self.object_testing.qpar("+".join(s)))
+            pdt.assert_series_equal(qi, self.object_testing.heat_flux("+".join(s)))
+            pdt.assert_series_equal(qi, self.object_testing.qpar("+".join(s)))
+            pdt.assert_series_equal(
+                self.object_testing.heat_flux("+".join(s)),
+                self.object_testing.qpar("+".join(s)),
+            )
 
     @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
         species = self.species
-        slist   = species.split("+")
-        ns      = len(slist)
-        data    = self.data
+        slist = species.split("+")
+        ns = len(slist)
+        data = self.data
 
         tkc = ["x", "y", "z"]
         v = data.loc[:, "v"].loc[:, pd.IndexSlice[tkc, slist]]
@@ -1574,26 +1712,21 @@ class PlasmaTestBase(ABC):
         rtot = r.sum(axis=1)
 
         bat = self.object_testing.build_alfvenic_turbulence
-        if ns == 1:
+        AlfvenicTurbulence = alfvenic_turbulence.AlfvenicTurbulence  # noqa: F821
+        if ns == 1:  # noqa: F821
             v = v.xs(species, axis=1, level="S")
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(v,
-                                                              b,
-                                                              rtot,
-                                                              species)
+            alf_turb = AlfvenicTurbulence(v, b, rtot, species)
             self.assertEqual(alf_turb, bat(species))
 
         elif ns == 2:
 
             # Check CoM velocity case.
-            vcom = v.multiply(r,
-                              axis=1,
-                              level="S").sum(axis=1,
-                                             level="C").divide(rtot,
-                                                               axis=0)
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(vcom,
-                                                              b,
-                                                              rtot,
-                                                              species)
+            vcom = (
+                v.multiply(r, axis=1, level="S")
+                .sum(axis=1, level="C")
+                .divide(rtot, axis=0)
+            )
+            alf_turb = AlfvenicTurbulence(vcom, b, rtot, species)
             self.assertEqual(alf_turb, bat(species))
 
             s0, s1 = species.split("+")
@@ -1604,52 +1737,37 @@ class PlasmaTestBase(ABC):
             dv = v0.subtract(v1, axis=1, level="C")
             s0s1 = ",".join([s0, s1])
             r1 = r.xs(s1, axis=1)
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              r1,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, r1, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s1,s0 case.
             dv = v1.subtract(v0, axis=1, level="C")
             s0s1 = ",".join([s1, s0])
             r0 = r.xs(s0, axis=1)
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              r0,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, r0, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s0,s0+s1 case.
             dv = v0.subtract(vcom, axis=1)
             s0s1 = ",".join([s0, species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s1,s0+s1 case.
             dv = v1.subtract(vcom, axis=1)
             s0s1 = ",".join([s1, species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
         elif ns == 3:
 
             # Check CoM velocity case.
-            vcom = v.multiply(r,
-                              axis=1,
-                              level="S").sum(axis=1,
-                                             level="C").divide(rtot,
-                                                               axis=0)
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(vcom,
-                                                              b,
-                                                              rtot,
-                                                              species)
+            vcom = (
+                v.multiply(r, axis=1, level="S")
+                .sum(axis=1, level="C")
+                .divide(rtot, axis=0)
+            )
+            alf_turb = AlfvenicTurbulence(vcom, b, rtot, species)
             self.assertEqual(alf_turb, bat(species))
 
             s0, s1, s2 = species.split("+")
@@ -1660,68 +1778,61 @@ class PlasmaTestBase(ABC):
             # Check dv s0,stot case.
             dv = v0.subtract(vcom, axis=1)
             s0s1 = ",".join([s0, species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s1,stot case.
             dv = v1.subtract(vcom, axis=1)
             s0s1 = ",".join([s1, species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s2,stot case.
             dv = v2.subtract(vcom, axis=1)
             s0s1 = ",".join([s2, species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
-
             # Check dv s0+s1,stot case.
-            tks  = [s0, s1]
+            tks = [s0, s1]
             r0r1 = r.loc[:, tks]
-            v0v1 = v.loc[:, pd.IndexSlice[tkc, tks]].multiply(r0r1,
-                axis=1).sum(axis=1, level="C").divide(r0r1.sum(axis=1), axis=0)
+            v0v1 = (
+                v.loc[:, pd.IndexSlice[tkc, tks]]
+                .multiply(r0r1, axis=1)
+                .sum(axis=1, level="C")
+                .divide(r0r1.sum(axis=1), axis=0)
+            )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s1+s2,stot case.
-            tks  = [s1, s2]
+            tks = [s1, s2]
             r0r1 = r.loc[:, tks]
-            v0v1 = v.loc[:, pd.IndexSlice[tkc, tks]].multiply(r0r1,
-                axis=1).sum(axis=1, level="C").divide(r0r1.sum(axis=1), axis=0)
+            v0v1 = (
+                v.loc[:, pd.IndexSlice[tkc, tks]]
+                .multiply(r0r1, axis=1)
+                .sum(axis=1, level="C")
+                .divide(r0r1.sum(axis=1), axis=0)
+            )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check dv s0+s2,stot case.
-            tks  = [s0, s2]
+            tks = [s0, s2]
             r0r1 = r.loc[:, tks]
-            v0v1 = v.loc[:, pd.IndexSlice[tkc, tks]].multiply(r0r1,
-                axis=1).sum(axis=1, level="C").divide(r0r1.sum(axis=1), axis=0)
+            v0v1 = (
+                v.loc[:, pd.IndexSlice[tkc, tks]]
+                .multiply(r0r1, axis=1)
+                .sum(axis=1, level="C")
+                .divide(r0r1.sum(axis=1), axis=0)
+            )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = alfvenic_turbulence.AlfvenicTurbulence(dv,
-                                                              b,
-                                                              rtot,
-                                                              s0s1)
+            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
             self.assertEqual(alf_turb, bat(s0s1))
 
             # Check bad species
@@ -1730,33 +1841,33 @@ class PlasmaTestBase(ABC):
                     bat(bad_species)
         else:
             msg = "Unexpected number of species in test case\nslist: %s"
-            raise NotImplemenmtedError(msg % (slist))
-
+            raise NotImplementedError(msg % (slist))
 
     @unittest.skip("Not yet implemented")
     def test_drop_species(self):
-        print_inline_debug_info = True
+        print_inline_debug_info = True  # noqa: F841
 
         slist = list(self.stuple)
         if len(slist) == 1:
             msg = "Must have >1 species. Can't have empty plasma."
             with self.assertRaisesRegex(ValueError, msg):
                 self.object_testing.drop_species(*slist)
-            return None # Exit test.
+            return None  # Exit test.
 
         combos = []
         for i in np.arange(1, len(slist) + 1):
             combos += list(itertools.combinations(slist, i))
         combos.sort(key=len)
 
-        data = self.data
-        for c in combo:
+        data = self.data  # noqa: F841
+        for c in combos:
             raise NotImplementedError
+
 
 #####
 # Tests
 #####
-#@unittest.skip
+# @unittest.skip
 class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1767,17 +1878,24 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
         """
-        bad_species = ["a+p1", "p1", "p2",
-                       ("a", "p1"), ("a", "p1", "p2"), ("p1", "p2"),
-                       "a+p1+p2", "p1+p2"]
+        bad_species = [
+            "a+p1",
+            "p1",
+            "p2",
+            ("a", "p1"),
+            ("a", "p1", "p2"),
+            ("p1", "p2"),
+            "a+p1+p2",
+            "p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1788,17 +1906,24 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
         """
-        bad_species = ["a+p1", "a", "p2",
-                       ("a", "p1"), ("a", "p1", "p2"), ("p1", "p2"),
-                       "a+p1+p2", "p1+p2"]
+        bad_species = [
+            "a+p1",
+            "a",
+            "p2",
+            ("a", "p1"),
+            ("a", "p1", "p2"),
+            ("p1", "p2"),
+            "a+p1+p2",
+            "p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1809,17 +1934,24 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
         """
-        bad_species = ["a+p1", "a", "p1",
-                       ("a", "p2"), ("a", "p1", "p2"), ("p1", "p2"),
-                       "a+p1+p2", "p1+p2"]
+        bad_species = [
+            "a+p1",
+            "a",
+            "p1",
+            ("a", "p2"),
+            ("a", "p1", "p2"),
+            ("p1", "p2"),
+            "a+p1+p2",
+            "p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1831,17 +1963,24 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
                     self.object_testing._chk_species(*s)
         """
         bad_species = [
-                       ("a", "p2"), ("a", "e"), ("p2", "e"),
-                       ("a", "p1", "p2"), ("p1", "p2"),
-                       "a+p1+p2", "p1+p2", "a+e+p1+p2", "e+p1+p2"]
+            ("a", "p2"),
+            ("a", "e"),
+            ("p2", "e"),
+            ("a", "p1", "p2"),
+            ("p1", "p2"),
+            "a+p1+p2",
+            "p1+p2",
+            "a+e+p1+p2",
+            "e+p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1853,17 +1992,24 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
                     self.object_testing._chk_species(*s)
         """
         bad_species = [
-                       ("a", "p1"), ("a", "e"), ("p2", "e"),
-                       ("a", "p1", "p2"), ("p1", "p2"),
-                       "a+p1+p2", "p1+p2", "a+e+p1+p2", "e+p1+p2"]
+            ("a", "p1"),
+            ("a", "e"),
+            ("p2", "e"),
+            ("a", "p1", "p2"),
+            ("p1", "p2"),
+            "a+p1+p2",
+            "p1+p2",
+            "a+e+p1+p2",
+            "e+p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1874,18 +2020,24 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
         """
-        bad_species = ["a",
-                       ("a", "p2"), ("a", "e"), ("p2", "e"),
-                       ("a", "p1", "p2"),
-                       "a+p1+p2", "a+e+p1+p2", "e+p1+p2"]
+        bad_species = [
+            "a",
+            ("a", "p2"),
+            ("a", "e"),
+            ("p2", "e"),
+            ("a", "p1", "p2"),
+            "a+p1+p2",
+            "a+e+p1+p2",
+            "e+p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
-#@unittest.skip
+
+# @unittest.skip
 class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
     # @unittest.skip
     def test_chk_species_fail(self):
@@ -1896,19 +2048,24 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
         """
-        bad_species = ["a+e", "a+e", "e",
-                       ("e", "p1"), ("a", "p1", "p2", "e"), ("p1", "p2", "e"),
-                       "a+e+p1+p2", "e+p1+p2"]
+        bad_species = [
+            "a+e",
+            "a+e",
+            "e",
+            ("e", "p1"),
+            ("a", "p1", "p2", "e"),
+            ("p1", "p2", "e"),
+            "a+e+p1+p2",
+            "e+p1+p2",
+        ]
         for s in bad_species:
-            with self.assertRaisesRegex(ValueError,
-                                        "Requested species unavailable."):
+            with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
 
 
 if __name__ == "__main__":
-    import sys
 
     # Just make recursion stacks smaller in Terminal.
     # Comment this line if it causes problems with other
@@ -1919,10 +2076,15 @@ if __name__ == "__main__":
         run_this_test = "TestPlasmaP1P2"
         run_this_test = None
         unittest.main(verbosity=2, defaultTest=run_this_test)
-        #unittest.main()
+        # unittest.main()
 
-    except (AssertionError, AttributeError, ValueError, TypeError, IndexError) as e:
-        import sys
+    except (  # noqa: F841
+        AssertionError,
+        AttributeError,
+        ValueError,
+        TypeError,
+        IndexError,
+    ) as e:
         import traceback as tb
 
         exc_info = sys.exc_info()

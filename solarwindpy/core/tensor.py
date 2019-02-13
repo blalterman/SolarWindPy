@@ -19,22 +19,27 @@ Notes
 
 """
 
-import pdb
-import logging
+import pdb  # noqa: F401
 
-import re as re
-import numpy as np
+# import logging
+
+# import re as re
+# import numpy as np
 import pandas as pd
-import warnings
-import itertools
 
-from numbers import Number
-from pandas import MultiIndex as MI
+# import warnings
+# import itertools
 
-from abc import ABC, abstractmethod, abstractproperty
+# from numbers import Number
+# from pandas import MultiIndex as MI
 
-from scipy import constants
-from scipy.constants import physical_constants
+# from abc import ABC, abstractmethod, abstractproperty
+
+# from scipy import constants
+
+
+# from scipy.constants
+# import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -46,13 +51,16 @@ try:
 except ImportError:
     import base
 
+
 class Tensor(base.Base):
     def __init__(self, data):
         # print(type(self), data, sep="\n")
         super(Tensor, self).__init__(data)
+
     def __call__(self, component):
         assert isinstance(component, str)
         return self.__getattr__(component)
+
     def set_data(self, new):
         super(Tensor, self).set_data(new)
         chk = pd.Index(["per", "par", "scalar"])

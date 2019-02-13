@@ -1,16 +1,25 @@
 r"""Package for solar wind data analysis."""
 
-import pdb
-import logging
+import pdb  # noqa: F401
+
+# import logging
 from pkg_resources import get_distribution, DistributionNotFound
 
 from .core import units_constants, base, vector, tensor, ions, plasma
 from . import plotting
+
 pp = plotting
 
-__all__ = ["plasma", "ions", "tensor", "vector", "base", "units_constants",
-           "plotting", "pp",
-          ]
+__all__ = [
+    "plasma",
+    "ions",
+    "tensor",
+    "vector",
+    "base",
+    "units_constants",
+    "plotting",
+    "pp",
+]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
 
