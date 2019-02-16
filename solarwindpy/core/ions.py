@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Contais Ion class.
 
-Class inherets from base.Base and contains vector.Vector along with
-tensor.Tensor objects.
+Class inherets from :py:mod:`~solarwindpy.core.base.Base` and contains :py:mod:`~solarwindpy.core.vector.Vector` along with
+:py:mod:`~solarwindpy.core.tensor.Tensor` objects.
 
 Author: B. L. Alterman <balterma@umich.edu>
 
@@ -113,9 +113,9 @@ class Ion(base.Base):
         assert pd.Index(chk).isin(data.columns).all()
         self._data = data
 
-    @property
-    def data(self):
-        return self._data
+    #     @property
+    #     def data(self):
+    #         return self._data
 
     @property
     def species(self):
@@ -128,7 +128,7 @@ class Ion(base.Base):
     @property
     def v(self):
         r"""
-        Shortcut to `velocity` property.
+        Shortcut to :py:meth:`velocity` property.
         """
         return self.velocity
 
