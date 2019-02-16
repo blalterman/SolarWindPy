@@ -83,6 +83,7 @@ autodoc_default_options = {
     "private-members": None,
     "inherited-members": None,
     "show-inheritance": None,
+    "exclude-members": "_abc_impl",  # , "_set_ions", "_init_logger", "_init_constants", Need to be able to use all of these in exclude-members
 }
 
 # -- Options for HTML output -------------------------------------------------

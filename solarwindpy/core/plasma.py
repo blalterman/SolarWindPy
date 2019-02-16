@@ -564,7 +564,8 @@ class Plasma(base.Base):
 
         Derivation
         ----------
-        In uncertain units, the NRL Plasma Formulary (2016) defined $\beta$:
+        In uncertain units, the NRL Plasma Formulary (2016) defined
+        :math:`\beta`:
 
             :math:`\beta = \frac{8 \pi n k_B T}{B^2} = \frac{2 k_b T / m}{B^2 / 4 \phi \rho}`
 
@@ -680,7 +681,7 @@ class Plasma(base.Base):
     def dv(self, s0, s1):
         r"""
         Calculate the differential flow between species `s0` and
-        species `s1`: $v_{s0} - v_{s1}$.
+        species `s1`: :math:`v_{s0} - v_{s1}`.
 
         Parameters
         ----------
@@ -823,7 +824,7 @@ class Plasma(base.Base):
 
             :math:`AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`
 
-        N.B. Because of the $1 +$, afsq(s0, s1).sum(axis=1) is not the
+        N.B. Because of the :math:`1 +`, afsq(s0, s1).sum(axis=1) is not the
              same as afsq(s0+s1). The two are related by:
 
                 afsq.(s0+s1) = 1 + (afsq(s0, s1) - 1).sum(axis=1)
@@ -1204,7 +1205,7 @@ class Plasma(base.Base):
 
         To avoid overflow erros, we return ln(ratio).
 
-        The VDF for species $i$ at velocity $v_j$ is:
+        The VDF for species :math:`i` at velocity :math:`v_j` is:
 
             :math:`f_i(v_j) = \frac{n_i}{(\pi w_i ^2)^{3/2}} \exp[ -(\frac{v_j - v_i}{w_i})^2]`
 
