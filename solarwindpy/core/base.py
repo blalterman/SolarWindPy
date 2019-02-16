@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-r"""Contains in situ data Base and Core classes.
+r"""Contains in situ data :py:class:`Base` and :py:class:`Core` classes.
 
 Base inherets Core.
 
@@ -147,7 +147,7 @@ class Core(ABC):
         r"""
         Conform the species inputs to a standard form.
 
-        Primarily called from within `_chk_species`.
+        Primarily called from within :py:meth:`~solarwindpy.core.plasma.Plasma._chk_species`.
         """
         #        print("",
         #              "<_conform_species>",
@@ -188,8 +188,7 @@ class Core(ABC):
 class Base(Core):
     r"""Inherets Core and adds data property.
 
-    Has methods for validating species when setting data. Data is stored as a
-    pandas DataFrame. Method and properties fall back to this DataFrame when not found.
+    Has methods for validating species when setting data. Data is stored as a pandas DataFrame. Method and properties fall back to this DataFrame when not found.
     """
 
     def __init__(self, data):

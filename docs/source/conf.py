@@ -34,7 +34,7 @@ release = "0.0.1-alpha"
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+needs_sphinx = "1.8"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -74,6 +74,16 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+
+# Set default values for autodoc. These are also used by apidoc.
+autodoc_default_options = {
+    "members": None,
+    "member-order": None,
+    "undoc-members": None,
+    "private-members": None,
+    "inherited-members": None,
+    "show-inheritance": None,
+}
 
 # -- Options for HTML output -------------------------------------------------
 
