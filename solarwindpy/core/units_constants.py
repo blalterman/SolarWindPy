@@ -1,19 +1,14 @@
 #!/usr/bin/env python
-"""
-Name   : units_constants.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+"""Units and constants for transforming into and out of SI units.
 
-Description
------------
--Contains a units and constants for use with Plamsma, Vector, etc.
-
-Propodes Updates
-----------------
--
+All data is sourced from :py:mod:`scipy.constants` and :py:dict:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
 
 Notes
------
+^^^^^
+-
+
+Propodes Updates
+^^^^^^^^^^^^^^^^
 -
 
 """

@@ -1,24 +1,14 @@
 #!/usr/bin/env python
-r"""
-Name    :  labels
-Author  :  B. L. Alterman
-e-mail  :  balterma@umich.edu
+r"""Tools for creating plot labels.
 
-Description
------------
--Tools for making labels from (Measurement, Component, Species) tuples.
-
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
+Author: B. L. Alterman <balterma@umich.edu>
 
 Notes
------
+^^^^^
+-
+
+Propodes Updates
+^^^^^^^^^^^^^^^^
 -
 
 """

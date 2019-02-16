@@ -1,45 +1,19 @@
 #!/usr/bin/env python
-"""
-Name   : tensor.py
-Author : Benjamin L. Alterman
-e-mail : balterma@umich.edu
+r"""Tensor class for storing quantities like thermal speed, pressure, and temperature.
 
-Description
------------
--Contains Tensor class and subclasses.
-
-
-Propodes Updates
-----------------
--
+:py:class:`Tensor` inherets :py:class:`~solarwindpy.core.Base`.
 
 Notes
------
+^^^^^
 -
 
+Propodes Updates
+^^^^^^^^^^^^^^^^
+-
 """
 
 import pdb  # noqa: F401
-
-# import logging
-
-# import re as re
-# import numpy as np
 import pandas as pd
-
-# import warnings
-# import itertools
-
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# from abc import ABC, abstractmethod, abstractproperty
-
-# from scipy import constants
-
-
-# from scipy.constants
-# import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't

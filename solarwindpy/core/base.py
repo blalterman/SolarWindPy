@@ -3,8 +3,6 @@ r"""Contains in situ data :py:class:`Base` and :py:class:`Core` classes.
 
 Base inherets Core.
 
-Author: B. L. Alterman <balterma@umich.edu>
-
 Notes
 ^^^^^
 -

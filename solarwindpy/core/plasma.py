@@ -1,15 +1,12 @@
 #!/usr/bin/env python
-"""
-Name   : plasma.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+"""The Plasma class that contains all Ions, magnetic field, and spacecraft information.
 
-Description
------------
--Contains Plasma class.
+Notes
+^^^^^
+-
 
 Propodes Updates
-----------------
+^^^^^^^^^^^^^^^^
 -It would be cute if one could call `plasma % a`, i.e. plasma mod
  an ion and return a new plasma without that ion in it. Well, either
  mod or subtract. Subtract and add probably make more sense. (20180129)
@@ -27,29 +24,13 @@ Propodes Updates
  and then calls `self.__Plasma__set_ions()` to update the ions after drop. (20180404)
 -Moved `_conform_species` to base.Base so that it is accessable for
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
-
-Notes
------
--
-
 """
 import pdb  # noqa: F401
-
-# import logging
-
-# import re as re
 import numpy as np
 import pandas as pd
-
-# import warnings
 import itertools
 
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# from abc import ABC, abstractmethod, abstractproperty
-
-from scipy import constants
+# from scipy import constants
 
 # from scipy.constants import physical_constants
 
@@ -75,10 +56,14 @@ except ImportError:
 
 
 class Plasma(base.Base):
+    r"""The class through which ions, magnetic field, and spacecraft data interact.
+
+    When method lookup fails, fall back to `self.ions.loc[attr]` and then fall back to
+    `super(Plasma, self).__getattr__(attr)`.
+    """
+
     def __init__(self, data, *species):
         r"""
-        Instantiate a plasma.
-
         Parameters
         ----------
         data: pd.DataFrame
@@ -99,6 +84,14 @@ class Plasma(base.Base):
 
     @property
     def auxiliary_data(self):
+        r"""Any data that does not fall into the following categories
+
+            -magnetic field
+            -ion velocity
+            -ion number density
+            -ion thermal speed
+            -date and time information
+        """
         try:
             return self._auxiliary_data
         except AttributeError:
@@ -106,6 +99,8 @@ class Plasma(base.Base):
 
     @property
     def aux(self):
+        r"""Shortcut to :py:meth:`auxiliary_data`.
+        """
         return self.auxiliary_data
 
     def save(
@@ -253,7 +248,7 @@ class Plasma(base.Base):
 
     def _chk_species(self, *species):
         r"""
-        Check the species in each Plasma method call.
+        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:meth:`ions`.
         """
         species = self._conform_species(*species)
         minimal_species = [s.split("+") for s in species]
@@ -286,10 +281,14 @@ class Plasma(base.Base):
 
     @property
     def species(self):
+        r"""Tuple of species contained in plasma.
+        """
         return self._species
 
     @property
     def ions(self):
+        r"""`pd.Series` containing the ions.
+        """
         return self._ions
 
     def _set_ions(self):
@@ -306,12 +305,16 @@ class Plasma(base.Base):
         self._species = species
 
     def set_data(self, new):
+        r"""Set the data and log statistics about it.
+        """
         assert isinstance(new, pd.DataFrame)
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
         # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
 
         # These are the only quantities we want in plasma.
+        # TODO: move `theta_rms`, `mag_rms` and anything not common to
+        #       multiple spacecraft to `auxiliary_data`. (20190216)
         tk_plasma = pd.IndexSlice[
             ["year", "fdoy", "gse", "b", "n", "v", "w"],
             ["", "x", "y", "z", "per", "par", "lat", "lon", "theta_rms", "mag_rms"],
@@ -399,12 +402,17 @@ class Plasma(base.Base):
 
     @property
     def gse(self):
+        r"""Spacecraft GSE location.
+        """
+        #         TODO: convert to `scloc` for use with Wind/SWE/FC and PSP/SWEAP/SPC
+        #               data. (20190216)
         return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
 
     @property
     def bfield(self):
+        r"""Magnetic field data.
+        """
         return self._bfield
-        # return vector.Vector(self.data.b.xs("", axis=1, level="S"))
 
     @property
     def b(self):
@@ -417,6 +425,8 @@ class Plasma(base.Base):
         r"""
         Get the ion number densities.
         """
+
+        # TODO: conform API to match sum convention for other methods.
         slist = self._chk_species(*species)
         n = self.data.n
         # print("<Module>",
@@ -439,7 +449,7 @@ class Plasma(base.Base):
 
     def n(self, *species):
         r"""
-        Shortcut to `number_density`.
+        Shortcut to :py:meth:`number_density`.
         """
         return self.number_density(*species)
 
@@ -451,7 +461,7 @@ class Plasma(base.Base):
         ----------
         species: str
             Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
+            contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
 
@@ -472,7 +482,7 @@ class Plasma(base.Base):
 
     def rho(self, *species):
         r"""
-        Shortcut to `mass_density` method.
+        Shortcut to :py:meth:`mass_density` method.
         """
         return self.mass_density(*species)
 
@@ -484,7 +494,7 @@ class Plasma(base.Base):
         ----------
         species: str
             Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
+            contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
 
@@ -517,7 +527,7 @@ class Plasma(base.Base):
         ----------
         species: str
             Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
+            contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
 
@@ -540,44 +550,41 @@ class Plasma(base.Base):
 
     def beta(self, *species):
         r"""
-        Get the plasma beta.
+        Get perpendicular, parallel, and scalar plasma beta.
 
         Parameters
         ----------
         species: str
-            Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
-            a pd.Series is returned. Otherwise, the individual quantities are
-            returned as a pd.DataFrame.
+            Each species is a string. Species handling controlled by :py:meth:`pth`.
 
         Returns
         -------
-        beta: pd.Series or pd.DataFrame
+        beta: :py:class:`pd.DataFrame`
             See Parameters for more info.
 
         Derivation
         ----------
         In uncertain units, the NRL Plasma Formulary (2016) defined $\beta$:
 
-            $\beta = 8 \pi n k_B T / B^2 = (2 k_b T / m) / (B^2 / 4 \phi \rho)$
+            :math:`\beta = 8 \pi n k_B T / B^2 = (2 k_b T / m) / (B^2 / 4 \phi \rho)`
 
         and the Alfven speed as:
 
-            $C_A^2 = B^2 / 4 \pi \rho$.
+            :math:`C_A^2 = B^2 / 4 \pi \rho`.
 
         I define thermal speed as:
 
-            $w^2 = 2 k_B T / m$.
+            :math:`w^2 = 2 k_B T / m`.
 
         Combining these equations, we get:
 
-            $\beta = w^2 / C_A^2$,
+            :math:`\beta = w^2 / C_A^2`,
 
         which is independent of dimensional constants. Given I define
-        $p_{th} = \rho w^2/2$ and $C_A^2 = B^2/\mu_0 \rho$ in SI units, I can
-        rewrite $\beta$
+        :math:`p_{th} = \rho w^2/2$ and $C_A^2 = B^2/\mu_0 \rho` in SI units, I can
+        rewrite :math`\beta`
 
-            $\beta = (2 p_{th} / \rho) (\mu_0 \rho / B^2) = 2 \mu_0 p_{th}/B^2$.
+            :math`\beta = (2 p_{th} / \rho) (\mu_0 \rho / B^2) = 2 \mu_0 p_{th}/B^2`.
         """
         slist = self._chk_species(*species)  # noqa: F841
         include_dynamic = False
@@ -595,19 +602,20 @@ class Plasma(base.Base):
 
     def anisotropy(self, *species):
         r"""
-        Get the thermal temperature.
+        Pressure anisotropy.
+
+        Note that for a single species, the pressure anisotropy is just the
+        temperature anisotropy.
 
         Parameters
         ----------
         species: str
-            Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
-            a pd.Series is returned. Otherwise, the individual quantities are
-            returned as a pd.DataFrame.
+            Each species is a string. Species handling is primarily controlled
+            by :py:meth:`pth`.
 
         Returns
         -------
-        temperature: pd.Series or pd.DataFrame
+        ani: :py:class:`pd.Series` or :py:class:`pd.DataFrame`
             See Parameters for more info.
         """
         include_dynamic = False
@@ -628,19 +636,19 @@ class Plasma(base.Base):
 
     def velocity(self, *species):
         r"""
-        Get the ion velocity or calculate the center of mass velocity.
+        Get an ion velocity or calculate the center-of-mass velocity.
 
         Parameters
         ----------
         species: str
-            Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed ovver and
-            a pd.Series is returned. Otherwise, the individual quantities are
-            returned as a pd.DataFrame.
+            Each species is a string. If only one string is passed and contains
+            "+", return a pd.Series containing the center-of-mass velocity
+            :py:class:`~solarwindpy.core.vector.Vector`. If contains a single species,
+            return that ion's velocity.
 
         Returns
         -------
-        velocity: pd.DataFrame
+        velocity: :py:class:`pd.Series` or :py:class:`pd.DataFrame`
         """
         stuple = self._chk_species(*species)
 
@@ -706,7 +714,7 @@ class Plasma(base.Base):
         r"""
         Calculate the dynamic or drift pressure for the given species.
 
-            $p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2$
+            :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
 
         Parameters
         ----------
@@ -768,7 +776,7 @@ class Plasma(base.Base):
 
     def pdv(self, *species):
         r"""
-        Shortcut to `pdynamic`.
+        Shortcut to :py:meth:`pdynamic`.
         """
         return self.pdynamic(*species)
 
@@ -779,10 +787,7 @@ class Plasma(base.Base):
         Parameters
         ----------
         species: str
-            Each species is a string. If only one string is passed, it can
-            contain "+". If this is the case, the species are summed over and
-            a pd.Series is returned. Otherwise, the individual quantities are
-            returned as a pd.DataFrame.
+            Species controlled by :py:meth:`mass_density`
 
         Returns
         -------
@@ -816,7 +821,7 @@ class Plasma(base.Base):
     def afsq(self, *species, pdynamic=False):
         r"""Calculate the square of anisotropy factor.
 
-            $AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)$
+            :math:`AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`
 
         N.B. Because of the $1 +$, afsq(s0, s1).sum(axis=1) is not the
              same as afsq(s0+s1). The two are related by:
@@ -832,7 +837,7 @@ class Plasma(base.Base):
             returned as a pd.DataFrame.
         pydnamic: bool, str
             If str, the component of the dynamic pressure to use when
-            calculating $p_{\tilde{v}}$.
+            calculating :math:`p_{\tilde{v}}`.
 
         Returns
         -------
@@ -886,7 +891,7 @@ class Plasma(base.Base):
         r"""
         Calculate the anisotropic MHD Alfven speed:
 
-            $C_{A;Ani} = C_A\sqrt{AFSQ}$
+            :math:`C_{A;Ani} = C_A\sqrt{AFSQ}`
 
         Parameters
         ----------
@@ -894,11 +899,11 @@ class Plasma(base.Base):
             Each species is a string. If only one string is passed, it can
             contain "+". In either case, all species are summed over and
             a pd.Series is returned. This addresses complications from the
-tuple = self._chk_species(*species)
-mass densities in Ca and AFSQ, the latter via pth.
+            `stuple = self._chk_species(*species)` mass densities in Ca and AFSQ,
+            the latter via :py:meth:`pth`.
         pydnamic: bool, str
             If str, the component of the dynamic pressure to use when
-            calculating $p_{\tilde{v}}$.
+            calculating :math:`p_{\tilde{v}}`.
 
         Returns
         -------
@@ -932,7 +937,7 @@ mass densities in Ca and AFSQ, the latter via pth.
         r"""
         Calculate the Coulomb logarithm between species s0 and s1.
 
-            $\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_z}})$
+            :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_z}})`
 
         Parameters
         ----------
@@ -943,9 +948,9 @@ mass densities in Ca and AFSQ, the latter via pth.
         Returns
         -------
         lnlambda: pd.Series
-            Only pd.Series is returned because Coulomb require
+            Only `pd.Series` is returned because Coulomb require
             species alignment in such a fashion that array
-            operations using DataFrame alignment won't work.
+            operations using `pd.DataFrame` alignment won't work.
 
         See Also
         --------
@@ -1166,7 +1171,9 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         sa, sb = sa[0], sb[0]
 
-        r = constants.au - (self.gse.x * self.constants.misc.loc["Re [m]"])
+        r = self.constants.misc.loc["1AU [m]"] - (
+            self.gse.x * self.constants.misc.loc["Re [m]"]
+        )
         vsw = self.velocity("+".join(self.species)).mag * self.units.v
         tau_exp = r.divide(vsw, axis=0)
 
@@ -1199,17 +1206,17 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         The VDF for species $i$ at velocity $v_j$ is:
 
-            $f_i(v_j) = \frac{n_i}{(\pi w_i ^2)^{3/2}} \exp[ -(\frac{v_j - v_i}{w_i})^2]$
+            :math:`f_i(v_j) = \frac{n_i}{(\pi w_i ^2)^{3/2}} \exp[ -(\frac{v_j - v_i}{w_i})^2]`
 
         The beam to core VDF ratio evaluated at the proton beam velocity is:
 
-            $\frac{f_2}{f_1}|_{v_2} = \frac{n_2}{n_1} ( \frac{w_1}{w_2} )^3 \exp[ (\frac{v_2 - v_1}{w_1})^2 ]$
+            :math:`\frac{f_2}{f_1}|_{v_2} = \frac{n_2}{n_1} ( \frac{w_1}{w_2} )^3 \exp[ (\frac{v_2 - v_1}{w_1})^2 ]`
 
-        where $n$ is the number density, $w$ gives the thermal speed, and $u$ is
-        the bulk velocity.
+        where :math:`n` is the number density, :math:`w` gives the thermal speed, and
+        :math:`u` is the bulk velocity.
 
-        In the case of a Bimaxwellian, we $w^3 = w_\parallel w_\perp^2$ and
-        $(\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_perp^2$.
+        In the case of a Bimaxwellian, we :math:`w^3 = w_\parallel w_\perp^2`
+        :math:`(\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_perp^2`.
 
         Parameters
         ----------
@@ -1319,6 +1326,9 @@ mass densities in Ca and AFSQ, the latter via pth.
         -----
         Not tested in `test_plasma.py`.
         """
+
+        # TODO: move calculation of `datetime` objects to `mission_loaders`.
+
         try:
             return self._jd
         except AttributeError:
@@ -1448,7 +1458,7 @@ mass densities in Ca and AFSQ, the latter via pth.
         r"""
         Calculate the parallel heat flux
 
-            $Q_\parallel = \rho (v^3 + \frac{3/2}vw^2)$
+            :math:`Q_\parallel = \rho (v^3 + \frac{3/2}vw^2)`
 
         Parameters
         ----------
@@ -1458,7 +1468,7 @@ mass densities in Ca and AFSQ, the latter via pth.
 
         Returns
         -------
-        q: pd.Series or pd.DataFrame
+        q: `pd.Series` or `pd.DataFrame`
             Dimensionality depends on species inputs.
         """
 
@@ -1495,7 +1505,7 @@ mass densities in Ca and AFSQ, the latter via pth.
 
     def qpar(self, *species):
         r"""
-        Shortcut to `heat_flux`.
+        Shortcut to :py:meth:`heat_flux`.
         """
         return self.heat_flux(*species)
 

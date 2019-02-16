@@ -1,40 +1,21 @@
 #!/usr/bin/env python
-"""
-Name   : vector.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+"""A Vector class and subclasses.
 
-Description
------------
--Contains a Vector class and subclasses.
-
-Propodes Updates
-----------------
--
+:py:class:`Vector` inherets :py:class:`~solarwindpy.core.Base`. The subclass
+:py:class:`BField:` inheretes :py:class:`Vector`.
 
 Notes
------
+^^^^^
 -
 
+Propodes Updates
+^^^^^^^^^^^^^^^^
+-
 """
 import pdb  # noqa: F401
-
-# import logging
-
-# import re as re
 import numpy as np
 import pandas as pd
 
-# import warnings
-# import itertools
-
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# from abc import ABC, abstractmethod, abstractproperty
-
-# from scipy import constants
-# from scipy.constants import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -206,8 +187,9 @@ class Vector(base.Base):
 class BField(Vector):
     @property
     def pressure(self):
-        r"""
-        Magnetic pressure or energy density in same units as thermal pressure.
+        r"""Magnetic pressure or energy density in same units as thermal pressure.
+
+            :math:`p_B = \frac{1}{2\mu_0} B^2`
         """
         bsq = self.mag.pow(2.0)
         const = self.units.b ** 2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
@@ -218,6 +200,6 @@ class BField(Vector):
     @property
     def pb(self):
         r"""
-        Shortcut to `pressure`.
+        Shortcut to :py:meth:`pressure`.
         """
         return self.pressure

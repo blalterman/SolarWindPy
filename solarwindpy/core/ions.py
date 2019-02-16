@@ -4,9 +4,6 @@ r"""Contais Ion class.
 Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` along with
 :py:class:`~solarwindpy.core.tensor.Tensor` objects.
 
-Author: B. L. Alterman <balterma@umich.edu>
-
-
 Notes
 ^^^^^
 -
@@ -52,6 +49,18 @@ except ImportError:
 
 
 class Ion(base.Base):
+    r"""Ion class.
+
+    Properties
+    ----------
+    species, velocity, thermal_speed, number_density, mass_density, anisotropy,
+    temperature, pressure
+
+    Methods
+    -------
+    set_species, set_data
+    """
+
     def __init__(self, data, species):
         self.set_species(species)
         super(Ion, self).__init__(data)
@@ -112,10 +121,6 @@ class Ion(base.Base):
         ]
         assert pd.Index(chk).isin(data.columns).all()
         self._data = data
-
-    #     @property
-    #     def data(self):
-    #         return self._data
 
     @property
     def species(self):
