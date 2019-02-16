@@ -5,6 +5,7 @@ import pdb  # noqa: F401
 # import logging
 from pkg_resources import get_distribution, DistributionNotFound
 
+from . import core  # noqa: F401
 from .core import units_constants, base, vector, tensor, ions, plasma
 from . import plotting
 
