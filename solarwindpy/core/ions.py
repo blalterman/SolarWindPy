@@ -125,7 +125,7 @@ class Ion(base.Base):
 
     @property
     def velocity(self):
-        r"""Ion's :py:class:`~solarwindpy.core.vector.Vector`.
+        r"""Ion's velocity stored as a :py:class:`~solarwindpy.core.vector.Vector`.
         """
         return vector.Vector(self.data.v)
 
@@ -177,9 +177,7 @@ class Ion(base.Base):
 
     @property
     def anisotropy(self):
-        r"""Temperature anisotropy.
-
-            $R_T = p_\perp/p_\parallel$
+        r"""Temperature anisotropy :math:`R_T = p_\perp/p_\parallel`.
         """
         exp = pd.Series({"par": -1, "per": 1})
         pth = self.pth.drop("scalar", axis=1)
@@ -192,7 +190,7 @@ class Ion(base.Base):
 
     @property
     def temperature(self):
-        r"""$T = \frac{m}{2 k_B} w^2$.
+        r""":math:`T = \frac{m}{2 k_B} w^2`.
         """
         m = self.constants.m.loc[self.species]
         # TODO: Make math operations work on ThermalSpeed
@@ -204,9 +202,7 @@ class Ion(base.Base):
 
     @property
     def pth(self):
-        r"""Thermal pressure.
-
-            $p_\mathrm{th} = \frac{\rho}{2}w^2$
+        r"""Thermal pressure :math:`p_\mathrm{th} = \frac{1}{2}\rho w^2`.
         """
         rho = self.rho * self.units.rho
         # TODO: Make math operations work on ThermalSpeed
