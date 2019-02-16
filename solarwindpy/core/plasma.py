@@ -566,7 +566,7 @@ class Plasma(base.Base):
         ----------
         In uncertain units, the NRL Plasma Formulary (2016) defined $\beta$:
 
-            :math:`\beta = 8 \pi n k_B T / B^2 = (2 k_b T / m) / (B^2 / 4 \phi \rho)`
+            :math:`\beta = \frac{8 \pi n k_B T}{B^2} = \frac{2 k_b T / m}{B^2 / 4 \phi \rho}`
 
         and the Alfven speed as:
 
@@ -574,17 +574,17 @@ class Plasma(base.Base):
 
         I define thermal speed as:
 
-            :math:`w^2 = 2 k_B T / m`.
+            :math:`w^2 = \frac{2 k_B T}{m}`.
 
         Combining these equations, we get:
 
             :math:`\beta = w^2 / C_A^2`,
 
         which is independent of dimensional constants. Given I define
-        :math:`p_{th} = \rho w^2/2$ and $C_A^2 = B^2/\mu_0 \rho` in SI units, I can
-        rewrite :math`\beta`
+        :math:`p_{th} = \frac{1}{2} \rho w^2` and :math:`C_A^2 = \frac{1}{\mu_0}B^2 \rho` in SI units, I can
+        rewrite :math:`\beta`
 
-            :math`\beta = (2 p_{th} / \rho) (\mu_0 \rho / B^2) = 2 \mu_0 p_{th}/B^2`.
+            :math:`\beta = \frac{2 p_{th}}{\rho} \frac{\mu_0 \rho}{B^2} = \frac{2 \mu_0 p_{th}}{B^2}`.
         """
         slist = self._chk_species(*species)  # noqa: F841
         include_dynamic = False
