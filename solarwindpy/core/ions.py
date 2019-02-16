@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Contais Ion class.
 
-Class inherets from :py:mod:`~solarwindpy.core.base.Base` and contains :py:mod:`~solarwindpy.core.vector.Vector` along with
-:py:mod:`~solarwindpy.core.tensor.Tensor` objects.
+Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` along with
+:py:class:`~solarwindpy.core.tensor.Tensor` objects.
 
 Author: B. L. Alterman <balterma@umich.edu>
 
@@ -119,10 +119,14 @@ class Ion(base.Base):
 
     @property
     def species(self):
+        r"""Ion species.
+        """
         return self._species
 
     @property
     def velocity(self):
+        r"""Ion's :py:class:`~solarwindpy.core.vector.Vector`.
+        """
         return vector.Vector(self.data.v)
 
     @property
@@ -134,22 +138,32 @@ class Ion(base.Base):
 
     @property
     def thermal_speed(self):
+        r"""Ion's thermal speed stored as :py:class:`~solarwindpy.core.tensor.Tensor`.
+        """
         return tensor.Tensor(self.data.w)
 
     @property
     def w(self):
+        r"""Shortcut to :py:meth:`thermal_speed`.
+        """
         return self.thermal_speed
 
     @property
-    def n(self):
+    def number_density(self):
+        r"""Number density returned from underlying :py:meth:`~solarwindpy.core.base.Base.data` as a `pd.Series`.
+        """
         return self.data.n
 
     @property
-    def number_density(self):
-        return self.n
+    def n(self):
+        r"""Shortcut to :py:meth:`number_density`.
+        """
+        return self.number_density
 
     @property
     def mass_density(self):
+        r"""Ion's mass density.
+        """
         out = self.n * self.constants.m_in_mp.loc[self.species]
         out.name = "rho"
         return out
@@ -157,12 +171,16 @@ class Ion(base.Base):
     @property
     def rho(self):
         r"""
-        Shortcut to `mass_density` property.
+        Shortcut to :py:meth:`mass_density`.
         """
         return self.mass_density
 
     @property
     def anisotropy(self):
+        r"""Temperature anisotropy.
+
+            $R_T = p_\perp/p_\parallel$
+        """
         exp = pd.Series({"par": -1, "per": 1})
         pth = self.pth.drop("scalar", axis=1)
         assert pth.shape[1] == 2
@@ -174,6 +192,8 @@ class Ion(base.Base):
 
     @property
     def temperature(self):
+        r"""$T = \frac{m}{2 k_B} w^2$.
+        """
         m = self.constants.m.loc[self.species]
         # TODO: Make math operations work on ThermalSpeed
         w = self.w.data * self.units.w
@@ -184,6 +204,10 @@ class Ion(base.Base):
 
     @property
     def pth(self):
+        r"""Thermal pressure.
+
+            $p_\mathrm{th} = \frac{\rho}{2}w^2$
+        """
         rho = self.rho * self.units.rho
         # TODO: Make math operations work on ThermalSpeed
         w = self.w.multiply(self.units.w)
