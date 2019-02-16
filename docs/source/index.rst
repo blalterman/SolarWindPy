@@ -1,28 +1,13 @@
-#########################
-SolarWindPy Documentation
-#########################
+Welcome to SolarWindPy's documentation!
+=======================================
 
-
-.. automodule:: solarwindpy
-   :imported-members:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-
-.. automodule:: solarwindpy.core
-   :imported-members:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-   tmp
-
+   
+   modules
+   
 
 Indices and tables
 ==================
