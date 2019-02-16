@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-"""
-Name   : base.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+r"""Contains in situ data Base and Core classes.
 
-Description
------------
--Contains Base class.
+Base inherets Core.
 
-Propodes Updates
-----------------
--
+Author: B. L. Alterman <balterma@umich.edu>
 
 Notes
------
+^^^^^
+-
+
+Propodes Updates
+^^^^^^^^^^^^^^^^
 -
 
 """
@@ -48,6 +45,13 @@ except ImportError:
 
 
 class Core(ABC):
+    r"""Initializes methods and properties common to inhereting classes.
+
+    1. Initialized properties include logger, units, and constants.
+    2. Contains checks for species passed to methods inhereting classes.
+    3. Partially implenets total ordering, including disabling some comparisons.
+    """
+
     def __init__(self):
         self._init_logger()
         self._init_units()
@@ -181,8 +185,13 @@ class Core(ABC):
         return species
 
 
-# class Base(ABC):
 class Base(Core):
+    r"""Inherets Core and adds data property.
+
+    Has methods for validating species when setting data. Data is stored as a
+    pandas DataFrame. Method and properties fall back to this DataFrame when not found.
+    """
+
     def __init__(self, data):
         super(Base, self).__init__()
         self.set_data(data)

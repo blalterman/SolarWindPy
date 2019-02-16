@@ -1,17 +1,25 @@
-r"""Package for solar wind data analysis."""
+r"""
+Package for solar wind data analysis.
+
+Primary focus is in situ solar wind measurements and the additional tools
+necessary for context (e.g. solar activity indicies) and some simple plotting
+methods.
+"""
 
 import pdb  # noqa: F401
 
 # import logging
 from pkg_resources import get_distribution, DistributionNotFound
 
-from . import core  # noqa: F401
+# from . import core  # noqa: F401
 from .core import units_constants, base, vector, tensor, ions, plasma
-from . import plotting
+from . import core, plotting, solar_activity
 
 pp = plotting
+sa = solar_activity
 
 __all__ = [
+    "core",
     "plasma",
     "ions",
     "tensor",
@@ -20,6 +28,8 @@ __all__ = [
     "units_constants",
     "plotting",
     "pp",
+    "solar_activity",
+    "sa",
 ]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"

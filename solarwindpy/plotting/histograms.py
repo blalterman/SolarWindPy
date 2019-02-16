@@ -1,26 +1,15 @@
 #!/usr/bin/env python
-r"""
-Name   : histograms
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+r"""Tools for aggregating, creating, and saving 1D and 2D plots.
 
-Description
------------
--Tools for aggregating, creating, and saving 1D and 2D plots.
-
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
+Author: B. L. Alterman <balterma@umich.edu>
 
 Notes
------
+^^^^^
 -
 
+Propodes Updates
+^^^^^^^^^^^^^^^^
+-Convert `xlabel`, `ylabel`, properties, setters, etc., to utizie `Labels` `namedtuple`.
 """
 
 import pdb  # noqa: F401
@@ -49,6 +38,27 @@ Labels = namedtuple("Labels", "x,y,z", defaults=(None,))
 
 
 class AggPlot(ABC):
+    r"""ABC for aggregating data in 1D and 2D.
+
+    Properties
+    ----------
+    logger, data, bins, clip, cut, logx, xlabel, ylabel, clim, other_axis
+
+    Methods
+    -------
+    set_<>:
+        Set property <>.
+    calc_bins, make_cut, agg, clip_data, make_plot
+
+    AbstractProperties
+    ------------------
+    path, _agg_axes
+
+    AbstractMethods
+    ---------------
+    __init__, set_ylabel, set_path, set_data, _format_axis, make_plot
+    """
+
     @abstractmethod
     def __init__(self):
         pass
@@ -218,41 +228,38 @@ class AggPlot(ABC):
         return agg
 
     # Old version that cuts at percentiles.
+    @staticmethod
+    def clip_data(data, clip):
+        q0 = 0.001
+        q1 = 0.999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+        if isinstance(clip, str) and clip.lower()[0] == "l":
+            data = data.clip_lower(lo, axis=1)
+        elif isinstance(clip, str) and clip.lower()[0] == "u":
+            data = data.clip_upper(up, axis=1)
+        else:
+            data = data.clip(lo, up, axis=1)
+        return data
+
+    # New version that uses binning to cut.
     #     @staticmethod
-    #     def clip_data(data, clip):
+    #     def clip_data(data, bins, clip):
     #         q0 = 0.001
     #         q1 = 0.999
     #         pct = data.quantile([q0, q1])
     #         lo  = pct.loc[q0]
     #         up  = pct.loc[q1]
+    #         lo = bins.iloc[0]
+    #         up = bins.iloc[-1]
     #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo, axis=1)
+    #             data = data.clip_lower(lo)
     #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up, axis=1)
+    #             data = data.clip_upper(up)
     #         else:
-    #             data = data.clip(lo, up, axis=1)
+    #             data = data.clip(lo, up)
     #         return data
-    # New version that uses binning to cut.
-    @staticmethod
-    def clip_data(data, bins, clip):
-        #         q0 = 0.001
-        #         q1 = 0.999
-        #         pct = data.quantile([q0, q1])
-        #         lo  = pct.loc[q0]
-        #         up  = pct.loc[q1]
-        lo = bins.iloc[0]
-        up = bins.iloc[-1]
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up)
-        else:
-            data = data.clip(lo, up)
-        return data
-
-    @abstractmethod
-    def set_ylabel(self, ylbl):
-        pass
 
     @abstractproperty
     def path(self):
@@ -260,10 +267,21 @@ class AggPlot(ABC):
 
     @abstractproperty
     def _agg_axes(self):
+        r"""The axes over which the aggregation takes place.
+
+        1D cases aggregate over `x`. 2D cases aggregate over `x` and `y`.
+        """
+        pass
+
+    @abstractmethod
+    def set_ylabel(self, ylbl):
         pass
 
     @abstractmethod
     def set_path(self, new):
+        # TODO: move "auto" methods here to iterate through `Labels` named tuple
+        #       and pull the strings for creating the path. Also check for each
+        #       label's scale and add that information.
         pass
 
     @abstractmethod
@@ -280,7 +298,35 @@ class AggPlot(ABC):
 
 
 class Hist1D(AggPlot):
+    r"""Create 1D plot of `x`, optionally aggregating `y` in bins of `x`.
+
+    Properties
+    ----------
+    _agg_axes, path
+
+    Methods
+    -------
+    set_ylabel, set_path, set_data, agg, _format_axis, make_plot
+    """
+
     def __init__(self, x, y=None, logx=False, clip_data=True, nbins=101):
+        r"""
+        Parameters
+        ----------
+        x: pd.Series
+            Data from which to create bins.
+        y: pd.Series, None
+            If not None, the values to aggregate in bins of `x`. If None,
+            aggregate counts of `x`.
+        logx: bool
+            If True, compute bins in log-space.
+        clip_data: bool
+            If True, remove the extreme values at 0.001 and 0.999 percentiles
+            before calculating bins or aggregating.
+        nbins: int, str, array-like
+            Dispatched to `np.histogram_bin_edges` or `pd.cut` depending on
+            input type and value.
+        """
         self.set_data(x, y, logx, clip_data)
         self.calc_bins(nbins=nbins)
         self.make_cut()
@@ -295,6 +341,8 @@ class Hist1D(AggPlot):
 
     @property
     def path(self):
+        r"""Path for saving figure.
+        """
         path = self._path
         if path is None:
             return path
@@ -311,6 +359,9 @@ class Hist1D(AggPlot):
         self._ylabel = ylbl
 
     def set_path(self, new):
+        r"""If `self.xlabel` and `self.ylabel` are `labels.TeXlabel` instances,
+        use the each of their `path` methods to set Path.
+        """
         path = Path("")
         if new == "auto":
             path = path / self.xlabel.path
@@ -365,6 +416,12 @@ class Hist1D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, **kwargs):
+        r"""Make a plot on `ax`.
+
+        If `ax` is None, create a `mpl.subplots` axis.
+
+        `**kwargs` passed directly to `ax.plot`.
+        """
         agg = self.agg()
         #         tko = self.other_axis
         x = pd.IntervalIndex(agg.index).mid
@@ -413,7 +470,6 @@ class Hist2D(AggPlot):
     log<x,y>:
     <x,y,z>label:
     path: None, Path
-
 
     Methods
     -------
@@ -468,6 +524,11 @@ class Hist2D(AggPlot):
 
     @property
     def axnorm(self):
+        r"""Data normalization in plot.
+
+        Not `mpl.colors.Normalize` instance. That is passed as a `kwarg` to
+        `make_plot`.
+        """
         return self._axnorm
 
     @property
@@ -518,6 +579,7 @@ class Hist2D(AggPlot):
         self._zlabel = zlbl
 
     def set_path(self, new):
+        # Bug: path doesn't auto-set log information.
         path = Path("")
         if new == "auto":
             path = path / self.xlabel.path / self.ylabel.path
@@ -659,6 +721,24 @@ class Hist2D(AggPlot):
     def make_plot(
         self, ax=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs
     ):
+        r"""
+        Make a 2D plot on `ax` using `ax.pcolormesh`.
+
+        Paremeters
+        ----------
+        ax: mpl.axes.Axes, None
+            If None, create an `Axes` instance from `plt.subplots`.
+        cbar: bool
+            If True, create color bar with `zlabel`.
+        limit_color_norm: bool
+            If True, limit the color range to 0.001 and 0.999 percentile range
+            of the z-value, count or otherwise.
+        cbar_kwargs: dict, None
+            If not None, kwargs passed to `self._make_cbar`.
+        **kwargs:
+            Passed to `ax.pcolormesh`.
+            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+        """
         agg = self.agg()
         x = pd.IntervalIndex(agg.columns).mid
         y = pd.IntervalIndex(agg.index).mid

@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-"""
-Name   : ions.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+r"""Contais Ion class.
 
-Description
------------
--Contains Ion class.
+Class inherets from base.Base and contains vector.Vector along with
+tensor.Tensor objects.
 
-Propodes Updates
-----------------
--
+Author: B. L. Alterman <balterma@umich.edu>
+
 
 Notes
------
+^^^^^
+-
+
+Propodes Updates
+^^^^^^^^^^^^^^^^
 -
 
 """
