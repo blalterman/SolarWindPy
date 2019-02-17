@@ -41,12 +41,12 @@ SolarWindPy is licensed under a standard 3-clause BSD license. See
 Acknowledging and Citing SolarWindPy
 ====================================
 
-See ```CITATION.md```_ for instructions on citing SolarWindPy.
+See ```CITATION.rst```_ for instructions on citing SolarWindPy.
 
-.. _``LICENSE.md``: LICENSE.rst
-.. _``CITATION.md``: CITATION.rst
+.. _``LICENSE.rst``: LICENSE.rst
+.. _``CITATION.rst``: CITATION.rst
 
 .. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
    :target: https://travis-ci.com/blalterman/SolarWindPy
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-   :target: ./LICENSE.md
+   :target: ./LICENSE.rst
