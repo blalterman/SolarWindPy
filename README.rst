@@ -1,7 +1,3 @@
-
-.. _LICENSE.rst: LICENSE.rst
-.. _CITATION.rst: CITATION.rst
-
 ###########
 SolarWindPy
 ###########
@@ -46,6 +42,9 @@ Acknowledging and Citing SolarWindPy
 ====================================
 
 See :ref:`CITATION.rst` for instructions on citing SolarWindPy.
+
+.. _LICENSE.rst: LICENSE.rst
+.. _CITATION.rst: CITATION.rst
 
 .. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
    :target: https://travis-ci.com/blalterman/SolarWindPy
