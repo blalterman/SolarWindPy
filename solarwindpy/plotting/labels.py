@@ -221,7 +221,10 @@ class TeXlabel(object):
     logger: logger
         Logging instance used to record process.
     mcs0: 3-tuple
+        (<Measurement>, <Component>, <Species>) tuple.
     mcs1: 3-tuple or None
+        (<Measurement>, <Component>, <Species>) tuple that specifies the denomenator
+        for the label.
     tex: str
         The laTeX formatted string, excluding units and $s used for math
         escapes.

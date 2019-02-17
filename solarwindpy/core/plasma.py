@@ -187,7 +187,7 @@ class Plasma(base.Base):
         Load data from an HDF5 file at `fname` and create a plasma.
 
         Parameters
-        ---------
+        ----------
         fname: str or pathlib.Path
             The file from which to load the data.
         species: list-like of str
@@ -688,6 +688,7 @@ class Plasma(base.Base):
         s0, s1: str
             If either species contains a "+", the center-of-mass velocity
             for the indicated species is used.
+
         Returns
         -------
         dv: vector.Vector

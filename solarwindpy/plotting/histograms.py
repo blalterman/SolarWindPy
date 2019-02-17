@@ -48,6 +48,7 @@ class AggPlot(ABC):
     -------
     set_<>:
         Set property <>.
+
     calc_bins, make_cut, agg, clip_data, make_plot
 
     AbstractProperties
@@ -735,7 +736,7 @@ class Hist2D(AggPlot):
             of the z-value, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
-        **kwargs:
+        kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
@@ -779,6 +780,7 @@ class GridHist2D(object):
     Properties
     ----------
     data: pd.DataFrame
+
     axnorm: str or None
         Specify if column, row, total, or density normalization should be used.
     log: namedtuple
