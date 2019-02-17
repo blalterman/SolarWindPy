@@ -42,8 +42,8 @@ Acknowledging and Citing SolarWindPy
 
 See ```CITATION.md```_ for instructions on citing SolarWindPy.
 
-.. _``LICENSE.md``: LICENSE.md
-.. _``CITATION.md``: CITATION.md
+.. _``LICENSE.md``: LICENSE.rst
+.. _``CITATION.md``: CITATION.rst
 
 .. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
    :target: https://travis-ci.com/blalterman/SolarWindPy
