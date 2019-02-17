@@ -1,24 +1,25 @@
+###########
 SolarWindPy
-===========
+###########
 
 |Build Status| |License|
 
 Python data analysis tools for solar wind measurements.
 
 Installation
-------------
+============
 
 SolarWindPy will soon be installable from pip via
 ``pip install solarwindpy``. We plant to target conda quickly there
 after, most likely through the ``conda-forge`` channel.
 
 User
-~~~~
+----
 
 TODO
 
 Development
-~~~~~~~~~~~
+-----------
 
 1) Fork the repo.
 2) Clone the repo.
@@ -32,13 +33,13 @@ Development
    >>> python -m solarwindpy.tests.run_tests
 
 License
--------
+=======
 
 SolarWindPy is licensed under a standard 3-clause BSD license. See
 ```LICENSE.md```_.
 
 Acknowledging and Citing SolarWindPy
-------------------------------------
+====================================
 
 See ```CITATION.md```_ for instructions on citing SolarWindPy.
 
