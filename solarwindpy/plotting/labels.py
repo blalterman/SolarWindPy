@@ -1,16 +1,5 @@
 #!/usr/bin/env python
-r"""Tools for creating plot labels.
-
-Author: B. L. Alterman <balterma@umich.edu>
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
-
+r"""Tools for creating physical quantity plot labels.
 """
 import pdb  # noqa: F401
 import logging

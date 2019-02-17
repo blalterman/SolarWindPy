@@ -1,27 +1,5 @@
 #!/usr/bin/env python
-
-r"""
-Name   : tools
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Helper and convenience tools for plotting.
-
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+r""":py:mod:`~solarwindpy.plotting` helper functions.
 """
 
 import pdb  # noqa: F401

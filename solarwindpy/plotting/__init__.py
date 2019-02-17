@@ -1,26 +1,5 @@
 #!/usr/bin/env python
-r"""
-Name   : plotting
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-alias  : pp
-
-Description
------------
--Tools for plotting
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+r"""Plotting utilities for :py:mod:`solarwindpy`.
 """
 
 # import pdb # noqa

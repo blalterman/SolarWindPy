@@ -3,14 +3,6 @@
 
 :py:class:`Vector` inherets :py:class:`~solarwindpy.core.Base`. The subclass
 :py:class:`BField:` inheretes :py:class:`Vector`.
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
 """
 import pdb  # noqa: F401
 import numpy as np

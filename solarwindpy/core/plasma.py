@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 """The Plasma class that contains all Ions, magnetic field, and spacecraft information.
 
-Notes
-^^^^^
--
-
 Propodes Updates
 ^^^^^^^^^^^^^^^^
 -It would be cute if one could call `plasma % a`, i.e. plasma mod

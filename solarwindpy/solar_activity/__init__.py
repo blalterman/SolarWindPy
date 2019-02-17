@@ -1,22 +1,7 @@
 #!/usr/bin/env python
-"""
-Name   : solar_activity.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-alias  : sa
+r"""Solar activity indicator tools.
 
-Description
------------
--Contains solar activity analysis download and analysis tools.
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+Inclues utilities for downloading and analyzing indices from various sources.
 """
 import pdb  # noqa: F401
 

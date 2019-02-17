@@ -1,21 +1,10 @@
 #!/usr/bin/env python
-r"""Tools for aggregating, creating, and saving 1D and 2D plots.
-
-Author: B. L. Alterman <balterma@umich.edu>
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--Convert `xlabel`, `ylabel`, properties, setters, etc., to utizie `Labels` `namedtuple`.
+r"""Aggregate, create, and save 1D and 2D plots.
 """
 
 import pdb  # noqa: F401
 import logging
 
-# import re as re
 import numpy as np
 import pandas as pd
 import matplotlib as mpl

@@ -3,15 +3,6 @@ r"""Contais Ion class.
 
 Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` along with
 :py:class:`~solarwindpy.core.tensor.Tensor` objects.
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
-
 """
 
 import pdb  # noqa: F401

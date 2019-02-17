@@ -1,21 +1,5 @@
 #!/usr/bin/env python
-"""
-Name   : test_quantities.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Tests for vector.py and tensor.py
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+r"""Test :py:class:`~solarwindpy.core.vector.Vector` and :py:class:`~solarwindpy.core.tensor.Tensor`.
 """
 import pdb
 

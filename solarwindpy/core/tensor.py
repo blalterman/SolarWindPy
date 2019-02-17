@@ -2,14 +2,6 @@
 r"""Tensor class for storing quantities like thermal speed, pressure, and temperature.
 
 :py:class:`Tensor` inherets :py:class:`~solarwindpy.core.Base`.
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
 """
 
 import pdb  # noqa: F401

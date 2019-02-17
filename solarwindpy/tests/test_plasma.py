@@ -1,22 +1,14 @@
 #!/usr/bin/env python
-"""
-Name   : test_plasma.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
+r"""Test :py:class:`~solarwindpy.core.plasma.Plasma`.
 
-Description
------------
--Tests for Plasma class.
+Includes tests for making contained instances of :py:class:`~solarwindpy.core.vector.Vector`
+and :py:class:`~solarwindpy.core.tensor.Tensor`.
+
 
 Propodes Updates
 ----------------
 -Different test cases to catch longitudinal diffusion rates
  that don't equal 1. (Priority: High)
-
-Notes
------
--
-
 """
 import pdb
 

@@ -1,21 +1,5 @@
 #!/usr/bin/env python
-"""
-Name   : run_tests.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Run test suite.
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+r"""Run :py:mod:`solarwindpy` tests.
 """
 import pdb  # noqa: F401
 import unittest

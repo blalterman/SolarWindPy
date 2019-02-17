@@ -1,21 +1,5 @@
 #!/usr/bin/env python
-"""
-Name   : test_ions.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Test Ion class.
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+r"""Test :py:class:`~solarwindpy.core.ions.Ion`.
 """
 import pdb
 

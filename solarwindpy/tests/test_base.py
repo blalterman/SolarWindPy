@@ -1,44 +1,12 @@
 #!/usr/bin/env python
-"""
-Name   : test_base.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Base class for tests.
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+r"""Test setup with *Wind/SWE/FC*.
 """
 import pdb
-
-# import re as re
 import numpy as np
 import pandas as pd
 import unittest
-
-# import sys
-# import itertools
-
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# import numpy.testing as npt
 import pandas.util.testing as pdt
-
-# from abc import ABC, abstractproperty
-# from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
 from unittest import TestCase
-
-# from scipy import constants
-# from scipy.constants import physical_constants
 
 pd.set_option("mode.chained_assignment", "raise")
 

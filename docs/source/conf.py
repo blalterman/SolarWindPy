@@ -85,6 +85,9 @@ autodoc_default_options = {
     "show-inheritance": None,
     "exclude-members": "_abc_impl",  # , "_set_ions", "_init_logger", "_init_constants", Need to be able to use all of these in exclude-members
 }
+autoclass_content = "both"
+autodoc_member_order = "groupwise"
+
 
 # -- Options for HTML output -------------------------------------------------
 

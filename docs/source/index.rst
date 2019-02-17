@@ -1,5 +1,6 @@
-Welcome to SolarWindPy's documentation!
-=======================================
+###############
+SolarWindPy Docs
+################
 
 .. include:: ../../LICENSE.rst
 .. include:: ../../CITATION.rst
@@ -7,9 +8,8 @@ Welcome to SolarWindPy's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
+      
    modules
-   
 
 Indices and tables
 ==================

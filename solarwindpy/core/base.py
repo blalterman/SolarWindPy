@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 r"""Contains in situ data :py:class:`Base` and :py:class:`Core` classes.
 
-Base inherets Core.
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
-
+:py:class:`Base` inherets :py:class:`Core`.
 """
 
 import pdb  # noqa: F401

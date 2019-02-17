@@ -2,15 +2,6 @@
 """Units and constants for transforming into and out of SI units.
 
 All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
-
-Notes
-^^^^^
--
-
-Propodes Updates
-^^^^^^^^^^^^^^^^
--
-
 """
 
 import pdb  # noqa: F401
