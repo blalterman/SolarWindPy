@@ -1,6 +1,8 @@
 Welcome to SolarWindPy's documentation!
 =======================================
 
+.. include:: ../../LICENSE.rst
+.. include:: ../../CITATION.rst
 
 .. toctree::
    :maxdepth: 2
