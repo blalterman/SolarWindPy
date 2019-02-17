@@ -36,15 +36,15 @@ License
 =======
 
 SolarWindPy is licensed under a standard 3-clause BSD license. See
-```LICENSE.md```_.
+:ref:`LICENSE.rst`.
 
 Acknowledging and Citing SolarWindPy
 ====================================
 
-See ```CITATION.rst```_ for instructions on citing SolarWindPy.
+See :ref:`CITATION.rst` for instructions on citing SolarWindPy.
 
-.. _``LICENSE.rst``: LICENSE.rst
-.. _``CITATION.rst``: CITATION.rst
+.. _LICENSE.rst: LICENSE.rst
+.. _CITATION.rst: CITATION.rst
 
 .. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
    :target: https://travis-ci.com/blalterman/SolarWindPy
