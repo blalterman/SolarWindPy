@@ -25,13 +25,12 @@ Development
 2) Clone the repo.
 3) Build and install development repo. From ``SolarWindPy`` directiory,
    execute
-   
       >>> python setup.py sdist bdist_wheel
       >>> python setup.py develop
       
-4) Verify the current tests pass.
-
-::
+4) Execute ``pre-commit install`` to install ``flake8`` and ``black``. 
+   These are tools for checking code style, variable definitions, etc.
+5) Verify the current tests pass.
 
    >>> python -m solarwindpy.tests.run_tests
 
