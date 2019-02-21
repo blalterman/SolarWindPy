@@ -25,7 +25,10 @@ Development
 2) Clone the repo.
 3) Build and install development repo. From ``SolarWindPy`` directiory,
    execute
-   ``>>> python setup.py sdist bdist_wheel  >>> python setup.py develop``
+   
+      >>> python setup.py sdist bdist_wheel
+      >>> python setup.py develop
+      
 4) Verify the current tests pass.
 
 ::
