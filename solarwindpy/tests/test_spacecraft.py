@@ -7,15 +7,18 @@ import pandas as pd
 import unittest
 import pandas.util.testing as pdt
 from unittest import TestCase
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractclassmethod
+
+from solarwindpy.vector import Vector
+from solarwindpy.spacecraft import Spacecraft
 
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class TestData(TestCase):
+class TestBase(ABC, TestCase):
     @classmethod
     def setUpClass(cls):
-        # print("TestData.setUpClass", flush=True)
+        # print("TestBase.setUpClass", flush=True)
         test_plasma = {
             ("pos_HCI", "x", ""): {0: -4000000, 1: -200000, 2: -300000},
             ("pos_HCI", "y", ""): {0: 20000000, 1: 30000000, 2: 10000000},
@@ -30,72 +33,129 @@ class TestData(TestCase):
             ("gse", "z", ""): {0: 30, 1: 25, 2: -50},
         }
 
-        test_data = pd.DataFrame.from_dict(test_plasma, orient="columns")
-        test_data = test_data.astype(np.float64)
+        test_data = pd.DataFrame.from_dict(
+            test_plasma, orient="columns", dtype=np.float64
+        )
+
         test_data.columns.names = ["M", "C", "S"]
+        cls.data = test_data
+        cls.set_object_testing()
+        # print("Done with TestBase", flush=True)
 
-        cls.data = test_plasma
-        # print("Done with TestData", flush=True)
-
-    @staticmethod
-    def assert_series_not_equal(*args, **kwargs):
-        try:
-            pdt.assert_series_equal(*args, **kwargs)
-        except AssertionError:
-            # frames are not equal
-            pass
-        else:
-            # frames are equal
-            raise AssertionError
-
-    @staticmethod
-    def assert_frame_not_equal(*args, **kwargs):
-        try:
-            pdt.assert_frame_equal(*args, **kwargs)
-        except AssertionError:
-            # frames are not equal
-            pass
-        else:
-            # frames are equal
-            raise AssertionError
-
-
-class TestGSE(TestData):
-    # Has location, no velocity
-    raise NotImplementedError
-
-
-class TestHCI(TestData):
-    # Has location and velocity
-    raise NotImplementedError
-
-
-class TestCarrington(TestData):
-    raise NotImplementedError
-
-
-class TestSpaceCraft(ABC, TestData):
-    raise NotImplementedError
-
-    def test_spacecraft_pos(self):
-        raise NotImplementedError
+    @abstractclassmethod
+    def set_object_testing(cls):
+        pass
 
     @abstractmethod
-    def test_spacecraft_vel(self):
-        raise NotImplementedError
+    def name(self):
+        pass
 
-    def test_spacecraft_frame(self):
-        raise NotImplementedError
+    @abstractmethod
+    def frame(self):
+        pass
+
+    def test_data(self):
+        ot = self.object_testing
+        pdt.assert_frame_equal(self.data, ot.data)
+
+    def test_name(self):
+        ot = self.object_testing
+        self.assertEqual(self.name, ot.name)
+
+    def test_frame(self):
+        ot = self.object_testing
+        self.assertEqual(self.frame, ot.frame)
+
+    @abstractmethod
+    def test_position(self):
+        cols = pd.Index(("x", "y", "z"))
+
+        ot = self.object_testing
+        pdt.assert_index_equal(cols, ot.position.columns)
+        self.assertIsInstance(ot.position, Vector)
+        self.assertEqual(ot.position, ot.pos)
+        return ot
+
+    @abstractmethod
+    def test_velocity(self):
+        cols = pd.Index(("x", "y", "z"))
+
+        ot = self.object_testing
+        pdt.assert_index_equal(cols, ot.velocity.columns)
+        self.assertIsInstance(ot.velocity, Vector)
+        self.assertEqual(ot.velocity, ot.v)
+        return ot
 
 
-class TestWind(TestSpaceCraft):
-    # Has only GSE
-    raise NotImplementedError
+class TestWind(TestBase):
+    @classmethod
+    def set_object_testing(cls):
+        data = cls.data.xs("gse", axis=1, level="M").xs("", level="S")
+        sc = Spacecraft(data, "wind", "gse", velocity=None, carrington=None)
+
+        cls.object_testing = sc
+
+    @property
+    def frame(self):
+        return "GSE"
+
+    @property
+    def name(self):
+        return "WIND"
+
+    def test_position(self):
+        super(TestWind, self).test_position()
+
+        pos = self.data.xs("gse", axis=1, level="M").xs("", axis=1, level="S")
+        ot = self.object_testing
+        pdt.assert_frame_equal(pos, ot.position.data)
+
+    def test_velocity(self):
+        with self.assertRaises(NotImplementedError):
+            self.object_testing.velocity
+        with self.assertRaises(NotImplementedError):
+            self.object_testing.v
 
 
-class TestPSP(TestSpaceCraft):
-    # Has HCI vel, pos and carrington
-    raise NotImplementedError
+class TestPSP(TestBase):
+    @classmethod
+    def set_object_testing(cls):
+        pos = cls.data.xs("pos_HCI", axis=1, level="M")
+        v = cls.data.xs("v_HCI", axis=1, level="M")
+        carr = cls.data.xs("Carr", axis=1, level="M")
+        sc = Spacecraft(pos, "psp", "hci", velocity=v, carrington=carr)
+        cls.object_testing = sc
+
+    @property
+    def frame(self):
+        return "HCI"
+
+    @property
+    def name(self):
+        return "PSP"
+
+    def test_position(self):
+        super(TestPSP, self).test_position()
+
+        pos = self.data.xs("pos_HCI", axis=1, level="M").xs("", axis=1, level="S")
+        ot = self.object_testing
+        pdt.assert_frame_equal(pos, ot.position.data)
+
+    def test_velocity(self):
+        super(TestPSP, self).test_velocity()
+
+        v = self.data.xs("v_HCI", axis=1, level="M").xs("", axis=1, level="S")
+        ot = self.object_testing
+        pdt.assert_frame_equal(v, ot.velocity)
+
+    def test_carrington(self):
+        cols = pd.Index(("lat", "lon"))
+        carr = self.data.xs("Carr", axis=1, level="M").xs("", axis=1, level="S")
+
+        ot = self.object_testing
+        pdt.assert_index_equal(cols, ot.carrington.columns)
+        self.assertIsInstance(ot.carrington, pd.DataFrame)
+        self.assertEqual(carr, ot.carrington)
 
 
 if __name__ == "__main__":
