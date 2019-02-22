@@ -18,16 +18,9 @@ import pandas as pd
 import unittest
 import sys
 import itertools
-
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# import numpy.testing as npt
 import pandas.util.testing as pdt
 
 from abc import ABC, abstractproperty, abstractmethod
-
-# from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
