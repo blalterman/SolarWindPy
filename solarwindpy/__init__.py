@@ -9,7 +9,7 @@ import pdb  # noqa: F401
 
 from pkg_resources import get_distribution, DistributionNotFound
 
-from .core import units_constants, base, vector, tensor, ions, plasma
+from .core import units_constants, base, vector, tensor, ions, plasma, spacecraft
 from . import core, plotting, solar_activity
 
 pp = plotting
@@ -21,6 +21,7 @@ __all__ = [
     "ions",
     "tensor",
     "vector",
+    "spacecraft",
     "base",
     "units_constants",
     "plotting",

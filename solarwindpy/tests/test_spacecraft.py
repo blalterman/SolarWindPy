@@ -7,15 +7,15 @@ import pandas as pd
 import unittest
 import pandas.util.testing as pdt
 from unittest import TestCase
-from abc import ABC, abstractmethod, abstractclassmethod
+from abc import ABC, abstractclassmethod, abstractproperty
 
-from solarwindpy.vector import Vector
-from solarwindpy.spacecraft import Spacecraft
+from solarwindpy import vector
+from solarwindpy import spacecraft
 
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class TestBase(ABC, TestCase):
+class TestBase(ABC):
     @classmethod
     def setUpClass(cls):
         # print("TestBase.setUpClass", flush=True)
@@ -36,9 +36,8 @@ class TestBase(ABC, TestCase):
         test_data = pd.DataFrame.from_dict(
             test_plasma, orient="columns", dtype=np.float64
         )
-
         test_data.columns.names = ["M", "C", "S"]
-        cls.data = test_data
+        cls.data = test_data.xs("", axis=1, level="S")
         cls.set_object_testing()
         # print("Done with TestBase", flush=True)
 
@@ -46,52 +45,56 @@ class TestBase(ABC, TestCase):
     def set_object_testing(cls):
         pass
 
-    @abstractmethod
+    @abstractproperty
     def name(self):
         pass
 
-    @abstractmethod
+    @abstractproperty
     def frame(self):
         pass
 
+    def test_position(self):
+        cols = pd.Index(("x", "y", "z"), name="C")
+
+        ot = self.object_testing
+        pdt.assert_index_equal(cols, ot.position.columns)
+        self.assertIsInstance(ot.position, vector.Vector)
+        self.assertEqual(ot.position, ot.r)
+        return ot
+
+    def test_velocity(self):
+        cols = pd.Index(("x", "y", "z"), name="C")
+
+        ot = self.object_testing
+
+        pdt.assert_index_equal(cols, ot.velocity.columns)
+        self.assertIsInstance(ot.velocity, vector.Vector)
+        self.assertEqual(ot.velocity, ot.v)
+        return ot
+
     def test_data(self):
         ot = self.object_testing
+
         pdt.assert_frame_equal(self.data, ot.data)
 
     def test_name(self):
         ot = self.object_testing
+
         self.assertEqual(self.name, ot.name)
 
     def test_frame(self):
         ot = self.object_testing
+
         self.assertEqual(self.frame, ot.frame)
 
-    @abstractmethod
-    def test_position(self):
-        cols = pd.Index(("x", "y", "z"))
 
-        ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.position.columns)
-        self.assertIsInstance(ot.position, Vector)
-        self.assertEqual(ot.position, ot.pos)
-        return ot
-
-    @abstractmethod
-    def test_velocity(self):
-        cols = pd.Index(("x", "y", "z"))
-
-        ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.velocity.columns)
-        self.assertIsInstance(ot.velocity, Vector)
-        self.assertEqual(ot.velocity, ot.v)
-        return ot
-
-
-class TestWind(TestBase):
+class TestWind(TestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
-        data = cls.data.xs("gse", axis=1, level="M").xs("", level="S")
-        sc = Spacecraft(data, "wind", "gse", velocity=None, carrington=None)
+        data = cls.data.xs("gse", axis=1, level="M")
+        data = pd.concat({"pos": data}, axis=1, names=["M"])
+        cls.data = data
+        sc = spacecraft.Spacecraft(data, "wind", "gse")
 
         cls.object_testing = sc
 
@@ -105,26 +108,32 @@ class TestWind(TestBase):
 
     def test_position(self):
         super(TestWind, self).test_position()
-
-        pos = self.data.xs("gse", axis=1, level="M").xs("", axis=1, level="S")
+        pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
         pdt.assert_frame_equal(pos, ot.position.data)
 
     def test_velocity(self):
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(KeyError):
             self.object_testing.velocity
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(KeyError):
             self.object_testing.v
 
+    def test_carrington(self):
+        with self.assertRaises(KeyError):
+            self.object_testing.carrington
 
-class TestPSP(TestBase):
+
+class TestPSP(TestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
-        pos = cls.data.xs("pos_HCI", axis=1, level="M")
+        p = cls.data.xs("pos_HCI", axis=1, level="M")
         v = cls.data.xs("v_HCI", axis=1, level="M")
-        carr = cls.data.xs("Carr", axis=1, level="M")
-        sc = Spacecraft(pos, "psp", "hci", velocity=v, carrington=carr)
+        c = cls.data.xs("Carr", axis=1, level="M")
+
+        data = pd.concat({"v": v, "pos": p, "carr": c}, axis=1, names=["M"])
+        sc = spacecraft.Spacecraft(data, "psp", "hci")
         cls.object_testing = sc
+        cls.data = data
 
     @property
     def frame(self):
@@ -137,25 +146,25 @@ class TestPSP(TestBase):
     def test_position(self):
         super(TestPSP, self).test_position()
 
-        pos = self.data.xs("pos_HCI", axis=1, level="M").xs("", axis=1, level="S")
+        pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
         pdt.assert_frame_equal(pos, ot.position.data)
 
     def test_velocity(self):
         super(TestPSP, self).test_velocity()
 
-        v = self.data.xs("v_HCI", axis=1, level="M").xs("", axis=1, level="S")
+        v = self.data.xs("v", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(v, ot.velocity)
+        pdt.assert_frame_equal(v, ot.velocity.data)
 
     def test_carrington(self):
-        cols = pd.Index(("lat", "lon"))
-        carr = self.data.xs("Carr", axis=1, level="M").xs("", axis=1, level="S")
+        cols = pd.Index(("lat", "lon"), name="C")
+        carr = self.data.xs("carr", axis=1, level="M")
 
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.carrington.columns)
         self.assertIsInstance(ot.carrington, pd.DataFrame)
-        self.assertEqual(carr, ot.carrington)
+        pdt.assert_index_equal(cols, ot.carrington.columns)
+        pdt.assert_frame_equal(carr, ot.carrington)
 
 
 if __name__ == "__main__":
@@ -168,13 +177,7 @@ if __name__ == "__main__":
     try:
         unittest.main(verbosity=2)
 
-    except (  # noqa: 841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
+    except (AssertionError, AttributeError, ValueError, TypeError) as e:  # noqa: 841
         import sys
         import traceback as tb
 

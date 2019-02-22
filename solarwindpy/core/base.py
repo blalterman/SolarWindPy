@@ -6,21 +6,11 @@ r"""Contains in situ data :py:class:`Base` and :py:class:`Core` classes.
 
 import pdb  # noqa: F401
 import logging
-
-# import re as re
 import numpy as np
 import pandas as pd
 
-# import warnings
-# import itertools
-
-# from numbers import Number
 from pandas import MultiIndex as MI
-
 from abc import ABC, abstractmethod  # , abstractproperty
-
-# from scipy import constants
-# from scipy.constants import physical_constants
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't

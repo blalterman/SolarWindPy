@@ -33,10 +33,6 @@ import numpy as np
 import pandas as pd
 import itertools
 
-# from scipy import constants
-
-# from scipy.constants import physical_constants
-
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
@@ -45,15 +41,11 @@ pd.set_option("mode.chained_assignment", "raise")
 try:
     from . import base
     from . import vector
-
-    #     from . import tensor
     from . import ions
 #    from . import alfvenic_turbulence as alf_turb
 except ImportError:
     import base
     import vector
-
-    #     import tensor
     import ions
 #    import alfvenic_turbulence as alf_turb
 

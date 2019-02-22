@@ -5,20 +5,7 @@ All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants
 """
 
 import pdb  # noqa: F401
-
-# import logging
-#
-# import re as re
-# import numpy as np
 import pandas as pd
-
-# import warnings
-# import itertools
-#
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# from abc import ABC, abstractmethod, abstractproperty
 
 from scipy import constants
 from scipy.constants import physical_constants
