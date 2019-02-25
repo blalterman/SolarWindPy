@@ -6,6 +6,7 @@ Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:cla
 
 import pdb  # noqa: F401
 import pandas as pd
+import numpy as np
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -82,6 +83,37 @@ class Spacecraft(base.Base):
             return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know its Carrington location.")
+
+    @property
+    def distance2sun(self):
+        r"""Radial distance to Sun in meters.
+        """
+        pos = self.position
+        frame = self.frame
+
+        if frame == "GSE":
+            re = self.constants.misc.loc["Re [m]"]
+            au = self.constants.misc.loc["1AU [m]"]
+            sign_x = pd.Series(
+                [-1.0, 1.0, 1.0], index=pd.Index(("x", "y", "z"), name="C")
+            )
+            change_origin = pd.Series(
+                [au, 0.0, 0.0], index=pd.Index(("x", "y", "z"), name="C")
+            )
+            pos_SI = pos.multiply(sign_x).multiply(re).add(change_origin)
+
+        elif frame == "HCI":
+            rs = self.constants.misc.loc["Rs [m]"]
+            pos_SI = pos.multiply(rs)
+
+        else:
+            raise NotImplementedError("Unrecognized reference frame `{}`".format(frame))
+
+        # distance2sun units should be [m], so this shouldn't matter. However, just as
+        # beta is treated in this way, we similarly treat distance2sun.
+        d2s = pos_SI.pow(2).sum(axis=1).pipe(np.sqrt) / self.units.distance2sun
+        d2s.name = "distance2sun"
+        return d2s
 
     def set_frame_name(self, frame, name):
         frame = frame.upper()

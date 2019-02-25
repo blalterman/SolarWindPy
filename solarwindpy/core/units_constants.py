@@ -30,7 +30,8 @@ class Constants(object):
                 "gamma": 5.0 / 3.0,
                 "hbar": physical_constants["Planck constant over 2 pi"][0],
                 "1AU [m]": constants.au,
-                "Re [m]": 6378.1e3,
+                "Re [m]": 6378.1e3,  # Earth Radius in meters
+                "Rs [m]": 695.508e6,  # Sun Radius in meters
             }
         )
 
@@ -173,3 +174,7 @@ class Units(object):
     @property
     def qpar(self):
         return 1e-4
+
+    @property
+    def distance2sun(self):
+        return 1.0  # unit stored in [m]

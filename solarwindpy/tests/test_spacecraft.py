@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import unittest
 import pandas.util.testing as pdt
+from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
 
@@ -20,9 +21,9 @@ class TestBase(ABC):
     def setUpClass(cls):
         # print("TestBase.setUpClass", flush=True)
         test_plasma = {
-            ("pos_HCI", "x", ""): {0: -4000000, 1: -200000, 2: -300000},
-            ("pos_HCI", "y", ""): {0: 20000000, 1: 30000000, 2: 10000000},
-            ("pos_HCI", "z", ""): {0: 300000, 1: 200000, 2: 400000},
+            ("pos_HCI", "x", ""): {0: -42, 1: -22, 2: -34},
+            ("pos_HCI", "y", ""): {0: 23, 1: 31, 2: 11},
+            ("pos_HCI", "z", ""): {0: 35, 1: 27, 2: 49},
             ("v_HCI", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
             ("v_HCI", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
             ("v_HCI", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
@@ -55,7 +56,6 @@ class TestBase(ABC):
 
     def test_position(self):
         cols = pd.Index(("x", "y", "z"), name="C")
-
         ot = self.object_testing
         pdt.assert_index_equal(cols, ot.position.columns)
         self.assertIsInstance(ot.position, vector.Vector)
@@ -64,9 +64,7 @@ class TestBase(ABC):
 
     def test_velocity(self):
         cols = pd.Index(("x", "y", "z"), name="C")
-
         ot = self.object_testing
-
         pdt.assert_index_equal(cols, ot.velocity.columns)
         self.assertIsInstance(ot.velocity, vector.Vector)
         self.assertEqual(ot.velocity, ot.v)
@@ -74,18 +72,46 @@ class TestBase(ABC):
 
     def test_data(self):
         ot = self.object_testing
-
         pdt.assert_frame_equal(self.data, ot.data)
 
     def test_name(self):
         ot = self.object_testing
-
         self.assertEqual(self.name, ot.name)
 
     def test_frame(self):
         ot = self.object_testing
-
         self.assertEqual(self.frame, ot.frame)
+
+    def test_distance2sun(self):
+        ot = self.object_testing
+
+        frame = self.frame
+        pos = self.data.loc[:, "pos"]
+        if frame == "GSE":
+            # Origin is Earth, so we need to transform x-component to sun-centered.
+            assert pos.columns.equals(pd.Index(("x", "y", "z"), name="C"))
+            au = constants.au  # 1 AU in meters
+            re = 6378.1e3  # Earth radius in meters
+            sign_x = re * pd.Series(
+                [-1.0, 1.0, 1.0], index=pd.Index(("x", "y", "z"), name="C")
+            )
+            change_origin = pd.Series(
+                [au, 0.0, 0.0], index=pd.Index(("x", "y", "z"), name="C")
+            )
+            pos = pos.multiply(sign_x, axis=1).add(change_origin, axis=1)
+
+        elif frame == "HCI":
+            # Origin is sun and propagationd distance is just magnitude
+            assert pos.columns.equals(pd.Index(("x", "y", "z"), name="C"))
+            rs = 695.508e6  # Sun radius in meters
+            pos = pos.multiply(rs)
+
+        else:
+            raise NotImplementedError("No test written for frame {}".format(frame))
+
+        dist = pos.pow(2).sum(axis=1).pipe(np.sqrt)
+        dist.name = "distance2sun"
+        pdt.assert_series_equal(dist, ot.distance2sun)
 
 
 class TestWind(TestBase, TestCase):
