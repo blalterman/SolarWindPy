@@ -10,6 +10,8 @@ from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
 
+import test_base as base
+
 from solarwindpy import vector
 from solarwindpy import spacecraft
 
@@ -19,28 +21,40 @@ pd.set_option("mode.chained_assignment", "raise")
 class TestBase(ABC):
     @classmethod
     def setUpClass(cls):
-        # print("TestBase.setUpClass", flush=True)
-        test_plasma = {
-            ("pos_HCI", "x", ""): {0: -42, 1: -22, 2: -34},
-            ("pos_HCI", "y", ""): {0: 23, 1: 31, 2: 11},
-            ("pos_HCI", "z", ""): {0: 35, 1: 27, 2: 49},
-            ("v_HCI", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
-            ("v_HCI", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
-            ("v_HCI", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
-            ("Carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},
-            ("Carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0},
-            ("gse", "x", ""): {0: 230, 1: 235, 2: 240},
-            ("gse", "y", ""): {0: 50, 1: 20, 2: 10},
-            ("gse", "z", ""): {0: 30, 1: 25, 2: -50},
-        }
-
-        test_data = pd.DataFrame.from_dict(
-            test_plasma, orient="columns", dtype=np.float64
-        )
-        test_data.columns.names = ["M", "C", "S"]
-        cls.data = test_data.xs("", axis=1, level="S")
+        data = base.TestData()
+        #         pdb.set_trace()
+        cls.data = data.spacecraft_data
         cls.set_object_testing()
-        # print("Done with TestBase", flush=True)
+
+    #         print("TestBase.setUpClass", flush=True)
+    #         test_plasma = {
+    #             ("pos_HCI", "x", ""): {0: -42, 1: -22, 2: -34},
+    #             ("pos_HCI", "y", ""): {0: 23, 1: 31, 2: 11},
+    #             ("pos_HCI", "z", ""): {0: 35, 1: 27, 2: 49},
+    #             ("v_HCI", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
+    #             ("v_HCI", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
+    #             ("v_HCI", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
+    #             ("Carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},
+    #             ("Carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0},
+    #             ("gse", "x", ""): {0: 230, 1: 235, 2: 240},
+    #             ("gse", "y", ""): {0: 50, 1: 20, 2: 10},
+    #             ("gse", "z", ""): {0: 30, 1: 25, 2: -50},
+    #         }
+    #
+    #         test_data = pd.DataFrame.from_dict(
+    #             test_plasma, orient="columns", dtype=np.float64
+    #         )
+    #         test_data.columns.names = ["M", "C", "S"]
+    #         cls.data = test_data.xs("", axis=1, level="S")
+    #         cls.set_object_testing()
+    #         print("Done with TestBase", flush=True)
+
+    #         super(TestBase, cls).setUpClass()
+    #         # print(cls.data.iloc[:, :7])
+    #         # print(cls.data.columns.values)
+    #         cls.data = cls.spacecraft_data
+    #         del cls.spacecraft_data
+    #         cls.set_object_testing()
 
     @abstractclassmethod
     def set_object_testing(cls):

@@ -14,6 +14,7 @@ from . import core, plotting, solar_activity
 
 pp = plotting
 sa = solar_activity
+sc = spacecraft
 
 __all__ = [
     "core",
@@ -22,6 +23,7 @@ __all__ = [
     "tensor",
     "vector",
     "spacecraft",
+    "sc",
     "base",
     "units_constants",
     "plotting",

@@ -42,11 +42,13 @@ try:
     from . import base
     from . import vector
     from . import ions
+    from . import spacecraft
 #    from . import alfvenic_turbulence as alf_turb
 except ImportError:
     import base
     import vector
     import ions
+    import spacecraft
 #    import alfvenic_turbulence as alf_turb
 
 
@@ -57,7 +59,7 @@ class Plasma(base.Base):
     `super(Plasma, self).__getattr__(attr)`.
     """
 
-    def __init__(self, data, *species):
+    def __init__(self, data, *species, spacecraft=None, auxiliary_data=None):
         r"""
         Parameters
         ----------
@@ -70,6 +72,8 @@ class Plasma(base.Base):
         self._set_species(*species)
         super(Plasma, self).__init__(data)
         self._set_ions()
+        self.set_spacecraft(spacecraft)
+        self.set_auxiliary_data(auxiliary_data)
 
     def __getattr__(self, attr):
         if attr in self.ions.index:
@@ -78,19 +82,32 @@ class Plasma(base.Base):
             return super(Plasma, self).__getattr__(attr)
 
     @property
+    def spacecraft(self):
+        r"""`Spacecraft` object stored in `plasma`.
+        """
+        return self._spacecraft
+
+    @property
+    def sc(self):
+        r"""Shortcut to `spacecraft`.
+        """
+        return self.spacecraft
+
+    @property
     def auxiliary_data(self):
-        r"""Any data that does not fall into the following categories
+        r"""Any data that does not fall into the following categories.
+        Epoch is index.
 
             -magnetic field
             -ion velocity
             -ion number density
             -ion thermal speed
-            -date and time information
         """
-        try:
-            return self._auxiliary_data
-        except AttributeError:
-            raise AttributeError("No auxiliary data set.")
+        #         try:
+        return self._auxiliary_data
+
+    #         except AttributeError:
+    #             raise AttributeError("No auxiliary data set.")
 
     @property
     def aux(self):
@@ -102,8 +119,10 @@ class Plasma(base.Base):
         self,
         fname,
         dkey="FC",
+        sckey="SC",
         akey="FC_AUX",
         data_modifier_fcn=None,
+        sc_modifier_fcn=None,
         aux_modifier_fcn=None,
     ):
         r"""
@@ -117,6 +136,8 @@ class Plasma(base.Base):
             is `fname("swe", "h5", strip_date=True)`.
         dkey: None
             The HDF5 file key at which to store the data.
+        sckey: None
+            The HDF5 file key at which to store the spacecraft data.
         akey: None
             The HDF5 file key at which to store the auxiliary_data.
         data_modifier_fcn: None, FunctionType
@@ -127,33 +148,27 @@ class Plasma(base.Base):
                     return data.drop("a", axis=1, level="S")
 
             It can only take one argument, `data`.
+        spacecraft_modifier_fcn: None, FunctionType
+            A function to modifie the spacecraft data saved. See `data_modifier_fcn`
+            for syntax.
         aux_modifier_fcn: None, FunctionType
             A function to modify the auxiliary_data saved. See
             `data_modifier_fcn` for syntax.
         """
+        from types import FunctionType
+
         fname = str(fname)
         data = self.data
+        sc = self.sc
         aux = self.aux
 
         if data_modifier_fcn is not None:
-            from types import FunctionType
-
             if not isinstance(data_modifier_fcn, FunctionType):
                 msg = (
                     "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
                 ) % type(data_modifier_fcn)
                 raise TypeError(msg)
             data = data_modifier_fcn(data)
-
-        if aux_modifier_fcn is not None:
-            from types import FunctionType
-
-            if not isinstance(aux_modifier_fcn, FunctionType):
-                msg = (
-                    "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
-                ) % type(aux_modifier_fcn)
-                raise TypeError(msg)
-            aux = aux_modifier_fcn(aux)
 
         # Recalculate "w_scalar" on load, so no need to save.
         data.drop("scalar", axis=1, level="C").to_hdf(fname, key=dkey)
@@ -166,18 +181,48 @@ class Plasma(base.Base):
             data.shape,
         )
 
-        aux.to_hdf(fname, key=akey)
-        self.logger.info(
-            "aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
-                "file", "akey", "shape"
-            ),
-            fname,
-            akey,
-            aux.shape,
-        )
+        msg = "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+        if sc is not None:
+            sc = sc.data
+            if sc_modifier_fcn is not None:
+                if not isinstance(sc_modifier_fcn, FunctionType):
+                    raise TypeError(msg % type(sc_modifier_fcn))
+                sc = sc_modifier_fcn(sc)
+
+            sc.to_hdf(fname, key=sckey)
+            self.logger.info(
+                "spacecraft saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
+                    "file", "sckey", "shape"
+                ),
+                fname,
+                sckey,
+                sc.shape,
+            )
+        else:
+            self.logger.info("No spacecraft data to save")
+
+        if aux is not None:
+            if aux_modifier_fcn is not None:
+                if not isinstance(aux_modifier_fcn, FunctionType):
+                    raise TypeError(msg % type(aux_modifier_fcn))
+                aux = aux_modifier_fcn(aux)
+
+            aux.to_hdf(fname, key=akey)
+            self.logger.info(
+                "aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
+                    "file", "akey", "shape"
+                ),
+                fname,
+                akey,
+                aux.shape,
+            )
+        else:
+            self.logger.info("No auxiliary data to save")
 
     @classmethod
-    def load_from_file(cls, fname, *species, dkey="FC", akey="FC_AUX", **kwargs):
+    def load_from_file(
+        cls, fname, *species, dkey="FC", sckey="SC", akey="FC_AUX", **kwargs
+    ):
         r"""
         Load data from an HDF5 file at `fname` and create a plasma.
 
@@ -190,6 +235,8 @@ class Plasma(base.Base):
             selected from the data.
         dkey: str, "FC"
             The key for getting data from HDF5 file.
+        sckey: str, "SC"
+            The key for getting spacecraft data from the HDF5 file.
         akey: str, "FC_AUX"
             key for getting auxiliary data from HDF5 file.
         kwargs:
@@ -208,27 +255,74 @@ class Plasma(base.Base):
             )
             raise ValueError(msg)
 
-        plasma = cls(data, *species, **kwargs)
+        plasma = cls(
+            data,
+            *species,
+            #             spacecraft=spacecraft, auxiliary_data=aux,
+            **kwargs
+        )
+
         plasma.logger.info(
             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
         )
 
-        if akey:
-            aux = pd.read_hdf(fname, key=akey)
-            aux.columns.names = ["M", "C", "S"]
+        #         plasma = cls(data, *species, **kwargs)
+        #         plasma.logger.info(
+        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
+        #         )
 
-            if not plasma.data.index.equals(aux.index):
-                msg = "Auxiliary data index must equal the plasma index."
-                raise ValueError(msg)
+        if sckey:
+            raise NotImplementedError(
+                "Need to figure out how to set spacecraft name and origin in `save` method"
+            )
+            sc = pd.read_hdf(fname, key=sckey)
+            sc.names = ("M", "C")
 
-            plasma._auxiliary_data = aux
+            name = None
+            frame = None
+            sc = spacecraft.Spacecraft(data, name, frame)
+
+            #             if not data.index.equals(sc.index):
+            #                 msg = "Spacecraft data index must equal plasma index"
+            #                 raise ValueError(msg)
+
+            plasma.set_spacecraft(sc)
             plasma.logger.info(
-                "Loaded auxiliary_data from file\nFile:  %s\nakey:  %s",
-                str(fname),
-                akey,
+                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
             )
 
+        if akey:
+            aux = pd.read_hdf(fname, key=akey)
+            aux.columns.names = ("M", "C", "S")
+
+            #             if not data.index.equals(aux.index):
+            #                 msg = "Auxiliary data index must equal the plasma index."
+            #                 raise ValueError(msg)
+
+            plasma.set_auxiliary_data(aux)
+            plasma.logger.info(
+                "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
+            )
+        #             plasma._auxiliary_data = aux
+        #             plasma.logger.info(
+        #                 "Loaded auxiliary_data from file\nFile:  %s\nakey:  %s",
+        #                 str(fname),
+        #                 akey,
+        #             )
+
         # Put a try-except statement here to log when no auxiliary data is loaded.
+
+        #         plasma = cls(
+        #             data, *species, spacecraft=spacecraft, auxiliary_data=aux, **kwargs
+        #         )
+
+        #         plasma.logger.info(
+        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s\nsckey:  %s\nakey:  %s",
+        #             str(fname),
+        #             dkey,
+        #             sckey,
+        #             akey,
+        #         )
 
         return plasma
 
@@ -299,6 +393,76 @@ class Plasma(base.Base):
         self._ions = ions_
         self._species = species
 
+    def set_spacecraft(self, new):
+        assert isinstance(new, spacecraft.Spacecraft) or new is None
+
+        if new is not None:
+            assert isinstance(new.data.index, pd.DatetimeIndex)
+            assert new.data.index.equals(self.data.index)
+            assert new.data.columns.names == ("M", "C")
+            # Don't test spacecraft data duplicating plasma data b/c labels will
+            # overlap even though they represent different quantities because
+            # spacecraft only has a 2-level MultiIndex.
+
+        self._log_object_at_load(new.data if new is not None else new, "spacecraft")
+        self._spacecraft = new
+
+    def set_auxiliary_data(self, new):
+        assert isinstance(new, pd.DataFrame) or new is None
+
+        if new is not None:
+            assert isinstance(new.index, pd.DatetimeIndex)
+            assert new.index.equals(self.data.index)
+            assert new.columns.names == ("M", "C", "S")
+            if new.columns.isin(self.data.columns).any():
+                raise ValueError("Auxiliary data should not duplicate plasma data")
+
+        self._log_object_at_load(new, "auxiliary_data")
+        self._auxiliary_data = new
+
+    def _log_object_at_load(self, data, name):
+        if data is None:
+            self.logger.info("No %s data passed to %s", name, self.__class__.__name__)
+            return None
+
+        else:
+            self.logger.info("Checking %s data contents", name)
+
+        nan_frame = data.isna()
+        nan_info = pd.DataFrame(
+            {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
+        )
+        # Log to DEBUG if no NaNs. Otherwise log to INFO.
+        if nan_info.any().any():
+            self.logger.info(
+                "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
+            )
+            #             self.logger.log(10 * int(1 + nan_info.any().any()),
+            #                             "plasma NaN info\n%s", nan_info.to_string())
+            self.logger.debug("NaN info\n%s", nan_info.to_string())
+        else:
+            self.logger.debug("does not contain NaNs")
+
+        pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
+        stats = (
+            pd.concat(
+                {
+                    "lin": data.describe(percentiles=pct),
+                    "log": data.pipe(np.log10).describe(percentiles=pct),
+                },
+                axis=0,
+            )
+            .unstack(level=0)
+            .sort_index(axis=0)
+            .sort_index(axis=1)
+            .T
+        )
+        self.logger.debug(
+            "stats\n%s\n%s",
+            stats.loc[:, ["count", "mean", "std"]].to_string(),
+            stats.drop(["count", "mean", "std"], axis=1).to_string(),
+        )
+
     def set_data(self, new):
         r"""Set the data and log statistics about it.
         """
@@ -306,27 +470,24 @@ class Plasma(base.Base):
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
         # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
+        assert isinstance(new.index, pd.DatetimeIndex)
+        if not new.index.is_monotonic:
+            raise ValueError(
+                "A non-monotonic DatetimeIndex typically indicates the presence of bad data."
+            )
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
         #       multiple spacecraft to `auxiliary_data`. (20190216)
         tk_plasma = pd.IndexSlice[
-            ["year", "fdoy", "gse", "b", "n", "v", "w"],
-            ["", "x", "y", "z", "per", "par", "lat", "lon", "theta_rms", "mag_rms"],
+            ["b", "n", "v", "w"],
+            ["", "x", "y", "z", "per", "par"],
             list(self.species) + [""],
         ]
 
         data = new.loc[:, tk_plasma].sort_index(axis=1)
-        # We'll store this data in a secondary container.
-        aux = new.drop(data.columns, axis=1).sort_index(axis=1)
-
-        #        drop_species = new.columns.get_level_values("S").unique()
-        #        drop_species = [x for x in drop_species if x not in
-        #                        self.species and x != ""]
-        #        new = new.drop(drop_species, axis=1, level="S")
-        #
-        #        drop_errors = [k for k in new.columns if "err" in k[0]]
-        #        new = new.drop(drop_errors, axis=1)
+        dropped = new.drop(data.columns, axis=1)
+        data = data.loc[:, ~data.columns.duplicated()]
 
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
         w = (
@@ -344,64 +505,63 @@ class Plasma(base.Base):
         data.columns = self.mi_tuples(data.columns)
         data = data.sort_index(axis=1)
 
-        # Because of subclassing, we call a __init__ a whole bunch,
-        # so drop duplicates when added in by accident.
-        data = data.loc[:, ~data.columns.duplicated()]
-
         self._data = data
         self.logger.debug("plasma shape: %s", data.shape)
-        self._auxiliary_data = aux
-        self.logger.debug(
-            "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
-            aux.shape,
-            "\n    ".join([""] + [str(x) for x in aux.columns.values]),
+        self.logger.info(
+            "columns dropped from plasma\n%s", [str(c) for c in dropped.columns.values]
         )
+        #         self.logger.debug(
+        #             "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
+        #             aux.shape,
+        #             "\n    ".join([""] + [str(x) for x in aux.columns.values]),
+        #         )
 
         self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
-        # self._gse = GSE(new)
 
-        nan_frame = data.isna()
-        nan_info = pd.DataFrame(
-            {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
-        )
-        # Log to DEBUG if no NaNs. Otherwise log to INFO.
-        if nan_info.any().any():
-            self.logger.info(
-                "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
-            )
-            #             self.logger.log(10 * int(1 + nan_info.any().any()),
-            #                             "plasma NaN info\n%s", nan_info.to_string())
-            self.logger.debug("plasma NaN info\n%s", nan_info.to_string())
-        else:
-            self.logger.debug("plasma does not contain NaNs")
+        self._log_object_at_load(data, "plasma")
 
-        pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-        stats = (
-            pd.concat(
-                {
-                    "lin": data.describe(percentiles=pct),
-                    "log": data.pipe(np.log10).describe(percentiles=pct),
-                },
-                axis=0,
-            )
-            .unstack(level=0)
-            .sort_index(axis=0)
-            .sort_index(axis=1)
-            .T
-        )
-        self.logger.debug(
-            "plasma stats\n%s\n%s",
-            stats.loc[:, ["count", "mean", "std"]].to_string(),
-            stats.drop(["count", "mean", "std"], axis=1).to_string(),
-        )
+    #         nan_frame = data.isna()
+    #         nan_info = pd.DataFrame(
+    #             {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
+    #         )
+    #         # Log to DEBUG if no NaNs. Otherwise log to INFO.
+    #         if nan_info.any().any():
+    #             self.logger.info(
+    #                 "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
+    #             )
+    #             #             self.logger.log(10 * int(1 + nan_info.any().any()),
+    #             #                             "plasma NaN info\n%s", nan_info.to_string())
+    #             self.logger.debug("plasma NaN info\n%s", nan_info.to_string())
+    #         else:
+    #             self.logger.debug("plasma does not contain NaNs")
+    #
+    #         pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
+    #         stats = (
+    #             pd.concat(
+    #                 {
+    #                     "lin": data.describe(percentiles=pct),
+    #                     "log": data.pipe(np.log10).describe(percentiles=pct),
+    #                 },
+    #                 axis=0,
+    #             )
+    #             .unstack(level=0)
+    #             .sort_index(axis=0)
+    #             .sort_index(axis=1)
+    #             .T
+    #         )
+    #         self.logger.debug(
+    #             "plasma stats\n%s\n%s",
+    #             stats.loc[:, ["count", "mean", "std"]].to_string(),
+    #             stats.drop(["count", "mean", "std"], axis=1).to_string(),
+    #         )
 
-    @property
-    def gse(self):
-        r"""Spacecraft GSE location.
-        """
-        #         TODO: convert to `scloc` for use with Wind/SWE/FC and PSP/SWEAP/SPC
-        #               data. (20190216)
-        return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
+    #     @property
+    #     def gse(self):
+    #         r"""Spacecraft GSE location.
+    #         """
+    #         #         TODO: convert to `scloc` for use with Wind/SWE/FC and PSP/SWEAP/SPC
+    #         #               data. (20190216)
+    #         return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
 
     @property
     def bfield(self):
@@ -418,7 +578,7 @@ class Plasma(base.Base):
 
     def number_density(self, *species):
         r"""
-        Get the ion number densities.
+        Ion number densities.
         """
 
         # TODO: conform API to match sum convention for other methods.
@@ -1279,69 +1439,69 @@ class Plasma(base.Base):
 
         return f2f1
 
-    @property
-    def dt2ts(self):
-        r"""
-        Convert the (year, fdoy) data to a timestamp.
-
-        Algorithm mostly copied from `space_plasma.tools.py`. (20171128T1435)
-        """
-        try:
-            return self._ts
-        except AttributeError:
-            return self.calc_dt2ts()
-
-    def calc_dt2ts(self):
-        self.logger.debug("Calculating dt2ts")
-
-        year = self.data.year.astype(int)
-        fdoy = self.data.fdoy
-
-        errors = "raise"
-        # Subtract 1 b/c dates start at 1, but time deltas start at zero.
-        dt = pd.to_timedelta(fdoy - 1.0, unit="D", errors=errors)
-        yy = pd.to_datetime(year, format="%Y", errors=errors)
-        ts = yy.add(dt, axis=0)
-        ts.name = "timestamp"
-
-        # print("<Module>",
-        #      "<year>", type(year), year,
-        #      "<fody>", type(fdoy), fdoy,
-        #      "<dt>", type(dt), dt,
-        #      "<yy>", type(yy), yy,
-        #      "<ts>", type(ts), ts,
-        #      "", sep="\n")
-        self._ts = ts
-        return ts
-
-    @property
-    def dt2jd(self):
-        r"""
-        Convet (year, fdoy) to Julian date.
-
-        Notes
-        -----
-        Not tested in `test_plasma.py`.
-        """
-
-        # TODO: move calculation of `datetime` objects to `mission_loaders`.
-
-        try:
-            return self._jd
-        except AttributeError:
-            return self.calc_dt2jd()
-
-    def calc_dt2jd(self):
-        self.logger.debug("Calculating dt2jd")
-        yy = pd.to_datetime(self.data.year.astype(int), format="%Y", errors="raise")
-        fd = self.data.fdoy
-
-        jd = pd.DatetimeIndex(yy).to_julian_date()
-        jd = pd.Series(jd.values, index=yy.index, name="jd")
-        jd = jd.add(fd, axis=0)
-        jd.name = "jd"
-        self._jd = jd
-        return jd
+    #     @property
+    #     def dt2ts(self):
+    #         r"""
+    #         Convert the (year, fdoy) data to a timestamp.
+    #
+    #         Algorithm mostly copied from `space_plasma.tools.py`. (20171128T1435)
+    #         """
+    #         try:
+    #             return self._ts
+    #         except AttributeError:
+    #             return self.calc_dt2ts()
+    #
+    #     def calc_dt2ts(self):
+    #         self.logger.debug("Calculating dt2ts")
+    #
+    #         year = self.data.year.astype(int)
+    #         fdoy = self.data.fdoy
+    #
+    #         errors = "raise"
+    #         # Subtract 1 b/c dates start at 1, but time deltas start at zero.
+    #         dt = pd.to_timedelta(fdoy - 1.0, unit="D", errors=errors)
+    #         yy = pd.to_datetime(year, format="%Y", errors=errors)
+    #         ts = yy.add(dt, axis=0)
+    #         ts.name = "timestamp"
+    #
+    #         # print("<Module>",
+    #         #      "<year>", type(year), year,
+    #         #      "<fody>", type(fdoy), fdoy,
+    #         #      "<dt>", type(dt), dt,
+    #         #      "<yy>", type(yy), yy,
+    #         #      "<ts>", type(ts), ts,
+    #         #      "", sep="\n")
+    #         self._ts = ts
+    #         return ts
+    #
+    #     @property
+    #     def dt2jd(self):
+    #         r"""
+    #         Convet (year, fdoy) to Julian date.
+    #
+    #         Notes
+    #         -----
+    #         Not tested in `test_plasma.py`.
+    #         """
+    #
+    #         # TODO: move calculation of `datetime` objects to `mission_loaders`.
+    #
+    #         try:
+    #             return self._jd
+    #         except AttributeError:
+    #             return self.calc_dt2jd()
+    #
+    #     def calc_dt2jd(self):
+    #         self.logger.debug("Calculating dt2jd")
+    #         yy = pd.to_datetime(self.data.year.astype(int), format="%Y", errors="raise")
+    #         fd = self.data.fdoy
+    #
+    #         jd = pd.DatetimeIndex(yy).to_julian_date()
+    #         jd = pd.Series(jd.values, index=yy.index, name="jd")
+    #         jd = jd.add(fd, axis=0)
+    #         jd.name = "jd"
+    #         self._jd = jd
+    #         return jd
 
     def estimate_electrons(self, inplace=False):
         r"""

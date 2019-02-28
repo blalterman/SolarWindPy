@@ -30,6 +30,7 @@ import test_base as base
 from solarwindpy import vector
 from solarwindpy import ions
 from solarwindpy import plasma
+from solarwindpy import spacecraft
 
 # import alfvenic_turbulence
 
@@ -44,6 +45,10 @@ class PlasmaTestBase(ABC):
         # print("Data", cls.data, sep="\n")
         data = cls.data
         plas = plasma.Plasma(data, *cls().species.split("+"))
+        #         plas = plasma.Plasma(data,
+        #                              *cls().species.split("+"),
+        #                              spacecraft=None,
+        #                              auxiliary_data=None)
 
         par = data.w.par.pow(2)
         per = data.w.per.pow(2)
@@ -91,7 +96,7 @@ class PlasmaTestBase(ABC):
     def mass(self):
         trans = {
             "a": "alpha particle",
-            "p": "proton",
+            "p": "p,roton",
             "p1": "proton",
             "p2": "proton",
             "e": "electron",
@@ -215,7 +220,6 @@ class PlasmaTestBase(ABC):
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     self.object_testing._conform_species(*s.split(","))
 
-    # @unittest.skip
     def test_chk_species_success(self):
         # print(self.slist)
         self.assertEqual(self.stuple, self.object_testing._chk_species(*self.stuple))
@@ -256,27 +260,6 @@ class PlasmaTestBase(ABC):
         pass
         # # print(s, end="\n", flush=True)
 
-    # @unittest.skip
-    # def test_conform_species(self):
-    #     # Test species combinations that I think are ok.
-    #     species = ["a", "a+p1+p2",
-    #                ["a", "p1"], ["a", "p1", "p2"],
-    #                ["a", "a+p2"], ["p1", "a+p2"],
-    #                "e", "a+e", ["p1", "a+p2", "e"]]
-    #     for s in species:
-    #         if isinstance(s, str):
-    #             s = s.split("+")
-    #         self.assertEqual(sorted(s), self.object_testing._conform_species(*s))
-    #         self.assertTrue(hasattr(self.object_testing._conform_species(*s),
-    #                         "__iter__"))
-    #     # Test for unallowed combinations.
-    #     species = ["a,p1", "a,p1+p2"]
-    #     for s in species:
-    #         if isinstance(s, str):
-    #             s = s.split("+")
-    #         with self.assertRaisesRegex(AssertionError, "Invalid species:"):
-    #             self.object_testing._chk_species(*s)
-    # @unittest.skip
     def test_species(self):
         self.assertEqual(self.object_testing.species, self.stuple)
 
@@ -286,22 +269,16 @@ class PlasmaTestBase(ABC):
         ):
             plasma.Plasma(self.object_testing.data)
 
-    # @unittest.skip
-    def test_gse(self):
-        self.assertEqual(
-            vector.Vector(self.data.gse.xs("", axis=1, level="S")),
-            self.object_testing.gse,
-        )
+    #     def test_gse(self):
+    #         self.assertEqual(
+    #             vector.Vector(self.data.gse.xs("", axis=1, level="S")),
+    #             self.object_testing.gse,
+    #         )
 
-    # @unittest.skip
     def test_bfield(self):
-        self.assertEqual(
-            vector.BField(self.data.b.xs("", axis=1, level="S")),
-            self.object_testing.bfield,
-        )
-        self.assertEqual(
-            vector.BField(self.data.b.xs("", axis=1, level="S")), self.object_testing.b
-        )
+        b = self.data.b.xs("", axis=1, level="S").loc[:, ["x", "y", "z"]]
+        self.assertEqual(vector.BField(b), self.object_testing.bfield)
+        self.assertEqual(vector.BField(b), self.object_testing.b)
         self.assertEqual(self.object_testing.b, self.object_testing.bfield)
 
     def test_number_density(self):
@@ -332,7 +309,6 @@ class PlasmaTestBase(ABC):
                 self.object_testing.n(*combo),
             )
 
-    # @unittest.skip
     def test_mass_density(self):
         # print_inline_debug_info = False
         ions_ = pd.concat(
@@ -386,7 +362,6 @@ class PlasmaTestBase(ABC):
                     self.object_testing.rho("+".join(s)),
                 )
 
-    # @unittest.skip
     def test_pth(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
@@ -419,7 +394,6 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.pth("+".join(s)))
 
-    # @unittest.skip
     def test_temperature(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
@@ -455,7 +429,6 @@ class PlasmaTestBase(ABC):
                     this_ion, self.object_testing.temperature("+".join(s))
                 )
 
-    # @unittest.skip
     def test_beta(self):
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
         pth = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
@@ -503,7 +476,6 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
 
-    # @unittest.skip
     def test_anisotropy(self):
 
         # Test individual components. Should return RT values.
@@ -557,7 +529,6 @@ class PlasmaTestBase(ABC):
                     ani_sum, self.object_testing.anisotropy("+".join(s))
                 )
 
-    # @unittest.skip
     def test_velocity(self):
         for s in self.species_combinations:
             if len(s) == 1:
@@ -1158,8 +1129,57 @@ class PlasmaTestBase(ABC):
                 check_names=False,
             )
 
-    # @unittest.skip
-    def test_nc(self):
+    def test_spacecraft_in_plasma(self):
+        sc_data = base.TestData().spacecraft_data
+
+        Wind = pd.concat(
+            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+        )
+        Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
+
+        PSP = pd.concat(
+            {
+                "pos": sc_data.xs("pos_HCI", axis=1, level="M"),
+                "v": sc_data.xs("v_HCI", axis=1, level="M"),
+                "carr": sc_data.xs("Carr", axis=1, level="M"),
+            },
+            axis=1,
+            names=["M"],
+        )
+        PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
+
+        ot = self.object_testing
+        ot.set_spacecraft(None)
+        self.assertIsNone(ot.spacecraft)
+
+        ot.set_spacecraft(Wind)
+        self.assertEqual(ot.spacecraft, Wind)
+        self.assertEqual(ot.spacecraft, ot.sc)
+
+        ot.set_spacecraft(PSP)
+        self.assertEqual(ot.spacecraft, PSP)
+        self.assertEqual(ot.spacecraft, ot.sc)
+
+        self.assertNotEqual(ot.spacecraft, Wind)
+        self.assertNotEqual(ot.sc, Wind)
+
+        ot.set_spacecraft(None)
+
+    def test_nc_without_spacecraft(self):
+        #         if len(self.stuple) == 1:
+        #             # We only test Nc for plasmas with more than 1 species.
+        #             return None
+
+        ot = self.object_testing
+        ot.set_spacecraft(None)
+        combos2 = [x for x in self.species_combinations if len(x) == 2]
+        for combo in combos2:
+            sa, sb = combo
+            # Assert failure to calculate Nc when no spacecraft set.
+            with self.assertRaises(ValueError):
+                ot.nc(sa, sb)
+
+    def test_nc_with_spacecraft(self):
 
         if len(self.stuple) == 1:
             # We only test plasmas w/ > 1 species.
@@ -1188,9 +1208,27 @@ class PlasmaTestBase(ABC):
         )
         vsw = vcom.pow(2.0).sum(axis=1).pipe(np.sqrt) * 1e3
 
-        # Re = 6378.1e3.
-        r = constants.au - (self.data.gse.x * 6378.1e3)
-        tau_exp = r.multiply(vsw.pow(-1.0), axis=0)
+        sc_data = base.TestData().spacecraft_data
+
+        Wind = pd.concat(
+            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+        )
+        Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
+        tau_exp_Wind = Wind.distance2sun.multiply(vsw.pow(-1.0), axis=0)
+
+        PSP = pd.concat(
+            {
+                "pos": sc_data.xs("pos_HCI", axis=1, level="M"),
+                "v": sc_data.xs("v_HCI", axis=1, level="M"),
+                "carr": sc_data.xs("Carr", axis=1, level="M"),
+            },
+            axis=1,
+            names=["M"],
+        )
+        PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
+        #         Rs = 695.508e6 # [m]
+        #         r_Re = constants.au - (self.data.gse.x * Rs)
+        tau_exp_PSP = PSP.distance2sun.multiply(vsw.pow(-1.0), axis=0)
 
         # print("",
         #       "<Test>",
@@ -1211,106 +1249,108 @@ class PlasmaTestBase(ABC):
         invalid_msg = "Invalid species"
 
         combos2 = [x for x in self.species_combinations if len(x) == 2]
+        ot = self.object_testing
         for combo in combos2:
             sa, sb = combo
 
-            nuab = self.object_testing.nuc(sa, sb, both_species=False)
-            nuba = self.object_testing.nuc(sb, sa, both_species=False)
-            nuc = self.object_testing.nuc(sa, sb, both_species=True)
+            for sc, tau_exp in zip((Wind, PSP), (tau_exp_Wind), (tau_exp_PSP)):
 
-            ncab = nuab.multiply(tau_exp, axis=0) * 1e-7
-            ncab.name = "%s-%s" % (sa, sb)
+                ot.set_spacecraft(sc)
 
-            ncba = nuba.multiply(tau_exp, axis=0) * 1e-7
-            ncba.name = "%s-%s" % (sb, sa)
+                nuab = ot.nuc(sa, sb, both_species=False)
+                nuba = ot.nuc(sb, sa, both_species=False)
+                nuc = ot.nuc(sa, sb, both_species=True)
 
-            nc = nuc.multiply(tau_exp, axis=0) * 1e-7
-            nc.name = "%s+%s" % combo
+                ncab = nuab.multiply(tau_exp, axis=0) * 1e-7
+                ncab.name = "%s-%s" % (sa, sb)
 
-            # print("",
-            #       "<nuab>", type(nuab), nuab,
-            #       "<ncab>", type(ncab), ncab,
-            #       "<nuba>", type(nuba), nuba,
-            #       "<ncba>", type(ncba), ncba,
-            #       "<nuc>", type(nuc), nuc,
-            #       "<nc>", type(nc), nc,
-            #       "",
-            #       sep="\n")
+                ncba = nuba.multiply(tau_exp, axis=0) * 1e-7
+                ncba.name = "%s-%s" % (sb, sa)
 
-            pdt.assert_series_equal(
-                ncab, self.object_testing.nc(sa, sb, both_species=False)
-            )
-            pdt.assert_series_equal(
-                ncba, self.object_testing.nc(sb, sa, both_species=False)
-            )
-            pdt.assert_series_equal(
-                nc, self.object_testing.nc(sa, sb, both_species=True)
-            )
-            pdt.assert_series_equal(
-                nc, self.object_testing.nc(sb, sa, both_species=True), check_names=False
-            )
-            pdt.assert_series_equal(
-                self.object_testing.nc(sa, sb, both_species=True),
-                self.object_testing.nc(sb, sa, both_species=True),
-                check_names=False,
-            )
+                nc = nuc.multiply(tau_exp, axis=0) * 1e-7
+                nc.name = "%s+%s" % combo
+
+                # print("",
+                #       "<nuab>", type(nuab), nuab,
+                #       "<ncab>", type(ncab), ncab,
+                #       "<nuba>", type(nuba), nuba,
+                #       "<ncba>", type(ncba), ncba,
+                #       "<nuc>", type(nuc), nuc,
+                #       "<nc>", type(nc), nc,
+                #       "",
+                #       sep="\n")
+
+                pdt.assert_series_equal(ncab, ot.nc(sa, sb, both_species=False))
+                pdt.assert_series_equal(ncba, ot.nc(sb, sa, both_species=False))
+                pdt.assert_series_equal(nc, ot.nc(sa, sb, both_species=True))
+                pdt.assert_series_equal(
+                    nc, ot.nc(sb, sa, both_species=True), check_names=False
+                )
+                pdt.assert_series_equal(
+                    ot.nc(sa, sb, both_species=True),
+                    ot.nc(sb, sa, both_species=True),
+                    check_names=False,
+                )
+
+        # Ensure spacecraft is None
+        ot.set_spacecraft(None)
 
         with self.assertRaisesRegex(ValueError, individual_msg):
-            self.object_testing.nc("+".join(combo), sa)
+            ot.nc("+".join(combo), sa)
         with self.assertRaisesRegex(ValueError, individual_msg):
-            self.object_testing.nc(sa, "+".join(combo))
+            ot.nc(sa, "+".join(combo))
 
         with self.assertRaisesRegex(ValueError, invalid_msg):
-            self.object_testing.nc(",".join(combo), sa)
+            ot.nc(",".join(combo), sa)
         with self.assertRaisesRegex(ValueError, invalid_msg):
-            self.object_testing.nc(sa, ",".join(combo))
+            ot.nc(sa, ",".join(combo))
 
         with self.assertRaisesRegex(TypeError, invalid_msg):
-            self.object_testing.nc(combo, sa)
+            ot.nc(combo, sa)
         with self.assertRaisesRegex(TypeError, invalid_msg):
-            self.object_testing.nc(sa, combo)
+            ot.nc(sa, combo)
 
-    def test_dt2ts(self):
-        r"""
-        Test the conversion of (year, fdoy) values to Pandas datetime objects.
-        """
-        print_inline_debug = False
-        year = self.data.year
-        fdoy = self.data.fdoy
-
-        pdt.assert_series_equal(
-            year,
-            pd.Series((1994.0, 2005.0, 2016.0), name="year"),
-            "Year values have changed from initial test write. They won't pass.",
-        )
-        pdt.assert_series_equal(
-            fdoy,
-            pd.Series((12.5, 309.1, 61.75), name="fdoy"),
-            "Year values have changed from initial test write. They won't pass.",
-        )
-        test_against = [
-            pd.datetime(1994, 1, 12, 12),
-            pd.datetime(2005, 11, 5, 2, 24),
-            pd.datetime(2016, 3, 1, 18),
-        ]
-        test_against = pd.Series(test_against, name="timestamp")
-
-        if print_inline_debug:
-            print(
-                "<Test>",
-                "<year>",
-                type(year),
-                year,
-                "<fdoy>",
-                type(fdoy),
-                fdoy,
-                "<test_against>",
-                type(test_against),
-                test_against,
-                "",
-                sep="\n",
-            )
-        pdt.assert_series_equal(test_against, self.object_testing.dt2ts)
+    #     def test_dt2ts(self):
+    #         r"""
+    #         Test the conversion of (year, fdoy) values to Pandas datetime objects.
+    #         """
+    #         print_inline_debug = False
+    #         year = self.data.year
+    #         fdoy = self.data.fdoy
+    #
+    #         pdt.assert_series_equal(
+    #             year,
+    #             pd.Series((1994.0, 2005.0, 2016.0), name="year"),
+    #             "Year values have changed from initial test write. They won't pass.",
+    #         )
+    #         pdt.assert_series_equal(
+    #             fdoy,
+    #             pd.Series((12.5, 309.1, 61.75), name="fdoy"),
+    #             "Year values have changed from initial test write. They won't pass.",
+    #         )
+    #         test_against = [
+    #             pd.datetime(1994, 1, 12, 12),
+    #             pd.datetime(2005, 11, 5, 2, 24),
+    #             pd.datetime(2016, 3, 1, 18),
+    #         ]
+    #         test_against = pd.Series(test_against, name="timestamp")
+    #
+    #         if print_inline_debug:
+    #             print(
+    #                 "<Test>",
+    #                 "<year>",
+    #                 type(year),
+    #                 year,
+    #                 "<fdoy>",
+    #                 type(fdoy),
+    #                 fdoy,
+    #                 "<test_against>",
+    #                 type(test_against),
+    #                 test_against,
+    #                 "",
+    #                 sep="\n",
+    #             )
+    #         pdt.assert_series_equal(test_against, self.object_testing.dt2ts)
 
     def test_estimate_electrons(self):
         #        print_inline_debug_info = True
@@ -1421,7 +1461,6 @@ class PlasmaTestBase(ABC):
             # self.object_testing._Plasma__set_species(*species)
             # self.object_testing._Plasma__set_ions()
 
-    # @unittest.skip("Bug w/ `_chk_species` is preventing tests from passing.")
     def test_pdynamic(self):
         print_inline_debug_info = False
 
@@ -1682,6 +1721,22 @@ class PlasmaTestBase(ABC):
                 self.object_testing.qpar("+".join(s)),
             )
 
+    def test_set_auxiliary_data(self):
+        ot = self.object_testing
+        data = base.TestData().combined_data
+        drop = data.columns.isin(ot.data.columns)
+        aux = data.loc[:, ~drop]
+        ot.set_auxiliary_data(aux)
+        pdt.assert_frame_equal(aux, ot.auxiliary_data)
+        pdt.assert_frame_equal(ot.auxiliary_data, ot.aux)
+
+        ot.set_auxiliary_data(None)
+        self.assertIsNone(ot.auxiliary_data)
+        self.assertIsNone(ot.aux)
+
+        with self.assertRaises(ValueError):
+            ot.set_auxiliary_data(ot.data)
+
     @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
         species = self.species
@@ -1852,9 +1907,7 @@ class PlasmaTestBase(ABC):
 #####
 # Tests
 #####
-# @unittest.skip
 class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -1880,9 +1933,7 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -1908,9 +1959,7 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -1936,9 +1985,7 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -1965,9 +2012,7 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -1994,9 +2039,7 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:
@@ -2022,9 +2065,7 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing._chk_species(*s)
 
 
-# @unittest.skip
 class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
-    # @unittest.skip
     def test_chk_species_fail(self):
         r"""
         The code will look something like:

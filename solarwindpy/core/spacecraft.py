@@ -155,4 +155,6 @@ class Spacecraft(base.Base):
 
         target = pd.concat(target, axis=1, names=["M"])
 
+        assert isinstance(target.index, pd.DatetimeIndex)
+
         self._data = target
