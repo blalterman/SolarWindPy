@@ -74,6 +74,7 @@ class TestBase(ABC):
         pdt.assert_index_equal(cols, ot.position.columns)
         self.assertIsInstance(ot.position, vector.Vector)
         self.assertEqual(ot.position, ot.r)
+        self.assertEqual(ot.position, ot.pos)
         return ot
 
     def test_velocity(self):

@@ -49,6 +49,7 @@ class Constants(object):
                 "p": 1.0,
                 "p1": 1.0,
                 "p2": 1.0,
+                "pm": 1.0,
                 "a": mamp,
                 "a1": mamp,
                 "a2": mamp,
@@ -64,6 +65,7 @@ class Constants(object):
             "p": constants.m_p,
             "p1": constants.m_p,
             "p2": constants.m_p,
+            "pm": constants.m_p,  # proton moment
             "a": ma,
             "a1": ma,
             "a2": ma,
@@ -78,7 +80,7 @@ class Constants(object):
         a = physical_constants["alpha particle mass in u"][0]
         p = physical_constants["proton mass in u"][0]
         e = physical_constants["electron mass in u"][0]
-        out = {"a": a, "a1": a, "a2": a, "p": p, "p1": p, "p2": p, "e": e}
+        out = {"a": a, "a1": a, "a2": a, "p": p, "p1": p, "p2": p, "pm": p, "e": e}
         return pd.Series(out)
 
     @property
@@ -86,7 +88,7 @@ class Constants(object):
         a = 2.0 * constants.e
         p = constants.e
         e = -constants.e
-        out = {"e": e, "p": p, "p1": p, "p2": p, "a": a, "a1": a, "a2": a}
+        out = {"e": e, "p": p, "p1": p, "p2": p, "pm": p, "a": a, "a1": a, "a2": a}
         return pd.Series(out)
 
     @property
@@ -96,6 +98,7 @@ class Constants(object):
             "p": 1.0,
             "p1": 1.0,
             "p2": 1.0,
+            "pm": 1.0,
             "a": 2.0,
             "a1": 2.0,
             "a2": 2.0,

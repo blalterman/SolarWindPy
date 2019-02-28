@@ -56,6 +56,11 @@ class Spacecraft(base.Base):
         return vector.Vector(pos)
 
     @property
+    def pos(self):
+        # Ensures that `sc.pos` returns vector.
+        return self.position
+
+    @property
     def r(self):
         r"""Shortcut to :py:meth:`position`.
         """
