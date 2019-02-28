@@ -1253,7 +1253,7 @@ class PlasmaTestBase(ABC):
         for combo in combos2:
             sa, sb = combo
 
-            for sc, tau_exp in zip((Wind, PSP), (tau_exp_Wind), (tau_exp_PSP)):
+            for sc, tau_exp in zip((Wind, PSP), (tau_exp_Wind, tau_exp_PSP)):
 
                 ot.set_spacecraft(sc)
 

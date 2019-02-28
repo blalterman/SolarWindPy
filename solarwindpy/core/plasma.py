@@ -1328,9 +1328,15 @@ class Plasma(base.Base):
 
         sa, sb = sa[0], sb[0]
 
-        r = self.constants.misc.loc["1AU [m]"] - (
-            self.gse.x * self.constants.misc.loc["Re [m]"]
-        )
+        sc = self.spacecraft
+        if sc is None:
+            msg = "Plasma doesn't contain spacecraft data. Can't calculate Coulomb number."
+            raise ValueError(msg)
+
+        r = sc.distance2sun * self.units.distance2sun
+        #         r = self.constants.misc.loc["1AU [m]"] - (
+        #             self.gse.x * self.constants.misc.loc["Re [m]"]
+        #         )
         vsw = self.velocity("+".join(self.species)).mag * self.units.v
         tau_exp = r.divide(vsw, axis=0)
 
