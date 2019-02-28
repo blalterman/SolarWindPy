@@ -47,6 +47,7 @@ _trans_measurement = {
 _inU = {
     "b": r"\mathrm{nT}",
     "Re": r"\mathrm{R}_\oplus",
+    "Rs": r"\mathrm{R}_\odot",
     "kms": r"\mathrm{km \; s^{-1}}",
     "pPa": r"\mathrm{pPa}",
     "cm-3": r"\mathrm{cm}^{-3}",
@@ -59,6 +60,7 @@ _inU = {
 _trans_units = {
     # Vector components.
     "gse": _inU["Re"],
+    "hci": _inU["Rs"],
     "colat": _inU["deg"],
     "lat": _inU["deg"],
     "lon": _inU["deg"],
@@ -148,6 +150,7 @@ _templates = {
     "fdoy": r"\mathrm{Fractional \; Day \; of \; Year}",
     # Coordinates, e.g. for location plots.
     "gse": r"{$C}_{\mathrm{GSE}}",
+    "hci": r"{$C}_{\mathrm{HCI}}",
     "colat": r"\theta_{$C}",
     "b": "B_{$C}",
     "n": r"n_{$S}",
