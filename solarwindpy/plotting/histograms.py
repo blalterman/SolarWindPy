@@ -69,8 +69,12 @@ class AggPlot(ABC):
         return self._data
 
     @property
-    def bins(self):
-        return self._bins
+    def edges(self):
+        return {k: v.left.union(v.right) for k, v in self.intervals.items()}
+
+    @property
+    def intervals(self):
+        return dict(self._intervals)
 
     @property
     def clip(self):
@@ -111,7 +115,7 @@ class AggPlot(ABC):
         assert isinstance(top, Number) or top is None
         self._clim = (bottom, top)
 
-    def calc_bins(self, nbins=101):
+    def calc_bins_intervals(self, nbins=101, precision=3):
         r"""
         Calculate histogram bins.
 
@@ -122,9 +126,13 @@ class AggPlot(ABC):
             If str and nbins != "knuth", use `np.histogram(data, bins=nbins)`
             to calculate bins.
             If array-like, treat as bins.
+
+        precision: int
+            Precision at which to store intervals.
         """
         data = self.data
         bins = {}
+        intervals = {}
 
         for k in self._agg_axes:
             d = data.loc[
@@ -160,24 +168,31 @@ class AggPlot(ABC):
             assert np.unique(b).size == b.size
             assert not np.isnan(b).any()
 
-            bins[k] = b
+            b = b.round(precision)
 
-        bins = pd.DataFrame.from_dict(bins, orient="columns")
-        self._bins = bins
+            zipped = zip(b[:-1], b[1:])
+            i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
+
+            bins[k] = b
+            intervals[k] = pd.IntervalIndex(i)
+
+        bins = tuple(bins.items())
+        intervals = tuple(intervals.items())
+        self._intervals = intervals
 
     def make_cut(self):
-        bins = self.bins
+        intervals = self.intervals
         data = self.data
 
         cut = {}
         for k in self._agg_axes:
             d = data.loc[:, k]
-            b = bins.loc[:, k]
+            i = intervals[k]
 
             if self.clip:
-                d = self.clip_data(d, b, self.clip)
+                d = self.clip_data(d, self.clip)
 
-            c = pd.cut(d, b)
+            c = pd.cut(d, i)
             cut[k] = c
 
         cut = pd.DataFrame.from_dict(cut, orient="columns")
@@ -318,7 +333,7 @@ class Hist1D(AggPlot):
             input type and value.
         """
         self.set_data(x, y, logx, clip_data)
-        self.calc_bins(nbins=nbins)
+        self.calc_bins_intervals(nbins=nbins)
         self.make_cut()
         self.set_xlabel(None)
         self.set_ylabel(None)
@@ -387,8 +402,13 @@ class Hist1D(AggPlot):
         self._clip = clip
 
     def agg(self):
+        raise NotImplementedError(
+            """Need toi check reindex on `self.intervals` to capture empty
+bins."""
+        )
+        intervals = self.intervals["x"]
         agg = super(Hist1D, self).agg()
-        agg.index = pd.IntervalIndex(agg.index)
+        agg = agg.reindex(intervals)
         return agg
 
     def _format_axis(self, ax):
@@ -492,7 +512,7 @@ class Hist2D(AggPlot):
         self._init_logger()
         self.set_data(x, y, z, logx, logy, clip_data)
         self.set_axnorm(axnorm)
-        self.calc_bins(nbins=nbins)
+        self.calc_bins_intervals(nbins=nbins)
         self.make_cut()
         self.set_xlabel(None)
         self.set_ylabel(None)
@@ -636,34 +656,37 @@ class Hist2D(AggPlot):
         self._axnorm = new
 
     def agg(self):
-        agg = super(Hist2D, self).agg().unstack("x")
+        agg = super(Hist2D, self).agg()  # .unstack("x")
 
         axnorm = self.axnorm
         if axnorm is None:
             pass
         elif axnorm == "c":
-            agg = agg.divide(agg.max(axis=0), axis=1)
+            agg = agg.divide(agg.max(level="x"), level="x")
         elif axnorm == "r":
-            agg = agg.divide(agg.max(axis=1), axis=0)
+            agg = agg.divide(agg.max(level="y"), level="y")
         elif axnorm == "t":
-            agg = agg.divide(agg.max().max())
+            agg = agg.divide(agg.max())
         elif axnorm == "d":
             N = agg.sum().sum()
-            x = pd.IntervalIndex(agg.columns)
-            y = pd.IntervalIndex(agg.index)
-            dx = x.right - x.left
-            dy = y.right - y.left
+            x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
+            y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
+            dx = pd.Series(x.right - x.left, index=x)
+            dy = pd.Series(y.right - y.left, index=y)
             if self.logx:
                 dx = 10.0 ** dx
             if self.logy:
                 dy = 10.0 ** dy
-            agg = agg.divide(dx, axis=1).divide(dy, axis=0).divide(N)
+
+            agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
         else:
             raise ValueError("Unrecognized axnorm: %s" % axnorm)
 
-        agg.columns = pd.IntervalIndex(agg.columns)
-        agg.index = pd.IntervalIndex(agg.index)
+        agg = agg.unstack("x")
+        intervals = self.intervals
+
+        agg = agg.reindex(index=intervals["y"], columns=intervals["x"])
 
         return agg
 
@@ -730,8 +753,13 @@ class Hist2D(AggPlot):
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
         agg = self.agg()
-        x = pd.IntervalIndex(agg.columns).mid
-        y = pd.IntervalIndex(agg.index).mid
+        x = self.edges["x"]
+        y = self.edges["y"]
+        # x = pd.IntervalIndex(agg.columns).mid
+        # y = pd.IntervalIndex(agg.index).mid
+
+        assert x.size == agg.shape[1] + 1
+        assert y.size == agg.shape[0] + 1
 
         if ax is None:
             fig, ax = plt.subplots()

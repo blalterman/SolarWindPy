@@ -4,6 +4,9 @@ if [[ "$#" -eq 0 ]]; then
     read -spt 60 "Environment name?" envname
 else
     envname=$1
+fi
+
+echo $envname
 
 conda create -n $envname python=3 \
                          pandas \
@@ -28,5 +31,5 @@ conda create -n $envname python=3 \
                          sphinx_rtd_theme \
                          pre_commit
 
-conda activate $1
+conda activate $envname
 
