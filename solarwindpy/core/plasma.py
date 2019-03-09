@@ -64,9 +64,67 @@ class Plasma(base.Base):
         Parameters
         ----------
         data: pd.DataFrame
-            Contains n, v, w, and b at a minimum.
+            Contains magnetic field vector and core quantities for each species,
+            including vector velocity, bi-maxwellian thermal speed, and number density.
+            Structured as a `pandas.DataFrame` with a 3-level MultiIndex for the columns.
+            MultiIndex levels should be labelled "M", "C", and "S" for measurement,
+            component, and species. Index should contain datetime information. If
+            loading from a CDF file, this would be the Epoch variable. See Examples
+            below for details.
         species: iterable of strings
             The species included in the plasma.
+        spacecraft: Spacecraft, None
+            If not None, the :py:class:`~solarwindpy.core.spacecraft.Spacecraft`
+            instance containing, at a minimum, the spacecraft's location. If None, then
+            Coulomb number `nc` method returns a ValueError.
+        auxiliary_data: pd.DataFrame, None
+            If not None, any additional data to carry with plasma, for example, data
+            quality flags. Column labelling scheme should match `data`.
+
+        Examples
+        --------
+        >>> epoch = pd.Series({0: pd.to_datetime("1995-01-01"),
+                               1: pd.to_datetime("2015-03-23"),
+                               2: pd.to_datetime("2022-10-09")}, name="Epoch")
+        >>> data = {
+        ("b", "x", ""): {0: 0.5, 1: 0.6, 2: 0.7},
+        ("b", "y", ""): {0: -0.25, 1: -0.26, 2: 0.27},
+        ("b", "z", ""): {0: 0.3, 1: 0.4, 2: -0.7},
+        ("n", "", "a"): {0: 0.5, 1: 1.0, 2: 1.5},
+        ("n", "", "p1"): {0: 1.0, 1: 2.0, 2: 3.0},
+        ("v", "x", "a"): {0: 125.0, 1: 250.0, 2: 375.0},
+        ("v", "x", "p1"): {0: 100.0, 1: 200.0, 2: 300.0},
+        ("v", "y", "a"): {0: 250.0, 1: 375.0, 2: 750.0},
+        ("v", "y", "p1"): {0: 200.0, 1: 300.0, 2: 600.0},
+        ("v", "z", "a"): {0: 500.0, 1: 750.0, 2: 1000.0},
+        ("v", "z", "p1"): {0: 400.0, 1: 600.0, 2: 800.0},
+        ("w", "par", "a"): {0: 3.0, 1: 4.0, 2: 5.0},
+        ("w", "par", "p1"): {0: 10.0, 1: 20.0, 2: 30.0},
+        ("w", "per", "a"): {0: 7.0, 1: 9.0, 2: 10.0},
+        ("w", "per", "p1"): {0: 7.0, 1: 26.0, 2: 28.0},
+        }
+        >>> data = pd.DataFrame.from_dict(data, orient="columns")
+        >>> data.columns.names = ["M", "C", "S"]
+        >>> data.index = epoch
+        >>> data.T
+        Epoch     1995-01-01  2015-03-23  2022-10-09
+        M C   S
+        b x             0.50        0.60        0.70
+          y            -0.25       -0.26        0.27
+          z             0.30        0.40       -0.70
+        n     a         0.50        1.00        1.50
+              p1        1.00        2.00        3.00
+        v x   a       125.00      250.00      375.00
+              p1      100.00      200.00      300.00
+          y   a       250.00      375.00      750.00
+              p1      200.00      300.00      600.00
+          z   a       500.00      750.00     1000.00
+              p1      400.00      600.00      800.00
+        w par a         3.00        4.00        5.00
+              p1       10.00       20.00       30.00
+          per a         7.00        9.00       10.00
+              p1        7.00       26.00       28.00
+        >>> plasma = Plasma(data, "a", "p1")
         """
         self._init_logger()
         self._set_species(*species)
