@@ -23,7 +23,7 @@ except ModuleNotFoundError:
 from . import tools
 
 LogAxes = namedtuple("LogAxes", "x,y")
-Labels = namedtuple("Labels", "x,y,z", defaults=(None,))
+AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 
 
 class AggPlot(ABC):
@@ -284,7 +284,7 @@ class AggPlot(ABC):
 
     @abstractmethod
     def set_path(self, new):
-        # TODO: move "auto" methods here to iterate through `Labels` named tuple
+        # TODO: move "auto" methods here to iterate through `AxesLabels` named tuple
         #       and pull the strings for creating the path. Also check for each
         #       label's scale and add that information.
         pass
@@ -854,7 +854,7 @@ class GridHist2D(object):
         self.set_axnorm(None)
         self.set_log(x=False, y=False)
         self.set_data(x, y, cat, z)
-        self._labels = Labels("x", "y")  # Unsure how else to set defaults.
+        self._labels = AxesLabels("x", "y")  # Unsure how else to set defaults.
         self.set_cnorms(None)
 
     #         self._init_fig(use_gs)
@@ -896,14 +896,14 @@ class GridHist2D(object):
         try:
             return self._fig
         except AttributeError:
-            return self._init_fig()[0]
+            return self.init_fig()[0]
 
     @property
     def axes(self):
         try:
             return self._axes
         except AttributeError:
-            return self._init_fig()[1]
+            return self.init_fig()[1]
 
     @property
     def cbars(self):
@@ -958,13 +958,24 @@ class GridHist2D(object):
         if len(kwargs.keys()):
             raise KeyError("Unexpected kwarg: {}".format(kwargs.keys()))
 
-        self._labels = Labels(x, y, z)
+        self._labels = AxesLabels(x, y, z)
 
-    def _init_fig(self, use_gs=False):
-        scale = 1.5
+    def init_fig(self, use_gs=False, layout="auto", scale=1.5):
+
+        if layout == "auto":
+            raise NotImplementedError(
+                """Need some densest packing algorithm I haven't
+found yet"""
+            )
+
+        assert len(layout) == 2
+        nrows, ncols = layout
 
         if use_gs:
-            raise NotImplementedError("Unsure how to consistently store single cax.")
+            raise NotImplementedError(
+                """Unsure how to consistently store single cax or
+deal with variable layouts."""
+            )
             fig = plt.figure(figsize=np.array([8, 6]) * scale)
 
             gs = mpl.gridspec.GridSpec(
@@ -1011,17 +1022,17 @@ class GridHist2D(object):
 
         else:
             fig, axes = tools.subplots(
-                nrows=3, ncols=4, scale_width=scale, scale_height=scale
+                nrows=nrows, ncols=ncols, scale_width=scale, scale_height=scale
             )
         #             cax = None
 
-        keys = sorted(self.grouped.groups.keys())
+        keys = ["All"] + sorted(self.grouped.groups.keys())
         axes = pd.Series(axes.ravel(), index=pd.CategoricalIndex(keys))
 
         self._fig = fig
         self._axes = axes
         self._use_gs = False
-        return fig, axes  # , cax
+        return fig, axes
 
     def make_h2ds(self):
         grouped = self.grouped
@@ -1056,10 +1067,17 @@ class GridHist2D(object):
         self._h2ds = h2ds
         return h2ds
 
+    @staticmethod
+    def _make_axis_text_label(key):
+        r"""Format the `key` identifying the Categorial group for this axis. To modify,
+sublcass `GridHist2D` and redefine this staticmethod.
+"""
+        return key
+
     def _format_axes(self):
         axes = self.axes
         for k, ax in axes.items():
-            lbl = r"$v_\mathrm{sw} = %.0f$" % k.mid
+            lbl = self._make_axis_text_label(k)
             ax.text(
                 0.025,
                 0.95,
@@ -1069,8 +1087,8 @@ class GridHist2D(object):
                 fontdict={"color": "k"},
             )
 
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-1, 1)
+        # ax.set_xlim(-1, 1)
+        # ax.set_ylim(-1, 1)
 
     def make_plots(self, **kwargs):
         h2ds = self.hist2ds
