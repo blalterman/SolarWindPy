@@ -51,7 +51,7 @@ class AggPlot(ABC):
 
     @abstractmethod
     def __init__(self):
-        pass
+        self._init_logger()
 
     def __str__(self):
         return self.__class__.__name__
@@ -61,7 +61,7 @@ class AggPlot(ABC):
         return self._logger
 
     def _init_logger(self):
-        logger = logging.getLogger(name="analysis.%s" % self.__class__.__name__)
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
     @property
@@ -332,6 +332,7 @@ class Hist1D(AggPlot):
             Dispatched to `np.histogram_bin_edges` or `pd.cut` depending on
             input type and value.
         """
+        super(Hist1D, self).__init__()
         self.set_data(x, y, logx, clip_data)
         self.calc_bins_intervals(nbins=nbins)
         self.make_cut()
@@ -509,7 +510,7 @@ class Hist2D(AggPlot):
         clip_data=False,
         nbins=101,
     ):
-        self._init_logger()
+        super(Hist2D, self).__init__()
         self.set_data(x, y, z, logx, logy, clip_data)
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins)
@@ -869,7 +870,7 @@ class GridHist2D(object):
         return self._axnorm
 
     @property
-    def log(self):
+    def logger(self):
         return self._log
 
     @property
@@ -921,6 +922,11 @@ class GridHist2D(object):
     @property
     def path(self):
         raise NotImplementedError("Just haven't sat down to write this.")
+
+    def _init_logger(self):
+        self._logger = logging.getLogger(
+            "{}.{}".format(__name__, self.__class__.__name__)
+        )
 
     def set_nbins(self, new):
         self._nbins = new

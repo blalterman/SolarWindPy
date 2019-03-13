@@ -64,7 +64,6 @@ _trans_units = {
     "colat": _inU["deg"],
     "lat": _inU["deg"],
     "lon": _inU["deg"],
-    #     "colat": r"\mathrm{sr}",
     # Trig things.
     "theta": _inU["deg"],
     "phi": _inU["deg"],
@@ -98,7 +97,7 @@ _trans_units = {
     # Collisional things
     "lnlambda": _inU["dimless"],
     # TODO: verify that these units are Hertz.
-    "nuc": "10^{-7} \mathrm{Hz}",
+    "nuc": "10^{-7} \mathrm{Hz}",  # noqa: W605
     "nc": _inU["dimless"],
     "chisq": _inU["dimless"],
     "chisqnu": _inU["dimless"],
@@ -118,6 +117,9 @@ _trans_units = {
     "sigma_r": _inU["dimless"],
     "ra": _inU["dimless"],
     "re": _inU["dimless"],
+    # Nyquist things
+    "Wn": _inU["dimless"],
+    "gamma": r"\Omega_p",
 }
 
 _trans_component = {
@@ -191,6 +193,10 @@ _templates = {
     "sigma_r": r"\sigma_{r;{$S}}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
+    # Instability things,
+    "Wn": r"\mathrm{W_n}",
+    "gamma": r"\gamma/\Omega_{{$S}}",
+    "eth": r"\eth",  # "_{{$C;$S}}"
 }
 
 
@@ -260,7 +266,7 @@ class TeXlabel(object):
         r"""
         Init a logger with a StreamHandler at INFO level.
         """
-        logger = logging.getLogger(name="analysis.%s" % self.__class__.__name__)
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
     @property

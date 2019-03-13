@@ -34,18 +34,17 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
     assert isinstance(fig, mpl.figure.Figure)
     assert isinstance(spath, Path)
 
-    alog = logging.getLogger("analysis.%s" % __name__)
-
-    fig.tight_layout()
+    alog = logging.getLogger(__name__)
 
     if add_info:
-        info = "B. L. Alterman %s" % datetime.now().strftime("%Y%m%dT%H%M%S")
+        info = "B. L. Alterman {}".format(datetime.now().strftime("%Y%m%dT%H%M%S"))
         fig.text(0, 0, info)
+
+    if tight_layout:
         fig.tight_layout()
 
-    alog.debug("Saving figure\n%s" % spath.resolve())
+    #     alog.debug("Saving figure\n%s", spath.resolve())
 
-    bbox_inches = kwargs.pop("bbox_inches", "tight")
     meta = kwargs.pop("metadata", {})
     if "Author" not in meta.keys():
         meta["Author"] = "B. L. Alterman"
@@ -56,6 +55,10 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
 
     # Save the PDF without the timestamp so we can create the final LaTeX file
     # without them.
+    # Add the datetime stamp to the PNG as those are what we render most often when
+    # working, drafting, etc.
+
+    bbox_inches = kwargs.pop("bbox_inches", "tight")
     for fmt in (".pdf", ".png"):
         fig.savefig(
             spath.with_suffix(fmt),
@@ -65,13 +68,4 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
             **kwargs
         )
 
-    # Add the datetime stamp to the PNG as those are what we render most often when
-    # working, drafting, etc.
-
-    #     fig.savefig(spath.with_suffix(".png"),
-    #                 bbox_inches=bbox_inches,
-    #                 format="png",
-    #                 meta=meta,
-    #                 **kwargs)
-
-    alog.info("Saved figure\n%s" % spath.resolve())
+    alog.info("Saved figure\n%s", spath.resolve())

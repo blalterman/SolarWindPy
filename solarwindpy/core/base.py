@@ -112,7 +112,7 @@ class Core(ABC):
         r"""
         Init a logger with a StreamHandler at INFO level.
         """
-        logger = logging.getLogger(name="analysis.%s" % self.__class__.__name__)
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
     def _init_units(self):
