@@ -1,3 +1,5 @@
+version: 1
+
 formatters:
     detailed: 
         format: "%(asctime)s - %(name)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s"
@@ -8,6 +10,11 @@ handlers:
         class: logging.StreamHandler
         level: INFO
         formatter: simple
+    main:
+        class: logging.FileHandler
+        level: DEBUG
+        formatter: detailed
+        filename: main.log
     core:
         class: logging.FileHandler
         level: DEBUG
@@ -23,32 +30,26 @@ handlers:
         level: DEBUG
         formatter: detailed
         filename: solarwindpy/solar_activity.log
-    main:
-        class: logging.FileHandler
-        level: DEBUG
-        formatter: detailed
 loggers:
-    console:
-        qualname: console
+    main:
+        qualname: main
         propagate: True
-        level: INFO
-        handlers: [console]
+        level: DEBUG
+        handlers: [console, main]
     solarwindpy:
         qualname: solarwindpy
+        level: DEBUG
         propagate: True
         handlers: [console]
     core:
         qualname: solarwindpy.core
         propagate: True
-        level: DEBUG
         handlers: [core]
     plotting:
         qualname: solarwindpy.plotting
         propagate: True
-        level: DEBUG
         handlers: [plotting]
     solar_activity:
         qualname: solarwindpy.solar_activity
         propagate: True
-        level: DEBUG
         handlers: [solar_activity]
