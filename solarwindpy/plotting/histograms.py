@@ -960,6 +960,24 @@ class GridHist2D(object):
 
         self._labels = AxesLabels(x, y, z)
 
+    def set_fig_axes(self, fig, axes, use_gs=False):
+        self._set_fig(fig)
+        self._set_axes(axes)
+        self._use_gs = bool(use_gs)
+
+    def _set_fig(self, new):
+        self._fig = new
+
+    def _set_axes(self, new):
+        if new.size != len(self.grouped.groups.keys()) + 1:
+            msg = "Number of axes must match number of Categoricals + 1 for All."
+            raise ValueError(msg)
+
+        keys = ["All"] + sorted(self.grouped.groups.keys())
+        axes = pd.Series(new.ravel(), index=pd.CategoricalIndex(keys))
+
+        self._axes = axes
+
     def init_fig(self, use_gs=False, layout="auto", scale=1.5):
 
         if layout == "auto":
@@ -1026,18 +1044,42 @@ deal with variable layouts."""
             )
         #             cax = None
 
-        keys = ["All"] + sorted(self.grouped.groups.keys())
-        axes = pd.Series(axes.ravel(), index=pd.CategoricalIndex(keys))
-
-        self._fig = fig
-        self._axes = axes
-        self._use_gs = False
+        self.set_fig_axes(fig, axes, use_gs)
         return fig, axes
+
+    def _build_one_hist2d(self, x, y, z):
+        h2d = Hist2D(
+            x,
+            y,
+            z=z,
+            logx=self.log.x,
+            logy=self.log.y,
+            clip_data=False,
+            nbins=self.nbins,
+        )
+        h2d.set_axnorm(self.axnorm)
+        h2d.set_xlabel(self.labels.x)
+        h2d.set_ylabel(self.labels.y)
+        if self.labels.z is not None:
+            h2d.set_zlabel(self.labels.z)
+
+        return h2d
 
     def make_h2ds(self):
         grouped = self.grouped
 
-        h2ds = {}
+        # Build case that doesn't include subgroups.
+
+        x = self.data.loc[:, "x"]
+        y = self.data.loc[:, "y"]
+        try:
+            z = self.data.loc[:, "z"]
+        except KeyError:
+            z = None
+
+        hall = self._build_one_hist2d(x, y, z)
+
+        h2ds = {"All": hall}
         for k, g in grouped:
             x = g.loc[:, "x"]
             y = g.loc[:, "y"]
@@ -1046,22 +1088,7 @@ deal with variable layouts."""
             except KeyError:
                 z = None
 
-            h2d = Hist2D(
-                x,
-                y,
-                z=z,
-                logx=self.log.x,
-                logy=self.log.y,
-                clip_data=False,
-                nbins=self.nbins,
-            )
-            h2d.set_axnorm(self.axnorm)
-            h2d.set_xlabel(self.labels.x)
-            h2d.set_ylabel(self.labels.y)
-            if self.labels.z is not None:
-                h2d.set_zlabel(self.labels.z)
-
-            h2ds[k] = h2d
+            h2ds[k] = self._build_one_hist2d(x, y, z)
 
         h2ds = pd.Series(h2ds)
         self._h2ds = h2ds
@@ -1085,6 +1112,7 @@ sublcass `GridHist2D` and redefine this staticmethod.
                 transform=ax.transAxes,
                 va="top",
                 fontdict={"color": "k"},
+                bbox={"color": "wheat"},
             )
 
         # ax.set_xlim(-1, 1)

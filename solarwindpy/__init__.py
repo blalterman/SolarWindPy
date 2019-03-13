@@ -10,7 +10,7 @@ import pdb  # noqa: F401
 from pkg_resources import get_distribution, DistributionNotFound
 
 from .core import units_constants, base, vector, tensor, ions, plasma, spacecraft
-from . import core, plotting, solar_activity
+from . import core, plotting, solar_activity, tools
 
 pp = plotting
 sa = solar_activity
@@ -30,6 +30,7 @@ __all__ = [
     "pp",
     "solar_activity",
     "sa",
+    "tools",
 ]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
