@@ -493,13 +493,15 @@ class Plasma(base.Base):
         # Log to DEBUG if no NaNs. Otherwise log to INFO.
         if nan_info.any().any():
             self.logger.info(
-                "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
+                "%s %.0f spectra contain at least one NaN",
+                name,
+                nan_info.any(axis=1).sum(),
             )
             #             self.logger.log(10 * int(1 + nan_info.any().any()),
             #                             "plasma NaN info\n%s", nan_info.to_string())
-            self.logger.debug("NaN info\n%s", nan_info.to_string())
+            self.logger.debug("%s NaN info\n%s", name, nan_info.to_string())
         else:
-            self.logger.debug("does not contain NaNs")
+            self.logger.debug("%s does not contain NaNs", name)
 
         pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
         stats = (
@@ -516,7 +518,8 @@ class Plasma(base.Base):
             .T
         )
         self.logger.debug(
-            "stats\n%s\n%s",
+            "%s stats\n%s\n%s",
+            name,
             stats.loc[:, ["count", "mean", "std"]].to_string(),
             stats.drop(["count", "mean", "std"], axis=1).to_string(),
         )
@@ -565,9 +568,13 @@ class Plasma(base.Base):
 
         self._data = data
         self.logger.debug("plasma shape: %s", data.shape)
-        self.logger.info(
-            "columns dropped from plasma\n%s", [str(c) for c in dropped.columns.values]
-        )
+        if dropped.columns.values:
+            self.logger.info(
+                "columns dropped from plasma\n%s",
+                [str(c) for c in dropped.columns.values],
+            )
+        else:
+            self.logger.info("no columns dropped from plasma")
         #         self.logger.debug(
         #             "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
         #             aux.shape,

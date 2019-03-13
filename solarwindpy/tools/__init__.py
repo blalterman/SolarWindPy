@@ -81,7 +81,7 @@ def swap_protons(data, logger=None):
     assert (chk.dropna() <= 1.0).all()
 
     if logger is None:
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger("main.{}".format(__name__))
         hdlr = logging.StreamHandler()
         hdlr.setLevel(logging.INFO)
 

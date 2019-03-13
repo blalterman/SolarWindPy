@@ -81,6 +81,7 @@ class Spacecraft(base.Base):
         super(Spacecraft, self).__init__(data)
         self.set_frame_name(frame, name)
         self.set_data(data)
+        self._log_spacecraft()
 
     @property
     def frame(self):
@@ -120,8 +121,7 @@ class Spacecraft(base.Base):
 
     @property
     def v(self):
-        r"""Shortcut to :py:meth:`velocity`.
-        """
+        r"""Shortcut to :py:meth:`velocity`."""
         return self.velocity
 
     @property
@@ -163,6 +163,11 @@ class Spacecraft(base.Base):
         d2s = pos_SI.pow(2).sum(axis=1).pipe(np.sqrt) / self.units.distance2sun
         d2s.name = "distance2sun"
         return d2s
+
+    def _log_spacecraft(self):
+        self.logger.info(
+            "Created %s spacecraft with %s reference frame", self.name, self.frame
+        )
 
     def set_frame_name(self, frame, name):
         frame = frame.upper()

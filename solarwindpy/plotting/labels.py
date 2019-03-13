@@ -341,12 +341,14 @@ class TeXlabel(object):
 TeX        : %s
 with units : %s
 save path  : %s
+template   : %s
          M : %s -> %s
          C : %s -> %s
          S : %s -> %s""",
             tex,
             with_units,
             path,
+            template_string,
             m,
             m1,
             c if c else None,

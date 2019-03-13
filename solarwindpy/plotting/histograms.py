@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 
 from . import tools
 
-LogAxes = namedtuple("LogAxes", "x,y")
+LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 
 
@@ -31,7 +31,7 @@ class AggPlot(ABC):
 
     Properties
     ----------
-    logger, data, bins, clip, cut, logx, xlabel, ylabel, clim, other_axis
+    logger, data, bins, clip, cut, logx, labels.x, labels.y, clim, agg_axes
 
     Methods
     -------
@@ -46,7 +46,7 @@ class AggPlot(ABC):
 
     AbstractMethods
     ---------------
-    __init__, set_ylabel, set_path, set_data, _format_axis, make_plot
+    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot
     """
 
     @abstractmethod
@@ -85,30 +85,45 @@ class AggPlot(ABC):
         return self._cut
 
     @property
-    def logx(self):
-        return self._logx
+    def log(self):
+        return self._log
 
     @property
-    def xlabel(self):
-        return self._xlabel
-
-    @property
-    def ylabel(self):
-        return self._ylabel
+    def labels(self):
+        return self._labels
 
     @property
     def clim(self):
         return self._clim
 
     @property
-    def other_axis(self):
+    def agg_axes(self):
         tko = [c for c in self.data.columns if c not in self._agg_axes]
         assert len(tko) == 1
         tko = tko[0]
         return tko
 
-    def set_xlabel(self, xlbl):
-        self._xlabel = xlbl
+    def set_log(self, x=None, y=None):
+        if x is None:
+            x = self.log.x
+        if y is None:
+            y = self.log.y
+        log = LogAxes(x, y)
+        self._log = log
+
+    def set_labels(self, **kwargs):
+        r"""Set or update x, y, or z labels. Any label not specified in kwargs
+        is propagated from `self.labels.<x, y, or z>`.
+        """
+
+        x = kwargs.pop("x", self.labels.x)
+        y = kwargs.pop("y", self.labels.y)
+        z = kwargs.pop("z", self.labels.z)
+
+        if len(kwargs.keys()):
+            raise KeyError("Unexpected kwarg: {}".format(kwargs.keys()))
+
+        self._labels = AxesLabels(x, y, z)
 
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
@@ -154,16 +169,11 @@ class AggPlot(ABC):
                 try:
                     b = np.histogram_bin_edges(d, nbins)
                 except MemoryError:
-                    # Clip the extremely large values and extremely small values.
+                    # Clip the extremely large values and extremely small outliers.
                     lo, up = d.quantile([0.0005, 0.9995])
                     b = np.histogram_bin_edges(d.clip(lo, up), nbins)
                 except AttributeError:
                     c, b = np.histogram(d, nbins)
-
-            #             elif hasattr(nbins, "__iter__"):
-            #                 b = nbins
-            #             else:
-            #                 raise ValueError("Unrecognized `nbins`\nnbins: %s" % (nbins))
 
             assert np.unique(b).size == b.size
             assert not np.isnan(b).any()
@@ -181,6 +191,8 @@ class AggPlot(ABC):
         self._intervals = intervals
 
     def make_cut(self):
+        r"""Calculate the `Categorical` quantities for the aggregation axes.
+        """
         intervals = self.intervals
         data = self.data
 
@@ -199,10 +211,14 @@ class AggPlot(ABC):
         self._cut = cut
 
     def agg(self):
-        r"""The aggregated quantity.
+        r"""Perform the aggregation along the agg axes.
+
+        If either of the count limits specified in `clim` are not None, apply them.
         """
         cut = self.cut
-        tko = self.other_axis
+        tko = self.agg_axes
+
+        self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
 
         other = self.data.loc[:, tko]
         joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
@@ -279,10 +295,6 @@ class AggPlot(ABC):
         pass
 
     @abstractmethod
-    def set_ylabel(self, ylbl):
-        pass
-
-    @abstractmethod
     def set_path(self, new):
         # TODO: move "auto" methods here to iterate through `AxesLabels` named tuple
         #       and pull the strings for creating the path. Also check for each
@@ -311,7 +323,7 @@ class Hist1D(AggPlot):
 
     Methods
     -------
-    set_ylabel, set_path, set_data, agg, _format_axis, make_plot
+    set_path, set_data, agg, _format_axis, make_plot
     """
 
     def __init__(self, x, y=None, logx=False, clip_data=True, nbins=101):
@@ -336,8 +348,7 @@ class Hist1D(AggPlot):
         self.set_data(x, y, logx, clip_data)
         self.calc_bins_intervals(nbins=nbins)
         self.make_cut()
-        self.set_xlabel(None)
-        self.set_ylabel(None)
+        self._labels(x="x", y=r"$\mathrm{Count} \; [\#]$")
         self.set_path(None)
         self.set_clim(None, None)
 
@@ -353,27 +364,21 @@ class Hist1D(AggPlot):
         if path is None:
             return path
 
-        scale_info = "-".join(["logX" if self.logx else "linX"]).strip("-")
+        scale_info = "-".join(["logX" if self.log.x else "linX"]).strip("-")
 
         out = path / scale_info
         return out
 
-    def set_ylabel(self, ylbl):
-        if ylbl is None:
-            ylbl = r"$\mathrm{Count} \; [\#]$"
-
-        self._ylabel = ylbl
-
     def set_path(self, new):
-        r"""If `self.xlabel` and `self.ylabel` are `labels.TeXlabel` instances,
+        r"""If `self.labels.x` and `self.labels.y` are `labels.TeXlabel` instances,
         use the each of their `path` methods to set Path.
         """
         path = Path("")
         if new == "auto":
-            path = path / self.xlabel.path
+            path = path / self.labels.x.path
 
             try:
-                path = path / self.ylabel.path
+                path = path / self.labels.y.path
             except AttributeError:
                 if self.data.loc[:, "y"].dropna().unique().size == 1:
                     path = path / "count"
@@ -399,7 +404,7 @@ class Hist1D(AggPlot):
         data.loc[:, "y"] = y
 
         self._data = data
-        self._logx = logx
+        self._log = LogAxes(x=logx)
         self._clip = clip
 
     def agg(self):
@@ -413,15 +418,15 @@ bins."""
         return agg
 
     def _format_axis(self, ax):
-        xlbl = self.xlabel
+        xlbl = self.labels.x
         if xlbl is not None:
             ax.set_xlabel(xlbl)
 
-        ylbl = self.ylabel
+        ylbl = self.labels.y
         if ylbl is not None:
             ax.set_ylabel(ylbl)
 
-        if self.logx:
+        if self.log.x:
             ax.set_xscale("log")
 
         ax.grid(True, which="major", axis="both")
@@ -434,14 +439,14 @@ bins."""
         `**kwargs` passed directly to `ax.plot`.
         """
         agg = self.agg()
-        #         tko = self.other_axis
+        #         tko = self.agg_axes
         x = pd.IntervalIndex(agg.index).mid
         y = agg
 
         if ax is None:
             fig, ax = plt.subplots()
 
-        if self.logx:
+        if self.log.x:
             x = 10.0 ** x
 
         ax.plot(x, y, **kwargs)
@@ -515,23 +520,13 @@ class Hist2D(AggPlot):
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins)
         self.make_cut()
-        self.set_xlabel(None)
-        self.set_ylabel(None)
-        self.set_zlabel(None)
+        self._labels = AxesLabels(x="x", y="y", z=None)
         self.set_path(None)
         self.set_clim(None, None)
 
     @property
     def _agg_axes(self):
         return ("x", "y")
-
-    @property
-    def logy(self):
-        return self._logy
-
-    @property
-    def zlabel(self):
-        return self._zlabel
 
     @property
     def axnorm(self):
@@ -554,16 +549,19 @@ class Hist2D(AggPlot):
             z = axnorm.capitalize() + "norm"
 
         scale_info = "-".join(
-            ["logX" if self.logx else "linX", "logX" if self.logy else "linY", z]
+            ["logX" if self.log.x else "linX", "logX" if self.log.y else "linY", z]
         ).strip("-")
 
         out = path / scale_info
         return out
 
-    def set_ylabel(self, ylbl):
-        self._ylabel = ylbl
+    def set_labels(self, **kwargs):
 
-    def set_zlabel(self, zlbl):
+        z = kwargs.pop("z", self.labels.z)
+        z = self._add_meta_to_zlbl(z)
+        super(Hist2D, self).set_labels(z=z, **kwargs)
+
+    def _add_meta_to_zlbl(self, zlbl):
         # BUG: path's won't auto create if they are strings.
         axnorm = self.axnorm
         if axnorm == "c":
@@ -587,21 +585,21 @@ class Hist2D(AggPlot):
             else:
                 zlbl = r"$\mathrm{Count} \; [\#]$"
 
-        self._zlabel = zlbl
+        return zlbl
 
     def set_path(self, new):
         # Bug: path doesn't auto-set log information.
         path = Path("")
         if new == "auto":
-            path = path / self.xlabel.path / self.ylabel.path
-            #             for c in (self.xlabel, self.ylabel, self.zlabel):
+            path = path / self.labels.x.path / self.labels.y.path
+            #             for c in (self.labels.x, self.labels.y, self.labels.z):
             #                 try:
             #                     path = path / c.path
             #                 except AttributeError:
             #                     pass
 
             try:
-                path = path / self.zlabel.path
+                path = path / self.labels.z.path
             except AttributeError:
                 if self.data.loc[:, "z"].dropna().unique().size == 1:
                     path = path / "count"
@@ -634,8 +632,7 @@ class Hist2D(AggPlot):
         data.loc[:, "z"] = z
 
         self._data = data
-        self._logx = logx
-        self._logy = logy
+        self._log = LogAxes(x=logx, y=logy)
         self._clip = clip
 
     def set_axnorm(self, new):
@@ -674,9 +671,9 @@ class Hist2D(AggPlot):
             y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
             dx = pd.Series(x.right - x.left, index=x)
             dy = pd.Series(y.right - y.left, index=y)
-            if self.logx:
+            if self.log.x:
                 dx = 10.0 ** dx
-            if self.logy:
+            if self.log.y:
                 dy = 10.0 ** dy
 
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
@@ -692,23 +689,23 @@ class Hist2D(AggPlot):
         return agg
 
     def _format_axis(self, ax):
-        xlbl = self.xlabel
-        ylbl = self.ylabel
+        xlbl = self.labels.x
+        ylbl = self.labels.y
 
         if xlbl is not None:
             ax.set_xlabel(xlbl)
         if ylbl is not None:
             ax.set_ylabel(ylbl)
 
-        if self.logx:
+        if self.log.x:
             ax.set_xscale("log")
-        if self.logy:
+        if self.log.y:
             ax.set_yscale("log")
 
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, **kwargs):
-        label = kwargs.pop("label", self.zlabel)
+        label = kwargs.pop("label", self.labels.z)
         #         if label is None and self.data.loc[:, "z"].unique().size == 1:
         #             label = r"$\mathrm{Count} \; [\#]$"
 
@@ -743,7 +740,7 @@ class Hist2D(AggPlot):
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
         cbar: bool
-            If True, create color bar with `zlabel`.
+            If True, create color bar with `labels.z`.
         limit_color_norm: bool
             If True, limit the color range to 0.001 and 0.999 percentile range
             of the z-value, count or otherwise.
@@ -765,9 +762,9 @@ class Hist2D(AggPlot):
         if ax is None:
             fig, ax = plt.subplots()
 
-        if self.logx:
+        if self.log.x:
             x = 10.0 ** x
-        if self.logy:
+        if self.log.y:
             y = 10.0 ** y
 
         axnorm = self.axnorm
@@ -876,6 +873,12 @@ class GridHist2D(object):
     @property
     def nbins(self):
         return self._nbins
+
+    @property
+    def log(self):
+        r"""LogAxes booleans.
+        """
+        return self._log
 
     @property
     def labels(self):
@@ -1064,10 +1067,9 @@ deal with variable layouts."""
             nbins=self.nbins,
         )
         h2d.set_axnorm(self.axnorm)
-        h2d.set_xlabel(self.labels.x)
-        h2d.set_ylabel(self.labels.y)
-        if self.labels.z is not None:
-            h2d.set_zlabel(self.labels.z)
+
+        xlbl, ylbl, zlbl = self.labels.x, self.labels.y, self.labels.z
+        h2d.set_labels(x=xlbl, y=ylbl, z=zlbl)
 
         return h2d
 

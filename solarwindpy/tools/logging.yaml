@@ -32,24 +32,19 @@ handlers:
         filename: solarwindpy/solar_activity.log
 loggers:
     main:
-        qualname: main
         propagate: True
         level: DEBUG
         handlers: [console, main]
     solarwindpy:
-        qualname: solarwindpy
         level: DEBUG
         propagate: True
         handlers: [console]
-    core:
-        qualname: solarwindpy.core
+    solarwindpy.core:
         propagate: True
         handlers: [core]
-    plotting:
-        qualname: solarwindpy.plotting
+    solarwindpy.plotting:
         propagate: True
         handlers: [plotting]
-    solar_activity:
-        qualname: solarwindpy.solar_activity
+    solarwindpy.solar_activity:
         propagate: True
         handlers: [solar_activity]
