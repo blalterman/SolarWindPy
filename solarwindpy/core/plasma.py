@@ -568,7 +568,7 @@ class Plasma(base.Base):
 
         self._data = data
         self.logger.debug("plasma shape: %s", data.shape)
-        if dropped.columns.values:
+        if dropped.columns.values.any():
             self.logger.info(
                 "columns dropped from plasma\n%s",
                 [str(c) for c in dropped.columns.values],
