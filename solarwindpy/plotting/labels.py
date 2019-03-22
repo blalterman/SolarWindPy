@@ -307,7 +307,13 @@ class TeXlabel(object):
     def _build_one_label(self, m, c, s):
 
         mcs = MCS(m, c, s)
-        path = "_".join([m, c, s])
+        path = (
+            "_".join(
+                [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
+            )
+            .replace(",", "")
+            .replace("__", "_")
+        )
 
         err = False
         if "_err" in m:
@@ -377,7 +383,8 @@ template   : %s
 
             tex = "{}/{}".format(tex0, tex1)
             with_units = r"$%s \; [%s]$" % (tex, units)
-            path = Path(path0) / path1
+            path = Path("-OV-".join([path0, path1]))
+            #             path = Path(path0) / path1
 
             self.logger.debug(
                 r"""Joined ratio label
