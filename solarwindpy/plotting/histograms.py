@@ -181,7 +181,11 @@ class AggPlot(base.Base):
         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
 
         other = self.data.loc[cut.index, tko]
-        joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
+
+        joint = cut.copy(deep=True)
+        joint.loc[:, other.name] = other
+        joint.sort_index(axis=1, inplace=True)
+        # joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
         gb = joint.groupby(list(self._agg_axes))
 
         if other.dropna().unique().size == 1:
@@ -563,6 +567,13 @@ class Hist2D(AggPlot):
             z = pd.Series(1, index=x.index)
 
         data.loc[:, "z"] = z
+
+        data = data.dropna()
+        if not data.shape[0]:
+            raise ValueError(
+                "You can't build a %s with data that is exclusively NaNs"
+                % self.__class__.__name__
+            )
 
         self._data = data
         self._log = base.LogAxes(x=logx, y=logy)

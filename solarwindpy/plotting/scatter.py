@@ -142,7 +142,7 @@ class Scatter(base.Base):
         if cbar and zkey is not None:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            self._make_cbar(pc, ax, **cbar_kwargs)
+            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
         else:
             cbar = None
 
