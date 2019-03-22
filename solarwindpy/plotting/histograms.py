@@ -21,9 +21,6 @@ except ModuleNotFoundError:
 from . import tools
 from . import base
 
-# LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
-# AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
-
 
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
@@ -39,33 +36,14 @@ class AggPlot(base.Base):
 
     calc_bins, make_cut, agg, clip_data, make_plot
 
-    AbstractProperties
-    ------------------
+    Abstract Properties
+    ---------_---------
     path, _agg_axes
 
-    AbstractMethods
-    ---------------
+    Abstract Methods
+    ---------_------
     __init__, set_labels.y, set_path, set_data, _format_axis, make_plot
     """
-
-    #    @abstractmethod
-    #    def __init__(self):
-    #        self._init_logger()
-    #
-    #    def __str__(self):
-    #        return self.__class__.__name__
-    #
-    #    @property
-    #    def logger(self):
-    #        return self._logger
-    #
-    #    def _init_logger(self):
-    #        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
-    #        self._logger = logger
-    #
-    #    @property
-    #    def data(self):
-    #        return self._data
 
     @property
     def edges(self):
@@ -75,21 +53,9 @@ class AggPlot(base.Base):
     def intervals(self):
         return dict(self._intervals)
 
-    #    @property
-    #    def clip(self):
-    #        return self._clip
-
     @property
     def cut(self):
         return self._cut
-
-    #    @property
-    #    def log(self):
-    #        return self._log
-    #
-    #    @property
-    #    def labels(self):
-    #        return self._labels
 
     @property
     def clim(self):
@@ -101,28 +67,6 @@ class AggPlot(base.Base):
         assert len(tko) == 1
         tko = tko[0]
         return tko
-
-    #    def set_log(self, x=None, y=None):
-    #        if x is None:
-    #            x = self.log.x
-    #        if y is None:
-    #            y = self.log.y
-    #        log = LogAxes(x, y)
-    #        self._log = log
-    #
-    #    def set_labels(self, **kwargs):
-    #        r"""Set or update x, y, or z labels. Any label not specified in kwargs
-    #        is propagated from `self.labels.<x, y, or z>`.
-    #        """
-    #
-    #        x = kwargs.pop("x", self.labels.x)
-    #        y = kwargs.pop("y", self.labels.y)
-    #        z = kwargs.pop("z", self.labels.z)
-    #
-    #        if len(kwargs.keys()):
-    #            raise KeyError("Unexpected kwarg: {}".format(kwargs.keys()))
-    #
-    #        self._labels = AxesLabels(x, y, z)
 
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
@@ -148,15 +92,32 @@ class AggPlot(base.Base):
         bins = {}
         intervals = {}
 
+        agg_axes = self._agg_axes
+
+        if isinstance(nbins, (str, int)) or (
+            hasattr(nbins, "__iter__") and len(nbins) != len(agg_axes)
+        ):
+            # Single paramter for `nbins`.
+            nbins = {k: nbins for k in agg_axes}
+
+        elif len(nbins) == len(agg_axes):
+            # Passed one bin spec per axis
+            nbins = {k: v for k, v in zip(agg_axes, nbins)}
+
+        else:
+            msg = "Unrecognized `nbins`\ntype: {}\n bins:{}"
+            raise ValueError(msg.format(type(nbins), nbins))
+
         for k in self._agg_axes:
+            b = nbins[k]
             d = data.loc[
                 :, k
             ].dropna()  # Numpy and Astropy don't like NaNs when calculating bins.
 
-            if isinstance(nbins, str):
-                nbins = nbins.lower()
+            if isinstance(b, str):
+                b = b.lower()
 
-            if isinstance(nbins, str) and nbins == "knuth":
+            if isinstance(b, str) and b == "knuth":
                 try:
                     assert knuth_bin_width
                 except NameError:
@@ -166,13 +127,13 @@ class AggPlot(base.Base):
 
             else:
                 try:
-                    b = np.histogram_bin_edges(d, nbins)
+                    b = np.histogram_bin_edges(d, b)
                 except MemoryError:
                     # Clip the extremely large values and extremely small outliers.
                     lo, up = d.quantile([0.0005, 0.9995])
-                    b = np.histogram_bin_edges(d.clip(lo, up), nbins)
+                    b = np.histogram_bin_edges(d.clip(lo, up), b)
                 except AttributeError:
-                    c, b = np.histogram(d, nbins)
+                    c, b = np.histogram(d, b)
 
             assert np.unique(b).size == b.size
             assert not np.isnan(b).any()
@@ -289,10 +250,6 @@ class AggPlot(base.Base):
     #             data = data.clip(lo, up)
     #         return data
 
-    #    @abstractproperty
-    #    def path(self):
-    #        pass
-
     @abstractproperty
     def _agg_axes(self):
         r"""The axes over which the aggregation takes place.
@@ -300,26 +257,6 @@ class AggPlot(base.Base):
         1D cases aggregate over `x`. 2D cases aggregate over `x` and `y`.
         """
         pass
-
-
-#    @abstractmethod
-#    def set_path(self, new):
-#        # TODO: move "auto" methods here to iterate through `AxesLabels` named tuple
-#        #       and pull the strings for creating the path. Also check for each
-#        #       label's scale and add that information.
-#        pass
-#
-#    @abstractmethod
-#    def set_data(self, x, y, logx, clip):
-#        pass
-#
-#    @abstractmethod
-#    def _format_axis(self, ax):
-#        pass
-#
-#    @abstractmethod
-#    def make_plot(self):
-#        pass
 
 
 class Hist1D(AggPlot):
@@ -363,12 +300,6 @@ class Hist1D(AggPlot):
     @property
     def _agg_axes(self):
         return ("x",)
-
-    #    @property
-    #    def path(self):
-    #        r"""Path for saving figure.
-    #        """
-    #        return self._path
 
     def set_path(self, new, add_scale=True):
         path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
@@ -543,10 +474,6 @@ class Hist2D(AggPlot):
         """
         return self._axnorm
 
-    #    @property
-    #    def path(self):
-    #        return self._path
-
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.
         path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
@@ -712,12 +639,6 @@ class Hist2D(AggPlot):
 
     def _make_cbar(self, mappable, ax, **kwargs):
         label = kwargs.pop("label", self.labels.z)
-        #         if label is None and self.data.loc[:, "z"].unique().size == 1:
-        #             label = r"$\mathrm{Count} \; [\#]$"
-
-        #         fig = ax.figure
-        #         if isinstance(kwargs["cax"], mpl.axes.Axes):
-        #             ax = None
         cbar = ax.figure.colorbar(mappable, ax=ax, label=label, **kwargs)
         return cbar
 
@@ -759,8 +680,6 @@ class Hist2D(AggPlot):
         agg = self.agg()
         x = self.edges["x"]
         y = self.edges["y"]
-        # x = pd.IntervalIndex(agg.columns).mid
-        # y = pd.IntervalIndex(agg.index).mid
 
         assert x.size == agg.shape[1] + 1
         assert y.size == agg.shape[0] + 1
@@ -860,8 +779,6 @@ class GridHist2D(object):
         self.set_data(x, y, cat, z)
         self._labels = base.AxesLabels("x", "y")  # Unsure how else to set defaults.
         self.set_cnorms(None)
-
-    #         self._init_fig(use_gs)
 
     @property
     def data(self):

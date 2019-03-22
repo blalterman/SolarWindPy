@@ -141,7 +141,7 @@ class Base(ABC):
         return path, x, y, z, scale_info
 
     @abstractmethod
-    def set_data(self, x, y, logx, clip):
+    def set_data(self):
         pass
 
     @abstractmethod

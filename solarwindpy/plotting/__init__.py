@@ -10,11 +10,11 @@ r"""Plotting utilities for :py:mod:`solarwindpy`.
 # from datetime import datetime
 # from pathlib import Path
 
-from . import labels, histograms, tools
+from . import labels, histograms, scatter, tools
 
 subplots = tools.subplots
 
 subplots = tools.subplots
 save = tools.save
 
-__all__ = ["labels", "histograms", "tools", "subplots", "save"]
+__all__ = ["labels", "histograms", "scatter", "tools", "subplots", "save"]
