@@ -180,7 +180,7 @@ class AggPlot(base.Base):
 
         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
 
-        other = self.data.loc[:, tko]
+        other = self.data.loc[cut.index, tko]
         joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
         gb = joint.groupby(list(self._agg_axes))
 
