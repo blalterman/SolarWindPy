@@ -1310,48 +1310,6 @@ class PlasmaTestBase(ABC):
         with self.assertRaisesRegex(TypeError, invalid_msg):
             ot.nc(sa, combo)
 
-    #     def test_dt2ts(self):
-    #         r"""
-    #         Test the conversion of (year, fdoy) values to Pandas datetime objects.
-    #         """
-    #         print_inline_debug = False
-    #         year = self.data.year
-    #         fdoy = self.data.fdoy
-    #
-    #         pdt.assert_series_equal(
-    #             year,
-    #             pd.Series((1994.0, 2005.0, 2016.0), name="year"),
-    #             "Year values have changed from initial test write. They won't pass.",
-    #         )
-    #         pdt.assert_series_equal(
-    #             fdoy,
-    #             pd.Series((12.5, 309.1, 61.75), name="fdoy"),
-    #             "Year values have changed from initial test write. They won't pass.",
-    #         )
-    #         test_against = [
-    #             pd.datetime(1994, 1, 12, 12),
-    #             pd.datetime(2005, 11, 5, 2, 24),
-    #             pd.datetime(2016, 3, 1, 18),
-    #         ]
-    #         test_against = pd.Series(test_against, name="timestamp")
-    #
-    #         if print_inline_debug:
-    #             print(
-    #                 "<Test>",
-    #                 "<year>",
-    #                 type(year),
-    #                 year,
-    #                 "<fdoy>",
-    #                 type(fdoy),
-    #                 fdoy,
-    #                 "<test_against>",
-    #                 type(test_against),
-    #                 test_against,
-    #                 "",
-    #                 sep="\n",
-    #             )
-    #         pdt.assert_series_equal(test_against, self.object_testing.dt2ts)
-
     def test_estimate_electrons(self):
         #        print_inline_debug_info = True
 
@@ -1736,6 +1694,15 @@ class PlasmaTestBase(ABC):
 
         with self.assertRaises(ValueError):
             ot.set_auxiliary_data(ot.data)
+
+    def test_epoch(self):
+        epoch = self.data.index
+        self.assertIsInstance(epoch, pd.DatetimeIndex)
+
+        ot = self.object_testing
+        pdt.assert_index_equal(epoch, ot.index)
+        pdt.assert_index_equal(epoch, ot.epoch)
+        pdt.assert_index_equal(ot.epoch, ot.data.index)
 
     @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):

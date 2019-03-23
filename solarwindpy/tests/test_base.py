@@ -19,10 +19,11 @@ class TestData(object):
     def epoch(self):
         epoch = pd.Series(
             {
-                0: pd.to_datetime("1995-01-01"),
-                1: pd.to_datetime("2015-03-23"),
-                2: pd.to_datetime("2022-10-09"),
-            }
+                0: pd.to_datetime("1995-01-01 12:35:00"),
+                1: pd.to_datetime("2015-03-23 19:29:09"),
+                2: pd.to_datetime("2022-10-09 01:47:01.23456"),
+            },
+            name="epoch",
         )
         return epoch
 
