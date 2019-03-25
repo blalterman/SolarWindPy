@@ -114,7 +114,12 @@ class SWEData(TestCase):
     @classmethod
     def setUpClass(cls):
         data = TestData()
-        cls.data = data.plasma_data
+
+        # Hack integer based index for Alfvenic Trubuelnce tests
+        cls.data = data.plasma_data.reset_index(drop=True)
+
+        # cls.data = data.plasma_data
+
         cls.set_object_testing()
 
 
