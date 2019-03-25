@@ -102,16 +102,27 @@ class AlfvenicTurbulence(base.Core):
 
     """
 
-    def __init__(self, velocity, bfield, rho, species, auto_reindex=True, **kwargs):
+    def __init__(self, velocity, bfield, rho, species, **kwargs):
+        r"""Initialize an :py:class:`AlfvenicTurbulence` object.
+
+        Parameters
+        ----------
+        velocity: pd.DataFrame
+            Vector velocity measurments.
+        bfield: pd.DataFrame
+            Vector mangetic field measurements.
+        rho: pd.Series
+            Mass density measurments, used to put `bfield` into Alfven units.
+        kwargs:
+            Passed to `rolling` method when mean-subtracing in `set_data`.
+        """
         #         print("<Module>",
         #               "__init__",
         #               sep="\n",
         #               end="\n")
 
         super(AlfvenicTurbulence, self).__init__()
-        self.set_data(
-            velocity, bfield, rho, species, auto_reindex=auto_reindex, **kwargs
-        )
+        self.set_data(velocity, bfield, rho, species, **kwargs)
 
     @property
     def data(self):
@@ -287,7 +298,7 @@ class AlfvenicTurbulence(base.Core):
     def rE(self):
         return self.elsasser_ratio
 
-    def set_data(self, v_in, b_in, rho, species, auto_reindex=True, **kwargs):
+    def set_data(self, v_in, b_in, rho, species, **kwargs):
         r"""The `auto_reindex` kwarg can be set to False so that, if running a
         large batch of analysis on the same data, one can reindex once outside
         of this class and avoid many unnecessary reindexing cases within it.

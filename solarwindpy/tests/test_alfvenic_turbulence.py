@@ -102,7 +102,6 @@ class AlfvenicTrubulenceTestBase(ABC):
             b,
             rtot,
             "+".join(species),
-            auto_reindex=False,
             window=test_window,
             min_periods=test_periods,
         )
@@ -436,7 +435,6 @@ class AlfvenicTrubulenceTestBase(ABC):
             b_nT,
             r,
             ot.species,
-            auto_reindex=True,
             window=self.test_window,
             min_periods=self.test_periods,
         )
