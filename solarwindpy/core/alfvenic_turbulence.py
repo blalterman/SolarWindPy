@@ -82,7 +82,7 @@ class AlfvenicTurbulence(base.Core):
 
     Properties
     ----------
-    data, velocity, v, bfield, b, species, z_plus, zp, z_minus, zm, e_plus, ep,
+    deltas, velocity, v, bfield, b, species, z_plus, zp, z_minus, zm, e_plus, ep,
     e_minus, em, kinetic_energy, ev, magnetic_energy, eb, total_energy, etot,
     residual_energy, eres, normalized_residual_energy, eres_norm, sigma_r,
     cross_helicity, normalized_cross_helicity, sigma_c, alfven_ratio, rA,
@@ -90,7 +90,7 @@ class AlfvenicTurbulence(base.Core):
 
     Methods
     -------
-    set_data
+    set_deltas
 
     Notes
     -----
@@ -115,13 +115,27 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def data(self):
-        return self._data
+        r"""Shortcut to `deltas` to satisfy equality checks.
+        """
+        return self.deltas
+
+    @property
+    def deltas(self):
+        r"""Mean-subtracted quantities used to calculated Elsasser variables.
+        """
+        return self._deltas
+
+    @property
+    def measurements(self):
+        r"""Measurements used to calcualte `deltas`.
+        """
+        return self._measurements
 
     @property
     def velocity(self):
         r"""Velocity in Plasma's v-units.
         """
-        return self.data.loc[:, "v"]
+        return self.deltas.loc[:, "v"]
 
     @property
     def v(self):
@@ -134,7 +148,7 @@ class AlfvenicTurbulence(base.Core):
         r"""Magnetic field in Alfven units, where velocity is stored in Plasma's
         v-units.
         """
-        return self.data.loc[:, "b"]
+        return self.deltas.loc[:, "b"]
 
     @property
     def b(self):
@@ -334,7 +348,12 @@ class AlfvenicTurbulence(base.Core):
         rolled = data.rolling(window, min_periods=min_periods, center=center, **kwargs)
         agged = rolled.agg("mean")
         deltas = data.subtract(agged, axis=1)
-        self._data = deltas
+
+        data.name = "measurements"
+        deltas.name = "deltas"
+
+        self._measurements = data
+        self._deltas = deltas
         self._species = species
 
     def _clean_species_for_setting(self, species):
