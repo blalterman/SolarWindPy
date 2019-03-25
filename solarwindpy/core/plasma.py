@@ -140,6 +140,10 @@ class Plasma(base.Base):
             return super(Plasma, self).__getattr__(attr)
 
     @property
+    def epoch(self):
+        return self.data.index
+
+    @property
     def spacecraft(self):
         r"""`Spacecraft` object stored in `plasma`.
         """

@@ -45,10 +45,6 @@ class PlasmaTestBase(ABC):
         # print("Data", cls.data, sep="\n")
         data = cls.data
         plas = plasma.Plasma(data, *cls().species.split("+"))
-        #         plas = plasma.Plasma(data,
-        #                              *cls().species.split("+"),
-        #                              spacecraft=None,
-        #                              auxiliary_data=None)
 
         par = data.w.par.pow(2)
         per = data.w.per.pow(2)
@@ -84,13 +80,6 @@ class PlasmaTestBase(ABC):
             return combos
         else:
             return None
-        # all_combos = []
-        # if ncombinations.any():
-        #     for n in ncombinations:
-        #         combos = itertools.combinations(stuple, n)
-        #         # for combo in combos:
-        #     s = "+".join(combo)
-        #     print(combo, s, sep="\n")
 
     @property
     def mass(self):
@@ -144,34 +133,13 @@ class PlasmaTestBase(ABC):
 
     def test_ions(self):
         ions_ = pd.Series({s: ions.Ion(self.data, s) for s in self.stuple})
-        # print_inline_debug_info = False
-        # if print_inline_debug_info:
-        #     msg = "\n<Ions>\n%s\n%s\n\n<Plasma>\n%s\n%s\n\nDiff\n%s"
-        #     fcn = lambda x: x.data
-        #     msg = msg % (
-        #           ions,
-        #           pd.concat(ions.apply(fcn).to_dict(), axis=1, names=["S"]).T,
-        #           self.object_testing.ions,
-        #           self.object_testing.data.drop("", axis=1, level="S").T,
-        #           "", #ions.a.data - self.object_testing.ions.a.data,
-        #           # ions.a.data == self.object_testing.ions.a.data
-        #           )
-        #     print(msg)
-        # print(ions.index)
-        # print(self.object_testing.ions.index)
-        # print(ions.index == self.object_testing.ions.index)
         pdt.assert_index_equal(ions_.index, self.object_testing.ions.index)
-        # self.assertEqual(ions.index, self.object_testing.ions.index,
-        #                 "Unequal ion lists.\nIons: %s\nPlasma: %s\n" % (ions,
-        #                                             self.object_testing.ions))
         for k, i in ions_.iteritems():
             pdt.assert_frame_equal(
                 i.data,
                 self.object_testing.ions.loc[k].data,
                 "Unequal data for ion: %s" % k,
             )
-        # self.assertTrue( (ions_ == self.object_testing.ions).all(), msg)
-        # pdt.assert_series_equal(ions, self.object_testing.ions)
 
     def test_conform_species(self):
         r"""
@@ -258,7 +226,6 @@ class PlasmaTestBase(ABC):
                     self.object_testing._chk_species(*s)
         """
         pass
-        # # print(s, end="\n", flush=True)
 
     def test_species(self):
         self.assertEqual(self.object_testing.species, self.stuple)
@@ -268,12 +235,6 @@ class PlasmaTestBase(ABC):
             ValueError, "You must specify a species to instantiate a Plasma."
         ):
             plasma.Plasma(self.object_testing.data)
-
-    #     def test_gse(self):
-    #         self.assertEqual(
-    #             vector.Vector(self.data.gse.xs("", axis=1, level="S")),
-    #             self.object_testing.gse,
-    #         )
 
     def test_bfield(self):
         b = self.data.b.xs("", axis=1, level="S").loc[:, ["x", "y", "z"]]
@@ -1310,48 +1271,6 @@ class PlasmaTestBase(ABC):
         with self.assertRaisesRegex(TypeError, invalid_msg):
             ot.nc(sa, combo)
 
-    #     def test_dt2ts(self):
-    #         r"""
-    #         Test the conversion of (year, fdoy) values to Pandas datetime objects.
-    #         """
-    #         print_inline_debug = False
-    #         year = self.data.year
-    #         fdoy = self.data.fdoy
-    #
-    #         pdt.assert_series_equal(
-    #             year,
-    #             pd.Series((1994.0, 2005.0, 2016.0), name="year"),
-    #             "Year values have changed from initial test write. They won't pass.",
-    #         )
-    #         pdt.assert_series_equal(
-    #             fdoy,
-    #             pd.Series((12.5, 309.1, 61.75), name="fdoy"),
-    #             "Year values have changed from initial test write. They won't pass.",
-    #         )
-    #         test_against = [
-    #             pd.datetime(1994, 1, 12, 12),
-    #             pd.datetime(2005, 11, 5, 2, 24),
-    #             pd.datetime(2016, 3, 1, 18),
-    #         ]
-    #         test_against = pd.Series(test_against, name="timestamp")
-    #
-    #         if print_inline_debug:
-    #             print(
-    #                 "<Test>",
-    #                 "<year>",
-    #                 type(year),
-    #                 year,
-    #                 "<fdoy>",
-    #                 type(fdoy),
-    #                 fdoy,
-    #                 "<test_against>",
-    #                 type(test_against),
-    #                 test_against,
-    #                 "",
-    #                 sep="\n",
-    #             )
-    #         pdt.assert_series_equal(test_against, self.object_testing.dt2ts)
-
     def test_estimate_electrons(self):
         #        print_inline_debug_info = True
 
@@ -1736,6 +1655,15 @@ class PlasmaTestBase(ABC):
 
         with self.assertRaises(ValueError):
             ot.set_auxiliary_data(ot.data)
+
+    def test_epoch(self):
+        epoch = self.data.index
+        self.assertIsInstance(epoch, pd.DatetimeIndex)
+
+        ot = self.object_testing
+        pdt.assert_index_equal(epoch, ot.data.index)
+        pdt.assert_index_equal(epoch, ot.epoch)
+        pdt.assert_index_equal(ot.epoch, ot.data.index)
 
     @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
