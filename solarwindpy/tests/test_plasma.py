@@ -32,9 +32,6 @@ from solarwindpy import ions
 from solarwindpy import plasma
 from solarwindpy import spacecraft
 
-# import alfvenic_turbulence
-
-
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -1662,6 +1659,7 @@ class PlasmaTestBase(ABC):
 
         ot = self.object_testing
         pdt.assert_index_equal(epoch, ot.data.index)
+        pdt.assert_index_equal(epoch, ot.index)
         pdt.assert_index_equal(epoch, ot.epoch)
         pdt.assert_index_equal(ot.epoch, ot.data.index)
 

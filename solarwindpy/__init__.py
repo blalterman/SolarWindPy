@@ -9,12 +9,22 @@ import pdb  # noqa: F401
 
 from pkg_resources import get_distribution, DistributionNotFound
 
-from .core import units_constants, base, vector, tensor, ions, plasma, spacecraft
+from .core import (
+    units_constants,
+    base,
+    vector,
+    tensor,
+    ions,
+    plasma,
+    spacecraft,
+    alfvenic_turbulence,
+)
 from . import core, plotting, solar_activity, tools
 
 pp = plotting
 sa = solar_activity
 sc = spacecraft
+at = alfvenic_turbulence
 
 __all__ = [
     "core",
@@ -24,6 +34,8 @@ __all__ = [
     "vector",
     "spacecraft",
     "sc",
+    "alfvenic_turbulence",
+    "at",
     "base",
     "units_constants",
     "plotting",
