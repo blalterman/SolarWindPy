@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""Object for calculating Alfvenic turbulence.
+"""
+Name                :   alfvenic_turbulence.py
+Common Alias        :
+Version             :   0.1.00
+Updated             :   20181120
+Author              :   Benjamin L. Alterman
+e-mail              :   balterma@umich.edu
 
 Description
 -----------
@@ -13,19 +19,29 @@ Bibliography
 [2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
     wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
     463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
-"""
 
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
+Dependencies beyond standard distribution
+-----------------------------------------
+-
+
+Revision History
+----------------
+-Started module. (20181120)
+
+Propodes Updates
+----------------
+-
+
+Notes
+-----
+-
+
+"""
 
 import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd
-
-from types import FunctionType
-
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -35,33 +51,68 @@ pd.set_option("mode.chained_assignment", "raise")
 
 try:
     from . import base
-#     from . import units_constants as uc
 except ImportError:
     import base
-#     import units_constants as uc
 
 
 class AlfvenicTurbulence(base.Core):
-    def __init__(self, velocity, bfield, rho, species, auto_reindex=True):
-        #         self._init_units()
-        #         self._init_constants()
+    r"""Handle and calculate Alfvenic turbulence quantities using the Elsasser
+    variables following Section B.3.1 in [1].
 
+    Lloyd Woodham helped me define these calculations at the 2018 AGU Fall
+    Meeting and overcome deficiencies in [1]'s explanation.
+
+    Parameters
+    ----------
+    velocity : pd.DataFrame, pd.Series (?)
+        The velocity vector in the same basis as `bfield`.
+        Can be a single species, a CoM species, or a differential flow. The
+        differential flow case is an area of curiosity for me and I do not
+        suggest passing it as an input.
+        Expect [v] = km/s (i.e. default stored in `units_constants.Units`).
+    bfield : pd.DataFrame, pd.Series (?)
+        Magnetic field vector in the same basis as `velocity`.
+        Expect [b] = nT (i.e. default stored in `units_contants.Units`).
+    rho : pd.Series
+        The total mass density of the plasma used to define velocity.
+        Expect [rho] = m_p / cm^3 (i.e. default stored in
+        `units_constants.Units`).
+    species: str
+        The species string. Can contain `+`. Can contain at most one `,`.
+
+    Properties
+    ----------
+    data, velocity, v, bfield, b, species, z_plus, zp, z_minus, zm, e_plus, ep,
+    e_minus, em, kinetic_energy, ev, magnetic_energy, eb, total_energy, etot,
+    residual_energy, eres, normalized_residual_energy, eres_norm, sigma_r,
+    cross_helicity, normalized_cross_helicity, sigma_c, alfven_ratio, rA,
+    elsasser_ratio, rE
+
+    Methods
+    -------
+    set_data
+
+    Notes
+    -----
+
+    Citations
+    ---------
+    1. Bruno, R. & Carbone, V. The solar wind as a turbulence laboratory.
+    Living Rev. Sol. Phys. 10, 1–208 (2013).
+
+    """
+
+    def __init__(self, velocity, bfield, rho, species, auto_reindex=True, **kwargs):
         #         print("<Module>",
         #               "__init__",
         #               sep="\n",
         #               end="\n")
 
         super(AlfvenicTurbulence, self).__init__()
-        self.set_data(velocity, bfield, rho, species, auto_reindex=auto_reindex)
-        self.update_rolling()
-        self.set_agg("mean")
+        self.set_data(
+            velocity, bfield, rho, species, auto_reindex=auto_reindex, **kwargs
+        )
 
-    #     @property
-    #     def units(self):
-    #         return self._units
-    #     @property
-    #     def constants(self):
-    #         return self._constants
     @property
     def data(self):
         return self._data
@@ -70,7 +121,7 @@ class AlfvenicTurbulence(base.Core):
     def velocity(self):
         r"""Velocity in Plasma's v-units.
         """
-        return self.data.loc[:, "v"]  # self._velocity
+        return self.data.loc[:, "v"]
 
     @property
     def v(self):
@@ -83,7 +134,6 @@ class AlfvenicTurbulence(base.Core):
         r"""Magnetic field in Alfven units, where velocity is stored in Plasma's
         v-units.
         """
-        #         return self._bfield
         return self.data.loc[:, "b"]
 
     @property
@@ -131,9 +181,7 @@ class AlfvenicTurbulence(base.Core):
         # previous test cases. Based on a more detailed read of Bruno and
         # Carbone, I calculate +/-z before I take averages. Note that because
         # I am adding v and b, the differene shouldn't matter.
-        ep = 0.5 * self.zp.pow(2).sum(axis=1).rolling(
-            self.rolling_window, **self.rolling_kwargs
-        ).agg(self.agg)
+        ep = 0.5 * self.zp.pow(2).sum(axis=1)
         return ep
 
     @property
@@ -142,9 +190,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def e_minus(self):
-        em = 0.5 * self.zm.pow(2).sum(axis=1).rolling(
-            self.rolling_window, **self.rolling_kwargs
-        ).agg(self.agg)
+        em = 0.5 * self.zm.pow(2).sum(axis=1)
         return em
 
     @property
@@ -153,9 +199,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def kinetic_energy(self):
-        ev = 0.5 * self.v.pow(2).sum(axis=1).rolling(
-            self.rolling_window, **self.rolling_kwargs
-        ).agg(self.agg)
+        ev = 0.5 * self.v.pow(2).sum(axis=1)
         return ev
 
     @property
@@ -164,9 +208,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def magnetic_energy(self):
-        eb = 0.5 * self.b.pow(2).sum(axis=1).rolling(
-            self.rolling_window, **self.rolling_kwargs
-        ).agg(self.agg)
+        eb = 0.5 * self.b.pow(2).sum(axis=1)
         return eb
 
     @property
@@ -205,23 +247,16 @@ class AlfvenicTurbulence(base.Core):
     def cross_helicity(self):
         v = self.v
         b = self.b
-        # -1 so outward propagation is positive. [2]
-        c = -0.5 * v.multiply(b, axis=1).sum(axis=1).rolling(
-            self.rolling_window, **self.rolling_kwargs
-        ).agg(self.agg)
-
+        c = 0.5 * v.multiply(b).sum(axis=1)
         return c
 
     @property
     def normalized_cross_helicity(self):
         ep = self.ep
         em = self.em
-
         num = ep.subtract(em)
         den = ep.add(em)
-        # -1 so outward propagation is positive. [2]
-        out = -1.0 * num.divide(den)
-
+        out = num.divide(den)
         return out
 
     @property
@@ -244,49 +279,19 @@ class AlfvenicTurbulence(base.Core):
     def rE(self):
         return self.elsasser_ratio
 
-    @property
-    def agg(self):
-        return self._agg
+    def set_data(self, v_in, b_in, rho, species, auto_reindex=True, **kwargs):
+        r"""The `auto_reindex` kwarg can be set to False so that, if running a
+        large batch of analysis on the same data, one can reindex once outside
+        of this class and avoid many unnecessary reindexing cases within it.
 
-    def set_agg(self, new):
-        if isinstance(new, str):
-            new = (new,)
-        assert hasattr(new, "__iter__")
-        if not np.all([isinstance(x, (str, FunctionType)) for x in new]):
-            msg = "All aggregators must be strings or functions."
-            raise TypeError(msg)
-
-        new = tuple(sorted(new))
-        self._agg = new
-
-    @property
-    def rolling_window(self):
-        return self._rolling_window
-
-    @property
-    def rolling_kwargs(self):
-        return dict(self._rolling_kwargs)
-
-    def update_rolling(self, **new_kwargs):
-        r"""We treat `window` as a kwarg to simplify use of all `pd.<>.rolling`
-        inputs.
+        Be sure to carefully check your reindexing so as to not introduce lots
+        of NaNs. I ran into that bug when first writing this class.
         """
-        try:
-            kwargs = self.rolling_kwargs
-        except AttributeError:
-            kwargs = dict(window=5, min_periods=3, center=True)
-
-        kwargs.update(new_kwargs)
-
-        window = kwargs.pop("window")
-        kwargs = tuple(sorted(kwargs.items()))
-        self._rolling_window = window
-        self._rolling_kwargs = kwargs
-
-    def set_data(self, v_in, b_in, rho, species, auto_reindex=True):
 
         species = self._clean_species_for_setting(species)
         auto_reindex = bool(auto_reindex)
+
+        # assert rho.ndim == 1
 
         # Based on my read of Bruno and Carbone's definition in B.3.1 (p.166),
         # we first define the magnetic field in Alfven units. Then we calculate
@@ -321,13 +326,20 @@ class AlfvenicTurbulence(base.Core):
         #               sep="\n",
         #               end="\n\n")
 
-        data = pd.concat({"v": v, "b": b}, axis=1)
-        self._data = data
+        window = kwargs.pop("window", 30)
+        min_periods = kwargs.pop("min_periods", 5)
+        center = kwargs.pop("center", True)
+
+        data = pd.concat({"v": v, "b": b}, axis=1, names=["M"])
+        rolled = data.rolling(window, min_periods=min_periods, center=center, **kwargs)
+        agged = rolled.agg("mean")
+        deltas = data.subtract(agged, axis=1)
+        self._data = deltas
         self._species = species
 
     def _clean_species_for_setting(self, species):
         if not isinstance(species, str):
-            msg = "%s.species must be a single species w/ an optional `+`"
+            msg = "%s.species must be a single species w/ an optional `+` or `,`"
             raise TypeError(msg % self.__class__.__name__)
         if species.count(",") > 1:
             msg = "%s.species can contain at most one `,`\nspecies: %s"
