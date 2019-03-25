@@ -297,7 +297,21 @@ class AlfvenicTurbulence(base.Core):
         """
 
         species = self._clean_species_for_setting(species)
-        auto_reindex = bool(auto_reindex)
+        if not isinstance(v_in.index, pd.DatetimeIndex):
+            raise TypeError
+        if not isinstance(b_in.index, pd.DatetimeIndex):
+            raise TypeError
+        if not isinstance(rho.index, pd.DatetimeIndex):
+            raise TypeError
+
+        if not v_in.index.equals(b_in.index):
+            self.logger.warn("v and b have unequal indices. Results may be unexpected.")
+        if not v_in.index.equals(rho.index):
+            self.logger.warn(
+                """v and rho have unequal indices. Results may be
+unexpected."""
+            )
+        # auto_reindex = bool(auto_reindex)
 
         # assert rho.ndim == 1
 
@@ -310,18 +324,18 @@ class AlfvenicTurbulence(base.Core):
         )
         b_ca_units = b_in.divide(rho.pipe(np.sqrt), axis=0).multiply(coef)
 
-        if auto_reindex:
-            idx = v_in.index.union(b_in.index)
-            i0 = idx.min()
-            i1 = idx.max() + 1  # `stop` excludes `i1`, so use `i1 + 1`.
-            idx = pd.RangeIndex(start=i0, stop=i1, step=1)
-
-            v = v_in.reindex(idx, axis=0)
-            b = b_ca_units.reindex(idx, axis=0)
-
-        else:
-            v = v_in
-            b = b_ca_units
+        #        if auto_reindex:
+        #            idx = v_in.index.union(b_in.index)
+        #            i0 = idx.min()
+        #            i1 = idx.max() + 1  # `stop` excludes `i1`, so use `i1 + 1`.
+        #            idx = pd.RangeIndex(start=i0, stop=i1, step=1)
+        #
+        #            v = v_in.reindex(idx, axis=0)
+        #            b = b_ca_units.reindex(idx, axis=0)
+        #
+        #        else:
+        #            v = v_in
+        #            b = b_ca_units
 
         #         print("<set_data>",
         #               "<species>: %s" % species,
@@ -334,12 +348,11 @@ class AlfvenicTurbulence(base.Core):
         #               sep="\n",
         #               end="\n\n")
 
-        window = kwargs.pop("window", 30)
+        window = kwargs.pop("window", "15min")
         min_periods = kwargs.pop("min_periods", 5)
-        center = kwargs.pop("center", True)
 
-        data = pd.concat({"v": v, "b": b}, axis=1, names=["M"])
-        rolled = data.rolling(window, min_periods=min_periods, center=center, **kwargs)
+        data = pd.concat({"v": v_in, "b": b_ca_units}, axis=1, names=["M"])
+        rolled = data.rolling(window, min_periods=min_periods, **kwargs)
         agged = rolled.agg("mean")
         deltas = data.subtract(agged, axis=1)
 

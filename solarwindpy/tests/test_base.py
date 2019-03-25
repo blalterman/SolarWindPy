@@ -18,9 +18,12 @@ class TestData(object):
     @property
     def epoch(self):
         epoch = pd.Series(
+            # One date in early Wind mission and two dates outside. The long separation
+            # allows us to test Alfvenic Turbulence rolling to ensure NaNs pop up. The
+            # dates outside of the Wind mission help test for future compatibility.
             {
                 0: pd.to_datetime("1995-01-01 12:35:00"),
-                1: pd.to_datetime("2015-03-23 19:29:09"),
+                1: pd.to_datetime("2022-03-23 19:29:09"),
                 2: pd.to_datetime("2022-10-09 01:47:01.23456"),
             },
             name="epoch",
@@ -114,12 +117,7 @@ class SWEData(TestCase):
     @classmethod
     def setUpClass(cls):
         data = TestData()
-
-        # Hack integer based index for Alfvenic Trubuelnce tests
-        cls.data = data.plasma_data.reset_index(drop=True)
-
-        # cls.data = data.plasma_data
-
+        cls.data = data.plasma_data
         cls.set_object_testing()
 
 
