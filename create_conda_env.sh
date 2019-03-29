@@ -15,6 +15,7 @@ conda create -n $envname python=3 \
                          numexpr \
                          bottleneck \
                          matplotlib \
+                         pytables \
                          jupyter \
                          nbdime \
                          widgetsnbextension \
