@@ -11,7 +11,6 @@ black==19.3b0
 bleach==3.1.0
 Bottleneck==1.2.1
 cached-property==1.5.1
-cdflib==0.3.9
 certifi==2019.3.9
 cffi==1.12.2
 cfgv==1.6.0

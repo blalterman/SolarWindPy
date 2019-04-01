@@ -283,7 +283,15 @@ class Plasma(base.Base):
 
     @classmethod
     def load_from_file(
-        cls, fname, *species, dkey="FC", sckey="SC", akey="FC_AUX", **kwargs
+        cls,
+        fname,
+        *species,
+        dkey="FC",
+        sckey="SC",
+        akey="FC_AUX",
+        sc_frame=None,
+        sc_name=None,
+        **kwargs
     ):
         r"""
         Load data from an HDF5 file at `fname` and create a plasma.
@@ -334,15 +342,18 @@ class Plasma(base.Base):
         #         )
 
         if sckey:
-            raise NotImplementedError(
-                "Need to figure out how to set spacecraft name and origin in `save` method"
-            )
+            #             raise NotImplementedError(
+            #                 "Need to figure out how to set spacecraft name and origin in `save` method"
+            #             )
             sc = pd.read_hdf(fname, key=sckey)
             sc.names = ("M", "C")
 
-            name = None
-            frame = None
-            sc = spacecraft.Spacecraft(data, name, frame)
+            if (sc_name is None) or (sc_frame is None):
+                raise ValueError(
+                    "Must specify spacecraft name and frame\nname : %s\nframe: %s"
+                    % (sc_name, sc_frame)
+                )
+            sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
             #             if not data.index.equals(sc.index):
             #                 msg = "Spacecraft data index must equal plasma index"
