@@ -20,7 +20,7 @@ conda create -n $envname python=3 \
                          nbdime \
                          widgetsnbextension \
                          yaml \
-                         pyyaml \
+                         "pyyaml>=4.2b1" \
                          astropy \
                          setuptools \
                          twine \
