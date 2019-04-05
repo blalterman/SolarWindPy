@@ -14,11 +14,11 @@ conda create -n $envname python=3 \
                          numpy \
                          numexpr \
                          bottleneck \
-                         matplotlib \
+                         #matplotlib \
                          pytables \
-                         jupyter \
-                         nbdime \
-                         widgetsnbextension \
+                         #jupyter \
+                         #nbdime \
+                         #widgetsnbextension \
                          yaml \
                          "pyyaml>=4.2b1" \
                          astropy \

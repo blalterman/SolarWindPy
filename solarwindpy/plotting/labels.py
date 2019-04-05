@@ -312,7 +312,10 @@ class TeXlabel(object):
                 [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
             )
             .replace(",", "")
+            .replace(",{", "{")
             .replace("__", "_")
+            .replace(".", "")
+            .strip("_")
         )
 
         err = False
@@ -338,6 +341,7 @@ class TeXlabel(object):
             tex.replace("\; ()", "")  # noqa: W605
             .replace("\; {}", "")  # noqa: W605
             .replace("()", "")
+            .replace("_{}", "")
             .replace("{}", "")
             .replace(",}", "}")
         )
@@ -384,13 +388,12 @@ template   : %s
             tex = "{}/{}".format(tex0, tex1)
             with_units = r"$%s \; [%s]$" % (tex, units)
             path = Path("-OV-".join([path0, path1]))
-            #             path = Path(path0) / path1
 
             self.logger.debug(
                 r"""Joined ratio label
 TeX       : %s
 w/ units  : %s
-save path :
+save path : %s
        T0 : %s
        U0 : %s
        P0 : %s
@@ -399,6 +402,7 @@ save path :
        P1 : %s""",
                 tex,
                 with_units,
+                path,
                 tex0,
                 units0,
                 path0,

@@ -346,7 +346,7 @@ class Plasma(base.Base):
             #                 "Need to figure out how to set spacecraft name and origin in `save` method"
             #             )
             sc = pd.read_hdf(fname, key=sckey)
-            sc.names = ("M", "C")
+            sc.columns.names = ("M", "C")
 
             if (sc_name is None) or (sc_frame is None):
                 raise ValueError(
