@@ -32,5 +32,5 @@ conda create -n $envname python=3 \
                          sphinx_rtd_theme \
                          pre_commit
 
-conda activate $envname
+#conda activate $envname
 
