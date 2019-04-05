@@ -14,12 +14,14 @@ conda create -n $envname python=3 \
                          numpy \
                          numexpr \
                          bottleneck \
-                         #matplotlib \
+                         matplotlib \
                          pytables \
-                         #jupyter \
-                         #nbdime \
-                         #widgetsnbextension \
+                         jupyter \
+                         nbdime \
+                         widgetsnbextension \
+                         "mkl_fft=1.0.6" \
                          yaml \
+                         #pyyaml \
                          "pyyaml>=4.2b1" \
                          astropy \
                          setuptools \
@@ -27,7 +29,6 @@ conda create -n $envname python=3 \
                          wheel \
                          flake8 \
                          black \
-                         pre_commit \
                          sphinx \
                          sphinx_rtd_theme \
                          pre_commit
