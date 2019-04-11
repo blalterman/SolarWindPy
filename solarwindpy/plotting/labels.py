@@ -31,7 +31,17 @@ _all_species_re = re.compile(r"({})".format("|".join(_all_species_re)))
 _default_template_string = "{$M}_{{$C},{$S}}"
 
 
-vsw = r"$V_\mathrm{SW} \; [\mathrm{km \, s^{-1}}]$"
+class Vsw(object):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return r"$V_\mathrm{SW} \; [\mathrm{km \, s^{-1}}]$"
+
+    @property
+    def path(self):
+        return "vsw"
+
 
 _trans_measurement = {
     "pth": r"p",
@@ -334,7 +344,6 @@ class TeXlabel(object):
         tex = template.safe_substitute(**d)
         if err:
             tex = r"\sigma(%s)" % tex
-        with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
 
         # clean up empty parentheses
         tex = (
@@ -342,9 +351,12 @@ class TeXlabel(object):
             .replace("\; {}", "")  # noqa: W605
             .replace("()", "")
             .replace("_{}", "")
+            .replace("{},", "")
             .replace("{}", "")
             .replace(",}", "}")
         )
+
+        with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
 
         self.logger.debug(
             r"""Built TeX label

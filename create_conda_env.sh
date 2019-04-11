@@ -19,10 +19,10 @@ conda create -n $envname python=3 \
                          jupyter \
                          nbdime \
                          widgetsnbextension \
-                         "mkl_fft=1.0.6" \
+                         #"mkl_fft=1.0.6" \
                          yaml \
-                         #pyyaml \
-                         "pyyaml>=4.2b1" \
+                         pyyaml \
+                         #"pyyaml>=4.2b1" \
                          astropy \
                          setuptools \
                          twine \
