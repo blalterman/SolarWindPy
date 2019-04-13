@@ -43,6 +43,28 @@ class Vsw(object):
         return "vsw"
 
 
+class Distance2Sun(object):
+    def __init__(self, units):
+        self.set_units(units)
+
+    def __str__(self):
+        return r"$\mathrm{Propagation \; Distance} \; [\mathrm{%s}]$" % self.units
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def path(self):
+        return "distance2sun"
+
+    def set_units(self, units):
+        if units not in ("m", "km", r"R_\bigodot"):
+            raise NotImplementedError("Unrecognized distance2sun units %s" % units)
+
+        self._units = units
+
+
 _trans_measurement = {
     "pth": r"p",
     "beta": r"\beta",

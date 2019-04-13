@@ -73,7 +73,7 @@ class AggPlot(base.Base):
         assert isinstance(top, Number) or top is None
         self._clim = (bottom, top)
 
-    def calc_bins_intervals(self, nbins=101, precision=3):
+    def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
         Calculate histogram bins.
 
@@ -85,12 +85,15 @@ class AggPlot(base.Base):
             to calculate bins.
             If array-like, treat as bins.
 
-        precision: int
-            Precision at which to store intervals.
+        precision: int or None
+            Precision at which to store intervals. If None, default to 3.
         """
         data = self.data
         bins = {}
         intervals = {}
+
+        if precision is None:
+            precision = 3
 
         agg_axes = self._agg_axes
 
@@ -110,9 +113,9 @@ class AggPlot(base.Base):
 
         for k in self._agg_axes:
             b = nbins[k]
-            d = data.loc[
-                :, k
-            ].dropna()  # Numpy and Astropy don't like NaNs when calculating bins.
+            # Numpy and Astropy don't like NaNs when calculating bins.
+            # Infinities in bins (typically from log10(0)) also create problems.
+            d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
 
             if isinstance(b, str):
                 b = b.lower()
@@ -275,7 +278,9 @@ class Hist1D(AggPlot):
     set_path, set_data, agg, _format_axis, make_plot
     """
 
-    def __init__(self, x, y=None, logx=False, clip_data=True, nbins=101):
+    def __init__(
+        self, x, y=None, logx=False, clip_data=True, nbins=101, bin_precision=None
+    ):
         r"""
         Parameters
         ----------
@@ -295,7 +300,7 @@ class Hist1D(AggPlot):
         """
         super(Hist1D, self).__init__()
         self.set_data(x, y, logx, clip_data)
-        self.calc_bins_intervals(nbins=nbins)
+        self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self._labels = base.AxesLabels(x="x", y=r"$\mathrm{Count} \; [\#]$")
         self.set_path(None)
@@ -339,6 +344,9 @@ class Hist1D(AggPlot):
 
     def set_data(self, x, y, logx, clip):
         logx = bool(logx)
+        #         if logx:
+        #             x = np.abs(x)
+        #             x = np.log10(x[x > 0])
         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
 
         #         if clip:
@@ -455,11 +463,12 @@ class Hist2D(AggPlot):
         logy=False,
         clip_data=False,
         nbins=101,
+        bin_precision=None,
     ):
         super(Hist2D, self).__init__()
         self.set_data(x, y, z, logx, logy, clip_data)
         self.set_axnorm(axnorm)
-        self.calc_bins_intervals(nbins=nbins)
+        self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self._labels = base.AxesLabels(x="x", y="y", z=None)
         self.set_path(None)
