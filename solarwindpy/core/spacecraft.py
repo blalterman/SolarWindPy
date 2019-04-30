@@ -149,7 +149,9 @@ class Spacecraft(base.Base):
             change_origin = pd.Series(
                 [au, 0.0, 0.0], index=pd.Index(("x", "y", "z"), name="C")
             )
-            pos_SI = pos.multiply(sign_x).multiply(re).add(change_origin)
+            pos_SI = (
+                pos.multiply(sign_x, axis=1).multiply(re).add(change_origin, axis=1)
+            )
 
         elif frame == "HCI":
             rs = self.constants.misc.loc["Rs [m]"]

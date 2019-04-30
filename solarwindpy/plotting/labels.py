@@ -48,7 +48,7 @@ class Distance2Sun(object):
         self.set_units(units)
 
     def __str__(self):
-        return r"$\mathrm{Propagation \; Distance} \; [\mathrm{%s}]$" % self.units
+        return r"$\mathrm{Distance \; to \; Sun} \; [\mathrm{%s}]$" % self.units
 
     @property
     def units(self):
