@@ -523,7 +523,7 @@ class Plasma(base.Base):
             pd.concat(
                 {
                     "lin": data.describe(percentiles=pct),
-                    "log": data.pipe(np.log10).describe(percentiles=pct),
+                    "log": data.applymap(np.log10).describe(percentiles=pct),
                 },
                 axis=0,
             )
@@ -576,7 +576,7 @@ class Plasma(base.Base):
         )
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #          where there is none.
-        w = w.sum(axis=1, level="S", skipna=False).pipe(np.sqrt)
+        w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
         data = pd.concat([data, w], axis=1)

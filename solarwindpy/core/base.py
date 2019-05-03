@@ -163,8 +163,7 @@ class Core(ABC):
             raise ValueError(msg % self.__class__.__name__)
         return species
     
-    @staticmethod
-    def _verify_datetimeindex(data):
+    def _verify_datetimeindex(self, data):
         if not isinstance(data.index, pd.DatetimeIndex):
             self.logger.warning(r"""A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working.""")
             
