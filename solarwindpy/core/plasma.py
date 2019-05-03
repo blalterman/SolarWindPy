@@ -542,15 +542,18 @@ class Plasma(base.Base):
     def set_data(self, new):
         r"""Set the data and log statistics about it.
         """
-        assert isinstance(new, pd.DataFrame)
+        #         assert isinstance(new, pd.DataFrame)
+        super(Plasma, self).set_data(new)
+
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
         # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
-        assert isinstance(new.index, pd.DatetimeIndex)
-        if not new.index.is_monotonic:
-            self.logger.warning(
-                r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. It will also impact performance and prevent some Datetime-dependent tools from working."""
-            )
+
+        #         assert isinstance(new.index, pd.DatetimeIndex)
+        #         if not new.index.is_monotonic:
+        #             self.logger.warning(
+        #                 r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working."""
+        #             )
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
@@ -590,58 +593,10 @@ class Plasma(base.Base):
             )
         else:
             self.logger.info("no columns dropped from plasma")
-        #         self.logger.debug(
-        #             "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
-        #             aux.shape,
-        #             "\n    ".join([""] + [str(x) for x in aux.columns.values]),
-        #         )
 
         self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
 
         self._log_object_at_load(data, "plasma")
-
-    #         nan_frame = data.isna()
-    #         nan_info = pd.DataFrame(
-    #             {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
-    #         )
-    #         # Log to DEBUG if no NaNs. Otherwise log to INFO.
-    #         if nan_info.any().any():
-    #             self.logger.info(
-    #                 "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
-    #             )
-    #             #             self.logger.log(10 * int(1 + nan_info.any().any()),
-    #             #                             "plasma NaN info\n%s", nan_info.to_string())
-    #             self.logger.debug("plasma NaN info\n%s", nan_info.to_string())
-    #         else:
-    #             self.logger.debug("plasma does not contain NaNs")
-    #
-    #         pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-    #         stats = (
-    #             pd.concat(
-    #                 {
-    #                     "lin": data.describe(percentiles=pct),
-    #                     "log": data.pipe(np.log10).describe(percentiles=pct),
-    #                 },
-    #                 axis=0,
-    #             )
-    #             .unstack(level=0)
-    #             .sort_index(axis=0)
-    #             .sort_index(axis=1)
-    #             .T
-    #         )
-    #         self.logger.debug(
-    #             "plasma stats\n%s\n%s",
-    #             stats.loc[:, ["count", "mean", "std"]].to_string(),
-    #             stats.drop(["count", "mean", "std"], axis=1).to_string(),
-    #         )
-
-    #     @property
-    #     def gse(self):
-    #         r"""Spacecraft GSE location.
-    #         """
-    #         #         TODO: convert to `scloc` for use with Wind/SWE/FC and PSP/SWEAP/SPC
-    #         #               data. (20190216)
-    #         return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
 
     @property
     def bfield(self):

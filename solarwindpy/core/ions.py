@@ -73,7 +73,9 @@ class Ion(base.Base):
         self._species = species
 
     def set_data(self, data):
-        assert isinstance(data, pd.DataFrame)
+#         assert isinstance(data, pd.DataFrame)
+        super(Ion, self).set_data(data)
+        
         species = self.species
         # TODO: Implement the following optional species xs if necessary
         #       based on ways ions are later created in Plasma.

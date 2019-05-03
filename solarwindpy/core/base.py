@@ -162,6 +162,17 @@ class Core(ABC):
             msg = "You must specify a species to instantiate a %s."
             raise ValueError(msg % self.__class__.__name__)
         return species
+    
+    @staticmethod
+    def _verify_datetimeindex(data):
+        if not isinstance(data.index, pd.DatetimeIndex):
+            self.logger.warning(r"""A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working.""")
+            
+        if not data.index.is_monotonic:
+            self.logger.warning(
+                r"""A non-monotonic Index typicall indicates the presence of bad data. This will impact perfomance, especially if it is a DatetimeIndex."""
+            )
+
 
 
 class Base(Core):
@@ -190,47 +201,6 @@ class Base(Core):
         # print("attr: %s" % out)
         return out
 
-    #     def __eq__(self, other):
-    #         if id(self) == id(other):
-    #             return True
-    #         elif type(self) != type(other):
-    #             return False
-    #         else:
-    #             try:
-    #                 eq_data = (self.data == other.data)
-    #             except ValueError as e:
-    #                 #print(dir(e), flush=True)
-    #                 msg = "Can only compare identically-labeled DataFrame objects"
-    #                 if msg in str(e):
-    #                     return False
-    #                 else:
-    #                     raise e
-    #
-    #             while isinstance(eq_data, pd.core.generic.NDFrame):
-    #                 # TODO: remove while loop
-    #                 #       Something like a list comprehension might avoid
-    #                 #       run conditions upon inheritence and overriding.
-    #                 #       E.g:
-    #                 #           eq_data = [v.all() if v.ndim()>= 1 else v for v in a]
-    #                 #           np.all(eq_data)
-    #                 #       Contact Eshed Magali to figure out the details. (BLA 20180217)
-    #                 eq_data = eq_data.all()
-    #             if eq_data and (type(self) == type(other)):
-    #                 return True
-    #         return False
-    #
-    #     # TODO: Write tests for these then ensure they pass.
-    #     def __neq__(self, other):
-    #         return not self.__eq__(other)
-    #     def __lt__(self, other):
-    #         raise NotImplementedError
-    #     def __gt__(self, other):
-    #         raise NotImplementedError
-    #     def __le__(self, other):
-    #         raise NotImplementedError
-    #     def __ge__(self, other):
-    #         raise NotImplementedError
-
     @staticmethod
     def mi_tuples(x):
         names = ["M", "C", "S"]  # , "N"]
@@ -244,6 +214,8 @@ class Base(Core):
         if not data_exists:
             msg = "You can't set an object with empty data."
             raise ValueError(msg)
+        
+        self._verify_datetimeindex(new)
 
     def _clean_species_for_setting(self, *species):
         species = super(Base, self)._clean_species_for_setting(*species)
