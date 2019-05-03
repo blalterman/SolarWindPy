@@ -548,8 +548,8 @@ class Plasma(base.Base):
         assert new.columns.names == ["M", "C", "S"]
         assert isinstance(new.index, pd.DatetimeIndex)
         if not new.index.is_monotonic:
-            raise ValueError(
-                "A non-monotonic DatetimeIndex typically indicates the presence of bad data."
+            self.logger.warning(
+                r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. It will also impact performance and prevent some Datetime-dependent tools from working."""
             )
 
         # These are the only quantities we want in plasma.
