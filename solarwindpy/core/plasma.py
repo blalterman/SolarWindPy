@@ -542,18 +542,18 @@ class Plasma(base.Base):
     def set_data(self, new):
         r"""Set the data and log statistics about it.
         """
-#         assert isinstance(new, pd.DataFrame)
+        #         assert isinstance(new, pd.DataFrame)
         super(Plasma, self).set_data(new)
-    
+
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
         # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
-        
-#         assert isinstance(new.index, pd.DatetimeIndex)
-#         if not new.index.is_monotonic:
-#             self.logger.warning(
-#                 r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working."""
-#             )
+
+        #         assert isinstance(new.index, pd.DatetimeIndex)
+        #         if not new.index.is_monotonic:
+        #             self.logger.warning(
+        #                 r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working."""
+        #             )
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
