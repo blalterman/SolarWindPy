@@ -182,8 +182,11 @@ class Spacecraft(base.Base):
         self._name = name
 
     def set_data(self, data):
+        super(Spacecraft, self).set_data(data)
+        
         p = data.xs("pos", axis=1, level="M")
-        assert isinstance(p, pd.DataFrame)
+#         assert isinstance(p, pd.DataFrame)
+        
         p = p.loc[:, ["x", "y", "z"]]
         assert p.shape[1] == 3
 
