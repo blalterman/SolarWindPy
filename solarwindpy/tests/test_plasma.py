@@ -241,52 +241,19 @@ class PlasmaTestBase(ABC):
         self.assertEqual(self.object_testing.b, self.object_testing.bfield)
 
     def test_number_density(self):
-        # print_inline_debug_info = False
+        ot = self.object_testing
 
-        ions_ = self.data.n.xs("", axis=1, level="C")
-
-        for combo in self.species_combinations:
-            if len(combo) > 1:
-                tk = list(combo)
-                fcn = pdt.assert_frame_equal
-            else:
-                tk = combo[0]
-                fcn = pdt.assert_series_equal
-            n = ions_.loc[:, tk]
-
-            # if print_inline_debug_info:
-            #     print("<Test>",
-            #           "<species>: {}".format(combo),
-            #           "<n>", type(n), n,
-            #           "",
-            #           sep="\n")
-
-            fcn(n, self.object_testing.number_density(*combo))
-            fcn(n, self.object_testing.n(*combo))
-            fcn(
-                self.object_testing.number_density(*combo),
-                self.object_testing.n(*combo),
-            )
-
-    def test_mass_density(self):
         # print_inline_debug_info = False
         ions_ = pd.concat(
-            {s: self.object_testing.ions[s].mass_density for s in self.stuple},
-            axis=1,
-            names=["S"],
+            {s: ot.ions[s].number_density for s in self.stuple}, axis=1, names=["S"]
         )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
         sum_species = self.species
 
-        pdt.assert_series_equal(
-            total_ions, self.object_testing.mass_density(sum_species)
-        )
-        pdt.assert_series_equal(total_ions, self.object_testing.rho(sum_species))
-        pdt.assert_series_equal(
-            self.object_testing.rho(sum_species),
-            self.object_testing.mass_density(sum_species),
-        )
+        pdt.assert_series_equal(total_ions, ot.number_density(sum_species))
+        pdt.assert_series_equal(total_ions, ot.n(sum_species))
+        pdt.assert_series_equal(ot.n(sum_species), ot.number_density(sum_species))
 
         # print("", *self.species_combinations, sep="\n")
         # Check that plasma returns each ion species independently.
@@ -297,28 +264,70 @@ class PlasmaTestBase(ABC):
             #     print(s)
             #     print("<Ion>", type(this_ion))
             #     print(this_ion)
-            #     print("<Plasma>", type(self.object_testing.mass_density(*s)))
-            #     print(self.object_testing.mass_density(*s))
+            #     print("<Plasma>", type(ot.number_density(*s)))
+            #     print(ot.number_density(*s))
 
             if isinstance(this_ion, pd.Series):
                 fcn = pdt.assert_series_equal
             else:
                 fcn = pdt.assert_frame_equal
 
-            fcn(this_ion, self.object_testing.mass_density(*s))
-            fcn(this_ion, self.object_testing.rho(*s))
-            fcn(self.object_testing.rho(*s), self.object_testing.mass_density(*s))
+            fcn(this_ion, ot.number_density(*s))
+            fcn(this_ion, ot.n(*s))
+            fcn(ot.n(*s), ot.number_density(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1)
                 this_ion.name = "+".join(sorted(s))
+                pdt.assert_series_equal(this_ion, ot.number_density("+".join(s)))
+                pdt.assert_series_equal(this_ion, ot.n("+".join(s)))
                 pdt.assert_series_equal(
-                    this_ion, self.object_testing.mass_density("+".join(s))
+                    ot.number_density("+".join(s)), ot.n("+".join(s))
                 )
-                pdt.assert_series_equal(this_ion, self.object_testing.rho("+".join(s)))
+
+    def test_mass_density(self):
+        ot = self.object_testing
+
+        # print_inline_debug_info = False
+        ions_ = pd.concat(
+            {s: ot.ions[s].mass_density for s in self.stuple}, axis=1, names=["S"]
+        )
+        total_ions = ions_.sum(axis=1)
+        total_ions.name = "+".join(self.stuple)
+        sum_species = self.species
+
+        pdt.assert_series_equal(total_ions, ot.mass_density(sum_species))
+        pdt.assert_series_equal(total_ions, ot.rho(sum_species))
+        pdt.assert_series_equal(ot.rho(sum_species), ot.mass_density(sum_species))
+
+        # print("", *self.species_combinations, sep="\n")
+        # Check that plasma returns each ion species independently.
+        for s in self.species_combinations:
+            this_ion = ions_.loc[:, s[0] if len(s) == 1 else s]
+
+            # if print_inline_debug_info:
+            #     print(s)
+            #     print("<Ion>", type(this_ion))
+            #     print(this_ion)
+            #     print("<Plasma>", type(ot.mass_density(*s)))
+            #     print(ot.mass_density(*s))
+
+            if isinstance(this_ion, pd.Series):
+                fcn = pdt.assert_series_equal
+            else:
+                fcn = pdt.assert_frame_equal
+
+            fcn(this_ion, ot.mass_density(*s))
+            fcn(this_ion, ot.rho(*s))
+            fcn(ot.rho(*s), ot.mass_density(*s))
+
+            if len(s) > 1:
+                this_ion = this_ion.sum(axis=1)
+                this_ion.name = "+".join(sorted(s))
+                pdt.assert_series_equal(this_ion, ot.mass_density("+".join(s)))
+                pdt.assert_series_equal(this_ion, ot.rho("+".join(s)))
                 pdt.assert_series_equal(
-                    self.object_testing.mass_density("+".join(s)),
-                    self.object_testing.rho("+".join(s)),
+                    ot.mass_density("+".join(s)), ot.rho("+".join(s))
                 )
 
     def test_pth(self):

@@ -613,29 +613,30 @@ class Plasma(base.Base):
 
     def number_density(self, *species):
         r"""
-        Ion number densities.
-        """
+        Get the plasma number densities.
 
-        # TODO: conform API to match sum convention for other methods.
+        Parameters
+        ----------
+        species: str
+            Each species is a string. If only one string is passed, it can
+            contain "+". If this is the case, the species are summed over and
+            a pd.Series is returned. Otherwise, the individual quantities are
+            returned as a pd.DataFrame.
+
+        Returns
+        -------
+        n: pd.Series or pd.DataFrame
+            See Parameters for more info.
+        """
         slist = self._chk_species(*species)
-        n = self.data.n
-        # print("<Module>",
-        #      "<n>",
-        #      type(n),
-        #      n,
-        #      sep="\n")
-        if "C" in n.columns.names:
-            n = n.xs("", axis=1, level="C")
-        out = n.loc[:, slist[0] if len(slist) == 1 else slist]
-        # print(
-        #      "<xs(c)>",
-        #      type(n),
-        #      n,
-        #      "<out>",
-        #      type(out),
-        #      out,
-        #      "", sep="\n")
-        return out
+
+        n = {s: self.ions.loc[s].n for s in slist}
+        n = pd.concat(n, axis=1, names=["S"]).sort_index(axis=1)
+
+        if len(species) == 1:
+            n = n.sum(axis=1)
+            n.name = species[0]
+        return n
 
     def n(self, *species):
         r"""
