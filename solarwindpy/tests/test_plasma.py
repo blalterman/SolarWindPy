@@ -31,6 +31,7 @@ from solarwindpy import vector
 from solarwindpy import ions
 from solarwindpy import plasma
 from solarwindpy import spacecraft
+from solarwindpy import alfvenic_turbulence
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -1663,7 +1664,7 @@ class PlasmaTestBase(ABC):
         pdt.assert_index_equal(epoch, ot.epoch)
         pdt.assert_index_equal(ot.epoch, ot.data.index)
 
-    @unittest.skip("Code under dev. Not ready to test.")
+    # @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
         species = self.species
         slist = species.split("+")
@@ -1678,11 +1679,17 @@ class PlasmaTestBase(ABC):
         rtot = r.sum(axis=1)
 
         bat = self.object_testing.build_alfvenic_turbulence
-        AlfvenicTurbulence = alfvenic_turbulence.AlfvenicTurbulence  # noqa: F821
-        if ns == 1:  # noqa: F821
+        AlfvenicTurbulence = alfvenic_turbulence.AlfvenicTurbulence
+
+        test_window = "365d"
+        test_periods = 1
+        if ns == 1:
             v = v.xs(species, axis=1, level="S")
-            alf_turb = AlfvenicTurbulence(v, b, rtot, species)
-            self.assertEqual(alf_turb, bat(species))
+            alf_turb = AlfvenicTurbulence(
+                v, b, rtot, species, window=test_window, min_periods=test_periods
+            )
+            built = bat(species, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
         elif ns == 2:
 
@@ -1692,8 +1699,11 @@ class PlasmaTestBase(ABC):
                 .sum(axis=1, level="C")
                 .divide(rtot, axis=0)
             )
-            alf_turb = AlfvenicTurbulence(vcom, b, rtot, species)
-            self.assertEqual(alf_turb, bat(species))
+            alf_turb = AlfvenicTurbulence(
+                vcom, b, rtot, species, window=test_window, min_periods=test_periods
+            )
+            built = bat(species, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             s0, s1 = species.split("+")
             v0 = v.xs(s0, axis=1, level="S")
@@ -1703,27 +1713,39 @@ class PlasmaTestBase(ABC):
             dv = v0.subtract(v1, axis=1, level="C")
             s0s1 = ",".join([s0, s1])
             r1 = r.xs(s1, axis=1)
-            alf_turb = AlfvenicTurbulence(dv, b, r1, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, r1, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s1,s0 case.
             dv = v1.subtract(v0, axis=1, level="C")
             s0s1 = ",".join([s1, s0])
             r0 = r.xs(s0, axis=1)
-            alf_turb = AlfvenicTurbulence(dv, b, r0, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, r0, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s0,s0+s1 case.
             dv = v0.subtract(vcom, axis=1)
             s0s1 = ",".join([s0, species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s1,s0+s1 case.
             dv = v1.subtract(vcom, axis=1)
             s0s1 = ",".join([s1, species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
         elif ns == 3:
 
@@ -1733,8 +1755,11 @@ class PlasmaTestBase(ABC):
                 .sum(axis=1, level="C")
                 .divide(rtot, axis=0)
             )
-            alf_turb = AlfvenicTurbulence(vcom, b, rtot, species)
-            self.assertEqual(alf_turb, bat(species))
+            alf_turb = AlfvenicTurbulence(
+                vcom, b, rtot, species, window=test_window, min_periods=test_periods
+            )
+            built = bat(species, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             s0, s1, s2 = species.split("+")
             v0 = v.xs(s0, axis=1, level="S")
@@ -1744,20 +1769,29 @@ class PlasmaTestBase(ABC):
             # Check dv s0,stot case.
             dv = v0.subtract(vcom, axis=1)
             s0s1 = ",".join([s0, species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s1,stot case.
             dv = v1.subtract(vcom, axis=1)
             s0s1 = ",".join([s1, species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s2,stot case.
             dv = v2.subtract(vcom, axis=1)
             s0s1 = ",".join([s2, species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s0+s1,stot case.
             tks = [s0, s1]
@@ -1770,8 +1804,11 @@ class PlasmaTestBase(ABC):
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s1+s2,stot case.
             tks = [s1, s2]
@@ -1784,8 +1821,11 @@ class PlasmaTestBase(ABC):
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check dv s0+s2,stot case.
             tks = [s0, s2]
@@ -1798,8 +1838,11 @@ class PlasmaTestBase(ABC):
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
-            alf_turb = AlfvenicTurbulence(dv, b, rtot, s0s1)
-            self.assertEqual(alf_turb, bat(s0s1))
+            alf_turb = AlfvenicTurbulence(
+                dv, b, rtot, s0s1, window=test_window, min_periods=test_periods
+            )
+            built = bat(s0s1, window=test_window, min_periods=test_periods)
+            self.assertEqual(alf_turb, built)
 
             # Check bad species
             for bad_species in ("a,p1,p2", "a+p1,p1+p2,a+p2"):

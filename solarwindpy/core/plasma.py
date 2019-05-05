@@ -43,13 +43,13 @@ try:
     from . import vector
     from . import ions
     from . import spacecraft
-#    from . import alfvenic_turbulence as alf_turb
+    from . import alfvenic_turbulence as alf_turb
 except ImportError:
     import base
     import vector
     import ions
     import spacecraft
-#    import alfvenic_turbulence as alf_turb
+    import alfvenic_turbulence as alf_turb
 
 
 class Plasma(base.Base):
@@ -283,7 +283,15 @@ class Plasma(base.Base):
 
     @classmethod
     def load_from_file(
-        cls, fname, *species, dkey="FC", sckey="SC", akey="FC_AUX", **kwargs
+        cls,
+        fname,
+        *species,
+        dkey="FC",
+        sckey="SC",
+        akey="FC_AUX",
+        sc_frame=None,
+        sc_name=None,
+        **kwargs
     ):
         r"""
         Load data from an HDF5 file at `fname` and create a plasma.
@@ -334,15 +342,18 @@ class Plasma(base.Base):
         #         )
 
         if sckey:
-            raise NotImplementedError(
-                "Need to figure out how to set spacecraft name and origin in `save` method"
-            )
+            #             raise NotImplementedError(
+            #                 "Need to figure out how to set spacecraft name and origin in `save` method"
+            #             )
             sc = pd.read_hdf(fname, key=sckey)
-            sc.names = ("M", "C")
+            sc.columns.names = ("M", "C")
 
-            name = None
-            frame = None
-            sc = spacecraft.Spacecraft(data, name, frame)
+            if (sc_name is None) or (sc_frame is None):
+                raise ValueError(
+                    "Must specify spacecraft name and frame\nname : %s\nframe: %s"
+                    % (sc_name, sc_frame)
+                )
+            sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
             #             if not data.index.equals(sc.index):
             #                 msg = "Spacecraft data index must equal plasma index"
@@ -531,15 +542,18 @@ class Plasma(base.Base):
     def set_data(self, new):
         r"""Set the data and log statistics about it.
         """
-        assert isinstance(new, pd.DataFrame)
+        #         assert isinstance(new, pd.DataFrame)
+        super(Plasma, self).set_data(new)
+
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
         # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
-        assert isinstance(new.index, pd.DatetimeIndex)
-        if not new.index.is_monotonic:
-            raise ValueError(
-                "A non-monotonic DatetimeIndex typically indicates the presence of bad data."
-            )
+
+        #         assert isinstance(new.index, pd.DatetimeIndex)
+        #         if not new.index.is_monotonic:
+        #             self.logger.warning(
+        #                 r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working."""
+        #             )
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
@@ -579,58 +593,10 @@ class Plasma(base.Base):
             )
         else:
             self.logger.info("no columns dropped from plasma")
-        #         self.logger.debug(
-        #             "auxiliary data added to plasma\nshape: %s\ncolumns: %s",
-        #             aux.shape,
-        #             "\n    ".join([""] + [str(x) for x in aux.columns.values]),
-        #         )
 
         self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
 
         self._log_object_at_load(data, "plasma")
-
-    #         nan_frame = data.isna()
-    #         nan_info = pd.DataFrame(
-    #             {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
-    #         )
-    #         # Log to DEBUG if no NaNs. Otherwise log to INFO.
-    #         if nan_info.any().any():
-    #             self.logger.info(
-    #                 "%.0f spectra contain at least one NaN", nan_info.any(axis=1).sum()
-    #             )
-    #             #             self.logger.log(10 * int(1 + nan_info.any().any()),
-    #             #                             "plasma NaN info\n%s", nan_info.to_string())
-    #             self.logger.debug("plasma NaN info\n%s", nan_info.to_string())
-    #         else:
-    #             self.logger.debug("plasma does not contain NaNs")
-    #
-    #         pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-    #         stats = (
-    #             pd.concat(
-    #                 {
-    #                     "lin": data.describe(percentiles=pct),
-    #                     "log": data.pipe(np.log10).describe(percentiles=pct),
-    #                 },
-    #                 axis=0,
-    #             )
-    #             .unstack(level=0)
-    #             .sort_index(axis=0)
-    #             .sort_index(axis=1)
-    #             .T
-    #         )
-    #         self.logger.debug(
-    #             "plasma stats\n%s\n%s",
-    #             stats.loc[:, ["count", "mean", "std"]].to_string(),
-    #             stats.drop(["count", "mean", "std"], axis=1).to_string(),
-    #         )
-
-    #     @property
-    #     def gse(self):
-    #         r"""Spacecraft GSE location.
-    #         """
-    #         #         TODO: convert to `scloc` for use with Wind/SWE/FC and PSP/SWEAP/SPC
-    #         #               data. (20190216)
-    #         return vector.Vector(self.data.gse.xs("", axis=1, level="S"))
 
     @property
     def bfield(self):
@@ -1681,8 +1647,8 @@ class Plasma(base.Base):
     # def w(self):
     #     return self._w
 
-    def build_alfvenic_turbulence(self, species, auto_reindex=True):
-        raise NotImplementedError("Still working on module dev")
+    def build_alfvenic_turbulence(self, species, **kwargs):
+        # raise NotImplementedError("Still working on module dev")
         r"""Create an Alfvenic turbulence instance.
 
         Parameters
@@ -1694,19 +1660,19 @@ class Plasma(base.Base):
             is a valid identifier. Here, the 2nd species is treated as the
             mass density passed to `AlfvenTurbulence` and used for converting
             magentic field in Alfven units.
-        auto_reindex: bool
-            Passed to `AlfvenicTurbulence`. If True, reindex the input data
-            such that it is a continuous, monotonic, and increasing
-            `pd.Int64Index` so that `window` and `min_periods` rolling
-            aggregation on spectrum number is roughly analagous to time.
+        kwargs:
+            Passed to `rolling` method in
+            :py:class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`
+            to specify window size.
         """
         species_ = species.split(",")
 
-        auto_reindex = bool(auto_reindex)
         b = self.bfield.cartesian
 
         if len(species_) == 1:
-            slist = self._chk_species(species_[0])  # noqa: F841
+            # Don't hold onto `_chk_species` return because we need `velocity` and
+            # `mass_density` to process center-of-mass species. (20190325)
+            self._chk_species(species_[0])
             v = self.velocity(species)
             r = self.mass_density(species)
 
@@ -1723,8 +1689,8 @@ class Plasma(base.Base):
             msg = "`species` can only contain at most 1 comma\nspecies: %s"
             raise ValueError(msg % species)
 
-        turb = alf_turb.AlfvenicTurbulence(  # noqa: F821
-            v, b, r, species, auto_reindex=auto_reindex
-        )
+        v = v.cartesian
+
+        turb = alf_turb.AlfvenicTurbulence(v, b, r, species, **kwargs)
 
         return turb

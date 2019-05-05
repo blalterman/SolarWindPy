@@ -31,7 +31,39 @@ _all_species_re = re.compile(r"({})".format("|".join(_all_species_re)))
 _default_template_string = "{$M}_{{$C},{$S}}"
 
 
-vsw = r"$V_\mathrm{SW} \; [\mathrm{km \, s^{-1}}]$"
+class Vsw(object):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return r"$V_\mathrm{SW} \; [\mathrm{km \, s^{-1}}]$"
+
+    @property
+    def path(self):
+        return "vsw"
+
+
+class Distance2Sun(object):
+    def __init__(self, units):
+        self.set_units(units)
+
+    def __str__(self):
+        return r"$\mathrm{Distance \; to \; Sun} \; [\mathrm{%s}]$" % self.units
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def path(self):
+        return "distance2sun"
+
+    def set_units(self, units):
+        if units not in ("m", "km", r"R_\bigodot"):
+            raise NotImplementedError("Unrecognized distance2sun units %s" % units)
+
+        self._units = units
+
 
 _trans_measurement = {
     "pth": r"p",
@@ -312,7 +344,10 @@ class TeXlabel(object):
                 [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
             )
             .replace(",", "")
+            .replace(",{", "{")
             .replace("__", "_")
+            .replace(".", "")
+            .strip("_")
         )
 
         err = False
@@ -331,16 +366,19 @@ class TeXlabel(object):
         tex = template.safe_substitute(**d)
         if err:
             tex = r"\sigma(%s)" % tex
-        with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
 
         # clean up empty parentheses
         tex = (
             tex.replace("\; ()", "")  # noqa: W605
             .replace("\; {}", "")  # noqa: W605
             .replace("()", "")
+            .replace("_{}", "")
+            .replace("{},", "")
             .replace("{}", "")
             .replace(",}", "}")
         )
+
+        with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
 
         self.logger.debug(
             r"""Built TeX label
@@ -384,13 +422,12 @@ template   : %s
             tex = "{}/{}".format(tex0, tex1)
             with_units = r"$%s \; [%s]$" % (tex, units)
             path = Path("-OV-".join([path0, path1]))
-            #             path = Path(path0) / path1
 
             self.logger.debug(
                 r"""Joined ratio label
 TeX       : %s
 w/ units  : %s
-save path :
+save path : %s
        T0 : %s
        U0 : %s
        P0 : %s
@@ -399,6 +436,7 @@ save path :
        P1 : %s""",
                 tex,
                 with_units,
+                path,
                 tex0,
                 units0,
                 path0,

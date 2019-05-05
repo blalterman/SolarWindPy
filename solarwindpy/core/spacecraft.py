@@ -149,7 +149,9 @@ class Spacecraft(base.Base):
             change_origin = pd.Series(
                 [au, 0.0, 0.0], index=pd.Index(("x", "y", "z"), name="C")
             )
-            pos_SI = pos.multiply(sign_x).multiply(re).add(change_origin)
+            pos_SI = (
+                pos.multiply(sign_x, axis=1).multiply(re).add(change_origin, axis=1)
+            )
 
         elif frame == "HCI":
             rs = self.constants.misc.loc["Rs [m]"]
@@ -182,8 +184,11 @@ class Spacecraft(base.Base):
         self._name = name
 
     def set_data(self, data):
+        super(Spacecraft, self).set_data(data)
+        
         p = data.xs("pos", axis=1, level="M")
-        assert isinstance(p, pd.DataFrame)
+#         assert isinstance(p, pd.DataFrame)
+        
         p = p.loc[:, ["x", "y", "z"]]
         assert p.shape[1] == 3
 
