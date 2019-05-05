@@ -1570,7 +1570,7 @@ class Plasma(base.Base):
 
         ve = niqivi.divide(ne, axis=0)
 
-        wp = self.w.scalar.loc[:, tkw]
+        wp = self.w(tkw).loc[:, "scalar"]
         nrat = self.number_density(tkw).divide(ne, axis=0)
         mpme = self.constants.m_in_mp["e"] ** -1
         we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
