@@ -672,10 +672,43 @@ class Plasma(base.Base):
         return rho
 
     def rho(self, *species):
-        r"""
-        Shortcut to :py:meth:`mass_density` method.
+        r"""Shortcut to :py:meth:`mass_density`.
         """
         return self.mass_density(*species)
+
+    def thermal_speed(self, *species):
+        r"""Get the thermal speed.
+
+        Parameters
+        ----------
+        species: str
+            Each species is a string. A total species ("s0+s1+...") cannot be passed
+            because the result is physically amibguous.
+
+        Returns
+        -------
+        w: pd.Series or pd.DataFrame
+            See Parameters for more info.
+        """
+        if np.any(["+" in s for s in species]):
+            raise NotImplementedError(
+                "The result of a total species thermal speed is physically ambiguous"
+            )
+
+        slist = self._chk_species(*species)
+        w = {s: self.ions.loc[s].thermal_speed.data for s in slist}
+        w = pd.concat(w, axis=1, names=["S"]).sort_index(axis=1)
+        w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+
+        if len(species) == 1:
+            w = w.sum(axis=1, level="C")
+
+        return w
+
+    def w(self, *species):
+        r"""Shortcut to :py:meth:`thermal_speed`.
+        """
+        return self.thermal_speed(*species)
 
     def pth(self, *species):
         r"""
@@ -1643,10 +1676,6 @@ class Plasma(base.Base):
         Shortcut to :py:meth:`heat_flux`.
         """
         return self.heat_flux(*species)
-
-    # @property
-    # def w(self):
-    #     return self._w
 
     def build_alfvenic_turbulence(self, species, **kwargs):
         # raise NotImplementedError("Still working on module dev")
