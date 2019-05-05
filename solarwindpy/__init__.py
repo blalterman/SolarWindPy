@@ -21,6 +21,7 @@ from .core import (
 )
 from . import core, plotting, solar_activity, tools
 
+Plasma = core.plasma.Plasma
 pp = plotting
 sa = solar_activity
 sc = spacecraft
