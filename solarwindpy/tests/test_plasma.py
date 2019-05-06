@@ -330,6 +330,33 @@ class PlasmaTestBase(ABC):
                     ot.mass_density("+".join(s)), ot.rho("+".join(s))
                 )
 
+    def test_thermal_speed(self):
+        ot = self.object_testing
+        ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
+        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+
+        for s in self.species_combinations:
+            if len(s) == 1:
+                this_ion = ions_.xs(s[0], axis=1, level="S")
+                pdt.assert_frame_equal(this_ion, ot.thermal_speed(*s))
+                pdt.assert_frame_equal(ot.thermal_speed(*s), ot.w(*s))
+                pdt.assert_frame_equal(ot.thermal_speed(s[0]), ot.w(*s))
+
+            else:
+                these_ions = ions_.loc[:, pd.IndexSlice[:, s]]
+                pdt.assert_frame_equal(these_ions, ot.thermal_speed(*s))
+                pdt.assert_frame_equal(these_ions, ot.w(*s))
+                pdt.assert_frame_equal(ot.thermal_speed(*s), ot.w(*s))
+
+                msg = "The result of a total species thermal speed is physically ambiguous"
+                with self.assertRaisesRegex(NotImplementedError, msg):
+                    ot.thermal_speed("+".join(s))
+                with self.assertRaisesRegex(NotImplementedError, msg):
+                    ot.w("+".join(s))
+                with self.assertRaises(ValueError):
+                    ot.thermal_speed(",".join(s))
+
     def test_pth(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
