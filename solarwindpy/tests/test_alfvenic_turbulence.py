@@ -46,7 +46,9 @@ from abc import ABC, abstractproperty
 from scipy import constants
 from scipy.constants import physical_constants
 
-import test_base as base
+# import test_base as base
+from solarwindpy.tests import test_base as base
+
 from solarwindpy import alfvenic_turbulence as turb
 
 pd.set_option("mode.chained_assignment", "raise")

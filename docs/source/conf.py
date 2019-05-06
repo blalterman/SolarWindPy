@@ -69,7 +69,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-# exclude_patterns = ["solarwindpy.tests*"]
+exclude_patterns = ["solarwindpy.tests*"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -174,8 +174,7 @@ texinfo_documents = [
         "SolarWindPy Documentation",
         author,
         "SolarWindPy",
-        "One line description of project.",
-        "Miscellaneous",
+        "Data analysis tools for solar wind thermal plasma measurements.",
     )
 ]
 
