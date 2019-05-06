@@ -32,7 +32,7 @@ class AlfvenicTurbulence(base.Core):
     variables following Section B.3.1 in [1].
 
     Lloyd Woodham helped me define these calculations at the 2018 AGU Fall
-    Meeting and overcome deficiencies in [1]'s explanation.
+    Meeting and understand [1].
 
     Parameters
     ----------
