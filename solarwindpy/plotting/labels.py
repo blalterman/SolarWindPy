@@ -59,6 +59,9 @@ class Distance2Sun(object):
         return "distance2sun"
 
     def set_units(self, units):
+        trans = {"Rs": r"R_\bigodot", "Re": r"R_\oplus"}
+        units = trans.get(units, units)
+
         if units not in ("m", "km", r"R_\bigodot"):
             raise NotImplementedError("Unrecognized distance2sun units %s" % units)
 

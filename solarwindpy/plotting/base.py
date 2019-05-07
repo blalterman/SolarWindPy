@@ -110,17 +110,23 @@ class Base(ABC):
             try:
                 x = self.labels.x.path
             except AttributeError:
-                x = "x"
+                x = self.labels.x
+                if not (isinstance(x, str) and x != "None"):
+                    x = "x"
 
             try:
                 y = self.labels.y.path
             except AttributeError:
-                y = "y"
+                y = self.labels.y
+                if not (isinstance(y, str) and y != "None"):
+                    y = "y"
 
             try:
                 z = self.labels.z.path
             except AttributeError:
-                z = "z"
+                z = self.labels.z
+                if not (isinstance(z, str) and z != "None"):
+                    z = "z"
 
             path = Path(self.__class__.__name__)
 
