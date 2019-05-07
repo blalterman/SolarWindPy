@@ -14,7 +14,8 @@ from unittest import TestCase
 from abc import ABC, abstractproperty
 from scipy import constants
 
-import test_base as base
+# import test_base as base
+from solarwindpy.tests import test_base as base
 
 from solarwindpy import vector
 from solarwindpy import tensor

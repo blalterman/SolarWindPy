@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """The Plasma class that contains all Ions, magnetic field, and spacecraft information.
 
-Propodes Updates
+Propoded Updates
 ^^^^^^^^^^^^^^^^
 -It would be cute if one could call `plasma % a`, i.e. plasma mod
  an ion and return a new plasma without that ion in it. Well, either
@@ -332,7 +332,7 @@ class Plasma(base.Base):
             **kwargs
         )
 
-        plasma.logger.info(
+        plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
         )
 
@@ -360,7 +360,7 @@ class Plasma(base.Base):
             #                 raise ValueError(msg)
 
             plasma.set_spacecraft(sc)
-            plasma.logger.info(
+            plasma.logger.warning(
                 "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
             )
 
@@ -373,7 +373,7 @@ class Plasma(base.Base):
             #                 raise ValueError(msg)
 
             plasma.set_auxiliary_data(aux)
-            plasma.logger.info(
+            plasma.logger.warning(
                 "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
             )
         #             plasma._auxiliary_data = aux
@@ -523,7 +523,7 @@ class Plasma(base.Base):
             pd.concat(
                 {
                     "lin": data.describe(percentiles=pct),
-                    "log": data.pipe(np.log10).describe(percentiles=pct),
+                    "log": data.applymap(np.log10).describe(percentiles=pct),
                 },
                 axis=0,
             )
@@ -576,7 +576,7 @@ class Plasma(base.Base):
         )
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #          where there is none.
-        w = w.sum(axis=1, level="S", skipna=False).pipe(np.sqrt)
+        w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
         data = pd.concat([data, w], axis=1)
@@ -613,29 +613,30 @@ class Plasma(base.Base):
 
     def number_density(self, *species):
         r"""
-        Ion number densities.
-        """
+        Get the plasma number densities.
 
-        # TODO: conform API to match sum convention for other methods.
+        Parameters
+        ----------
+        species: str
+            Each species is a string. If only one string is passed, it can
+            contain "+". If this is the case, the species are summed over and
+            a pd.Series is returned. Otherwise, the individual quantities are
+            returned as a pd.DataFrame.
+
+        Returns
+        -------
+        n: pd.Series or pd.DataFrame
+            See Parameters for more info.
+        """
         slist = self._chk_species(*species)
-        n = self.data.n
-        # print("<Module>",
-        #      "<n>",
-        #      type(n),
-        #      n,
-        #      sep="\n")
-        if "C" in n.columns.names:
-            n = n.xs("", axis=1, level="C")
-        out = n.loc[:, slist[0] if len(slist) == 1 else slist]
-        # print(
-        #      "<xs(c)>",
-        #      type(n),
-        #      n,
-        #      "<out>",
-        #      type(out),
-        #      out,
-        #      "", sep="\n")
-        return out
+
+        n = {s: self.ions.loc[s].n for s in slist}
+        n = pd.concat(n, axis=1, names=["S"]).sort_index(axis=1)
+
+        if len(species) == 1:
+            n = n.sum(axis=1)
+            n.name = species[0]
+        return n
 
     def n(self, *species):
         r"""
@@ -671,10 +672,43 @@ class Plasma(base.Base):
         return rho
 
     def rho(self, *species):
-        r"""
-        Shortcut to :py:meth:`mass_density` method.
+        r"""Shortcut to :py:meth:`mass_density`.
         """
         return self.mass_density(*species)
+
+    def thermal_speed(self, *species):
+        r"""Get the thermal speed.
+
+        Parameters
+        ----------
+        species: str
+            Each species is a string. A total species ("s0+s1+...") cannot be passed
+            because the result is physically amibguous.
+
+        Returns
+        -------
+        w: pd.Series or pd.DataFrame
+            See Parameters for more info.
+        """
+        if np.any(["+" in s for s in species]):
+            raise NotImplementedError(
+                "The result of a total species thermal speed is physically ambiguous"
+            )
+
+        slist = self._chk_species(*species)
+        w = {s: self.ions.loc[s].thermal_speed.data for s in slist}
+        w = pd.concat(w, axis=1, names=["S"]).sort_index(axis=1)
+        w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+
+        if len(species) == 1:
+            w = w.sum(axis=1, level="C")
+
+        return w
+
+    def w(self, *species):
+        r"""Shortcut to :py:meth:`thermal_speed`.
+        """
+        return self.thermal_speed(*species)
 
     def pth(self, *species):
         r"""
@@ -1536,7 +1570,7 @@ class Plasma(base.Base):
 
         ve = niqivi.divide(ne, axis=0)
 
-        wp = self.w.scalar.loc[:, tkw]
+        wp = self.w(tkw).loc[:, "scalar"]
         nrat = self.number_density(tkw).divide(ne, axis=0)
         mpme = self.constants.m_in_mp["e"] ** -1
         we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
@@ -1642,10 +1676,6 @@ class Plasma(base.Base):
         Shortcut to :py:meth:`heat_flux`.
         """
         return self.heat_flux(*species)
-
-    # @property
-    # def w(self):
-    #     return self._w
 
     def build_alfvenic_turbulence(self, species, **kwargs):
         # raise NotImplementedError("Still working on module dev")

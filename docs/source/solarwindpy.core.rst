@@ -4,6 +4,14 @@ solarwindpy.core package
 Submodules
 ----------
 
+solarwindpy.core.alfvenic\_turbulence module
+--------------------------------------------
+
+.. automodule:: solarwindpy.core.alfvenic_turbulence
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 solarwindpy.core.base module
 ----------------------------
 
@@ -24,6 +32,14 @@ solarwindpy.core.plasma module
 ------------------------------
 
 .. automodule:: solarwindpy.core.plasma
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+solarwindpy.core.spacecraft module
+----------------------------------
+
+.. automodule:: solarwindpy.core.spacecraft
     :members:
     :undoc-members:
     :show-inheritance:

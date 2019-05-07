@@ -10,7 +10,8 @@ from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
 
-import test_base as base
+# import test_base as base
+from solarwindpy.tests import test_base as base
 
 from solarwindpy import vector
 from solarwindpy import spacecraft

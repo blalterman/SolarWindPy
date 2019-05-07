@@ -12,6 +12,14 @@ solarwindpy.tests.run\_tests module
     :undoc-members:
     :show-inheritance:
 
+solarwindpy.tests.test\_alfvenic\_turbulence module
+---------------------------------------------------
+
+.. automodule:: solarwindpy.tests.test_alfvenic_turbulence
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 solarwindpy.tests.test\_base module
 -----------------------------------
 
@@ -40,6 +48,14 @@ solarwindpy.tests.test\_quantities module
 -----------------------------------------
 
 .. automodule:: solarwindpy.tests.test_quantities
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+solarwindpy.tests.test\_spacecraft module
+-----------------------------------------
+
+.. automodule:: solarwindpy.tests.test_spacecraft
     :members:
     :undoc-members:
     :show-inheritance:

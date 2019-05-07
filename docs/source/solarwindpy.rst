@@ -10,6 +10,7 @@ Subpackages
     solarwindpy.plotting
     solarwindpy.solar_activity
     solarwindpy.tests
+    solarwindpy.tools
 
 Module contents
 ---------------
