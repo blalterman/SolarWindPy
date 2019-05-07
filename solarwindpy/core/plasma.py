@@ -332,7 +332,7 @@ class Plasma(base.Base):
             **kwargs
         )
 
-        plasma.logger.info(
+        plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
         )
 
@@ -360,7 +360,7 @@ class Plasma(base.Base):
             #                 raise ValueError(msg)
 
             plasma.set_spacecraft(sc)
-            plasma.logger.info(
+            plasma.logger.warning(
                 "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
             )
 
@@ -373,7 +373,7 @@ class Plasma(base.Base):
             #                 raise ValueError(msg)
 
             plasma.set_auxiliary_data(aux)
-            plasma.logger.info(
+            plasma.logger.warning(
                 "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
             )
         #             plasma._auxiliary_data = aux
