@@ -69,7 +69,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-# exclude_patterns = ["solarwindpy.tests*"]
+exclude_patterns = ["solarwindpy.tests*"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -83,7 +83,7 @@ autodoc_default_options = {
     "private-members": None,
     "inherited-members": None,
     "show-inheritance": None,
-    "exclude-members": "_abc_impl",  # , "_set_ions", "_init_logger", "_init_constants", Need to be able to use all of these in exclude-members
+    "exclude-members": "_abc_impl,_set_ions,_init_logger,_init_constants,_init_units,_clean_species_for_setting,_verify_datetimeindex,_conform_species",  # Need to be able to use all of these in exclude-members
 }
 autoclass_content = "both"
 autodoc_member_order = "groupwise"
@@ -174,8 +174,7 @@ texinfo_documents = [
         "SolarWindPy Documentation",
         author,
         "SolarWindPy",
-        "One line description of project.",
-        "Miscellaneous",
+        "Data analysis tools for solar wind thermal plasma measurements.",
     )
 ]
 

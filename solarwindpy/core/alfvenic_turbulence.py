@@ -1,16 +1,5 @@
 #!/usr/bin/env python
-"""
-Name                :   alfvenic_turbulence.py
-Common Alias        :
-Version             :   0.1.00
-Updated             :   20181120
-Author              :   Benjamin L. Alterman
-e-mail              :   balterma@umich.edu
-
-Description
------------
--Contains a class to analyze Alfvenic turbulence.
--Primarily follows [1].
+"""Tools for calculating Alfvenic turbulence quantities derived from Elasser variables.
 
 Bibliography
 ------------
@@ -19,23 +8,6 @@ Bibliography
 [2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
     wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
     463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
-
-Dependencies beyond standard distribution
------------------------------------------
--
-
-Revision History
-----------------
--Started module. (20181120)
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
 """
 
 import pdb  # noqa: F401
@@ -60,7 +32,7 @@ class AlfvenicTurbulence(base.Core):
     variables following Section B.3.1 in [1].
 
     Lloyd Woodham helped me define these calculations at the 2018 AGU Fall
-    Meeting and overcome deficiencies in [1]'s explanation.
+    Meeting and understand [1].
 
     Parameters
     ----------
@@ -94,11 +66,6 @@ class AlfvenicTurbulence(base.Core):
 
     Notes
     -----
-
-    Citations
-    ---------
-    1. Bruno, R. & Carbone, V. The solar wind as a turbulence laboratory.
-    Living Rev. Sol. Phys. 10, 1–208 (2013).
 
     """
 

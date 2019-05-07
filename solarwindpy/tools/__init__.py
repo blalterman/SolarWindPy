@@ -28,8 +28,6 @@ import pdb  # noqa: F401
 import logging
 import pandas as pd
 
-from . import config_loggers  # noqa F401
-
 
 def swap_protons(data, logger=None):
     r"""

@@ -109,9 +109,6 @@ class Core(ABC):
         return self._data
 
     def _init_logger(self):
-        r"""
-        Init a logger with a StreamHandler at INFO level.
-        """
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
@@ -162,16 +159,17 @@ class Core(ABC):
             msg = "You must specify a species to instantiate a %s."
             raise ValueError(msg % self.__class__.__name__)
         return species
-    
+
     def _verify_datetimeindex(self, data):
         if not isinstance(data.index, pd.DatetimeIndex):
-            self.logger.warning(r"""A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working.""")
-            
+            self.logger.warning(
+                r"""A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working."""
+            )
+
         if not data.index.is_monotonic:
             self.logger.warning(
                 r"""A non-monotonic Index typicall indicates the presence of bad data. This will impact perfomance, especially if it is a DatetimeIndex."""
             )
-
 
 
 class Base(Core):
@@ -213,7 +211,7 @@ class Base(Core):
         if not data_exists:
             msg = "You can't set an object with empty data."
             raise ValueError(msg)
-        
+
         self._verify_datetimeindex(new)
 
     def _clean_species_for_setting(self, *species):
