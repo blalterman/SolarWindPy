@@ -54,6 +54,7 @@ class Constants(object):
                 "a": mamp,
                 "a1": mamp,
                 "a2": mamp,
+                "a_bimax": mamp,
                 "e": memp,
             }
         )
@@ -68,6 +69,7 @@ class Constants(object):
             "p2": constants.m_p,
             "pm": constants.m_p,  # proton moment
             "p_bimax": constants.m_p,
+            "a_bimax": ma,
             "a": ma,
             "a1": ma,
             "a2": ma,
@@ -86,6 +88,7 @@ class Constants(object):
             "a": a,
             "a1": a,
             "a2": a,
+            "a_bimax": a,
             "p": p,
             "p1": p,
             "p2": p,
@@ -106,10 +109,11 @@ class Constants(object):
             "p1": p,
             "p2": p,
             "pm": p,
+            "p_bimax": p,
             "a": a,
             "a1": a,
             "a2": a,
-            "p_bimax": p,
+            "a_bimax": a,
         }
         return pd.Series(out)
 
@@ -125,6 +129,7 @@ class Constants(object):
             "a": 2.0,
             "a1": 2.0,
             "a2": 2.0,
+            "a_bimax": 2.0,
         }
         return pd.Series(out)
 
