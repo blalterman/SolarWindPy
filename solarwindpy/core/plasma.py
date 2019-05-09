@@ -328,23 +328,14 @@ class Plasma(base.Base):
         plasma = cls(
             data,
             *species,
-            #             spacecraft=spacecraft, auxiliary_data=aux,
             **kwargs
         )
 
         plasma.logger.warning(
-            "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
+            "Loaded plasma from file\nFile :  %s\ndkey :  %s\nshape: %s", str(fname), dkey, plasma.data.shape,
         )
 
-        #         plasma = cls(data, *species, **kwargs)
-        #         plasma.logger.info(
-        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
-        #         )
-
         if sckey:
-            #             raise NotImplementedError(
-            #                 "Need to figure out how to set spacecraft name and origin in `save` method"
-            #             )
             sc = pd.read_hdf(fname, key=sckey)
             sc.columns.names = ("M", "C")
 
@@ -355,10 +346,6 @@ class Plasma(base.Base):
                 )
             sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
-            #             if not data.index.equals(sc.index):
-            #                 msg = "Spacecraft data index must equal plasma index"
-            #                 raise ValueError(msg)
-
             plasma.set_spacecraft(sc)
             plasma.logger.warning(
                 "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
@@ -368,34 +355,10 @@ class Plasma(base.Base):
             aux = pd.read_hdf(fname, key=akey)
             aux.columns.names = ("M", "C", "S")
 
-            #             if not data.index.equals(aux.index):
-            #                 msg = "Auxiliary data index must equal the plasma index."
-            #                 raise ValueError(msg)
-
             plasma.set_auxiliary_data(aux)
             plasma.logger.warning(
                 "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
             )
-        #             plasma._auxiliary_data = aux
-        #             plasma.logger.info(
-        #                 "Loaded auxiliary_data from file\nFile:  %s\nakey:  %s",
-        #                 str(fname),
-        #                 akey,
-        #             )
-
-        # Put a try-except statement here to log when no auxiliary data is loaded.
-
-        #         plasma = cls(
-        #             data, *species, spacecraft=spacecraft, auxiliary_data=aux, **kwargs
-        #         )
-
-        #         plasma.logger.info(
-        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s\nsckey:  %s\nakey:  %s",
-        #             str(fname),
-        #             dkey,
-        #             sckey,
-        #             akey,
-        #         )
 
         return plasma
 
@@ -1469,11 +1432,11 @@ class Plasma(base.Base):
         n1 = self.xs(("n", "", core), axis=1)
         n2 = self.xs(("n", "", beam), axis=1)
 
-        w = self.w.drop("scalar", axis=1, level="C")
-        w1_par = w.par.p1
-        w1_per = w.per.p1
-        w2_par = w.par.p2
-        w2_per = w.per.p2
+        w = self.w(beam, core).drop("scalar", axis=1, level="C")
+        w1_par = w.par.loc[:, core]
+        w1_per = w.per.loc[:, core]
+        w2_par = w.par.loc[:, beam]
+        w2_per = w.per.loc[:, beam]
 
         if beam == "a":
             #             msg = "Based on a conversation with Justin, I'm not sure if we want to use this cut, so it's disabled."

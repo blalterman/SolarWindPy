@@ -59,6 +59,7 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
     # working, drafting, etc.
 
     bbox_inches = kwargs.pop("bbox_inches", "tight")
+    alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
     for fmt in (".pdf", ".png"):
         fig.savefig(
             spath.with_suffix(fmt),
@@ -67,5 +68,4 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
             meta=meta,
             **kwargs
         )
-
-    alog.info("Saved figure\n%s", spath.resolve())
+        alog.info("Suffix: %s", fmt)
