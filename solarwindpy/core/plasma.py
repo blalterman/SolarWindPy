@@ -59,7 +59,14 @@ class Plasma(base.Base):
     `super(Plasma, self).__getattr__(attr)`.
     """
 
-    def __init__(self, data, *species, spacecraft=None, auxiliary_data=None):
+    def __init__(
+        self,
+        data,
+        *species,
+        spacecraft=None,
+        auxiliary_data=None,
+        log_plasma_stats=False
+    ):
         r"""
         Parameters
         ----------
@@ -128,6 +135,7 @@ class Plasma(base.Base):
         """
         self._init_logger()
         self._set_species(*species)
+        self.set_log_plasma_stats(log_plasma_stats)
         super(Plasma, self).__init__(data)
         self._set_ions()
         self.set_spacecraft(spacecraft)
@@ -176,6 +184,13 @@ class Plasma(base.Base):
         r"""Shortcut to :py:meth:`auxiliary_data`.
         """
         return self.auxiliary_data
+
+    @property
+    def log_plasma_at_init(self):
+        return self._log_plasma_at_init
+
+    def set_log_plasma_stats(self, new):
+        self._log_plasma_at_init = bool(new)
 
     def save(
         self,
@@ -291,6 +306,8 @@ class Plasma(base.Base):
         akey="FC_AUX",
         sc_frame=None,
         sc_name=None,
+        start=None,
+        stop=None,
         **kwargs
     ):
         r"""
@@ -309,12 +326,17 @@ class Plasma(base.Base):
             The key for getting spacecraft data from the HDF5 file.
         akey: str, "FC_AUX"
             key for getting auxiliary data from HDF5 file.
+        start, stop: None, parsable by `pd.to_datetime`
+            If not None, time to start/stop for loading data.
         kwargs:
             Passed to `Plasma.__init__`.
         """
 
         data = pd.read_hdf(fname, key=dkey)
         data.columns.names = ["M", "C", "S"]
+
+        if start is not None or stop is not None:
+            data = data.loc[start:stop]
 
         if not species:
             species = [s for s in data.columns.get_level_values("S").unique() if s]
@@ -325,26 +347,18 @@ class Plasma(base.Base):
             )
             raise ValueError(msg)
 
-        plasma = cls(
-            data,
-            *species,
-            #             spacecraft=spacecraft, auxiliary_data=aux,
-            **kwargs
-        )
+        plasma = cls(data, *species, **kwargs)
 
         plasma.logger.warning(
-            "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
+            "Loaded plasma from file\nFile:  %s\n\ndkey  :  %s\nshape : %s\nstart : %s\nstop  : %s",
+            str(fname),
+            dkey,
+            data.shape,
+            data.index.min(),
+            data.index.max(),
         )
 
-        #         plasma = cls(data, *species, **kwargs)
-        #         plasma.logger.info(
-        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s", str(fname), dkey
-        #         )
-
         if sckey:
-            #             raise NotImplementedError(
-            #                 "Need to figure out how to set spacecraft name and origin in `save` method"
-            #             )
             sc = pd.read_hdf(fname, key=sckey)
             sc.columns.names = ("M", "C")
 
@@ -353,11 +367,11 @@ class Plasma(base.Base):
                     "Must specify spacecraft name and frame\nname : %s\nframe: %s"
                     % (sc_name, sc_frame)
                 )
-            sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
-            #             if not data.index.equals(sc.index):
-            #                 msg = "Spacecraft data index must equal plasma index"
-            #                 raise ValueError(msg)
+            if start is not None or stop is not None:
+                sc = sc.loc[data.index]
+
+            sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
             plasma.set_spacecraft(sc)
             plasma.logger.warning(
@@ -368,34 +382,13 @@ class Plasma(base.Base):
             aux = pd.read_hdf(fname, key=akey)
             aux.columns.names = ("M", "C", "S")
 
-            #             if not data.index.equals(aux.index):
-            #                 msg = "Auxiliary data index must equal the plasma index."
-            #                 raise ValueError(msg)
+            if start is not None or stop is not None:
+                aux = aux.loc[data.index]
 
             plasma.set_auxiliary_data(aux)
             plasma.logger.warning(
                 "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
             )
-        #             plasma._auxiliary_data = aux
-        #             plasma.logger.info(
-        #                 "Loaded auxiliary_data from file\nFile:  %s\nakey:  %s",
-        #                 str(fname),
-        #                 akey,
-        #             )
-
-        # Put a try-except statement here to log when no auxiliary data is loaded.
-
-        #         plasma = cls(
-        #             data, *species, spacecraft=spacecraft, auxiliary_data=aux, **kwargs
-        #         )
-
-        #         plasma.logger.info(
-        #             "Loaded plasma from file\nFile:  %s\n\ndkey:  %s\nsckey:  %s\nakey:  %s",
-        #             str(fname),
-        #             dkey,
-        #             sckey,
-        #             akey,
-        #         )
 
         return plasma
 
@@ -494,50 +487,50 @@ class Plasma(base.Base):
         self._auxiliary_data = new
 
     def _log_object_at_load(self, data, name):
+
         if data is None:
             self.logger.info("No %s data passed to %s", name, self.__class__.__name__)
             return None
 
-        else:
-            self.logger.info("Checking %s data contents", name)
+        elif self.log_plasma_at_init:
 
-        nan_frame = data.isna()
-        nan_info = pd.DataFrame(
-            {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
-        )
-        # Log to DEBUG if no NaNs. Otherwise log to INFO.
-        if nan_info.any().any():
-            self.logger.info(
-                "%s %.0f spectra contain at least one NaN",
+            nan_frame = data.isna()
+            nan_info = pd.DataFrame(
+                {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
+            )
+            # Log to DEBUG if no NaNs. Otherwise log to INFO.
+            if nan_info.any().any():
+                self.logger.info(
+                    "%s %.0f spectra contain at least one NaN",
+                    name,
+                    nan_info.any(axis=1).sum(),
+                )
+                #             self.logger.log(10 * int(1 + nan_info.any().any()),
+                #                             "plasma NaN info\n%s", nan_info.to_string())
+                self.logger.debug("%s NaN info\n%s", name, nan_info.to_string())
+            else:
+                self.logger.debug("%s does not contain NaNs", name)
+
+            pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
+            stats = (
+                pd.concat(
+                    {
+                        "lin": data.describe(percentiles=pct),
+                        "log": data.applymap(np.log10).describe(percentiles=pct),
+                    },
+                    axis=0,
+                )
+                .unstack(level=0)
+                .sort_index(axis=0)
+                .sort_index(axis=1)
+                .T
+            )
+            self.logger.debug(
+                "%s stats\n%s\n%s",
                 name,
-                nan_info.any(axis=1).sum(),
+                stats.loc[:, ["count", "mean", "std"]].to_string(),
+                stats.drop(["count", "mean", "std"], axis=1).to_string(),
             )
-            #             self.logger.log(10 * int(1 + nan_info.any().any()),
-            #                             "plasma NaN info\n%s", nan_info.to_string())
-            self.logger.debug("%s NaN info\n%s", name, nan_info.to_string())
-        else:
-            self.logger.debug("%s does not contain NaNs", name)
-
-        pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-        stats = (
-            pd.concat(
-                {
-                    "lin": data.describe(percentiles=pct),
-                    "log": data.applymap(np.log10).describe(percentiles=pct),
-                },
-                axis=0,
-            )
-            .unstack(level=0)
-            .sort_index(axis=0)
-            .sort_index(axis=1)
-            .T
-        )
-        self.logger.debug(
-            "%s stats\n%s\n%s",
-            name,
-            stats.loc[:, ["count", "mean", "std"]].to_string(),
-            stats.drop(["count", "mean", "std"], axis=1).to_string(),
-        )
 
     def set_data(self, new):
         r"""Set the data and log statistics about it.
@@ -585,7 +578,12 @@ class Plasma(base.Base):
         data = data.sort_index(axis=1)
 
         self._data = data
-        self.logger.debug("plasma shape: %s", data.shape)
+        self.logger.debug(
+            "plasma shape: %s\nstart: %s\nstop: %s",
+            data.shape,
+            data.index.min(),
+            data.index.max(),
+        )
         if dropped.columns.values.any():
             self.logger.info(
                 "columns dropped from plasma\n%s",
@@ -611,7 +609,7 @@ class Plasma(base.Base):
         """
         return self.bfield
 
-    def number_density(self, *species):
+    def number_density(self, *species, skipna=True):
         r"""
         Get the plasma number densities.
 
@@ -622,6 +620,10 @@ class Plasma(base.Base):
             contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
+        skipna: bool, default True
+            Follows `pd.DataFrame.sum` convention. If True, NA excluded from
+            results. If False, NA propagates. False is helpful to identify
+            when a species is not measured using NaNs in its number density.
 
         Returns
         -------
@@ -634,15 +636,16 @@ class Plasma(base.Base):
         n = pd.concat(n, axis=1, names=["S"]).sort_index(axis=1)
 
         if len(species) == 1:
-            n = n.sum(axis=1)
+            n = n.sum(axis=1, skipna=skipna)
             n.name = species[0]
+
         return n
 
-    def n(self, *species):
+    def n(self, *species, skipna=True):
         r"""
         Shortcut to :py:meth:`number_density`.
         """
-        return self.number_density(*species)
+        return self.number_density(*species, skipna=skipna)
 
     def mass_density(self, *species):
         r"""

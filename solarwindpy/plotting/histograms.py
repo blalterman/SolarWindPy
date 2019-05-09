@@ -548,8 +548,12 @@ class Hist2D(AggPlot):
             prefix = ""
 
         if zlbl is not None:
+            fmt = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$"
             if prefix:
-                zlbl = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$" % (prefix, zlbl.tex)
+                try:
+                    zlbl = fmt % (prefix, zlbl.tex)
+                except AttributeError:
+                    zlbl = fmt % (prefix, r"\mathrm{" + zlbl + "}")
 
         elif self.data.loc[:, "z"].dropna().unique().size == 1:
             if prefix:
