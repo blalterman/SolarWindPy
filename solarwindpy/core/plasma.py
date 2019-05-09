@@ -1472,11 +1472,11 @@ class Plasma(base.Base):
         n1 = self.xs(("n", "", core), axis=1)
         n2 = self.xs(("n", "", beam), axis=1)
 
-        w = self.w.drop("scalar", axis=1, level="C")
-        w1_par = w.par.p1
-        w1_per = w.per.p1
-        w2_par = w.par.p2
-        w2_per = w.per.p2
+        w = self.w(beam, core).drop("scalar", axis=1, level="C")
+        w1_par = w.par.loc[:, core]
+        w1_per = w.per.loc[:, core]
+        w2_par = w.par.loc[:, beam]
+        w2_per = w.per.loc[:, beam]
 
         if beam == "a":
             #             msg = "Based on a conversation with Justin, I'm not sure if we want to use this cut, so it's disabled."
