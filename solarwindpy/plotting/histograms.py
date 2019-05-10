@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 
 from . import tools
 from . import base
+from . import labels as labels_module
 
 
 class AggPlot(base.Base):
@@ -302,7 +303,9 @@ class Hist1D(AggPlot):
         self.set_data(x, y, logx, clip_data)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self._labels = base.AxesLabels(x="x", y=r"$\mathrm{Count} \; [\#]$")
+        self._labels = base.AxesLabels(
+            x="x", y=labels_module.Count() if y is None else "y"
+        )
         self.set_path(None)
         self.set_clim(None, None)
 
@@ -315,17 +318,17 @@ class Hist1D(AggPlot):
 
         if new == "auto":
 
-            n_unique_y = self.data.loc[:, "y"].dropna().unique().size
+            #             n_unique_y = self.data.loc[:, "y"].dropna().unique().size
 
-            if (y == "y") and (n_unique_y == 1):
-                y = "count"
+            #             if (y == "y") and (n_unique_y == 1):
+            #                 y = "count"
 
-            elif n_unique_y > 1:
-                # Expect aggregating data.
-                pass
+            #             elif n_unique_y > 1:
+            #                 # Expect aggregating data.
+            #                 pass
 
-            else:
-                raise ValueError("Unable to auto set y-component of path")
+            #             else:
+            #                 raise ValueError("Unable to auto set y-component of path")
 
             path = path / x / y
 
@@ -470,7 +473,9 @@ class Hist2D(AggPlot):
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self._labels = base.AxesLabels(x="x", y="y", z=None)
+        self._labels = base.AxesLabels(
+            x="x", y="y", z=labels_module.Count() if z is None else "z"
+        )
         self.set_path(None)
         self.set_clim(None, None)
 
@@ -493,17 +498,17 @@ class Hist2D(AggPlot):
 
         if new == "auto":
 
-            n_unique_z = self.data.loc[:, "z"].unique().size
+            #             n_unique_z = self.data.loc[:, "z"].unique().size
 
-            if (z == "z") and (n_unique_z == 1):
-                z = "count"
+            #             if (z == "z") and (n_unique_z == 1):
+            #                 z = "count"
 
-            elif n_unique_z > 1:
-                # Expect aggregating data.
-                pass
+            #             elif n_unique_z > 1:
+            #                 # Expect aggregating data.
+            #                 pass
 
-            else:
-                raise ValueError("Unable to auto set z-component of path")
+            #             else:
+            #                 raise ValueError("Unable to auto set z-component of path")
 
             path = path / x / y / z
 

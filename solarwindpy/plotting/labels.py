@@ -43,6 +43,18 @@ class Vsw(object):
         return "vsw"
 
 
+class Count(object):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return r"$\mathrm{Count} \; [\#]$"
+
+    @property
+    def path(self):
+        return "count"
+
+
 class Distance2Sun(object):
     def __init__(self, units):
         self.set_units(units)
@@ -122,7 +134,7 @@ _trans_units = {
     # Temperatures, pressures, and anisotropies.
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
-    "T": r"10^5 \mathrm{K}",
+    "T": r"10^5 \, \mathrm{K}",
     "Q": r"\mu W \, m^{-2}",  # heatflux,
     "Qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
