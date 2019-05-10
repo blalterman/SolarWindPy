@@ -31,6 +31,22 @@ _all_species_re = re.compile(r"({})".format("|".join(_all_species_re)))
 _default_template_string = "{$M}_{{$C},{$S}}"
 
 
+def _run_species_substitution(pattern):
+    r""" Basic substitution of any species within a species string so long
+    as the species has a substitution in the ion_species dictionary.
+    Note: this equation might only work because a->\alpha is the only
+    actual translation made and, based on lexsort order, would be the
+    first group. This function may need to be updated for more complex
+    patterns, e.g. if we translate something like He2+->\text{He}^{2+}."""
+
+    def repl(x):
+        return _trans_species[x.group()]
+
+    substitution = re.subn(_all_species_re, repl, pattern)
+
+    return substitution
+
+
 class Vsw(object):
     def __init__(self):
         pass
@@ -344,10 +360,10 @@ class TeXlabel(object):
         first group. This function may need to be updated for more complex
         patterns, e.g. if we translate something like He2+->\text{He}^{2+}."""
 
-        def repl(x):
-            return _trans_species[x.group()]
+        #         def repl(x):
+        #             return _trans_species[x.group()]
 
-        substitution = re.subn(_all_species_re, repl, pattern)
+        substitution = _run_species_substitution(pattern)
 
         return substitution[0]
 
