@@ -52,7 +52,11 @@ class Vsw(object):
         pass
 
     def __str__(self):
-        return r"$V_\mathrm{SW} \; [\mathrm{km \, s^{-1}}]$"
+        return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
+
+    @property
+    def tex(self):
+        return r"V_\mathrm{SW}"
 
     @property
     def path(self):
@@ -64,7 +68,11 @@ class Count(object):
         pass
 
     def __str__(self):
-        return r"$\mathrm{Count} \; [\#]$"
+        return r"$%s \; [\#]$" % self.tex
+
+    @property
+    def tex(self):
+        return r"\mathrm{Count}"
 
     @property
     def path(self):
@@ -76,7 +84,7 @@ class Distance2Sun(object):
         self.set_units(units)
 
     def __str__(self):
-        return r"$\mathrm{Distance \; to \; Sun} \; [\mathrm{%s}]$" % self.units
+        return r"$%s \; [\mathrm{%s}]$" % (self.tex, self.units)
 
     @property
     def units(self):
@@ -85,6 +93,10 @@ class Distance2Sun(object):
     @property
     def path(self):
         return "distance2sun"
+
+    @property
+    def tex(self):
+        return r"\mathrm{Distance \; to \; Sun}"
 
     def set_units(self, units):
         trans = {"Rs": r"R_\bigodot", "Re": r"R_\oplus"}

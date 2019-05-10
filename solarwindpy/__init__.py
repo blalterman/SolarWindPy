@@ -9,6 +9,9 @@ import pdb  # noqa: F401
 
 from pkg_resources import get_distribution, DistributionNotFound
 
+import pandas as pd
+
+
 from .core import (
     units_constants,
     base,
@@ -20,6 +23,9 @@ from .core import (
     alfvenic_turbulence,
 )
 from . import core, plotting, solar_activity, tools
+
+pd.set_option("mode.chained_assignment", "raise")
+pd.set_option("mode.use_inf_as_na", True)
 
 Plasma = core.plasma.Plasma
 pp = plotting
