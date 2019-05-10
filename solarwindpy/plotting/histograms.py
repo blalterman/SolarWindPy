@@ -737,6 +737,33 @@ class Hist2D(AggPlot):
 
         return ax, cbar
 
+    def project_1d(self, axis, **kwargs):
+        r"""Make a `Hist1D` from the data stored in this `His2D`.
+
+        Parameters
+        ----------
+        axis: str
+            "x" or "y", specifying the axis to project into 1D.
+        kwargs:
+            Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
+
+        Returns
+        -------
+        h1: `Hist1D`
+        """
+        axis = axis.lower()
+        assert axis in ("x", "y")
+        h1 = Hist1D(
+            self.data[axis],
+            y=self.data["z"],
+            logx=self.log._asdict()[axis],
+            clip_data=False,  # Any clipping will be addressed by bins.
+            nbins=self.edges[axis].values,
+        )
+        h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()["z"])
+
+        return h1
+
 
 class GridHist2D(object):
     r"""A grid of 2D heatmaps separating the data based on a categorical value.
