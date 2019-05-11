@@ -53,7 +53,7 @@ class Exponential(FitFunction):
 
     @property
     def TeX_function(self):
-        TeX = r"f(x)=A \cdot e^{-c(x-x_0)}"
+        TeX = r"f(x)=A \cdot e^{-cx}"
         return TeX
 
 
