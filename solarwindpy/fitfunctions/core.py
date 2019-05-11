@@ -28,10 +28,10 @@ class FitFunction(ABC):
 
     Assuming that you don't want any special formatting, the typical call order
     is:
-            fit_function = FitFunction(function, TeX_string)
-            params, errors = fit_function.make_fit(xobs, yobs, binned=True)
-            fit_function.TeX_parameters()
-            fit_function.pretty_result()
+        fit_function = FitFunction(function, TeX_string)
+        fit_function.make_fit(xobs, yobs)
+        fit_function.TeX_parameters()
+        fit_function.pretty_result()
 
     Instances are callable.
     """
@@ -106,6 +106,10 @@ class FitFunction(ABC):
         r"""Function written in LaTeX.
         """
         pass
+
+    @property
+    def logger(self):
+        return self._logger
 
     @property
     def popt(self):
@@ -367,10 +371,9 @@ class FitFunction(ABC):
         mask = np.isfinite(x)
         if not mask.all():
             self.logger.warning(
-                "%s %s observations are NaN. This {:.3%} of the data has been dropped.",
-                (~mask).sum(),
-                axis,
-                (~mask).finite(),
+                "{} {} observations are NaN. This {:.3%} of the data has been dropped.".format(
+                    (~mask).sum(), axis, (~mask).mean()
+                )
             )
 
         if xmin is not None:
@@ -489,7 +492,7 @@ class FitFunction(ABC):
                 "I don't trust them and don't know if the optimized "
                 "parameters are meaningful.\n\nsigma\n-----\n%s\n\npcov\n----\n%s\n\n"
             )
-            self.logger.warnings(msg, sigma, pcov)
+            self.logger.warning(msg, sigma, pcov)
 
         self._set_popt(popt)
         self._set_psigma(sigma)
@@ -686,8 +689,9 @@ class FitFunction(ABC):
             dict(color="wheat", alpha=0.75)
         xloc, yloc: scalar
             0.05, 0.9
-        horizontalalignment, verticalalignment: str
-            "left", "right"
+        ha, va: str
+            ha - horizontalalignment (defaults "left")
+            va - verticalalignment (default "right")
         transform:
             ax.transAxes
         """
@@ -696,8 +700,8 @@ class FitFunction(ABC):
         bbox = dict(color="wheat", alpha=0.75)
         xloc = kwargs.pop("xloc", 0.05)
         yloc = kwargs.pop("yloc", 0.9)
-        horizontalalignment = kwargs.pop("horizontalalignment", "left")
-        verticalalignment = kwargs.pop("verticalalignment", "top")
+        horizontalalignment = kwargs.pop("ha", "left")
+        verticalalignment = kwargs.pop("va", "top")
         axtrans = kwargs.pop("transform", ax.transAxes)
 
         ax.text(
@@ -753,7 +757,7 @@ class FitFunction(ABC):
             fig, ax = plt.subplots()
 
         if hist_kwargs is None:
-            hist_kwargs = dict(color="darkgray")
+            hist_kwargs = dict(color="k")
 
         if bins_kwargs is None:
             bins_kwargs = dict(color="darkgreen")
@@ -797,7 +801,7 @@ class FitFunction(ABC):
 
         ax.grid(True, which="major", axis="both")
 
-        ax.legend()
+        ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
 
         # Copied from plt.hist. (20161107_0112)
         ax.update_datalim(
@@ -838,6 +842,7 @@ class FitFunction(ABC):
 
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
+            ax.set_yscale("symlog", linthreshy=10)
             ax.set_ylim(-100, 100)
 
         else:
@@ -854,6 +859,8 @@ class FitFunction(ABC):
         self, annotate=True, resid_pct=True, fit_resid_axes=None, **kwargs
     ):
         r"""Make a stacked fit, residual plot.
+
+        kwargs passed to `plot_fit`.
         """
 
         if fit_resid_axes is not None:
@@ -874,3 +881,5 @@ class FitFunction(ABC):
         resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
 
         hist_ax.tick_params(labelbottom="off")
+
+        return hist_ax, resid_ax
