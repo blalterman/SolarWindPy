@@ -22,7 +22,7 @@ from .core import (
     spacecraft,
     alfvenic_turbulence,
 )
-from . import core, plotting, solar_activity, tools
+from . import core, plotting, solar_activity, tools, fitfunctions
 
 pd.set_option("mode.chained_assignment", "raise")
 pd.set_option("mode.use_inf_as_na", True)
@@ -50,6 +50,7 @@ __all__ = [
     "solar_activity",
     "sa",
     "tools",
+    "fitfunctions",
 ]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
