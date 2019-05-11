@@ -84,11 +84,6 @@ class FitFunction(ABC):
         y = self.function(x, *popt_)
         return y
 
-    def _init_logger(self):
-        self._logger = logging.getLogger(
-            "{}.{}".format(__file__, self.__class__.__name__)
-        )
-
     @abstractproperty
     def function(self):
         r"""Get the function that`curve_fit` fits.
@@ -99,8 +94,46 @@ class FitFunction(ABC):
         """
         pass
 
-    def _set_function(self, new):
-        self._function = new
+    @abstractproperty
+    def p0(self):
+        r"""
+        The initial guess for the FitFunction.
+        """
+        pass
+
+    @abstractproperty
+    def TeX_function(self):
+        r"""Function written in LaTeX.
+        """
+        pass
+
+    @property
+    def popt(self):
+        r"""Optimized fit parameters.
+        """
+        return dict(self._popt)
+
+    @property
+    def psigma(self):
+        return dict(self._psigma)
+
+    @property
+    def pcov(self):
+        # Return a copy to protect the values.
+        return self._pcov.copy()
+
+    @property
+    def sufficient_data(self):
+        r"""
+        A check to ensure that we can fit the data before doing any
+        computations.
+        """
+        chk = self.tk_observed.sum() >= len(self.argnames)
+        if not chk:
+            msg = "There is insufficient data to fit the model."
+            raise ValueError(msg)
+        else:
+            return True
 
     @property
     def argnames(self):
@@ -108,16 +141,6 @@ class FitFunction(ABC):
         The names of the actual function arguments pulled by getargspec.
         """
         return self._argnames
-
-    def _set_argnames(self):
-        r"""
-        Set the arguments of the function, assuming that the first
-        is dependent variable.
-
-        Should be called after function is set.
-        """
-        args = getargspec(self.function).args[1:]
-        self._argnames = args
 
     @property
     def xobs_raw(self):
@@ -159,6 +182,138 @@ class FitFunction(ABC):
         The weights, having accounted for xlim, ylim, and wlim.
         """
         return self._weights
+
+    @property
+    def tk_observed(self):
+        r"""The mask used to take the observed data from the raw data.
+        """
+        return self._tk_observed
+
+    # @property
+    # def binsigma_raw(self):
+    #     r"""
+    #     The std of the data in each bin, not accounting for the extrema
+    #     limits.
+    #     """
+    #     try:
+    #         return self._binsigma_raw
+    #     except AttributeError:
+    #         msg = "Please set binsigma."
+    #         raise AttributeError(msg)
+
+    @property
+    def binsigma(self):
+        r"""
+        The std of the data in each bin.
+
+        Only used for the bins meeting the extrema conditions.
+        """
+        return self._binsigma
+
+    @property
+    def chisqdof(self):
+        r"""Calculate the chisq/dof for the fit.
+        """
+        yvals = self.yobs
+        yfits = self(self.xobs)
+        binsigma = self.binsigma
+
+        # Assign the 0 counts that become negative with -1 to 0.
+        # binsigma[~yvals.astype(bool)] = 0
+
+        msg = "Not finite: %s"
+        assert np.isfinite(yvals).all(), msg % (~np.isfinite(yvals)).sum()
+        assert np.isfinite(yfits).all(), msg % (~np.isfinite(yfits)).sum()
+        assert np.isfinite(binsigma).all(), msg % (~np.isfinite(binsigma)).sum()
+
+        chisq = ((yvals - yfits) / binsigma) ** 2.0
+        ddof = len(yvals) - len(self.p0) - 1
+        chisqdof = chisq.sum() / ddof
+
+        return chisqdof
+
+    @property
+    def TeX_chisqdof(self):
+        r"""Chisqdof to two decimal places, chosen arbitrarily.
+        """
+        out = r"\chi^2_\nu = {:.2f}".format(self.chisqdof)
+        return out
+
+    @property
+    def label(self):
+        r"""The label for use when plotting.
+        """
+        # TODO: What is this? How do I use it?
+        return self.function.func_name.title()
+
+    @property
+    def TeX_argnames(self):
+        try:
+            # Saved as tuple, so convert from tuple.
+            out = self._TeX_argnames
+            out = dict(out)
+            return out
+
+        except AttributeError:
+            return None
+
+    @property
+    def TeX_popt(self):
+        r"""Create a dictionary with (k, v) pairs corresponding to
+        (self.argnames, popt \pm psigma) with the appropriate uncertainty.
+
+        See `set_TeX_trans_argnames` to translate the argnames for TeX.
+        """
+        psigma = self.psigma
+        popt = self.popt.items()
+        TeX_popt = {k: self.val_uncert_2_string(v, psigma[k]) for k, v in popt}
+
+        translate = self.TeX_argnames
+        if translate is not None:
+            for k0, k1 in translate.items():
+                TeX_popt[k1] = TeX_popt[k0]
+                del TeX_popt[k0]
+
+        return TeX_popt
+
+    @staticmethod
+    def _check_and_add_math_escapes(x):
+        r"""
+        Add "$" math escapes to a string.
+
+        This function can probably be turned into a
+        static method.
+        """
+        assert isinstance(x, str)
+        if not x.count("$"):
+            x = r"$%s$" % x
+
+        if x.count("$") % 2:
+            msg = (
+                "An even number of math escapes are necessary."
+                " You have %s" % x.count("$")
+            )
+            raise ValueError(msg)
+
+        return x
+
+    @staticmethod
+    def _calc_precision(value):
+        r"""Primarily for use with the `val_uncert_2_string` and other methods that may
+        require this.
+        """
+        # assert 1 > value > 0, \
+        #     "Only written to deal with 0 < X < 1 numbers.\nX = %s" % value
+
+        # Convert the fractional part to an exponential string.
+        # E.g. 0.0009865 -> 9.865000e-04
+        precision = "%e" % value  # (value - int(value))
+
+        # Split the exponential notation at the `e`,  a la
+        # "1.250000e-04"; take the exponent "4", excluding the sign.
+        precision = int(precision.partition("e")[2])
+
+        return precision
 
     @staticmethod
     def _check_raw_obs(arr, name):
@@ -206,12 +361,6 @@ class FitFunction(ABC):
         self._yobs_raw = yobs
         self._weights_raw = weights
 
-    @property
-    def tk_observed(self):
-        r"""The mask used to take the observed data from the raw data.
-        """
-        return self._tk_observed
-
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
         mask = np.full_like(x, True, dtype=bool)
 
@@ -233,6 +382,21 @@ class FitFunction(ABC):
             mask = mask & xmax_mask
 
         return mask
+
+    def _init_logger(self):
+        self._logger = logging.getLogger(
+            "{}.{}".format(__file__, self.__class__.__name__)
+        )
+
+    def _set_argnames(self):
+        r"""
+        Set the arguments of the function, assuming that the first
+        is dependent variable.
+
+        Should be called after function is set.
+        """
+        args = getargspec(self.function).args[1:]
+        self._argnames = args
 
     def set_fit_obs(
         self, xmin=None, xmax=None, ymin=None, ymax=None, wmin=None, wmax=None
@@ -265,54 +429,20 @@ class FitFunction(ABC):
         self._weights = weights
         self._tk_observed = mask
 
-    @property
-    def popt(self):
-        r"""Optimized fit parameters.
-        """
-        return dict(self._popt)
-
     def _set_popt(self, new):
         r"""Save as a tuple of (k, v) pairs so immutable. Convert to a dictionary i
         before returning the actual data with `pcov` method.
         """
         self._popt = list(zip(self.argnames, new))
 
-    @property
-    def psigma(self):
-        return dict(self._psigma)
-
     def _set_psigma(self, new):
         assert isinstance(new, np.ndarray)
         self._psigma = list(zip(self.argnames, new))
-
-    @property
-    def pcov(self):
-        # Return a copy to protect the values.
-        return self._pcov.copy()
 
     def _set_pcov(self, new):
         assert isinstance(new, np.ndarray)
         # assert new.shape[0] == new.shape[1] square matrix?
         self._pcov = new
-
-    @abstractproperty
-    def p0(self):
-        r"""
-        The initial guess for the FitFunction.
-        """
-
-    @property
-    def sufficient_data(self):
-        r"""
-        A check to ensure that we can fit the data before doing any
-        computations.
-        """
-        chk = self.tk_observed.sum() >= len(self.argnames)
-        if not chk:
-            msg = "There is insufficient data to fit the model."
-            raise ValueError(msg)
-        else:
-            return True
 
     def make_fit(self, **kwargs):
         r"""Fit the function with the independent values `xobs` and dependent values
@@ -386,27 +516,6 @@ class FitFunction(ABC):
 
         return r
 
-    # @property
-    # def binsigma_raw(self):
-    #     r"""
-    #     The std of the data in each bin, not accounting for the extrema
-    #     limits.
-    #     """
-    #     try:
-    #         return self._binsigma_raw
-    #     except AttributeError:
-    #         msg = "Please set binsigma."
-    #         raise AttributeError(msg)
-
-    @property
-    def binsigma(self):
-        r"""
-        The std of the data in each bin.
-
-        Only used for the bins meeting the extrema conditions.
-        """
-        return self._binsigma
-
     def set_binsigma(self, new):
         r"""Set the binsigma to new.
 
@@ -428,66 +537,6 @@ class FitFunction(ABC):
         else:
             msg = "Unrecgonized binsigma: %s\ntype: %s" % (new, type(new))
             raise TypeError(msg)
-
-    @property
-    def chisqdof(self):
-        r"""Calculate the chisq/dof for the fit.
-        """
-        yvals = self.yobs
-        yfits = self(self.xobs)
-        binsigma = self.binsigma
-
-        # Assign the 0 counts that become negative with -1 to 0.
-        # binsigma[~yvals.astype(bool)] = 0
-
-        msg = "Not finite: %s"
-        assert np.isfinite(yvals).all(), msg % (~np.isfinite(yvals)).sum()
-        assert np.isfinite(yfits).all(), msg % (~np.isfinite(yfits)).sum()
-        assert np.isfinite(binsigma).all(), msg % (~np.isfinite(binsigma)).sum()
-
-        chisq = ((yvals - yfits) / binsigma) ** 2.0
-        ddof = len(yvals) - len(self.p0) - 1
-        chisqdof = chisq.sum() / ddof
-
-        return chisqdof
-
-    @property
-    def TeX_chisqdof(self):
-        r"""Chisqdof to two decimal places, chosen arbitrarily.
-        """
-        out = r"\chi^2_\nu = {:.2f}".format(self.chisqdof)
-        return out
-
-    @property
-    def label(self):
-        r"""The label for use when plotting.
-        """
-        # TODO: What is this? How do I use it?
-        return self.function.func_name.title()
-
-    @abstractproperty
-    def TeX_function(self):
-        r"""Function written in LaTeX.
-        """
-        pass
-
-    @staticmethod
-    def _calc_precision(value):
-        r"""Primarily for use with the `val_uncert_2_string` and other methods that may
-        require this.
-        """
-        # assert 1 > value > 0, \
-        #     "Only written to deal with 0 < X < 1 numbers.\nX = %s" % value
-
-        # Convert the fractional part to an exponential string.
-        # E.g. 0.0009865 -> 9.865000e-04
-        precision = "%e" % value  # (value - int(value))
-
-        # Split the exponential notation at the `e`,  a la
-        # "1.250000e-04"; take the exponent "4", excluding the sign.
-        precision = int(precision.partition("e")[2])
-
-        return precision
 
     def val_uncert_2_string(self, value, uncertainty):
         r"""
@@ -532,62 +581,11 @@ class FitFunction(ABC):
         # pdb.set_trace()
         return out
 
-    @property
-    def TeX_argnames(self):
-        try:
-            # Saved as tuple, so convert from tuple.
-            out = self._TeX_argnames
-            out = dict(out)
-            return out
-
-        except AttributeError:
-            return None
-
     def set_TeX_argnames(self, **kwargs):
         r"""Define the mapping to format LaTeX function argnames.
         """
         # Save a tuple so immutable.
         self._TeX_argnames = kwargs.items()
-
-    @property
-    def TeX_popt(self):
-        r"""Create a dictionary with (k, v) pairs corresponding to
-        (self.argnames, popt \pm psigma) with the appropriate uncertainty.
-
-        See `set_TeX_trans_argnames` to translate the argnames for TeX.
-        """
-        psigma = self.psigma
-        popt = self.popt.items()
-        TeX_popt = {k: self.val_uncert_2_string(v, psigma[k]) for k, v in popt}
-
-        translate = self.TeX_argnames
-        if translate is not None:
-            for k0, k1 in translate.items():
-                TeX_popt[k1] = TeX_popt[k0]
-                del TeX_popt[k0]
-
-        return TeX_popt
-
-    @staticmethod
-    def _check_and_add_math_escapes(x):
-        r"""
-        Add "$" math escapes to a string.
-
-        This function can probably be turned into a
-        static method.
-        """
-        assert isinstance(x, str)
-        if not x.count("$"):
-            x = r"$%s$" % x
-
-        if x.count("$") % 2:
-            msg = (
-                "An even number of math escapes are necessary."
-                " You have %s" % x.count("$")
-            )
-            raise ValueError(msg)
-
-        return x
 
     def set_TeX_info(
         self,
