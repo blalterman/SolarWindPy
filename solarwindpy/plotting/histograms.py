@@ -69,6 +69,30 @@ class AggPlot(base.Base):
         tko = tko[0]
         return tko
 
+    @property
+    def joint(self):
+        r"""A combination of the categorical and continuous data for use in `Groupby`.
+        """
+        cut = self.cut
+        tko = self.agg_axes
+
+        self.logger.info("""Joining data (%s) with cat (%s)""", tko, cut.columns.values)
+
+        other = self.data.loc[cut.index, tko]
+
+        joint = cut.copy(deep=True)
+        joint.loc[:, other.name] = other
+        joint.sort_index(axis=1, inplace=True)
+
+        return joint
+
+    @property
+    def grouped(self):
+        r"""`joint.groupby` with appropriate axes passes.
+        """
+        gb = self.joint.groupby(list(self._agg_axes))
+        return gb
+
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
         assert isinstance(top, Number) or top is None
@@ -179,19 +203,15 @@ class AggPlot(base.Base):
 
         If either of the count limits specified in `clim` are not None, apply them.
         """
+
         cut = self.cut
         tko = self.agg_axes
 
         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
 
+        gb = self.grouped
+
         other = self.data.loc[cut.index, tko]
-
-        joint = cut.copy(deep=True)
-        joint.loc[:, other.name] = other
-        joint.sort_index(axis=1, inplace=True)
-        # joint = pd.concat([cut, other], axis=1).sort_index(axis=1)
-        gb = joint.groupby(list(self._agg_axes))
-
         if other.dropna().unique().size == 1:
             fcn = "count"
         else:
@@ -280,7 +300,7 @@ class Hist1D(AggPlot):
     """
 
     def __init__(
-        self, x, y=None, logx=False, clip_data=True, nbins=101, bin_precision=None
+        self, x, y=None, logx=False, clip_data=False, nbins=101, bin_precision=None
     ):
         r"""
         Parameters
@@ -389,6 +409,8 @@ class Hist1D(AggPlot):
         If `ax` is None, create a `mpl.subplots` axis.
 
         `**kwargs` passed directly to `ax.plot`.
+
+        `drawstyle` defaults to `steps-mid`.
         """
         agg = self.agg()
         #         tko = self.agg_axes
@@ -401,7 +423,8 @@ class Hist1D(AggPlot):
         if self.log.x:
             x = 10.0 ** x
 
-        ax.plot(x, y, **kwargs)
+        drawstyle = kwargs.pop("drawstyle", "steps-mid")
+        ax.plot(x, y, drawstyle=drawstyle, **kwargs)
 
         self._format_axis(ax)
 
