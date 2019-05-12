@@ -5,7 +5,7 @@ import pdb  # noqa: F401
 import logging
 import re
 from pathlib import Path
-from string import Template
+from string import Template as StringTemplate
 from collections import namedtuple
 
 MCS = namedtuple("MCS", "m,c,s")
@@ -404,7 +404,7 @@ class TeXlabel(object):
         d = {"M": m1, "C": c1, "S": s1}
 
         template_string = _templates.get(m, _default_template_string)
-        template = Template(template_string)
+        template = StringTemplate(template_string)
 
         tex = template.safe_substitute(**d)
         if err:
