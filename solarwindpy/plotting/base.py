@@ -9,7 +9,6 @@ from pathlib import Path
 from collections import namedtuple
 from abc import ABC, abstractmethod
 
-
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 
@@ -50,9 +49,9 @@ class Base(ABC):
     def data(self):
         return self._data
 
-    @property
-    def clip(self):
-        return self._clip
+    #     @property
+    #     def clip(self):
+    #         return self._clip
 
     @property
     def log(self):

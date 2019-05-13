@@ -60,7 +60,7 @@ class Vsw(object):
 
     @property
     def path(self):
-        return "vsw"
+        return Path("vsw")
 
 
 class Count(object):
@@ -76,7 +76,36 @@ class Count(object):
 
     @property
     def path(self):
-        return "count"
+        return Path("count")
+
+
+class DateTime(object):
+    def __init__(self, dt):
+        r"""
+        Parameters
+        ----------
+        dt: str
+            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+        """
+        self.set_dt(dt)
+
+    def __str__(self):
+        return r"$%s$" % self.tex
+
+    @property
+    def dt(self):
+        return self._dt
+
+    @property
+    def tex(self):
+        return r"\mathrm{%s}" % self.dt.replace(" ", r" \, ")
+
+    @property
+    def path(self):
+        return Path(self.dt.lower())
+
+    def set_dt(self, new):
+        self._dt = new
 
 
 class Distance2Sun(object):

@@ -93,6 +93,10 @@ class AggPlot(base.Base):
         gb = self.joint.groupby(list(self._agg_axes))
         return gb
 
+    @property
+    def clip(self):
+        return self._clip
+
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
         assert isinstance(top, Number) or top is None
