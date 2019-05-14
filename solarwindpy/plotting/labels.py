@@ -24,6 +24,8 @@ _trans_species = {
     "he": r"\mathrm{He}",
 }
 
+_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
+
 _all_species_re = sorted(_trans_species.keys())[
     ::-1
 ]  # Order so we check for p1 and p2 before p.
@@ -62,21 +64,68 @@ class Vsw(object):
     def path(self):
         return Path("vsw")
 
-
-class Count(object):
-    def __init__(self):
+    def build_label(self):
         pass
 
+
+class Count(object):
+    def __init__(self, norm=None):
+        self.set_axnorm(None)
+        self.build_label()
+
     def __str__(self):
-        return r"$%s \; [\#]$" % self.tex
+        return r"${} \; [\#]$".format(self.tex)
 
     @property
     def tex(self):
-        return r"\mathrm{Count}"
+        return self._tex
 
     @property
     def path(self):
-        return Path("count")
+        return self._path
+
+    @property
+    def axnorm(self):
+        return self._axnorm
+
+    def set_axnorm(self, norm):
+        assert norm in (None, "c", "r", "t", "d")
+        self._axnorm = norm
+
+    def _build_tex(self):
+        norm = self.axnorm
+        if norm is None:
+            tex = "{}"
+
+        elif norm == "c":
+            tex = r"Col. Norm {}"
+
+        elif norm == "r":
+            tex = r"Row Norm {}"
+
+        elif norm == "t":
+            tex = r"Total Norm {}"
+
+        elif norm == "d":
+            tex = r"Density Norm {}"
+
+        else:
+            raise ValueError("Unrecognized normalization {}".format(norm))
+
+        return r"\mathrm{%s}" % tex.format("Count").replace(" ", r" \, ")
+
+    def _build_path(self):
+        path = Path("count")
+
+        norm = self.axnorm
+        if norm is not None:
+            path = path / (norm.upper() + "norm")
+
+        return path
+
+    def build_label(self):
+        self._tex = self._build_tex()
+        self._path = self._build_path()
 
 
 class DateTime(object):
@@ -341,23 +390,28 @@ class TeXlabel(object):
         Build the label.
     """
 
-    def __init__(self, mcs0, mcs1=None):
+    def __init__(self, mcs0, mcs1=None, axnorm=None):
         r"""        Parameters
         ----------
         mcs0: tuple of strings
-            Form is `("m", "c", "s")` where m = measurement, c=component, and
+            Form is `("M", "C", "S")` where m = measurement, c=component, and
             s=species. Both c and s can be empty strings when that metadata
             does not apply. (For example, a magnetic field has no species.)
             If an m, c, or s value raises a `KeyError` in its dictionary, then
             it is passed through without change.
         mcs1: tuple or None
-            If not None, `("m", "c", "s")` info. Treated such that `mcs0` is
+            If not None, `("M", "C", "S")` info. Treated such that `mcs0` is
             the numerator and `mcs1` is the denomenator in a fraction label.
             When `mcs1` is specified, units are checked and, if they are
             identical, dimensionless units are speciefied.
+        axnorm: str or None
+            If not None, axis normalization on plot. Primarily used for
+            creating colorbar labels.
         """
         self._init_logger()
-        self.build_label(mcs0, mcs1)
+        self.set_axnorm(axnorm)
+        self.set_mcs(mcs0, mcs1)
+        self.build_label()
 
     def __str__(self):
         return self._with_units
@@ -393,6 +447,27 @@ class TeXlabel(object):
     def path(self):
         return self._path
 
+    @property
+    def axnorm(self):
+        return self._axnorm
+
+    def set_mcs(self, mcs0, mcs1):
+        mcs0_ = MCS(*mcs0)
+
+        mcs1_ = None
+        if mcs1 is not None:
+            mcs1_ = MCS(*mcs1)
+
+        self._mcs0 = mcs0_
+        self._mcs1 = mcs1_
+
+    def set_axnorm(self, new):
+        if isinstance(new, str):
+            new = new.lower()
+
+        assert new in (None, "c", "r", "t", "d")
+        self._axnorm = new
+
     def make_species(self, pattern):
         r""" Basic substitution of any species within a species string so long
         as the species has a substitution in the ion_species dictionary.
@@ -408,9 +483,13 @@ class TeXlabel(object):
 
         return substitution[0]
 
-    def _build_one_label(self, m, c, s):
+    def _build_one_label(self, mcs):
 
-        mcs = MCS(m, c, s)
+        m = mcs.m
+        c = mcs.c
+        s = mcs.s
+
+        #         mcs = MCS(m, c, s)
         path = (
             "_".join(
                 [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
@@ -450,19 +529,20 @@ class TeXlabel(object):
             .replace(",}", "}")
         )
 
-        with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
+        #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
+        units = _trans_units[m]
 
         self.logger.debug(
             r"""Built TeX label
 TeX        : %s
-with units : %s
+units      : %s
 save path  : %s
 template   : %s
          M : %s -> %s
          C : %s -> %s
          S : %s -> %s""",
             tex,
-            with_units,
+            units,
             path,
             template_string,
             m,
@@ -473,15 +553,30 @@ template   : %s
             s1 if s1 else None,
         )
 
-        return tex, with_units, path, mcs
+        return tex, units, path
 
-    def build_label(self, mcs0, mcs1=None):
-        tex0, units0, path0, mcs0_ = self._build_one_label(*mcs0)
+    def _combine_tex_path_units_axnorm(self, tex, path, units):
+        axnorm = self.axnorm
+        tex_norm = _trans_axnorm[axnorm]
+        if tex_norm:
+            units = r"\#"
+            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)
+            path = path / (axnorm.upper() + "norm")
+
+        with_units = r"${tex} \; [{units}]$".format(tex=tex, units=units)
+
+        return tex, path, units, with_units
+
+    def build_label(self):
+        mcs0 = self.mcs0
+        mcs1 = self.mcs1
+
+        tex0, units0, path0 = self._build_one_label(mcs0)
 
         if mcs1 is not None:
-            tex1, units1, path1, mcs1_ = self._build_one_label(*mcs1)
+            tex1, units1, path1 = self._build_one_label(mcs1)
 
-            m0, m1 = mcs0[0], mcs1[0]
+            m0, m1 = mcs0.m, mcs1.m
             u0, u1 = (
                 _trans_units[m0.replace("_err", "")],
                 _trans_units[m1.replace("_err", "")],
@@ -492,39 +587,46 @@ template   : %s
                 units = r"{}/{}".format(u0, u1)
 
             tex = "{}/{}".format(tex0, tex1)
-            with_units = r"$%s \; [%s]$" % (tex, units)
+            #             with_units = r"$%s \; [%s]$" % (tex, units)
             path = Path("-OV-".join([path0, path1]))
 
-            self.logger.debug(
-                r"""Joined ratio label
-TeX       : %s
-w/ units  : %s
-save path : %s
-       T0 : %s
-       U0 : %s
-       P0 : %s
-       T1 : %s
-       U1 : %s
-       P1 : %s""",
-                tex,
-                with_units,
-                path,
-                tex0,
-                units0,
-                path0,
-                tex1,
-                units1,
-                path1,
-            )
-
         else:
-            mcs1_ = None
             tex = tex0
-            with_units = units0
+            units = units0
             path = Path(path0)
 
-        self._mcs0 = mcs0_
-        self._mcs1 = mcs1_
+            tex1 = None
+            units1 = None
+            path1 = None
+
+        tex, path, units, with_units = self._combine_tex_path_units_axnorm(
+            tex, path, units
+        )
+
+        self.logger.debug(
+            r"""Joined ratio label
+TeX        : %s
+units      : %s
+with units : %s
+save path  : %s
+        T0 : %s
+        U0 : %s
+        P0 : %s
+        T1 : %s
+        U1 : %s
+        P1 : %s""",
+            tex,
+            units,
+            with_units,
+            path,
+            tex0,
+            units0,
+            path0,
+            tex1,
+            units1,
+            path1,
+        )
+
         self._tex = tex
         self._with_units = with_units
         self._path = Path(path)

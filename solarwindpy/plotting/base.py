@@ -49,10 +49,6 @@ class Base(ABC):
     def data(self):
         return self._data
 
-    #     @property
-    #     def clip(self):
-    #         return self._clip
-
     @property
     def log(self):
         return self._log

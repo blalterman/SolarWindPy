@@ -68,4 +68,4 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
             meta=meta,
             **kwargs
         )
-        alog.info("Suffix: %s", fmt)
+        alog.info("Suffix saved: %s", fmt)

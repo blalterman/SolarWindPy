@@ -12,6 +12,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from numbers import Number
 from abc import abstractproperty
+from pathlib import Path
 
 try:
     from astropy.stats import knuth_bin_width
@@ -497,12 +498,12 @@ class Hist2D(AggPlot):
     ):
         super(Hist2D, self).__init__()
         self.set_data(x, y, z, logx, logy, clip_data)
+        self._labels = base.AxesLabels(
+            x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
+        )
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self._labels = base.AxesLabels(
-            x="x", y="y", z=labels_module.Count() if z is None else "z"
-        )
         self.set_path(None)
         self.set_clim(None, None)
 
@@ -547,13 +548,19 @@ class Hist2D(AggPlot):
         if add_scale:
             assert scale_info is not None
 
-            axnorm = self.axnorm
-            if axnorm is not None:
-                axnorm = axnorm.capitalize() + "norm"
-                scale_info = scale_info + [axnorm]
-
+            #             axnorm = self.axnorm
+            #             if axnorm is not None:
+            #                 axnorm = axnorm.capitalize() + "norm"
+            #                 scale_info = scale_info
             scale_info = "-".join(scale_info)
-            path = path / scale_info
+
+            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
+                # Insert <norm> at end of path so scale order is (x, y, z).
+                path = path.parts
+                path = path[:-1] + (scale_info + "-" + path[-1],)
+                path = Path(*path)
+            else:
+                path = path / scale_info
 
         self._path = path
 
@@ -562,38 +569,41 @@ class Hist2D(AggPlot):
     def set_labels(self, **kwargs):
 
         z = kwargs.pop("z", self.labels.z)
-        z = self._add_meta_to_zlbl(z)
+        if isinstance(z, labels_module.Count):
+            z.set_axnorm(self.axnorm)
+            z.build_label()
+
         super(Hist2D, self).set_labels(z=z, **kwargs)
 
-    def _add_meta_to_zlbl(self, zlbl):
-        # BUG: path's won't auto create if they are strings.
-        axnorm = self.axnorm
-        if axnorm == "c":
-            prefix = "Col."
-        elif axnorm == "d":
-            prefix = "Density"
-        elif axnorm == "r":
-            prefix = "Row"
-        elif axnorm == "t":
-            prefix = "Total"
-        else:
-            prefix = ""
+    #     def _add_meta_to_zlbl(self, zlbl):
+    #         # BUG: path's won't auto create if they are strings.
+    #         axnorm = self.axnorm
+    #         if axnorm == "c":
+    #             prefix = "Col."
+    #         elif axnorm == "d":
+    #             prefix = "Density"
+    #         elif axnorm == "r":
+    #             prefix = "Row"
+    #         elif axnorm == "t":
+    #             prefix = "Total"
+    #         else:
+    #             prefix = ""
 
-        if zlbl is not None:
-            fmt = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$"
-            if prefix:
-                try:
-                    zlbl = fmt % (prefix, zlbl.tex)
-                except AttributeError:
-                    zlbl = fmt % (prefix, r"\mathrm{" + zlbl + "}")
+    #         if zlbl is not None:
+    #             fmt = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$"
+    #             if prefix:
+    #                 try:
+    #                     zlbl = fmt % (prefix, zlbl.tex)
+    #                 except AttributeError:
+    #                     zlbl = fmt % (prefix, r"\mathrm{" + zlbl + "}")
 
-        elif self.data.loc[:, "z"].dropna().unique().size == 1:
-            if prefix:
-                zlbl = r"$\mathrm{%s \; Norm. \; Count} \; [\#]$" % prefix
-            else:
-                zlbl = r"$\mathrm{Count} \; [\#]$"
+    #         elif self.data.loc[:, "z"].dropna().unique().size == 1:
+    #             if prefix:
+    #                 zlbl = r"$\mathrm{%s \; Norm. \; Count} \; [\#]$" % prefix
+    #             else:
+    #                 zlbl = r"$\mathrm{Count} \; [\#]$"
 
-        return zlbl
+    #         return zlbl
 
     def set_data(self, x, y, z, logx, logy, clip):
         logx = bool(logx)
@@ -632,7 +642,6 @@ class Hist2D(AggPlot):
 ===== =============================================================
  c     Column normalize
  d     Density normalize.
-       If scale is log-scaled, deltas are calculated in log-space.
  r     Row normalize
  t     Total normalize
 ===== =============================================================
@@ -640,6 +649,12 @@ class Hist2D(AggPlot):
         if new is not None:
             new = new.lower()[0]
             assert new in ("c", "r", "t", "d")
+
+        zlbl = self.labels.z
+        if isinstance(zlbl, labels_module.Count):
+            zlbl.set_axnorm(new)
+            zlbl.build_label()
+
         self._axnorm = new
 
     def agg(self):
