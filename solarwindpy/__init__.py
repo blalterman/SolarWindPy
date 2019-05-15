@@ -32,6 +32,9 @@ pp = plotting
 sa = solar_activity
 sc = spacecraft
 at = alfvenic_turbulence
+Hist1D = plotting.histograms.Hist1D
+Hist2D = plotting.histograms.Hist2D
+TeXlabel = plotting.labels.TeXlabel
 
 __all__ = [
     "core",

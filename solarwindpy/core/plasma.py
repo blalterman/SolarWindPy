@@ -1598,9 +1598,7 @@ class Plasma(base.Base):
             if data.columns.intersection(electrons.data.columns).size:
                 data.update(electrons.data)
             else:
-                data = pd.concat(
-                    [data, electrons.data, self.auxiliary_data], axis=1
-                ).sort_index(axis=1)
+                data = pd.concat([data, electrons.data], axis=1).sort_index(axis=1)
                 species = sorted(self.species + ("e",))
                 self._set_species(*species)
                 self.set_data(data)
