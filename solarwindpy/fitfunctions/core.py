@@ -723,7 +723,7 @@ class FitFunction(ABC):
         annotate=True,
         subplots_kwargs=None,
         hist_kwargs=None,
-        bins_kwargs=None,
+        bin_kwargs=None,
         fit_kwargs=None,
         annotate_kwargs=None,
     ):
@@ -745,7 +745,7 @@ class FitFunction(ABC):
             Passed to plt.subplots(**subplots_kwargs)
         hist_kwargs: dict
             Passed to ax.plot(**hist_kwargs) for plotting obs.
-        bins_kwargs: dict
+        bin_kwargs: dict
             Passed to ax.plot(**bins_kwargs) for plotting raw obs.
         fit_kwargs: dict
             Passed to ax.plot(**fit_kwargs) for plotting fit.
@@ -759,8 +759,8 @@ class FitFunction(ABC):
         if hist_kwargs is None:
             hist_kwargs = dict(color="k")
 
-        if bins_kwargs is None:
-            bins_kwargs = dict(color="darkgreen")
+        if bin_kwargs is None:
+            bin_kwargs = dict(color="darkgreen")
 
         if fit_kwargs is None:
             fit_kwargs = dict(color="darkorange")
@@ -776,7 +776,7 @@ class FitFunction(ABC):
             ylabel = r"$\mathrm{Count} \; [\#]$"
 
         hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
-        bin_label = bins_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
+        bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
         fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
 
         # Plot the raw data histograms.
@@ -785,16 +785,28 @@ class FitFunction(ABC):
             self.yobs_raw,
             drawstyle=drawstyle,
             label=hist_label,
+            color=hist_kwargs.pop("color", "k"),
             **hist_kwargs
         )
 
         # Overplot with the data as selected for the plot.
         ax.plot(
-            self.xobs, self.yobs, drawstyle=drawstyle, label=bin_label, **bins_kwargs
+            self.xobs,
+            self.yobs,
+            drawstyle=drawstyle,
+            label=bin_label,
+            color=bin_kwargs.pop("color", "darkgreen"),
+            **bin_kwargs
         )
 
         # Overplot the fit.
-        ax.plot(self.xobs_raw, self(self.xobs_raw), label=fit_label, **fit_kwargs)
+        ax.plot(
+            self.xobs_raw,
+            self(self.xobs_raw),
+            label=fit_label,
+            color=fit_kwargs.pop("color", "darkorange"),
+            **fit_kwargs
+        )
 
         if ylabel is not None:
             ax.set_ylabel(ylabel)
