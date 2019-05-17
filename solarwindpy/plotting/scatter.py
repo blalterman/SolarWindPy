@@ -31,7 +31,7 @@ class Scatter(base.Base):
 
     """
 
-    def __init__(self, x, y, z=None, clip_data=True):
+    def __init__(self, x, y, z=None, clip_data=False):
         r"""
         Parameters
         ----------
