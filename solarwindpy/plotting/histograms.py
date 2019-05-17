@@ -203,10 +203,14 @@ class AggPlot(base.Base):
         cut = pd.DataFrame.from_dict(cut, orient="columns")
         self._cut = cut
 
-    def agg(self):
+    def agg(self, fcn=None):
         r"""Perform the aggregation along the agg axes.
 
         If either of the count limits specified in `clim` are not None, apply them.
+
+        `fcn` allows you to specify a specific function for aggregation. Otherwise,
+        automatically choose "count" or "mean" based on the uniqueness of the aggregated
+        values.
         """
 
         cut = self.cut
@@ -216,11 +220,12 @@ class AggPlot(base.Base):
 
         gb = self.grouped
 
-        other = self.data.loc[cut.index, tko]
-        if other.dropna().unique().size == 1:
-            fcn = "count"
-        else:
-            fcn = "mean"
+        if fcn is None:
+            other = self.data.loc[cut.index, tko]
+            if other.dropna().unique().size == 1:
+                fcn = "count"
+            else:
+                fcn = "mean"
 
         agg = gb.agg(fcn).loc[:, tko]
 
@@ -388,9 +393,9 @@ class Hist1D(AggPlot):
         self._log = base.LogAxes(x=logx)
         self._clip = clip
 
-    def agg(self):
+    def agg(self, **kwargs):
         intervals = self.intervals["x"]
-        agg = super(Hist1D, self).agg()
+        agg = super(Hist1D, self).agg(**kwargs)
         agg = agg.reindex(intervals)
         return agg
 
@@ -657,8 +662,8 @@ class Hist2D(AggPlot):
 
         self._axnorm = new
 
-    def agg(self):
-        agg = super(Hist2D, self).agg()  # .unstack("x")
+    def agg(self, **kwargs):
+        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
 
         axnorm = self.axnorm
         if axnorm is None:

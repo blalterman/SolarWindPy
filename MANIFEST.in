@@ -1,2 +1,5 @@
 # Include the README, LICENSE, and CITATION files
-include *.md
+include CITATION.rst
+include LICESNSE.rst
+include README.rst
+# include solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv
