@@ -100,6 +100,12 @@ class Scatter(base.Base):
         if ylbl is not None:
             ax.set_ylabel(ylbl)
 
+        if self.log.x:
+            ax.set_xscale("log")
+
+        if self.log.y:
+            ax.set_yscale("log")
+
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, **kwargs):
