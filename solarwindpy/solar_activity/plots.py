@@ -16,7 +16,7 @@ class IndicatorPlot(pp.base.Base):
     def __init__(self, indicator, ykey, plasma_index=None):
         self.set_data(indicator, ykey, plasma_index)
         self.set_log(x=False, y=False)
-        self._labels = pp.base.AxesLabels(x=pp.labels.DateTime("Year"), y="y")
+        self._labels = pp.base.AxesLabels(x=pp.labels.special.DateTime("Year"), y="y")
 
     @abstractmethod
     def _format_axis(self, ax):
@@ -89,7 +89,7 @@ class IndicatorPlot(pp.base.Base):
 class SSNPlot(IndicatorPlot):
     def __init__(self, indicator, **kwargs):
         super(SSNPlot, self).__init__(indicator, "ssn", **kwargs)
-        self.set_labels(y=pp.labels.SSN(indicator.id.key))
+        self.set_labels(y=pp.labels.special.SSN(indicator.id.key))
 
     def _format_axis(self, ax):
         super(SSNPlot, self)._format_axis(ax)
