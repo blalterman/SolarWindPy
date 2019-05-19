@@ -94,9 +94,9 @@ class AggPlot(base.Base):
         gb = self.joint.groupby(list(self._agg_axes))
         return gb
 
-    @property
-    def clip(self):
-        return self._clip
+    #     @property
+    #     def clip(self):
+    #         return self._clip
 
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
@@ -413,16 +413,19 @@ class Hist1D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def make_plot(self, ax=None, **kwargs):
+    def make_plot(self, ax=None, fcn=None, **kwargs):
         r"""Make a plot on `ax`.
 
         If `ax` is None, create a `mpl.subplots` axis.
 
         `**kwargs` passed directly to `ax.plot`.
 
-        `drawstyle` defaults to `steps-mid`.
+        `drawstyle` defaults to `steps-mid`
+
+        `fcn` passed to `self.agg`. Only one function is allow b/c we
+        don't yet handle uncertainties.
         """
-        agg = self.agg()
+        agg = self.agg(fcn=fcn)
         #         tko = self.agg_axes
         x = pd.IntervalIndex(agg.index).mid
         y = agg
