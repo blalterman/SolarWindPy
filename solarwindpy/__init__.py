@@ -11,7 +11,6 @@ from pkg_resources import get_distribution, DistributionNotFound
 
 import pandas as pd
 
-
 from .core import (
     units_constants,
     base,
@@ -30,8 +29,6 @@ pd.set_option("mode.use_inf_as_na", True)
 Plasma = core.plasma.Plasma
 pp = plotting
 sa = solar_activity
-sc = spacecraft
-at = alfvenic_turbulence
 Hist1D = plotting.histograms.Hist1D
 Hist2D = plotting.histograms.Hist2D
 TeXlabel = plotting.labels.TeXlabel
