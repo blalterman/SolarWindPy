@@ -272,7 +272,8 @@ _trans_units = {
     "re": _inU["dimless"],
     # Nyquist things
     "Wn": _inU["dimless"],
-    "gamma": r"\Omega_p",
+    "gamma": _inU["dimless"],
+    "gamma_max": _inU["dimless"],
 }
 
 _trans_component = {
@@ -349,6 +350,7 @@ _templates = {
     # Instability things,
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma/\Omega_{{$S}}",
+    "gamma_max": r"\gamma_\max/\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
 }
 
