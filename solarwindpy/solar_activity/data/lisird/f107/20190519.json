@@ -1,0 +1,11 @@
+{
+    "time": {
+        "units": "milliseconds since 1970-01-01",
+        "length": "10"
+    },
+    "f107": {
+        "missing_value": "-99999",
+        "units": "solar flux unit (SFU)",
+        "long_name": "f10.7 cm Radio Flux"
+    }
+}

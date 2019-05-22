@@ -170,7 +170,7 @@ class Distance2Sun(object):
 
     @property
     def path(self):
-        return "distance2sun"
+        return Path("distance2sun")
 
     @property
     def tex(self):
@@ -184,6 +184,36 @@ class Distance2Sun(object):
             raise NotImplementedError("Unrecognized distance2sun units %s" % units)
 
         self._units = units
+
+
+class SSN(object):
+    def __init__(self, key):
+        self.set_kind(key)
+
+    def __str__(self):
+        return r"$%s \; [\#]$" % self.tex
+
+    @property
+    def units(self):
+        return _inU["dimless"]
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def tex(self):
+        return r"\mathrm{%s} \; \mathrm{SSN}" % self.kind
+
+    @property
+    def kind(self):
+        return self._kind
+
+    def set_kind(self, new):
+        new = new.upper()
+        assert new in ("M", "M13", "D", "Y")
+        self._kind = new
+        self._path = Path(f"""{new.lower()!s}-ssn""")
 
 
 _trans_measurement = {
@@ -272,7 +302,14 @@ _trans_units = {
     "re": _inU["dimless"],
     # Nyquist things
     "Wn": _inU["dimless"],
-    "gamma": r"\Omega_p",
+    "gamma": _inU["dimless"],
+    "gamma_max": _inU["dimless"],
+    # Solar Activity
+    #     "ssn": _inU["dimless"],
+    "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
+    "f107": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
+    "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
+    "MgII": _inU["dimless"],
 }
 
 _trans_component = {
@@ -297,6 +334,11 @@ _trans_component = {
     # These will be replaced by dot products and regex.
     "bv": r"{\vec{B} \cdot \vec{v}}",
     "dv": r"\Delta v",  # For "e" terms
+    # Solar Activity
+    #     "monthly-13": r"\mathrm{M13}",
+    #     "monthly": r"\mathrm{M}",
+    #     "daily": r"\mathrm{D}",
+    #     "yearly": r"\mathrm{Y}",
 }
 
 _templates = {
@@ -346,10 +388,17 @@ _templates = {
     "sigma_r": r"\sigma_{r;{$S}}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
-    # Instability things,
+    # Instability things
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma/\Omega_{{$S}}",
+    "gamma_max": r"\gamma_\max/\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
+    # Solar Activity
+    #     "ssn": r"{{$C}} \; \mathrm{SSN}",
+    "Lalpha": r"\mathrm{L}-\alpha",
+    "f10.7": r"\mathrm{F}10.7",
+    "CaK": r"\mathrm{CaK}",
+    "MgII": r"\mathrm{MgII}",
 }
 
 

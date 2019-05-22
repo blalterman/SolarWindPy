@@ -31,7 +31,7 @@ class Scatter(base.Base):
 
     """
 
-    def __init__(self, x, y, z=None, clip_data=True):
+    def __init__(self, x, y, z=None, clip_data=False):
         r"""
         Parameters
         ----------
@@ -99,6 +99,12 @@ class Scatter(base.Base):
         ylbl = self.labels.y
         if ylbl is not None:
             ax.set_ylabel(ylbl)
+
+        if self.log.x:
+            ax.set_xscale("log")
+
+        if self.log.y:
+            ax.set_yscale("log")
 
         ax.grid(True, which="major", axis="both")
 
