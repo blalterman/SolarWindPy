@@ -69,8 +69,9 @@ class Count(ArbitraryLabel):
         return self._axnorm
 
     def set_axnorm(self, norm):
-        norm = norm.lower()
-        #         assert norm in (None, "c", "r", "t", "d")
+        if norm is not None:
+            norm = norm.lower()
+
         assert norm in base._trans_axnorm.keys()
         self._axnorm = norm
 
@@ -94,7 +95,7 @@ class Count(ArbitraryLabel):
         #        else:
         #            raise ValueError("Unrecognized normalization {}".format(norm))
 
-        tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm[self.norm]
+        tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm[self.axnorm]
         return tex.replace(" ", r" \, ")
 
     def _build_path(self):

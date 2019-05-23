@@ -11,9 +11,9 @@ echo $envname
 
 core="pandas scipy numpy numexpr bottleneck matplotlib pytables"
 dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-use="jupyter nbdime widgetsnbextension yaml pyyaml astropy"
+use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy"
 
-pkgs="$core $dev" #$use"
+pkgs="$core $dev" # $use"
 
 conda create -n $envname python=3 $pkgs
 #                         pandas \
