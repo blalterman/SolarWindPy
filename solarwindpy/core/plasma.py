@@ -947,6 +947,8 @@ class Plasma(base.Base):
 
             :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
 
+        The calculation is done in the plasma frame.
+
         Parameters
         ----------
         species: list-like of str
@@ -963,8 +965,7 @@ class Plasma(base.Base):
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        # pdb.set_trace()
-
+        # Calculate as m*v
         scom = "+".join(species)
         const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
         rho_i = self.mass_density(*stuple)
