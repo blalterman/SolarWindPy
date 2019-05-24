@@ -344,6 +344,13 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(ot.thermal_speed(*s), ot.w(*s))
                 pdt.assert_frame_equal(ot.thermal_speed(s[0]), ot.w(*s))
 
+                # Test that the scalar thermal speed is as expected in plasma.
+                scalar = this_ion.loc[:, "scalar"].pow(2)
+                par = this_ion.loc[:, "par"].pow(2)
+                per = this_ion.loc[:, "per"].pow(2)
+                chk = per.multiply(2).add(par).multiply(1.0 / 3.0)
+                pdt.assert_series_equal(scalar, chk, check_names=False)
+
             else:
                 these_ions = ions_.loc[:, pd.IndexSlice[:, s]]
                 pdt.assert_frame_equal(these_ions, ot.thermal_speed(*s))

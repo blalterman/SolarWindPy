@@ -568,8 +568,10 @@ class Plasma(base.Base):
             .multiply(coeff, axis=1, level="C")
         )
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
-        #          where there is none.
+        #       where there is none. Actually, not possible as we are combining along
+        #       "S".
         w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
         data = pd.concat([data, w], axis=1)
