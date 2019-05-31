@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 solarwindpy/solar_activity/data/*.csv
 solarwindpy/solar_activity/data/*.json
+solarwindpy/solar_activity/data/**/*.csv
 stale
 .*.swp
 .DS_store

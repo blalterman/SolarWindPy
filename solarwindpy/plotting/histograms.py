@@ -411,6 +411,9 @@ class Hist1D(AggPlot):
         if self.log.x:
             ax.set_xscale("log")
 
+        if self.log.y:
+            ax.set_yscale("log")
+
         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
@@ -812,10 +815,11 @@ class Hist2D(AggPlot):
             self.data[axis],
             y=self.data["z"],
             logx=self.log._asdict()[axis],
-            clip_data=False,  # Any clipping will be addressed by bins.
+            clip_data=False,  # Any clipping will be addressed by Hist2D's bins.
             nbins=self.edges[axis].values,
         )
         h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()["z"])
+        h1.set_path("auto")
 
         return h1
 

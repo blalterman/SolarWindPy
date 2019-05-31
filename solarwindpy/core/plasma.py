@@ -330,7 +330,15 @@ class Plasma(base.Base):
             If not None, time to start/stop for loading data.
         kwargs:
             Passed to `Plasma.__init__`.
+            `log_plasma_stats` defaults to False to accelerate startup.
         """
+
+        #     @property
+        #     def log_plasma_at_init(self):
+        #         return self._log_plasma_at_init
+
+        #     def set_log_plasma_stats(self, new):
+        #         self._log_plasma_at_init = bool(new)
 
         data = pd.read_hdf(fname, key=dkey)
         data.columns.names = ["M", "C", "S"]
@@ -347,7 +355,8 @@ class Plasma(base.Base):
             )
             raise ValueError(msg)
 
-        plasma = cls(data, *species, **kwargs)
+        log_at_init = kwargs.pop("log_plasma_stats", False)
+        plasma = cls(data, *species, log_plasma_stats=log_at_init, **kwargs)
 
         plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey  :  %s\nshape : %s\nstart : %s\nstop  : %s",

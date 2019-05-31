@@ -50,7 +50,7 @@ class Vsw(ArbitraryLabel):
 
 class Count(ArbitraryLabel):
     def __init__(self, norm=None):
-        self.set_axnorm(None)
+        self.set_axnorm(norm)
         self.build_label()
 
     def __str__(self):
@@ -76,26 +76,12 @@ class Count(ArbitraryLabel):
         self._axnorm = norm
 
     def _build_tex(self):
-        #        norm = self.axnorm
-        #        if norm is None:
-        #            tex = "{}"
-        #
-        #        elif norm == "c":
-        #            tex = r"Col. Norm {}"
-        #
-        #        elif norm == "r":
-        #            tex = r"Row Norm {}"
-        #
-        #        elif norm == "t":
-        #            tex = r"Total Norm {}"
-        #
-        #        elif norm == "d":
-        #            tex = r"Density Norm {}"
-        #
-        #        else:
-        #            raise ValueError("Unrecognized normalization {}".format(norm))
+        axnorm = base._trans_axnorm[self.axnorm]
+        if axnorm:
+            tex = r"\mathrm{%s Norm Count}" % axnorm
+        else:
+            tex = r"\mathrm{Count}"
 
-        tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm[self.axnorm]
         return tex.replace(" ", r" \, ")
 
     def _build_path(self):
@@ -104,6 +90,72 @@ class Count(ArbitraryLabel):
         norm = self.axnorm
         if norm is not None:
             path = path / (norm.upper() + "norm")
+
+        return path
+
+    def build_label(self):
+        self._tex = self._build_tex()
+        self._path = self._build_path()
+
+
+class Probability(ArbitraryLabel):
+    def __init__(self, other_label):
+        r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+        """
+        self.set_other_label(other_label)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [\%]$".format(self.tex)
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def other_label(self):
+        return self._other_label
+
+    def set_other_label(self, other):
+        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        self._other_label = other
+
+    def _build_tex(self):
+        other = self.other_label
+        try:
+            tex = other.tex
+        except AttributeError:
+            tex = r"\mathrm{Prob.(%s)}" % other
+
+        return tex.replace(" ", r" \, ")
+
+    def _build_path(self):
+        other = self.other_label
+
+        try:
+            other = str(other.path)
+        except AttributeError:
+            other = (
+                other.replace(">", "GT")
+                .replace("<", "LT")
+                .replace(r"\gt", "GT")
+                .replace(r"\lt", "GT")
+                .replace(r"\geq", "GEQ")
+                .replace(r"\leq", "LEQ")
+                .replace(r"\gt", "GT")
+                .replace(r"\neq", "NEQ")
+                .replace(r"\eq", "EQ")
+                .replace(r"==", "EQ")
+                .replace(r"!=", "NEQ")
+            )
+
+        other = other.replace(" ", "-")
+
+        path = Path("prob-" + other)
 
         return path
 

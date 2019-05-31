@@ -100,11 +100,12 @@ class SIDCLoader(DataLoader):
             dt.loc[:, "day"] = 1
 
         elif key == "d":
-            dtypes_columns = _m_dtypes_columns
+            dtypes_columns = _d_dtypes_columns
             csv = pd.read_csv(
                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
             )
             csv.columns = dtypes_columns.columns
+
             dt = csv.loc[:, ["year", "month", "day"]]
 
         else:
@@ -151,11 +152,6 @@ class SIDC(ActivityIndicator):
         convert_nan: bool
             See `SIDC.convert_nan`.
         """
-
-        if key == "d":
-            raise NotImplementedError(
-                "Need to figure out how to handle the definitive flag in last column."
-            )
 
         self._init_logger()
         self.set_id(SIDC_ID(key))

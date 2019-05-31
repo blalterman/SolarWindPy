@@ -186,7 +186,7 @@ _templates = {
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
     "q": r"q_{$S}",  # charge density
-    "count": _mathrm("Count"),
+    #     "count": _mathrm("Count"),
     "ratio": _mathrm("Ratio"),
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
