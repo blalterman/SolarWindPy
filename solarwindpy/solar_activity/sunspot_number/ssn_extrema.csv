@@ -1,0 +1,40 @@
+# Solar cycle extrema calculated using 13-Month Smoothed values. Information
+# for Cycles 1 through 24 was extracted from Tables (1) and (2) in The Solar 
+# Cycle Living Review by D. H. Hathaway. The citation is
+# 
+#     Hathaway, D. H. (2015). The solar cycle. Living Reviews in Solar 
+#     Physics, 12(1). https://doi.org/10.1007/lrsp-2015-4
+#
+# Author: B.L.Alterman
+# Date:   2018-08-08
+# e-mail: balterma@umich.edu
+#
+# Notes
+# -----
+# pd.read_csv("extrema.csv", header=0, skiprows=15, index_col=0)
+
+cycle,Max,Min
+1,1761-06-01,1755-02-01
+2,1769-09-01,1766-06-01
+3,1778-05-01,1775-06-01
+4,1788-02-01,1784-09-01
+5,1805-02-01,1798-04-01
+6,1816-05-01,1810-08-01
+7,1829-11-01,1823-05-01
+8,1837-03-01,1833-11-01
+9,1848-02-01,1843-07-01
+10,1860-02-01,1855-12-01
+11,1870-08-01,1867-03-01
+12,1883-12-01,1878-12-01
+13,1894-01-01,1890-03-01
+14,1906-02-01,1902-01-01
+15,1917-08-01,1913-07-01
+16,1928-04-01,1923-08-01
+17,1937-04-01,1933-09-01
+18,1947-05-01,1944-02-01
+19,1958-03-01,1954-04-01
+20,1968-11-01,1964-10-01
+21,1979-12-01,1976-03-01
+22,1989-07-01,1986-09-01
+23,2000-04-01,1996-05-01
+24,2014-04-01,2008-12-01

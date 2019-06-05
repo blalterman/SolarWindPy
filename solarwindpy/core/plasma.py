@@ -568,8 +568,10 @@ class Plasma(base.Base):
             .multiply(coeff, axis=1, level="C")
         )
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
-        #          where there is none.
+        #       where there is none. Actually, not possible as we are combining along
+        #       "S".
         w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
         data = pd.concat([data, w], axis=1)
@@ -945,6 +947,8 @@ class Plasma(base.Base):
 
             :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
 
+        The calculation is done in the plasma frame.
+
         Parameters
         ----------
         species: list-like of str
@@ -961,8 +965,7 @@ class Plasma(base.Base):
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        # pdb.set_trace()
-
+        # Calculate as m*v
         scom = "+".join(species)
         const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
         rho_i = self.mass_density(*stuple)

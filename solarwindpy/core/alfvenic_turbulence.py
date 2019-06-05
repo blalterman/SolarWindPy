@@ -8,6 +8,9 @@ Bibliography
 [2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
     wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
     463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
+﻿[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
+    Cyclotron Resonance as a Dissipation Mechanism in Solar Wind Turbulence: A
+    Statistical Study at Ion-Kinetic Scales. Astrophys. J. 856, 49 (2018).
 """
 
 import pdb  # noqa: F401
@@ -31,8 +34,9 @@ class AlfvenicTurbulence(base.Core):
     r"""Handle and calculate Alfvenic turbulence quantities using the Elsasser
     variables following Section B.3.1 in [1].
 
-    Lloyd Woodham helped me define these calculations at the 2018 AGU Fall
-    Meeting and understand [1].
+    Lloyd Woodham <https://orcid.org/0000-0003-2845-4250> helped me define these
+    calculations at the 2018 AGU Fall Meeting and understand [1]. Please cite [3] if
+    using this module.
 
     Parameters
     ----------
