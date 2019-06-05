@@ -897,9 +897,9 @@ class PlasmaTestBase(ABC):
     def test_lnlambda(self):
         # print_inline_debug_info = False
 
-        if len(self.stuple) == 1:
-            # We only test plasmas w/ > 1 species.
-            return None
+        #        if len(self.stuple) == 1:
+        #            # We only test plasmas w/ > 1 species.
+        #            return None
 
         kb_J = constants.physical_constants["Boltzmann constant"]
         kb_eV = constants.physical_constants["Boltzmann constant in eV/K"]
@@ -1010,6 +1010,14 @@ class PlasmaTestBase(ABC):
                 self.object_testing.lnlambda(combo[0], list(combo))
             with self.assertRaisesRegex((TypeError, ValueError), invalid):
                 self.object_testing.lnlambda(combo[1], list(combo))
+
+    @unittest.skip("in progress")
+    def test_nuc_ii(self):
+        pass
+
+    @unittest.skip("in progress")
+    def test_nc_ii(self):
+        pass
 
     def test_nuc_ij(self):
         r"""
