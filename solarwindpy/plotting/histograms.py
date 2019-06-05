@@ -736,7 +736,13 @@ class Hist2D(AggPlot):
         norm.clip = True
 
     def make_plot(
-        self, ax=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs
+        self,
+        ax=None,
+        cbar=True,
+        limit_color_norm=False,
+        cbar_kwargs=None,
+        fcn=None,
+        **kwargs
     ):
         r"""
         Make a 2D plot on `ax` using `ax.pcolormesh`.
@@ -752,11 +758,13 @@ class Hist2D(AggPlot):
             of the z-value, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
+        fcn: FunctionType, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
-        agg = self.agg()
+        agg = self.agg(fcn=fcn)
         x = self.edges["x"]
         y = self.edges["y"]
 
@@ -808,14 +816,32 @@ class Hist2D(AggPlot):
         """
         axis = axis.lower()
         assert axis in ("x", "y")
+
+        data = self.data
+
+        if data.loc[:, "z"].unique().size >= 2:
+            # Either all 1 or 1 and NaN.
+            other = "z"
+        else:
+            possible_axes = {"x", "y"}
+            possible_axes.remove(axis)
+            other = possible_axes.pop()
+
+        logx = self.log._asdict()[axis]
+        x = self.data.loc[:, axis]
+        if logx:
+            # Need to convert back to regular from log-space for data setting.
+            x = 10.0 ** x
+
         h1 = Hist1D(
-            self.data[axis],
-            y=self.data["z"],
-            logx=self.log._asdict()[axis],
+            x,
+            y=self.data.loc[:, other],
+            logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,
         )
-        h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()["z"])
+        h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()[other])
+        h1.set_path("auto")
 
         return h1
 
