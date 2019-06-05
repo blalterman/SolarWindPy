@@ -1264,9 +1264,9 @@ class Plasma(base.Base):
 
         return lnlambda
 
-    def nuc(self, sa, sb, both_species=True):
+    def nuc_ij(self, sa, sb, both_species=True):
         r"""
-        Calculate the momentum collision rate following Hernandez & Marsch
+        Calculate the two species momentum collision rate following Hernandez & Marsch
         (JGR 1985; doi:10.1029/JA090iA11p11062).
 
         Parameters
@@ -1379,9 +1379,9 @@ class Plasma(base.Base):
 
         return nu
 
-    def nc(self, sa, sb, both_species=True):
+    def nc_ij(self, sa, sb, both_species=True):
         r"""
-        Calculate the Coulomb number between species `sa` and `sb`.
+        Calculate the two-species Coulomb number between species `sa` and `sb`.
 
         Parameters
         ----------
@@ -1424,7 +1424,7 @@ class Plasma(base.Base):
         vsw = self.velocity("+".join(self.species)).mag * self.units.v
         tau_exp = r.divide(vsw, axis=0)
 
-        nuc = self.nuc(sa, sb, both_species=both_species) * self.units.nuc
+        nuc = self.nuc_ij(sa, sb, both_species=both_species) * self.units.nuc
 
         nc = nuc.multiply(tau_exp, axis=0) / self.units.nc
         nc.name = nuc.name
