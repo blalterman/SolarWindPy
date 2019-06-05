@@ -892,6 +892,6 @@ class FitFunction(ABC):
         hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")
         resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
 
-        hist_ax.tick_params(labelbottom="off")
+        hist_ax.tick_params(labelbottom=False)
 
         return hist_ax, resid_ax
