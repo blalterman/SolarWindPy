@@ -39,11 +39,11 @@ class AggPlot(base.Base):
     calc_bins, make_cut, agg, clip_data, make_plot
 
     Abstract Properties
-    ---------_---------
-    path, _agg_axes
+    -------------------
+    path, _gb_axes
 
     Abstract Methods
-    ---------_------
+    ----------------
     __init__, set_labels.y, set_path, set_data, _format_axis, make_plot
     """
 
@@ -65,7 +65,9 @@ class AggPlot(base.Base):
 
     @property
     def agg_axes(self):
-        tko = [c for c in self.data.columns if c not in self._agg_axes]
+        r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.
+        """
+        tko = [c for c in self.data.columns if c not in self._gb_axes]
         assert len(tko) == 1
         tko = tko[0]
         return tko
@@ -82,7 +84,7 @@ class AggPlot(base.Base):
         other = self.data.loc[cut.index, tko]
 
         joint = cut.copy(deep=True)
-        joint.loc[:, other.name] = other
+        joint.loc[:, tko] = other
         joint.sort_index(axis=1, inplace=True)
 
         return joint
@@ -91,12 +93,8 @@ class AggPlot(base.Base):
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes.
         """
-        gb = self.joint.groupby(list(self._agg_axes))
+        gb = self.joint.groupby(list(self._gb_axes))
         return gb
-
-    #     @property
-    #     def clip(self):
-    #         return self._clip
 
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
@@ -125,23 +123,23 @@ class AggPlot(base.Base):
         if precision is None:
             precision = 3
 
-        agg_axes = self._agg_axes
+        gb_axes = self._gb_axes
 
         if isinstance(nbins, (str, int)) or (
-            hasattr(nbins, "__iter__") and len(nbins) != len(agg_axes)
+            hasattr(nbins, "__iter__") and len(nbins) != len(gb_axes)
         ):
             # Single paramter for `nbins`.
-            nbins = {k: nbins for k in agg_axes}
+            nbins = {k: nbins for k in gb_axes}
 
-        elif len(nbins) == len(agg_axes):
+        elif len(nbins) == len(gb_axes):
             # Passed one bin spec per axis
-            nbins = {k: v for k, v in zip(agg_axes, nbins)}
+            nbins = {k: v for k, v in zip(gb_axes, nbins)}
 
         else:
             msg = "Unrecognized `nbins`\ntype: {}\n bins:{}"
             raise ValueError(msg.format(type(nbins), nbins))
 
-        for k in self._agg_axes:
+        for k in self._gb_axes:
             b = nbins[k]
             # Numpy and Astropy don't like NaNs when calculating bins.
             # Infinities in bins (typically from log10(0)) also create problems.
@@ -190,7 +188,7 @@ class AggPlot(base.Base):
         data = self.data
 
         cut = {}
-        for k in self._agg_axes:
+        for k in self._gb_axes:
             d = data.loc[:, k]
             i = intervals[k]
 
@@ -244,6 +242,10 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
+        # Ensure all bins are represented in the data. (20190605)
+        for k, v in self.intervals.items():
+            agg = agg.reindex(index=v, level=k)
+
         return agg
 
     # Old version that cuts at percentiles.
@@ -289,8 +291,8 @@ class AggPlot(base.Base):
     #         return data
 
     @abstractproperty
-    def _agg_axes(self):
-        r"""The axes over which the aggregation takes place.
+    def _gb_axes(self):
+        r"""The axes or columns over which the `groupby` aggregation takes place.
 
         1D cases aggregate over `x`. 2D cases aggregate over `x` and `y`.
         """
@@ -302,7 +304,7 @@ class Hist1D(AggPlot):
 
     Properties
     ----------
-    _agg_axes, path
+    _gb_axes, path
 
     Methods
     -------
@@ -340,7 +342,7 @@ class Hist1D(AggPlot):
         self.set_clim(None, None)
 
     @property
-    def _agg_axes(self):
+    def _gb_axes(self):
         return ("x",)
 
     def set_path(self, new, add_scale=True):
@@ -394,9 +396,9 @@ class Hist1D(AggPlot):
         self._clip = clip
 
     def agg(self, **kwargs):
-        intervals = self.intervals["x"]
+        #         intervals = self.intervals["x"]
         agg = super(Hist1D, self).agg(**kwargs)
-        agg = agg.reindex(intervals)
+        #         agg = agg.reindex(intervals, level="x")
         return agg
 
     def _format_axis(self, ax):
@@ -516,7 +518,7 @@ class Hist2D(AggPlot):
         self.set_clim(None, None)
 
     @property
-    def _agg_axes(self):
+    def _gb_axes(self):
         return ("x", "y")
 
     @property
@@ -665,9 +667,13 @@ class Hist2D(AggPlot):
 
         self._axnorm = new
 
-    def agg(self, **kwargs):
-        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
+    def _axis_normalizer(self, agg):
+        r"""Takes care of row, column, total, and density normaliation.
 
+        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
+        as actual method with `self` passed so we have access to `self.log` for density
+        normalization.
+        """
         axnorm = self.axnorm
         if axnorm is None:
             pass
@@ -679,6 +685,7 @@ class Hist2D(AggPlot):
             agg = agg.divide(agg.max())
         elif axnorm == "d":
             N = agg.sum().sum()
+            # N = agg.sum(level=["x", "y"]
             x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
             y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
             dx = pd.Series(x.right - x.left, index=x)
@@ -693,10 +700,42 @@ class Hist2D(AggPlot):
         else:
             raise ValueError("Unrecognized axnorm: %s" % axnorm)
 
-        agg = agg.unstack("x")
-        intervals = self.intervals
+        return agg
 
-        agg = agg.reindex(index=intervals["y"], columns=intervals["x"])
+    def agg(self, **kwargs):
+        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
+        agg = self._axis_normalizer(agg)
+
+        #         axnorm = self.axnorm
+        #         if axnorm is None:
+        #             pass
+        #         elif axnorm == "c":
+        #             agg = agg.divide(agg.max(level="x"), level="x")
+        #         elif axnorm == "r":
+        #             agg = agg.divide(agg.max(level="y"), level="y")
+        #         elif axnorm == "t":
+        #             agg = agg.divide(agg.max())
+        #         elif axnorm == "d":
+        #             N = agg.sum().sum()
+        #             # N = agg.sum(level=["x", "y"]
+        #             x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
+        #             y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
+        #             dx = pd.Series(x.right - x.left, index=x)
+        #             dy = pd.Series(y.right - y.left, index=y)
+        #             if self.log.x:
+        #                 dx = 10.0 ** dx
+        #             if self.log.y:
+        #                 dy = 10.0 ** dy
+
+        #             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
+
+        #         else:
+        #             raise ValueError("Unrecognized axnorm: %s" % axnorm)
+
+        #         intervals = self.intervals
+        #         agg = agg.unstack("x")
+        #         agg = agg.reindex(index=intervals["y"], columns=intervals["x"])
+        # agg.reindex(index=intervals["y"], level="y").reindex(index=intervals["x"], level="x").unstack("x")
 
         return agg
 
@@ -717,8 +756,13 @@ class Hist2D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, **kwargs):
+        if isinstance(ax, mpl.axes.Axes):
+            fig = ax.figure
+        elif isinstance(ax, np.ndarray):
+            fig = ax[0].figure
+
         label = kwargs.pop("label", self.labels.z)
-        cbar = ax.figure.colorbar(mappable, ax=ax, label=label, **kwargs)
+        cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
         return cbar
 
     def _limit_color_norm(self, norm):
@@ -764,7 +808,7 @@ class Hist2D(AggPlot):
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
-        agg = self.agg(fcn=fcn)
+        agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
         y = self.edges["y"]
 
