@@ -1011,9 +1011,9 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex((TypeError, ValueError), invalid):
                 self.object_testing.lnlambda(combo[1], list(combo))
 
-    def test_nuc_ij(self):
+    def test_nuc(self):
         r"""
-        We calculate the two-species collision frequency for differential
+        We calculate the collision frequency for differential
         flow following Hernandez & Marsch (JGR 1985,
         doi:10.1029/JA090iA11p11062) Eq. (18).
         """
@@ -1116,19 +1116,19 @@ class PlasmaTestBase(ABC):
             #           sep="\n")
 
             pdt.assert_series_equal(
-                nuab, self.object_testing.nuc_ij(sa, sb, both_species=False)
+                nuab, self.object_testing.nuc(sa, sb, both_species=False)
             )
             pdt.assert_series_equal(
-                nuba, self.object_testing.nuc_ij(sb, sa, both_species=False)
+                nuba, self.object_testing.nuc(sb, sa, both_species=False)
             )
-            pdt.assert_series_equal(nuc, self.object_testing.nuc_ij(sa, sb))
+            pdt.assert_series_equal(nuc, self.object_testing.nuc(sa, sb))
 
             nuc.name = "%s+%s" % (sb, sa)
-            pdt.assert_series_equal(nuc, self.object_testing.nuc_ij(sb, sa))
+            pdt.assert_series_equal(nuc, self.object_testing.nuc(sb, sa))
 
             pdt.assert_series_equal(
-                self.object_testing.nuc_ij(sa, sb),
-                self.object_testing.nuc_ij(sb, sa),
+                self.object_testing.nuc(sa, sb),
+                self.object_testing.nuc(sb, sa),
                 check_names=False,
             )
 
@@ -1168,7 +1168,7 @@ class PlasmaTestBase(ABC):
 
         ot.set_spacecraft(None)
 
-    def test_nc_ij_without_spacecraft(self):
+    def test_nc_without_spacecraft(self):
         #         if len(self.stuple) == 1:
         #             # We only test Nc for plasmas with more than 1 species.
         #             return None
@@ -1180,9 +1180,9 @@ class PlasmaTestBase(ABC):
             sa, sb = combo
             # Assert failure to calculate Nc when no spacecraft set.
             with self.assertRaises(ValueError):
-                ot.nc_ij(sa, sb)
+                ot.nc(sa, sb)
 
-    def test_nc_ij_with_spacecraft(self):
+    def test_nc_with_spacecraft(self):
 
         if len(self.stuple) == 1:
             # We only test plasmas w/ > 1 species.
@@ -1260,9 +1260,9 @@ class PlasmaTestBase(ABC):
 
                 ot.set_spacecraft(sc)
 
-                nuab = ot.nuc_ij(sa, sb, both_species=False)
-                nuba = ot.nuc_ij(sb, sa, both_species=False)
-                nuc = ot.nuc_ij(sa, sb, both_species=True)
+                nuab = ot.nuc(sa, sb, both_species=False)
+                nuba = ot.nuc(sb, sa, both_species=False)
+                nuc = ot.nuc(sa, sb, both_species=True)
 
                 ncab = nuab.multiply(tau_exp, axis=0) * 1e-7
                 ncab.name = "%s-%s" % (sa, sb)
@@ -1283,15 +1283,15 @@ class PlasmaTestBase(ABC):
                 #       "",
                 #       sep="\n")
 
-                pdt.assert_series_equal(ncab, ot.nc_ij(sa, sb, both_species=False))
-                pdt.assert_series_equal(ncba, ot.nc_ij(sb, sa, both_species=False))
-                pdt.assert_series_equal(nc, ot.nc_ij(sa, sb, both_species=True))
+                pdt.assert_series_equal(ncab, ot.nc(sa, sb, both_species=False))
+                pdt.assert_series_equal(ncba, ot.nc(sb, sa, both_species=False))
+                pdt.assert_series_equal(nc, ot.nc(sa, sb, both_species=True))
                 pdt.assert_series_equal(
-                    nc, ot.nc_ij(sb, sa, both_species=True), check_names=False
+                    nc, ot.nc(sb, sa, both_species=True), check_names=False
                 )
                 pdt.assert_series_equal(
-                    ot.nc_ij(sa, sb, both_species=True),
-                    ot.nc_ij(sb, sa, both_species=True),
+                    ot.nc(sa, sb, both_species=True),
+                    ot.nc(sb, sa, both_species=True),
                     check_names=False,
                 )
 
@@ -1299,19 +1299,19 @@ class PlasmaTestBase(ABC):
         ot.set_spacecraft(None)
 
         with self.assertRaisesRegex(ValueError, individual_msg):
-            ot.nc_ij("+".join(combo), sa)
+            ot.nc("+".join(combo), sa)
         with self.assertRaisesRegex(ValueError, individual_msg):
-            ot.nc_ij(sa, "+".join(combo))
+            ot.nc(sa, "+".join(combo))
 
         with self.assertRaisesRegex(ValueError, invalid_msg):
-            ot.nc_ij(",".join(combo), sa)
+            ot.nc(",".join(combo), sa)
         with self.assertRaisesRegex(ValueError, invalid_msg):
-            ot.nc_ij(sa, ",".join(combo))
+            ot.nc(sa, ",".join(combo))
 
         with self.assertRaisesRegex(TypeError, invalid_msg):
-            ot.nc_ij(combo, sa)
+            ot.nc(combo, sa)
         with self.assertRaisesRegex(TypeError, invalid_msg):
-            ot.nc_ij(sa, combo)
+            ot.nc(sa, combo)
 
     def test_estimate_electrons(self):
         #        print_inline_debug_info = True

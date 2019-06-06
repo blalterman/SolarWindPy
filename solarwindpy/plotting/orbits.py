@@ -123,6 +123,52 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         transformed = grouped.transform(self._axis_normalizer)
         return transformed
 
+    def project_1d(self, axis, **kwargs):
+        r"""Make a `Hist1D` from the data stored in this `His2D`.
+
+        Parameters
+        ----------
+        axis: str
+            "x" or "y", specifying the axis to project into 1D.
+        kwargs:
+            Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
+
+        Returns
+        -------
+        h1: `Hist1D`
+        """
+        axis = axis.lower()
+        assert axis in ("x", "y")
+
+        data = self.data
+
+        if data.loc[:, "z"].unique().size >= 2:
+            # Either all 1 or 1 and NaN.
+            other = "z"
+        else:
+            possible_axes = {"x", "y"}
+            possible_axes.remove(axis)
+            other = possible_axes.pop()
+
+        logx = self.log._asdict()[axis]
+        x = self.data.loc[:, axis]
+        if logx:
+            # Need to convert back to regular from log-space for data setting.
+            x = 10.0 ** x
+
+        h1 = OrbitHist1D(
+            self.orbit,
+            x,
+            y=self.data.loc[:, other],
+            logx=logx,
+            clip_data=False,  # Any clipping will be addressed by bins.
+            nbins=self.edges[axis].values,
+        )
+        h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()[other])
+        h1.set_path("auto")
+
+        return h1
+
     def make_plot(
         self,
         axes=None,
@@ -180,6 +226,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
+            #             use_gridspec = kwargs.pop("use_gridspec", False)
             cbar = self._make_cbar(pc, axes.values, **cbar_kwargs)
 
         self._format_axes(axes)

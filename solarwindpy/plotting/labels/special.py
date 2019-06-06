@@ -224,6 +224,9 @@ class Distance2Sun(ArbitraryLabel):
 
         self._units = units
 
+    def build_label(self):
+        pass
+
 
 class SSN(ArbitraryLabel):
     def __init__(self, key):
