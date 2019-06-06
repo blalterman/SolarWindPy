@@ -8,3 +8,5 @@ from . import special
 TeXlabel = base.TeXlabel
 Vsw = special.Vsw
 Count = special.Count
+
+available_TeXlabel_measurements = base.available

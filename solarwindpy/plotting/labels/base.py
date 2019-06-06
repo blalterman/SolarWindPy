@@ -4,6 +4,7 @@ r"""Tools for creating physical quantity plot labels.
 import pdb  # noqa: F401
 import logging
 import re
+from abc import ABC
 from pathlib import Path
 from string import Template as StringTemplate
 from collections import namedtuple
@@ -30,7 +31,7 @@ _all_species_re = sorted(_trans_species.keys())[
     ::-1
 ]  # Order so we check for p1 and p2 before p.
 _all_species_re = re.compile(r"({})".format("|".join(_all_species_re)))
-_default_template_string = "{$M}_{{$C},{$S}}"
+_default_template_string = "{$M}_{{$C};{$S}}"
 
 
 def _run_species_substitution(pattern):
@@ -140,7 +141,7 @@ _trans_units = {
     # Solar Activity
     #     "ssn": _inU["dimless"],
     "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
-    "f107": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
+    "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
 }
@@ -235,7 +236,72 @@ _templates = {
 }
 
 
-class TeXlabel(object):
+def available():
+    m = sorted(list(_trans_measurement.keys()) + list(_templates.keys()))
+    c = sorted(_trans_component.keys())
+    s = sorted(_trans_species.keys())
+    print(
+        r"""TeXlabel knows
+
+Measurements
+------------
+{m}
+
+Components
+----------
+{c}
+
+Species
+-------
+{s}
+""".format(
+            m=", ".join(m), c=", ".join(c), s=", ".join(s)
+        )
+    )
+
+
+class Base(ABC):
+    def __init__(self):
+        self._init_logger()
+
+    def __str__(self):
+        return self._with_units
+
+    def __repr__(self):
+        # Makes debugging easier.
+        return str(self.tex)
+
+    def __gt__(self, other):
+        return str(self) > str(other)
+
+    def __le__(self, other):
+        return str(self) < str(other)
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __geq__(self, other):
+        return str(self) >= str(other)
+
+    def __leq__(self, other):
+        return str(self) <= str(other)
+
+    def __hash__(self):
+        return hash(str(self))
+
+    @property
+    def logger(self):
+        return self._logger
+
+    def _init_logger(self, handlers=None):
+        r"""
+        Init a logger with a StreamHandler at INFO level.
+        """
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
+        self._logger = logger
+
+
+class TeXlabel(Base):
     r"""Create a LaTeX label from (Measurement, Component, Species)
     information that includes units and a str useable for creating a path at
     which a figure can be saved.
@@ -270,6 +336,11 @@ class TeXlabel(object):
     -------
     build_label:
         Build the label.
+
+    Notes
+    -----
+    Comparison operators and hash are defined based on `str(self)`. So `TeXlabels` identifying
+    identical quantities hash identically.
     """
 
     def __init__(self, mcs0, mcs1=None, axnorm=None):
@@ -290,24 +361,10 @@ class TeXlabel(object):
             If not None, axis normalization on plot. Primarily used for
             creating colorbar labels.
         """
-        self._init_logger()
+        super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
         self.build_label()
-
-    def __str__(self):
-        return self._with_units
-
-    @property
-    def logger(self):
-        return self._logger
-
-    def _init_logger(self, handlers=None):
-        r"""
-        Init a logger with a StreamHandler at INFO level.
-        """
-        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
-        self._logger = logger
 
     @property
     def mcs0(self):
@@ -407,6 +464,7 @@ class TeXlabel(object):
             .replace("()", "")
             .replace("_{}", "")
             .replace("{},", "")
+            .replace("{};", "")
             .replace("{}", "")
             .replace(",}", "}")
         )

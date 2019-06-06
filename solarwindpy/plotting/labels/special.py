@@ -3,12 +3,12 @@ r"""Special labels not handled by :py:class:`TeXlabel`.
 """
 import pdb  # noqa: F401
 from pathlib import Path
-from abc import ABC, abstractproperty, abstractmethod
+from abc import abstractproperty, abstractmethod
 
 from . import base
 
 
-class ArbitraryLabel(ABC):
+class ArbitraryLabel(base.Base):
     def __init__(self):
         pass
 

@@ -1454,7 +1454,7 @@ class Plasma(base.Base):
         :math:`u` is the bulk velocity.
 
         In the case of a Bimaxwellian, we :math:`w^3 = w_\parallel w_\perp^2`
-        :math:`(\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_perp^2`.
+        :math:`(\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_\perp^2`.
 
         Parameters
         ----------
