@@ -87,7 +87,8 @@ class DataLoader(Base):
 
     @abstractproperty
     def data_path(self):
-        return Path(__file__).parent / "data"
+        #        return Path(__file__).parent / "data"
+        return Path.home() / "solarwindpy" / "data"
 
     @abstractstaticmethod
     def convert_nans(data):

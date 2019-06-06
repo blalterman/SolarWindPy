@@ -27,18 +27,16 @@ for which the Bibtex entry is:
     volume = {831},
     year = {2016}
     }
-
-
 """
 
-import pdb as pdb  # noqa: F401
+import pdb  # noqa: F401
+import logging
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
 
-# from collections import namedtuple
-from numbers import Number
-
+from collections import namedtuple
 from matplotlib import pyplot as plt
 
 _inst_type_idx = pd.Index([u"AIC", u"FMW", u"MM", u"OFI"], name=u"Intability")
@@ -119,11 +117,19 @@ _plot_contour_kwargs = pd.DataFrame(
     columns=["color", "linestyle", "marker"],
 )
 
+_instability_tests = namedtuple("InstabilityTests", "AIC,MM,FMW,OFI")(
+    np.greater, np.greater, np.less, np.less
+)
+
 
 def beta_ani_inst(beta, a=None, b=None, c=None):
-    r"""Functional form of the instability contour.
+    r"""Constant growth rate isocontours from Eq. (5) in [1].
 
-    Eq. (5) in [1].
+        $R_p = 1 + \frac{a}{(\beta_{\parallel,p} - c)^b}$
+
+    where $p$ is defined assuming only a single proton population is fit.
+
+    `a`, `b`, and `c` are kwargs so that **kwarg expansion works.
     """
     # Effectively, type checking.
     a = float(a)
@@ -142,322 +148,134 @@ class StabilityCondition(object):
 
         StabilityCondition(growth_rate, beta, anisotropy, fill=-9999)
 
-    Parameters
-    ----------
-    growth_rate: int
-        Should correspond the the growth rate minor_axis index of the
-        `insta_params` Pandas.Panel in the containing module. Unless something
-        has changed, these where [-2, -3, -4] when the class was written.
-    beta, anisotropy : pd.Series, 1D np.ndarray, or 1D DataFrame
-        The 1D array-like objects containing the beta and anisotropy
-        measurements.
-    fill : -9999
-        The fill value placed in the `stability_bin` object when instantiated.
-        If any fill values are left in that object, not all measurements have
-        been visited.
-
     Methods
     -------
-    set_fill :
-        Set the fill value.
-    set_instability_parameters :
+    set_instability_parameters:
         Take the instability parameters corresponding to the passed growth rate.
-    set_beta_ani :
-        Set the beta and anistropy values.
-    _calc_instability_thresholds :
+    set_beta_ani:
+        Set the be    set_fill :
+        Set the fill value.ta and anistropy values.
+    _calc_instability_thresholds:
         Calculate the instability thresholds. This is a private method that
         should not be called. See `calculate_stability_criteria`.
-    _calc_is_unstable :
+    _calc_is_unstable:
         Determine if a measurement is unstable to each instability. This is a
         private method that should not be called. See
         `calculate_stability_criteria`.
-    _calc_stability_bin :
+    _calc_stability_bin:
         Identify which instability (if any) each measurement is unstale to.
         This is a private method that should not be called. See
         `calculate_stability_criteria`.
-    calculate_stability_criteria :
+    calculate_stability_criteria:
         Run `_calc_instability_thresholds`, `_calc_is_unstable`, and
         `_calc_stability_bin` in that order. Use this method over the others
         individually.
 
     Properties
     ----------
-    fill :
-        The fill value
-    instability_parameters :
+    instability_parameters:
         The Pandas DataFrame of instability parameters.
-    beta :
+    beta:
         The beta values of the object.
-    anisotropy :
+    anisotropy:
         The anisotropy values of the object.
-    stability_map : dict
+    stability_map: dict
         The map of ints to strings identifying the instabilities.
-    stability_map_inverse : dict
+    stability_map_inverse: dict
         The inverse of `stability_map`.
-    instability_tests : dict
+    instability_tests: dict
         The tests used for each instability threshold. The keys are "AIC", "MM",
         "FMW", and "OFI" for Alfven/Ion-Cyclotron, Mirror Mode, Fast
         Magnetosonic / Whistler, and Oblique Firehose. The values are numpy
         ufuncs.
-    instability_thresholds : pd.DataFrame
+    instability_thresholds: pd.DataFrame
         The value of the anisotropy for which the plasma goes unstable.
-    is_unstable : pd.DataFrame
+    is_unstable: pd.DataFrame
         Boolean DataFrame indicating if a measurement is unstable to a given
         instability.
-    stability_bin : pd.Series
+    stability_bin: pd.Series
         The integer corresponding to the (in)stability condition of the
         measurement. The string identifying the instability is given by the
         `stability_map`.
-    norm : mpl.colors.Normalize(min(stability_map), max(stability_map))
+    norm: mpl.colors.Normalize(min(stability_map), max(stability_map))
         The normalization instance used for plotting the stability bin.
-    cmap : matplotlib colormap
+    cmap: matplotlib colormap
         A linearly segmented to have one level for each (in)stability condition.
-
-
-    See Also
-    --------
-    what else should I look at?
-
-    Notes
-    -----
-    -last test :
-    -pass?
-        --condition:
-            -version  :
-            -location :
-        --failure:
-    -Development history:
-        -Started class. (20161005_1912)
-    --major challenges:
-
-    Proposed updates
-    ----------------
-    1)  Subclass VerboseDebug and set the verbose and debug parameters.
-        (20161005_1912)
-
-    Do not try
-    ----------
-
     """
 
-    def __init__(self, growth_rate, beta, anisotropy, fill=-9999):
-
-        self.set_fill(fill)
+    def __init__(self, growth_rate, beta, anisotropy):
+        r"""
+        growth_rate: int
+            Should correspond the the growth rate minor_axis index of the
+            `insta_params` Pandas.Panel in the containing module. Unless something
+            has changed, these where [-2, -3, -4] when the class was written.
+        beta, anisotropy: pd.Series
+            The 1D array-like objects containing the beta and anisotropy
+            measurements.
+        """
+        self._init_logger()
         self.set_instability_parameters(growth_rate)
         self.set_beta_ani(beta, anisotropy)
         self.calculate_stability_criteria()
 
+    def __str__(self):
+        return self.__class__.__name__
+
+    def _init_logger(self):
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
+        self._logger = logger
+
     @property
     def fill(self):
-        return self._fill
-
-    def set_fill(self, new):
-        assert isinstance(new, Number), "You passed: %s" % new
-        self._fill = new
-
-    def set_instability_parameters(self, growth_rate):
-        assert isinstance(growth_rate, int)
-        assert growth_rate in insta_params.minor_axis, (
-            "The valid growth rates are %s. You passed %s."
-            % (insta_params.minor_axis.tolist(), growth_rate)
-        )
-
-        temp = insta_params.copy(deep=True).minor_xs(growth_rate)
-        self._instability_parameters = temp
+        r"""Used for building data containers and checking that all entries are visited.
+        """
+        return -9999.0
 
     @property
     def instability_parameters(self):
         return self._instability_parameters
 
     @property
+    def data(self):
+        return self._data
+
+    @property
     def beta(self):
-        return self._beta
+        return self.data.loc[:, "beta"]
 
     @property
     def anisotropy(self):
-        return self._anisotropy
-
-    def set_beta_ani(self, beta, anisotropy):
-        # TODO: we need to account for the possible different shapes of beta and ani, depending on whether
-        # we are using ani as an axis and beta as a color or both as 1D arrays.
-
-        if isinstance(beta, np.ndarray):
-            beta = pd.Series(beta)
-
-        elif isinstance(beta, pd.Series):
-            pass
-        #             beta = beta.values.squeeze()
-
-        elif isinstance(beta, pd.DataFrame):
-            assert (
-                beta.shape[1] == 1
-            ), "`beta` must be a 1D DataFrame. If you want it to be a 2D DataFrame, you need to ravel some stuff."
-            #             beta = beta.values.squeeze()
-            beta = beta.iloc[:, 0]
-
-        else:
-            msg = "Unrecognized `beta`."
-            raise TypeError(msg)
-
-        if isinstance(anisotropy, np.ndarray):
-            #             pass
-            anisotropy = pd.Series(anisotropy)
-
-        elif isinstance(anisotropy, pd.Series):
-            pass
-        #             anisotropy = anisotropy.values.squeeze()
-
-        elif isinstance(anisotropy, pd.DataFrame):
-            assert (
-                anisotropy.shape[1] == 1
-            ), "`anisotropy` must be a 1D DataFrame. If you want it to be a 2D DataFrame, you need to ravel some stuff."
-            #             anisotropy = anisotropy.values.squeeze()
-            anisotropy = anisotropy.iloc[:, 0]
-
-        else:
-            msg = "Unrecognized `anisotropy`."
-            raise TypeError(msg)
-
-        assert beta.shape == anisotropy.shape
-        if len(beta.index.difference(anisotropy.index)):
-            "You haven't tested `beta` and `anistropy` with difference indices."
-
-        self._beta = beta
-        self._anisotropy = anisotropy
+        return self.data.loc[:, "anisotropy"]
 
     @property
     def stability_map(self):
-        temp = {
+        return {
             4: "MM",
             3: "Between\nAIC &\nMM",
             2: "Stable",
             1: "Between\nFMW &\nOFI",
             0: "OFI",
         }
-        return temp
 
     @property
     def stability_map_inverse(self):
-        temp = {v: k for k, v in self.stability_map.items()}
-        return temp
-
-    def _calc_instability_thresholds(self):
-        instability_thresholds = {
-            k: beta_ani_inst(self.beta, **v)
-            for k, v in self.instability_parameters.iterrows()
-        }
-        instability_thresholds = pd.DataFrame.from_dict(instability_thresholds)
-        instability_thresholds = instability_thresholds.sort_index(axis=1)
-        self._instability_thresholds = instability_thresholds
+        return {v: k for k, v in self.stability_map.items()}
 
     @property
     def instability_thresholds(self):
-        try:
-            return self._instability_thresholds
-        except AttributeError:
-            self._calc_instability_thresholds()
-            return self._instability_thresholds
+        return self._instability_thresholds
 
     @property
     def instability_tests(self):
-        # TODO: this should probably be turned into a class method or something similar.
-        # priority - 4
-        # I need to better understand classmethods, staticmethods, and properties to use this.
-        temp = pd.Series(
-            [np.greater, np.greater, np.less, np.less],
-            index=["AIC", "MM", "FMW", "OFI"],
-            name="Instability Tests",
-        )
-        return temp
-
-    def _calc_is_unstable(self):
-        is_unstable = {
-            k: self.instability_tests[k](self.anisotropy, v)
-            for k, v in self.instability_thresholds.iteritems()
-        }
-        is_unstable = pd.concat(is_unstable, axis=1).sort_index(axis=1)
-
-        # If the value is NaN in `instability_thresholds`, the comparison
-        # returns False. We want to propagate it so that we can check the
-        # other instabilities.
-        is_unstable.mask(self.instability_thresholds.isnull(), inplace=True)
-
-        # When an instability is NaN, we have to check the other instabilities.
-        for key, column in is_unstable.iteritems():
-
-            # Temporarily replace the NaNs here with False because NaNs don"t
-            # qualify as unstable on their own. We make the replacement here
-            # and not earlier because we are relying on those NaNs to indicate
-            # the spectra we must actually check against the other
-            # instabilities.
-            others = is_unstable.drop(key, axis=1)
-            others = others.replace(np.nan, False).all(axis=1)
-            column = column.mask(column.isnull(), others).astype(bool)
-
-            is_unstable.loc[:, key] = column
-
-        if is_unstable.isnull().any().any():
-            msg = "Did you visit every data point? " "It looks like you missed %s."
-            msg = msg % (not is_unstable.isnull()).sum()
-            raise ValueError(msg)
-
-        self._is_unstable = is_unstable
+        return _instability_tests._asdict()
 
     @property
     def is_unstable(self):
-        try:
-            return self._is_unstable
-        except AttributeError:
-            self._calc_is_unstable()
-            return self._is_unstable
-
-    def _calc_stability_bin(self):
-
-        between_AIC_MM = self.is_unstable.AIC & self.is_unstable.MM.pipe(np.logical_not)
-        between_FMW_OFI = self.is_unstable.FMW & self.is_unstable.OFI.pipe(
-            np.logical_not
-        )
-
-        stable = self.is_unstable.pipe(np.logical_not).all(axis=1)
-
-        # Here, we use integer identifiers b/c they are more
-        # computationally efficient to process.
-        stability_bin = pd.Series(
-            self.fill, index=self.is_unstable.index, name="Stability"
-        )
-
-        stability_bin.mask(stable, self.stability_map_inverse["Stable"], inplace=True)
-        stability_bin.mask(
-            between_AIC_MM,
-            self.stability_map_inverse["Between\nAIC &\nMM"],
-            inplace=True,
-        )
-        stability_bin.mask(
-            self.is_unstable.MM, self.stability_map_inverse["MM"], inplace=True
-        )
-        stability_bin.mask(
-            between_FMW_OFI,
-            self.stability_map_inverse["Between\nFMW &\nOFI"],
-            inplace=True,
-        )
-        stability_bin.mask(
-            self.is_unstable.OFI, self.stability_map_inverse["OFI"], inplace=True
-        )
-
-        if (stability_bin == self.fill).any():
-            msg = "Did you visit every data point? " "It looks like you missed %s."
-            msg = msg % (stability_bin == self.fill).sum()
-            raise ValueError(msg)
-
-        self._stability_bin = stability_bin
+        return self._is_unstable
 
     @property
     def stability_bin(self):
-        try:
-            return self._stability_bin
-        except AttributeError:
-            self._calc_stability_bin()
-            return self._stability_bin
+        return self._stability_bin
 
     @property
     def cmap(self):
@@ -494,6 +312,94 @@ class StabilityCondition(object):
         )
 
         return format_dict
+
+    def set_instability_parameters(self, growth_rate):
+        growth_rate = int(growth_rate)
+        temp = insta_params.xs(growth_rate, axis=0, level="Growth Rate")
+        self._instability_parameters = temp
+
+    def set_beta_ani(self, beta, anisotropy):
+        assert beta.shape == anisotropy.shape
+        data = pd.concat({"beta": beta, "anisotropy": anisotropy}, axis=1)
+        self._data = data
+
+    def _calc_instability_thresholds(self):
+        r"""Calculate the beta for which a given anisotropy is unstable.
+        """
+        instability_thresholds = {
+            k: beta_ani_inst(self.beta, **v)
+            for k, v in self.instability_parameters.iterrows()
+        }
+        instability_thresholds = pd.DataFrame.from_dict(instability_thresholds)
+        instability_thresholds = instability_thresholds.sort_index(axis=1)
+        self._instability_thresholds = instability_thresholds
+
+    def _calc_is_unstable(self):
+        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`.
+        """
+        is_unstable = {
+            k: self.instability_tests[k](self.anisotropy, v)
+            for k, v in self.instability_thresholds.iteritems()
+        }
+        is_unstable = pd.concat(is_unstable, axis=1).sort_index(axis=1)
+
+        # If the value is NaN in `instability_thresholds`, the comparison
+        # returns False. We want to propagate it so that we can check the
+        # other instabilities.
+        is_unstable.mask(self.instability_thresholds.isnull(), inplace=True)
+
+        # When an instability is NaN, we have to check the other instabilities.
+        for key, column in is_unstable.iteritems():
+
+            # Temporarily replace the NaNs here with False because NaNs don"t
+            # qualify as unstable on their own. We make the replacement here
+            # and not earlier because we are relying on those NaNs to indicate
+            # the spectra we must actually check against the other
+            # instabilities.
+            others = is_unstable.drop(key, axis=1)
+            others = others.replace(np.nan, False).all(axis=1)
+            column = column.mask(column.isnull(), others).astype(bool)
+
+            is_unstable.loc[:, key] = column
+
+        if is_unstable.isnull().any().any():
+            msg = "Did you visit every data point? " "It looks like you missed %s."
+            msg = msg % (not is_unstable.isnull()).sum()
+            raise ValueError(msg)
+
+        self._is_unstable = is_unstable
+
+    def _calc_stability_bin(self):
+        r"""Using the results of `self._calc_instability_threshold` and `self._calc_is_unstable`,
+        determine the category each spectrum belongs in:
+            MM, between_AIC_MM, Stable, between_FMW_OFI, OFI
+        """
+        unstable = self.is_unstable
+        between_AIC_MM = unstable.AIC & unstable.MM.pipe(np.logical_not)
+        between_FMW_OFI = unstable.FMW & unstable.OFI.pipe(np.logical_not)
+        stable = unstable.pipe(np.logical_not).all(axis=1)
+
+        # Here, we use integer identifiers b/c they are more
+        # computationally efficient to process.
+        stability_bin = pd.Series(self.fill, index=unstable.index, name="Stability")
+
+        map_inverse = self.stability_map_inverse
+        stability_bin.mask(stable, map_inverse["Stable"], inplace=True)
+        stability_bin.mask(
+            between_AIC_MM, map_inverse["Between\nAIC &\nMM"], inplace=True
+        )
+        stability_bin.mask(unstable.MM, map_inverse["MM"], inplace=True)
+        stability_bin.mask(
+            between_FMW_OFI, map_inverse["Between\nFMW &\nOFI"], inplace=True
+        )
+        stability_bin.mask(unstable.OFI, map_inverse["OFI"], inplace=True)
+
+        if (stability_bin == self.fill).any():
+            msg = "Did you visit every data point? " "It looks like you missed %s."
+            msg = msg % (stability_bin == self.fill).sum()
+            raise ValueError(msg)
+
+        self._stability_bin = stability_bin
 
     def calculate_stability_criteria(self):
         r"""
@@ -558,6 +464,7 @@ class StabilityContours(object):
 
     def __init__(self, beta):
         self.set_beta(beta)
+        self._calc_instability_contours()
 
     @property
     def beta(self):
@@ -576,9 +483,9 @@ class StabilityContours(object):
         need to calculate them once, move the calculation to
         a separate method.
         """
-        params = insta_params.to_frame()
-        contours = {k: beta_ani_inst(self.beta, **v) for k, v in params.iterrows()}
-
+        contours = {
+            k: beta_ani_inst(self.beta, **v) for k, v in insta_params.iterrows()
+        }
         contours = pd.Series(contours).unstack(level=0)
 
         assert isinstance(contours, pd.DataFrame)
@@ -586,11 +493,12 @@ class StabilityContours(object):
 
     @property
     def contours(self):
-        try:
-            return self._contourss
-        except AttributeError:
-            self._calc_instability_contours()
-            return self._contours
+        #         try:
+        return self._contours
+
+    #         except AttributeError:
+    #             self._calc_instability_contours()
+    #             return self._contours
 
     def plot_contours(self, ax, fix_scale=True, plot_gamma=None):
         r"""
@@ -637,11 +545,11 @@ class StabilityContours(object):
             ax.set_xscale("log")
             ax.set_yscale("log")
 
-        if gamma is None:
+        if plot_gamma is None:
             # Only need legend table if plotting all contours.
             self._add_table_legend(ax, images_for_table_legend)
         else:
-            ax.legend(loc=1, title=r"$\gamma = %s$" % plot_gamma)
+            ax.legend(loc=1, title=r"$\gamma = %s$" % plot_gamma, framealpha=0)
 
     @staticmethod
     def _add_table_legend(ax, images):
@@ -653,7 +561,7 @@ class StabilityContours(object):
         Source: https://stackoverflow.com/a/25995730/1200989
         """
         assert isinstance(images, pd.DataFrame)
-        assert images.shape == _plot_contour_kwargs.shape
+        #         assert images.shape == _plot_contour_kwargs.shape
 
         # create blank rectangle
         extra = mpl.patches.Rectangle(

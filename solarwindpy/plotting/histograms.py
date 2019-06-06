@@ -413,6 +413,9 @@ class Hist1D(AggPlot):
         if self.log.x:
             ax.set_xscale("log")
 
+        if self.log.y:
+            ax.set_yscale("log")
+
         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
