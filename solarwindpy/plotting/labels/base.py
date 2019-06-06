@@ -236,30 +236,6 @@ _templates = {
 }
 
 
-def available():
-    m = sorted(list(_trans_measurement.keys()) + list(_templates.keys()))
-    c = sorted(_trans_component.keys())
-    s = sorted(_trans_species.keys())
-    print(
-        r"""TeXlabel knows
-
-Measurements
-------------
-{m}
-
-Components
-----------
-{c}
-
-Species
--------
-{s}
-""".format(
-            m=", ".join(m), c=", ".join(c), s=", ".join(s)
-        )
-    )
-
-
 class Base(ABC):
     def __init__(self):
         self._init_logger()
