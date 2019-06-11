@@ -13,7 +13,15 @@ import pandas as pd
 
 from pathlib import Path
 
-from ..base import Base, ID, DataLoader, _Loader_Dtypes_Columns, ActivityIndicator
+from .. import base
+
+Base = base.Base
+ID = base.ID
+DataLoader = base.DataLoader
+_Loader_Dtypes_Columns = base._Loader_Dtypes_Columns
+ActivityIndicator = base.ActivityIndicator
+
+# import Base, ID, DataLoader, _Loader_Dtypes_Columns, ActivityIndicator
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -162,15 +170,25 @@ class SIDC(ActivityIndicator):
     def extrema(self):
         return self._extrema
 
+    @property
+    def spec_by_ssn_band(self):
+        return self._spec_by_ssn_band
+
+    @property
+    def ssn_band_intervals(self):
+        return self._ssn_band_intervals
+
     def load_data(self):
         loader = SIDCLoader(self.id.key, self.id.url)
         loader.load_data()
         self._loader = loader
 
     def interpolate_data(self, target_index):
-        return super(SIDC, self).interpolate_data(
+        interpolated = super(SIDC, self).interpolate_data(
             self.data.loc[:, "ssn"].dropna(how="any", axis=0), target_index
         )
+        self._interpolated = interpolated
+        return interpolated
 
     #################
     # Normalize SSN #
@@ -183,6 +201,11 @@ class SIDC(ActivityIndicator):
         except KeyError:  # AttributeError:
             return self.normalize_ssn()
 
+    #     @property
+    #     def interpolated_normalized_ssn(self):
+    #         try:
+    #             return self._
+
     @property
     def norm_by(self):
         try:
@@ -190,9 +213,28 @@ class SIDC(ActivityIndicator):
         except AttributeError:
             raise AttributeError("Please calculate `normalize_ssn`")
 
+    def _run_normalization(self, ssn, norm_fcn):
+        cut = self.extrema.cut_spec_by_interval(ssn.index, kind="All")
+        joint = pd.concat([ssn, cut], axis=1, keys=["ssn", "cycle"]).sort_index(axis=1)
+        grouped = joint.groupby("cycle")
+
+        normed = {}
+        for k, g in grouped:
+            g = g.loc[:, "ssn"]
+            normed[k] = norm_fcn(g)
+        normed = pd.concat(normed.values(), axis=0).sort_index()
+        return normed
+
     def normalize_ssn(self, norm_by="max"):
         r"""
-        Z-score normalize SSN within each solar cycle.
+        Normalize SSN within each solar cycle.
+
+        If data has been interpolated, interpolate NSSN to interpolated datetime.
+
+        Parameters
+        ----------
+        norm_by: str
+            max, zscore, feature-scale
         """
         # Note: "max" and "feature-scale" are the same if the min(SSN) = 0.
         assert norm_by in ("max", "zscore", "feature-scale")
@@ -214,43 +256,66 @@ class SIDC(ActivityIndicator):
             def norm_fcn(g):
                 return g.subtract(g.min()).divide(g.max() - g.min())
 
-        cut = self.extrema.cut_spec_by_interval(self.data.index, kind="All")
-
         ssn = self.data.loc[:, "ssn"]
-        joint = pd.concat([ssn, cut], axis=1, keys=["ssn", "cycle"]).sort_index(axis=1)
-        grouped = joint.groupby("cycle")
+        normed = self._run_normalization(ssn, norm_fcn)
 
-        normed = {}
-        for k, g in grouped:
-            g = g.loc[:, "ssn"]
-            normed[k] = norm_fcn(g)
-        normed = pd.concat(normed.values(), axis=0).sort_index()
+        #         cut = self.extrema.cut_spec_by_interval(self.data.index, kind="All")
+
+        #         ssn = self.data.loc[:, "ssn"]
+        #         joint = pd.concat([ssn, cut], axis=1, keys=["ssn", "cycle"]).sort_index(axis=1)
+        #         grouped = joint.groupby("cycle")
+
+        #         normed = {}
+        #         for k, g in grouped:
+        #             g = g.loc[:, "ssn"]
+        #             normed[k] = norm_fcn(g)
+        #         normed = pd.concat(normed.values(), axis=0).sort_index()
 
         self.data.loc[:, "nssn"] = normed
         self.data.sort_index(axis=1, inplace=True)
 
-        self._normalized_ssn = normed
+        try:
+            #             target_index = self.interpolated.index
+            #             interpolated = super(SIDC, self).interpolate_data(normed.dropna(),
+            #                                                               target_index)
+            interpolated = self.interpolated.loc[:, "ssn"]
+            normed_interpolated = self._run_normalization(interpolated, norm_fcn)
+            self.interpolated.loc[:, "nssn"] = normed_interpolated
+
+        except AttributeError:
+            pass
+
+        #         self._normalized_ssn = normed
         return normed
 
-    def cut_spec_by_ssn_band(self, epoch, dssn=2.0):
+    def cut_spec_by_ssn_band(self, dssn=2.0):
         r"""Cut the sunspot number at each spectrum in intervals of 10 with a width +/- dssn.
         """
 
-        raise NotImplementedError(
-            r"""Do you want this to apply to `SIDC` data or something
-        you've interpolated?"""
-        )
+        #         raise NotImplementedError(
+        #             r"""Do you want this to apply to `SIDC` data or something
+        #         you've interpolated?"""
+        #         )
 
         # TODO: need to update this for a normalized SSN option.
         dssn = float(dssn)
         #         mids = np.linspace(30, 180, 16)
-        mids = np.linspace(0, 180, 37)
+        mids = np.arange(
+            0,
+            self.data.ssn.max(),  # TODO: change to account for normalized ssn
+            2.0 * dssn,
+        )
+
+        #         mids = np.linspace(0, 180, 37)
         left = mids - dssn
         right = mids + dssn
         intervals = [pd.Interval(l, r) for l, r in zip(left, right)]
         intervals = pd.IntervalIndex(intervals, name="ssn_intervals")
         try:
-            cut = pd.cut(self.interp_ssn, intervals)
+            cut = pd.cut(
+                self.interpolated.loc[:, "ssn"],  # TODO: Fix this generalized hack
+                intervals,
+            )
         except KeyError as e:
             if np.isnan(e.args[0]):
                 # Check that intervals don't overlap.
@@ -268,102 +333,54 @@ class SIDC(ActivityIndicator):
         self._ssn_band_intervals = intervals
         return cut
 
-    ####################################################
-    # Calculate dt bands about ssn defined by ssn_band #
-    ####################################################
-    @property
-    def ssn_dt_bands(self):
-        r"""
-        The (left, right) values for each dt about a given ssn.
-        """
-        try:
-            return self._ssn_dt_bands
-        except AttributeError:
-            self.logger.debug("Calculating `cut_jd_by_ssn_dt_band` with defaults")
-            self.cut_jd_by_ssn_dt_band()
-            return self._ssn_dt_bands
 
-    @property
-    def ssn_dt_band_intervals(self):
-        r"""
-        The intervals corresponding to `ssn_dt_bands`.
-
-        These are primarily useful for finding mappers between `ssn_dt_bands`
-        and the corresponding `cycle_edge`.
-        """
-        try:
-            return self._ssn_dt_band_intervals
-        except AttributeError:
-            self.logger.debug("Calculating `cut_jd_by_ssn_dt_band` with defaults")
-            self.cut_jd_by_ssn_dt_band()
-            return self._ssn_dt_band_intervals
-
-    @property
-    def spec_by_ssn_dt_band(self):
-        r"""
-        For each (ssn_band, cycle_edge) pair, find the timestamp closest to
-        the middle of the band and report the timestamp +/- dt for that value.
-
-        Note
-        ----
-        In contrast to other `spec_by_<X>` properties, this returns categoricals
-        identified by a (cycle_edge, ssn_band) point. Care must be taken to ensure
-        gropby operations are properly performed with them.
-        """
-        try:
-            return self._spec_by_ssn_dt_band
-        except AttributeError:
-            self.logger.info("Calculating `cut_jd_by_ssn_dt_band` with defaults")
-            return self.cut_jd_by_ssn_dt_band()
-
-
-#     #########################################################
-#     # Interpolate SSN Julian dates -> spectrum Julian Dates #
-#     #########################################################
+#     ####################################################
+#     # Calculate dt bands about ssn defined by ssn_band #
+#     ####################################################
 #     @property
-#     def interp_ssn(self):
+#     def ssn_dt_bands(self):
 #         r"""
-#         The sunspot number interpolated to each spectrum based on Julian date.
+#         The (left, right) values for each dt about a given ssn.
 #         """
 #         try:
-#             return self._interp_ssn
+#             return self._ssn_dt_bands
 #         except AttributeError:
-#             self.logger.debug("Calling `interp_ssn2jd_ion` with defaults.")
-#             return self.interp_ssn2jd_ion()
-#     def interp_ssn2jd_ion(self, **kwargs):
+#             self.logger.debug("Calculating `cut_jd_by_ssn_dt_band` with defaults")
+#             self.cut_jd_by_ssn_dt_band()
+#             return self._ssn_dt_bands
+
+#     @property
+#     def ssn_dt_band_intervals(self):
 #         r"""
-#         Interpolate the SSN to each jd_ion value.
-#
-#         Returns
-#         -------
-#         interp: pd.Series
-#             Series of sunspot number at every measurement index.
+#         The intervals corresponding to `ssn_dt_bands`.
+
+#         These are primarily useful for finding mappers between `ssn_dt_bands`
+#         and the corresponding `cycle_edge`.
 #         """
-#         data = self.data.loc[:, ["jd", "ssn", "std", "std_error"]]
-#         nans = data.isna().any(axis=1).sum()
-#         if nans:
-#             self.logger.debug("Dropping %s NaNs from SSN data before interpolating", nans)
-#             data = data.dropna()
-#
-#         # TODO: interpolate `std` and `std_error` too.
-#         xi = self.data.loc[:, "jd"]
-#         yi = self.data.loc[:, "ssn"]
-#         x  = self.jd_ion
-#
-#         xi = xi.values
-#         yi = yi.values
-#         x  = x.values
-#
-#
-#         interpolator = InterpolatedUnivariateSpline(xi.values, # x-values
-#                                                     yi.values,    # y-values
-#                                                     check_finite=True
-#                                                    )
-#         interp = interpolator(x)
-#         interp = pd.Series(interp, index=self.jd_ion.index, name="ssn_interp")
-#
-#         self._interp_ssn = interp
-#         return interp
+#         try:
+#             return self._ssn_dt_band_intervals
+#         except AttributeError:
+#             self.logger.debug("Calculating `cut_jd_by_ssn_dt_band` with defaults")
+#             self.cut_jd_by_ssn_dt_band()
+#             return self._ssn_dt_band_intervals
+
+#     @property
+#     def spec_by_ssn_dt_band(self):
+#         r"""
+#         For each (ssn_band, cycle_edge) pair, find the timestamp closest to
+#         the middle of the band and report the timestamp +/- dt for that value.
+
+#         Note
+#         ----
+#         In contrast to other `spec_by_<X>` properties, this returns categoricals
+#         identified by a (cycle_edge, ssn_band) point. Care must be taken to ensure
+#         gropby operations are properly performed with them.
+#         """
+#         try:
+#             return self._spec_by_ssn_dt_band
+#         except AttributeError:
+#             self.logger.info("Calculating `cut_jd_by_ssn_dt_band` with defaults")
+#             return self.cut_jd_by_ssn_dt_band()
 
 
 class SSNExtrema(Base):
@@ -444,27 +461,35 @@ class SSNExtrema(Base):
             kind = available_kind
         elif isinstance(kind, str):
             if kind == "Edges":
-                kind = ["Rise", "Fall"]
+                intervals = intervals.loc[:, ["Fall", "Rise"]]
+            #                 kind = ["Rise", "Fall"]
             else:
-                kind = [kind]
+                intervals = intervals.loc[:, [kind]]
+        #                 kind = [kind]
         elif hasattr(kind, "__iter__"):
             if not np.all([k in available_kind for k in kind]):
                 raise ValueError(f"""Interval `{kind!s}` is unavailable""")
+            intervals = intervals.loc[:, kind]
         else:
             raise ValueError(f"""Interval `{kind!s}` is unavailable""")
 
-        kind = np.unique(kind)
+        #         kind = np.unique(kind)
 
-        cut = {}
-        for k in kind:
-            ii = pd.IntervalIndex(intervals.loc[:, k])
-            cut[k] = pd.cut(epoch, ii)
+        ii = pd.IntervalIndex(intervals.stack().sort_values())
+        if not (ii.is_unique and ii.is_monotonic_increasing):
+            raise ValueError
 
-        if len(kind) == 1:
-            cut = cut[kind[0]]
-            cut.name = kind[0]
-        else:
-            cut = pd.concat(cut, axis=1)
+        cut = pd.cut(epoch, ii)
+        cut.name = "Cycle_Interval"
+        #         for k in kind:
+        #             ii = pd.IntervalIndex(intervals.loc[:, k])
+        #             cut[k] = pd.cut(epoch, ii)
+
+        #         if len(kind) == 1:
+        #             cut = cut[kind[0]]
+        #             cut.name = kind[0]
+        #         else:
+        #             cut = pd.concat(cut, axis=1, names=["Edge"])
 
         return cut
 

@@ -224,6 +224,8 @@ class ActivityIndicator(Base):
         assert isinstance(new, ID)
         self._id = new
 
+    # Need to store `interpolated` in subclass. Allows normalized ssn to be interpolated.
+    @abstractmethod
     def interpolate_data(self, source_data, target_index):
         assert isinstance(target_index, pd.DatetimeIndex)
         assert isinstance(source_data.index, pd.DatetimeIndex)
@@ -250,6 +252,5 @@ class ActivityIndicator(Base):
             interpolated[k] = interped
 
         interpolated = pd.DataFrame(interpolated, index=target_index)
-
         self._interpolated = interpolated
         return interpolated

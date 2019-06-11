@@ -203,4 +203,6 @@ class LISIRD(ActivityIndicator):
         }
 
         source = self.data.loc[:, trans[self.id.key]].dropna(how="any", axis=0)
-        return super(LISIRD, self).interpolate_data(source, target_index)
+        interpolated = super(LISIRD, self).interpolate_data(source, target_index)
+        self._interpolated = interpolated
+        return interpolated
