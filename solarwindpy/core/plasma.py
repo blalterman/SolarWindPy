@@ -347,7 +347,8 @@ class Plasma(base.Base):
             )
             raise ValueError(msg)
 
-        plasma = cls(data, *species, **kwargs)
+        log_at_init = kwargs.pop("log_plasma_stats", False)
+        plasma = cls(data, *species, log_plasma_stats=log_at_init, **kwargs)
 
         plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey  :  %s\nshape : %s\nstart : %s\nstop  : %s",
