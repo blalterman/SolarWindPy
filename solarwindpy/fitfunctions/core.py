@@ -7,7 +7,7 @@ well-formatted LaTeX that describes the fit.
 """
 
 import pdb  # noqa: F401
-import logging
+import logging  # noqa: F401
 import re
 import numpy as np
 import matplotlib as mpl
@@ -51,7 +51,7 @@ class FitFunction(ABC):
         wmax=None,
     ):
 
-        self._init_logger()
+        #         self._init_logger()
         self._set_argnames()
         self._set_raw_obs(xobs, yobs, weights)
 
@@ -107,9 +107,9 @@ class FitFunction(ABC):
         """
         pass
 
-    @property
-    def logger(self):
-        return self._logger
+    #     @property
+    #     def logger(self):
+    #         return self._logger
 
     @property
     def popt(self):
@@ -369,12 +369,12 @@ class FitFunction(ABC):
         mask = np.full_like(x, True, dtype=bool)
 
         mask = np.isfinite(x)
-        if not mask.all():
-            self.logger.warning(
-                "{} {} observations are NaN. This {:.3%} of the data has been dropped.".format(
-                    (~mask).sum(), axis, (~mask).mean()
-                )
-            )
+        #         if not mask.all():
+        #             self.logger.warning(
+        #                 "{} {} observations are NaN. This {:.3%} of the data has been dropped.".format(
+        #                     (~mask).sum(), axis, (~mask).mean()
+        #                 )
+        #             )
 
         if xmin is not None:
             xmin_mask = x >= xmin
@@ -386,10 +386,10 @@ class FitFunction(ABC):
 
         return mask
 
-    def _init_logger(self):
-        self._logger = logging.getLogger(
-            "{}.{}".format(__file__, self.__class__.__name__)
-        )
+    #     def _init_logger(self):
+    #         self._logger = logging.getLogger(
+    #             "{}.{}".format(__file__, self.__class__.__name__)
+    #         )
 
     def _set_argnames(self):
         r"""
@@ -462,20 +462,16 @@ class FitFunction(ABC):
             msg = "You haven't decided how to save `return_full` output."
             raise NotImplementedError(msg)
 
-        assert "p0" not in kwargs
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
         except ValueError as e:
             return e
 
+        #         assert "p0" not in kwargs
+        p0 = kwargs.pop("p0", self.p0)
         try:
             result = curve_fit(
-                self.function,
-                self.xobs,
-                self.yobs,
-                p0=self.p0,
-                sigma=self.weights,
-                **kwargs
+                self.function, self.xobs, self.yobs, p0=p0, sigma=self.weights, **kwargs
             )
         except RuntimeError as e:
             return e
@@ -485,14 +481,14 @@ class FitFunction(ABC):
 
         # Need to figure out how/where to save the full output.
 
-        # Check that he sigma values are finite.
-        if not np.isfinite(sigma).all():
-            msg = (
-                "Negative covariances lead to NaN uncertainties. "
-                "I don't trust them and don't know if the optimized "
-                "parameters are meaningful.\n\nsigma\n-----\n%s\n\npcov\n----\n%s\n\n"
-            )
-            self.logger.warning(msg, sigma, pcov)
+        #         # Check that he sigma values are finite.
+        #         if not np.isfinite(sigma).all():
+        #             msg = (
+        #                 "Negative covariances lead to NaN uncertainties. "
+        #                 "I don't trust them and don't know if the optimized "
+        #                 "parameters are meaningful.\n\nsigma\n-----\n%s\n\npcov\n----\n%s\n\n"
+        #             )
+        #             self.logger.warning(msg, sigma, pcov)
 
         self._set_popt(popt)
         self._set_psigma(sigma)
@@ -561,16 +557,16 @@ class FitFunction(ABC):
         #            "value = %s\nuncertainty = %s")
         #     raise ValueError(msg % (value, uncertainty))
 
+        vprecision = 3
         if np.isfinite(uncertainty):
             uprecision = self._calc_precision(uncertainty)
             vprecision = self._calc_precision(value)
             vprecision = vprecision - uprecision
 
-        else:
-            vprecision = 3
-            self.logger.warning(
-                "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
-            )
+        #         else:
+        #             self.logger.warning(
+        #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
+        #             )
 
         template = r"{:.%se} \pm {:.0e}"
         template = template % abs(vprecision)

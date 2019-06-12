@@ -69,3 +69,14 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
             **kwargs
         )
         alog.info("Suffix saved: %s", fmt)
+
+
+def joint_legend(ax, tax, **kwargs):
+    r"""Create one legend on `ax` that contains information for both `ax` and `tax.
+    """
+
+    h0, l0 = ax.get_legend_handles_labels()
+    h1, l1 = tax.get_legend_handles_labels()
+    hdl = h0 + h1
+    lbl = l0 + l1
+    ax.legend(hdl, lbl, **kwargs)
