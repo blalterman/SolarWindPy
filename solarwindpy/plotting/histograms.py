@@ -244,7 +244,8 @@ class AggPlot(base.Base):
 
         # Ensure all bins are represented in the data. (20190605)
         for k, v in self.intervals.items():
-            agg = agg.reindex(index=v, level=k)
+            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
@@ -709,37 +710,6 @@ class Hist2D(AggPlot):
         agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
         agg = self._axis_normalizer(agg)
 
-        #         axnorm = self.axnorm
-        #         if axnorm is None:
-        #             pass
-        #         elif axnorm == "c":
-        #             agg = agg.divide(agg.max(level="x"), level="x")
-        #         elif axnorm == "r":
-        #             agg = agg.divide(agg.max(level="y"), level="y")
-        #         elif axnorm == "t":
-        #             agg = agg.divide(agg.max())
-        #         elif axnorm == "d":
-        #             N = agg.sum().sum()
-        #             # N = agg.sum(level=["x", "y"]
-        #             x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
-        #             y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
-        #             dx = pd.Series(x.right - x.left, index=x)
-        #             dy = pd.Series(y.right - y.left, index=y)
-        #             if self.log.x:
-        #                 dx = 10.0 ** dx
-        #             if self.log.y:
-        #                 dy = 10.0 ** dy
-
-        #             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
-
-        #         else:
-        #             raise ValueError("Unrecognized axnorm: %s" % axnorm)
-
-        #         intervals = self.intervals
-        #         agg = agg.unstack("x")
-        #         agg = agg.reindex(index=intervals["y"], columns=intervals["x"])
-        # agg.reindex(index=intervals["y"], level="y").reindex(index=intervals["x"], level="x").unstack("x")
-
         return agg
 
     def _format_axis(self, ax):
@@ -847,7 +817,7 @@ class Hist2D(AggPlot):
 
         return ax, cbar
 
-    def project_1d(self, axis, **kwargs):
+    def project_1d(self, axis, project_counts=False, **kwargs):
         r"""Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
@@ -882,12 +852,16 @@ class Hist2D(AggPlot):
 
         h1 = Hist1D(
             x,
-            y=self.data.loc[:, other],
+            y=self.data.loc[:, other] if not project_counts else None,
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,
         )
-        h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()[other])
+
+        h1.set_labels(x=self.labels._asdict()[axis])
+        if not project_counts:
+            h1.set_labels(y=self.labels._asdict()[other])
+
         h1.set_path("auto")
 
         return h1

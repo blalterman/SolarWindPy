@@ -493,12 +493,7 @@ class StabilityContours(object):
 
     @property
     def contours(self):
-        #         try:
         return self._contours
-
-    #         except AttributeError:
-    #             self._calc_instability_contours()
-    #             return self._contours
 
     def plot_contours(self, ax, fix_scale=True, plot_gamma=None):
         r"""
