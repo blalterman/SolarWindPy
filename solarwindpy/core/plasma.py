@@ -1474,7 +1474,30 @@ class Plasma(base.Base):
         -------
         f2f1 : pd.Series
             Natural logarithm of the beam to core VDF ratio.
+
+        Notes
+        -----
+        This routine was written for Faraday cup data quality validation, so
+        alpha particle velocities are projected with a :math:`\sqrt{2.0}` boost.
         """
+        beam = self._chk_species(beam)
+        core = self._chk_species(core)
+
+        if len(beam) > 1:
+            raise ValueError(
+                """VDFs are evaluated on a species-by-species basis. Beam `{}` is invalid.""".format(
+                    beam
+                )
+            )
+        if len(core) > 1:
+            raise ValueError(
+                """VDFs are evaluated on a species-by-species basis. Core `{}` is invalid.""".format(
+                    core
+                )
+            )
+
+        beam = beam[0]
+        core = core[0]
 
         n1 = self.xs(("n", "", core), axis=1)
         n2 = self.xs(("n", "", beam), axis=1)
@@ -1485,42 +1508,43 @@ class Plasma(base.Base):
         w2_par = w.par.loc[:, beam]
         w2_per = w.per.loc[:, beam]
 
+        vc = self.v(core).cartesian
+        vb = self.v(beam).cartesian
+
         if beam == "a":
-            #             msg = "Based on a conversation with Justin, I'm not sure if we want to use this cut, so it's disabled."
-            raise NotImplementedError
+            vb = vb.multiply(np.sqrt(2.0))
+        elif core == "a":
+            vc = vc.multiply(np.sqrt(2.0))
 
-        # We calculate at the peak beam velocity, so we only need one dv.
-        dv2 = self.dv(beam, core).project(self.b)
-
-        #         # We're using a Bimaxwellian, so this should be sufficient.
-        #         dv2_par = dv2.par
-        #         dv2_per = dv2.per
-
-        if beam == "p2":
-            # BUG?
-            # If Mike's code didn't properly subtract the y-GSE component
-            # of the proton beam velocity due to the Earth's orbital motion
-            # around the sun.
-            #             dvw = dv2_par.divide(w1_par, axis=0).pow(2)
-            dvw = dv2.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
-        elif beam == "a":
-            raise NotImplementedError
-        #             w1.columns = w1.columns.get_level_values("Component")
-        #             dvw = dv2.divide(w1, axis=1, level="C").pow(2).sum(axis=1)
-        else:
-            msg = "Unrecognizez beam: %s" % beam
-            raise ValueError(msg)
-
-        f2f1 = dvw  # .pipe(np.exp)
+        dv = vb.subtract(vc).multiply(self.b.uv.cartesian)
+        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par) * (w1_per / w2_per).pow(2)
+        coef = nbar.multiply(wbar, axis=0).apply(np.log)
         # f2f1 = nbar * wbar * f2f1
-        f2f1 = np.log(nbar * wbar) + f2f1
+        f2f1 = coef.add(dvw, axis=0)
 
         assert isinstance(f2f1, pd.Series)
         sbc = "%s/%s" % (beam, core)
         f2f1.name = sbc
+
+        #        print("",
+        #              "<Module>",
+        #              "<species>: {},{}".format(beam, core),
+        #              "<ni>", type(n1), n1,
+        #              "<nj>", type(n2), n2,
+        #              "<nbar>", type(nbar), nbar,
+        #              "<w1_par>", type(w1_par), w1_par,
+        #              "<w1_per>", type(w1_per), w1_per,
+        #              "<w2_par>", type(w2_par), w2_par,
+        #              "<w2_per>", type(w2_per), w2_per,
+        #              "<wbar>", type(wbar), wbar,
+        #              "<coef>", type(coef), coef,
+        #              "<dv>", type(dv), dv,
+        #              "<dvw>", type(dvw), dvw,
+        #              "<f2f1>", type(f2f1), f2f1
+        #        )
 
         return f2f1
 

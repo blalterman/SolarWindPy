@@ -1916,6 +1916,86 @@ class PlasmaTestBase(ABC):
         for c in combos:
             raise NotImplementedError
 
+    def test_VDFratio(self):
+        #        print_inline_debug_info = True
+
+        ot = self.object_testing
+        slist = [s for s in self.species_combinations if len(s) == 2]
+        sother = [sisj[::-1] for sisj in slist]
+        slist = slist + sother
+
+        for sisj in slist:
+            si, sj = sisj
+            ni = self.data.loc[:, ("n", "", si)]
+            nj = self.data.loc[:, ("n", "", sj)]
+
+            wi = self.data.loc[:, "w"].xs(si, axis=1, level="S").drop("scalar", axis=1)
+            wi_par = wi.loc[:, "par"]
+            wi_per = wi.loc[:, "per"]
+
+            wj = self.data.loc[:, "w"].xs(sj, axis=1, level="S").drop("scalar", axis=1)
+            wj_par = wj.loc[:, "par"]
+            wj_per = wj.loc[:, "per"]
+
+            nbar = ni.divide(nj)
+            par = wj_par.divide(wi_par)
+            per = wj_per.divide(wi_per).pow(2)
+            wbar = par.multiply(per, axis=0)
+            coef = nbar.multiply(wbar, axis=0).apply(np.log)
+
+            vi = self.data.loc[:, "v"].xs(si, axis=1, level="S")
+            vj = self.data.loc[:, "v"].xs(sj, axis=1, level="S")
+            if si == "a":
+                vi = vi.multiply(np.sqrt(2.0))
+            elif sj == "a":
+                vj = vj.multiply(np.sqrt(2.0))
+
+            dv = vi.subtract(vj).multiply(ot.b.uv.cartesian)
+            #            dv = ot.dv(si, sj).project(ot.b)
+            dvw = dv.divide(wj).pow(2).sum(axis=1)
+
+            f2f1 = coef.add(dvw, axis=0)
+            f2f1.name = "{}/{}".format(si, sj)
+
+            #            if print_inline_debug_info:
+            #                print("",
+            #                      "<Test>",
+            #                      "<species>: {},{}".format(si, sj),
+            #                      "<ni>", type(ni), ni,
+            #                      "<nj>", type(nj), nj,
+            #                      "<nbar>", type(nbar), nbar,
+            #                      "<wi>", type(wi), wi,
+            #                      "<wj>", type(wj), wj,
+            #                      "<wbar>", type(wbar), wbar,
+            #                      "<coef>", type(coef), coef,
+            #                      "<dvw>", type(dvw), dvw,
+            #                      "<f2f1>", type(f2f1), f2f1,
+            #                      "",
+            #                      sep="\n",
+            #                )
+
+            pdt.assert_series_equal(f2f1, ot.vdf_ratio(si, sj))
+
+            # Test catching multi-species strings.
+            ssum = "+".join(sisj)
+            scomma = ",".join(sisj)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(ssum, si)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(ssum, sj)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(scomma, si)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(scomma, sj)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(si, ssum)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(sj, ssum)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(si, scomma)
+            with self.assertRaises(ValueError):
+                ot.vdf_ratio(sj, scomma)
+
 
 #####
 # Tests
@@ -2112,10 +2192,13 @@ if __name__ == "__main__":
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
     try:
-        run_this_test = "TestPlasmaP1P2"
+        #        run_this_test = "TestPlasmaP1P2"
         run_this_test = None
         unittest.main(verbosity=2, defaultTest=run_this_test)
-        # unittest.main()
+
+    #        for tc in ("TestPlasmaAlphaP1", "TestPlasmaAlphaP1P2", "TestPlasmaAlphaP2"):
+    #            unittest.main(verbosity=2, defaultTest="%s.test_VDFratio" % tc)
+    # unittest.main()
 
     except (  # noqa: F841
         AssertionError,

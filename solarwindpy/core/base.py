@@ -148,6 +148,7 @@ class Core(ABC):
             #                  sep="\n",
             #                  end="\n\n")
             raise ValueError(msg)
+
         slist = species
         if len(species) == 1:
             slist = species[0].split("+")
