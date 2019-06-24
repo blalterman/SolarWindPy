@@ -55,6 +55,7 @@ def swap_protons(data, logger=None):
     n2 = p2.n
 
     swap = n2.divide(n1) > 1.0
+    swapped = swap.to_frame(name=("swapped_protons", "", ""))
 
     p1_into_p2 = p1.where(swap, axis=0).dropna(axis=0, how="all")
     p2_into_p1 = p2.where(swap, axis=0).dropna(axis=0, how="all")
@@ -70,7 +71,7 @@ def swap_protons(data, logger=None):
     )
 
     new_data = pd.concat(
-        [data.drop(["p1", "p2"], axis=1, level="S"), new_protons], axis=1
+        [data.drop(["p1", "p2"], axis=1, level="S"), new_protons, swapped], axis=1
     ).sort_index(axis=1)
 
     chk = new_data.loc[:, ("n", "", "p2")].divide(

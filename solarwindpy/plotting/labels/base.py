@@ -443,10 +443,11 @@ class TeXlabel(Base):
             .replace("{};", "")
             .replace("{}", "")
             .replace(",}", "}")
+            .replace("};}", "}}")
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
-        units = _trans_units[m]
+        units = _trans_units.get(m, "???")
 
         self.logger.debug(
             r"""Built TeX label
