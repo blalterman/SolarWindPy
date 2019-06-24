@@ -849,11 +849,14 @@ class Plasma(base.Base):
         ani: :py:class:`pd.Series` or :py:class:`pd.DataFrame`
             See Parameters for more info.
         """
+        pth = self.pth(*species).drop("scalar", axis=1)
+
         include_dynamic = False
         if include_dynamic:
             raise NotImplementedError
+            pdv = self.pdv(*species)
+            pth.loc[:, "par"] = pth.loc[:, "par"].add(pdv, axis=0)
 
-        pth = self.pth(*species).drop("scalar", axis=1)
         exp = pd.Series({"par": -1, "per": 1})
 
         if len(species) > 1:

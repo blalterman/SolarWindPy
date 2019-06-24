@@ -168,7 +168,7 @@ class Core(ABC):
 
         if not data.index.is_monotonic:
             self.logger.warning(
-                r"""A non-monotonic Index typicall indicates the presence of bad data. This will impact perfomance, especially if it is a DatetimeIndex."""
+                r"""A non-monotonic Index typically indicates the presence of bad data. This will impact perfomance, especially if it is a DatetimeIndex."""
             )
 
 

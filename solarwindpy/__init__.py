@@ -52,6 +52,7 @@ __all__ = [
     "sa",
     "tools",
     "fitfunctions",
+    "instabilities",
 ]
 
 __author__ = "B. L. Alterman <balterma@umich.edu>"
