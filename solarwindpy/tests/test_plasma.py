@@ -1422,8 +1422,8 @@ class PlasmaTestBase(ABC):
             # self.object_testing._Plasma__set_species(*species)
             # self.object_testing._Plasma__set_ions()
 
-    def test_pdynamic(self):
-        print_inline_debug_info = False
+    def test_pdynamic_without_m2q_projection(self):
+        #        print_inline_debug_info = False
 
         slist = list(self.stuple)
 
@@ -1447,32 +1447,33 @@ class PlasmaTestBase(ABC):
         ).sort_index(axis=1)
         rho = n.multiply(m, axis=1, level="S")
 
-        if print_inline_debug_info:
-            print(
-                "",
-                "<Test>",
-                "<species>: {}".format(self.stuple),
-                "<v>",
-                type(v),
-                v,
-                "<m>",
-                type(m),
-                m,
-                "<n>",
-                type(n),
-                n,
-                "<rho>",
-                type(rho),
-                rho,
-                sep="\n",
-            )
+        #        if print_inline_debug_info:
+        #            print(
+        #                "",
+        #                "<Test>",
+        #                "<species>: {}".format(self.stuple),
+        #                "<v>",
+        #                type(v),
+        #                v,
+        #                "<m>",
+        #                type(m),
+        #                m,
+        #                "<n>",
+        #                type(n),
+        #                n,
+        #                "<rho>",
+        #                type(rho),
+        #                rho,
+        #                sep="\n",
+        #            )
 
+        ot = self.object_testing
         for combo in self.species_combinations:
 
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
-                    self.object_testing.pdynamic(*combo)
+                    ot.pdynamic(*combo)
                 continue  # Skip this test case.
 
             scom = "+".join(combo)
@@ -1495,70 +1496,60 @@ class PlasmaTestBase(ABC):
             )  # [m_p] * [n] * [dv]**2 / [p]
             pdv = dvsq_rho.multiply(const)
 
-            if print_inline_debug_info:
-                print(
-                    "",
-                    "<combo>: {}".format(combo),
-                    "<scom>: %s" % scom,
-                    "<rho_i>",
-                    type(rho_i),
-                    rho_i,
-                    "<rho_t>",
-                    type(rho_t),
-                    rho_t,
-                    "<v_i>",
-                    type(v_i),
-                    v_i,
-                    "<vcom>",
-                    type(vcom),
-                    vcom,
-                    "<dv_i>",
-                    type(dv_i),
-                    dv_i,
-                    "<dvsq_i>",
-                    type(dvsq_i),
-                    dvsq_i,
-                    "<dvsq_rho_i>",
-                    type(dvsq_rho_i),
-                    dvsq_rho_i,
-                    "<dvsq_rho>",
-                    type(dvsq_rho),
-                    dvsq_rho,
-                    "<const> %s" % const,
-                    "<pdv>",
-                    type(pdv),
-                    pdv,
-                    sep="\n",
-                    end="\n\n",
-                )
+            #            if print_inline_debug_info:
+            #                print(
+            #                    "",
+            #                    "<combo>: {}".format(combo),
+            #                    "<scom>: %s" % scom,
+            #                    "<rho_i>",
+            #                    type(rho_i),
+            #                    rho_i,
+            #                    "<rho_t>",
+            #                    type(rho_t),
+            #                    rho_t,
+            #                    "<v_i>",
+            #                    type(v_i),
+            #                    v_i,
+            #                    "<vcom>",
+            #                    type(vcom),
+            #                    vcom,
+            #                    "<dv_i>",
+            #                    type(dv_i),
+            #                    dv_i,
+            #                    "<dvsq_i>",
+            #                    type(dvsq_i),
+            #                    dvsq_i,
+            #                    "<dvsq_rho_i>",
+            #                    type(dvsq_rho_i),
+            #                    dvsq_rho_i,
+            #                    "<dvsq_rho>",
+            #                    type(dvsq_rho),
+            #                    dvsq_rho,
+            #                    "<const> %s" % const,
+            #                    "<pdv>",
+            #                    type(pdv),
+            #                    pdv,
+            #                    sep="\n",
+            #                    end="\n\n",
+            #                )
 
             pdv.name = "pdynamic"
-            pdt.assert_series_equal(pdv, self.object_testing.pdynamic(*combo))
-            pdt.assert_series_equal(pdv, self.object_testing.pdv(*combo))
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo), self.object_testing.pdv(*combo)
-            )
-            pdt.assert_series_equal(
-                self.object_testing.pdv(*combo), self.object_testing.pdynamic(*combo)
-            )
-            pdt.assert_series_equal(self.object_testing.pdynamic(*combo), pdv)
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo),
-                self.object_testing.pdynamic(*combo),
-            )
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo),
-                self.object_testing.pdynamic(*combo[::-1]),
-            )
+            pdt.assert_series_equal(pdv, ot.pdynamic(*combo))
+            pdt.assert_series_equal(pdv, ot.pdv(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdv(*combo))
+            pdt.assert_series_equal(ot.pdv(*combo), ot.pdynamic(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), pdv)
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdynamic(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdynamic(*combo[::-1]))
 
             invalid_msg = "Invalid species"
             # dynamic pressure shouldn't work with a comma separated list or sub-list.
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(",".join(combo))
+                ot.pdynamic(",".join(combo))
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(",".join(combo), combo[0])
+                ot.pdynamic(",".join(combo), combo[0])
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(combo[0], ",".join(combo))
+                ot.pdynamic(combo[0], ",".join(combo))
 
             # dynamic pressure should work with sum of species, but ot a sub-list
             # that includes a sum.
@@ -1566,9 +1557,93 @@ class PlasmaTestBase(ABC):
 
             #            print("<combo[0], scom>: {}, {}".format(combo[0], scom), end="\n\n")
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(combo[0], scom)
+                ot.pdynamic(combo[0], scom)
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(scom, combo[0])
+                ot.pdynamic(scom, combo[0])
+
+    def test_pdynamic_with_m2q_projection(self):
+
+        slist = list(self.stuple)
+
+        if len(slist) == 1:
+            msg = "Must have >1 species to calculate dynamic pressure."
+            with self.assertRaisesRegex(ValueError, msg):
+                self.object_testing.pdynamic(*slist)
+            return None  # Exit test.
+
+        # Neither `n` nor `rho` units b/c Vcom divides out
+        # the [rho].
+        m = self.mass_in_mp
+        n = self.data.n.xs("", axis=1, level="C")
+        n = pd.concat(
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
+        rho = n.multiply(m, axis=1, level="S")
+
+        const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12  # [m_p] * [n] * [dv]**2 / [p]
+
+        ot = self.object_testing
+        bad_scom_msg = """A center-of-mass species is not valid when projecting by sqrt(m/q)
+beam: {}
+core: {}"""
+
+        comma_msg = """A comma cannot be passed in a species when projecting by sqrt(m/q)
+beam: {}
+core: {}"""
+
+        for combo in self.species_combinations:
+            scom = "+".join(combo)
+            comma = ",".join(combo)
+
+            if len(combo) == 1:
+                msg = "Must have >1 species to calculate dynamic pressure."
+                with self.assertRaisesRegex(ValueError, msg):
+                    self.object_testing.pdynamic(*combo)
+                continue  # Skip this test case.
+
+            elif len(combo) == 2:
+                dvsq = ot.dv(*combo).mag.pow(2)
+                rho_s = rho.loc[:, combo]
+                mu = rho_s.product(axis=1).divide(rho_s.sum(axis=1))
+                pdv = dvsq.multiply(mu, axis=0).multiply(const)
+                pdv.name = "pdynamic"
+
+                pdt.assert_series_equal(pdv, ot.pdynamic(*combo, project_m2q=True))
+                pdt.assert_series_equal(pdv, ot.pdv(*combo, project_m2q=True))
+                pdt.assert_series_equal(
+                    ot.pdv(*combo, project_m2q=True),
+                    ot.pdynamic(*combo, project_m2q=True),
+                )
+
+                for s in combo:
+                    with self.assertRaisesRegex(
+                        ValueError, bad_scom_msg.format(scom, s)
+                    ):
+                        ot.pdynamic(scom, s, project_m2q=True)
+                    with self.assertRaisesRegex(
+                        ValueError, bad_scom_msg.format(s, scom)
+                    ):
+                        ot.pdynamic(s, scom, project_m2q=True)
+
+            elif len(combo) == 3:
+                for s in combo:
+                    with self.assertRaisesRegex(
+                        ValueError, bad_scom_msg.format(scom, s)
+                    ):
+                        ot.pdynamic(scom, s, project_m2q=True)
+                    with self.assertRaisesRegex(
+                        ValueError, bad_scom_msg.format(s, scom)
+                    ):
+                        ot.pdynamic(s, scom, project_m2q=True)
+
+            else:
+                raise NotImplementedError("Unrecognized combo length: {}".format(combo))
+
+            for s in combo:
+                with self.assertRaisesRegex(ValueError, comma_msg.format(scom, s)):
+                    ot.pdynamic(comma, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, comma_msg.format(s, scom)):
+                    ot.pdynamic(s, comma, project_m2q=True)
 
     def test_heatflux(self):
         print_inline_debug_info = False

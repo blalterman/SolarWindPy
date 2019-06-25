@@ -911,7 +911,7 @@ class Plasma(base.Base):
         """
         return self.velocity(*species)
 
-    def dv(self, s0, s1):
+    def dv(self, s0, s1, project_m2q=False):
         r"""
         Calculate the differential flow between species `s0` and
         species `s1`: :math:`v_{s0} - v_{s1}`.
@@ -921,6 +921,9 @@ class Plasma(base.Base):
         s0, s1: str
             If either species contains a "+", the center-of-mass velocity
             for the indicated species is used.
+        project_m2q: bool, False
+            If True, project each speed by :math:`\sqrt{m/q}`. Disables center-
+            of-mass species.
 
         Returns
         -------
@@ -937,15 +940,18 @@ class Plasma(base.Base):
             )
             raise NotImplementedError(msg % (s0, s1))
 
-        v0 = self.velocity(s0)
-        v1 = self.velocity(s1)
+        v0 = self.velocity(s0).cartesian
+        v1 = self.velocity(s1).cartesian
 
-        dv = v0.cartesian.subtract(v1.cartesian)
+        if project_m2q:
+            raise NotImplementedError
+
+        dv = v0.subtract(v1)
         dv = vector.Vector(dv)
 
         return dv
 
-    def pdynamic(self, *species):
+    def pdynamic(self, *species, project_m2q=False):
         r"""
         Calculate the dynamic or drift pressure for the given species.
 
@@ -958,6 +964,9 @@ class Plasma(base.Base):
         species: list-like of str
             List-like of individual species, e.g. ["a", "p1"].
             Can NOT be a list-like including sums, e.g. ["a", "p1+p2"].
+        project_m2q: bool, False
+            If True, project the velocities by :math:`\sqrt{m/q}`. Allows for only
+            two species to be passed and takes the differential flow between them.
 
         Returns
         -------
@@ -969,16 +978,22 @@ class Plasma(base.Base):
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        # Calculate as m*v
-        scom = "+".join(species)
         const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
-        rho_i = self.mass_density(*stuple)
-        dv_i = pd.concat(
-            {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
-        )
-        dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
-        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-        pdv = dvsq_rho_i.sum(axis=1).multiply(const)
+
+        if not project_m2q:
+            # Calculate as m*v
+            scom = "+".join(species)
+            rho_i = self.mass_density(*stuple)
+            dv_i = pd.concat(
+                {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
+            )
+            dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
+            dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
+            pdv = dvsq_rho_i.sum(axis=1).multiply(const)
+
+        else:
+            raise NotImplementedError("In progress")
+
         pdv.name = "pdynamic"
 
         #        print("",
