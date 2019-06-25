@@ -2162,13 +2162,16 @@ class PlasmaTestBase(ABC):
             vi = self.data.loc[:, "v"].xs(si, axis=1, level="S")
             vj = self.data.loc[:, "v"].xs(sj, axis=1, level="S")
             if si == "a":
-                vi = vi.multiply(np.sqrt(2.0))
+                vi = vi.multiply(np.sqrt(self.mass_in_mp[si] / self.charge_states[si]))
             elif sj == "a":
-                vj = vj.multiply(np.sqrt(2.0))
+                vj = vj.multiply(np.sqrt(self.mass_in_mp[sj] / self.charge_states[sj]))
+            #            vi = vi.multiply(np.sqrt(self.mass_in_mp[si] / self.charge_states[si]))
+            #            vj = vj.multiply(np.sqrt(self.mass_in_mp[sj] / self.charge_states[sj]))
 
-            dv = vi.subtract(vj).multiply(ot.b.uv.cartesian)
+            dv = vi.subtract(vj)
+            dv = vector.Vector(dv).project(ot.b)
             #            dv = ot.dv(si, sj).project(ot.b)
-            dvw = dv.divide(wj).pow(2).sum(axis=1)
+            dvw = dv.divide(wj, axis=1).pow(2).sum(axis=1)
 
             f2f1 = coef.add(dvw, axis=0)
             f2f1.name = "{}/{}".format(si, sj)
@@ -2195,22 +2198,28 @@ class PlasmaTestBase(ABC):
             # Test catching multi-species strings.
             ssum = "+".join(sisj)
             scomma = ",".join(sisj)
-            with self.assertRaises(ValueError):
+            msg0 = "Invalid species"
+            msg1 = "VDFs are evaluated on a species-by-species basis."
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(ssum, si)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(ssum, sj)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, si)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, sj)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(si, ssum)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(sj, ssum)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(si, scomma)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(sj, scomma)
+            with self.assertRaisesRegex(ValueError, msg0):
+                ot.vdf_ratio(ssum, scomma)
+            with self.assertRaisesRegex(ValueError, msg0):
+                ot.vdf_ratio(scomma, ssum)
 
 
 #####

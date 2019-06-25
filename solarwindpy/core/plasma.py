@@ -1545,19 +1545,11 @@ species: {}
         w2_par = w.par.loc[:, beam]
         w2_per = w.per.loc[:, beam]
 
-        vc = self.v(core).cartesian
-        vb = self.v(beam).cartesian
-
-        if beam == "a":
-            vb = vb.multiply(np.sqrt(2.0))
-        elif core == "a":
-            vc = vc.multiply(np.sqrt(2.0))
-
-        dv = vb.subtract(vc).multiply(self.b.uv.cartesian)
+        dv = self.dv(beam, core, project_m2q=True).project(self.b)
         dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
 
         nbar = n2 / n1
-        wbar = (w1_par / w2_par) * (w1_per / w2_per).pow(2)
+        wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
         coef = nbar.multiply(wbar, axis=0).apply(np.log)
         # f2f1 = nbar * wbar * f2f1
         f2f1 = coef.add(dvw, axis=0)
@@ -1580,8 +1572,10 @@ species: {}
         #              "<coef>", type(coef), coef,
         #              "<dv>", type(dv), dv,
         #              "<dvw>", type(dvw), dvw,
-        #              "<f2f1>", type(f2f1), f2f1
-        #        )
+        #              "<f2f1>", type(f2f1), f2f1,
+        #              "",
+        #              sep="\n"
+        #             )
 
         return f2f1
 
