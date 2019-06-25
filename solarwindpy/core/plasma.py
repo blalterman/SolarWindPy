@@ -868,7 +868,7 @@ class Plasma(base.Base):
 
         return ani
 
-    def velocity(self, *species):
+    def velocity(self, *species, project_m2q=False):
         r"""
         Get an ion velocity or calculate the center-of-mass velocity.
 
@@ -879,6 +879,9 @@ class Plasma(base.Base):
             "+", return a pd.Series containing the center-of-mass velocity
             :py:class:`~solarwindpy.core.vector.Vector`. If contains a single species,
             return that ion's velocity.
+        project_m2q: bool, False
+            If True, project velocity by :math:`\sqrt{m/q}`. Disables center-of-
+            mass species.
 
         Returns
         -------
@@ -890,7 +893,24 @@ class Plasma(base.Base):
 
         if len(stuple) == 1:
             # print("<Module.ion>")
-            v = self.ions.loc[stuple[0]].velocity
+            s = stuple[0]
+            v = self.ions.loc[s].velocity
+            if project_m2q:
+                m2q = np.sqrt(
+                    self.constants.m_in_mp[s] / self.constants.charge_states[s]
+                )
+                v = v.multiply(m2q)
+                v = vector.Vector(v)
+
+        elif project_m2q:
+            raise NotImplementedError(
+                """A multi-species velocity is not valid when projecting by sqrt(m/q).
+species: {}
+""".format(
+                    species
+                )
+            )
+
         else:
             # print("<Module.sum>")
             v = self.ions.loc[list(stuple)].apply(lambda x: x.velocity)
@@ -905,13 +925,13 @@ class Plasma(base.Base):
 
         return v
 
-    def v(self, *species):
+    def v(self, *species, project_m2q=False):
         r"""
         Shortcut to `velocity`.
         """
-        return self.velocity(*species)
+        return self.velocity(*species, project_m2q=project_m2q)
 
-    def dv(self, s0, s1):
+    def dv(self, s0, s1, project_m2q=False):
         r"""
         Calculate the differential flow between species `s0` and
         species `s1`: :math:`v_{s0} - v_{s1}`.
@@ -921,6 +941,9 @@ class Plasma(base.Base):
         s0, s1: str
             If either species contains a "+", the center-of-mass velocity
             for the indicated species is used.
+        project_m2q: bool, False
+            If True, project each speed by :math:`\sqrt{m/q}`. Disables center-
+            of-mass species.
 
         Returns
         -------
@@ -937,15 +960,15 @@ class Plasma(base.Base):
             )
             raise NotImplementedError(msg % (s0, s1))
 
-        v0 = self.velocity(s0)
-        v1 = self.velocity(s1)
+        v0 = self.velocity(s0, project_m2q=project_m2q).cartesian
+        v1 = self.velocity(s1, project_m2q=project_m2q).cartesian
 
-        dv = v0.cartesian.subtract(v1.cartesian)
+        dv = v0.subtract(v1)
         dv = vector.Vector(dv)
 
         return dv
 
-    def pdynamic(self, *species):
+    def pdynamic(self, *species, project_m2q=False):
         r"""
         Calculate the dynamic or drift pressure for the given species.
 
@@ -958,6 +981,9 @@ class Plasma(base.Base):
         species: list-like of str
             List-like of individual species, e.g. ["a", "p1"].
             Can NOT be a list-like including sums, e.g. ["a", "p1+p2"].
+        project_m2q: bool, False
+            If True, project the velocities by :math:`\sqrt{m/q}`. Allows for only
+            two species to be passed and takes the differential flow between them.
 
         Returns
         -------
@@ -969,16 +995,27 @@ class Plasma(base.Base):
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        # Calculate as m*v
-        scom = "+".join(species)
         const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
-        rho_i = self.mass_density(*stuple)
-        dv_i = pd.concat(
-            {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
-        )
-        dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
-        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-        pdv = dvsq_rho_i.sum(axis=1).multiply(const)
+
+        if not project_m2q:
+            # Calculate as m*v
+            scom = "+".join(species)
+            rho_i = self.mass_density(*stuple)
+            dv_i = pd.concat(
+                {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
+            )
+            dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
+            dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
+            pdv = dvsq_rho_i.sum(axis=1)
+
+        elif len(stuple) == 2:
+            # Can only have 2 species with `project_m2q`.
+            dvsq = self.dv(*stuple).cartesian.pow(2).sum(axis=1)
+            rho_i = self.mass_density(*stuple)
+            mu = rho_i.product(axis=1).divide(rho_i.sum(axis=1), axis=0)
+            pdv = dvsq.multiply(mu, axis=0)
+
+        pdv = pdv.multiply(const)
         pdv.name = "pdynamic"
 
         #        print("",
@@ -1000,7 +1037,7 @@ class Plasma(base.Base):
         #                                level="S").multiply(rhi_i,
         #                                                    axis=1,
         #                                                    level="S").sum(axis=1)
-        pdv.name = "pdynamic"
+        #        pdv.name = "pdynamic"
 
         #        print(
         #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
@@ -1010,11 +1047,11 @@ class Plasma(base.Base):
 
         return pdv
 
-    def pdv(self, *species):
+    def pdv(self, *species, project_m2q=False):
         r"""
         Shortcut to :py:meth:`pdynamic`.
         """
-        return self.pdynamic(*species)
+        return self.pdynamic(*species, project_m2q=project_m2q)
 
     def ca(self, *species):
         r"""
@@ -1478,7 +1515,8 @@ class Plasma(base.Base):
         Notes
         -----
         This routine was written for Faraday cup data quality validation, so
-        alpha particle velocities are projected with a :math:`\sqrt{2.0}` boost.
+        alpha particle velocities are projected with by :math:`\sqrt{2.0}` to
+        the velocity window in which they are measured.
         """
         beam = self._chk_species(beam)
         core = self._chk_species(core)
@@ -1508,19 +1546,11 @@ class Plasma(base.Base):
         w2_par = w.par.loc[:, beam]
         w2_per = w.per.loc[:, beam]
 
-        vc = self.v(core).cartesian
-        vb = self.v(beam).cartesian
-
-        if beam == "a":
-            vb = vb.multiply(np.sqrt(2.0))
-        elif core == "a":
-            vc = vc.multiply(np.sqrt(2.0))
-
-        dv = vb.subtract(vc).multiply(self.b.uv.cartesian)
+        dv = self.dv(beam, core, project_m2q=True).project(self.b)
         dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
 
         nbar = n2 / n1
-        wbar = (w1_par / w2_par) * (w1_per / w2_per).pow(2)
+        wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
         coef = nbar.multiply(wbar, axis=0).apply(np.log)
         # f2f1 = nbar * wbar * f2f1
         f2f1 = coef.add(dvw, axis=0)
@@ -1543,8 +1573,10 @@ class Plasma(base.Base):
         #              "<coef>", type(coef), coef,
         #              "<dv>", type(dv), dv,
         #              "<dvw>", type(dvw), dvw,
-        #              "<f2f1>", type(f2f1), f2f1
-        #        )
+        #              "<f2f1>", type(f2f1), f2f1,
+        #              "",
+        #              sep="\n"
+        #             )
 
         return f2f1
 

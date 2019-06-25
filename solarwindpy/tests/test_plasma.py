@@ -527,33 +527,59 @@ class PlasmaTestBase(ABC):
                 #           "<summed>",
                 #           self.object_testing.anisotropy("+".join(s)),
                 #           sep="\n")
+
                 pdt.assert_frame_equal(ani_s, self.object_testing.anisotropy(*s))
                 pdt.assert_series_equal(
                     ani_sum, self.object_testing.anisotropy("+".join(s))
                 )
 
     def test_velocity(self):
+        ot = self.object_testing
         for s in self.species_combinations:
             if len(s) == 1:
+                # Test the species
+                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.velocity(*s))
+                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.v(*s))
+                self.assertEqual(ot.velocity(*s), ot.v(*s))
+
+                # Test `project_m2q`.
+                v = ot.ions.loc[s[0]].velocity
+                m2q = np.sqrt(self.mass_in_mp[s[0]] / self.charge_states[s[0]])
+                v = v.multiply(m2q)
+                pdt.assert_frame_equal(v, ot.v(*s, project_m2q=True).data)
+                pdt.assert_frame_equal(v, ot.velocity(*s, project_m2q=True).data)
+                self.assertEqual(vector.Vector(v), ot.v(*s, project_m2q=True))
+                self.assertEqual(vector.Vector(v), ot.velocity(*s, project_m2q=True))
                 self.assertEqual(
-                    self.object_testing.ions.loc[s[0]].velocity,
-                    self.object_testing.velocity(*s),
+                    ot.v(*s, project_m2q=True), ot.velocity(*s, project_m2q=True)
                 )
-                self.assertEqual(
-                    self.object_testing.ions.loc[s[0]].velocity,
-                    self.object_testing.v(*s),
-                )
-                self.assertEqual(
-                    self.object_testing.velocity(*s), self.object_testing.v(*s)
-                )
+
             else:
                 # Test species = (s0, s1, ..., sn)
-                ot = self.object_testing
-                ions_ = self.object_testing.ions.loc[list(s)].apply(lambda x: x.v)
+                ions_ = ot.ions.loc[list(s)].apply(lambda x: x.v)
 
                 pdt.assert_series_equal(ions_, ot.velocity(*s))
                 pdt.assert_series_equal(ions_, ot.v(*s))
-                pdt.assert_series_equal(self.object_testing.velocity(*s), ot.v(*s))
+                pdt.assert_series_equal(ot.velocity(*s), ot.v(*s))
+
+                # comma-separated species list fails
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.velocity(",".join(s))
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.v(",".join(s))
+
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.velocity(*s, project_m2q=True)
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.v(*s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.velocity(",".join(s), project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.v(",".join(s), project_m2q=True)
 
                 # Test species = "s0+s1+...+sn"
                 rhos = ot.rho(*s)
@@ -568,6 +594,15 @@ class PlasmaTestBase(ABC):
 
                 self.assertEqual(ions_, ot.v("+".join(s)))
                 self.assertEqual(ions_, ot.velocity("+".join(s)))
+
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.velocity("+".join(s), project_m2q=True)
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.v("+".join(s), project_m2q=True)
 
     def test_dv(self):
         # print_inline_debug_info = False
@@ -594,12 +629,21 @@ class PlasmaTestBase(ABC):
             v0 = self.data.v.xs(sb, axis=1, level="S")
             v1 = self.data.v.xs(sc, axis=1, level="S")
             dv = v0.subtract(v1, axis=1)
-            vector_dv = vector.Vector(dv)
             pdt.assert_frame_equal(dv, ot.dv(sb, sc).data)
-            self.assertEqual(vector_dv, ot.dv(sb, sc))
+            self.assertEqual(vector.Vector(dv), ot.dv(sb, sc))
+
+            # Test single species \sqrt{m/q} projection.
+            v0 = v0.multiply(np.sqrt(self.mass_in_mp[sb] / self.charge_states[sb]))
+            v1 = v1.multiply(np.sqrt(self.mass_in_mp[sc] / self.charge_states[sc]))
+            dv_projected = v0.subtract(v1, axis=1)
+            pdt.assert_frame_equal(dv_projected, ot.dv(sb, sc, project_m2q=True).data)
+            self.assertEqual(
+                vector.Vector(dv_projected), ot.dv(sb, sc, project_m2q=True)
+            )
 
             # Calculate dv for v_s - v_com.
             ssum = "+".join(combo)
+            scomma = ",".join(combo)
             for s in combo:
                 tk = pd.IndexSlice[["x", "y", "z"], list(combo)]
                 vs = self.data.v.loc[:, tk]
@@ -631,9 +675,36 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
                 self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
+                # Verify that we can't pass a sum or comma species with `project_m2q`
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.dv(s, ssum, project_m2q=True)
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
+
         if len(self.stuple) > 2:
             # Calculate dv for v_si - v_com for each s in stuple.
             ssum = "+".join(self.stuple)
+            scomma = ",".join(self.stuple)
 
             tk = pd.IndexSlice[["x", "y", "z"], list(self.stuple)]
             vs = self.data.v.loc[:, tk]
@@ -677,6 +748,39 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
                 self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
+                # Test comma-separated species failes.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s)
+                # Test comma-separated species failes with `project_m2q`.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify center-of-mass species fail with `project_m2q`.
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
+                    ot.dv(s, ssum, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
+
             for combo in combos2:
                 # Calculate dv for v_{s0+s1} - v_com for each s in stuple.
                 tk = pd.IndexSlice[["x", "y", "z"], list(combo)]
@@ -711,6 +815,35 @@ class PlasmaTestBase(ABC):
                 right = self.object_testing.dv("+".join(combo), ssum)
                 pdt.assert_frame_equal(dv_s0s1, right.data)
                 self.assertEqual(vector.Vector(dv_s0s1), right)
+
+                # Test comma-separated species failes
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s)
+                # Test comma-separated species failes with `project_m2q`.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify center-of-mass species fail with `project_m2q`.
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(s, ssum, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
 
     def test_ca(self):
         tk = ["x", "y", "z"]
@@ -1422,8 +1555,8 @@ class PlasmaTestBase(ABC):
             # self.object_testing._Plasma__set_species(*species)
             # self.object_testing._Plasma__set_ions()
 
-    def test_pdynamic(self):
-        print_inline_debug_info = False
+    def test_pdynamic_without_m2q_projection(self):
+        #        print_inline_debug_info = False
 
         slist = list(self.stuple)
 
@@ -1447,32 +1580,33 @@ class PlasmaTestBase(ABC):
         ).sort_index(axis=1)
         rho = n.multiply(m, axis=1, level="S")
 
-        if print_inline_debug_info:
-            print(
-                "",
-                "<Test>",
-                "<species>: {}".format(self.stuple),
-                "<v>",
-                type(v),
-                v,
-                "<m>",
-                type(m),
-                m,
-                "<n>",
-                type(n),
-                n,
-                "<rho>",
-                type(rho),
-                rho,
-                sep="\n",
-            )
+        #        if print_inline_debug_info:
+        #            print(
+        #                "",
+        #                "<Test>",
+        #                "<species>: {}".format(self.stuple),
+        #                "<v>",
+        #                type(v),
+        #                v,
+        #                "<m>",
+        #                type(m),
+        #                m,
+        #                "<n>",
+        #                type(n),
+        #                n,
+        #                "<rho>",
+        #                type(rho),
+        #                rho,
+        #                sep="\n",
+        #            )
 
+        ot = self.object_testing
         for combo in self.species_combinations:
 
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
-                    self.object_testing.pdynamic(*combo)
+                    ot.pdynamic(*combo)
                 continue  # Skip this test case.
 
             scom = "+".join(combo)
@@ -1495,80 +1629,162 @@ class PlasmaTestBase(ABC):
             )  # [m_p] * [n] * [dv]**2 / [p]
             pdv = dvsq_rho.multiply(const)
 
-            if print_inline_debug_info:
-                print(
-                    "",
-                    "<combo>: {}".format(combo),
-                    "<scom>: %s" % scom,
-                    "<rho_i>",
-                    type(rho_i),
-                    rho_i,
-                    "<rho_t>",
-                    type(rho_t),
-                    rho_t,
-                    "<v_i>",
-                    type(v_i),
-                    v_i,
-                    "<vcom>",
-                    type(vcom),
-                    vcom,
-                    "<dv_i>",
-                    type(dv_i),
-                    dv_i,
-                    "<dvsq_i>",
-                    type(dvsq_i),
-                    dvsq_i,
-                    "<dvsq_rho_i>",
-                    type(dvsq_rho_i),
-                    dvsq_rho_i,
-                    "<dvsq_rho>",
-                    type(dvsq_rho),
-                    dvsq_rho,
-                    "<const> %s" % const,
-                    "<pdv>",
-                    type(pdv),
-                    pdv,
-                    sep="\n",
-                    end="\n\n",
-                )
+            #            if print_inline_debug_info:
+            #                print(
+            #                    "",
+            #                    "<combo>: {}".format(combo),
+            #                    "<scom>: %s" % scom,
+            #                    "<rho_i>",
+            #                    type(rho_i),
+            #                    rho_i,
+            #                    "<rho_t>",
+            #                    type(rho_t),
+            #                    rho_t,
+            #                    "<v_i>",
+            #                    type(v_i),
+            #                    v_i,
+            #                    "<vcom>",
+            #                    type(vcom),
+            #                    vcom,
+            #                    "<dv_i>",
+            #                    type(dv_i),
+            #                    dv_i,
+            #                    "<dvsq_i>",
+            #                    type(dvsq_i),
+            #                    dvsq_i,
+            #                    "<dvsq_rho_i>",
+            #                    type(dvsq_rho_i),
+            #                    dvsq_rho_i,
+            #                    "<dvsq_rho>",
+            #                    type(dvsq_rho),
+            #                    dvsq_rho,
+            #                    "<const> %s" % const,
+            #                    "<pdv>",
+            #                    type(pdv),
+            #                    pdv,
+            #                    sep="\n",
+            #                    end="\n\n",
+            #                )
 
             pdv.name = "pdynamic"
-            pdt.assert_series_equal(pdv, self.object_testing.pdynamic(*combo))
-            pdt.assert_series_equal(pdv, self.object_testing.pdv(*combo))
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo), self.object_testing.pdv(*combo)
-            )
-            pdt.assert_series_equal(
-                self.object_testing.pdv(*combo), self.object_testing.pdynamic(*combo)
-            )
-            pdt.assert_series_equal(self.object_testing.pdynamic(*combo), pdv)
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo),
-                self.object_testing.pdynamic(*combo),
-            )
-            pdt.assert_series_equal(
-                self.object_testing.pdynamic(*combo),
-                self.object_testing.pdynamic(*combo[::-1]),
-            )
+            pdt.assert_series_equal(pdv, ot.pdynamic(*combo))
+            pdt.assert_series_equal(pdv, ot.pdv(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdv(*combo))
+            pdt.assert_series_equal(ot.pdv(*combo), ot.pdynamic(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), pdv)
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdynamic(*combo))
+            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdynamic(*combo[::-1]))
 
             invalid_msg = "Invalid species"
             # dynamic pressure shouldn't work with a comma separated list or sub-list.
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(",".join(combo))
+                ot.pdynamic(",".join(combo))
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(",".join(combo), combo[0])
+                ot.pdynamic(",".join(combo), combo[0])
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(combo[0], ",".join(combo))
+                ot.pdynamic(combo[0], ",".join(combo))
 
-            # dynamic pressure should work with sum of species, but ot a sub-list
+            # dynamic pressure should work with sum of species, but not a sub-list
             # that includes a sum.
             pdt.assert_series_equal(pdv, self.object_testing.pdynamic(scom))
 
             #            print("<combo[0], scom>: {}, {}".format(combo[0], scom), end="\n\n")
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(combo[0], scom)
+                ot.pdynamic(combo[0], scom)
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                self.object_testing.pdynamic(scom, combo[0])
+                ot.pdynamic(scom, combo[0])
+
+            # dynamic pressure should fail when each element is a sum or comma list.
+            with self.assertRaisesRegex(ValueError, invalid_msg):
+                ot.pdynamic(scom, ",".join(combo))
+            with self.assertRaisesRegex(ValueError, invalid_msg):
+                ot.pdynamic(",".join(combo), scom)
+
+    def test_pdynamic_with_m2q_projection(self):
+
+        slist = list(self.stuple)
+
+        if len(slist) == 1:
+            msg = "Must have >1 species to calculate dynamic pressure."
+            with self.assertRaisesRegex(ValueError, msg):
+                self.object_testing.pdynamic(*slist)
+            return None  # Exit test.
+
+        # Neither `n` nor `rho` units b/c Vcom divides out
+        # the [rho].
+        m = self.mass_in_mp
+        n = self.data.n.xs("", axis=1, level="C")
+        n = pd.concat(
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
+        ).sort_index(axis=1)
+        rho = n.multiply(m, axis=1, level="S")
+
+        const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12  # [m_p] * [n] * [dv]**2 / [p]
+
+        ot = self.object_testing
+        invalid_msg = "Invalid species"
+        for combo in self.species_combinations:
+            scom = "+".join(combo)
+            comma = ",".join(combo)
+
+            if len(combo) == 1:
+                msg = "Must have >1 species to calculate dynamic pressure."
+                with self.assertRaisesRegex(ValueError, msg):
+                    self.object_testing.pdynamic(*combo)
+                continue  # Skip this test case.
+
+            elif len(combo) == 2:
+                dvsq = ot.dv(*combo).mag.pow(2)
+                rho_s = rho.loc[:, combo]
+                mu = rho_s.product(axis=1).divide(rho_s.sum(axis=1))
+                pdv = dvsq.multiply(mu, axis=0).multiply(const)
+                pdv.name = "pdynamic"
+
+                pdt.assert_series_equal(pdv, ot.pdynamic(*combo, project_m2q=True))
+                pdt.assert_series_equal(pdv, ot.pdv(*combo, project_m2q=True))
+                pdt.assert_series_equal(
+                    ot.pdv(*combo, project_m2q=True),
+                    ot.pdynamic(*combo, project_m2q=True),
+                )
+
+                for s in combo:
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(scom, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, scom, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(comma, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, comma, project_m2q=True)
+
+            elif len(combo) == 3:
+                for s in combo:
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(scom, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, scom, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(comma, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, comma, project_m2q=True)
+
+            else:
+                raise NotImplementedError("Unrecognized combo length: {}".format(combo))
+
+            for s in combo:
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(comma, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(s, comma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(scom, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(s, scom, project_m2q=True)
+
+            with self.assertRaisesRegex(ValueError, "Invalid species"):
+                ot.pdynamic(scom, comma, project_m2q=True)
+            with self.assertRaisesRegex(ValueError, "Invalid species"):
+                ot.pdynamic(comma, scom, project_m2q=True)
 
     def test_heatflux(self):
         print_inline_debug_info = False
@@ -1946,13 +2162,16 @@ class PlasmaTestBase(ABC):
             vi = self.data.loc[:, "v"].xs(si, axis=1, level="S")
             vj = self.data.loc[:, "v"].xs(sj, axis=1, level="S")
             if si == "a":
-                vi = vi.multiply(np.sqrt(2.0))
+                vi = vi.multiply(np.sqrt(self.mass_in_mp[si] / self.charge_states[si]))
             elif sj == "a":
-                vj = vj.multiply(np.sqrt(2.0))
+                vj = vj.multiply(np.sqrt(self.mass_in_mp[sj] / self.charge_states[sj]))
+            #            vi = vi.multiply(np.sqrt(self.mass_in_mp[si] / self.charge_states[si]))
+            #            vj = vj.multiply(np.sqrt(self.mass_in_mp[sj] / self.charge_states[sj]))
 
-            dv = vi.subtract(vj).multiply(ot.b.uv.cartesian)
+            dv = vi.subtract(vj)
+            dv = vector.Vector(dv).project(ot.b)
             #            dv = ot.dv(si, sj).project(ot.b)
-            dvw = dv.divide(wj).pow(2).sum(axis=1)
+            dvw = dv.divide(wj, axis=1).pow(2).sum(axis=1)
 
             f2f1 = coef.add(dvw, axis=0)
             f2f1.name = "{}/{}".format(si, sj)
@@ -1979,22 +2198,28 @@ class PlasmaTestBase(ABC):
             # Test catching multi-species strings.
             ssum = "+".join(sisj)
             scomma = ",".join(sisj)
-            with self.assertRaises(ValueError):
+            msg0 = "Invalid species"
+            msg1 = "VDFs are evaluated on a species-by-species basis."
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(ssum, si)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(ssum, sj)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, si)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, sj)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(si, ssum)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg1):
                 ot.vdf_ratio(sj, ssum)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(si, scomma)
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(sj, scomma)
+            with self.assertRaisesRegex(ValueError, msg0):
+                ot.vdf_ratio(ssum, scomma)
+            with self.assertRaisesRegex(ValueError, msg0):
+                ot.vdf_ratio(scomma, ssum)
 
 
 #####
@@ -2194,7 +2419,7 @@ if __name__ == "__main__":
     try:
         #        run_this_test = "TestPlasmaP1P2"
         run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test)
+        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
 
     #        for tc in ("TestPlasmaAlphaP1", "TestPlasmaAlphaP1P2", "TestPlasmaAlphaP2"):
     #            unittest.main(verbosity=2, defaultTest="%s.test_VDFratio" % tc)

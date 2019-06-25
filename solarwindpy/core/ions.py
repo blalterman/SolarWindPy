@@ -73,9 +73,9 @@ class Ion(base.Base):
         self._species = species
 
     def set_data(self, data):
-#         assert isinstance(data, pd.DataFrame)
+        #         assert isinstance(data, pd.DataFrame)
         super(Ion, self).set_data(data)
-        
+
         species = self.species
         # TODO: Implement the following optional species xs if necessary
         #       based on ways ions are later created in Plasma.
@@ -109,7 +109,7 @@ class Ion(base.Base):
     def velocity(self):
         r"""Ion's velocity stored as a :py:class:`~solarwindpy.core.vector.Vector`.
         """
-        return vector.Vector(self.data.v)
+        return vector.Vector(self.data.loc[:, "v"])
 
     @property
     def v(self):
@@ -122,7 +122,7 @@ class Ion(base.Base):
     def thermal_speed(self):
         r"""Ion's thermal speed stored as :py:class:`~solarwindpy.core.tensor.Tensor`.
         """
-        return tensor.Tensor(self.data.w)
+        return tensor.Tensor(self.data.loc[:, "w"])
 
     @property
     def w(self):
@@ -134,7 +134,7 @@ class Ion(base.Base):
     def number_density(self):
         r"""Number density returned from underlying :py:meth:`~solarwindpy.core.base.Base.data` as a `pd.Series`.
         """
-        return self.data.n
+        return self.data.loc[:, "n"]
 
     @property
     def n(self):
