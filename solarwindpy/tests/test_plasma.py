@@ -527,33 +527,55 @@ class PlasmaTestBase(ABC):
                 #           "<summed>",
                 #           self.object_testing.anisotropy("+".join(s)),
                 #           sep="\n")
+
                 pdt.assert_frame_equal(ani_s, self.object_testing.anisotropy(*s))
                 pdt.assert_series_equal(
                     ani_sum, self.object_testing.anisotropy("+".join(s))
                 )
 
     def test_velocity(self):
+        ot = self.object_testing
         for s in self.species_combinations:
             if len(s) == 1:
+                # Test the species
+                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.velocity(*s))
+                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.v(*s))
+                self.assertEqual(ot.velocity(*s), ot.v(*s))
+
+                # Test `project_m2q`.
+                v = ot.ions.loc[s[0]].velocity
+                m2q = np.sqrt(self.mass_in_mp[s[0]] / self.charge_states[s[0]])
+                v = v.multiply(m2q)
+                pdt.assert_frame_equal(v, ot.v(*s, project_m2q=True).data)
+                pdt.assert_frame_equal(v, ot.velocity(*s, project_m2q=True).data)
+                self.assertEqual(vector.Vector(v), ot.v(*s, project_m2q=True))
+                self.assertEqual(vector.Vector(v), ot.velocity(*s, project_m2q=True))
                 self.assertEqual(
-                    self.object_testing.ions.loc[s[0]].velocity,
-                    self.object_testing.velocity(*s),
+                    ot.v(*s, project_m2q=True), ot.velocity(*s, project_m2q=True)
                 )
-                self.assertEqual(
-                    self.object_testing.ions.loc[s[0]].velocity,
-                    self.object_testing.v(*s),
-                )
-                self.assertEqual(
-                    self.object_testing.velocity(*s), self.object_testing.v(*s)
-                )
+
             else:
                 # Test species = (s0, s1, ..., sn)
-                ot = self.object_testing
-                ions_ = self.object_testing.ions.loc[list(s)].apply(lambda x: x.v)
+                ions_ = ot.ions.loc[list(s)].apply(lambda x: x.v)
 
                 pdt.assert_series_equal(ions_, ot.velocity(*s))
                 pdt.assert_series_equal(ions_, ot.v(*s))
-                pdt.assert_series_equal(self.object_testing.velocity(*s), ot.v(*s))
+                pdt.assert_series_equal(ot.velocity(*s), ot.v(*s))
+
+                # comma-separated species list fails
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.velocity(",".join(s))
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.v(",".join(s))
+
+                with self.assertRaises(NotImplementedError):
+                    ot.velocity(*s, project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.v(*s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.velocity(",".join(s), project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.v(",".join(s), project_m2q=True)
 
                 # Test species = "s0+s1+...+sn"
                 rhos = ot.rho(*s)
@@ -568,6 +590,11 @@ class PlasmaTestBase(ABC):
 
                 self.assertEqual(ions_, ot.v("+".join(s)))
                 self.assertEqual(ions_, ot.velocity("+".join(s)))
+
+                with self.assertRaises(NotImplementedError):
+                    ot.velocity("+".join(s), project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.v("+".join(s), project_m2q=True)
 
     def test_dv(self):
         # print_inline_debug_info = False
@@ -594,12 +621,21 @@ class PlasmaTestBase(ABC):
             v0 = self.data.v.xs(sb, axis=1, level="S")
             v1 = self.data.v.xs(sc, axis=1, level="S")
             dv = v0.subtract(v1, axis=1)
-            vector_dv = vector.Vector(dv)
             pdt.assert_frame_equal(dv, ot.dv(sb, sc).data)
-            self.assertEqual(vector_dv, ot.dv(sb, sc))
+            self.assertEqual(vector.Vector(dv), ot.dv(sb, sc))
+
+            # Test single species \sqrt{m/q} projection.
+            v0 = v0.multiply(np.sqrt(self.mass_in_mp[sb] / self.charge_states[sb]))
+            v1 = v1.multiply(np.sqrt(self.mass_in_mp[sc] / self.charge_states[sc]))
+            dv_projected = v0.subtract(v1, axis=1)
+            pdt.assert_frame_equal(dv_projected, ot.dv(sb, sc, project_m2q=True).data)
+            self.assertEqual(
+                vector.Vector(dv_projected), ot.dv(sb, sc, project_m2q=True)
+            )
 
             # Calculate dv for v_s - v_com.
             ssum = "+".join(combo)
+            scomma = ",".join(combo)
             for s in combo:
                 tk = pd.IndexSlice[["x", "y", "z"], list(combo)]
                 vs = self.data.v.loc[:, tk]
@@ -631,9 +667,32 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
                 self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
+                # Verify that we can't pass a sum or comma species with `project_m2q`
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(s, ssum, project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
+
         if len(self.stuple) > 2:
             # Calculate dv for v_si - v_com for each s in stuple.
             ssum = "+".join(self.stuple)
+            scomma = ",".join(self.stuple)
 
             tk = pd.IndexSlice[["x", "y", "z"], list(self.stuple)]
             vs = self.data.v.loc[:, tk]
@@ -677,6 +736,35 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(dv, ot.dv(s, ssum).data)
                 self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
+                # Test comma-separated species failes.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s)
+                # Test comma-separated species failes with `project_m2q`.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify center-of-mass species fail with `project_m2q`.
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(s, ssum, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
+
             for combo in combos2:
                 # Calculate dv for v_{s0+s1} - v_com for each s in stuple.
                 tk = pd.IndexSlice[["x", "y", "z"], list(combo)]
@@ -711,6 +799,35 @@ class PlasmaTestBase(ABC):
                 right = self.object_testing.dv("+".join(combo), ssum)
                 pdt.assert_frame_equal(dv_s0s1, right.data)
                 self.assertEqual(vector.Vector(dv_s0s1), right)
+
+                # Test comma-separated species failes
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s)
+                # Test comma-separated species failes with `project_m2q`.
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(s, scomma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.dv(scomma, s, project_m2q=True)
+
+                # Verify center-of-mass species fail with `project_m2q`.
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(ssum, s, project_m2q=True)
+                with self.assertRaises(NotImplementedError):
+                    ot.dv(s, ssum, project_m2q=True)
+
+                # Verify a combination of comma and sum fail.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum)
+
+                # Verify a combination of comma and sum fail with `project_m2q`.
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(ssum, scomma, project_m2q=True)
+                with self.assertRaises((NotImplementedError, ValueError)):
+                    ot.dv(scomma, ssum, project_m2q=True)
 
     def test_ca(self):
         tk = ["x", "y", "z"]

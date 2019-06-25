@@ -868,7 +868,7 @@ class Plasma(base.Base):
 
         return ani
 
-    def velocity(self, *species):
+    def velocity(self, *species, project_m2q=False):
         r"""
         Get an ion velocity or calculate the center-of-mass velocity.
 
@@ -879,6 +879,9 @@ class Plasma(base.Base):
             "+", return a pd.Series containing the center-of-mass velocity
             :py:class:`~solarwindpy.core.vector.Vector`. If contains a single species,
             return that ion's velocity.
+        project_m2q: bool, False
+            If True, project velocity by :math:`\sqrt{m/q}`. Disables center-of-
+            mass species.
 
         Returns
         -------
@@ -890,7 +893,20 @@ class Plasma(base.Base):
 
         if len(stuple) == 1:
             # print("<Module.ion>")
-            v = self.ions.loc[stuple[0]].velocity
+            s = stuple[0]
+            v = self.ions.loc[s].velocity
+            if project_m2q:
+                m2q = np.sqrt(
+                    self.constants.m_in_mp[s] / self.constants.charge_states[s]
+                )
+                v = v.multiply(m2q)
+                v = vector.Vector(v)
+
+        elif project_m2q:
+            raise NotImplementedError(
+                "`project_m2q` is only implemented with individual species for data quality checking purposes."
+            )
+
         else:
             # print("<Module.sum>")
             v = self.ions.loc[list(stuple)].apply(lambda x: x.velocity)
@@ -905,11 +921,11 @@ class Plasma(base.Base):
 
         return v
 
-    def v(self, *species):
+    def v(self, *species, project_m2q=False):
         r"""
         Shortcut to `velocity`.
         """
-        return self.velocity(*species)
+        return self.velocity(*species, project_m2q=project_m2q)
 
     def dv(self, s0, s1, project_m2q=False):
         r"""
@@ -940,11 +956,8 @@ class Plasma(base.Base):
             )
             raise NotImplementedError(msg % (s0, s1))
 
-        v0 = self.velocity(s0).cartesian
-        v1 = self.velocity(s1).cartesian
-
-        if project_m2q:
-            raise NotImplementedError
+        v0 = self.velocity(s0, project_m2q=project_m2q).cartesian
+        v1 = self.velocity(s1, project_m2q=project_m2q).cartesian
 
         dv = v0.subtract(v1)
         dv = vector.Vector(dv)
