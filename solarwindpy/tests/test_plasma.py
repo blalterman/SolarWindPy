@@ -568,9 +568,13 @@ class PlasmaTestBase(ABC):
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.v(",".join(s))
 
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.velocity(*s, project_m2q=True)
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.v(*s, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.velocity(",".join(s), project_m2q=True)
@@ -591,9 +595,13 @@ class PlasmaTestBase(ABC):
                 self.assertEqual(ions_, ot.v("+".join(s)))
                 self.assertEqual(ions_, ot.velocity("+".join(s)))
 
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.velocity("+".join(s), project_m2q=True)
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.v("+".join(s), project_m2q=True)
 
     def test_dv(self):
@@ -668,9 +676,13 @@ class PlasmaTestBase(ABC):
                 self.assertEqual(vector.Vector(dv), ot.dv(s, ssum))
 
                 # Verify that we can't pass a sum or comma species with `project_m2q`
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.dv(s, ssum, project_m2q=True)
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.dv(ssum, s, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.dv(s, scomma, project_m2q=True)
@@ -748,9 +760,13 @@ class PlasmaTestBase(ABC):
                     ot.dv(scomma, s, project_m2q=True)
 
                 # Verify center-of-mass species fail with `project_m2q`.
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.dv(ssum, s, project_m2q=True)
-                with self.assertRaises(NotImplementedError):
+                with self.assertRaisesRegex(
+                    NotImplementedError, "A multi-species velocity is not valid"
+                ):
                     ot.dv(s, ssum, project_m2q=True)
 
                 # Verify a combination of comma and sum fail.
@@ -1668,7 +1684,7 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(ValueError, invalid_msg):
                 ot.pdynamic(combo[0], ",".join(combo))
 
-            # dynamic pressure should work with sum of species, but ot a sub-list
+            # dynamic pressure should work with sum of species, but not a sub-list
             # that includes a sum.
             pdt.assert_series_equal(pdv, self.object_testing.pdynamic(scom))
 
@@ -1677,6 +1693,12 @@ class PlasmaTestBase(ABC):
                 ot.pdynamic(combo[0], scom)
             with self.assertRaisesRegex(ValueError, invalid_msg):
                 ot.pdynamic(scom, combo[0])
+
+            # dynamic pressure should fail when each element is a sum or comma list.
+            with self.assertRaisesRegex(ValueError, invalid_msg):
+                ot.pdynamic(scom, ",".join(combo))
+            with self.assertRaisesRegex(ValueError, invalid_msg):
+                ot.pdynamic(",".join(combo), scom)
 
     def test_pdynamic_with_m2q_projection(self):
 
@@ -1700,14 +1722,7 @@ class PlasmaTestBase(ABC):
         const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12  # [m_p] * [n] * [dv]**2 / [p]
 
         ot = self.object_testing
-        bad_scom_msg = """A center-of-mass species is not valid when projecting by sqrt(m/q)
-beam: {}
-core: {}"""
-
-        comma_msg = """A comma cannot be passed in a species when projecting by sqrt(m/q)
-beam: {}
-core: {}"""
-
+        invalid_msg = "Invalid species"
         for combo in self.species_combinations:
             scom = "+".join(combo)
             comma = ",".join(combo)
@@ -1733,34 +1748,43 @@ core: {}"""
                 )
 
                 for s in combo:
-                    with self.assertRaisesRegex(
-                        ValueError, bad_scom_msg.format(scom, s)
-                    ):
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
                         ot.pdynamic(scom, s, project_m2q=True)
-                    with self.assertRaisesRegex(
-                        ValueError, bad_scom_msg.format(s, scom)
-                    ):
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
                         ot.pdynamic(s, scom, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(comma, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, comma, project_m2q=True)
 
             elif len(combo) == 3:
                 for s in combo:
-                    with self.assertRaisesRegex(
-                        ValueError, bad_scom_msg.format(scom, s)
-                    ):
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
                         ot.pdynamic(scom, s, project_m2q=True)
-                    with self.assertRaisesRegex(
-                        ValueError, bad_scom_msg.format(s, scom)
-                    ):
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
                         ot.pdynamic(s, scom, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(comma, s, project_m2q=True)
+                    with self.assertRaisesRegex(ValueError, invalid_msg):
+                        ot.pdynamic(s, comma, project_m2q=True)
 
             else:
                 raise NotImplementedError("Unrecognized combo length: {}".format(combo))
 
             for s in combo:
-                with self.assertRaisesRegex(ValueError, comma_msg.format(scom, s)):
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.pdynamic(comma, s, project_m2q=True)
-                with self.assertRaisesRegex(ValueError, comma_msg.format(s, scom)):
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.pdynamic(s, comma, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(scom, s, project_m2q=True)
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.pdynamic(s, scom, project_m2q=True)
+
+            with self.assertRaisesRegex(ValueError, "Invalid species"):
+                ot.pdynamic(scom, comma, project_m2q=True)
+            with self.assertRaisesRegex(ValueError, "Invalid species"):
+                ot.pdynamic(comma, scom, project_m2q=True)
 
     def test_heatflux(self):
         print_inline_debug_info = False
@@ -2386,7 +2410,7 @@ if __name__ == "__main__":
     try:
         #        run_this_test = "TestPlasmaP1P2"
         run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test)
+        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
 
     #        for tc in ("TestPlasmaAlphaP1", "TestPlasmaAlphaP1P2", "TestPlasmaAlphaP2"):
     #            unittest.main(verbosity=2, defaultTest="%s.test_VDFratio" % tc)

@@ -904,7 +904,11 @@ class Plasma(base.Base):
 
         elif project_m2q:
             raise NotImplementedError(
-                "`project_m2q` is only implemented with individual species for data quality checking purposes."
+                """A multi-species velocity is not valid when projecting by sqrt(m/q).
+species: {}
+""".format(
+                    species
+                )
             )
 
         else:
@@ -1002,11 +1006,16 @@ class Plasma(base.Base):
             )
             dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-            pdv = dvsq_rho_i.sum(axis=1).multiply(const)
+            pdv = dvsq_rho_i.sum(axis=1)
 
-        else:
-            raise NotImplementedError("In progress")
+        elif len(stuple) == 2:
+            # Can only have 2 species with `project_m2q`.
+            dvsq = self.dv(*stuple).cartesian.pow(2).sum(axis=1)
+            rho_i = self.mass_density(*stuple)
+            mu = rho_i.product(axis=1).divide(rho_i.sum(axis=1), axis=0)
+            pdv = dvsq.multiply(mu, axis=0)
 
+        pdv = pdv.multiply(const)
         pdv.name = "pdynamic"
 
         #        print("",
@@ -1028,7 +1037,7 @@ class Plasma(base.Base):
         #                                level="S").multiply(rhi_i,
         #                                                    axis=1,
         #                                                    level="S").sum(axis=1)
-        pdv.name = "pdynamic"
+        #        pdv.name = "pdynamic"
 
         #        print(
         #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
@@ -1038,11 +1047,11 @@ class Plasma(base.Base):
 
         return pdv
 
-    def pdv(self, *species):
+    def pdv(self, *species, project_m2q=False):
         r"""
         Shortcut to :py:meth:`pdynamic`.
         """
-        return self.pdynamic(*species)
+        return self.pdynamic(*species, project_m2q=project_m2q)
 
     def ca(self, *species):
         r"""
