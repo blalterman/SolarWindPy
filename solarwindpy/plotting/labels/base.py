@@ -51,7 +51,7 @@ def _run_species_substitution(pattern):
 
 
 _trans_measurement = {
-    "pth": r"p",
+    "pth": r"P",
     "beta": r"\beta",
     "dbeta": r"\Delta \beta",
     "dv": r"\Delta v",
