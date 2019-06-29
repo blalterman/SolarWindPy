@@ -6,6 +6,7 @@ Inclues utilities for downloading and analyzing indices from various sources.
 
 __all__ = ["sunspot_number", "ssn", "lisird", "plots"]
 
+import pdb  # noqa: F401
 import pandas as pd
 
 from . import sunspot_number  # noqa: F401
@@ -39,6 +40,6 @@ def get_all_indices():
     ).sort_index(
         axis=1
     )  # .dropna()
-    sa.loc[:, "JD"] = sa.index.to_julian_date()
+    #     sa.loc[:, "JD"] = sa.index.to_julian_date()
 
     return sa
