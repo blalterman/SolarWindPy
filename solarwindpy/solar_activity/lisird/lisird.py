@@ -1,26 +1,6 @@
 #!/usr/bin/env python
-"""
-Name   : lisird.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Tools for interfacing with the LISIRD hosted by LASP
- <http://lasp.colorado.edu/lisird/>
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+"""-Tools for interfacing with the LASP Interactive Solar Irradiance Data Center (LISIRD).
+<http://lasp.colorado.edu/lisird/>
 """
 
 import pdb  # noqa: F401
