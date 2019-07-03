@@ -13,7 +13,13 @@ from pathlib import Path
 
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
-from ..base import ID, DataLoader, ActivityIndicator  # , _Loader_Dtypes_Columns
+from ..base import (
+    ID,
+    DataLoader,
+    ActivityIndicator,
+    IndicatorExtrema,
+)  # , _Loader_Dtypes_Columns
+from .extrema_calculator import ExtremaCalculator
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -207,3 +213,19 @@ class LISIRD(ActivityIndicator):
         interpolated = super(LISIRD, self).interpolate_data(source, target_index)
         self._interpolated = interpolated
         return interpolated
+
+
+class LISIRDExtrema(IndicatorExtrema):
+    @property
+    def extrema_calculator(self):
+        r""":py:class:`ExtremaCalculator` used to calculate the extrema.
+        """
+        return self._extrema_calculator
+
+    def load_or_set_data(self, *args, **kwargs):
+        r"""Get extrema from :py:class:`ExtremaCalculator`.
+        """
+        ec = ExtremaCalculator(*args, **kwargs)
+        extrema = ec.formatted_extrema
+        self._data = extrema
+        self._extrema_calculator = ec

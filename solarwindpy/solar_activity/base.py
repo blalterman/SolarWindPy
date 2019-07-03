@@ -271,3 +271,138 @@ class ActivityIndicator(Base):
 
         self._interpolated = interpolated
         return interpolated
+
+
+class IndicatorExtrema(Base):
+    def __init__(self, *args, **kwargs):
+        self._init_logger()
+        self.load_or_set_data(*args, **kwargs)
+        self.calculate_intervals()
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def cycle_intervals(self):
+        r"""`pd.Interval`s corresponding to each Rising and Fall edge along with each
+        full indicator cycle.
+        """
+        return self._cycle_intervals
+
+    @property
+    def extrema_bands(self):
+        r"""Bands of time ($\Delta t$) about indicator extrema, where dt is specified when
+        calling :py:meth:`calculate_intervals`.
+        """
+        return self._extrema_bands
+
+    @abstractmethod
+    def load_or_set_data(self):
+        pass
+
+    #         path = Path(__file__).parent / "ssn_extrema.csv"
+    #         data = pd.read_csv(path, header=0, skiprows=15, index_col=0)
+    #         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
+    #         data.columns.names = ["kind"]
+    #         self._data = data
+
+    #######################################################################
+    # Tools for grouping data by Cycle and Cycle Edge (Rising or Falling) #
+    #######################################################################
+    def calculate_intervals(self):
+        r"""The rising edge comes before the falling edge in time, i.e. it's Max N, Min N.
+        Also calculate intervals for a full SSN cycle.
+        """
+        extrema = self.data
+        intervals = pd.DataFrame(
+            index=extrema.index, columns=pd.Index(["Rise", "Fall", "All"], name="kind")
+        )
+
+        # Make `today` only keep the date.
+        today = pd.to_datetime(pd.to_datetime("today").date())
+        for c, r in extrema.iterrows():
+            t0 = r.loc["Min"]
+            t1 = r.loc["Max"]
+            try:
+                t2 = extrema.loc[c + 1, "Min"]
+            except KeyError:
+                t2 = today
+
+            rise_ = pd.Interval(t0, t1)
+            fall_ = pd.Interval(t1, t2)
+            all_ = pd.Interval(t0, t2)
+
+            intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "All": all_})
+
+        self._cycle_intervals = intervals.sort_index(axis=1)
+
+    def cut_spec_by_interval(self, epoch, kind=None):
+        r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
+        cycle numbers.
+
+        If `kind` is not None, it should be some subset of "All", "Rise", or "Fall". If
+        `kind` is "Edges", use ["Rise", "Fall"].
+        """
+        if isinstance(epoch, pd.DatetimeIndex):
+            epoch = epoch.to_series()
+
+        intervals = self.cycle_intervals
+
+        available_kind = intervals.columns.get_level_values("kind")
+        if kind is None:
+            kind = available_kind
+        elif isinstance(kind, str):
+            if kind == "Edges":
+                intervals = intervals.loc[:, ["Fall", "Rise"]]
+            #                 kind = ["Rise", "Fall"]
+            else:
+                intervals = intervals.loc[:, [kind]]
+        #                 kind = [kind]
+        elif hasattr(kind, "__iter__"):
+            if not np.all([k in available_kind for k in kind]):
+                raise ValueError(f"""Interval `{kind!s}` is unavailable""")
+            intervals = intervals.loc[:, kind]
+        else:
+            raise ValueError(f"""Interval `{kind!s}` is unavailable""")
+
+        ii = pd.IntervalIndex(intervals.stack().sort_values())
+        if not (ii.is_unique and ii.is_monotonic_increasing):
+            raise ValueError
+
+        cut = pd.cut(epoch, ii)
+        cut.name = "Cycle_Interval"
+
+        return cut
+
+    ############################################################
+    # Tools for selecting data within some dt of cycle extrema #
+    ############################################################
+    def calculate_extrema_bands(self, dt="365d"):
+        r"""Calculate `pd.IntervalIndex` that is at extrema +/- dt.
+        """
+        dt = pd.to_timedelta(dt)
+        extrema = self.data.stack()
+
+        left = extrema.subtract(dt)
+        right = extrema.add(dt)
+        lr = pd.DataFrame({"left": left, "right": right})
+
+        def make_interval(x):
+            return pd.Interval(x.loc["left"], x.loc["right"])
+
+        bands = lr.apply(make_interval, axis=1).unstack(level="kind")
+        self._extrema_bands = bands
+
+    def cut_about_extrema_bands(self, epoch):
+        r"""Assign each `epoch` measurement within $\Delta t$ to a Indicator extrema, where
+        $\Delta t$ is assigned by :py:meth:`calc_extrema_bands`.
+        """
+        bands = self.extrema_bands
+
+        # TODO: verify bands shape
+        intervals = pd.IntervalIndex(bands.stack().values).sort_values()
+        cut = pd.cut(epoch, intervals)
+        cut.name = "spec_by_extrema_band"
+
+        return cut

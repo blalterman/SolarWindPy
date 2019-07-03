@@ -10,7 +10,8 @@ import solarwindpy as swp
 
 
 class ExtremaCalculator(object):
-    r"""Calculate the minima and maxima for a activity index.
+    r"""Calculate the minima and maxima for a activity index, defining an
+    Indicator Cycle starting at Minima N and ending at Minimum N+1.
 
     Properties
     ----------
