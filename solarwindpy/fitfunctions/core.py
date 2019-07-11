@@ -13,14 +13,18 @@ import numpy as np
 import matplotlib as mpl
 
 from abc import ABC, abstractproperty
+from collections import namedtuple
 from matplotlib import pyplot as plt
 from inspect import getargspec
 from scipy.optimize import curve_fit
 
+import solarwindpy as swp
 
 # Compile this once on import to save time.
 _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
 _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
+
+AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 
 
 class FitFunction(ABC):
@@ -62,6 +66,8 @@ class FitFunction(ABC):
         self.set_fit_obs(
             xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, wmin=wmin, wmax=wmax
         )
+
+        self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
 
     def __str__(self):
         return self.__class__.__name__
@@ -110,6 +116,10 @@ class FitFunction(ABC):
     #     @property
     #     def logger(self):
     #         return self._logger
+
+    @property
+    def labels(self):
+        return self._labels
 
     @property
     def popt(self):
@@ -400,6 +410,21 @@ class FitFunction(ABC):
         """
         args = getargspec(self.function).args[1:]
         self._argnames = args
+
+    def set_labels(self, **kwargs):
+        r"""Set or update x, y, or z labels. Any label not specified in kwargs
+        is propagated from `self.labels.<x, y, or z>`.
+        """
+
+        x = kwargs.pop("x", self.labels.x)
+        y = kwargs.pop("y", self.labels.y)
+        z = kwargs.pop("z", self.labels.z)
+
+        if len(kwargs.keys()):
+            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+            raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+        self._labels = AxesLabels(x, y, z)
 
     def set_fit_obs(
         self, xmin=None, xmax=None, ymin=None, ymax=None, wmin=None, wmax=None
@@ -756,7 +781,12 @@ class FitFunction(ABC):
             hist_kwargs = dict(color="k")
 
         if bin_kwargs is None:
-            bin_kwargs = dict(color="darkgreen")
+            bin_kwargs = dict(
+                color="darkgreen",
+                #                               markerfacecolor="fuchsia",
+                #                               markeredgecolor="fuchsia",
+                marker="P",
+            )
 
         if fit_kwargs is None:
             fit_kwargs = dict(color="darkorange")
@@ -819,6 +849,9 @@ class FitFunction(ABC):
         if annotate:
             self.annotate_TeX_info(ax, **annotate_kwargs)
 
+        ax.set_xlabel(self.labels.x)
+        ax.set_ylabel(self.labels.y)
+
         return ax
 
     def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **plot_kwargs):
@@ -848,6 +881,7 @@ class FitFunction(ABC):
 
         ax.grid(True, which="major", axis="both")
 
+        ax.set_xlabel(self.labels.x)
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
             ax.set_yscale("symlog", linthreshy=10)
@@ -885,9 +919,11 @@ class FitFunction(ABC):
         self.plot_fit(ax=hist_ax, annotate=annotate, **kwargs)
         self.plot_residuals(ax=resid_ax, pct=resid_pct)
 
-        hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")
-        resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
+        #         hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")
+        #         hist_ax.set_ylabel(self.labels.y)
+        #         resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
 
         hist_ax.tick_params(labelbottom=False)
+        hist_ax.xaxis.label.set_visible(False)
 
         return hist_ax, resid_ax

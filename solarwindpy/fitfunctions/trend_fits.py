@@ -51,6 +51,7 @@ class TrendFit(object):
         self.set_fitfunctions(ffunc1d, trendfunc)
         self._trend_logx = bool(trend_logx)
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
+        self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
 
     @property
     def agged(self):
@@ -99,9 +100,40 @@ class TrendFit(object):
     def trend_logx(self):
         return self._trend_logx
 
+    @property
+    def labels(self):
+        return self._labels
+
     def set_agged(self, new):
         assert isinstance(new, pd.DataFrame)
         self._agged = new
+
+    def set_labels(self, **kwargs):
+        r"""Set or update x, y, or z labels. Any label not specified in kwargs
+        is propagated from `self.labels.<x, y, or z>`.
+        """
+
+        x = kwargs.pop("x", self.labels.x)
+        y = kwargs.pop("y", self.labels.y)
+        z = kwargs.pop("z", self.labels.z)
+
+        if len(kwargs.keys()):
+            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+            raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+        self._labels = core.AxesLabels(x, y, z)
+
+        try:
+            # Update ffunc1d labels
+            self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))
+        except AttributeError:
+            pass
+
+        try:
+            # Update trendfunc labels
+            self.trend_func.set_labels(x=x, y=y, z=z)
+        except AttributeError:
+            pass
 
     def set_fitfunctions(self, ffunc1d, trendfunc):
         if ffunc1d is None:
@@ -120,9 +152,17 @@ class TrendFit(object):
         """
         agg = self.agged
         x = pd.IntervalIndex(agg.index).mid.values
+
+        ylbl = self.labels.y
+        zlbl = self.labels.z
+
         ffuncs = {}
         for k, y in agg.items():
-            ffuncs[k] = self.ffunc1d_class(x, y.values, **kwargs)
+            ff1d = self.ffunc1d_class(x, y.values, **kwargs)
+            # These are slices along y traversing the x-axis, so we
+            # rotate labels accordingly.
+            ff1d.set_labels(x=ylbl, y=zlbl)
+            ffuncs[k] = ff1d
 
         ffuncs = pd.Series(ffuncs)
         self._ffuncs = ffuncs
@@ -138,7 +178,7 @@ class TrendFit(object):
         self.ffuncs.drop(bad_idx, inplace=True)
         self.make_popt_frame()
 
-    def plot_all_ffuncs(self, xlbl="x", ylbl="y", legend_title_fmt="%.0f", **kwargs):
+    def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
         r"""`kwargs` passed to each `ffunc.plot_fit_resid(**kwargs)`.
 
         legend_title_fmt: str
@@ -146,11 +186,30 @@ class TrendFit(object):
             can easily instert TeX into `legend_title_fmt should we desire.
         """
         axes = {}
+        popt = self.popt_1d
+        yk, wk = self.popt1d_keys
+        yv = popt.loc[:, yk]
+        wv = popt.loc[:, wk]
+
+        y0, y1 = self.trend_func.yobs.min(), self.trend_func.yobs.max()
+        y_ok = (y0 <= yv) & (yv <= y1)
+
+        w0, w1 = self.trend_func.weights.min(), self.trend_func.weights.max()
+        w_ok = (w0 <= wv) & (wv <= w1)
+
+        in_trend = y_ok & w_ok
+
+        legend_title = "{} ${}$\n{}"
+
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plot_fit_resid(**kwargs)
-            hax.set_ylabel(ylbl)
-            rax.set_xlabel(xlbl)
-            hax.legend_.set_title(legend_title_fmt % k.mid)
+            hax.legend_.set_title(
+                legend_title.format(
+                    (legend_title_fmt % k.mid),
+                    self.labels.x.units,
+                    "In Fit" if in_trend.loc[k] else "Not In Fit",
+                )
+            )
             axes[k] = {"hax": hax, "rax": rax}
 
         axes = pd.DataFrame.from_dict(axes, orient="index")
@@ -187,12 +246,15 @@ class TrendFit(object):
 
         self._trend_func = trend
 
-    def plot_all_popt_1d(self, ax, **kwargs):
+    def plot_all_popt_1d(self, ax=None, **kwargs):
         r"""Plot all the 1D popt appropriate for identifying the trend on
         `ax`.
 
         kwargs passed to `ax.errorbar`
         """
+        if ax is None:
+            fig, ax = swp.pp.subplots()
+
         popt = self.popt_1d
         ykey, wkey = self.popt1d_keys
 
@@ -215,6 +277,10 @@ class TrendFit(object):
         )
 
         bl[0].set_linestyle(linestyle)
+
+        ax.set_xlabel(self.labels.x)
+        ax.set_ylabel(self.labels.y)
+
         return pl, cl, bl
 
     def plot_trend_fit_resid(self, **kwargs):
@@ -231,6 +297,7 @@ class TrendFit(object):
 
         if self.trend_logx:
             rax.set_xscale("log")
+
         return hax, rax
 
     def plot_trend_and_resid_on_ffuncs(self, trend_kwargs=None, fit1d_kwargs=None):
@@ -248,6 +315,7 @@ class TrendFit(object):
 
         if self.trend_logx:
             rax.set_xscale("log")
+
         return hax, rax
 
     def plot_1d_popt_and_trend(self, ax=None, **kwargs):
@@ -255,8 +323,6 @@ class TrendFit(object):
         """
         if ax is None:
             fig, ax = swp.pp.subplots()
-
-        ylbl = ax.get_ylabel()
 
         kwargs_popt_1d = kwargs.pop("kwargs_popt_1d", dict())
         self.plot_all_popt_1d(ax, **kwargs_popt_1d)
@@ -266,5 +332,3 @@ class TrendFit(object):
         self.trend_func.plot_fit(
             ax, annotate_kwargs=annotate_kwargs, fit_kwargs=fit_kwargs, **kwargs
         )
-
-        ax.set_ylabel(ylbl)

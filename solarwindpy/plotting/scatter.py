@@ -45,6 +45,7 @@ class Scatter(base.Base):
         super(Scatter, self).__init__()
         self.set_data(x, y, z, clip_data)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else "z")
+        self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)
 
     def set_data(self, x, y, z=None, clip_data=True):
