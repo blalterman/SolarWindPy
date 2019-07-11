@@ -51,7 +51,7 @@ def _run_species_substitution(pattern):
 
 
 _trans_measurement = {
-    "pth": r"p",
+    "pth": r"P",
     "beta": r"\beta",
     "dbeta": r"\Delta \beta",
     "dv": r"\Delta v",
@@ -495,8 +495,8 @@ template   : %s
 
             m0, m1 = mcs0.m, mcs1.m
             u0, u1 = (
-                _trans_units[m0.replace("_err", "")],
-                _trans_units[m1.replace("_err", "")],
+                _trans_units.get(m0.replace("_err", ""), "???"),
+                _trans_units.get(m1.replace("_err", ""), "???"),
             )
             if u0 == u1:
                 units = r"\#"

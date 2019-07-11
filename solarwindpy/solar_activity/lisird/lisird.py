@@ -1,26 +1,6 @@
 #!/usr/bin/env python
-"""
-Name   : lisird.py
-Author : B. L. Alterman
-e-mail : balterma@umich.edu
-
-Description
------------
--Tools for interfacing with the LISIRD hosted by LASP
- <http://lasp.colorado.edu/lisird/>
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+"""-Tools for interfacing with the LASP Interactive Solar Irradiance Data Center (LISIRD).
+<http://lasp.colorado.edu/lisird/>
 """
 
 import pdb  # noqa: F401
@@ -68,7 +48,22 @@ class LISIRD_ID(ID):
         URLs replace the wild card in <http://lasp.colorado.edu/lisird/latis/*>.
 
         Note that the CaK line should probably be served directly from
-        <https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/>
+        <https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/>.
+        The quantities in CaK data are
+
+            ======== ====================================================
+             k3       Core Intensity
+             k2vk3    Relative blue K2 peak w/rt K3 instensity
+             delk1    Separation of the blue and red K1 minima (K1V-K1R)
+             delk2    Separation of the two emission maxima (K2V-K2R)
+             delwb    Wilson-Bappu parameter, width between the outer
+                      edges of the K2 emission peaks
+             emdx     Emission index equivalent width in 1 angstrom
+                      band centered on K3
+             viored   ???
+            ======== ====================================================
+
+        (<https://www.nso.edu/wp-content/uploads/2018/09/cak_paper.pdf>).
         """
         super(LISIRD_ID, self).__init__(key)
 
@@ -142,8 +137,14 @@ class LISIRDLoader(DataLoader):
 
         d_old = old_data_path.with_suffix(".csv")
         m_old = old_data_path.with_suffix(".json")
-        d_old.unlink()
-        m_old.unlink()
+        try:
+            d_old.unlink()
+        except FileNotFoundError:
+            pass
+        try:
+            m_old.unlink()
+        except FileNotFoundError:
+            pass
 
     def load_data(self):
         super(LISIRDLoader, self).load_data()

@@ -252,5 +252,22 @@ class ActivityIndicator(Base):
             interpolated[k] = interped
 
         interpolated = pd.DataFrame(interpolated, index=target_index)
+
+        # Remove extrapolated data
+        tk = pd.Series(True, target_index)
+
+        t1 = target_index[-1]
+        s1 = source_data.index[-1]
+        if s1 < t1:
+            tk = tk & (target_index <= s1)
+
+        t0 = target_index[0]
+        s0 = source_data.index[0]
+        if t0 < s0:
+            tk = tk & (s0 <= target_index)
+
+        if not tk.all():
+            interpolated.where(tk, inplace=True, axis=0)
+
         self._interpolated = interpolated
         return interpolated
