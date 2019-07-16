@@ -676,14 +676,19 @@ class FitFunction(ABC):
             info = "\n".join(info).replace("$$", "$")
 
         if additional_info is not None:
-            if hasattr(additional_info, "__iter__"):
+            if hasattr(additional_info, "__iter__") and not isinstance(
+                additional_info, str
+            ):
                 for i, this_info in enumerate(additional_info):
                     additional_info[i] = self._check_and_add_math_escapes(this_info)
 
                 additional_info = "\n".join(additional_info)
                 additional_info = self._check_and_add_math_escapes(additional_info)
 
-                info += "\n" + additional_info
+            if not isinstance(additional_info, str):
+                raise TypeError("Additional info must be a string")
+
+            info += "\n" + additional_info
 
         if annotate_fcn is not None:
             info = annotate_fcn(info)
@@ -781,12 +786,7 @@ class FitFunction(ABC):
             hist_kwargs = dict(color="k")
 
         if bin_kwargs is None:
-            bin_kwargs = dict(
-                color="darkgreen",
-                #                               markerfacecolor="fuchsia",
-                #                               markeredgecolor="fuchsia",
-                marker="P",
-            )
+            bin_kwargs = dict(color="darkgreen", markerfacecolor="none", marker="P")
 
         if fit_kwargs is None:
             fit_kwargs = dict(color="darkorange")

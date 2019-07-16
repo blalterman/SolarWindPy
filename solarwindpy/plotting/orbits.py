@@ -39,6 +39,13 @@ class OrbitPlot(ABC):
         gb = self.joint.groupby(list(self._gb_axes) + [self._orbit_key])
         return gb
 
+    def set_path(self, *args, orbit=None, **kwargs):
+        r"""Set path information, accounting for orbit info.
+        """
+        super(OrbitPlot, self).set_path(*args, **kwargs)
+        if orbit is not None:
+            self._path = self.path / orbit.path
+
     def set_orbit(self, new):
         r"""`IntervalIndex` corresponding to the times we want to subset the orbit.
         """
