@@ -202,7 +202,7 @@ _templates = {
     "nuc": r"\nu_{$C,$S}",
     "nc": r"N_{C;$S}",
     # Misc
-    "VDFratio": r"\mathrm{log_{10}}(\frac{f_i}{f_j} \left(v_i\right)_{$S})",
+    "VDFratio": r"\mathrm{ln}(\frac{f_i}{f_j} \left(v_i\right)_{$S})",
     "chisq": r"\chi^2",
     "chisqnu": r"\chi^2_\nu",
     "edv": r"P_{\Delta v}/P_\mathrm{th}|_{$S}",

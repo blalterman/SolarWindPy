@@ -13,6 +13,8 @@ from abc import ABC
 from . import histograms
 from . import tools
 
+# from . import labels
+
 
 class OrbitPlot(ABC):
     def __init__(self, orbit, *args, **kwargs):
@@ -36,6 +38,13 @@ class OrbitPlot(ABC):
         """
         gb = self.joint.groupby(list(self._gb_axes) + [self._orbit_key])
         return gb
+
+    def set_path(self, *args, orbit=None, **kwargs):
+        r"""Set path information, accounting for orbit info.
+        """
+        super(OrbitPlot, self).set_path(*args, **kwargs)
+        if orbit is not None:
+            self._path = self.path / orbit.path
 
     def set_orbit(self, new):
         r"""`IntervalIndex` corresponding to the times we want to subset the orbit.
@@ -101,7 +110,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         super(OrbitHist2D, self).__init__(orbit, x, y, **kwargs)
 
     def _format_axes(self, axes):
-        for ax in axes:
+        for k, ax in axes.items():
             self._format_axis(ax)
 
         inbound = axes.loc["Inbound"]
@@ -111,11 +120,25 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         #         outbound.set_xlim(x0, x1)
         outbound.yaxis.label.set_visible(False)
 
+        # Make the Inbound/Outbound transition cyan.
         sin = inbound.spines["right"]
         sout = outbound.spines["left"]
         for spine in (sin, sout):
             spine.set_edgecolor("cyan")
             spine.set_linewidth(2.5)
+
+        # TODO: Get top and bottom axes to line up without `tight_layout`, which
+        #       puts colorbar into an unusable location.
+
+    #         for k, ax in axes.items():
+    #             au = 1.49597871e+11 # [m]
+    #             rs = 695700000 # [m]
+    #             conversion = au/rs
+    #             if self.labels.x == labels.special.Distance2Sun("Rs"):
+    #                 tax = ax.twiny()
+    #                 tax.grid(False)
+    #                 tax.set_xlim(* (np.array(ax.get_xlim()) / conversion))
+    #                 tax.set_xlabel(labels.special.Distance2Sun("AU"))
 
     def agg(self, **kwargs):
         agg = super(OrbitHist2D, self).agg(**kwargs)
@@ -123,7 +146,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         transformed = grouped.transform(self._axis_normalizer)
         return transformed
 
-    def project_1d(self, axis, **kwargs):
+    def project_1d(self, axis, project_counts=False, **kwargs):
         r"""Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
@@ -156,13 +179,23 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             # Need to convert back to regular from log-space for data setting.
             x = 10.0 ** x
 
+        y = self.data.loc[:, other] if not project_counts else None
+        if y is not None:
+            # Only select y-values plotted.
+            logy = self.log._asdict()[other]
+            yedges = self.edges[other].values
+            y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
+            if logy:
+                y = 10.0 ** y
+
         h1 = OrbitHist1D(
             self.orbit,
             x,
-            y=self.data.loc[:, other],
+            y=y,
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,
+            **kwargs
         )
         h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()[other])
         h1.set_path("auto")

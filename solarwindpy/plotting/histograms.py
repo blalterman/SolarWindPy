@@ -850,9 +850,18 @@ class Hist2D(AggPlot):
             # Need to convert back to regular from log-space for data setting.
             x = 10.0 ** x
 
+        y = self.data.loc[:, other] if not project_counts else None
+        if y is not None:
+            # Only select y-values plotted.
+            logy = self.log._asdict()[other]
+            yedges = self.edges[other].values
+            y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
+            if logy:
+                y = 10.0 ** y
+
         h1 = Hist1D(
             x,
-            y=self.data.loc[:, other] if not project_counts else None,
+            y=y,
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,

@@ -31,6 +31,9 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
 
     kwargs are passed to `fig.savefig`.
     """
+    if isinstance(fig, mpl.axes.Axes):
+        fig = fig.figure
+
     assert isinstance(fig, mpl.figure.Figure)
     assert isinstance(spath, Path)
 
