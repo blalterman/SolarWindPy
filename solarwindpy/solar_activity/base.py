@@ -217,6 +217,17 @@ class ActivityIndicator(Base):
         return self.loader.data
 
     @property
+    def extrema(self):
+        return self._extrema
+
+    @property
+    def norm_by(self):
+        try:
+            return self._norm_by
+        except AttributeError:
+            raise AttributeError("Please calculate normalized quantity")
+
+    @property
     def interpolated(self):
         return self._interpolated
 
@@ -271,6 +282,41 @@ class ActivityIndicator(Base):
 
         self._interpolated = interpolated
         return interpolated
+
+    @abstractproperty
+    def normalized(self):
+        pass
+
+    @abstractmethod
+    def set_extrema(self):
+        pass
+
+    @abstractmethod
+    def run_normalization(self):
+        r"""Normalize quantity within each cycle.
+
+        If data has been interpolated, run normalization on interpolated quantity too.
+
+        Parameters
+        ----------
+        norm_by: str
+            max, zscore, feature-scale
+        """
+        pass
+
+    def _run_normalization(self, indicator, norm_fcn):
+        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="All")
+        joint = pd.concat(
+            [indicator, cut], axis=1, keys=["indicator", "cycle"]
+        ).sort_index(axis=1)
+        grouped = joint.groupby("cycle")
+
+        normed = {}
+        for k, g in grouped:
+            g = g.loc[:, "indicator"]
+            normed[k] = norm_fcn(g)
+        normed = pd.concat(normed.values(), axis=0).sort_index()
+        return normed
 
 
 class IndicatorExtrema(Base):
@@ -335,7 +381,9 @@ class IndicatorExtrema(Base):
 
             intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "All": all_})
 
-        self._cycle_intervals = intervals.sort_index(axis=1)
+        intervals = intervals.sort_index(axis=1)
+        self._cycle_intervals = intervals
+        return intervals
 
     def cut_spec_by_interval(self, epoch, kind=None):
         r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
@@ -393,6 +441,7 @@ class IndicatorExtrema(Base):
 
         bands = lr.apply(make_interval, axis=1).unstack(level="kind")
         self._extrema_bands = bands
+        return bands
 
     def cut_about_extrema_bands(self, epoch):
         r"""Assign each `epoch` measurement within $\Delta t$ to a Indicator extrema, where
