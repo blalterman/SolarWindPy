@@ -23,6 +23,7 @@ _trans_species = {
     "p1": r"p_1",
     "p2": r"p_2",
     "he": r"\mathrm{He}",
+    "dv": r"\Delta v",  # Because we want pdv in species
 }
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}

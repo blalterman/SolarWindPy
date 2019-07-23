@@ -35,7 +35,7 @@ def _clean_str_list_for_printing(data):
     return agg
 
 
-def available_TeXlabel_measurements():
+def available_labels():
     m = sorted(list(base._trans_measurement.keys()) + list(base._templates.keys()))
     c = sorted(base._trans_component.keys())
     s = sorted(base._trans_species.keys())

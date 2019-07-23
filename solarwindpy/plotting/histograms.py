@@ -589,36 +589,6 @@ class Hist2D(AggPlot):
 
         super(Hist2D, self).set_labels(z=z, **kwargs)
 
-    #     def _add_meta_to_zlbl(self, zlbl):
-    #         # BUG: path's won't auto create if they are strings.
-    #         axnorm = self.axnorm
-    #         if axnorm == "c":
-    #             prefix = "Col."
-    #         elif axnorm == "d":
-    #             prefix = "Density"
-    #         elif axnorm == "r":
-    #             prefix = "Row"
-    #         elif axnorm == "t":
-    #             prefix = "Total"
-    #         else:
-    #             prefix = ""
-
-    #         if zlbl is not None:
-    #             fmt = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$"
-    #             if prefix:
-    #                 try:
-    #                     zlbl = fmt % (prefix, zlbl.tex)
-    #                 except AttributeError:
-    #                     zlbl = fmt % (prefix, r"\mathrm{" + zlbl + "}")
-
-    #         elif self.data.loc[:, "z"].dropna().unique().size == 1:
-    #             if prefix:
-    #                 zlbl = r"$\mathrm{%s \; Norm. \; Count} \; [\#]$" % prefix
-    #             else:
-    #                 zlbl = r"$\mathrm{Count} \; [\#]$"
-
-    #         return zlbl
-
     def set_data(self, x, y, z, logx, logy, clip):
         logx = bool(logx)
         logy = bool(logy)
@@ -736,6 +706,10 @@ class Hist2D(AggPlot):
 
         label = kwargs.pop("label", self.labels.z)
         cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
+
+        if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
+            cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+
         return cbar
 
     def _limit_color_norm(self, norm):
@@ -851,6 +825,7 @@ class Hist2D(AggPlot):
             x = 10.0 ** x
 
         y = self.data.loc[:, other] if not project_counts else None
+        logy = False
         if y is not None:
             # Only select y-values plotted.
             logy = self.log._asdict()[other]
@@ -867,6 +842,7 @@ class Hist2D(AggPlot):
             nbins=self.edges[axis].values,
         )
 
+        h1.set_log(y=logy)  # Need to propagate logy.
         h1.set_labels(x=self.labels._asdict()[axis])
         if not project_counts:
             h1.set_labels(y=self.labels._asdict()[other])

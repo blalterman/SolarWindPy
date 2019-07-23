@@ -78,7 +78,10 @@ class Count(ArbitraryLabel):
     def _build_tex(self):
         axnorm = base._trans_axnorm[self.axnorm]
         if axnorm:
-            tex = r"\mathrm{%s Norm Count}" % axnorm
+            if self.axnorm in ("r", "c"):
+                tex = r"\mathrm{%s Norm Count}" % axnorm
+            else:
+                tex = r"\mathrm{Probability Density}"
         else:
             tex = r"\mathrm{Count}"
 
