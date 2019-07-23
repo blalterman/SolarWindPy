@@ -76,7 +76,7 @@ class Count(ArbitraryLabel):
         self._axnorm = norm
 
     def _build_tex(self):
-        axnorm = base._trans_axnorm[self.axnorm]
+        axnorm = self.axnorm
         if axnorm:
             if self.axnorm in ("r", "c"):
                 tex = r"\mathrm{%s Norm Count}" % axnorm

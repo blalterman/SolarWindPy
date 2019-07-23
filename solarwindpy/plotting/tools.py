@@ -23,7 +23,7 @@ def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
     return plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
 
 
-def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
+def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
     r"""Save `fig` at `spath` as png and eps, tracking the save at alog.
 
     Note that we add `B.L. Alterman` and the datetime to the bottom left
@@ -39,14 +39,11 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
 
     alog = logging.getLogger(__name__)
 
-    if add_info:
-        info = "B. L. Alterman {}".format(datetime.now().strftime("%Y%m%dT%H%M%S"))
-        fig.text(0, 0, info)
+    tight_layout = kwargs.pop("tight_layout", True)
+    bbox_inches = kwargs.pop("bbox_inches", "tight")
 
     if tight_layout:
         fig.tight_layout()
-
-    #     alog.debug("Saving figure\n%s", spath.resolve())
 
     meta = kwargs.pop("metadata", {})
     if "Author" not in meta.keys():
@@ -61,17 +58,29 @@ def save(fig, spath, add_info=True, tight_layout=True, **kwargs):
     # Add the datetime stamp to the PNG as those are what we render most often when
     # working, drafting, etc.
 
-    bbox_inches = kwargs.pop("bbox_inches", "tight")
     alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
-    for fmt in (".pdf", ".png"):
-        fig.savefig(
-            spath.with_suffix(fmt),
-            bbox_inches=bbox_inches,
-            format=fmt.strip("."),
-            meta=meta,
-            **kwargs
-        )
-        alog.info("Suffix saved: %s", fmt)
+
+    fig.savefig(
+        spath.with_suffix(".pdf"),
+        bbox_inches=bbox_inches,
+        format="pdf",
+        meta=meta,
+        **kwargs
+    )
+    alog.info("Suffix saved: pdf")
+
+    if add_info:
+        info = "B. L. Alterman {}".format(datetime.now().strftime("%Y%m%dT%H%M%S"))
+        fig.text(info_x, info_y, info)
+
+    fig.savefig(
+        spath.with_suffix(".png"),
+        bbox_inches=bbox_inches,
+        format="png",
+        meta=meta,
+        **kwargs
+    )
+    alog.info("Suffix saved: png")
 
 
 def joint_legend(ax, tax, **kwargs):
