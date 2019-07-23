@@ -770,9 +770,9 @@ class FitFunction(ABC):
         subplots_kwargs: dict
             Passed to plt.subplots(**subplots_kwargs)
         hist_kwargs: dict
-            Passed to ax.plot(**hist_kwargs) for plotting obs.
+            Passed to ax.plot(**hist_kwargs) for plotting raw obs.
         bin_kwargs: dict
-            Passed to ax.plot(**bins_kwargs) for plotting raw obs.
+            Passed to ax.plot(**bins_kwargs) for plotting obs that are fit.
         fit_kwargs: dict
             Passed to ax.plot(**fit_kwargs) for plotting fit.
         annotate_kwargs:
@@ -786,7 +786,11 @@ class FitFunction(ABC):
             hist_kwargs = dict(color="k")
 
         if bin_kwargs is None:
-            bin_kwargs = dict(color="darkgreen", markerfacecolor="none", marker="P")
+            bin_kwargs = dict(
+                color="darkgreen",
+                #                               markerfacecolor="none",
+                marker="P",
+            )
 
         if fit_kwargs is None:
             fit_kwargs = dict(color="darkorange")
@@ -797,18 +801,15 @@ class FitFunction(ABC):
         if drawstyle is None:
             drawstyle = "steps-mid"
 
-        if ylabel is None:
-            # TODO: set defaults with `labels` classes from my plotting class?
-            ylabel = r"$\mathrm{Count} \; [\#]$"
-
         hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
         bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
         fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
 
         # Plot the raw data histograms.
-        ax.plot(
+        ax.errorbar(
             self.xobs_raw,
             self.yobs_raw,
+            yerr=self.weights_raw,
             drawstyle=drawstyle,
             label=hist_label,
             color=hist_kwargs.pop("color", "k"),
@@ -816,9 +817,10 @@ class FitFunction(ABC):
         )
 
         # Overplot with the data as selected for the plot.
-        ax.plot(
+        ax.errorbar(
             self.xobs,
             self.yobs,
+            yerr=self.weights,
             drawstyle=drawstyle,
             label=bin_label,
             color=bin_kwargs.pop("color", "darkgreen"),
@@ -833,9 +835,6 @@ class FitFunction(ABC):
             color=fit_kwargs.pop("color", "darkorange"),
             **fit_kwargs
         )
-
-        if ylabel is not None:
-            ax.set_ylabel(ylabel)
 
         ax.grid(True, which="major", axis="both")
 

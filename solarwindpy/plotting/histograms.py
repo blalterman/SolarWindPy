@@ -736,6 +736,10 @@ class Hist2D(AggPlot):
 
         label = kwargs.pop("label", self.labels.z)
         cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
+
+        if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
+            cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+
         return cbar
 
     def _limit_color_norm(self, norm):

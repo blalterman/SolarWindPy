@@ -6,6 +6,7 @@ results of those 1D fits along the 2nd dimension of the aggregated data.
 """
 
 import pdb  # noqa: F401
+import logging  # noqa: F401
 import pandas as pd
 from collections import namedtuple
 
@@ -78,6 +79,8 @@ class TrendFit(object):
 
     @property
     def popt_1d(self):
+        r"""Optimized parameters from 1D fits.
+        """
         return self._popt_1d
 
     @property
@@ -98,6 +101,10 @@ class TrendFit(object):
 
     @property
     def trend_logx(self):
+        r"""If True, trend's x-axis is log-scaled.
+
+        Should probably change this to pull from `trend_func` somehow, but unsure how to do so.
+        """
         return self._trend_logx
 
     @property
@@ -123,16 +130,22 @@ class TrendFit(object):
 
         self._labels = core.AxesLabels(x, y, z)
 
+        # log = logging.getLogger()
         try:
             # Update ffunc1d labels
             self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))
+        #             log.warning("Set ffunc1d labels {}".format(self.ffuncs.iloc[0].labels))
         except AttributeError:
+            #             log.warning("Skipping setting ffunc 1d labels")
             pass
 
         try:
             # Update trendfunc labels
             self.trend_func.set_labels(x=x, y=y, z=z)
+        #             log.warning("Set trend_func labels {}".format(self.trend_func.labels))
+
         except AttributeError:
+            #             log.warning("Skipping setting trend_func labels")
             pass
 
     def set_fitfunctions(self, ffunc1d, trendfunc):
@@ -243,6 +256,7 @@ class TrendFit(object):
         trend = fcn(
             x, popt.loc[:, ykey].values, weights=popt.loc[:, wkey].values, **kwargs
         )
+        trend.set_labels(**self.labels._asdict())
 
         self._trend_func = trend
 
