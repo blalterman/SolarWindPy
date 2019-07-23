@@ -13,7 +13,13 @@ from pathlib import Path
 
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
-from ..base import ID, DataLoader, ActivityIndicator  # , _Loader_Dtypes_Columns
+from ..base import (
+    ID,
+    DataLoader,
+    ActivityIndicator,
+    IndicatorExtrema,
+)  # , _Loader_Dtypes_Columns
+from .extrema_calculator import ExtremaCalculator
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -58,7 +64,7 @@ class LISIRD_ID(ID):
              delk2    Separation of the two emission maxima (K2V-K2R)
              delwb    Wilson-Bappu parameter, width between the outer
                       edges of the K2 emission peaks
-             emdx     Emission index equivalent width in 1 angstrom
+             emdx     Emission index equivalent width in 1 angstrom
                       band centered on K3
              viored   ???
             ======== ====================================================
@@ -185,10 +191,63 @@ class LISIRD(ActivityIndicator):
         self._init_logger()
         self.set_id(LISIRD_ID(key))
         self.load_data()
+        self.set_extrema()
+
+    def set_extrema(self):
+        pass
 
     @property
     def meta(self):
         return self.loader.meta
+
+    @property
+    def normalized(self):
+        pass
+
+    def run_normalization(self, norm_by="feature-scale"):
+        raise NotImplementedError(
+            r"""Need to fix normalization handling for each LISIRD
+quantity"""
+        )
+
+        # Note: "max" and "feature-scale" are the same if the min(SSN) = 0.
+        assert norm_by in ("max", "zscore", "feature-scale")
+        self.logger.info("Normalizing SSN by %s", norm_by)
+        self._norm_by = norm_by
+
+        if norm_by == "max":
+
+            def norm_fcn(g):
+                return g.divide(g.max())
+
+        elif norm_by == "zscore":
+
+            def norm_fcn(g):
+                return g.subtract(g.mean()).divide(g.std())
+
+        elif norm_by == "feature-scale":
+
+            def norm_fcn(g):
+                return g.subtract(g.min()).divide(g.max() - g.min())
+
+        normalized = {
+            k: self._run_normalization(v, norm_fcn) for k, v in self.data.items()
+        }
+        normalized = pd.concat(normalized, axis=1)
+
+        normed_interpolated = None
+        try:
+            interpolated = self.interpolated
+            normed_interpolated = {
+                k: self._run_normalization(v, norm_fcn) for k, v in interpolated.items()
+            }
+            normed_interpolated = pd.concat(normed_interpolated, axis=1)
+        except AttributeError:
+            pass
+
+        return normalized, normed_interpolated
+
+    run_normalization.__doc__ = ActivityIndicator.run_normalization
 
     def load_data(self):
         loader = LISIRDLoader(self.id.key, self.id.url)
@@ -207,3 +266,19 @@ class LISIRD(ActivityIndicator):
         interpolated = super(LISIRD, self).interpolate_data(source, target_index)
         self._interpolated = interpolated
         return interpolated
+
+
+class LISIRDExtrema(IndicatorExtrema):
+    @property
+    def extrema_calculator(self):
+        r""":py:class:`ExtremaCalculator` used to calculate the extrema.
+        """
+        return self._extrema_calculator
+
+    def load_or_set_data(self, *args, **kwargs):
+        r"""Get extrema from :py:class:`ExtremaCalculator`.
+        """
+        ec = ExtremaCalculator(*args, **kwargs)
+        extrema = ec.formatted_extrema
+        self._data = extrema
+        self._extrema_calculator = ec

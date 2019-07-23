@@ -1,16 +1,17 @@
 __all__ = ["ExtremaCalculator"]
 
+import pdb  # noqa: F401
+
 import pandas as pd
 import matplotlib as mpl
 import numpy as np
-
-from collections import namedtuple
 
 import solarwindpy as swp
 
 
 class ExtremaCalculator(object):
-    r"""Calculate the minima and maxima for a activity index.
+    r"""Calculate the minima and maxima for a activity index, defining an
+    Indicator Cycle starting at Minima N and ending at Minimum N+1.
 
     Properties
     ----------
@@ -48,24 +49,25 @@ class ExtremaCalculator(object):
     set_name, set_data, set_threshold, find_extrema, make_plot
     """
 
-    def __init__(self, name, activity_index, threshold, window=None):
+    def __init__(self, name, activity_index, threshold=None, window=600):
         r"""Parameters
         ----------
         name: str
             key used to select activity indicator.
         activity_index: pd.Series
             Data as measured for the index.
-        threshold: scalar, FunctionType, number
+        threshold: scalar, FunctionType, None
             If scalar, the threshold for selecting data for finding Maxima/Minima.
             If FunctionType, called on `activity_index` (`self.data`) to calculate the threshold.
             If None, pull scalar from an internal dictionary. If not present in dictionary,
             calculate with `np.nanmedian`.
-        window: scalar, None
-            If not None, the number of days to apply for a rolling window mean.
+        window: scalar
+            The number of days to apply for a rolling window mean.
         """
         self.set_name(name)
         self.set_data(activity_index, window)
         self.set_threshold(threshold)
+        self.find_threshold_crossings()
         self.find_extrema()
 
     @property
@@ -99,24 +101,16 @@ class ExtremaCalculator(object):
         return self._extrema
 
     @property
+    def threshold_crossings(self):
+        return self._threshold_crossings
+
+    @property
+    def data_in_extrema_finding_intervals(self):
+        return self._data_in_extrema_finding_intervals
+
+    @property
     def formatted_extrema(self):
-        ext = self.extrema
-        minima = ext.loc[ext == "Min"]
-        maxima = ext.loc[ext == "Max"]
-
-        min0 = minima.index[0]
-        max0 = maxima.index[0]
-
-        if max0 < min0:
-            minima = pd.Series(minima.index, np.arange(minima.index.size))
-            maxima = pd.Series(maxima.index, np.arange(maxima.index.size) - 1)
-        else:
-            minima = pd.Series(minima.index, np.arange(minima.index.size))
-            maxima = pd.Series(maxima.index, np.arange(maxima.index.size))
-
-        to_save = pd.concat({"Min": minima, "Max": maxima}, axis=1)
-
-        return to_save
+        return self._formatted_extrema
 
     def set_name(self, new):
         if new in ("delk2", "delwb", "k2vk3", "viored", "delk1"):
@@ -126,15 +120,29 @@ class ExtremaCalculator(object):
         self._name = str(new)
 
     def set_data(self, index, window):
-        rolled = index.rolling("%sd" % window).mean()
-        rolled.index = rolled.index - pd.to_timedelta("%sd" % (window / 2.0))
+
+        if self.name in ("delk1", "delk2", "delwb", "emdx", "k2vk3", "k3", "viored"):
+            # We don't trust CaK before then.
+            index = index.loc["1977-01-01":]
+
+        rolled = index
+        if window is not None:
+            rolled = index.rolling("%sd" % window).mean()
+            rolled.index = rolled.index - pd.to_timedelta("%sd" % (window / 2.0))
 
         self._raw = index
         self._data = rolled
         self._window = window
 
     def _format_axis(self, ax):
-        ax.set_xlim(right=mpl.dates.date2num(pd.to_datetime("2020-01-02")))
+        left, _ = ax.get_xlim()
+        left = pd.to_datetime(
+            "{}-01-01".format(pd.to_datetime(mpl.dates.num2date(left)).year - 1)
+        )
+        ax.set_xlim(
+            left=mpl.dates.date2num(left),
+            right=mpl.dates.date2num(pd.to_datetime("2020-01-02")),
+        )
         ax.xaxis.set_major_formatter(mpl.dates.DateFormatter("%Y"))
         ax.xaxis.set_major_locator(mpl.dates.YearLocator(2))
         ax.figure.autofmt_xdate()
@@ -164,7 +172,8 @@ class ExtremaCalculator(object):
 
     def _plot_extrema_ranges(self, ax):
         joint = pd.concat(
-            {"cut": self.extrema_finders.cut, "indicator": self.data}, axis=1
+            {"cut": self.data_in_extrema_finding_intervals, "indicator": self.data},
+            axis=1,
         )
         gb = joint.groupby("cut")
 
@@ -176,9 +185,9 @@ class ExtremaCalculator(object):
 
         ax.legend_.set_visible(False)
 
-    def _plot_extrema_changes(self, ax):
-        changes = self.extrema_finders.changes
-        changes.plot(ax=ax, color="cyan", marker="P", ls="none", label="Changes")
+    def _plot_threshold_crossings(self, ax):
+        crossings = self.threshold_crossings
+        crossings.plot(ax=ax, color="cyan", marker="P", ls="none", label="Changes")
         ax.legend()
 
     def _plot_extrema(self, ax):
@@ -217,31 +226,6 @@ class ExtremaCalculator(object):
 
         threshold = pd.Series(threshold, index=self.data.index)
         self._threshold = threshold
-
-    @staticmethod
-    def _calculate_changes_between_extrema_regions(data, threshold):
-
-        high = data > threshold
-        low = data < threshold
-
-        dhigh = high.astype(int).diff() != 0
-        dlow = low.astype(int).diff() != 0
-        deltas = dlow | dhigh
-        changes = data.where(deltas).dropna()
-        return changes
-
-    @staticmethod
-    def _cut_data_into_extrema_finding_intervals(data, changes):
-        bins = changes.index
-        if bins[-1] <= data.index[-1]:
-            bins = bins.append(pd.DatetimeIndex([data.index[-1]]))
-        if bins[0] >= data.index[0]:
-            bins = bins.append(pd.DatetimeIndex([data.index[0]]))
-        bins = bins.sort_values()
-
-        cut = pd.cut(data.index, bins=bins)
-        cut = pd.Series(cut, index=data.index)
-        return cut
 
     @staticmethod
     def _find_extrema(threshold, cut, data):
@@ -284,14 +268,12 @@ class ExtremaCalculator(object):
             maxima = maxima.iloc[1:]
         elif name == "delk1":
             minima = minima.iloc[1:-1]
-        elif name == "emdx":
-            minima = minima.iloc[2:]
+        #         elif name == "emdx":
+        #             minima = minima.iloc[2:]
         #             maxima = maxima.iloc[:-1]
         elif name == "f107":
             minima = minima.iloc[:-1]
             maxima = maxima.iloc[1:]
-        elif name == "k3":
-            minima = minima.iloc[1:-1]
         elif name == "mg_index":
             maxima = maxima.iloc[1:]
         elif name == "sd_70":
@@ -301,37 +283,100 @@ class ExtremaCalculator(object):
         elif name == "viored":
             minima = minima.iloc[1:-1]
 
+        minimum_seperation = pd.to_timedelta("1000d")
+        tk_max = maxima.index.to_series().diff() > minimum_seperation
+        tk_min = minima.index.to_series().diff() > minimum_seperation
+
+        # 0th entry diff is NaT -> False by default.
+        tk_max.iloc[0] = True
+        tk_min.iloc[0] = True
+        maxima = maxima.loc[tk_max]
+        minima = minima.loc[tk_min]
+
         return maxima, minima
+
+    def find_threshold_crossings(self):
+        data = self.data
+        threshold = self.threshold
+
+        high = data > threshold
+        low = data < threshold
+
+        dhigh = high.astype(int).diff() != 0
+        dlow = low.astype(int).diff() != 0
+        deltas = dlow | dhigh
+        crossings = data.where(deltas).dropna()
+
+        self._threshold_crossings = crossings
+        return crossings
+
+    def cut_data_into_extrema_finding_intervals(self):
+        data = self.data
+        raw = self.raw
+        crossings = self.threshold_crossings
+
+        bins = crossings.index
+        if bins[-1] < raw.index[-1]:
+            bins = bins.append(pd.DatetimeIndex([raw.index[-1]]))
+        if bins[0] > raw.index[0]:
+            bins = bins.append(pd.DatetimeIndex([raw.index[0]]))
+
+        bins = bins.sort_values()
+
+        cut = pd.cut(data.index, bins=bins)
+        cut = pd.Series(cut, index=data.index)
+        self._data_in_extrema_finding_intervals = cut
+        return cut
+
+    @staticmethod
+    def format_extrema(extrema):
+        minima = extrema.loc[extrema == "Min"]
+        maxima = extrema.loc[extrema == "Max"]
+
+        min0 = minima.index[0]
+        max0 = maxima.index[0]
+
+        if max0 < min0:
+            minima = pd.Series(minima.index, np.arange(minima.index.size))
+            maxima = pd.Series(maxima.index, np.arange(maxima.index.size) - 1)
+        else:
+            minima = pd.Series(minima.index, np.arange(minima.index.size))
+            maxima = pd.Series(maxima.index, np.arange(maxima.index.size))
+
+        formatted = pd.concat({"Min": minima, "Max": maxima}, axis=1, names=["kind"])
+        formatted.index.name = "cycle"
+
+        return formatted
 
     def find_extrema(self):
         # raw = self.raw
         data = self.data
         threshold = self.threshold
+        cut = self.cut_data_into_extrema_finding_intervals()
 
-        changes = self._calculate_changes_between_extrema_regions(data, threshold)
-        cut = self._cut_data_into_extrema_finding_intervals(data, changes)
         maxima, minima = self._find_extrema(threshold, cut, data)  # data -> raw
         maxima, minima = self._validate_extrema(maxima, minima)
-
         extrema = pd.concat([maxima, minima], axis=0).sort_index()
+        formatted = self.format_extrema(extrema)
 
-        ExtremaFinders = namedtuple("ExtremaFinders", "changes,cut")
-        ef = ExtremaFinders(changes, cut)
-        self._extrema_finders = ef
         self._extrema = extrema
+        self._formatted_extrema = formatted
 
-    def make_plot(self, extrema=False, extrema_ranges=False):
+    def make_plot(self, crossings=False, extrema=False, ranges=False):
         fig, ax = swp.pp.subplots(scale_width=2.5)
 
         self._plot_data(ax)
         self._plot_threshold(ax)
 
-        if extrema_ranges:
-            self._plot_extrema_changes(ax)
+        if crossings:
+            self._plot_threshold_crossings(ax)
+
+        if ranges:
             self._plot_extrema_ranges(ax)
 
         if extrema:
             self._plot_extrema(ax)
+
         self._format_axis(ax)
 
         return ax
