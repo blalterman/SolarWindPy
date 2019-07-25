@@ -218,14 +218,14 @@ class TrendFit(object):
 
         in_trend = y_ok & w_ok
 
-        legend_title = "{} ${}$\n{}"
+        legend_title = "${}={}$\n{}"
 
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plot_fit_resid(**kwargs)
             hax.legend_.set_title(
                 legend_title.format(
+                    self.labels.x.tex,
                     (legend_title_fmt % k.mid),
-                    self.labels.x.units,
                     "In Fit" if in_trend.loc[k] else "Not In Fit",
                 )
             )

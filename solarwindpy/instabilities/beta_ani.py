@@ -29,20 +29,8 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
                 logy: True
                 axnorm: "t"
         """
-        #         x = plasma.beta(species).par
-        #         y = plasma.anisotropy(species)
-
-        #         tk = plasma.n("p2") > 1e-5
-        #         tk = tk & (~plasma.n("p2", skipna=False).isna())
-        #         tk = tk & (y > 1e-2) & (y < 1e2) & (x > 1e-2) & (x < 1e2)
-
-        #         if species == "p1":
-        #             tk = tk & (~plasma.aux.swapped_protons)
-
-        #         tk = tk.where(tk).dropna().index
-
-        x = beta  # x.loc[tk]
-        y = ani  # y.loc[tk]
+        x = beta
+        y = ani
 
         logx = kwargs.pop("logx", True)
         logy = kwargs.pop("logy", True)
@@ -59,16 +47,16 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
         self.set_path("auto")
         self.set_clim(5, None)
 
-    def get_edges(self):
+    def get_border(self):
         r"""Get the top and bottom edges of the plot.
 
         Returns
         -------
-        edges: namedtuple
+        border: namedtuple
             Contains "top" and "bottom" fields, each with a :py:class:`pd.Series`.
         """
 
-        Edges = namedtuple("Edges", "top,bottom")
+        Border = namedtuple("Border", "top,bottom")
         top = {}
         bottom = {}
         for x, v in self.agg().unstack("x").items():
@@ -87,8 +75,8 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
         for edge in (top, bottom):
             edge.index.names = ["y", "x"]
 
-        edges = Edges(top, bottom)
-        return edges
+        border = Border(top, bottom)
+        return border
 
     @staticmethod
     def _plot_one_edge(ax, edge, smooth=False, sg_kwargs=None, **kwargs):
@@ -131,7 +119,7 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
             Passed to `ax.plot`
         """
 
-        top, bottom = self.get_edges()
+        top, bottom = self.get_border()
 
         color = kwargs.pop("color", "cyan")
         etop = self._plot_one_edge(ax, top, smooth, sg_kwargs, color=color, **kwargs)

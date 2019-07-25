@@ -356,6 +356,10 @@ class TeXlabel(Base):
         return self._tex
 
     @property
+    def units(self):
+        return self._units
+
+    @property
     def with_units(self):
         return self._with_units
 
@@ -546,5 +550,6 @@ save path  : %s
         )
 
         self._tex = tex
+        self._units = units
         self._with_units = with_units
         self._path = Path(path)

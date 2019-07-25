@@ -741,7 +741,19 @@ class FitFunction(ABC):
             **kwargs
         )
 
-    def plot_fit(
+    def plot_bins(self, ax=None, ylabel=None, drawstyle=None, **kwargs):
+        pass
+
+    def plot_in_fit(self):
+        pass
+
+    def plot_fit(self):
+        pass
+
+    def plot(self):
+        pass
+
+    def plot_fit_bins(
         self,
         ax=None,
         ylabel=None,
@@ -786,11 +798,7 @@ class FitFunction(ABC):
             hist_kwargs = dict(color="k")
 
         if bin_kwargs is None:
-            bin_kwargs = dict(
-                color="darkgreen",
-                #                               markerfacecolor="none",
-                marker="P",
-            )
+            bin_kwargs = dict(color="darkgreen", markerfacecolor="none", marker="P")
 
         if fit_kwargs is None:
             fit_kwargs = dict(color="darkorange")
