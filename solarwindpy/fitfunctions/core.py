@@ -792,6 +792,7 @@ class FitFunction(ABC):
         color = kwargs.pop("color", "darkgreen")
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
+        markersize = kwargs.pop("markersize", 8)
         label = kwargs.pop("label", r"$\mathrm{in \; Fit}$")
 
         ax.errorbar(
@@ -803,6 +804,7 @@ class FitFunction(ABC):
             color=color,
             marker=marker,
             markerfacecolor=markerfacecolor,
+            markersize=markersize,
             **kwargs,
         )
 

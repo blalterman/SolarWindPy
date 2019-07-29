@@ -75,7 +75,7 @@ class LISIRD_ID(ID):
 
     @property
     def _url_base(self):
-        return r"http://lasp.colorado.edu/lisird/latis/"
+        return r"http://lasp.colorado.edu/lisird/latis/dap/"
 
     @property
     def _trans_url(self):
@@ -83,7 +83,10 @@ class LISIRD_ID(ID):
             ("Lalpha", "composite_lyman_alpha.jsond"),
             ("CaK", "cak.jsond"),
             ("f107", "noaa_radio_flux.jsond"),
-            ("MgII", "composite_mg_index.jsond"),
+            (
+                "MgII",
+                "composite_mg_index.jsond",
+            ),  # CHECK: Change to "bremen_composite_mgii.jsond" ?
         )
 
         return dict(trans_url)

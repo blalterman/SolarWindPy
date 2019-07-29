@@ -1692,6 +1692,9 @@ species: {}
 
             :math:`Q_\parallel = \rho (v^3 + \frac{3/2}vw^2)`
 
+        where :math:`v` is each species' velocity in the Center-of-Mass frame and
+        :math:`w` is each species parallel thermal speed.
+
         Parameters
         ----------
         species: list of strings
@@ -1705,14 +1708,18 @@ species: {}
         """
 
         slist = self._chk_species(*species)
+        if len(slist) <= 1:
+            raise ValueError("Must have >1 species to calculate heatflux.")
+
+        scom = "+".join(slist)
         rho = self.mass_density(*slist)
-        v = {s: self.v(s).project(self.b).par for s in slist}
-        v = pd.concat(v, axis=1, names=["S"]).sort_index(axis=1)
-        v.columns.name = "S"
+        dv = {s: self.dv(s, scom).project(self.b).par for s in slist}
+        dv = pd.concat(dv, axis=1, names=["S"]).sort_index(axis=1)
+        dv.columns.name = "S"
         w = self.data.w.par.loc[:, slist]
 
-        qa = v.pow(3)
-        qb = v.multiply(w.pow(2), axis=1, level="S")
+        qa = dv.pow(3)
+        qb = dv.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
 
         #        print("<Module>",
         #              "<species> {}".format(species),
@@ -1723,7 +1730,7 @@ species: {}
         #              "<qb>", type(qb), qb,
         #              sep="\n")
 
-        qs = qa.add((3.0 / 2.0) * qb, axis=1, level="S").multiply(rho, axis=0)
+        qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
             qs = qs.sum(axis=1)
             qs.name = "+".join(species)

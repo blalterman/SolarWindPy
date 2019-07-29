@@ -204,7 +204,7 @@ class Units(object):
 
     @property
     def qpar(self):
-        return 1e-4
+        return 1e-7
 
     @property
     def distance2sun(self):
