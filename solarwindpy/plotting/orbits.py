@@ -72,8 +72,10 @@ class OrbitPlot(ABC):
 
         time = pd.cut(self.data.index, self.orbit)
 
-        # Workaround for `labels=["inbound", "outbound"]` not working above. (20190605)
-        time = time.map({self.orbit[0]: "Inbound", self.orbit[1]: "Outbound"})
+        # Workaround for `labels=["Inbound", "Outbound"]` not working above. (20190605)
+        time = time.map({self.orbit[0]: "Inbound", self.orbit[1]: "Outbound"}).astype(
+            str
+        )
         # `name` must be distinct from `Epoch` or we end up with ambiguous group keys.
         time = pd.Series(time, index=self.data.index, name=self._orbit_key)
         cut = pd.concat([cut, time], axis=1).sort_index(axis=1)
@@ -89,11 +91,23 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
         ax.legend(loc=0, ncol=1, framealpha=0)
 
     def agg(self, **kwargs):
-        agg = super(OrbitHist1D, self).agg(**kwargs)
+        fcn = kwargs.pop("fcn", None)
+        agg = super(OrbitHist1D, self).agg(fcn=fcn, **kwargs)
 
-        raise NotImplementedError(
-            "Need to figure out how to get In & Out into single Series 'Both'"
+        cut = self.cut.drop("Orbit", axis=1)
+        tko = self.agg_axes
+        gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
+        agg_both = self._agg_runner(cut, tko, gb_both, fcn)
+        agg_both = (
+            pd.concat([agg_both], keys=["Both"], names=["Orbit"])
+            .swaplevel(0, 1, 0)
+            .sort_index(axis=0)
         )
+
+        agg = pd.concat([agg, agg_both], axis=0).sort_index(axis=0)
+        for k, v in self.intervals.items():
+            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
@@ -113,6 +127,7 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
             fig, ax = tools.subplots()
 
         agg = self.agg(fcn=fcn).unstack(self._orbit_key)
+        agg = agg.reindex(index=self.intervals["x"])
 
         x = pd.IntervalIndex(agg.index).mid
         if self.log.x:
@@ -203,15 +218,27 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
         agg_both = self._agg_runner(cut, tko, gb_both, fcn)
 
-        # Hack the Categorical index data types so that we can put `agg_both` into `agg`
         logging.getLogger("main").warning("Combining Both, Inbound, and Outbound agg")
         log_mem_usage()
 
-        agg = agg.unstack("Orbit")
-        agg.columns = agg.columns.tolist()
-        agg.loc[:, "Both"] = agg_both
-        agg.columns = pd.CategoricalIndex(agg.columns, ordered=True, name="Orbit")
-        agg = agg.stack()
+        #         # Hack the Categorical index data types so that we can put `agg_both` into `agg`
+        #         agg = agg.unstack("Orbit")
+        #         agg.columns = agg.columns.tolist()
+        #         agg.loc[:, "Both"] = agg_both
+        #         agg.columns = pd.CategoricalIndex(agg.columns, ordered=True, name="Orbit")
+        #         agg = agg.stack()
+
+        agg_both = (
+            pd.concat([agg_both], keys=["Both"], names=["Orbit"])
+            .swaplevel(0, 1, 0)
+            .swaplevel(1, 2, 0)
+            .sort_index(axis=0)
+        )
+
+        agg = pd.concat([agg, agg_both], axis=0).sort_index(axis=0)
+        for k, v in self.intervals.items():
+            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         logging.getLogger("main").warning("Grouping agg for axis normalization")
         log_mem_usage()
@@ -304,8 +331,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         logging.getLogger("main").warning("Reindexing agg on ax")
         log_mem_usage()
 
-        # Unstacking drops some NaN bins, so we must reindex again.
-        agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
+        #         # Unstacking drops some NaN bins, so we must reindex again.
+        #         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
 
         logging.getLogger("main").warning("Do the plotting")
         log_mem_usage()
