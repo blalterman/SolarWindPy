@@ -6,6 +6,8 @@ results of those 1D fits along the 2nd dimension of the aggregated data.
 """
 
 import pdb  # noqa: F401
+
+# import warnings
 import logging  # noqa: F401
 import pandas as pd
 from collections import namedtuple
@@ -33,6 +35,10 @@ class TrendFit(object):
 
         Similarly, `TrendFit.trend_fit.make_fit` must be called by the user so
         that kwargs can be appropriately passed to `curve_fit`.
+
+        call signagure is:
+
+            TrendFunc.make_ffunc1ds
 
         Parameters
         ----------
@@ -212,14 +218,14 @@ class TrendFit(object):
 
         in_trend = y_ok & w_ok
 
-        legend_title = "{} ${}$\n{}"
+        legend_title = "${}={}$\n{}"
 
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plot_fit_resid(**kwargs)
             hax.legend_.set_title(
                 legend_title.format(
+                    self.labels.x.tex,
                     (legend_title_fmt % k.mid),
-                    self.labels.x.units,
                     "In Fit" if in_trend.loc[k] else "Not In Fit",
                 )
             )
@@ -244,6 +250,9 @@ class TrendFit(object):
             passed to `trendfunc_class(x, y, **kwargs)`
         """
         popt = self.popt_1d
+        if not popt.shape[0]:
+            raise ValueError("Insufficient 1D fits to build trend function")
+
         x = pd.IntervalIndex(popt.index).mid
         if self.trend_logx:
             x = 10.0 ** x

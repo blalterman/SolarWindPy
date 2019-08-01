@@ -11,7 +11,7 @@ import matplotlib as mpl
 
 from matplotlib import pyplot as plt
 from numbers import Number
-from abc import abstractproperty
+from abc import abstractproperty, abstractmethod
 from pathlib import Path
 
 try:
@@ -106,6 +106,15 @@ class AggPlot(base.Base):
         """
         gb = self.joint.groupby(list(self._gb_axes))
         return gb
+
+    @property
+    def axnorm(self):
+        r"""Data normalization in plot.
+
+        Not `mpl.colors.Normalize` instance. That is passed as a `kwarg` to
+        `make_plot`.
+        """
+        return self._axnorm
 
     def set_clim(self, bottom, top):
         assert isinstance(bottom, Number) or bottom is None
@@ -348,6 +357,12 @@ class AggPlot(base.Base):
         """
         pass
 
+    @abstractmethod
+    def set_axnorm(self, new):
+        r"""The method by which the gridded data is normalized.
+        """
+        pass
+
 
 class Hist1D(AggPlot):
     r"""Create 1D plot of `x`, optionally aggregating `y` in bins of `x`.
@@ -362,7 +377,14 @@ class Hist1D(AggPlot):
     """
 
     def __init__(
-        self, x, y=None, logx=False, clip_data=False, nbins=101, bin_precision=None
+        self,
+        x,
+        y=None,
+        logx=False,
+        axnorm=None,
+        clip_data=False,
+        nbins=101,
+        bin_precision=None,
     ):
         r"""
         Parameters
@@ -374,6 +396,12 @@ class Hist1D(AggPlot):
             aggregate counts of `x`.
         logx: bool
             If True, compute bins in log-space.
+        axnorm: None, str
+        Normalize the histogram.
+            key  normalization
+            ---  -------------
+            t    total
+            d    density
         clip_data: bool
             If True, remove the extreme values at 0.001 and 0.999 percentiles
             before calculating bins or aggregating.
@@ -383,11 +411,12 @@ class Hist1D(AggPlot):
         """
         super(Hist1D, self).__init__()
         self.set_data(x, y, logx, clip_data)
+        self._labels = base.AxesLabels(
+            x="x", y=labels_module.Count(norm=axnorm) if y is None else "y"
+        )
+        self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self._labels = base.AxesLabels(
-            x="x", y=labels_module.Count() if y is None else "y"
-        )
         self.set_path(None)
         self.set_clim(None, None)
 
@@ -445,11 +474,73 @@ class Hist1D(AggPlot):
         self._log = base.LogAxes(x=logx)
         self._clip = clip
 
-    def agg(self, **kwargs):
-        #         intervals = self.intervals["x"]
-        agg = super(Hist1D, self).agg(**kwargs)
-        #         agg = agg.reindex(intervals, level="x")
+    def set_axnorm(self, new):
+        r"""The method by which the gridded data is normalized.
+
+===== =============================================================
+ key                           description
+===== =============================================================
+ d     Density normalize
+ t     Total normalize
+===== =============================================================
+"""
+        if new is not None:
+            new = new.lower()[0]
+            assert new == "d"
+
+        ylbl = self.labels.y
+        if isinstance(ylbl, labels_module.Count):
+            ylbl.set_axnorm(new)
+            ylbl.build_label()
+
+        self._axnorm = new
+
+    def _axis_normalizer(self, agg):
+        r"""Takes care of row, column, total, and density normaliation.
+
+        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
+        as actual method with `self` passed so we have access to `self.log` for density
+        normalization.
+        """
+
+        axnorm = self.axnorm
+        if axnorm is None:
+            pass
+        elif axnorm == "d":
+            n = agg.sum()
+            dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
+            agg = agg.divide(dx.multiply(n))
+
+        elif axnorm == "t":
+            agg = agg.divide(agg.max())
+
+        else:
+            raise ValueError("Unrecognized axnorm: %s" % axnorm)
+
         return agg
+
+    def agg(self, **kwargs):
+        if self.axnorm == "d":
+            fcn = kwargs.get("fcn", None)
+            if (fcn != "count") & (fcn is not None):
+                raise ValueError("Unable to calculate a PDF with non-count aggregation")
+
+        agg = super(Hist1D, self).agg(**kwargs)
+        agg = self._axis_normalizer(agg)
+
+        return agg
+
+    def set_labels(self, **kwargs):
+
+        if "z" in kwargs:
+            raise ValueError(r"{} doesn't have a z-label".format(self))
+
+        y = kwargs.pop("y", self.labels.y)
+        if isinstance(y, labels_module.Count):
+            y.set_axnorm(self.axnorm)
+            y.build_label()
+
+        super(Hist1D, self).set_labels(y=y, **kwargs)
 
     def _format_axis(self, ax):
         xlbl = self.labels.x
@@ -574,33 +665,11 @@ class Hist2D(AggPlot):
     def _gb_axes(self):
         return ("x", "y")
 
-    @property
-    def axnorm(self):
-        r"""Data normalization in plot.
-
-        Not `mpl.colors.Normalize` instance. That is passed as a `kwarg` to
-        `make_plot`.
-        """
-        return self._axnorm
-
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.
         path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
 
         if new == "auto":
-
-            #             n_unique_z = self.data.loc[:, "z"].unique().size
-
-            #             if (z == "z") and (n_unique_z == 1):
-            #                 z = "count"
-
-            #             elif n_unique_z > 1:
-            #                 # Expect aggregating data.
-            #                 pass
-
-            #             else:
-            #                 raise ValueError("Unable to auto set z-component of path")
-
             path = path / x / y / z
 
         else:
@@ -611,10 +680,6 @@ class Hist2D(AggPlot):
         if add_scale:
             assert scale_info is not None
 
-            #             axnorm = self.axnorm
-            #             if axnorm is not None:
-            #                 axnorm = axnorm.capitalize() + "norm"
-            #                 scale_info = scale_info
             scale_info = "-".join(scale_info)
 
             if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
@@ -637,36 +702,6 @@ class Hist2D(AggPlot):
             z.build_label()
 
         super(Hist2D, self).set_labels(z=z, **kwargs)
-
-    #     def _add_meta_to_zlbl(self, zlbl):
-    #         # BUG: path's won't auto create if they are strings.
-    #         axnorm = self.axnorm
-    #         if axnorm == "c":
-    #             prefix = "Col."
-    #         elif axnorm == "d":
-    #             prefix = "Density"
-    #         elif axnorm == "r":
-    #             prefix = "Row"
-    #         elif axnorm == "t":
-    #             prefix = "Total"
-    #         else:
-    #             prefix = ""
-
-    #         if zlbl is not None:
-    #             fmt = r"$\mathrm{%s \; Norm.} \; %s \; [\#]$"
-    #             if prefix:
-    #                 try:
-    #                     zlbl = fmt % (prefix, zlbl.tex)
-    #                 except AttributeError:
-    #                     zlbl = fmt % (prefix, r"\mathrm{" + zlbl + "}")
-
-    #         elif self.data.loc[:, "z"].dropna().unique().size == 1:
-    #             if prefix:
-    #                 zlbl = r"$\mathrm{%s \; Norm. \; Count} \; [\#]$" % prefix
-    #             else:
-    #                 zlbl = r"$\mathrm{Count} \; [\#]$"
-
-    #         return zlbl
 
     def set_data(self, x, y, z, logx, logy, clip):
         logx = bool(logx)
@@ -704,7 +739,7 @@ class Hist2D(AggPlot):
  key                           description
 ===== =============================================================
  c     Column normalize
- d     Density normalize.
+ d     Density normalize
  r     Row normalize
  t     Total normalize
 ===== =============================================================
@@ -742,11 +777,15 @@ class Hist2D(AggPlot):
             agg = agg.divide(agg.max())
         elif axnorm == "d":
             N = agg.sum().sum()
-            # N = agg.sum(level=["x", "y"]
             x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
             y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
-            dx = pd.Series(x.right - x.left, index=x)
-            dy = pd.Series(y.right - y.left, index=y)
+            dx = pd.Series(
+                x.length, index=x
+            )  # dx = pd.Series(x.right - x.left, index=x)
+            dy = pd.Series(
+                y.length, index=y
+            )  # dy = pd.Series(y.right - y.left, index=y)
+
             if self.log.x:
                 dx = 10.0 ** dx
             if self.log.y:
@@ -914,6 +953,7 @@ class Hist2D(AggPlot):
             x = 10.0 ** x
 
         y = self.data.loc[:, other] if not project_counts else None
+        logy = False
         if y is not None:
             # Only select y-values plotted.
             logy = self.log._asdict()[other]
@@ -930,6 +970,7 @@ class Hist2D(AggPlot):
             nbins=self.edges[axis].values,
         )
 
+        h1.set_log(y=logy)  # Need to propagate logy.
         h1.set_labels(x=self.labels._asdict()[axis])
         if not project_counts:
             h1.set_labels(y=self.labels._asdict()[other])

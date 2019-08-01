@@ -78,8 +78,10 @@ class Count(ArbitraryLabel):
     def _build_tex(self):
         axnorm = self.axnorm
         if axnorm:
-            axnorm = base._trans_axnorm.get(self.axnorm, "")
-            tex = r"\mathrm{%s Norm Count}" % axnorm
+            if self.axnorm in ("r", "c", "t"):
+                tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm.get(axnorm)
+            else:
+                tex = r"\mathrm{Probability Density}"
         else:
             tex = r"\mathrm{Count}"
 
@@ -257,6 +259,6 @@ class SSN(ArbitraryLabel):
 
     def set_kind(self, new):
         new = new.upper()
-        assert new in ("M", "M13", "D", "Y")
+        assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
         self._kind = new
         self._path = Path(f"""{new.lower()!s}-ssn""")

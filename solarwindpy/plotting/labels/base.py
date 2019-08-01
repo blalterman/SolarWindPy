@@ -23,6 +23,7 @@ _trans_species = {
     "p1": r"p_1",
     "p2": r"p_2",
     "he": r"\mathrm{He}",
+    "dv": r"\Delta v",  # Because we want pdv in species
 }
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
@@ -105,7 +106,7 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "Q": r"\mu W \, m^{-2}",  # heatflux,
+    "Q": r"mW \, cm^{-2}",  # heatflux,
     "Qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],

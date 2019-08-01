@@ -738,72 +738,34 @@ class FitFunction(ABC):
             horizontalalignment=horizontalalignment,
             verticalalignment=verticalalignment,
             transform=axtrans,
-            **kwargs
+            **kwargs,
         )
 
-    def plot_fit(
-        self,
-        ax=None,
-        ylabel=None,
-        drawstyle=None,
-        annotate=True,
-        subplots_kwargs=None,
-        hist_kwargs=None,
-        bin_kwargs=None,
-        fit_kwargs=None,
-        annotate_kwargs=None,
-    ):
-        r"""
-        Make a plot of the fit.
-
-        Parameters
-        ----------
-        ax: mpl.Axes.axis_subplot
-
-        ylabel: str, None
-            If None, defaults to a formatted Counts.
-        drawstyle: str, None
-            `mpl` `drawstyle`, shared by `hist` and `bins`.
-            If None, defaults to "steps-mid".
-        annotate: True
-            If True, add fit info to the annotation using ax.text.
-        subplots_kwargs: dict
-            Passed to plt.subplots(**subplots_kwargs)
-        hist_kwargs: dict
-            Passed to ax.plot(**hist_kwargs) for plotting raw obs.
-        bin_kwargs: dict
-            Passed to ax.plot(**bins_kwargs) for plotting obs that are fit.
-        fit_kwargs: dict
-            Passed to ax.plot(**fit_kwargs) for plotting fit.
-        annotate_kwargs:
-            Passed to ax.text.
+    def _format_hax(self, ax):
+        r"""Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and
+        :py:meth:`plot_fit` results.
         """
+        ax.grid(True, which="major", axis="both")
 
+        #         ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
+
+        # Copied from plt.hist. (20161107_0112)
+        ax.update_datalim(
+            [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
+        )
+
+        ax.set_xlabel(self.labels.x)
+        ax.set_ylabel(self.labels.y)
+
+    def plot_raw_obs(self, ax=None, drawstyle=None, **kwargs):
+        r"""Plot the observations used in the fit from :py:meth:`self.xobs_raw`,
+        :py:meth:`self.yobs_raw`, :py:meth:`self.weights_raw`.
+        """
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = swp.pp.subplots()
 
-        if hist_kwargs is None:
-            hist_kwargs = dict(color="k")
-
-        if bin_kwargs is None:
-            bin_kwargs = dict(
-                color="darkgreen",
-                #                               markerfacecolor="none",
-                marker="P",
-            )
-
-        if fit_kwargs is None:
-            fit_kwargs = dict(color="darkorange")
-
-        if annotate_kwargs is None:
-            annotate_kwargs = {}
-
-        if drawstyle is None:
-            drawstyle = "steps-mid"
-
-        hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
-        bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
-        fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
+        color = kwargs.pop("color", "k")
+        label = kwargs.pop("label", r"$\mathrm{Bins}$")
 
         # Plot the raw data histograms.
         ax.errorbar(
@@ -811,45 +773,176 @@ class FitFunction(ABC):
             self.yobs_raw,
             yerr=self.weights_raw,
             drawstyle=drawstyle,
-            label=hist_label,
-            color=hist_kwargs.pop("color", "k"),
-            **hist_kwargs
+            label=label,
+            color=color,
+            **kwargs,
         )
 
-        # Overplot with the data as selected for the plot.
+        self._format_hax(ax)
+
+        return ax
+
+    def plot_in_fit(self, ax=None, drawstyle=None, **kwargs):
+        r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
+        :py:meth:`self.yobs`, and :py:meth:`self.weights`.
+        """
+        if ax is None:
+            fig, ax = swp.pp.subplots()
+
+        color = kwargs.pop("color", "darkgreen")
+        marker = kwargs.pop("marker", "P")
+        markerfacecolor = kwargs.pop("markerfacecolor", "none")
+        markersize = kwargs.pop("markersize", 8)
+        label = kwargs.pop("label", r"$\mathrm{in \; Fit}$")
+
         ax.errorbar(
             self.xobs,
             self.yobs,
             yerr=self.weights,
             drawstyle=drawstyle,
-            label=bin_label,
-            color=bin_kwargs.pop("color", "darkgreen"),
-            **bin_kwargs
+            label=label,
+            color=color,
+            marker=marker,
+            markerfacecolor=markerfacecolor,
+            markersize=markersize,
+            **kwargs,
         )
+
+        self._format_hax(ax)
+
+        return ax
+
+    def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
+        r"""Plot the fit.
+        """
+        if ax is None:
+            fig, ax = swp.pp.subplots()
+
+        if annotate_kwargs is None:
+            annotate_kwargs = {}
+
+        color = kwargs.pop("color", "darkorange")
+        label = kwargs.pop("label", r"$\mathrm{Fit}$")
 
         # Overplot the fit.
-        ax.plot(
-            self.xobs_raw,
-            self(self.xobs_raw),
-            label=fit_label,
-            color=fit_kwargs.pop("color", "darkorange"),
-            **fit_kwargs
-        )
-
-        ax.grid(True, which="major", axis="both")
-
-        ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
-
-        # Copied from plt.hist. (20161107_0112)
-        ax.update_datalim(
-            [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
-        )
+        ax.plot(self.xobs_raw, self(self.xobs_raw), label=label, color=color, **kwargs)
 
         if annotate:
             self.annotate_TeX_info(ax, **annotate_kwargs)
 
-        ax.set_xlabel(self.labels.x)
-        ax.set_ylabel(self.labels.y)
+        self._format_hax(ax)
+
+        return ax
+
+    def plot_raw_in_fit(
+        self,
+        ax=None,
+        drawstyle=None,
+        annotate=True,
+        raw_kwargs=None,
+        in_kwargs=None,
+        fit_kwargs=None,
+        annotate_kwargs=None,
+    ):
+        r"""
+        Make a plot of the raw observations, observations in fit, and the fit.
+
+        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_in_fit`,
+        and :py:meth:`self.plot_fit`.
+
+        Parameters
+        ----------
+        ax: mpl.Axes.axis_subplot
+
+        drawstyle: str, None
+            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_in_fit`.
+            If None, defaults to "steps-mid".
+        annotate: True
+            If True, add fit info to the annotation using ax.text.
+        raw_kwargs: dict
+            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw_obs`.
+        in_kwargs: dict
+            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_in_fit`.
+        fit_kwargs: dict
+            Passed to ax.plot(**fit_kwargs) for plotting fit.
+        annotate_kwargs:
+            Passed to ax.text.
+        """
+
+        if ax is None:
+            fig, ax = swp.pp.subplots()
+
+        if raw_kwargs is None:
+            raw_kwargs = (
+                dict()
+            )  # dict(color="darkgreen", markerfacecolor="none", marker="P")
+
+        if in_kwargs is None:
+            in_kwargs = dict()  # dict(color="k")
+
+        if fit_kwargs is None:
+            fit_kwargs = dict()  # dict(color="darkorange")
+
+        if drawstyle is None:
+            drawstyle = "steps-mid"
+
+        self.plot_raw_obs(ax=ax, drawstyle=drawstyle, **raw_kwargs)
+        self.plot_in_fit(ax=ax, drawstyle=drawstyle, **in_kwargs)
+        self.plot_fit(
+            ax=ax, annotate=annotate, annotate_kwargs=annotate_kwargs, **fit_kwargs
+        )
+
+        #         hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
+        #         bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
+        #         fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
+
+        #         # Plot the raw data histograms.
+        #         ax.errorbar(
+        #             self.xobs_raw,
+        #             self.yobs_raw,
+        #             yerr=self.weights_raw,
+        #             drawstyle=drawstyle,
+        #             label=hist_label,
+        #             color=hist_kwargs.pop("color", "k"),
+        #             **hist_kwargs
+        #         )
+
+        #         # Overplot with the data as selected for the plot.
+        #         ax.errorbar(
+        #             self.xobs,
+        #             self.yobs,
+        #             yerr=self.weights,
+        #             drawstyle=drawstyle,
+        #             label=bin_label,
+        #             color=bin_kwargs.pop("color", "darkgreen"),
+        #             **bin_kwargs
+        #         )
+
+        #         # Overplot the fit.
+        #         ax.plot(
+        #             self.xobs_raw,
+        #             self(self.xobs_raw),
+        #             label=fit_label,
+        #             color=fit_kwargs.pop("color", "darkorange"),
+        #             **fit_kwargs
+        #         )
+
+        #         ax.grid(True, which="major", axis="both")
+
+        ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
+
+        #         # Copied from plt.hist. (20161107_0112)
+        #         ax.update_datalim(
+        #             [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
+        #         )
+
+        #         if annotate:
+        #             self.annotate_TeX_info(ax, **annotate_kwargs)
+
+        #         ax.set_xlabel(self.labels.x)
+        #         ax.set_ylabel(self.labels.y)
+
+        self._format_hax(ax)
 
         return ax
 
@@ -875,7 +968,7 @@ class FitFunction(ABC):
             self.residuals(pct=pct),
             drawstyle=drawstyle,
             color=color,
-            **plot_kwargs
+            **plot_kwargs,
         )
 
         ax.grid(True, which="major", axis="both")
@@ -896,7 +989,7 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_fit_resid(
+    def plot_raw_in_fit_resid(
         self, annotate=True, resid_pct=True, fit_resid_axes=None, **kwargs
     ):
         r"""Make a stacked fit, residual plot.
@@ -915,7 +1008,7 @@ class FitFunction(ABC):
             resid_ax = fig.add_subplot(gs[1])
             hist_ax = fig.add_subplot(gs[0], sharex=resid_ax)
 
-        self.plot_fit(ax=hist_ax, annotate=annotate, **kwargs)
+        self.plot_raw_in_fit(ax=hist_ax, annotate=annotate, **kwargs)
         self.plot_residuals(ax=resid_ax, pct=resid_pct)
 
         #         hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")

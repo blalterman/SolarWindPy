@@ -1789,20 +1789,18 @@ class PlasmaTestBase(ABC):
     def test_heatflux(self):
         print_inline_debug_info = False
 
-        # q = rho (v^3 + (3/2) v w^2)
+        # q = rho (dv^3 + (3/2) dv w^2)
         slist = list(self.stuple)
+        scom = "+".join(slist)
 
         if len(slist) == 1:
-            msg = "Must have >1 species to calculate dynamic pressure."
+            msg = "Must have >1 species to calculate heatflux."
             with self.assertRaisesRegex(ValueError, msg):
-                self.object_testing.pdynamic(*slist)
+                self.object_testing.heat_flux(*slist)
             return None  # Exit test.
 
         m = self.mass_in_mp
-        n = self.data.n.xs("", axis=1, level="C")
-        n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+        n = self.data.n.loc[:, pd.IndexSlice["", slist]].xs("", axis=1, level="C")
         rho = n.multiply(m, axis=1, level="S")
         rho.columns.names = ["S"]
 
@@ -1811,19 +1809,23 @@ class PlasmaTestBase(ABC):
         b = self.data.b.xs("", axis=1, level="S").loc[:, ["x", "y", "z"]]
         bhat = b.divide(b.pow(2).sum(axis=1).pipe(np.sqrt), axis=0)
 
-        v = self.data.v
-        v = pd.concat(
-            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
-        vpar = v.multiply(bhat, axis=0).sum(axis=1, level="S")
-        qa = vpar.pow(3)
-        qb = vpar.multiply(w.pow(2), axis=1, level="S")
-        qc = rho.multiply(
-            qa.add((3.0 / 2.0) * qb, axis=1, level="S"), axis=1, level="S"
+        v = self.data.v.loc[:, pd.IndexSlice[:, slist]]
+        vcom = (
+            v.multiply(rho, axis=1, level="S")
+            .sum(axis=1, level="C")
+            .divide(rho.sum(axis=1), axis=0)
         )
+        dv = v.subtract(vcom, axis=1, level="C")
 
-        coeff = constants.m_p * 1e6 * 1e9 / 1e-4  # [m_p] [n] [v]^3 / [q]
+        dvpar = dv.multiply(bhat, axis=0).sum(axis=1, level="S")
+        qa = dvpar.pow(3)
+        qb = dvpar.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
+        qc = rho.multiply(qa.add(qb, axis=1, level="S"), axis=1, level="S")
+
+        coeff = constants.m_p * 1e6 * 1e9 / 1e-7  # [m_p] [n] [v]^3 / [q]
         q = qc.multiply(coeff)
+        qtot = q.sum(axis=1)
+        qtot.name = "+".join(slist)
 
         if print_inline_debug_info:
             print(
@@ -1845,12 +1847,12 @@ class PlasmaTestBase(ABC):
                 "<bhat>",
                 type(bhat),
                 bhat,
-                "<v>",
-                type(v),
-                v,
-                "<vpar>",
-                type(vpar),
-                vpar,
+                "<dv>",
+                type(dv),
+                dv,
+                "<dvpar>",
+                type(dvpar),
+                dvpar,
                 "<qa>",
                 type(qa),
                 qa,
@@ -1863,40 +1865,52 @@ class PlasmaTestBase(ABC):
                 "<q>",
                 type(q),
                 q,
+                "<qtot>",
+                type(qtot),
+                qtot,
                 sep="\n",
             )
 
-        for s in self.species_combinations:
-            if len(s) == 1:
-                # Only single species case.
-                qi = q.loc[:, s[0]]
-                qi.name = s[0]
-            else:
-                qi = q.loc[:, list(s)]
+        ot = self.object_testing
+        pdt.assert_frame_equal(q, ot.heat_flux(*slist))
+        pdt.assert_frame_equal(q, ot.qpar(*slist))
+        pdt.assert_series_equal(qtot, ot.heat_flux(scom))
+        pdt.assert_series_equal(qtot, ot.qpar(scom))
 
-                if print_inline_debug_info:
-                    print("<qi>", type(qi), qi, sep="\n")
+        pdt.assert_frame_equal(ot.heat_flux(*slist), ot.qpar(*slist))
+        pdt.assert_series_equal(ot.heat_flux(scom), ot.qpar(scom))
 
-                # Check the list input case first.
-                pdt.assert_frame_equal(qi, self.object_testing.heat_flux(*s))
-                pdt.assert_frame_equal(qi, self.object_testing.qpar(*s))
-                pdt.assert_frame_equal(
-                    self.object_testing.heat_flux(*s), self.object_testing.qpar(*s)
-                )
-                # Then sum `qi` to check the sum case.
-                qi = qi.sum(axis=1)
-                qi.name = "+".join(sorted(list(s)))
-
-            if print_inline_debug_info:
-                print("<qi>", type(qi), qi, sep="\n")
-
-            # Check the sum case.
-            pdt.assert_series_equal(qi, self.object_testing.heat_flux("+".join(s)))
-            pdt.assert_series_equal(qi, self.object_testing.qpar("+".join(s)))
-            pdt.assert_series_equal(
-                self.object_testing.heat_flux("+".join(s)),
-                self.object_testing.qpar("+".join(s)),
-            )
+    #        for s in self.species_combinations:
+    #            if len(s) == 1:
+    #                # Only single species case.
+    #                qi = q.loc[:, s[0]]
+    #                qi.name = s[0]
+    #            else:
+    #                qi = q.loc[:, list(s)]
+    #
+    #                if print_inline_debug_info:
+    #                    print("<qi>", type(qi), qi, sep="\n")
+    #
+    #                # Check the list input case first.
+    #                pdt.assert_frame_equal(qi, self.object_testing.heat_flux(*s))
+    #                pdt.assert_frame_equal(qi, self.object_testing.qpar(*s))
+    #                pdt.assert_frame_equal(
+    #                    self.object_testing.heat_flux(*s), self.object_testing.qpar(*s)
+    #                )
+    #                # Then sum `qi` to check the sum case.
+    #                qi = qi.sum(axis=1)
+    #                qi.name = "+".join(sorted(list(s)))
+    #
+    #            if print_inline_debug_info:
+    #                print("<qi>", type(qi), qi, sep="\n")
+    #
+    #            # Check the sum case.
+    #            pdt.assert_series_equal(qi, self.object_testing.heat_flux("+".join(s)))
+    #            pdt.assert_series_equal(qi, self.object_testing.qpar("+".join(s)))
+    #            pdt.assert_series_equal(
+    #                self.object_testing.heat_flux("+".join(s)),
+    #                self.object_testing.qpar("+".join(s)),
+    #            )
 
     def test_set_auxiliary_data(self):
         ot = self.object_testing
