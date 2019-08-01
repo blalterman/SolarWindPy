@@ -728,8 +728,8 @@ class Hist2D(AggPlot):
         normalization.
         """
 
-        logging.getLogger("main").warning("Running axis normalization")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Running axis normalization")
+        #         log_mem_usage()
 
         axnorm = self.axnorm
         if axnorm is None:
@@ -766,8 +766,8 @@ class Hist2D(AggPlot):
         return agg
 
     def _format_axis(self, ax):
-        logging.getLogger("main").warning("Formatting an axis")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Formatting an axis")
+        #         log_mem_usage()
 
         xlbl = self.labels.x
         ylbl = self.labels.y
@@ -785,8 +785,8 @@ class Hist2D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, **kwargs):
-        logging.getLogger("main").warning("Making a cbar")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Making a cbar")
+        #         log_mem_usage()
 
         if isinstance(ax, mpl.axes.Axes):
             fig = ax.figure

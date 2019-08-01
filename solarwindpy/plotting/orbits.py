@@ -147,8 +147,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         super(OrbitHist2D, self).__init__(orbit, x, y, **kwargs)
 
     def _format_in_out_axes(self, inbound, outbound):
-        logging.getLogger("main").warning("Formatting in out axes")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Formatting in out axes")
+        #         log_mem_usage()
 
         xlim = np.concatenate([inbound.get_xlim(), outbound.get_xlim()])
         x0 = xlim.min()
@@ -187,8 +187,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             )
 
     def _format_in_out_both_axes(self, axi, axo, axb, cbari, cbaro, cbarb):
-        logging.getLogger("main").warning("Formatting in out both axes")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Formatting in out both axes")
+        #         log_mem_usage()
 
         ylim = np.concatenate([axi.get_ylim(), axi.get_ylim(), axb.get_ylim()])
         y0 = ylim.min()
@@ -204,22 +204,22 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and Both
         orbit legs.
         """
-        logging.getLogger("main").warning("Starting agg")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Starting agg")
+        #         log_mem_usage()
 
         fcn = kwargs.pop("fcn", None)
         agg = super(OrbitHist2D, self).agg(fcn=fcn, **kwargs)
 
-        logging.getLogger("main").warning("Running Both agg")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Running Both agg")
+        #         log_mem_usage()
 
         cut = self.cut.drop("Orbit", axis=1)
         tko = self.agg_axes
         gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
         agg_both = self._agg_runner(cut, tko, gb_both, fcn)
 
-        logging.getLogger("main").warning("Combining Both, Inbound, and Outbound agg")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Combining Both, Inbound, and Outbound agg")
+        #         log_mem_usage()
 
         #         # Hack the Categorical index data types so that we can put `agg_both` into `agg`
         #         agg = agg.unstack("Orbit")
@@ -240,8 +240,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
-        logging.getLogger("main").warning("Grouping agg for axis normalization")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Grouping agg for axis normalization")
+        #         log_mem_usage()
 
         grouped = agg.groupby(self._orbit_key)
         transformed = grouped.transform(self._axis_normalizer)
@@ -307,8 +307,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         r"""Refactored actually putting `agg` onto `ax` because Python was crashing
         due to the way too many `agg` runs. (20190731)
         """
-        logging.getLogger("main").warning("Putting agg on ax")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Putting agg on ax")
+        #         log_mem_usage()
 
         x = self.edges["x"]
         y = self.edges["y"]
@@ -328,14 +328,14 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         if limit_color_norm:
             self._limit_color_norm(norm)
 
-        logging.getLogger("main").warning("Reindexing agg on ax")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Reindexing agg on ax")
+        #         log_mem_usage()
 
         #         # Unstacking drops some NaN bins, so we must reindex again.
         #         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
 
-        logging.getLogger("main").warning("Do the plotting")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Do the plotting")
+        #         log_mem_usage()
 
         C = np.ma.masked_invalid(agg.values)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
@@ -348,8 +348,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
 
         self._format_axis(ax)
 
-        logging.getLogger("main").warning("Done putting agg on axis")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Done putting agg on axis")
+        #         log_mem_usage()
 
         return cbar
 
@@ -410,8 +410,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         #             #             use_gridspec = kwargs.pop("use_gridspec", False)
         #             cbar = self._make_cbar(pc, ax, **cbar_kwargs)
 
-        logging.getLogger("main").warning("Done with plot")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Done with plot")
+        #         log_mem_usage()
 
         return ax, cbar
 
@@ -452,8 +452,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         # For the sake of legacy code. (20190731)
         axes = pd.Series(axes, index=("Inbound", "Outbound"))
         cbars = pd.Series([cbari, cbaro], index=("Inbound", "Outbound"))
-        logging.getLogger("main").warning("Done with plot")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Done with plot")
+        #         log_mem_usage()
 
         return axes, cbars
 
@@ -481,7 +481,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         agg = self.agg(fcn=fcn)
         aggi = agg.xs("Inbound", axis=0, level="Orbit").unstack("x")
         aggo = agg.xs("Outbound", axis=0, level="Orbit").unstack("x")
-        aggb = agg.xs("Outbound", axis=0, level="Orbit").unstack("x")
+        aggb = agg.xs("Both", axis=0, level="Orbit").unstack("x")
 
         cbar = kwargs.pop("cbar", True)
 
@@ -507,7 +507,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         axes = pd.Series(axes, index=("Inbound", "Outbound", "Both"))
         cbars = pd.Series([cbari, cbaro, cbarb], index=("Inbound", "Outbound", "Both"))
 
-        logging.getLogger("main").warning("Done with plot")
-        log_mem_usage()
+        #         logging.getLogger("main").warning("Done with plot")
+        #         log_mem_usage()
 
         return axes, cbars
