@@ -25,6 +25,7 @@ _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros
 _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunction(ABC):
@@ -68,6 +69,7 @@ class FitFunction(ABC):
         )
 
         self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
+        self._log = LogAxes(x=False, y=False)
 
     def __str__(self):
         return self.__class__.__name__
@@ -112,10 +114,6 @@ class FitFunction(ABC):
         r"""Function written in LaTeX.
         """
         pass
-
-    #     @property
-    #     def logger(self):
-    #         return self._logger
 
     @property
     def labels(self):
@@ -289,6 +287,15 @@ class FitFunction(ABC):
                 del TeX_popt[k0]
 
         return TeX_popt
+
+    @property
+    def log(self):
+        r"""Log scale for axes
+
+        Only used for plotting purposes, in particular identifying when we need to plot weights/y
+        instead of weights.
+        """
+        return self._log
 
     @staticmethod
     def _check_and_add_math_escapes(x):
@@ -562,6 +569,17 @@ class FitFunction(ABC):
             msg = "Unrecgonized binsigma: %s\ntype: %s" % (new, type(new))
             raise TypeError(msg)
 
+    def set_log(self, **kwargs):
+        r"""Set :py:class:`LogAxes`.
+
+        Only used for determining if weights should be :py:math:`w/(y \ln(10))`.
+        """
+        log = self._log._asdict()
+        for k, v in kwargs.items():
+            log[k] = v
+
+        self._log = LogAxes(**log)
+
     def val_uncert_2_string(self, value, uncertainty):
         r"""
         Convert a value, uncertainty pair to a string in which the
@@ -767,15 +785,15 @@ class FitFunction(ABC):
         color = kwargs.pop("color", "k")
         label = kwargs.pop("label", r"$\mathrm{Bins}$")
 
+        x = self.xobs_raw
+        y = self.yobs_raw
+        w = self.weights_raw
+        if self.log.y and w is not None:
+            w = w / (y * np.log(10.0))
+
         # Plot the raw data histograms.
         ax.errorbar(
-            self.xobs_raw,
-            self.yobs_raw,
-            yerr=self.weights_raw,
-            drawstyle=drawstyle,
-            label=label,
-            color=color,
-            **kwargs,
+            x, y, yerr=w, drawstyle=drawstyle, label=label, color=color, **kwargs
         )
 
         self._format_hax(ax)
@@ -795,10 +813,17 @@ class FitFunction(ABC):
         markersize = kwargs.pop("markersize", 8)
         label = kwargs.pop("label", r"$\mathrm{in \; Fit}$")
 
+        x = self.xobs
+        y = self.yobs
+        w = self.weights
+        if self.log.y and w is not None:
+            w = w / (y * np.log(10.0))
+
+        # Plot the raw data histograms.
         ax.errorbar(
-            self.xobs,
-            self.yobs,
-            yerr=self.weights,
+            x,
+            y,
+            yerr=w,
             drawstyle=drawstyle,
             label=label,
             color=color,

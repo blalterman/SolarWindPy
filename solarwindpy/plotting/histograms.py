@@ -270,40 +270,8 @@ class AggPlot(base.Base):
         cut = self.cut
         tko = self.agg_axes
         gb = self.grouped
+
         agg = self._agg_runner(cut, tko, gb, fcn)
-
-        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
-
-        #         gb = self.grouped
-
-        #         if fcn is None:
-        #             other = self.data.loc[cut.index, tko]
-        #             if other.dropna().unique().size == 1:
-        #                 fcn = "count"
-        #             else:
-        #                 fcn = "mean"
-
-        #         agg = gb.agg(fcn).loc[:, tko]
-
-        #         c0, c1 = self.clim
-        #         if c0 is not None or c1 is not None:
-        #             cnt = gb.agg("count").loc[:, tko]
-        #             tk = pd.Series(True, index=agg.index)
-        #             #             tk  = pd.DataFrame(True,
-        #             #                                index=agg.index,
-        #             #                                columns=agg.columns
-        #             #                               )
-        #             if c0 is not None:
-        #                 tk = tk & (cnt >= c0)
-        #             if c1 is not None:
-        #                 tk = tk & (cnt <= c1)
-
-        #             agg = agg.where(tk)
-
-        #         # Ensure all bins are represented in the data. (20190605)
-        #         for k, v in self.intervals.items():
-        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
