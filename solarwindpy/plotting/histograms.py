@@ -23,16 +23,16 @@ from . import tools
 from . import base
 from . import labels as labels_module
 
-import os
-import psutil
+# import os
+# import psutil
 
 
-def log_mem_usage():
-    usage = psutil.Process(os.getpid()).memory_info()
-    usage = "\n".join(
-        ["{} {:.3f} GB".format(k, v * 1e-9) for k, v in usage._asdict().items()]
-    )
-    logging.getLogger("main").warning("Memory usage\n%s", usage)
+# def log_mem_usage():
+#    usage = psutil.Process(os.getpid()).memory_info()
+#    usage = "\n".join(
+#        ["{} {:.3f} GB".format(k, v * 1e-9) for k, v in usage._asdict().items()]
+#    )
+#    logging.getLogger("main").warning("Memory usage\n%s", usage)
 
 
 class AggPlot(base.Base):
