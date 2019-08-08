@@ -23,6 +23,17 @@ from . import tools
 from . import base
 from . import labels as labels_module
 
+# import os
+# import psutil
+
+
+# def log_mem_usage():
+#    usage = psutil.Process(os.getpid()).memory_info()
+#    usage = "\n".join(
+#        ["{} {:.3f} GB".format(k, v * 1e-9) for k, v in usage._asdict().items()]
+#    )
+#    logging.getLogger("main").warning("Memory usage\n%s", usage)
+
 
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
@@ -210,22 +221,11 @@ class AggPlot(base.Base):
         cut = pd.DataFrame.from_dict(cut, orient="columns")
         self._cut = cut
 
-    def agg(self, fcn=None):
-        r"""Perform the aggregation along the agg axes.
-
-        If either of the count limits specified in `clim` are not None, apply them.
-
-        `fcn` allows you to specify a specific function for aggregation. Otherwise,
-        automatically choose "count" or "mean" based on the uniqueness of the aggregated
-        values.
+    def _agg_runner(self, cut, tko, gb, fcn):
+        r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
+        can aggregate (Inbound, Outbound, and Both).
         """
-
-        cut = self.cut
-        tko = self.agg_axes
-
         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
-
-        gb = self.grouped
 
         if fcn is None:
             other = self.data.loc[cut.index, tko]
@@ -255,6 +255,23 @@ class AggPlot(base.Base):
         for k, v in self.intervals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+
+        return agg
+
+    def agg(self, fcn=None):
+        r"""Perform the aggregation along the agg axes.
+
+        If either of the count limits specified in `clim` are not None, apply them.
+
+        `fcn` allows you to specify a specific function for aggregation. Otherwise,
+        automatically choose "count" or "mean" based on the uniqueness of the aggregated
+        values.
+        """
+        cut = self.cut
+        tko = self.agg_axes
+        gb = self.grouped
+
+        agg = self._agg_runner(cut, tko, gb, fcn)
 
         return agg
 
@@ -713,6 +730,10 @@ class Hist2D(AggPlot):
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
         """
+
+        #         logging.getLogger("main").warning("Running axis normalization")
+        #         log_mem_usage()
+
         axnorm = self.axnorm
         if axnorm is None:
             pass
@@ -752,6 +773,9 @@ class Hist2D(AggPlot):
         return agg
 
     def _format_axis(self, ax):
+        #         logging.getLogger("main").warning("Formatting an axis")
+        #         log_mem_usage()
+
         xlbl = self.labels.x
         ylbl = self.labels.y
 
@@ -768,6 +792,9 @@ class Hist2D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, **kwargs):
+        #         logging.getLogger("main").warning("Making a cbar")
+        #         log_mem_usage()
+
         if isinstance(ax, mpl.axes.Axes):
             fig = ax.figure
         elif isinstance(ax, np.ndarray):
