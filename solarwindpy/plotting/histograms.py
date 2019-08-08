@@ -130,7 +130,7 @@ class AggPlot(base.Base):
         intervals = {}
 
         if precision is None:
-            precision = 3
+            precision = 5
 
         gb_axes = self._gb_axes
 
@@ -854,7 +854,9 @@ class Hist2D(AggPlot):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+
+            cbar_steal_ax = cbar_kwargs.pop("cbar_steal_axes", ax)
+            cbar = self._make_cbar(pc, cbar_steal_ax, **cbar_kwargs)
 
         self._format_axis(ax)
 

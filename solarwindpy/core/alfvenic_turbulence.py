@@ -18,16 +18,19 @@ import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 
+from collections import namedtuple
+
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 pd.set_option("mode.chained_assignment", "raise")
 
-
 try:
     from . import base
 except ImportError:
     import base
+
+AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
 
 
 class AlfvenicTurbulence(base.Core):
@@ -100,6 +103,13 @@ class AlfvenicTurbulence(base.Core):
         r"""Mean-subtracted quantities used to calculated Elsasser variables.
         """
         return self._data
+
+    @property
+    def averaging_info(self):
+        r"""Averaging window and minimum number of measurements / average used
+        in calculating background component in :math:`\delta B` and :math:`\delta v`.
+        """
+        return self._averaging_info
 
     @property
     def measurements(self):
@@ -344,6 +354,7 @@ unexpected."""
         self._measurements = data
         self._data = deltas
         self._species = species
+        self._averaging_info = AlvenicTurbAveraging(window, min_periods)
 
     def _clean_species_for_setting(self, species):
         if not isinstance(species, str):

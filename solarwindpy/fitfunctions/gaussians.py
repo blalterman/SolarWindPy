@@ -53,7 +53,7 @@ class Gaussian(FitFunction):
 
     @property
     def TeX_function(self):
-        TeX = r"f(x)=\frac{1}{\sqrt{2 \pi} \sigma} A\cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
+        #         TeX = r"f(x)=\frac{1}{\sqrt{2 \pi} \sigma} A\cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
         return TeX
 
@@ -64,6 +64,7 @@ class GaussianLn(FitFunction):
 
     def __init__(self, xobs, yobs, **kwargs):
         super(GaussianLn, self).__init__(xobs, yobs, **kwargs)
+        self.set_TeX_report_normal_parameters(False)
 
     @property
     def function(self):
@@ -72,6 +73,8 @@ class GaussianLn(FitFunction):
             coeff = (np.sqrt(2.0 * np.pi) * s) ** (-1.0)
             arg = -0.5 * (((x - m) / s) ** 2.0)
             return A * coeff * np.exp(arg)
+
+        return gaussian_ln
 
     @property
     def p0(self):
@@ -172,3 +175,5 @@ class GaussianLn(FitFunction):
                 del normal_popt[k0]
 
             TeX_popt.update(normal_popt)
+
+        return TeX_popt

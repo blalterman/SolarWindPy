@@ -91,4 +91,4 @@ def joint_legend(ax, tax, **kwargs):
     h1, l1 = tax.get_legend_handles_labels()
     hdl = h0 + h1
     lbl = l0 + l1
-    ax.legend(hdl, lbl, **kwargs)
+    return ax.legend(hdl, lbl, **kwargs)
