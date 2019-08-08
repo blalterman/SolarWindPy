@@ -112,6 +112,8 @@ _trans_units = {
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
+    # Flux
+    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
     # Collisional things
     "lnlambda": _inU["dimless"],
     # TODO: verify that these units are Hertz.
@@ -140,7 +142,6 @@ _trans_units = {
     "gamma": _inU["dimless"],
     "gamma_max": _inU["dimless"],
     # Solar Activity
-    #     "ssn": _inU["dimless"],
     "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
@@ -234,6 +235,8 @@ _templates = {
     "f10.7": r"\mathrm{F}10.7",
     "CaK": r"\mathrm{CaK}",
     "MgII": r"\mathrm{MgII}",
+    # Flux
+    "flux": r"\mathrm{Flux}_{$C}({$S})",
 }
 
 
