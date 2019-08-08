@@ -1690,7 +1690,7 @@ species: {}
         r"""
         Calculate the parallel heat flux
 
-            :math:`Q_\parallel = \rho (v^3 + \frac{3/2}vw^2)`
+            :math:`Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)`
 
         where :math:`v` is each species' velocity in the Center-of-Mass frame and
         :math:`w` is each species parallel thermal speed.
