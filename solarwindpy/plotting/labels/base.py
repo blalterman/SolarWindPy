@@ -133,6 +133,7 @@ _trans_units = {
     "etot": r"(%s)^2" % _inU["kms"],
     "eres": r"(%s)^2" % _inU["kms"],
     "xhel": r"(%s)^2" % _inU["kms"],
+    "sigma_m": _inU["dimless"],
     "sigma_c": _inU["dimless"],
     "sigma_r": _inU["dimless"],
     "ra": _inU["dimless"],
@@ -222,6 +223,7 @@ _templates = {
     "xhel": r"e^c_{{$S}}",
     "sigma_c": r"\sigma_{c;{$S}}",
     "sigma_r": r"\sigma_{r;{$S}}",
+    "sigma_m": r"\sigma_{m}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
     # Instability things
@@ -452,6 +454,7 @@ class TeXlabel(Base):
             .replace("{}", "")
             .replace(",}", "}")
             .replace("};}", "}}")
+            .replace(";}", "}")
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])

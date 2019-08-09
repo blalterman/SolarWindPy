@@ -60,6 +60,9 @@ class TrendFit(object):
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
         self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
 
+    def __str__(self):
+        return self.__class__.__name__
+
     @property
     def agged(self):
         return self._agged
