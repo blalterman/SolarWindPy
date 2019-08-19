@@ -36,9 +36,13 @@ class TrendFit(object):
         Similarly, `TrendFit.trend_fit.make_fit` must be called by the user so
         that kwargs can be appropriately passed to `curve_fit`.
 
-        call signagure is:
+        call signagure after instantiation is:
 
-            TrendFunc.make_ffunc1ds
+            0) Set x and y labels: TrendFunc.set_labels(x=<x label>, y=<y label>)
+            1) Make the 1D fit functions: TrendFunc.make_ffunc1ds()
+            2) TrendFunc.make_1dfits(): Run 1D fits
+            3) TrendFunc.make_trend_func(): init trend function
+            4) TrendFunc.trend_func.make_fit(): run trend fits
 
         Parameters
         ----------

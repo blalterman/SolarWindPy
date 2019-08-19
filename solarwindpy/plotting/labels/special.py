@@ -129,10 +129,10 @@ class Probability(ArbitraryLabel):
 
     def _build_tex(self):
         other = self.other_label
-        try:
-            tex = other.tex
-        except AttributeError:
-            tex = r"\mathrm{Prob.(%s)}" % other
+        #         try:
+        #             tex = other.tex
+        #         except AttributeError:
+        tex = r"\mathrm{Prob.}(%s)" % other.tex
 
         return tex.replace(" ", r" \, ")
 
