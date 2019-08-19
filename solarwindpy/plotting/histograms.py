@@ -791,17 +791,29 @@ class Hist2D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def _make_cbar(self, mappable, ax, **kwargs):
+    def _make_cbar(self, mappable, **kwargs):
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
+        ax = kwargs.pop("ax", None)
+        cax = kwargs.pop("cax", None)
+        if ax is not None and cax is not None:
+            raise ValueError("Can't pass ax and cax.")
 
-        if isinstance(ax, mpl.axes.Axes):
+        if ax is not None:
             fig = ax.figure
-        elif isinstance(ax, np.ndarray):
-            fig = ax[0].figure
+        elif cax is not None:
+            fig = cax.figure
+        else:
+            ax = plt.gca()
+            fig = ax.figure
+
+        #         if isinstance(ax, mpl.axes.Axes):
+        #             fig = ax.figure
+        #         elif isinstance(ax, np.ndarray):
+        #             fig = ax[0].figure
 
         label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
+        cbar = fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
 
         if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
             cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
@@ -882,8 +894,10 @@ class Hist2D(AggPlot):
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
 
-            cbar_steal_ax = cbar_kwargs.pop("cbar_steal_axes", ax)
-            cbar = self._make_cbar(pc, cbar_steal_ax, **cbar_kwargs)
+            if "cax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
+            cbar = self._make_cbar(pc, **cbar_kwargs)
 
         self._format_axis(ax)
 
