@@ -34,6 +34,10 @@ class OrbitPlot(ABC):
         super(OrbitPlot, self).__init__(*args, **kwargs)
 
     @property
+    def _disable_both(self):
+        return True
+
+    @property
     def orbit(self):
         return self._orbit
 
@@ -74,7 +78,9 @@ class OrbitPlot(ABC):
         time = time.map({self.orbit[0]: "Inbound", self.orbit[1]: "Outbound"}).astype(
             "category"
         )
-        time.add_categories("Both", inplace=True)
+
+        if not self._disable_both:
+            time.add_categories("Both", inplace=True)
 
         # `name` must be distinct from `Epoch` or we end up with ambiguous group keys.
         time = pd.Series(time, index=self.data.index, name=self._orbit_key)
@@ -94,22 +100,23 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
         fcn = kwargs.pop("fcn", None)
         agg = super(OrbitHist1D, self).agg(fcn=fcn, **kwargs)
 
-        cut = self.cut.drop("Orbit", axis=1)
-        tko = self.agg_axes
-        gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
-        agg_both = self._agg_runner(cut, tko, gb_both, fcn)
+        if not self._disable_both:
+            cut = self.cut.drop("Orbit", axis=1)
+            tko = self.agg_axes
+            gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
+            agg_both = self._agg_runner(cut, tko, gb_both, fcn)
 
-        agg = agg.unstack("Orbit")
-        agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
-        if agg_both.columns.nlevels == 2:
-            agg_both = agg_both.swaplevel(0, 1, 1)
+            agg = agg.unstack("Orbit")
+            agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
+            if agg_both.columns.nlevels == 2:
+                agg_both = agg_both.swaplevel(0, 1, 1)
 
-        agg = (
-            pd.concat([agg, agg_both], axis=1)
-            .sort_index(axis=1)
-            .stack("Orbit")
-            .sort_index(axis=0)
-        )
+            agg = (
+                pd.concat([agg, agg_both], axis=1)
+                .sort_index(axis=1)
+                .stack("Orbit")
+                .sort_index(axis=0)
+            )
 
         #         for k, v in self.intervals.items():
         #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
@@ -222,22 +229,23 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         #         logging.getLogger("main").warning("Running Both agg")
         #         log_mem_usage()
 
-        cut = self.cut.drop("Orbit", axis=1)
-        tko = self.agg_axes
-        gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
-        agg_both = self._agg_runner(cut, tko, gb_both, fcn)
+        if not self._disable_both:
+            cut = self.cut.drop("Orbit", axis=1)
+            tko = self.agg_axes
+            gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
+            agg_both = self._agg_runner(cut, tko, gb_both, fcn)
 
-        agg = agg.unstack("Orbit")
-        agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
-        if agg_both.columns.nlevels == 2:
-            agg_both = agg_both.swaplevel(0, 1, 1)
+            agg = agg.unstack("Orbit")
+            agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
+            if agg_both.columns.nlevels == 2:
+                agg_both = agg_both.swaplevel(0, 1, 1)
 
-        agg = (
-            pd.concat([agg, agg_both], axis=1)
-            .sort_index(axis=1)
-            .stack("Orbit")
-            .sort_index(axis=0)
-        )
+            agg = (
+                pd.concat([agg, agg_both], axis=1)
+                .sort_index(axis=1)
+                .stack("Orbit")
+                .sort_index(axis=0)
+            )
 
         #         for k, v in self.intervals.items():
         #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
@@ -392,6 +400,11 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         except KeyError:
             raise ValueError("Unrecognized kind '{}'".format(kind))
 
+        if kind == "Both" and self._disable_both:
+            raise NotImplementedError(
+                "Disabled both to prevent double linked list kernel crash"
+            )
+
         if ax is None:
             fig, ax = tools.subplots()
 
@@ -474,6 +487,12 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         `fcn` passed to `self.agg`. Only one function is allow b/c we
         don't yet handle uncertainties.
         """
+
+        if self._disable_both:
+            raise NotImplementedError(
+                "Disabled to attempt removing double-linked list kernel crash"
+            )
+
         fig, axes = tools.subplots(
             nrows=3,
             gridspec_kw=dict(wspace=0, hspace=0),

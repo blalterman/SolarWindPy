@@ -67,7 +67,8 @@ class Plasma(base.Base):
         auxiliary_data=None,
         log_plasma_stats=False
     ):
-        r"""
+        r"""*NOTE* Thermal speeds assume :math:`mw^2 = 2kT`.
+
         Parameters
         ----------
         data: pd.DataFrame

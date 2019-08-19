@@ -147,6 +147,8 @@ _trans_units = {
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
+    # MISC
+    "entropy": _inU["dimless"],
 }
 
 _trans_component = {
@@ -239,6 +241,8 @@ _templates = {
     "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
+    # MISC
+    "entropy": r"\mathrm{S}_{$S}",
 }
 
 
@@ -453,8 +457,10 @@ class TeXlabel(Base):
             .replace("{};", "")
             .replace("{}", "")
             .replace(",}", "}")
+            .replace(";}", "}")
             .replace("};}", "}}")
             .replace(";}", "}")
+            .replace("_{}", "")
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])

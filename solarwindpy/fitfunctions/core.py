@@ -54,22 +54,29 @@ class FitFunction(ABC):
         weights=None,
         wmin=None,
         wmax=None,
+        logx=False,
+        logy=False,
     ):
 
         #         self._init_logger()
         self._set_argnames()
         self._set_raw_obs(xobs, yobs, weights)
+        self._log = LogAxes(x=logx, y=logy)
 
         if weights is None:
             assert wmin is None
             assert wmax is None
 
         self.set_fit_obs(
-            xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, wmin=wmin, wmax=wmax
+            xmin=xmin,
+            xmax=xmax,
+            ymin=ymin,
+            ymax=ymax,
+            wmin=wmin,
+            wmax=wmax,
+            logx=logx,
+            logy=logy,
         )
-
-        self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
-        self._log = LogAxes(x=False, y=False)
 
     def __str__(self):
         return self.__class__.__name__
@@ -434,13 +441,23 @@ class FitFunction(ABC):
         self._labels = AxesLabels(x, y, z)
 
     def set_fit_obs(
-        self, xmin=None, xmax=None, ymin=None, ymax=None, wmin=None, wmax=None
+        self,
+        xmin=None,
+        xmax=None,
+        ymin=None,
+        ymax=None,
+        wmin=None,
+        wmax=None,
+        logx=False,
+        logy=False,
     ):
         r"""
         Set the observed values we'll actually use in the fit by applying limits
         to xobs_raw and yobs_raw and checking for finite values.
 
         All boundaries are inclusive <= or >=.
+
+        If logy, then make selection of `wmin` and `wmax` based on :math:`w/(y \ln(10))`.
         """
 
         xobs = self.xobs_raw
@@ -451,7 +468,13 @@ class FitFunction(ABC):
         ymask = self._build_one_obs_mask("yobs", yobs, ymin, ymax)
         mask = xmask & ymask
         if weights is not None:
-            wmask = self._build_one_obs_mask("weights", weights, wmin, wmax)
+            weights_for_mask = weights
+
+            if logy:
+                # Enables picking weights based on normalized scale for log stuff
+                weights_for_mask = weights_for_mask / (yobs * np.log(10))
+
+            wmask = self._build_one_obs_mask("weights", weights_for_mask, wmin, wmax)
             mask = mask & wmask
 
         xobs = xobs[mask]
@@ -463,6 +486,7 @@ class FitFunction(ABC):
         self._yobs = yobs
         self._weights = weights
         self._tk_observed = mask
+        self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
 
     def _set_popt(self, new):
         r"""Save as a tuple of (k, v) pairs so immutable. Convert to a dictionary i
