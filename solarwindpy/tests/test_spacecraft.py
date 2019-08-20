@@ -134,7 +134,7 @@ class TestWind(TestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
         data = cls.data.xs("gse", axis=1, level="M")
-        data = pd.concat({"pos": data}, axis=1, names=["M"])
+        data = pd.concat({"pos": data}, axis=1, names=["M"]).sort_index(axis=1)
         cls.data = data
         sc = spacecraft.Spacecraft(data, "wind", "gse")
 
@@ -172,7 +172,9 @@ class TestPSP(TestBase, TestCase):
         v = cls.data.xs("v_HCI", axis=1, level="M")
         c = cls.data.xs("Carr", axis=1, level="M")
 
-        data = pd.concat({"v": v, "pos": p, "carr": c}, axis=1, names=["M"])
+        data = pd.concat({"v": v, "pos": p, "carr": c}, axis=1, names=["M"]).sort_index(
+            axis=1
+        )
         sc = spacecraft.Spacecraft(data, "psp", "hci")
         cls.object_testing = sc
         cls.data = data
