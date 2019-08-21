@@ -49,8 +49,10 @@ class FitFunction(ABC):
         yobs,
         xmin=None,
         xmax=None,
+        xoutside=None,
         ymin=None,
         ymax=None,
+        youtside=None,
         weights=None,
         wmin=None,
         wmax=None,
@@ -70,8 +72,10 @@ class FitFunction(ABC):
         self.set_fit_obs(
             xmin=xmin,
             xmax=xmax,
+            xoutside=xoutside,
             ymin=ymin,
             ymax=ymax,
+            youtside=youtside,
             wmin=wmin,
             wmax=wmax,
             logx=logx,
@@ -392,7 +396,7 @@ class FitFunction(ABC):
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
         mask = np.full_like(x, True, dtype=bool)
 
-        mask = np.isfinite(x)
+        #         mask = np.isfinite(x)
         #         if not mask.all():
         #             self.logger.warning(
         #                 "{} {} observations are NaN. This {:.3%} of the data has been dropped.".format(
@@ -414,6 +418,21 @@ class FitFunction(ABC):
     #         self._logger = logging.getLogger(
     #             "{}.{}".format(__file__, self.__class__.__name__)
     #         )
+
+    def _build_outside_mask(self, axis, x, outside):
+        r"""Take data outside of the range `outside[0]:outside[1]`.
+        """
+
+        if outside is None:
+            return np.full_like(x, True, dtype=bool)
+
+        lower, upper = outside
+        assert lower < upper
+        l_mask = x < lower
+        u_mask = x > upper
+        mask = l_mask | u_mask
+
+        return mask
 
     def _set_argnames(self):
         r"""
@@ -444,8 +463,10 @@ class FitFunction(ABC):
         self,
         xmin=None,
         xmax=None,
+        xoutside=None,
         ymin=None,
         ymax=None,
+        youtside=None,
         wmin=None,
         wmax=None,
         logx=False,
@@ -466,7 +487,10 @@ class FitFunction(ABC):
 
         xmask = self._build_one_obs_mask("xobs", xobs, xmin, xmax)
         ymask = self._build_one_obs_mask("yobs", yobs, ymin, ymax)
-        mask = xmask & ymask
+        xout_mask = self._build_outside_mask("xobs", xobs, xoutside)
+        yout_mask = self._build_outside_mask("yobs", yobs, youtside)
+
+        mask = xmask & ymask & xout_mask & yout_mask
         if weights is not None:
             weights_for_mask = weights
 
