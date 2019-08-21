@@ -394,9 +394,9 @@ class FitFunction(ABC):
         self._weights_raw = weights
 
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
-        mask = np.full_like(x, True, dtype=bool)
+        #         mask = np.full_like(x, True, dtype=bool)
 
-        #         mask = np.isfinite(x)
+        mask = np.isfinite(x)
         #         if not mask.all():
         #             self.logger.warning(
         #                 "{} {} observations are NaN. This {:.3%} of the data has been dropped.".format(
@@ -428,8 +428,8 @@ class FitFunction(ABC):
 
         lower, upper = outside
         assert lower < upper
-        l_mask = x < lower
-        u_mask = x > upper
+        l_mask = x <= lower
+        u_mask = x >= upper
         mask = l_mask | u_mask
 
         return mask
