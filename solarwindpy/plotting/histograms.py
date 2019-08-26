@@ -90,7 +90,7 @@ class AggPlot(base.Base):
         cut = self.cut
         tko = self.agg_axes
 
-        self.logger.info("""Joining data (%s) with cat (%s)""", tko, cut.columns.values)
+        self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
 
         other = self.data.loc[cut.index, tko]
 
@@ -225,7 +225,8 @@ class AggPlot(base.Base):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
-        self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
         if fcn is None:
             other = self.data.loc[cut.index, tko]
@@ -269,6 +270,12 @@ class AggPlot(base.Base):
         """
         cut = self.cut
         tko = self.agg_axes
+
+        self.logger.info(
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
+            "\n".join([f"{k!s}: {v!s}" for k, v in self.labels._asdict().items()]),
+        )
+
         gb = self.grouped
 
         agg = self._agg_runner(cut, tko, gb, fcn)
@@ -278,8 +285,8 @@ class AggPlot(base.Base):
     # Old version that cuts at percentiles.
     @staticmethod
     def clip_data(data, clip):
-        q0 = 0.001
-        q1 = 0.999
+        q0 = 0.0001
+        q1 = 0.9999
         pct = data.quantile([q0, q1])
         lo = pct.loc[q0]
         up = pct.loc[q1]
@@ -396,19 +403,6 @@ class Hist1D(AggPlot):
         path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
 
         if new == "auto":
-
-            #             n_unique_y = self.data.loc[:, "y"].dropna().unique().size
-
-            #             if (y == "y") and (n_unique_y == 1):
-            #                 y = "count"
-
-            #             elif n_unique_y > 1:
-            #                 # Expect aggregating data.
-            #                 pass
-
-            #             else:
-            #                 raise ValueError("Unable to auto set y-component of path")
-
             path = path / x / y
 
         else:
@@ -829,7 +823,7 @@ class Hist2D(AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
-        **kwargs
+        **kwargs,
     ):
         r"""
         Make a 2D plot on `ax` using `ax.pcolormesh`.

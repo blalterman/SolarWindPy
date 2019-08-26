@@ -840,13 +840,13 @@ class FitFunction(ABC):
             w = w / (y * np.log(10.0))
 
         # Plot the raw data histograms.
-        ax.errorbar(
+        plotline, caplines, barlines = ax.errorbar(
             x, y, yerr=w, drawstyle=drawstyle, label=label, color=color, **kwargs
         )
 
         self._format_hax(ax)
 
-        return ax
+        return ax, plotline, caplines, barlines
 
     def plot_in_fit(self, ax=None, drawstyle=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
@@ -868,7 +868,7 @@ class FitFunction(ABC):
             w = w / (y * np.log(10.0))
 
         # Plot the raw data histograms.
-        ax.errorbar(
+        plotline, caplines, barlines = ax.errorbar(
             x,
             y,
             yerr=w,
@@ -883,7 +883,7 @@ class FitFunction(ABC):
 
         self._format_hax(ax)
 
-        return ax
+        return ax, plotline, caplines, barlines
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
         r"""Plot the fit.

@@ -102,10 +102,13 @@ class Count(ArbitraryLabel):
 
 
 class Probability(ArbitraryLabel):
-    def __init__(self, other_label):
+    def __init__(self, other_label, comparison=None):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+
+        The `comparison`, if passed, is something like "> 0".
         """
         self.set_other_label(other_label)
+        self.set_comparison(comparison)
         self.build_label()
 
     def __str__(self):
@@ -123,16 +126,25 @@ class Probability(ArbitraryLabel):
     def other_label(self):
         return self._other_label
 
+    @property
+    def comparison(self):
+        return self._comparison
+
     def set_other_label(self, other):
         assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
         self._other_label = other
+
+    def set_comparison(self, new):
+        if new is None:
+            new = ""
+        self._comparison = str(new)
 
     def _build_tex(self):
         other = self.other_label
         #         try:
         #             tex = other.tex
         #         except AttributeError:
-        tex = r"\mathrm{Prob.}(%s)" % other.tex
+        tex = r"\mathrm{Prob.}(%s %s)" % (other.tex, self.comparison)
 
         return tex.replace(" ", r" \, ")
 

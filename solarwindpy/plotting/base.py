@@ -90,6 +90,7 @@ class Base(ABC):
 
         self._labels = AxesLabels(x, y, z)
 
+    @abstractmethod
     def set_path(self, new, add_scale=False):
         r"""Build the plot save path.
 
