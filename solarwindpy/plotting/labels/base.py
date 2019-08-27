@@ -149,7 +149,7 @@ _trans_units = {
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
     # MISC
-    "entropy": r"K \mathrm{cm}^{-3/2}",
+    "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
 }
 
 _trans_component = {

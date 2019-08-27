@@ -34,9 +34,7 @@ class FitFunction(ABC):
     Assuming that you don't want any special formatting, the typical call order
     is:
         fit_function = FitFunction(function, TeX_string)
-        fit_function.make_fit(xobs, yobs)
-        fit_function.TeX_parameters()
-        fit_function.pretty_result()
+        fit_function.make_fit()
 
     Instances are callable.
     """
@@ -925,7 +923,7 @@ class FitFunction(ABC):
 
         Parameters
         ----------
-        ax: mpl.Axes.axis_subplot
+        ax: None, mpl.Axes.axis_subplot
 
         drawstyle: str, None
             `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_in_fit`.
@@ -940,6 +938,10 @@ class FitFunction(ABC):
             Passed to ax.plot(**fit_kwargs) for plotting fit.
         annotate_kwargs:
             Passed to ax.text.
+
+        Returns
+        -------
+        ax: mpl.Axes.axis_subplot
         """
 
         if ax is None:
@@ -964,43 +966,6 @@ class FitFunction(ABC):
         self.plot_fit(
             ax=ax, annotate=annotate, annotate_kwargs=annotate_kwargs, **fit_kwargs
         )
-
-        #         hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
-        #         bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
-        #         fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
-
-        #         # Plot the raw data histograms.
-        #         ax.errorbar(
-        #             self.xobs_raw,
-        #             self.yobs_raw,
-        #             yerr=self.weights_raw,
-        #             drawstyle=drawstyle,
-        #             label=hist_label,
-        #             color=hist_kwargs.pop("color", "k"),
-        #             **hist_kwargs
-        #         )
-
-        #         # Overplot with the data as selected for the plot.
-        #         ax.errorbar(
-        #             self.xobs,
-        #             self.yobs,
-        #             yerr=self.weights,
-        #             drawstyle=drawstyle,
-        #             label=bin_label,
-        #             color=bin_kwargs.pop("color", "darkgreen"),
-        #             **bin_kwargs
-        #         )
-
-        #         # Overplot the fit.
-        #         ax.plot(
-        #             self.xobs_raw,
-        #             self(self.xobs_raw),
-        #             label=fit_label,
-        #             color=fit_kwargs.pop("color", "darkorange"),
-        #             **fit_kwargs
-        #         )
-
-        #         ax.grid(True, which="major", axis="both")
 
         ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
 
