@@ -132,9 +132,23 @@ class FitFunction(ABC):
 
     @property
     def path(self):
-        base = Path(str(self)) / self.labels.x / self.labels.y
-        if self.labels.z != "z" and self.labels.z:
-            base = base / self.labels.z
+        base = Path(str(self))
+
+        try:
+            base /= self.labels.x.path
+        except AttributeError:
+            base /= str(self.labels.x)
+
+        try:
+            base /= self.labels.y.path
+        except AttributeError:
+            base /= str(self.labels.y)
+
+        if self.labels.z is not None:
+            try:
+                base = base / self.labels.z.path
+            except AttributeError:
+                base = base / str(self.labels.z)
 
         x_scale = "logX" if self.log.x else "linX"
         y_scale = "logY" if self.log.y else "logY"

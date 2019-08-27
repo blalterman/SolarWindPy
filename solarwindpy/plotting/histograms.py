@@ -116,7 +116,7 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
-    def set_clim(self, bottom, top):
+    def set_clim(self, bottom=None, top=None):
         assert isinstance(bottom, Number) or bottom is None
         assert isinstance(top, Number) or top is None
         self._clim = (bottom, top)
