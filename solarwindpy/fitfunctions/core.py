@@ -17,6 +17,7 @@ from collections import namedtuple
 from matplotlib import pyplot as plt
 from inspect import getargspec
 from scipy.optimize import curve_fit
+from pathlib import Path
 
 import solarwindpy as swp
 
@@ -62,6 +63,7 @@ class FitFunction(ABC):
         self._set_argnames()
         self._set_raw_obs(xobs, yobs, weights)
         self._log = LogAxes(x=logx, y=logy)
+        self._labels = AxesLabels("x", "y")
 
         if weights is None:
             assert wmin is None
@@ -127,6 +129,19 @@ class FitFunction(ABC):
     @property
     def labels(self):
         return self._labels
+
+    @property
+    def path(self):
+        base = Path(str(self)) / self.labels.x / self.labels.y
+        if self.labels.z != "z" and self.labels.z:
+            base = base / self.labels.z
+
+        x_scale = "logX" if self.log.x else "linX"
+        y_scale = "logY" if self.log.y else "logY"
+        scale_info = "_".join([x_scale, y_scale])
+
+        path = base / scale_info
+        return path
 
     @property
     def popt(self):
@@ -973,12 +988,6 @@ class FitFunction(ABC):
         #         ax.update_datalim(
         #             [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
         #         )
-
-        #         if annotate:
-        #             self.annotate_TeX_info(ax, **annotate_kwargs)
-
-        #         ax.set_xlabel(self.labels.x)
-        #         ax.set_ylabel(self.labels.y)
 
         self._format_hax(ax)
 
