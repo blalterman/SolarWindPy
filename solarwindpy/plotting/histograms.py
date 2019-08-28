@@ -282,6 +282,29 @@ class AggPlot(base.Base):
 
         return agg
 
+    def get_plotted_data_boolean_series(self):
+        f"""A boolean `pd.Series` identifing each measurement that is plotted.
+
+        Note: The Series is indexed identically to the data stored in the :py:class:`{self.__class__.__name__}`.
+              To align with another index, you may want to use:
+
+                  tk = {self.__class__.__name__}.get_plotted_data_boolean_series()
+                  idx = tk.replace(False, np.nan).dropna().index
+        """
+        agg = self.agg().dropna()
+        cut = self.cut
+
+        tk = pd.Series(True, index=cut.index)
+        for k, v in cut.items():
+            tk_ax = v.isin(agg.index.get_level_values(k))
+            tk = tk & tk_ax
+
+        self.logger.info(
+            f"Taking {tk.sum()!s} ({100*tk.mean():.1f}%) {self.__class__.__name__} spectra"
+        )
+
+        return tk
+
     # Old version that cuts at percentiles.
     @staticmethod
     def clip_data(data, clip):
@@ -758,7 +781,7 @@ class Hist2D(AggPlot):
         return agg
 
     def agg(self, **kwargs):
-        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
+        agg = super(Hist2D, self).agg(**kwargs)
         agg = self._axis_normalizer(agg)
 
         return agg
@@ -782,7 +805,25 @@ class Hist2D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def _make_cbar(self, mappable, ax, **kwargs):
+    def _make_cbar(self, mappable, ax, norm=None, **kwargs):
+        r"""Make a colorbar on `ax` using `mappable`.
+
+        Parameters
+        ----------
+        mappable:
+            See `figure.colorbar` kwarg of same name.
+        ax: mpl.axis.Axis
+            See `figure.colorbar` kwarg of same name.
+        norm: mpl.colors.Normalize instance
+            The normalization used in the plot. Passed here to determine
+            y-ticks.
+        ylocator: None, mpl.ticker.Locator instance or sublcass instance
+            If not None, the `Locator` to use for the colorbar y-ticks.
+            If None, `norm` is not `mpl.colors.BoundaryNorm`, and the plot
+            is column or row normalize, locator defaults to
+
+                mpl.ticker.MultipleLocator(0.1)
+        """
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
 
@@ -791,11 +832,19 @@ class Hist2D(AggPlot):
         elif isinstance(ax, np.ndarray):
             fig = ax[0].figure
 
+        ylocator = kwargs.pop("ylocator", None)
+        if (
+            ylocator is None
+            and self.axnorm in ("c", "r")
+            and not isinstance(norm, mpl.colors.BoundaryNorm)
+        ):
+            ylocator = mpl.ticker.MultipleLocator(0.1)
+
         label = kwargs.pop("label", self.labels.z)
         cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
 
-        if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
-            cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+        if ylocator is not None:
+            cbar.ax.yaxis.set_major_locator(ylocator)
 
         return cbar
 
@@ -872,7 +921,8 @@ class Hist2D(AggPlot):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(pc, ax, norm=norm, **cbar_kwargs)
 
         self._format_axis(ax)
 
