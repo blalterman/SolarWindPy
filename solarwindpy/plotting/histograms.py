@@ -832,19 +832,13 @@ class Hist2D(AggPlot):
         elif isinstance(ax, np.ndarray):
             fig = ax[0].figure
 
-        ylocator = kwargs.pop("ylocator", None)
-        if (
-            ylocator is None
-            and self.axnorm in ("c", "r")
-            and not isinstance(norm, mpl.colors.BoundaryNorm)
-        ):
-            ylocator = mpl.ticker.MultipleLocator(0.1)
+        ticks = kwargs.pop(
+            "ticks",
+            mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
+        )
 
         label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
-
-        if ylocator is not None:
-            cbar.ax.yaxis.set_major_locator(ylocator)
+        cbar = fig.colorbar(mappable, ax=ax, label=label, ticks=ticks, **kwargs)
 
         return cbar
 
