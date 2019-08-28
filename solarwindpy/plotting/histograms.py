@@ -420,9 +420,6 @@ class Hist1D(AggPlot):
 
     def set_data(self, x, y, logx, clip):
         logx = bool(logx)
-        #         if logx:
-        #             x = np.abs(x)
-        #             x = np.log10(x[x > 0])
         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
 
         #         if clip:
