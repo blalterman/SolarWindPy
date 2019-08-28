@@ -477,6 +477,34 @@ class Hist1D(AggPlot):
 
         self._axnorm = new
 
+    def construct_cdf(self):
+        r"""Convert the obsered measuremets.
+
+        Returns
+        -------
+        cdf: pd.DataFrame
+            "x" column is the value of the measuremnt.
+            "position" column is the normalized position in the cdf.
+            To plot the cdf:
+
+                cdf.plot(x="x", y="cdf")
+        """
+        data = self.data
+        if not data.loc[:, "y"].unique().size <= 2:
+            raise ValueError("Only able to convert data to a cdf if it is a histogram.")
+
+        tk = self.cut.loc[:, "x"].notna()
+        x = data.loc[tk, "x"]
+        cdf = x.sort_values().reset_index(drop=True)
+
+        if self.log.x:
+            cdf = 10.0 ** cdf
+
+        cdf = cdf.to_frame()
+        cdf.loc[:, "position"] = cdf.index / cdf.index.max()
+
+        return cdf
+
     def _axis_normalizer(self, agg):
         r"""Takes care of row, column, total, and density normaliation.
 
