@@ -104,7 +104,7 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
             cut = self.cut.drop("Orbit", axis=1)
             tko = self.agg_axes
             gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
-            agg_both = self._agg_runner(cut, tko, gb_both, fcn)
+            agg_both = self._agg_runner(cut, tko, gb_both, fcn).copy(deep=True)
 
             agg = agg.unstack("Orbit")
             agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
@@ -233,7 +233,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             cut = self.cut.drop("Orbit", axis=1)
             tko = self.agg_axes
             gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
-            agg_both = self._agg_runner(cut, tko, gb_both, fcn)
+            agg_both = self._agg_runner(cut, tko, gb_both, fcn).copy(deep=True)
 
             agg = agg.unstack("Orbit")
             agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
@@ -336,6 +336,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
         )
 
+        #         pdb.set_trace()
+
         if limit_color_norm:
             self._limit_color_norm(norm)
 
@@ -408,26 +410,10 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         if ax is None:
             fig, ax = tools.subplots()
 
-        #         XX, YY = np.meshgrid(x, y)
-
         agg = self.agg(fcn=fcn).xs(kind, axis=0, level="Orbit").unstack("x")
         cbar = self._put_agg_on_ax(
             ax, agg, cbar, limit_color_norm, cbar_kwargs, **kwargs
         )
-        # Unstacking drops some NaN bins, so we must reindex again.
-        #         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
-
-        #         C = np.ma.masked_invalid(agg.values)
-        #         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
-
-        #         if cbar:
-        #             if cbar_kwargs is None:
-        #                 cbar_kwargs = dict()
-        #             #             use_gridspec = kwargs.pop("use_gridspec", False)
-        #             cbar = self._make_cbar(pc, ax, **cbar_kwargs)
-
-        #         logging.getLogger("main").warning("Done with plot")
-        #         log_mem_usage()
 
         return ax, cbar
 
@@ -459,9 +445,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         cbaro = self._put_agg_on_ax(
             axes[1], aggo, cbar, limit_color_norm, cbar_kwargs, **kwargs
         )
-
-        #         axi, cbari = self.make_one_plot("Inbound", axes[0], cbar=False, **kwargs)
-        #         axo, cbaro = self.make_one_plot("Outbound", axes[1], cbar=True, **kwargs)
 
         self._format_in_out_axes(*axes)
 

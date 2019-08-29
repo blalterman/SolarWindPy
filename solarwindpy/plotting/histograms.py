@@ -90,7 +90,7 @@ class AggPlot(base.Base):
         cut = self.cut
         tko = self.agg_axes
 
-        self.logger.info("""Joining data (%s) with cat (%s)""", tko, cut.columns.values)
+        self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
 
         other = self.data.loc[cut.index, tko]
 
@@ -116,7 +116,7 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
-    def set_clim(self, bottom, top):
+    def set_clim(self, bottom=None, top=None):
         assert isinstance(bottom, Number) or bottom is None
         assert isinstance(top, Number) or top is None
         self._clim = (bottom, top)
@@ -225,7 +225,8 @@ class AggPlot(base.Base):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
-        self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
         if fcn is None:
             other = self.data.loc[cut.index, tko]
@@ -269,17 +270,46 @@ class AggPlot(base.Base):
         """
         cut = self.cut
         tko = self.agg_axes
+
+        self.logger.info(
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
+            "\n".join([f"{k!s}: {v!s}" for k, v in self.labels._asdict().items()]),
+        )
+
         gb = self.grouped
 
         agg = self._agg_runner(cut, tko, gb, fcn)
 
         return agg
 
+    def get_plotted_data_boolean_series(self):
+        f"""A boolean `pd.Series` identifing each measurement that is plotted.
+
+        Note: The Series is indexed identically to the data stored in the :py:class:`{self.__class__.__name__}`.
+              To align with another index, you may want to use:
+
+                  tk = {self.__class__.__name__}.get_plotted_data_boolean_series()
+                  idx = tk.replace(False, np.nan).dropna().index
+        """
+        agg = self.agg().dropna()
+        cut = self.cut
+
+        tk = pd.Series(True, index=cut.index)
+        for k, v in cut.items():
+            tk_ax = v.isin(agg.index.get_level_values(k))
+            tk = tk & tk_ax
+
+        self.logger.info(
+            f"Taking {tk.sum()!s} ({100*tk.mean():.1f}%) {self.__class__.__name__} spectra"
+        )
+
+        return tk
+
     # Old version that cuts at percentiles.
     @staticmethod
     def clip_data(data, clip):
-        q0 = 0.001
-        q1 = 0.999
+        q0 = 0.0001
+        q1 = 0.9999
         pct = data.quantile([q0, q1])
         lo = pct.loc[q0]
         up = pct.loc[q1]
@@ -396,19 +426,6 @@ class Hist1D(AggPlot):
         path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
 
         if new == "auto":
-
-            #             n_unique_y = self.data.loc[:, "y"].dropna().unique().size
-
-            #             if (y == "y") and (n_unique_y == 1):
-            #                 y = "count"
-
-            #             elif n_unique_y > 1:
-            #                 # Expect aggregating data.
-            #                 pass
-
-            #             else:
-            #                 raise ValueError("Unable to auto set y-component of path")
-
             path = path / x / y
 
         else:
@@ -426,9 +443,6 @@ class Hist1D(AggPlot):
 
     def set_data(self, x, y, logx, clip):
         logx = bool(logx)
-        #         if logx:
-        #             x = np.abs(x)
-        #             x = np.log10(x[x > 0])
         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
 
         #         if clip:
@@ -462,6 +476,34 @@ class Hist1D(AggPlot):
             ylbl.build_label()
 
         self._axnorm = new
+
+    def construct_cdf(self):
+        r"""Convert the obsered measuremets.
+
+        Returns
+        -------
+        cdf: pd.DataFrame
+            "x" column is the value of the measuremnt.
+            "position" column is the normalized position in the cdf.
+            To plot the cdf:
+
+                cdf.plot(x="x", y="cdf")
+        """
+        data = self.data
+        if not data.loc[:, "y"].unique().size <= 2:
+            raise ValueError("Only able to convert data to a cdf if it is a histogram.")
+
+        tk = self.cut.loc[:, "x"].notna()
+        x = data.loc[tk, "x"]
+        cdf = x.sort_values().reset_index(drop=True)
+
+        if self.log.x:
+            cdf = 10.0 ** cdf
+
+        cdf = cdf.to_frame()
+        cdf.loc[:, "position"] = cdf.index / cdf.index.max()
+
+        return cdf
 
     def _axis_normalizer(self, agg):
         r"""Takes care of row, column, total, and density normaliation.
@@ -767,7 +809,7 @@ class Hist2D(AggPlot):
         return agg
 
     def agg(self, **kwargs):
-        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
+        agg = super(Hist2D, self).agg(**kwargs)
         agg = self._axis_normalizer(agg)
 
         return agg
@@ -791,7 +833,25 @@ class Hist2D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def _make_cbar(self, mappable, ax, **kwargs):
+    def _make_cbar(self, mappable, ax, norm=None, **kwargs):
+        r"""Make a colorbar on `ax` using `mappable`.
+
+        Parameters
+        ----------
+        mappable:
+            See `figure.colorbar` kwarg of same name.
+        ax: mpl.axis.Axis
+            See `figure.colorbar` kwarg of same name.
+        norm: mpl.colors.Normalize instance
+            The normalization used in the plot. Passed here to determine
+            y-ticks.
+        ylocator: None, mpl.ticker.Locator instance or sublcass instance
+            If not None, the `Locator` to use for the colorbar y-ticks.
+            If None, `norm` is not `mpl.colors.BoundaryNorm`, and the plot
+            is column or row normalize, locator defaults to
+
+                mpl.ticker.MultipleLocator(0.1)
+        """
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
 
@@ -800,11 +860,13 @@ class Hist2D(AggPlot):
         elif isinstance(ax, np.ndarray):
             fig = ax[0].figure
 
-        label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
+        ticks = kwargs.pop(
+            "ticks",
+            mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
+        )
 
-        if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
-            cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+        label = kwargs.pop("label", self.labels.z)
+        cbar = fig.colorbar(mappable, ax=ax, label=label, ticks=ticks, **kwargs)
 
         return cbar
 
@@ -829,7 +891,7 @@ class Hist2D(AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
-        **kwargs
+        **kwargs,
     ):
         r"""
         Make a 2D plot on `ax` using `ax.pcolormesh`.
@@ -881,7 +943,8 @@ class Hist2D(AggPlot):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(pc, ax, norm=norm, **cbar_kwargs)
 
         self._format_axis(ax)
 

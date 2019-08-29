@@ -60,6 +60,7 @@ _trans_measurement = {
     "ab": r"A",
     "theta": r"\theta",
     "cos_theta": r"\cos\theta",
+    "carr": r"\mathrm{Carrington}",
 }
 
 _inU = {
@@ -82,6 +83,7 @@ _trans_units = {
     "colat": _inU["deg"],
     "lat": _inU["deg"],
     "lon": _inU["deg"],
+    "carr": _inU["deg"],
     # Trig things.
     "theta": _inU["deg"],
     "phi": _inU["deg"],
@@ -147,7 +149,7 @@ _trans_units = {
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
     # MISC
-    "entropy": _inU["dimless"],
+    "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
 }
 
 _trans_component = {
@@ -187,10 +189,11 @@ _templates = {
     "gse": r"{$C}_{\mathrm{GSE}}",
     "hci": r"{$C}_{\mathrm{HCI}}",
     "colat": r"\theta_{$C}",
+    "carr": r"\mathrm{Carrington} \, {$C}",
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
-    "q": r"q_{$S}",  # charge density
+    "Q": r"Q_{$S}",  # charge density
     #     "count": _mathrm("Count"),
     "ratio": _mathrm("Ratio"),
     "cos": r"\cos",
@@ -213,6 +216,7 @@ _templates = {
     "pdv": r"P_{\Delta v_{$S}}",
     "ab": r"A_{$S}",
     "e": r"e_{{$C}_{$S}}",
+    "entropy": r"\mathrm{S}_{$S}",
     # Alfvenic Turbulence
     "zp": r"Z^+_{{$S}}",
     "zm": r"Z^-_{{$S}}",
@@ -239,8 +243,6 @@ _templates = {
     "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
-    # MISC
-    "entropy": r"\mathrm{S}_{$S}",
 }
 
 
