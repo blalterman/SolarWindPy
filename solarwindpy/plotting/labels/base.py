@@ -193,7 +193,7 @@ _templates = {
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
-    "q": r"q_{$S}",  # charge density
+    "Q": r"Q_{$S}",  # charge density
     #     "count": _mathrm("Count"),
     "ratio": _mathrm("Ratio"),
     "cos": r"\cos",
