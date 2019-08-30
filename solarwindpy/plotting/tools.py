@@ -18,7 +18,7 @@ def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
     `scale_width` and `scale_height`.
     """
     scale = np.array([scale_width * ncols, scale_height * nrows])
-    figsize = kwargs.pop("figsize", scale * mpl.rcParams["figure.figsize"])
+    figsize = scale * kwargs.pop("figsize", mpl.rcParams["figure.figsize"])
 
     return plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
 
