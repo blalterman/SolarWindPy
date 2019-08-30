@@ -71,7 +71,7 @@ _inU = {
     "pPa": r"\mathrm{pPa}",
     "cm-3": r"\mathrm{cm}^{-3}",
     "dimless": r"\mathrm{\#}",
-    "unknown": r"?",
+    "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
 }
