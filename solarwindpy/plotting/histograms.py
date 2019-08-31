@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 
+from types import FunctionType
 from matplotlib import pyplot as plt
 from numbers import Number
 from abc import abstractproperty, abstractmethod
@@ -116,10 +117,13 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
-    def set_clim(self, bottom=None, top=None):
-        assert isinstance(bottom, Number) or bottom is None
-        assert isinstance(top, Number) or top is None
-        self._clim = (bottom, top)
+    def set_clim(self, lower=None, upper=None):
+        f"""Set the minimum (lower) and maximum (upper) alowed number of
+        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._clim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
@@ -570,21 +574,39 @@ class Hist1D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
-        r"""Make a plot on `ax`.
+        f"""Make a plot.
 
-        If `ax` is None, create a `mpl.subplots` axis.
-
-        `**kwargs` passed directly to `ax.plot`.
-
-        `drawstyle` defaults to `steps-mid`
-
-        `fcn` passed to `self.agg`. Only one function is allow b/c we
-        don't yet handle uncertainties.
+        Parameters
+        ----------
+        ax: None, mpl.axis.Axis
+            If `None`, create a subplot axis.
+        fcn: None, str, aggregative function, or 2-tuple of strings
+            Passed directly to `{self.__class__.__name__}.agg`. If
+            None, use the default aggregation function. If str or a
+            single aggregative function, use it.
+        kwargs:
+            Passed directly to `ax.plot`.
         """
         agg = self.agg(fcn=fcn)
-        #         tko = self.agg_axes
         x = pd.IntervalIndex(agg.index).mid
-        y = agg
+
+        if fcn is None or isinstance(fcn, str):
+            y = agg
+            dy = None
+
+        elif len(fcn) == 2:
+
+            f0, f1 = fcn
+            if isinstance(f0, FunctionType):
+                f0 = f0.__name__
+            if isinstance(f1, FunctionType):
+                f1 = f1.__name__
+
+            y = agg.loc[:, f0]
+            dy = agg.loc[:, f1]
+
+        else:
+            raise ValueError(f"Unrecognized `fcn` ({fcn})")
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -593,7 +615,7 @@ class Hist1D(AggPlot):
             x = 10.0 ** x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        ax.plot(x, y, drawstyle=drawstyle, **kwargs)
+        pl, cl, bl = ax.errorbar(x, y, dy=dy, drawstyle=drawstyle, **kwargs)
 
         self._format_axis(ax)
 
@@ -950,19 +972,25 @@ class Hist2D(AggPlot):
 
         return ax, cbar
 
-    def project_1d(self, axis, project_counts=False, **kwargs):
-        r"""Make a `Hist1D` from the data stored in this `His2D`.
+    def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
+        f"""Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
         ----------
         axis: str
             "x" or "y", specifying the axis to project into 1D.
+        only_plotted: bool
+            If True, only pass data that appears in the {self.__class__.__name__} plot
+            to the :py:class:`Hist1D`.
+        project_counts: bool
+            If True, only send the variable plotted along `axis` to :py:class:`Hist1D`.
+            Otherwise, send both axes (but not z-values).
         kwargs:
             Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
 
         Returns
         -------
-        h1: `Hist1D`
+        h1: :py:class:`Hist1D`
         """
         axis = axis.lower()
         assert axis in ("x", "y")
@@ -984,7 +1012,7 @@ class Hist2D(AggPlot):
             x = 10.0 ** x
 
         y = self.data.loc[:, other] if not project_counts else None
-        logy = False
+        logy = False  # Defined b/c project_counts option.
         if y is not None:
             # Only select y-values plotted.
             logy = self.log._asdict()[other]
@@ -992,6 +1020,12 @@ class Hist2D(AggPlot):
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
             if logy:
                 y = 10.0 ** y
+
+        if only_plotted:
+            tk = self.get_plotted_data_boolean_series()
+            x = x.loc[tk]
+            if y is not None:
+                y = y.loc[tk]
 
         h1 = Hist1D(
             x,
