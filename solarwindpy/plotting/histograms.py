@@ -856,7 +856,7 @@ class Hist2D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, ax, norm=None, **kwargs):
-        r"""Make a colorbar on `ax` using `mappable`.
+        f"""Make a colorbar on `ax` using `mappable`.
 
         Parameters
         ----------
@@ -867,12 +867,10 @@ class Hist2D(AggPlot):
         norm: mpl.colors.Normalize instance
             The normalization used in the plot. Passed here to determine
             y-ticks.
-        ylocator: None, mpl.ticker.Locator instance or sublcass instance
-            If not None, the `Locator` to use for the colorbar y-ticks.
-            If None, `norm` is not `mpl.colors.BoundaryNorm`, and the plot
-            is column or row normalize, locator defaults to
-
-                mpl.ticker.MultipleLocator(0.1)
+        kwargs:
+            Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
+            row or column normalized, `ticks` defaults to
+            :py:class:`mpl.ticker.MultipleLocator(0.1)`.
         """
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
@@ -952,7 +950,10 @@ class Hist2D(AggPlot):
 
         axnorm = self.axnorm
         norm = kwargs.pop(
-            "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
+            "norm",
+            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+            if axnorm in ("c", "r")
+            else None,
         )
 
         if limit_color_norm:

@@ -554,6 +554,17 @@ class FitFunction(ABC):
         # assert new.shape[0] == new.shape[1] square matrix?
         self._pcov = new
 
+    def _estimate_markevery(self):
+        try:
+            # Estimate marker density for readability
+            markevery = int(10.0 ** (np.floor(np.log10(self.xobs.size) - 1)))
+        except OverflowError:
+            # Or we have a huge number of data points, so lets only
+            # mark a few of them.
+            markevery = 1000
+
+        return markevery
+
     def make_fit(self, **kwargs):
         r"""Fit the function with the independent values `xobs` and dependent values
         `yobs` using `curve_fit`.
@@ -858,7 +869,7 @@ class FitFunction(ABC):
             fig, ax = swp.pp.subplots()
 
         color = kwargs.pop("color", "k")
-        label = kwargs.pop("label", r"$\mathrm{Bins}$")
+        label = kwargs.pop("label", r"$\mathrm{Obs}$")
 
         x = self.xobs_raw
         y = self.yobs_raw
@@ -886,13 +897,17 @@ class FitFunction(ABC):
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
         markersize = kwargs.pop("markersize", 8)
-        label = kwargs.pop("label", r"$\mathrm{in \; Fit}$")
+        markevery = kwargs.pop("markevery", None)
+        label = kwargs.pop("label", r"$\mathrm{Used}$")
 
         x = self.xobs
         y = self.yobs
         w = self.weights
         if self.log.y and w is not None:
             w = w / (y * np.log(10.0))
+
+        if markevery is None:
+            markevery = self._estimate_markevery()
 
         # Plot the raw data histograms.
         plotline, caplines, barlines = ax.errorbar(
@@ -905,6 +920,7 @@ class FitFunction(ABC):
             marker=marker,
             markerfacecolor=markerfacecolor,
             markersize=markersize,
+            markevery=markevery,
             **kwargs,
         )
 
@@ -923,9 +939,17 @@ class FitFunction(ABC):
 
         color = kwargs.pop("color", "darkorange")
         label = kwargs.pop("label", r"$\mathrm{Fit}$")
+        linestyle = kwargs.pop("ls", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
 
         # Overplot the fit.
-        ax.plot(self.xobs_raw, self(self.xobs_raw), label=label, color=color, **kwargs)
+        ax.plot(
+            self.xobs_raw,
+            self(self.xobs_raw),
+            label=label,
+            color=color,
+            linestyle=linestyle,
+            **kwargs,
+        )
 
         if annotate:
             self.annotate_TeX_info(ax, **annotate_kwargs)
@@ -1007,7 +1031,7 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **plot_kwargs):
+    def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **kwargs):
         r"""Make a plot of the fit function that includes the data and fit,
         but are limited to data included in the fit.
 
@@ -1019,17 +1043,28 @@ class FitFunction(ABC):
             subplots_kwargs = {}
 
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(**subplots_kwargs)
 
-        drawstyle = plot_kwargs.pop("drawstyle", "steps-mid")
-        color = plot_kwargs.pop("color", "darkgreen")
+        drawstyle = kwargs.pop("drawstyle", "steps-mid")
+        color = kwargs.pop("color", "darkgreen")
+        marker = kwargs.pop("marker", "P")
+        markerfacecolor = kwargs.pop("markerfacecolor", "none")
+        markersize = kwargs.pop("markersize", 8)
+        markevery = kwargs.pop("markevery", None)
+
+        if markevery is None:
+            markevery = self._estimate_markevery()
 
         ax.plot(
             self.xobs,
             self.residuals(pct=pct),
             drawstyle=drawstyle,
             color=color,
-            **plot_kwargs,
+            marker=marker,
+            markerfacecolor=markerfacecolor,
+            markersize=markersize,
+            markevery=markevery,
+            **kwargs,
         )
 
         ax.grid(True, which="major", axis="both")
@@ -1051,32 +1086,54 @@ class FitFunction(ABC):
         return ax
 
     def plot_raw_in_fit_resid(
-        self, annotate=True, resid_pct=True, fit_resid_axes=None, **kwargs
+        self, annotate=True, fit_resid_axes=None, resid_kwargs=None, **kwargs
     ):
-        r"""Make a stacked fit, residual plot.
+        f"""Make a stacked fit, residual plot.
 
-        kwargs passed to `plot_fit`.
+        Parameters
+        ----------
+        annotate: bool
+            If True, add fit annotation to axis.
+        fit_resid_axes: None, 2-tuple of mpl.axis.Axis
+            If not None, (fit, resid) axis pair to plot the (raw, used, fit)
+            and residual on, respectively. Otherwise, use `GridSpec` to build
+            a pair of axes where the `raw_in_fit` axis is 3 times the `resid_axis`.
+            Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share
+            an x-axis and `hax`'s x-ticks and label will be set invisible.
+        resid_kwargs: dict, None
+            Passed to :py:meth:`{self.__class__.__name__}.plot_residuals`.
+        kwargs:
+            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_in_fit`.
+
+        Returns
+        -------
+        hax: mpl.axis.Axis
+            Axis with raw observations, used observations, and fit plotted on it.
+        rax: mpl.axis.Axis
+            Axis with residuals plotted on it.
         """
 
         if fit_resid_axes is not None:
-            hist_ax, resid_ax = fit_resid_axes
+            hax, rax = fit_resid_axes
 
         else:
             fig = plt.figure()
             gs = mpl.gridspec.GridSpec(2, 1, height_ratios=[3, 1], hspace=0.1)
             # sharex in this code requires that I pass the axis object with which the x-axis is being shared.
             # Source for sharex option: http://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python
-            resid_ax = fig.add_subplot(gs[1])
-            hist_ax = fig.add_subplot(gs[0], sharex=resid_ax)
+            rax = fig.add_subplot(gs[1])
+            hax = fig.add_subplot(gs[0], sharex=rax)
 
-        self.plot_raw_in_fit(ax=hist_ax, annotate=annotate, **kwargs)
-        self.plot_residuals(ax=resid_ax, pct=resid_pct)
+        if resid_kwargs is None:
+            resid_kwargs = dict()
 
-        #         hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")
-        #         hist_ax.set_ylabel(self.labels.y)
-        #         resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
+        resid_pct = resid_kwargs.pop("resid_pct", True)
 
-        hist_ax.tick_params(labelbottom=False)
-        hist_ax.xaxis.label.set_visible(False)
+        self.plot_raw_in_fit(ax=hax, annotate=annotate, **kwargs)
+        self.plot_residuals(ax=rax, pct=resid_pct, **resid_kwargs)
 
-        return hist_ax, resid_ax
+        if fit_resid_axes is None:
+            hax.tick_params(labelbottom=False)
+            hax.xaxis.label.set_visible(False)
+
+        return hax, rax
