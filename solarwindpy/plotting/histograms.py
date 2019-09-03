@@ -481,7 +481,7 @@ class Hist1D(AggPlot):
 
         self._axnorm = new
 
-    def construct_cdf(self):
+    def construct_cdf(self, only_plotted=True):
         r"""Convert the obsered measuremets.
 
         Returns
@@ -498,6 +498,9 @@ class Hist1D(AggPlot):
             raise ValueError("Only able to convert data to a cdf if it is a histogram.")
 
         tk = self.cut.loc[:, "x"].notna()
+        if only_plotted:
+            tk = tk & self.get_plotted_data_boolean_series()
+
         x = data.loc[tk, "x"]
         cdf = x.sort_values().reset_index(drop=True)
 
@@ -615,7 +618,7 @@ class Hist1D(AggPlot):
             x = 10.0 ** x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        pl, cl, bl = ax.errorbar(x, y, dy=dy, drawstyle=drawstyle, **kwargs)
+        pl, cl, bl = ax.errorbar(x, y, yerr=dy, drawstyle=drawstyle, **kwargs)
 
         self._format_axis(ax)
 
