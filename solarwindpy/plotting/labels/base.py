@@ -108,7 +108,7 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "q": r"mW \, cm^{-2}",  # heatflux,
+    "q": r"\mathrm{mW \, cm^{-2}}",  # heatflux,
     "qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],

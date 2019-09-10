@@ -263,10 +263,11 @@ class Distance2Sun(ArbitraryLabel):
         return r"\mathrm{Distance \; to \; Sun}"
 
     def set_units(self, units):
-        trans = {"Rs": r"R_\bigodot", "Re": r"R_\oplus", "AU": r"AU", "au": r"AU"}
+        units = units.lower()
+        trans = {"rs": r"R_{\bigodot}", "re": r"R_{\oplus}", "au": r"\mathrm{AU}"}
         units = trans.get(units, units)
 
-        if units not in ("m", "km", r"R_\bigodot", "AU", "au"):
+        if units not in [*trans.values()] + ["m", "km"]:
             raise NotImplementedError("Unrecognized distance2sun units %s" % units)
 
         self._units = units
