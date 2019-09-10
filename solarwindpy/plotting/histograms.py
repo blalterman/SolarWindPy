@@ -526,6 +526,8 @@ class Hist1D(AggPlot):
         elif axnorm == "d":
             n = agg.sum()
             dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
+            if self.log.x:
+                dx = 10.0 ** dx
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":

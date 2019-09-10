@@ -886,7 +886,7 @@ class FitFunction(ABC):
 
         return ax, plotline, caplines, barlines
 
-    def plot_in_fit(self, ax=None, drawstyle=None, **kwargs):
+    def plot_used(self, ax=None, drawstyle=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
         :py:meth:`self.yobs`, and :py:meth:`self.weights`.
         """
@@ -958,20 +958,20 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_raw_in_fit(
+    def plot_raw_used_fit(
         self,
         ax=None,
         drawstyle=None,
         annotate=True,
         raw_kwargs=None,
-        in_kwargs=None,
+        used_kwargs=None,
         fit_kwargs=None,
         annotate_kwargs=None,
     ):
         r"""
         Make a plot of the raw observations, observations in fit, and the fit.
 
-        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_in_fit`,
+        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_used`,
         and :py:meth:`self.plot_fit`.
 
         Parameters
@@ -979,14 +979,14 @@ class FitFunction(ABC):
         ax: None, mpl.Axes.axis_subplot
 
         drawstyle: str, None
-            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_in_fit`.
+            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_used`.
             If None, defaults to "steps-mid".
         annotate: True
             If True, add fit info to the annotation using ax.text.
         raw_kwargs: dict
             Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw_obs`.
-        in_kwargs: dict
-            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_in_fit`.
+        used_kwargs: dict
+            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.
         fit_kwargs: dict
             Passed to ax.plot(**fit_kwargs) for plotting fit.
         annotate_kwargs:
@@ -1005,8 +1005,8 @@ class FitFunction(ABC):
                 dict()
             )  # dict(color="darkgreen", markerfacecolor="none", marker="P")
 
-        if in_kwargs is None:
-            in_kwargs = dict()  # dict(color="k")
+        if used_kwargs is None:
+            used_kwargs = dict()  # dict(color="k")
 
         if fit_kwargs is None:
             fit_kwargs = dict()  # dict(color="darkorange")
@@ -1015,7 +1015,7 @@ class FitFunction(ABC):
             drawstyle = "steps-mid"
 
         self.plot_raw_obs(ax=ax, drawstyle=drawstyle, **raw_kwargs)
-        self.plot_in_fit(ax=ax, drawstyle=drawstyle, **in_kwargs)
+        self.plot_used(ax=ax, drawstyle=drawstyle, **used_kwargs)
         self.plot_fit(
             ax=ax, annotate=annotate, annotate_kwargs=annotate_kwargs, **fit_kwargs
         )
@@ -1085,7 +1085,7 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_raw_in_fit_resid(
+    def plot_raw_used_fit_resid(
         self, annotate=True, fit_resid_axes=None, resid_kwargs=None, **kwargs
     ):
         f"""Make a stacked fit, residual plot.
@@ -1097,7 +1097,7 @@ class FitFunction(ABC):
         fit_resid_axes: None, 2-tuple of mpl.axis.Axis
             If not None, (fit, resid) axis pair to plot the (raw, used, fit)
             and residual on, respectively. Otherwise, use `GridSpec` to build
-            a pair of axes where the `raw_in_fit` axis is 3 times the `resid_axis`.
+            a pair of axes where the `raw_used_fit` axis is 3 times the `resid_axis`.
             Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share
             an x-axis and `hax`'s x-ticks and label will be set invisible.
         resid_kwargs: dict, None
@@ -1129,7 +1129,7 @@ class FitFunction(ABC):
 
         resid_pct = resid_kwargs.pop("resid_pct", True)
 
-        self.plot_raw_in_fit(ax=hax, annotate=annotate, **kwargs)
+        self.plot_raw_used_fit(ax=hax, annotate=annotate, **kwargs)
         self.plot_residuals(ax=rax, pct=resid_pct, **resid_kwargs)
 
         if fit_resid_axes is None:
