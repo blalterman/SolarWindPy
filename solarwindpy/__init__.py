@@ -28,6 +28,8 @@ pd.set_option("mode.chained_assignment", "raise")
 pd.set_option("mode.use_inf_as_na", True)
 
 Plasma = core.plasma.Plasma
+at = alfvenic_turbulence
+sc = spacecraft
 pp = plotting
 sa = solar_activity
 Hist1D = plotting.histograms.Hist1D
