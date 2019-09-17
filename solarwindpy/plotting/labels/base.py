@@ -235,7 +235,7 @@ _templates = {
     # Instability things
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma/\Omega_{{$S}}",
-    "gamma_max": r"\gamma_\max/\Omega_{{$S}}",
+    "gamma_max": r"\gamma_\mathrm{max}/\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",

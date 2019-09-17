@@ -65,7 +65,7 @@ class Plasma(base.Base):
         *species,
         spacecraft=None,
         auxiliary_data=None,
-        log_plasma_stats=False
+        log_plasma_stats=False,
     ):
         r"""*NOTE* Thermal speeds assume :math:`mw^2 = 2kT`.
 
@@ -309,7 +309,7 @@ class Plasma(base.Base):
         sc_name=None,
         start=None,
         stop=None,
-        **kwargs
+        **kwargs,
     ):
         r"""
         Load data from an HDF5 file at `fname` and create a plasma.
@@ -1395,14 +1395,16 @@ species: {}
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
-            nu.name = "%s+%s" % (sa, sb)
+            #             nu.name = "%s+%s" % (sa, sb)
+            nu.name = f"{sa}+{sb}"
             # print(
             #       "<rho_a/rho_b>", type(rho_ratio), rho_ratio,
             #       "<nuba>", type(nuba), nuba,
             #       sep="\n")
         else:
             nu = nuab
-            nu.name = "%s-%s" % (sa, sb)
+            #             nu.name = "%s-%s" % (sa, sb)
+            nu.name = f"{sa}-{sb}"
 
         # print(
         #       "<both_species> %s" % both_species,

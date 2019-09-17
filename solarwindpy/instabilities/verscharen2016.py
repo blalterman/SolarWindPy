@@ -544,7 +544,9 @@ class StabilityContours(object):
             # Only need legend table if plotting all contours.
             self._add_table_legend(ax, images_for_table_legend)
         else:
-            ax.legend(loc=1, title=r"$\gamma = %s$" % plot_gamma, framealpha=0)
+            ax.legend(
+                loc=1, title=r"$\gamma = 10^{%s}\Omega_{p}$" % plot_gamma, framealpha=0
+            )
 
     @staticmethod
     def _add_table_legend(ax, images):
