@@ -8,7 +8,7 @@ Bibliography
 [2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
     wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
     463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
-﻿[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
+[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
     Cyclotron Resonance as a Dissipation Mechanism in Solar Wind Turbulence: A
     Statistical Study at Ion-Kinetic Scales. Astrophys. J. 856, 49 (2018).
 """

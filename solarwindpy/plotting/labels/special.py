@@ -54,11 +54,15 @@ class Count(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [\#]$".format(self.tex)
+        return r"${} \; [{}]$".format(self.tex, self.units)
 
     @property
     def tex(self):
         return self._tex
+
+    @property
+    def units(self):
+        return r"\#"
 
     @property
     def path(self):
