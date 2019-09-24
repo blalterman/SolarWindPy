@@ -1,6 +1,13 @@
 solarwindpy.plotting package
 ============================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    solarwindpy.plotting.labels
+
 Submodules
 ----------
 
@@ -20,10 +27,10 @@ solarwindpy.plotting.histograms module
     :undoc-members:
     :show-inheritance:
 
-solarwindpy.plotting.labels module
+solarwindpy.plotting.orbits module
 ----------------------------------
 
-.. automodule:: solarwindpy.plotting.labels
+.. automodule:: solarwindpy.plotting.orbits
     :members:
     :undoc-members:
     :show-inheritance:

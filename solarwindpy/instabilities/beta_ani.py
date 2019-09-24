@@ -36,7 +36,9 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
         logy = kwargs.pop("logy", True)
         axnorm = kwargs.pop("axnorm", "t")
 
-        super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, axnorm=axnorm)
+        super(BetaRPlot, self).__init__(
+            x, y, logx=logx, logy=logy, axnorm=axnorm, **kwargs
+        )
         self.set_labels(
             x=swp.pp.labels.TeXlabel(("beta", "par", species.replace("_bimax", ""))),
             y=swp.pp.labels.TeXlabel(
@@ -132,7 +134,7 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
     def make_plot(self, **kwargs):
         ax = kwargs.pop("ax", None)
         if ax is None:
-            fig, ax = swp.pp.subplots(scale_width=1.5, scale_height=1.5)
+            fig, ax = swp.pp.subplots()
 
         cmap = kwargs.pop("cmap", "Greens_r")
         ax, cbar = super(BetaRPlot, self).make_plot(ax=ax, cmap=cmap, **kwargs)

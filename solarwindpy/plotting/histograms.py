@@ -145,7 +145,7 @@ class AggPlot(base.Base):
         intervals = {}
 
         if precision is None:
-            precision = 3
+            precision = 5
 
         gb_axes = self._gb_axes
 
@@ -860,7 +860,7 @@ class Hist2D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def _make_cbar(self, mappable, ax, norm=None, **kwargs):
+    def _make_cbar(self, mappable, **kwargs):
         f"""Make a colorbar on `ax` using `mappable`.
 
         Parameters
@@ -879,11 +879,18 @@ class Hist2D(AggPlot):
         """
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
+        ax = kwargs.pop("ax", None)
+        cax = kwargs.pop("cax", None)
+        if ax is not None and cax is not None:
+            raise ValueError("Can't pass ax and cax.")
 
-        if isinstance(ax, mpl.axes.Axes):
+        if ax is not None:
             fig = ax.figure
-        elif isinstance(ax, np.ndarray):
-            fig = ax[0].figure
+        elif cax is not None:
+            fig = cax.figure
+        else:
+            ax = plt.gca()
+            fig = ax.figure
 
         ticks = kwargs.pop(
             "ticks",
@@ -891,7 +898,9 @@ class Hist2D(AggPlot):
         )
 
         label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, ax=ax, label=label, ticks=ticks, **kwargs)
+        cbar = fig.colorbar(
+            mappable, label=label, ax=ax, cax=cax, ticks=ticks, **kwargs
+        )
 
         return cbar
 
@@ -971,8 +980,12 @@ class Hist2D(AggPlot):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
+
+            if "cax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(pc, ax, norm=norm, **cbar_kwargs)
+            cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
 
         self._format_axis(ax)
 

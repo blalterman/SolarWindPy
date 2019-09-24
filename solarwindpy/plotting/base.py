@@ -113,6 +113,8 @@ class Base(ABC):
                 x = self.labels.x
                 if not (isinstance(x, str) and x != "None"):
                     x = "x"
+                elif isinstance(x, str):
+                    x = x.replace(" ", "-")
 
             try:
                 y = self.labels.y.path
@@ -120,6 +122,8 @@ class Base(ABC):
                 y = self.labels.y
                 if not (isinstance(y, str) and y != "None"):
                     y = "y"
+                elif isinstance(y, str):
+                    y = y.replace(" ", "-")
 
             try:
                 z = self.labels.z.path
@@ -127,6 +131,8 @@ class Base(ABC):
                 z = self.labels.z
                 if not (isinstance(z, str) and z != "None"):
                     z = "z"
+                elif isinstance(z, str):
+                    z = z.replace(" ", "-")
 
             path = Path(self.__class__.__name__)
 

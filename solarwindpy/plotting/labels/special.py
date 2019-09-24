@@ -187,13 +187,13 @@ class Probability(ArbitraryLabel):
         self._path = self._build_path()
 
 
-class DateTime(ArbitraryLabel):
+class Timedelta(ArbitraryLabel):
     def __init__(self, dt):
         r"""
         Parameters
         ----------
         dt: str
-            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+            Classifies the `timedelta` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
         """
         self.set_dt(dt)
 
@@ -217,6 +217,38 @@ class DateTime(ArbitraryLabel):
 
     def set_dt(self, new):
         self._dt = new
+
+
+class DateTime(ArbitraryLabel):
+    def __init__(self, kind):
+        r"""
+        Parameters
+        ----------
+        dt: str
+            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+        """
+        self.set_kind(kind)
+
+    def __str__(self):
+        return r"$%s$" % self.tex
+
+    @property
+    def kind(self):
+        return self._kind
+
+    @property
+    def tex(self):
+        return r"\mathrm{%s}" % self.kind
+
+    @property
+    def path(self):
+        return Path(self.dt.lower())
+
+    def build_label(self):
+        pass
+
+    def set_kind(self, new):
+        self._kind = new
 
 
 class Distance2Sun(ArbitraryLabel):

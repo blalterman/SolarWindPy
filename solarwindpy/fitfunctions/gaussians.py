@@ -64,6 +64,7 @@ class GaussianLn(FitFunction):
 
     def __init__(self, xobs, yobs, **kwargs):
         super(GaussianLn, self).__init__(xobs, yobs, **kwargs)
+        self.set_TeX_report_normal_parameters(False)
 
     @property
     def function(self):
@@ -174,3 +175,5 @@ class GaussianLn(FitFunction):
                 del normal_popt[k0]
 
             TeX_popt.update(normal_popt)
+
+        return TeX_popt

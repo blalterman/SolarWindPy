@@ -64,6 +64,9 @@ class TrendFit(object):
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
         self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
 
+    def __str__(self):
+        return self.__class__.__name__
+
     @property
     def agged(self):
         return self._agged
@@ -202,11 +205,14 @@ class TrendFit(object):
         self.make_popt_frame()
 
     def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
-        r"""`kwargs` passed to each `ffunc.plot_raw_used_fit(**kwargs)`.
-
+        r"""
+        Parameters
+        ----------
         legend_title_fmt: str
             A string template for formatting the legend titles. Use % formatting so we
-            can easily instert TeX into `legend_title_fmt should we desire.
+            can easily instert TeX into `legend_title_fmt` should we desire.
+        kwargs:
+            Passed to :py:meth:`ffunc.plot_raw_in_fit`.
         """
         axes = {}
         popt = self.popt_1d

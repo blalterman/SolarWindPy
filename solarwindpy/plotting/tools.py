@@ -83,17 +83,6 @@ def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
     alog.info("Suffix saved: png")
 
 
-# def joint_legend(ax, tax, **kwargs):
-#     r"""Create one legend on `ax` that contains information for both `ax` and `tax.
-#     """
-
-#     h0, l0 = ax.get_legend_handles_labels()
-#     h1, l1 = tax.get_legend_handles_labels()
-#     hdl = h0 + h1
-#     lbl = l0 + l1
-#     ax.legend(hdl, lbl, **kwargs)
-
-
 def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     r"""Make a single legend combining handles and labels from all axes.
 

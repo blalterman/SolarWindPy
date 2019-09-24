@@ -443,14 +443,31 @@ class IndicatorExtrema(Base):
         self._extrema_bands = bands
         return bands
 
-    def cut_about_extrema_bands(self, epoch):
+    def cut_about_extrema_bands(self, epoch, tk_cycles=None, kind=None):
         r"""Assign each `epoch` measurement within $\Delta t$ to a Indicator extrema, where
         $\Delta t$ is assigned by :py:meth:`calc_extrema_bands`.
+
+        Parameters
+        ----------
+        epoch: pd.DatetimeIndex
+            Epochs to bin in extrema bands.
+        tk_cycles: None, slice
+            If not None, a slice object to take the cycles you want to use.
+        kind: None, "Min", "Max"
+            If "Min" or "Max", only use that kind of extrema.
         """
         bands = self.extrema_bands
+        if tk_cycles is not None:
+            bands = bands.loc[tk_cycles]
+
+        if kind is not None:
+            # `drop_level=False` so we can maintain `stack` and data shape.
+            bands = bands.xs(kind, axis=1, drop_level=False)
+        else:
+            bands = bands.stack()
 
         # TODO: verify bands shape
-        intervals = pd.IntervalIndex(bands.stack().values).sort_values()
+        intervals = pd.IntervalIndex(bands.values).sort_values()
         cut = pd.cut(epoch, intervals)
         cut.name = "spec_by_extrema_band"
 

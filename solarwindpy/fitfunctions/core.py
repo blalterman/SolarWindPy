@@ -30,10 +30,9 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunction(ABC):
-    r"""
-
-    Assuming that you don't want any special formatting, the typical call order
+    r"""Assuming that you don't want any special formatting, the typical call order
     is:
+
         fit_function = FitFunction(function, TeX_string)
         fit_function.make_fit()
 
@@ -658,7 +657,7 @@ class FitFunction(ABC):
     def set_log(self, **kwargs):
         r"""Set :py:class:`LogAxes`.
 
-        Only used for determining if weights should be :py:math:`w/(y \ln(10))`.
+        Only used for determining if weights should be :math:`w/(y \ln(10))`.
         """
         log = self._log._asdict()
         for k, v in kwargs.items():
@@ -809,8 +808,6 @@ class FitFunction(ABC):
     def annotate_TeX_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
 
-        **kwargs are passed to ax.text. Defaults are listed below.
-
         Parameters
         ----------
         ax: mpl.Axes.axis_subplot
@@ -824,6 +821,8 @@ class FitFunction(ABC):
             va - verticalalignment (default "right")
         transform:
             ax.transAxes
+        kwargs:
+            Others passed to `ax.text`.
         """
         info = self.TeX_info()
 
@@ -968,8 +967,7 @@ class FitFunction(ABC):
         fit_kwargs=None,
         annotate_kwargs=None,
     ):
-        r"""
-        Make a plot of the raw observations, observations in fit, and the fit.
+        r"""Make a plot of the raw observations, observations in fit, and the fit.
 
         Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_used`,
         and :py:meth:`self.plot_fit`.
@@ -988,9 +986,9 @@ class FitFunction(ABC):
         used_kwargs: dict
             Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.
         fit_kwargs: dict
-            Passed to ax.plot(**fit_kwargs) for plotting fit.
+            Passed to `ax.plot(**fit_kwargs)` for plotting fit.
         annotate_kwargs:
-            Passed to ax.text.
+            Passed to `ax.text`.
 
         Returns
         -------
