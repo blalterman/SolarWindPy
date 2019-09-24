@@ -73,6 +73,8 @@ class GaussianLn(FitFunction):
             arg = -0.5 * (((x - m) / s) ** 2.0)
             return A * coeff * np.exp(arg)
 
+        return gaussian_ln
+
     @property
     def p0(self):
         r"""

@@ -202,7 +202,7 @@ class TrendFit(object):
         self.make_popt_frame()
 
     def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
-        r"""`kwargs` passed to each `ffunc.plot_raw_in_fit(**kwargs)`.
+        r"""`kwargs` passed to each `ffunc.plot_raw_used_fit(**kwargs)`.
 
         legend_title_fmt: str
             A string template for formatting the legend titles. Use % formatting so we
@@ -225,7 +225,7 @@ class TrendFit(object):
         legend_title = "${}={}$\n{}"
 
         for k, ff in self.ffuncs.items():
-            hax, rax = ff.plot_raw_in_fit_resid(**kwargs)
+            hax, rax = ff.plot_raw_used_fit_resid(**kwargs)
             hax.legend_.set_title(
                 legend_title.format(
                     self.labels.x.tex,
@@ -314,10 +314,12 @@ class TrendFit(object):
         annotate_kwargs = kwargs.pop(
             "annotate_kwargs", dict(xloc=0.5, yloc=0.1, va="bottom")
         )
-        in_kwargs = kwargs.pop("in_kwargs", dict(color="k"))
+        used_kwargs = kwargs.pop("used_kwargs", dict(color="k"))
         drawstyle = kwargs.pop("drawstyle", "default")
-        hax, rax = self.trend_func.plot_raw_in_fit_resid(
-            drawstyle=drawstyle, annotate_kwargs=annotate_kwargs, in_kwargs=in_kwargs
+        hax, rax = self.trend_func.plot_raw_used_fit_resid(
+            drawstyle=drawstyle,
+            annotate_kwargs=annotate_kwargs,
+            used_kwargs=used_kwargs,
         )
 
         if self.trend_logx:
@@ -355,7 +357,7 @@ class TrendFit(object):
         annotate_kwargs = kwargs.pop("annotate_kwargs", dict())
         fit_kwargs = kwargs.pop("fit_kwargs", dict(color="limegreen"))
 
-        self.trend_func.plot_raw_in_fit(
+        self.trend_func.plot_raw_used_fit(
             ax,
             annotate_kwargs=annotate_kwargs,
             #             color=color,

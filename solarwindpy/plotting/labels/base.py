@@ -189,7 +189,7 @@ _templates = {
     "gse": r"{$C}_{\mathrm{GSE}}",
     "hci": r"{$C}_{\mathrm{HCI}}",
     "colat": r"\theta_{$C}",
-    "carr": r"\mathrm{Carrington} \, {$C}",
+    "carr": r"{$C}_\mathrm{Carrington}",
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
