@@ -144,6 +144,7 @@ _trans_units = {
     "Wn": _inU["dimless"],
     "gamma": _inU["dimless"],
     "gamma_max": _inU["dimless"],
+    "kvec": _inU["dimless"],
     # Solar Activity
     "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
@@ -237,6 +238,7 @@ _templates = {
     "gamma": r"\gamma/\Omega_{{$S}}",
     "gamma_max": r"\gamma_\mathrm{max}/\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
+    "kvec": r"k_{$C}\rho_{$S}",
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",
     "Lalpha": r"\mathrm{L}-\alpha",
