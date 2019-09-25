@@ -1,5 +1,6 @@
 __all__ = ["BetaRPlot"]
 
+import pdb  # noqa: F401
 import pandas as pd
 import numpy as np
 
@@ -27,17 +28,22 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
             Defaults
                 logx: True
                 logy: True
-                axnorm: "t"
+                # axnorm: "t"
         """
         x = beta
         y = ani
 
         logx = kwargs.pop("logx", True)
         logy = kwargs.pop("logy", True)
-        axnorm = kwargs.pop("axnorm", "t")
+        #         axnorm = kwargs.pop("axnorm", "t")
 
         super(BetaRPlot, self).__init__(
-            x, y, logx=logx, logy=logy, axnorm=axnorm, **kwargs
+            x,
+            y,
+            logx=logx,
+            logy=logy,
+            #             axnorm=axnorm,
+            **kwargs
         )
         self.set_labels(
             x=swp.pp.labels.TeXlabel(("beta", "par", species.replace("_bimax", ""))),

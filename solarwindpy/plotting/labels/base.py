@@ -464,7 +464,7 @@ class TeXlabel(Base):
             .replace(",}", "}")
             .replace("{,", "{")
             .replace(";}", "}")
-            .replace("};", "}")
+            .replace("};{}", "}")
             .replace("};}", "}}")
             .replace(";}", "}")
             .replace("_{}", "")
