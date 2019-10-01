@@ -44,6 +44,7 @@ class Base(ABC):
         return self._logger
 
     def _init_logger(self):
+        #         return None
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 

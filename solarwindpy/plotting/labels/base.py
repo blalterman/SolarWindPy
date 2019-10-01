@@ -109,6 +109,7 @@ _trans_units = {
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
     "q": r"\mathrm{mW \, cm^{-2}}",  # heatflux,
+    "Q": r"\mathrm{mW \, cm^{-2}}",  # Heating rate,
     "qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
@@ -195,7 +196,8 @@ _templates = {
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
-    "q": r"q_{$S}",  # charge density
+    "q": r"q_{{$C};{$S}}",  # heat flux
+    "Q": r"Q_{{$C};{$S}}",  # heating rate
     #     "count": _mathrm("Count"),
     "ratio": _mathrm("Ratio"),
     "cos": r"\cos",

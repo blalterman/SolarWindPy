@@ -158,27 +158,86 @@ class Probability(ArbitraryLabel):
 
     def _build_path(self):
         other = self.other_label
-
-        try:
-            other = str(other.path)
-        except AttributeError:
-            other = (
-                other.replace(">", "GT")
-                .replace("<", "LT")
-                .replace(r"\gt", "GT")
-                .replace(r"\lt", "GT")
-                .replace(r"\geq", "GEQ")
-                .replace(r"\leq", "LEQ")
-                .replace(r"\gt", "GT")
-                .replace(r"\neq", "NEQ")
-                .replace(r"\eq", "EQ")
-                .replace(r"==", "EQ")
-                .replace(r"!=", "NEQ")
-            )
-
+        other = str(other.path)
         other = other.replace(" ", "-")
 
-        path = Path("prob-" + other)
+        comp = (
+            self.comparison.replace(">", "GT")
+            .replace("<", "LT")
+            .replace(r"\gt", "GT")
+            .replace(r"\lt", "GT")
+            .replace(r"\geq", "GEQ")
+            .replace(r"\leq", "LEQ")
+            .replace(r"\gt", "GT")
+            .replace(r"\neq", "NEQ")
+            .replace(r"\eq", "EQ")
+            .replace(r"==", "EQ")
+            .replace(r"!=", "NEQ")
+        )
+
+        path = Path(f"prob-{other}-{comp}")
+
+        return path
+
+    def build_label(self):
+        self._tex = self._build_tex()
+        self._path = self._build_path()
+
+
+class MathFcn(ArbitraryLabel):
+    def __init__(self, fcn, other_label):
+        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
+        """
+        self.set_other_label(other_label)
+        self.set_function(fcn)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [{}]$".format(self.tex, self.units)
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return r"\mathrm{%s}(%s)" % (self.function, self.other_label.units)
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def other_label(self):
+        return self._other_label
+
+    @property
+    def function(self):
+        return self._function
+
+    def set_other_label(self, other):
+        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        self._other_label = other
+
+    def set_function(self, new):
+        if new is None:
+            new = ""
+        self._function = str(new)
+
+    def _build_tex(self):
+        #         try:
+        #             tex = other.tex
+        #         except AttributeError:
+        tex = r"\mathrm{%s}(%s)" % (self.function, self.other_label.tex)
+
+        return tex.replace(" ", r" \, ")
+
+    def _build_path(self):
+        other = self.other_label
+        other = str(other.path)
+        fcn = self.function
+
+        path = Path(f"{fcn}-{other}")
 
         return path
 
@@ -242,7 +301,7 @@ class DateTime(ArbitraryLabel):
 
     @property
     def path(self):
-        return Path(self.dt.lower())
+        return Path(self.kind.lower())
 
     def build_label(self):
         pass

@@ -565,12 +565,30 @@ class FitFunction(ABC):
         return markevery
 
     def make_fit(self, **kwargs):
-        r"""Fit the function with the independent values `xobs` and dependent values
-        `yobs` using `curve_fit`.
+        f"""Fit the function with the independent values `xobs` and dependent
+        values `yobs` using `curve_fit`.
 
-        `kwargs` are passed directly to `curve_fit`.
-        `p0` is set up internally, so it can't be passed.
+        Parameters
+        ----------
+        kwargs:
+            Unless specified here, defaults are as defined by `curve_fit`.
+
+                ============= ======================================
+                    kwarg                    default
+                ============= ======================================
+                 p0            Setup by `{self.__class__.__name__}`
+                 return_full   False
+                 method        "trf"
+                 loss          "huber"
+                 max_nfev      10000
+                 f_scale       0.1
+                ============= ======================================
+
         """
+        method = kwargs.pop("method", "trf")
+        loss = kwargs.pop("loss", "huber")
+        max_nfev = kwargs.pop("max_nfev", 10000)
+        f_scale = kwargs.pop("f_scale", 0.1)
 
         # This line is legacy. Not sure why it's here, but I'm copying it over
         # assuming I had a good reason to include it. (20170309 0011)
@@ -588,7 +606,16 @@ class FitFunction(ABC):
         p0 = kwargs.pop("p0", self.p0)
         try:
             result = curve_fit(
-                self.function, self.xobs, self.yobs, p0=p0, sigma=self.weights, **kwargs
+                self.function,
+                self.xobs,
+                self.yobs,
+                p0=p0,
+                sigma=self.weights,
+                method=method,
+                loss=loss,
+                max_nfev=max_nfev,
+                f_scale=f_scale,
+                **kwargs,
             )
         except RuntimeError as e:
             return e
@@ -860,13 +887,14 @@ class FitFunction(ABC):
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
 
-    def plot_raw_obs(self, ax=None, drawstyle=None, **kwargs):
+    def plot_raw(self, ax=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.xobs_raw`,
         :py:meth:`self.yobs_raw`, :py:meth:`self.weights_raw`.
         """
         if ax is None:
             fig, ax = swp.pp.subplots()
 
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "k")
         label = kwargs.pop("label", r"$\mathrm{Obs}$")
 
@@ -878,20 +906,21 @@ class FitFunction(ABC):
 
         # Plot the raw data histograms.
         plotline, caplines, barlines = ax.errorbar(
-            x, y, yerr=w, drawstyle=drawstyle, label=label, color=color, **kwargs
+            x, y, yerr=w, label=label, color=color, **kwargs
         )
 
         self._format_hax(ax)
 
         return ax, plotline, caplines, barlines
 
-    def plot_used(self, ax=None, drawstyle=None, **kwargs):
+    def plot_used(self, ax=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
         :py:meth:`self.yobs`, and :py:meth:`self.weights`.
         """
         if ax is None:
             fig, ax = swp.pp.subplots()
 
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "darkgreen")
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
@@ -913,7 +942,6 @@ class FitFunction(ABC):
             x,
             y,
             yerr=w,
-            drawstyle=drawstyle,
             label=label,
             color=color,
             marker=marker,
@@ -936,9 +964,10 @@ class FitFunction(ABC):
         if annotate_kwargs is None:
             annotate_kwargs = {}
 
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "darkorange")
         label = kwargs.pop("label", r"$\mathrm{Fit}$")
-        linestyle = kwargs.pop("ls", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
+        linestyle = kwargs.pop("linestyle", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
 
         # Overplot the fit.
         ax.plot(
@@ -982,7 +1011,7 @@ class FitFunction(ABC):
         annotate: True
             If True, add fit info to the annotation using ax.text.
         raw_kwargs: dict
-            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw_obs`.
+            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw`.
         used_kwargs: dict
             Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.
         fit_kwargs: dict
@@ -1012,7 +1041,7 @@ class FitFunction(ABC):
         if drawstyle is None:
             drawstyle = "steps-mid"
 
-        self.plot_raw_obs(ax=ax, drawstyle=drawstyle, **raw_kwargs)
+        self.plot_raw(ax=ax, drawstyle=drawstyle, **raw_kwargs)
         self.plot_used(ax=ax, drawstyle=drawstyle, **used_kwargs)
         self.plot_fit(
             ax=ax, annotate=annotate, annotate_kwargs=annotate_kwargs, **fit_kwargs
@@ -1043,6 +1072,7 @@ class FitFunction(ABC):
         if ax is None:
             fig, ax = plt.subplots(**subplots_kwargs)
 
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
         color = kwargs.pop("color", "darkgreen")
         marker = kwargs.pop("marker", "P")

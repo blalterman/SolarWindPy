@@ -231,7 +231,6 @@ class AggPlot(base.Base):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
-        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
         self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
         if fcn is None:
@@ -415,12 +414,12 @@ class Hist1D(AggPlot):
         """
         super(Hist1D, self).__init__()
         self.set_log(x=logx)
+        self.set_axnorm(axnorm)
         self.set_data(x, y, clip_data)
         self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
         #         self._labels = base.AxesLabels(
         #             x="x", y=labels_module.Count(norm=axnorm) if y is None else "y"
         #         )
-        self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_path(None)
@@ -752,7 +751,11 @@ class Hist2D(AggPlot):
 
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
-            z.set_axnorm(self.axnorm)
+            try:
+                z.set_axnorm(self.axnorm)
+            except AttributeError:
+                pass
+
             z.build_label()
 
         super(Hist2D, self).set_labels(z=z, **kwargs)
@@ -824,9 +827,6 @@ class Hist2D(AggPlot):
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
         """
-
-        #         logging.getLogger("main").warning("Running axis normalization")
-        #         log_mem_usage()
 
         axnorm = self.axnorm
         if axnorm is None:
