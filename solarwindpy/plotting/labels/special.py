@@ -149,12 +149,9 @@ class Probability(ArbitraryLabel):
 
     def _build_tex(self):
         other = self.other_label
-        #         try:
-        #             tex = other.tex
-        #         except AttributeError:
         tex = r"\mathrm{Prob.}(%s %s)" % (other.tex, self.comparison)
 
-        return tex.replace(" ", r" \, ")
+        self._tex = tex.replace(" ", r" \, ")
 
     def _build_path(self):
         other = self.other_label
@@ -177,11 +174,11 @@ class Probability(ArbitraryLabel):
 
         path = Path(f"prob-{other}-{comp}")
 
-        return path
+        self._path = path
 
     def build_label(self):
-        self._tex = self._build_tex()
-        self._path = self._build_path()
+        self._build_tex()
+        self._build_path()
 
 
 class MathFcn(ArbitraryLabel):
@@ -360,7 +357,7 @@ class SSN(ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s} \; \mathrm{SSN}" % self.kind
+        return r"\mathrm{%s} \, \mathrm{SSN}" % self.kind
 
     @property
     def kind(self):
@@ -374,3 +371,90 @@ class SSN(ArbitraryLabel):
         assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
         self._kind = new
         self._path = Path(f"""{new.lower()!s}-ssn""")
+
+
+class Xcorr(ArbitraryLabel):
+    def __init__(self, labelA, labelB, comparison=None):
+        r"""Cross correlation coefficeint between labelA and labelB.
+
+        """
+        self.set_constituents(labelA, labelB)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [{}]$".format(self.tex, self.units)
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return r"\#"
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def labelA(self):
+        return self._labelA
+
+    @property
+    def labelB(self):
+        return self._labelB
+
+    def set_constituents(self, labelA, labelB):
+        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+            raise TypeError
+        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+            raise TypeError
+
+        self._labelA = labelA
+        self._labelB = labelB
+
+    def _build_tex(self):
+        labelA = self.labelA
+        labelB = self.labelB
+
+        try:
+            texA = labelA.tex
+        except AttributeError:
+            texA = labelA
+
+        try:
+            texB = labelB.tex
+        except AttributeError:
+            texB = labelB
+
+        tex = r"\rho(%s,%s)" % (texA, texB)
+        tex = tex.replace(" ", r" \, ").replace(r" \, ", r"\,")
+        while tex.find(r"\,\,") >= 0:
+            tex = tex.replace(r"\,\,", r"\,")
+
+        self._tex = tex
+
+    def _build_path(self):
+        labelA = self.labelA
+        labelB = self.labelB
+
+        try:
+            pathA = labelA.path
+        except AttributeError:
+            pathA = labelA
+
+        try:
+            pathB = labelB.path
+        except AttributeError:
+            pathB = labelB
+
+        pathA = str(pathA).replace(" ", "-")
+        pathB = str(pathB).replace(" ", "-")
+
+        path = Path(f"Xcorr-{pathA}-{pathB}")
+
+        self._path = path
+
+    def build_label(self):
+        self._build_tex()
+        self._build_path()
