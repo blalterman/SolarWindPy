@@ -562,6 +562,9 @@ class FitFunction(ABC):
             # mark a few of them.
             markevery = 1000
 
+        if not markevery:
+            markevery = None
+
         return markevery
 
     def make_fit(self, **kwargs):

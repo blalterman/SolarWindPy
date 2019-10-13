@@ -181,6 +181,82 @@ class Probability(ArbitraryLabel):
         self._build_path()
 
 
+class CountOther(ArbitraryLabel):
+    def __init__(self, other_label, comparison=None):
+        r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+
+        The `comparison`, if passed, is something like "> 0".
+        """
+        self.set_other_label(other_label)
+        self.set_comparison(comparison)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [{}]$".format(self.tex, self.units)
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return r"\#"
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def other_label(self):
+        return self._other_label
+
+    @property
+    def comparison(self):
+        return self._comparison
+
+    def set_other_label(self, other):
+        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        self._other_label = other
+
+    def set_comparison(self, new):
+        if new is None:
+            new = ""
+        self._comparison = str(new)
+
+    def _build_tex(self):
+        other = self.other_label
+        tex = r"\mathrm{Count.}(%s %s)" % (other.tex, self.comparison)
+
+        self._tex = tex.replace(" ", r" \, ")
+
+    def _build_path(self):
+        other = self.other_label
+        other = str(other.path)
+        other = other.replace(" ", "-")
+
+        comp = (
+            self.comparison.replace(">", "GT")
+            .replace("<", "LT")
+            .replace(r"\gt", "GT")
+            .replace(r"\lt", "GT")
+            .replace(r"\geq", "GEQ")
+            .replace(r"\leq", "LEQ")
+            .replace(r"\gt", "GT")
+            .replace(r"\neq", "NEQ")
+            .replace(r"\eq", "EQ")
+            .replace(r"==", "EQ")
+            .replace(r"!=", "NEQ")
+        )
+
+        path = Path(f"cnt-{other}-{comp}")
+
+        self._path = path
+
+    def build_label(self):
+        self._build_tex()
+        self._build_path()
+
+
 class MathFcn(ArbitraryLabel):
     def __init__(self, fcn, other_label):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
@@ -374,11 +450,13 @@ class SSN(ArbitraryLabel):
 
 
 class Xcorr(ArbitraryLabel):
-    def __init__(self, labelA, labelB, comparison=None):
+    def __init__(self, labelA, labelB, method, short_tex=False):
         r"""Cross correlation coefficeint between labelA and labelB.
 
         """
         self.set_constituents(labelA, labelB)
+        self.set_method(method)
+        self.set_short_tex(short_tex)
         self.build_label()
 
     def __str__(self):
@@ -393,6 +471,10 @@ class Xcorr(ArbitraryLabel):
         return r"\#"
 
     @property
+    def short_tex(self):
+        return self._short_tex
+
+    @property
     def path(self):
         return self._path
 
@@ -404,6 +486,10 @@ class Xcorr(ArbitraryLabel):
     def labelB(self):
         return self._labelB
 
+    @property
+    def method(self):
+        return self._method
+
     def set_constituents(self, labelA, labelB):
         if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
             raise TypeError
@@ -412,6 +498,12 @@ class Xcorr(ArbitraryLabel):
 
         self._labelA = labelA
         self._labelB = labelB
+
+    def set_method(self, new):
+        self._method = str(new).title()
+
+    def set_short_tex(self, new):
+        self._short_tex = bool(new)
 
     def _build_tex(self):
         labelA = self.labelA
@@ -427,7 +519,11 @@ class Xcorr(ArbitraryLabel):
         except AttributeError:
             texB = labelB
 
-        tex = r"\rho(%s,%s)" % (texA, texB)
+        if self.short_tex:
+            tex = r"\rho_{%s}(%s,%s)" % (self.method[0], texA, texB)
+        else:
+            tex = r"\mathrm{{%s}}(%s,%s)" % (self.method, texA, texB)
+
         tex = tex.replace(" ", r" \, ").replace(r" \, ", r"\,")
         while tex.find(r"\,\,") >= 0:
             tex = tex.replace(r"\,\,", r"\,")
@@ -451,7 +547,8 @@ class Xcorr(ArbitraryLabel):
         pathA = str(pathA).replace(" ", "-")
         pathB = str(pathB).replace(" ", "-")
 
-        path = Path(f"Xcorr-{pathA}-{pathB}")
+        method = self.method
+        path = Path(f"Xcorr{method}-{pathA}-{pathB}")
 
         self._path = path
 
