@@ -33,6 +33,8 @@ class Base(ABC):
     @abstractmethod
     def __init__(self):
         self._init_logger()
+        self._labels = AxesLabels(x="x", y="y")
+        self._log = LogAxes(x=False)
 
     def __str__(self):
         return self.__class__.__name__
@@ -42,6 +44,7 @@ class Base(ABC):
         return self._logger
 
     def _init_logger(self):
+        # return None
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
@@ -72,7 +75,8 @@ class Base(ABC):
             x = self.log.x
         if y is None:
             y = self.log.y
-        log = LogAxes(x, y)
+
+        log = LogAxes(bool(x), bool(y))
         self._log = log
 
     def set_labels(self, **kwargs):
@@ -152,13 +156,30 @@ class Base(ABC):
 
         return path, x, y, z, scale_info
 
+    def _add_axis_labels(self, ax):
+        xlbl = self.labels.x
+        if xlbl is not None:
+            ax.set_xlabel(xlbl)
+
+        ylbl = self.labels.y
+        if ylbl is not None:
+            ax.set_ylabel(ylbl)
+
+        if self.log.x:
+            ax.set_xscale("log")
+
+        if self.log.y:
+            ax.set_yscale("log")
+
     @abstractmethod
     def set_data(self):
         pass
 
-    @abstractmethod
+    #     @abstractmethod
     def _format_axis(self, ax):
-        pass
+        self._add_axis_labels(ax)
+        ax.grid(True, which="major", axis="both")
+        ax.tick_params(axis="both", which="both", direction="inout")
 
     @abstractmethod
     def make_plot(self):

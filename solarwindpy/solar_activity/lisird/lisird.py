@@ -103,14 +103,20 @@ class LISIRDLoader(DataLoader):
 
     def convert_nans(self, data, meta):
         key = self.key
-        if key in ("CaK", "MgII"):
+        if key in ("CaK", "MgII", "f017"):
             self.logger.info("Prior inspection shows no missing data in `%s`.", key)
             return
 
         elif key == "Lalpha":
-            mv = np.float64(meta["type"]["missing_value"])
-        elif key == "f107":
-            mv = np.float64(meta["f107"]["missing_value"])
+            mv0 = np.float64(meta["irradiance"]["missing_value"])
+            mv1 = np.float64(meta["uncertainty"]["missing_value"])
+            if not mv0 == mv1:
+                raise NotImplementedError(
+                    f"Unsure how to handle mv0 ({mv0:.0f}) != mv1 ({mv1:.0f})"
+                )
+            mv = mv0
+        #         elif key == "f107":
+        #             mv = np.float64(meta["f107"]["missing_value"])
         else:
             raise NotImplementedError("Haven't inspected other data to convert.")
 

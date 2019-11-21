@@ -14,6 +14,8 @@ from matplotlib import pyplot as plt
 from numbers import Number
 from abc import abstractproperty, abstractmethod
 from pathlib import Path
+from collections import namedtuple
+from scipy.signal import savgol_filter
 
 try:
     from astropy.stats import knuth_bin_width
@@ -229,7 +231,6 @@ class AggPlot(base.Base):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
-        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
         self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
         if fcn is None:
@@ -412,11 +413,13 @@ class Hist1D(AggPlot):
             input type and value.
         """
         super(Hist1D, self).__init__()
-        self.set_data(x, y, logx, clip_data)
-        self._labels = base.AxesLabels(
-            x="x", y=labels_module.Count(norm=axnorm) if y is None else "y"
-        )
+        self.set_log(x=logx)
         self.set_axnorm(axnorm)
+        self.set_data(x, y, clip_data)
+        self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
+        #         self._labels = base.AxesLabels(
+        #             x="x", y=labels_module.Count(norm=axnorm) if y is None else "y"
+        #         )
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_path(None)
@@ -445,9 +448,12 @@ class Hist1D(AggPlot):
 
     set_path.__doc__ = base.Base.set_path.__doc__
 
-    def set_data(self, x, y, logx, clip):
-        logx = bool(logx)
-        data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
+    #     def set_data(self, x, y, logx, clip):
+    #         logx = bool(logx)
+    #         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
+
+    def set_data(self, x, y, clip):
+        data = pd.DataFrame({"x": np.log10(np.abs(x)) if self.log.x else x})
 
         #         if clip:
         #             data = self.clip_data(data, clip)
@@ -457,7 +463,7 @@ class Hist1D(AggPlot):
         data.loc[:, "y"] = y
 
         self._data = data
-        self._log = base.LogAxes(x=logx)
+        #         self._log = base.LogAxes(x=logx)
         self._clip = clip
 
     def set_axnorm(self, new):
@@ -561,22 +567,22 @@ class Hist1D(AggPlot):
 
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
-    def _format_axis(self, ax):
-        xlbl = self.labels.x
-        if xlbl is not None:
-            ax.set_xlabel(xlbl)
+    #     def _format_axis(self, ax):
+    #         xlbl = self.labels.x
+    #         if xlbl is not None:
+    #             ax.set_xlabel(xlbl)
 
-        ylbl = self.labels.y
-        if ylbl is not None:
-            ax.set_ylabel(ylbl)
+    #         ylbl = self.labels.y
+    #         if ylbl is not None:
+    #             ax.set_ylabel(ylbl)
 
-        if self.log.x:
-            ax.set_xscale("log")
+    #         if self.log.x:
+    #             ax.set_xscale("log")
 
-        if self.log.y:
-            ax.set_yscale("log")
+    #         if self.log.y:
+    #             ax.set_yscale("log")
 
-        ax.grid(True, which="major", axis="both")
+    #         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
         f"""Make a plot.
@@ -688,10 +694,20 @@ class Hist2D(AggPlot):
         bin_precision=None,
     ):
         super(Hist2D, self).__init__()
-        self.set_data(x, y, z, logx, logy, clip_data)
-        self._labels = base.AxesLabels(
+        self.set_log(x=logx, y=logy)
+        self.set_data(
+            x,
+            y,
+            z,
+            #                       logx, logy,
+            clip_data,
+        )
+        self.set_labels(
             x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
         )
+        #         self._labels = base.AxesLabels(
+        #             x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
+        #         )
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
@@ -735,18 +751,30 @@ class Hist2D(AggPlot):
 
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
-            z.set_axnorm(self.axnorm)
+            try:
+                z.set_axnorm(self.axnorm)
+            except AttributeError:
+                pass
+
             z.build_label()
 
         super(Hist2D, self).set_labels(z=z, **kwargs)
 
-    def set_data(self, x, y, z, logx, logy, clip):
-        logx = bool(logx)
-        logy = bool(logy)
+    #     def set_data(self, x, y, z, logx, logy, clip):
+    #         logx = bool(logx)
+    #         logy = bool(logy)
+    #         data = pd.DataFrame(
+    #             {
+    #                 "x": np.log10(np.abs(x)) if logx else x,
+    #                 "y": np.log10(np.abs(y)) if logy else y,
+    #             }
+    #         )
+
+    def set_data(self, x, y, z, clip):
         data = pd.DataFrame(
             {
-                "x": np.log10(np.abs(x)) if logx else x,
-                "y": np.log10(np.abs(y)) if logy else y,
+                "x": np.log10(np.abs(x)) if self.log.x else x,
+                "y": np.log10(np.abs(y)) if self.log.y else y,
             }
         )
 
@@ -766,7 +794,7 @@ class Hist2D(AggPlot):
             )
 
         self._data = data
-        self._log = base.LogAxes(x=logx, y=logy)
+        #         self._log = base.LogAxes(x=logx, y=logy)
         self._clip = clip
 
     def set_axnorm(self, new):
@@ -799,9 +827,6 @@ class Hist2D(AggPlot):
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
         """
-
-        #         logging.getLogger("main").warning("Running axis normalization")
-        #         log_mem_usage()
 
         axnorm = self.axnorm
         if axnorm is None:
@@ -841,24 +866,24 @@ class Hist2D(AggPlot):
 
         return agg
 
-    def _format_axis(self, ax):
-        #         logging.getLogger("main").warning("Formatting an axis")
-        #         log_mem_usage()
+    #     def _format_axis(self, ax):
+    #         #         logging.getLogger("main").warning("Formatting an axis")
+    #         #         log_mem_usage()
 
-        xlbl = self.labels.x
-        ylbl = self.labels.y
+    #         xlbl = self.labels.x
+    #         ylbl = self.labels.y
 
-        if xlbl is not None:
-            ax.set_xlabel(xlbl)
-        if ylbl is not None:
-            ax.set_ylabel(ylbl)
+    #         if xlbl is not None:
+    #             ax.set_xlabel(xlbl)
+    #         if ylbl is not None:
+    #             ax.set_ylabel(ylbl)
 
-        if self.log.x:
-            ax.set_xscale("log")
-        if self.log.y:
-            ax.set_yscale("log")
+    #         if self.log.x:
+    #             ax.set_xscale("log")
+    #         if self.log.y:
+    #             ax.set_yscale("log")
 
-        ax.grid(True, which="major", axis="both")
+    #         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, **kwargs):
         f"""Make a colorbar on `ax` using `mappable`.
@@ -885,9 +910,15 @@ class Hist2D(AggPlot):
             raise ValueError("Can't pass ax and cax.")
 
         if ax is not None:
-            fig = ax.figure
+            try:
+                fig = ax.figure
+            except AttributeError:
+                fig = ax[0].figure
         elif cax is not None:
-            fig = cax.figure
+            try:
+                fig = cax.figure
+            except AttributeError:
+                fig = cax[0].figure
         else:
             ax = plt.gca()
             fig = ax.figure
@@ -946,6 +977,14 @@ class Hist2D(AggPlot):
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+
+        Returns
+        -------
+        ax: mpl.axes.Axes
+            Axes upon which plot was made.
+        cbar_or_mappable: colorbar.Colorbar, mpl.collections.QuadMesh
+            If `cbar` is True, return the colorbar. Otherwise, return the `Quadmesh` used
+            to create the colorbar.
         """
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
@@ -981,7 +1020,7 @@ class Hist2D(AggPlot):
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
 
-            if "cax" not in cbar_kwargs.keys():
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
                 cbar_kwargs["ax"] = ax
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
@@ -989,7 +1028,206 @@ class Hist2D(AggPlot):
 
         self._format_axis(ax)
 
-        return ax, cbar
+        if cbar:
+            cbar_or_mappable = cbar
+        else:
+            cbar_or_mappable = pc
+
+        return ax, cbar_or_mappable
+
+    def get_border(self):
+        r"""Get the top and bottom edges of the plot.
+
+        Returns
+        -------
+        border: namedtuple
+            Contains "top" and "bottom" fields, each with a :py:class:`pd.Series`.
+        """
+
+        Border = namedtuple("Border", "top,bottom")
+        top = {}
+        bottom = {}
+        for x, v in self.agg().unstack("x").items():
+            yt = v.last_valid_index()
+            if yt is not None:
+                z = v.loc[yt]
+                top[(yt, x)] = z
+
+            yb = v.first_valid_index()
+            if yb is not None:
+                z = v.loc[yb]
+                bottom[(yb, x)] = z
+
+        top = pd.Series(top)
+        bottom = pd.Series(bottom)
+        for edge in (top, bottom):
+            edge.index.names = ["y", "x"]
+
+        border = Border(top, bottom)
+        return border
+
+    @staticmethod
+    def _plot_one_edge(ax, edge, smooth=False, sg_kwargs=None, **kwargs):
+        x = edge.index.get_level_values("x").mid
+        y = edge.index.get_level_values("y").mid
+
+        if sg_kwargs is None:
+            sg_kwargs = dict()
+
+        if smooth:
+            wlength = sg_kwargs.pop("window_length", int(np.floor(y.shape[0] / 10)))
+            polyorder = sg_kwargs.pop("polyorder", 3)
+
+            if not wlength % 2:
+                wlength -= 1
+
+            y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
+
+        x = 10.0 ** x
+        y = 10.0 ** y
+        return ax.plot(x, y, **kwargs)
+
+    def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
+        r"""Overplot the edges.
+
+        Parameters
+        ----------
+        ax:
+            Axis on which to plot.
+        smooth: bool
+            If True, apply a Savitzky-Golay filter (:py:func:`scipy.signal.savgol_filter`)
+            to the y-values before plotting to smooth the curve.
+        sg_kwargs: dict, None
+            If not None, dict of kwargs passed to Savitzky-Golay filter. Also allows
+            for setting of `window_length` and `polyorder` as kwargs. They default to
+            10\% of the number of observations (`window_length`) and 3 (`polyorder`).
+            Note that because `window_length` must be odd, if the 10\% value is even, we
+            take 1-window_length.
+        kwargs:
+            Passed to `ax.plot`
+        """
+
+        top, bottom = self.get_border()
+
+        color = kwargs.pop("color", "cyan")
+        label = kwargs.pop("label", None)
+        etop = self._plot_one_edge(
+            ax, top, smooth, sg_kwargs, color=color, label=label, **kwargs
+        )
+        ebottom = self._plot_one_edge(
+            ax, bottom, smooth, sg_kwargs, color=color, **kwargs
+        )
+
+        return etop, ebottom
+
+    def plot_contours(
+        self,
+        ax=None,
+        cbar=True,
+        limit_color_norm=False,
+        cbar_kwargs=None,
+        fcn=None,
+        plot_edges=True,
+        edges_kwargs=None,
+        clabel_kwargs=None,
+        skip_max_clbl=True,
+        **kwargs,
+    ):
+        f"""Make a contour plot on `ax` using `ax.contour`.
+
+        Paremeters
+        ----------
+        ax: mpl.axes.Axes, None
+            If None, create an `Axes` instance from `plt.subplots`.
+        cbar: bool
+            If True, create color bar with `labels.z`.
+        limit_color_norm: bool
+            If True, limit the color range to 0.001 and 0.999 percentile range
+            of the z-value, count or otherwise.
+        cbar_kwargs: dict, None
+            If not None, kwargs passed to `self._make_cbar`.
+        fcn: FunctionType, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
+        plot_edges: bool
+            If True, plot the smoothed, extreme edges of the 2D histogram.
+        edges_kwargs: None, dict
+            Passed to {self.plot_edges!s}.
+        clabel_kwargs: None, dict
+            If not None, dictionary of kwargs passed to `ax.clabel`.
+        skip_max_clbl: bool
+            If True, don't label the maximum contour. Primarily used when the maximum
+            contour is, effectively, a point.
+        maximum_color:
+            The color for the maximum of the PDF.
+        kwargs:
+            Passed to `ax.pcolormesh`.
+            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+        """
+        agg = self.agg(fcn=fcn).unstack("x")
+        x = self.intervals["x"].mid
+        y = self.intervals["y"].mid
+
+        assert x.size == agg.shape[1]
+        assert y.size == agg.shape[0]
+
+        x = 10.0 ** x
+        y = 10.0 ** y
+
+        XX, YY = np.meshgrid(x, y)
+
+        C = np.ma.masked_invalid(agg.values)
+
+        assert XX.shape == C.shape
+        assert YY.shape == C.shape
+
+        class nf(float):
+            # Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html
+            # Define a class that forces representation of float to look a certain way
+            # This remove trailing zero so '1.0' becomes '1'
+            def __repr__(self):
+                return str(self).rstrip("0")
+
+        if self.axnorm == "t":
+            levels = [0.01, 0.1, 0.3, 0.7, 0.99]
+
+        elif self.axnorm == "d":
+            levels = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+
+        else:
+            raise ValueError("Unrecognized axis normalization {}".format(self.axnorm))
+
+        linestyles = kwargs.pop(
+            "linestyles", ["-", ":", "--", (0, (7, 3, 1, 3, 1, 3)), "--", ":", "-"]
+        )
+        cmap = kwargs.pop("cmap", None)
+
+        qset = ax.contour(XX, YY, C, levels, linestyles=linestyles, cmap=cmap, **kwargs)
+
+        qset.levels = [nf(l) for l in qset.levels]
+
+        if clabel_kwargs is None:
+            clabel_kwargs = dict()
+
+        inline = clabel_kwargs.pop("inline", True)
+        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
+        fmt = clabel_kwargs.pop("fmt", "%s")
+
+        lbls = ax.clabel(
+            qset,
+            levels[:-1] if skip_max_clbl else levels,
+            inline=inline,
+            inline_spacing=inline_spacing,
+            fmt=fmt,
+        )
+
+        if plot_edges:
+
+            if edges_kwargs is None:
+                edges_kwargs = dict()
+
+            etop, ebottom = self.plot_edges(ax, **edges_kwargs)
+
+        return ax, lbls
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         f"""Make a `Hist1D` from the data stored in this `His2D`.
