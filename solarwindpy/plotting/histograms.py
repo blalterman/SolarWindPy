@@ -910,9 +910,15 @@ class Hist2D(AggPlot):
             raise ValueError("Can't pass ax and cax.")
 
         if ax is not None:
-            fig = ax.figure
+            try:
+                fig = ax.figure
+            except AttributeError:
+                fig = ax[0].figure
         elif cax is not None:
-            fig = cax.figure
+            try:
+                fig = cax.figure
+            except AttributeError:
+                fig = cax[0].figure
         else:
             ax = plt.gca()
             fig = ax.figure
@@ -971,6 +977,14 @@ class Hist2D(AggPlot):
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+
+        Returns
+        -------
+        ax: mpl.axes.Axes
+            Axes upon which plot was made.
+        cbar_or_mappable: colorbar.Colorbar, mpl.collections.QuadMesh
+            If `cbar` is True, return the colorbar. Otherwise, return the `Quadmesh` used
+            to create the colorbar.
         """
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
@@ -1006,7 +1020,7 @@ class Hist2D(AggPlot):
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
 
-            if "cax" not in cbar_kwargs.keys():
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
                 cbar_kwargs["ax"] = ax
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
@@ -1014,7 +1028,12 @@ class Hist2D(AggPlot):
 
         self._format_axis(ax)
 
-        return ax, cbar
+        if cbar:
+            cbar_or_mappable = cbar
+        else:
+            cbar_or_mappable = pc
+
+        return ax, cbar_or_mappable
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -1091,7 +1110,10 @@ class Hist2D(AggPlot):
         top, bottom = self.get_border()
 
         color = kwargs.pop("color", "cyan")
-        etop = self._plot_one_edge(ax, top, smooth, sg_kwargs, color=color, **kwargs)
+        label = kwargs.pop("label", None)
+        etop = self._plot_one_edge(
+            ax, top, smooth, sg_kwargs, color=color, label=label, **kwargs
+        )
         ebottom = self._plot_one_edge(
             ax, bottom, smooth, sg_kwargs, color=color, **kwargs
         )
