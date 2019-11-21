@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 
+from types import FunctionType
 from matplotlib import pyplot as plt
 from numbers import Number
 from abc import abstractproperty, abstractmethod
@@ -90,7 +91,7 @@ class AggPlot(base.Base):
         cut = self.cut
         tko = self.agg_axes
 
-        self.logger.info("""Joining data (%s) with cat (%s)""", tko, cut.columns.values)
+        self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
 
         other = self.data.loc[cut.index, tko]
 
@@ -116,10 +117,13 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
-    def set_clim(self, bottom, top):
-        assert isinstance(bottom, Number) or bottom is None
-        assert isinstance(top, Number) or top is None
-        self._clim = (bottom, top)
+    def set_clim(self, lower=None, upper=None):
+        f"""Set the minimum (lower) and maximum (upper) alowed number of
+        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._clim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
@@ -141,7 +145,7 @@ class AggPlot(base.Base):
         intervals = {}
 
         if precision is None:
-            precision = 3
+            precision = 5
 
         gb_axes = self._gb_axes
 
@@ -225,7 +229,8 @@ class AggPlot(base.Base):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
-        self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        #         self.logger.info("""aggregating %s data along %s""", tko, cut.columns.values)
+        self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
         if fcn is None:
             other = self.data.loc[cut.index, tko]
@@ -269,17 +274,46 @@ class AggPlot(base.Base):
         """
         cut = self.cut
         tko = self.agg_axes
+
+        self.logger.info(
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
+            "\n".join([f"{k!s}: {v!s}" for k, v in self.labels._asdict().items()]),
+        )
+
         gb = self.grouped
 
         agg = self._agg_runner(cut, tko, gb, fcn)
 
         return agg
 
+    def get_plotted_data_boolean_series(self):
+        f"""A boolean `pd.Series` identifing each measurement that is plotted.
+
+        Note: The Series is indexed identically to the data stored in the :py:class:`{self.__class__.__name__}`.
+              To align with another index, you may want to use:
+
+                  tk = {self.__class__.__name__}.get_plotted_data_boolean_series()
+                  idx = tk.replace(False, np.nan).dropna().index
+        """
+        agg = self.agg().dropna()
+        cut = self.cut
+
+        tk = pd.Series(True, index=cut.index)
+        for k, v in cut.items():
+            tk_ax = v.isin(agg.index.get_level_values(k))
+            tk = tk & tk_ax
+
+        self.logger.info(
+            f"Taking {tk.sum()!s} ({100*tk.mean():.1f}%) {self.__class__.__name__} spectra"
+        )
+
+        return tk
+
     # Old version that cuts at percentiles.
     @staticmethod
     def clip_data(data, clip):
-        q0 = 0.001
-        q1 = 0.999
+        q0 = 0.0001
+        q1 = 0.9999
         pct = data.quantile([q0, q1])
         lo = pct.loc[q0]
         up = pct.loc[q1]
@@ -396,19 +430,6 @@ class Hist1D(AggPlot):
         path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
 
         if new == "auto":
-
-            #             n_unique_y = self.data.loc[:, "y"].dropna().unique().size
-
-            #             if (y == "y") and (n_unique_y == 1):
-            #                 y = "count"
-
-            #             elif n_unique_y > 1:
-            #                 # Expect aggregating data.
-            #                 pass
-
-            #             else:
-            #                 raise ValueError("Unable to auto set y-component of path")
-
             path = path / x / y
 
         else:
@@ -426,9 +447,6 @@ class Hist1D(AggPlot):
 
     def set_data(self, x, y, logx, clip):
         logx = bool(logx)
-        #         if logx:
-        #             x = np.abs(x)
-        #             x = np.log10(x[x > 0])
         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
 
         #         if clip:
@@ -463,6 +481,37 @@ class Hist1D(AggPlot):
 
         self._axnorm = new
 
+    def construct_cdf(self, only_plotted=True):
+        r"""Convert the obsered measuremets.
+
+        Returns
+        -------
+        cdf: pd.DataFrame
+            "x" column is the value of the measuremnt.
+            "position" column is the normalized position in the cdf.
+            To plot the cdf:
+
+                cdf.plot(x="x", y="cdf")
+        """
+        data = self.data
+        if not data.loc[:, "y"].unique().size <= 2:
+            raise ValueError("Only able to convert data to a cdf if it is a histogram.")
+
+        tk = self.cut.loc[:, "x"].notna()
+        if only_plotted:
+            tk = tk & self.get_plotted_data_boolean_series()
+
+        x = data.loc[tk, "x"]
+        cdf = x.sort_values().reset_index(drop=True)
+
+        if self.log.x:
+            cdf = 10.0 ** cdf
+
+        cdf = cdf.to_frame()
+        cdf.loc[:, "position"] = cdf.index / cdf.index.max()
+
+        return cdf
+
     def _axis_normalizer(self, agg):
         r"""Takes care of row, column, total, and density normaliation.
 
@@ -477,6 +526,8 @@ class Hist1D(AggPlot):
         elif axnorm == "d":
             n = agg.sum()
             dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
+            if self.log.x:
+                dx = 10.0 ** dx
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":
@@ -528,21 +579,39 @@ class Hist1D(AggPlot):
         ax.grid(True, which="major", axis="both")
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
-        r"""Make a plot on `ax`.
+        f"""Make a plot.
 
-        If `ax` is None, create a `mpl.subplots` axis.
-
-        `**kwargs` passed directly to `ax.plot`.
-
-        `drawstyle` defaults to `steps-mid`
-
-        `fcn` passed to `self.agg`. Only one function is allow b/c we
-        don't yet handle uncertainties.
+        Parameters
+        ----------
+        ax: None, mpl.axis.Axis
+            If `None`, create a subplot axis.
+        fcn: None, str, aggregative function, or 2-tuple of strings
+            Passed directly to `{self.__class__.__name__}.agg`. If
+            None, use the default aggregation function. If str or a
+            single aggregative function, use it.
+        kwargs:
+            Passed directly to `ax.plot`.
         """
         agg = self.agg(fcn=fcn)
-        #         tko = self.agg_axes
         x = pd.IntervalIndex(agg.index).mid
-        y = agg
+
+        if fcn is None or isinstance(fcn, str):
+            y = agg
+            dy = None
+
+        elif len(fcn) == 2:
+
+            f0, f1 = fcn
+            if isinstance(f0, FunctionType):
+                f0 = f0.__name__
+            if isinstance(f1, FunctionType):
+                f1 = f1.__name__
+
+            y = agg.loc[:, f0]
+            dy = agg.loc[:, f1]
+
+        else:
+            raise ValueError(f"Unrecognized `fcn` ({fcn})")
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -551,7 +620,7 @@ class Hist1D(AggPlot):
             x = 10.0 ** x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        ax.plot(x, y, drawstyle=drawstyle, **kwargs)
+        pl, cl, bl = ax.errorbar(x, y, yerr=dy, drawstyle=drawstyle, **kwargs)
 
         self._format_axis(ax)
 
@@ -767,7 +836,7 @@ class Hist2D(AggPlot):
         return agg
 
     def agg(self, **kwargs):
-        agg = super(Hist2D, self).agg(**kwargs)  # .unstack("x")
+        agg = super(Hist2D, self).agg(**kwargs)
         agg = self._axis_normalizer(agg)
 
         return agg
@@ -791,20 +860,47 @@ class Hist2D(AggPlot):
 
         ax.grid(True, which="major", axis="both")
 
-    def _make_cbar(self, mappable, ax, **kwargs):
+    def _make_cbar(self, mappable, **kwargs):
+        f"""Make a colorbar on `ax` using `mappable`.
+
+        Parameters
+        ----------
+        mappable:
+            See `figure.colorbar` kwarg of same name.
+        ax: mpl.axis.Axis
+            See `figure.colorbar` kwarg of same name.
+        norm: mpl.colors.Normalize instance
+            The normalization used in the plot. Passed here to determine
+            y-ticks.
+        kwargs:
+            Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
+            row or column normalized, `ticks` defaults to
+            :py:class:`mpl.ticker.MultipleLocator(0.1)`.
+        """
         #         logging.getLogger("main").warning("Making a cbar")
         #         log_mem_usage()
+        ax = kwargs.pop("ax", None)
+        cax = kwargs.pop("cax", None)
+        if ax is not None and cax is not None:
+            raise ValueError("Can't pass ax and cax.")
 
-        if isinstance(ax, mpl.axes.Axes):
+        if ax is not None:
             fig = ax.figure
-        elif isinstance(ax, np.ndarray):
-            fig = ax[0].figure
+        elif cax is not None:
+            fig = cax.figure
+        else:
+            ax = plt.gca()
+            fig = ax.figure
+
+        ticks = kwargs.pop(
+            "ticks",
+            mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
+        )
 
         label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, ax=ax, label=label, **kwargs)
-
-        if hasattr(self.labels.z, "axnorm") and self.labels.z.axnorm in ("c", "r"):
-            cbar.ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+        cbar = fig.colorbar(
+            mappable, label=label, ax=ax, cax=cax, ticks=ticks, **kwargs
+        )
 
         return cbar
 
@@ -829,7 +925,7 @@ class Hist2D(AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
-        **kwargs
+        **kwargs,
     ):
         r"""
         Make a 2D plot on `ax` using `ax.pcolormesh`.
@@ -868,7 +964,10 @@ class Hist2D(AggPlot):
 
         axnorm = self.axnorm
         norm = kwargs.pop(
-            "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
+            "norm",
+            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+            if axnorm in ("c", "r")
+            else None,
         )
 
         if limit_color_norm:
@@ -881,25 +980,36 @@ class Hist2D(AggPlot):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+
+            if "cax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
 
         self._format_axis(ax)
 
         return ax, cbar
 
-    def project_1d(self, axis, project_counts=False, **kwargs):
-        r"""Make a `Hist1D` from the data stored in this `His2D`.
+    def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
+        f"""Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
         ----------
         axis: str
             "x" or "y", specifying the axis to project into 1D.
+        only_plotted: bool
+            If True, only pass data that appears in the {self.__class__.__name__} plot
+            to the :py:class:`Hist1D`.
+        project_counts: bool
+            If True, only send the variable plotted along `axis` to :py:class:`Hist1D`.
+            Otherwise, send both axes (but not z-values).
         kwargs:
             Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
 
         Returns
         -------
-        h1: `Hist1D`
+        h1: :py:class:`Hist1D`
         """
         axis = axis.lower()
         assert axis in ("x", "y")
@@ -921,7 +1031,7 @@ class Hist2D(AggPlot):
             x = 10.0 ** x
 
         y = self.data.loc[:, other] if not project_counts else None
-        logy = False
+        logy = False  # Defined b/c project_counts option.
         if y is not None:
             # Only select y-values plotted.
             logy = self.log._asdict()[other]
@@ -929,6 +1039,12 @@ class Hist2D(AggPlot):
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
             if logy:
                 y = 10.0 ** y
+
+        if only_plotted:
+            tk = self.get_plotted_data_boolean_series()
+            x = x.loc[tk]
+            if y is not None:
+                y = y.loc[tk]
 
         h1 = Hist1D(
             x,

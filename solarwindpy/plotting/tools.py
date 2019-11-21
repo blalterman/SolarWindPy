@@ -18,7 +18,7 @@ def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
     `scale_width` and `scale_height`.
     """
     scale = np.array([scale_width * ncols, scale_height * nrows])
-    figsize = kwargs.pop("figsize", scale * mpl.rcParams["figure.figsize"])
+    figsize = scale * kwargs.pop("figsize", mpl.rcParams["figure.figsize"])
 
     return plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
 
@@ -83,12 +83,39 @@ def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
     alog.info("Suffix saved: png")
 
 
-def joint_legend(ax, tax, **kwargs):
-    r"""Create one legend on `ax` that contains information for both `ax` and `tax.
-    """
+def joint_legend(*axes, idx_for_legend=-1, **kwargs):
+    r"""Make a single legend combining handles and labels from all axes.
 
-    h0, l0 = ax.get_legend_handles_labels()
-    h1, l1 = tax.get_legend_handles_labels()
-    hdl = h0 + h1
-    lbl = l0 + l1
-    ax.legend(hdl, lbl, **kwargs)
+    Place the legend on the axis located at the raveled `idx_for_legend`.
+    Assuming the last axis is on the right hand side of the figure, the default
+    index is -1.
+    """
+    axes = np.array(axes).ravel()
+
+    handles = []
+    labels = []
+
+    for ax in axes:
+        hdl, lbl = ax.get_legend_handles_labels()
+        for i, l in enumerate(lbl):
+            if l not in labels:
+                h = hdl[i]
+                try:
+                    if len(h) == 3:
+                        # Used `ax.errorbar`, not `ax.plot`.
+                        h = h[0]
+                except TypeError:
+                    pass
+
+                labels.append(l)
+                handles.append(h)
+
+    handles = np.array(handles)
+    labels = np.array(labels)
+
+    sorter = np.argsort(labels)
+    labels = labels[sorter]
+    handles = handles[sorter]
+
+    loc = kwargs.pop("loc", (1.05, 0.1))
+    axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)

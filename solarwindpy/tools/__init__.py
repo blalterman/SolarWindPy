@@ -26,6 +26,7 @@ Notes
 
 import pdb  # noqa: F401
 import logging
+import numpy as np
 import pandas as pd
 
 
@@ -94,3 +95,20 @@ def swap_protons(data, logger=None):
     logger.info("Swap proton labels when n2/n1 > 1\nstats\n%s", stats.to_string())
 
     return new_data, swap
+
+
+def normal_parameters(m, s):
+    r"""Calculate the normal parameters from log-normal parameters.
+
+        $\mu = \exp[m + (s^2)/2]$
+        $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
+
+    Applies for both :math:`ln` and :math:`log_{10}`. (<https://stats.stackexchange.com/a/22610/203218>)
+    """
+    mu = np.exp(m + ((s ** 2.0) / 2.0))
+    sigma = np.exp(s ** 2.0 + 2.0 * m)
+    sigma *= np.exp(s ** 2.0) - 1.0
+    sigma = np.sqrt(sigma)
+
+    out = pd.concat({"mu": mu, "sigma": sigma}, axis=1)
+    return out

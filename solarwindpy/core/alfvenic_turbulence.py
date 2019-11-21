@@ -8,7 +8,7 @@ Bibliography
 [2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
     wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
     463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
-﻿[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
+[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
     Cyclotron Resonance as a Dissipation Mechanism in Solar Wind Turbulence: A
     Statistical Study at Ion-Kinetic Scales. Astrophys. J. 856, 49 (2018).
 """
@@ -18,16 +18,19 @@ import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 
+from collections import namedtuple
+
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 pd.set_option("mode.chained_assignment", "raise")
 
-
 try:
     from . import base
 except ImportError:
     import base
+
+AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
 
 
 class AlfvenicTurbulence(base.Core):
@@ -100,6 +103,13 @@ class AlfvenicTurbulence(base.Core):
         r"""Mean-subtracted quantities used to calculated Elsasser variables.
         """
         return self._data
+
+    @property
+    def averaging_info(self):
+        r"""Averaging window and minimum number of measurements / average used
+        in calculating background component in :math:`\delta B` and :math:`\delta v`.
+        """
+        return self._averaging_info
 
     @property
     def measurements(self):
@@ -346,6 +356,7 @@ unexpected."""
         self._measurements = data
         self._data = deltas
         self._species = species
+        self._averaging_info = AlvenicTurbAveraging(window, min_periods)
 
     def _clean_species_for_setting(self, species):
         if not isinstance(species, str):

@@ -56,10 +56,11 @@ _trans_measurement = {
     "beta": r"\beta",
     "dbeta": r"\Delta \beta",
     "dv": r"\Delta v",
-    "Qbar": r"\bar{Q}",
+    "qbar": r"\bar{q}",
     "ab": r"A",
     "theta": r"\theta",
     "cos_theta": r"\cos\theta",
+    "carr": r"\mathrm{Carrington}",
 }
 
 _inU = {
@@ -70,7 +71,7 @@ _inU = {
     "pPa": r"\mathrm{pPa}",
     "cm-3": r"\mathrm{cm}^{-3}",
     "dimless": r"\mathrm{\#}",
-    "unkown": r"?",
+    "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
 }
@@ -82,6 +83,7 @@ _trans_units = {
     "colat": _inU["deg"],
     "lat": _inU["deg"],
     "lon": _inU["deg"],
+    "carr": _inU["deg"],
     # Trig things.
     "theta": _inU["deg"],
     "phi": _inU["deg"],
@@ -106,8 +108,8 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "Q": r"mW \, cm^{-2}",  # heatflux,
-    "Qbar": _inU["dimless"],
+    "q": r"\mathrm{mW \, cm^{-2}}",  # heatflux,
+    "qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
@@ -133,6 +135,7 @@ _trans_units = {
     "etot": r"(%s)^2" % _inU["kms"],
     "eres": r"(%s)^2" % _inU["kms"],
     "xhel": r"(%s)^2" % _inU["kms"],
+    "sigma_m": _inU["dimless"],
     "sigma_c": _inU["dimless"],
     "sigma_r": _inU["dimless"],
     "ra": _inU["dimless"],
@@ -141,13 +144,14 @@ _trans_units = {
     "Wn": _inU["dimless"],
     "gamma": _inU["dimless"],
     "gamma_max": _inU["dimless"],
+    "kvec": _inU["dimless"],
     # Solar Activity
     "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
     # MISC
-    "entropy": _inU["dimless"],
+    "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
 }
 
 _trans_component = {
@@ -187,6 +191,7 @@ _templates = {
     "gse": r"{$C}_{\mathrm{GSE}}",
     "hci": r"{$C}_{\mathrm{HCI}}",
     "colat": r"\theta_{$C}",
+    "carr": r"{$C}_\mathrm{Carrington}",
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
@@ -213,6 +218,7 @@ _templates = {
     "pdv": r"P_{\Delta v_{$S}}",
     "ab": r"A_{$S}",
     "e": r"e_{{$C}_{$S}}",
+    "entropy": r"\mathrm{S}_{$S}",
     # Alfvenic Turbulence
     "zp": r"Z^+_{{$S}}",
     "zm": r"Z^-_{{$S}}",
@@ -224,13 +230,15 @@ _templates = {
     "xhel": r"e^c_{{$S}}",
     "sigma_c": r"\sigma_{c;{$S}}",
     "sigma_r": r"\sigma_{r;{$S}}",
+    "sigma_m": r"\sigma_{m}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
     # Instability things
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma/\Omega_{{$S}}",
-    "gamma_max": r"\gamma_\max/\Omega_{{$S}}",
+    "gamma_max": r"\gamma_\mathrm{max}/\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
+    "kvec": r"k_{$C}\rho_{$S}",
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",
     "Lalpha": r"\mathrm{L}-\alpha",
@@ -239,8 +247,6 @@ _templates = {
     "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
-    # MISC
-    "entropy": r"\mathrm{S}_{$S}",
 }
 
 
@@ -423,6 +429,7 @@ class TeXlabel(Base):
             )
             .replace(",", "")
             .replace(",{", "{")
+            .replace("{,", "{")
             .replace("__", "_")
             .replace(".", "")
             .strip("_")
@@ -455,8 +462,11 @@ class TeXlabel(Base):
             .replace("{};", "")
             .replace("{}", "")
             .replace(",}", "}")
+            .replace("{,", "{")
             .replace(";}", "}")
+            .replace("};{}", "}")
             .replace("};}", "}}")
+            .replace(";}", "}")
             .replace("_{}", "")
         )
 

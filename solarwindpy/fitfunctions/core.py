@@ -17,6 +17,7 @@ from collections import namedtuple
 from matplotlib import pyplot as plt
 from inspect import getargspec
 from scipy.optimize import curve_fit
+from pathlib import Path
 
 import solarwindpy as swp
 
@@ -29,14 +30,11 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunction(ABC):
-    r"""
-
-    Assuming that you don't want any special formatting, the typical call order
+    r"""Assuming that you don't want any special formatting, the typical call order
     is:
+
         fit_function = FitFunction(function, TeX_string)
-        fit_function.make_fit(xobs, yobs)
-        fit_function.TeX_parameters()
-        fit_function.pretty_result()
+        fit_function.make_fit()
 
     Instances are callable.
     """
@@ -49,8 +47,10 @@ class FitFunction(ABC):
         yobs,
         xmin=None,
         xmax=None,
+        xoutside=None,
         ymin=None,
         ymax=None,
+        youtside=None,
         weights=None,
         wmin=None,
         wmax=None,
@@ -62,6 +62,7 @@ class FitFunction(ABC):
         self._set_argnames()
         self._set_raw_obs(xobs, yobs, weights)
         self._log = LogAxes(x=logx, y=logy)
+        self._labels = AxesLabels("x", "y")
 
         if weights is None:
             assert wmin is None
@@ -70,8 +71,10 @@ class FitFunction(ABC):
         self.set_fit_obs(
             xmin=xmin,
             xmax=xmax,
+            xoutside=xoutside,
             ymin=ymin,
             ymax=ymax,
+            youtside=youtside,
             wmin=wmin,
             wmax=wmax,
             logx=logx,
@@ -125,6 +128,33 @@ class FitFunction(ABC):
     @property
     def labels(self):
         return self._labels
+
+    @property
+    def path(self):
+        base = Path(str(self))
+
+        try:
+            base /= self.labels.x.path
+        except AttributeError:
+            base /= str(self.labels.x)
+
+        try:
+            base /= self.labels.y.path
+        except AttributeError:
+            base /= str(self.labels.y)
+
+        if self.labels.z is not None:
+            try:
+                base = base / self.labels.z.path
+            except AttributeError:
+                base = base / str(self.labels.z)
+
+        x_scale = "logX" if self.log.x else "linX"
+        y_scale = "logY" if self.log.y else "logY"
+        scale_info = "_".join([x_scale, y_scale])
+
+        path = base / scale_info
+        return path
 
     @property
     def popt(self):
@@ -390,7 +420,7 @@ class FitFunction(ABC):
         self._weights_raw = weights
 
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
-        mask = np.full_like(x, True, dtype=bool)
+        #         mask = np.full_like(x, True, dtype=bool)
 
         mask = np.isfinite(x)
         #         if not mask.all():
@@ -414,6 +444,21 @@ class FitFunction(ABC):
     #         self._logger = logging.getLogger(
     #             "{}.{}".format(__file__, self.__class__.__name__)
     #         )
+
+    def _build_outside_mask(self, axis, x, outside):
+        r"""Take data outside of the range `outside[0]:outside[1]`.
+        """
+
+        if outside is None:
+            return np.full_like(x, True, dtype=bool)
+
+        lower, upper = outside
+        assert lower < upper
+        l_mask = x <= lower
+        u_mask = x >= upper
+        mask = l_mask | u_mask
+
+        return mask
 
     def _set_argnames(self):
         r"""
@@ -444,8 +489,10 @@ class FitFunction(ABC):
         self,
         xmin=None,
         xmax=None,
+        xoutside=None,
         ymin=None,
         ymax=None,
+        youtside=None,
         wmin=None,
         wmax=None,
         logx=False,
@@ -466,7 +513,10 @@ class FitFunction(ABC):
 
         xmask = self._build_one_obs_mask("xobs", xobs, xmin, xmax)
         ymask = self._build_one_obs_mask("yobs", yobs, ymin, ymax)
-        mask = xmask & ymask
+        xout_mask = self._build_outside_mask("xobs", xobs, xoutside)
+        yout_mask = self._build_outside_mask("yobs", yobs, youtside)
+
+        mask = xmask & ymask & xout_mask & yout_mask
         if weights is not None:
             weights_for_mask = weights
 
@@ -502,6 +552,17 @@ class FitFunction(ABC):
         assert isinstance(new, np.ndarray)
         # assert new.shape[0] == new.shape[1] square matrix?
         self._pcov = new
+
+    def _estimate_markevery(self):
+        try:
+            # Estimate marker density for readability
+            markevery = int(10.0 ** (np.floor(np.log10(self.xobs.size) - 1)))
+        except OverflowError:
+            # Or we have a huge number of data points, so lets only
+            # mark a few of them.
+            markevery = 1000
+
+        return markevery
 
     def make_fit(self, **kwargs):
         r"""Fit the function with the independent values `xobs` and dependent values
@@ -596,7 +657,7 @@ class FitFunction(ABC):
     def set_log(self, **kwargs):
         r"""Set :py:class:`LogAxes`.
 
-        Only used for determining if weights should be :py:math:`w/(y \ln(10))`.
+        Only used for determining if weights should be :math:`w/(y \ln(10))`.
         """
         log = self._log._asdict()
         for k, v in kwargs.items():
@@ -747,8 +808,6 @@ class FitFunction(ABC):
     def annotate_TeX_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
 
-        **kwargs are passed to ax.text. Defaults are listed below.
-
         Parameters
         ----------
         ax: mpl.Axes.axis_subplot
@@ -762,6 +821,8 @@ class FitFunction(ABC):
             va - verticalalignment (default "right")
         transform:
             ax.transAxes
+        kwargs:
+            Others passed to `ax.text`.
         """
         info = self.TeX_info()
 
@@ -807,7 +868,7 @@ class FitFunction(ABC):
             fig, ax = swp.pp.subplots()
 
         color = kwargs.pop("color", "k")
-        label = kwargs.pop("label", r"$\mathrm{Bins}$")
+        label = kwargs.pop("label", r"$\mathrm{Obs}$")
 
         x = self.xobs_raw
         y = self.yobs_raw
@@ -816,15 +877,15 @@ class FitFunction(ABC):
             w = w / (y * np.log(10.0))
 
         # Plot the raw data histograms.
-        ax.errorbar(
+        plotline, caplines, barlines = ax.errorbar(
             x, y, yerr=w, drawstyle=drawstyle, label=label, color=color, **kwargs
         )
 
         self._format_hax(ax)
 
-        return ax
+        return ax, plotline, caplines, barlines
 
-    def plot_in_fit(self, ax=None, drawstyle=None, **kwargs):
+    def plot_used(self, ax=None, drawstyle=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
         :py:meth:`self.yobs`, and :py:meth:`self.weights`.
         """
@@ -835,7 +896,8 @@ class FitFunction(ABC):
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
         markersize = kwargs.pop("markersize", 8)
-        label = kwargs.pop("label", r"$\mathrm{in \; Fit}$")
+        markevery = kwargs.pop("markevery", None)
+        label = kwargs.pop("label", r"$\mathrm{Used}$")
 
         x = self.xobs
         y = self.yobs
@@ -843,8 +905,11 @@ class FitFunction(ABC):
         if self.log.y and w is not None:
             w = w / (y * np.log(10.0))
 
+        if markevery is None:
+            markevery = self._estimate_markevery()
+
         # Plot the raw data histograms.
-        ax.errorbar(
+        plotline, caplines, barlines = ax.errorbar(
             x,
             y,
             yerr=w,
@@ -854,12 +919,13 @@ class FitFunction(ABC):
             marker=marker,
             markerfacecolor=markerfacecolor,
             markersize=markersize,
+            markevery=markevery,
             **kwargs,
         )
 
         self._format_hax(ax)
 
-        return ax
+        return ax, plotline, caplines, barlines
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
         r"""Plot the fit.
@@ -872,9 +938,17 @@ class FitFunction(ABC):
 
         color = kwargs.pop("color", "darkorange")
         label = kwargs.pop("label", r"$\mathrm{Fit}$")
+        linestyle = kwargs.pop("ls", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
 
         # Overplot the fit.
-        ax.plot(self.xobs_raw, self(self.xobs_raw), label=label, color=color, **kwargs)
+        ax.plot(
+            self.xobs_raw,
+            self(self.xobs_raw),
+            label=label,
+            color=color,
+            linestyle=linestyle,
+            **kwargs,
+        )
 
         if annotate:
             self.annotate_TeX_info(ax, **annotate_kwargs)
@@ -883,39 +957,42 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_raw_in_fit(
+    def plot_raw_used_fit(
         self,
         ax=None,
         drawstyle=None,
         annotate=True,
         raw_kwargs=None,
-        in_kwargs=None,
+        used_kwargs=None,
         fit_kwargs=None,
         annotate_kwargs=None,
     ):
-        r"""
-        Make a plot of the raw observations, observations in fit, and the fit.
+        r"""Make a plot of the raw observations, observations in fit, and the fit.
 
-        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_in_fit`,
+        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_used`,
         and :py:meth:`self.plot_fit`.
 
         Parameters
         ----------
-        ax: mpl.Axes.axis_subplot
+        ax: None, mpl.Axes.axis_subplot
 
         drawstyle: str, None
-            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_in_fit`.
+            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_used`.
             If None, defaults to "steps-mid".
         annotate: True
             If True, add fit info to the annotation using ax.text.
         raw_kwargs: dict
             Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw_obs`.
-        in_kwargs: dict
-            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_in_fit`.
+        used_kwargs: dict
+            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.
         fit_kwargs: dict
-            Passed to ax.plot(**fit_kwargs) for plotting fit.
+            Passed to `ax.plot(**fit_kwargs)` for plotting fit.
         annotate_kwargs:
-            Passed to ax.text.
+            Passed to `ax.text`.
+
+        Returns
+        -------
+        ax: mpl.Axes.axis_subplot
         """
 
         if ax is None:
@@ -926,8 +1003,8 @@ class FitFunction(ABC):
                 dict()
             )  # dict(color="darkgreen", markerfacecolor="none", marker="P")
 
-        if in_kwargs is None:
-            in_kwargs = dict()  # dict(color="k")
+        if used_kwargs is None:
+            used_kwargs = dict()  # dict(color="k")
 
         if fit_kwargs is None:
             fit_kwargs = dict()  # dict(color="darkorange")
@@ -936,47 +1013,10 @@ class FitFunction(ABC):
             drawstyle = "steps-mid"
 
         self.plot_raw_obs(ax=ax, drawstyle=drawstyle, **raw_kwargs)
-        self.plot_in_fit(ax=ax, drawstyle=drawstyle, **in_kwargs)
+        self.plot_used(ax=ax, drawstyle=drawstyle, **used_kwargs)
         self.plot_fit(
             ax=ax, annotate=annotate, annotate_kwargs=annotate_kwargs, **fit_kwargs
         )
-
-        #         hist_label = hist_kwargs.pop("label", r"$\mathrm{Bins}$")
-        #         bin_label = bin_kwargs.pop("label", r"$\mathrm{in \; Fit}$")
-        #         fit_label = fit_kwargs.pop("label", r"$\mathrm{Fit}$")
-
-        #         # Plot the raw data histograms.
-        #         ax.errorbar(
-        #             self.xobs_raw,
-        #             self.yobs_raw,
-        #             yerr=self.weights_raw,
-        #             drawstyle=drawstyle,
-        #             label=hist_label,
-        #             color=hist_kwargs.pop("color", "k"),
-        #             **hist_kwargs
-        #         )
-
-        #         # Overplot with the data as selected for the plot.
-        #         ax.errorbar(
-        #             self.xobs,
-        #             self.yobs,
-        #             yerr=self.weights,
-        #             drawstyle=drawstyle,
-        #             label=bin_label,
-        #             color=bin_kwargs.pop("color", "darkgreen"),
-        #             **bin_kwargs
-        #         )
-
-        #         # Overplot the fit.
-        #         ax.plot(
-        #             self.xobs_raw,
-        #             self(self.xobs_raw),
-        #             label=fit_label,
-        #             color=fit_kwargs.pop("color", "darkorange"),
-        #             **fit_kwargs
-        #         )
-
-        #         ax.grid(True, which="major", axis="both")
 
         ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
 
@@ -985,17 +1025,11 @@ class FitFunction(ABC):
         #             [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
         #         )
 
-        #         if annotate:
-        #             self.annotate_TeX_info(ax, **annotate_kwargs)
-
-        #         ax.set_xlabel(self.labels.x)
-        #         ax.set_ylabel(self.labels.y)
-
         self._format_hax(ax)
 
         return ax
 
-    def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **plot_kwargs):
+    def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **kwargs):
         r"""Make a plot of the fit function that includes the data and fit,
         but are limited to data included in the fit.
 
@@ -1007,17 +1041,28 @@ class FitFunction(ABC):
             subplots_kwargs = {}
 
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(**subplots_kwargs)
 
-        drawstyle = plot_kwargs.pop("drawstyle", "steps-mid")
-        color = plot_kwargs.pop("color", "darkgreen")
+        drawstyle = kwargs.pop("drawstyle", "steps-mid")
+        color = kwargs.pop("color", "darkgreen")
+        marker = kwargs.pop("marker", "P")
+        markerfacecolor = kwargs.pop("markerfacecolor", "none")
+        markersize = kwargs.pop("markersize", 8)
+        markevery = kwargs.pop("markevery", None)
+
+        if markevery is None:
+            markevery = self._estimate_markevery()
 
         ax.plot(
             self.xobs,
             self.residuals(pct=pct),
             drawstyle=drawstyle,
             color=color,
-            **plot_kwargs,
+            marker=marker,
+            markerfacecolor=markerfacecolor,
+            markersize=markersize,
+            markevery=markevery,
+            **kwargs,
         )
 
         ax.grid(True, which="major", axis="both")
@@ -1038,33 +1083,55 @@ class FitFunction(ABC):
 
         return ax
 
-    def plot_raw_in_fit_resid(
-        self, annotate=True, resid_pct=True, fit_resid_axes=None, **kwargs
+    def plot_raw_used_fit_resid(
+        self, annotate=True, fit_resid_axes=None, resid_kwargs=None, **kwargs
     ):
-        r"""Make a stacked fit, residual plot.
+        f"""Make a stacked fit, residual plot.
 
-        kwargs passed to `plot_fit`.
+        Parameters
+        ----------
+        annotate: bool
+            If True, add fit annotation to axis.
+        fit_resid_axes: None, 2-tuple of mpl.axis.Axis
+            If not None, (fit, resid) axis pair to plot the (raw, used, fit)
+            and residual on, respectively. Otherwise, use `GridSpec` to build
+            a pair of axes where the `raw_used_fit` axis is 3 times the `resid_axis`.
+            Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share
+            an x-axis and `hax`'s x-ticks and label will be set invisible.
+        resid_kwargs: dict, None
+            Passed to :py:meth:`{self.__class__.__name__}.plot_residuals`.
+        kwargs:
+            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_in_fit`.
+
+        Returns
+        -------
+        hax: mpl.axis.Axis
+            Axis with raw observations, used observations, and fit plotted on it.
+        rax: mpl.axis.Axis
+            Axis with residuals plotted on it.
         """
 
         if fit_resid_axes is not None:
-            hist_ax, resid_ax = fit_resid_axes
+            hax, rax = fit_resid_axes
 
         else:
             fig = plt.figure()
             gs = mpl.gridspec.GridSpec(2, 1, height_ratios=[3, 1], hspace=0.1)
             # sharex in this code requires that I pass the axis object with which the x-axis is being shared.
             # Source for sharex option: http://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python
-            resid_ax = fig.add_subplot(gs[1])
-            hist_ax = fig.add_subplot(gs[0], sharex=resid_ax)
+            rax = fig.add_subplot(gs[1])
+            hax = fig.add_subplot(gs[0], sharex=rax)
 
-        self.plot_raw_in_fit(ax=hist_ax, annotate=annotate, **kwargs)
-        self.plot_residuals(ax=resid_ax, pct=resid_pct)
+        if resid_kwargs is None:
+            resid_kwargs = dict()
 
-        #         hist_ax.set_ylabel(r"$\mathrm{Count} \, [\#]$")
-        #         hist_ax.set_ylabel(self.labels.y)
-        #         resid_ax.set_ylabel(r"$\mathrm{Residual} \, [\%]$")
+        resid_pct = resid_kwargs.pop("resid_pct", True)
 
-        hist_ax.tick_params(labelbottom=False)
-        hist_ax.xaxis.label.set_visible(False)
+        self.plot_raw_used_fit(ax=hax, annotate=annotate, **kwargs)
+        self.plot_residuals(ax=rax, pct=resid_pct, **resid_kwargs)
 
-        return hist_ax, resid_ax
+        if fit_resid_axes is None:
+            hax.tick_params(labelbottom=False)
+            hax.xaxis.label.set_visible(False)
+
+        return hax, rax

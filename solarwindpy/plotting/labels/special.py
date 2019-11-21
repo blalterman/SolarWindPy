@@ -54,11 +54,15 @@ class Count(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [\#]$".format(self.tex)
+        return r"${} \; [{}]$".format(self.tex, self.units)
 
     @property
     def tex(self):
         return self._tex
+
+    @property
+    def units(self):
+        return r"\#"
 
     @property
     def path(self):
@@ -102,18 +106,25 @@ class Count(ArbitraryLabel):
 
 
 class Probability(ArbitraryLabel):
-    def __init__(self, other_label):
+    def __init__(self, other_label, comparison=None):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+
+        The `comparison`, if passed, is something like "> 0".
         """
         self.set_other_label(other_label)
+        self.set_comparison(comparison)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [\%]$".format(self.tex)
+        return r"${} \; [{}]$".format(self.tex, self.units)
 
     @property
     def tex(self):
         return self._tex
+
+    @property
+    def units(self):
+        return r"\%"
 
     @property
     def path(self):
@@ -123,16 +134,25 @@ class Probability(ArbitraryLabel):
     def other_label(self):
         return self._other_label
 
+    @property
+    def comparison(self):
+        return self._comparison
+
     def set_other_label(self, other):
         assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
         self._other_label = other
+
+    def set_comparison(self, new):
+        if new is None:
+            new = ""
+        self._comparison = str(new)
 
     def _build_tex(self):
         other = self.other_label
         #         try:
         #             tex = other.tex
         #         except AttributeError:
-        tex = r"\mathrm{Prob.}(%s)" % other.tex
+        tex = r"\mathrm{Prob.}(%s %s)" % (other.tex, self.comparison)
 
         return tex.replace(" ", r" \, ")
 
@@ -167,13 +187,13 @@ class Probability(ArbitraryLabel):
         self._path = self._build_path()
 
 
-class DateTime(ArbitraryLabel):
+class Timedelta(ArbitraryLabel):
     def __init__(self, dt):
         r"""
         Parameters
         ----------
         dt: str
-            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+            Classifies the `timedelta` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
         """
         self.set_dt(dt)
 
@@ -199,6 +219,38 @@ class DateTime(ArbitraryLabel):
         self._dt = new
 
 
+class DateTime(ArbitraryLabel):
+    def __init__(self, kind):
+        r"""
+        Parameters
+        ----------
+        dt: str
+            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+        """
+        self.set_kind(kind)
+
+    def __str__(self):
+        return r"$%s$" % self.tex
+
+    @property
+    def kind(self):
+        return self._kind
+
+    @property
+    def tex(self):
+        return r"\mathrm{%s}" % self.kind
+
+    @property
+    def path(self):
+        return Path(self.dt.lower())
+
+    def build_label(self):
+        pass
+
+    def set_kind(self, new):
+        self._kind = new
+
+
 class Distance2Sun(ArbitraryLabel):
     def __init__(self, units):
         self.set_units(units)
@@ -219,10 +271,11 @@ class Distance2Sun(ArbitraryLabel):
         return r"\mathrm{Distance \; to \; Sun}"
 
     def set_units(self, units):
-        trans = {"Rs": r"R_\bigodot", "Re": r"R_\oplus", "AU": r"AU", "au": r"AU"}
+        units = units.lower()
+        trans = {"rs": r"R_{\bigodot}", "re": r"R_{\oplus}", "au": r"\mathrm{AU}"}
         units = trans.get(units, units)
 
-        if units not in ("m", "km", r"R_\bigodot", "AU", "au"):
+        if units not in [*trans.values()] + ["m", "km"]:
             raise NotImplementedError("Unrecognized distance2sun units %s" % units)
 
         self._units = units
