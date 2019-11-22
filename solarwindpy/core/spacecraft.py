@@ -185,10 +185,10 @@ class Spacecraft(base.Base):
 
     def set_data(self, data):
         super(Spacecraft, self).set_data(data)
-        
+
         p = data.xs("pos", axis=1, level="M")
-#         assert isinstance(p, pd.DataFrame)
-        
+        #         assert isinstance(p, pd.DataFrame)
+
         p = p.loc[:, ["x", "y", "z"]]
         assert p.shape[1] == 3
 
@@ -212,8 +212,7 @@ class Spacecraft(base.Base):
         except KeyError:
             pass
 
-        target = pd.concat(target, axis=1, names=["M"])
+        target = pd.concat(target, axis=1, names=["M"], sort=True).sort_index(axis=1)
 
         assert isinstance(target.index, pd.DatetimeIndex)
-
         self._data = target

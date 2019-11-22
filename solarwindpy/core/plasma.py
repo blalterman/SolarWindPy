@@ -576,7 +576,7 @@ class Plasma(base.Base):
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
 
-        data = pd.concat([data, w], axis=1)
+        data = pd.concat([data, w], axis=1, sort=True)
 
         data.columns = self.mi_tuples(data.columns)
         data = data.sort_index(axis=1)
@@ -637,7 +637,7 @@ class Plasma(base.Base):
         slist = self._chk_species(*species)
 
         n = {s: self.ions.loc[s].n for s in slist}
-        n = pd.concat(n, axis=1, names=["S"]).sort_index(axis=1)
+        n = pd.concat(n, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
             n = n.sum(axis=1, skipna=skipna)
@@ -671,7 +671,7 @@ class Plasma(base.Base):
         slist = self._chk_species(*species)
 
         rho = {s: self.ions.loc[s].rho for s in slist}
-        rho = pd.concat(rho, axis=1, names=["S"]).sort_index(axis=1)
+        rho = pd.concat(rho, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
             rho = rho.sum(axis=1)
@@ -704,7 +704,7 @@ class Plasma(base.Base):
 
         slist = self._chk_species(*species)
         w = {s: self.ions.loc[s].thermal_speed.data for s in slist}
-        w = pd.concat(w, axis=1, names=["S"]).sort_index(axis=1)
+        w = pd.concat(w, axis=1, names=["S"], sort=True)
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
@@ -740,7 +740,7 @@ class Plasma(base.Base):
             raise NotImplementedError
 
         pth = {s: self.ions.loc[s].pth for s in slist}
-        pth = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
+        pth = pd.concat(pth, axis=1, names=["S"], sort=True)
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
@@ -769,7 +769,7 @@ class Plasma(base.Base):
         """
         slist = self._chk_species(*species)
         temp = {s: self.ions.loc[s].temperature for s in slist}
-        temp = pd.concat(temp, axis=1, names=["S"]).sort_index(axis=1)
+        temp = pd.concat(temp, axis=1, names=["S"], sort=True)
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
@@ -918,7 +918,10 @@ species: {}
             if len(species) == 1:
                 rhos = self.mass_density(*stuple)
                 v = pd.concat(
-                    v.apply(lambda x: x.cartesian).to_dict(), axis=1, names=["S"]
+                    v.apply(lambda x: x.cartesian).to_dict(),
+                    axis=1,
+                    names=["S"],
+                    sort=True,
                 )
                 rv = v.multiply(rhos, axis=1, level="S").sum(axis=1, level="C")
                 v = rv.divide(rhos.sum(axis=1), axis=0)
@@ -1003,7 +1006,10 @@ species: {}
             scom = "+".join(species)
             rho_i = self.mass_density(*stuple)
             dv_i = pd.concat(
-                {s: self.dv(s, scom).cartesian for s in stuple}, axis=1, names="S"
+                {s: self.dv(s, scom).cartesian for s in stuple},
+                axis=1,
+                names="S",
+                sort=True,
             )
             dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
@@ -1255,7 +1261,12 @@ species: {}
 
         #         fcn = lambda x: x.n  # .xs("", axis=1, level="C")
         n = (
-            pd.concat({s: self.ions.loc[s].n for s in (s0, s1)}, axis=1, names=["S"])
+            pd.concat(
+                {s: self.ions.loc[s].n for s in (s0, s1)},
+                axis=1,
+                names=["S"],
+                sort=True,
+            )
             * units.n
         )
 
@@ -1263,6 +1274,7 @@ species: {}
             {s: self.ions.loc[s].temperature.scalar for s in (s0, s1)},
             axis=1,
             names=["S"],
+            sort=True,
         )
         TeV = T * units.temperature * constants.kb.eV
 
@@ -1351,7 +1363,7 @@ species: {}
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]}, axis=1)
+        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]}, axis=1, sort=True)
         wab = w.pow(2.0).sum(axis=1).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).magnitude * units.dv
@@ -1391,7 +1403,9 @@ species: {}
 
         if both_species:
             exp = pd.Series({sa: 1.0, sb: -1.0})
-            rho_ratio = pd.concat({s: self.mass_density(s) for s in [sa, sb]}, axis=1)
+            rho_ratio = pd.concat(
+                {s: self.mass_density(s) for s in [sa, sb]}, axis=1, sort=True
+            )
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
@@ -1632,7 +1646,9 @@ species: {}
             ne = niqi
             niqivi = vi.multiply(niqi, axis=0)
         else:
-            vi = pd.concat(vi.apply(lambda x: x.cartesian).to_dict(), axis=1, names="S")
+            vi = pd.concat(
+                vi.apply(lambda x: x.cartesian).to_dict(), axis=1, names="S", sort=True
+            )
             niqi = ni.multiply(qi, axis=1, level="S")
             ne = niqi.sum(axis=1)
             niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
@@ -1643,11 +1659,11 @@ species: {}
         nrat = self.number_density(tkw).divide(ne, axis=0)
         mpme = self.constants.m_in_mp["e"] ** -1
         we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
-        we = pd.concat([we, we], axis=1, keys=["par", "per"])
+        we = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
 
         ne.name = ""
         electrons = pd.concat(
-            [ne, ve, we], axis=1, keys=["n", "v", "w"], names=["M", "C"]
+            [ne, ve, we], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
         )
         mask = ~ne.astype(bool)
         electrons = electrons.mask(mask, axis=0)
@@ -1664,7 +1680,7 @@ species: {}
             if data.columns.intersection(electrons.data.columns).size:
                 data.update(electrons.data)
             else:
-                data = pd.concat([data, electrons.data], axis=1).sort_index(axis=1)
+                data = pd.concat([data, electrons.data], axis=1, sort=True)
                 species = sorted(self.species + ("e",))
                 self._set_species(*species)
                 self.set_data(data)
@@ -1717,7 +1733,7 @@ species: {}
         scom = "+".join(slist)
         rho = self.mass_density(*slist)
         dv = {s: self.dv(s, scom).project(self.b).par for s in slist}
-        dv = pd.concat(dv, axis=1, names=["S"]).sort_index(axis=1)
+        dv = pd.concat(dv, axis=1, names=["S"], sort=True)
         dv.columns.name = "S"
         w = self.data.w.par.loc[:, slist]
 
