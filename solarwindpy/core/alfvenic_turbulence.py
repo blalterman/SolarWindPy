@@ -343,7 +343,9 @@ unexpected."""
         window = kwargs.pop("window", "15min")
         min_periods = kwargs.pop("min_periods", 5)
 
-        data = pd.concat({"v": v_in, "b": b_ca_units}, axis=1, names=["M"])
+        data = pd.concat(
+            {"v": v_in, "b": b_ca_units}, axis=1, names=["M"], sort=True
+        ).sort_index(axis=1)
         rolled = data.rolling(window, min_periods=min_periods, **kwargs)
         agged = rolled.agg("mean")
         deltas = data.subtract(agged, axis=1)

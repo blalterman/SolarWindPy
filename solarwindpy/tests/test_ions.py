@@ -50,7 +50,7 @@ class IonTestBase(ABC):
         kwargs = dict(axis=1, level="C")
         scalar = w.pow(2).multiply(coeff, **kwargs).sum(axis=1).pipe(np.sqrt)
         scalar.name = ("w", "scalar")
-        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
+        data = pd.concat([data, scalar], axis=1, sort=True)
         data.columns = pd.MultiIndex.from_tuples(data.columns, names=["M", "C"])
 
         ion = ions.Ion(data, cls().species)

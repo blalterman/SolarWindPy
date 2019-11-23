@@ -50,7 +50,7 @@ class PlasmaTestBase(ABC):
         scalar = ((2.0 * per) + par).multiply(1.0 / 3.0).pipe(np.sqrt)
         cols = scalar.columns.to_series().apply(lambda x: ("w", "scalar", x))
         scalar.columns = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
-        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
+        data = pd.concat([data, scalar], axis=1, sort=True)
 
         cls.object_testing = plas
         cls.data = data
@@ -246,7 +246,10 @@ class PlasmaTestBase(ABC):
 
         # print_inline_debug_info = False
         ions_ = pd.concat(
-            {s: ot.ions[s].number_density for s in self.stuple}, axis=1, names=["S"]
+            {s: ot.ions[s].number_density for s in self.stuple},
+            axis=1,
+            names=["S"],
+            sort=True,
         )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
@@ -291,7 +294,10 @@ class PlasmaTestBase(ABC):
 
         # print_inline_debug_info = False
         ions_ = pd.concat(
-            {s: ot.ions[s].mass_density for s in self.stuple}, axis=1, names=["S"]
+            {s: ot.ions[s].mass_density for s in self.stuple},
+            axis=1,
+            names=["S"],
+            sort=True,
         )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
@@ -334,7 +340,7 @@ class PlasmaTestBase(ABC):
     def test_thermal_speed(self):
         ot = self.object_testing
         ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         for s in self.species_combinations:
@@ -369,7 +375,7 @@ class PlasmaTestBase(ABC):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
         ions_ = {s: self.object_testing.ions[s].pth for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         # print("<Ions>", ions, sep="\n")
 
@@ -401,7 +407,7 @@ class PlasmaTestBase(ABC):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
         ions_ = {s: self.object_testing.ions[s].temperature for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         # print("<Ions>", ions, sep="\n")
 
@@ -434,7 +440,7 @@ class PlasmaTestBase(ABC):
 
     def test_beta(self):
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
-        pth = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
+        pth = pd.concat(pth, axis=1, names=["S"], sort=True)
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         bsq = self.data.loc[:, pd.IndexSlice["b", ["x", "y", "z"], ""]]
@@ -503,7 +509,7 @@ class PlasmaTestBase(ABC):
             else:
                 # Test list of and sums of sums of species.
                 pth = {sprime: self.object_testing.ions.loc[sprime].pth for sprime in s}
-                pth = pd.concat(pth, axis=1, names=["S"])
+                pth = pd.concat(pth, axis=1, names=["S"], sort=True)
                 pth = pth.drop("scalar", axis=1, level="C")
 
                 coeff = pd.Series({"par": -1, "per": 1})
@@ -584,7 +590,10 @@ class PlasmaTestBase(ABC):
                 # Test species = "s0+s1+...+sn"
                 rhos = ot.rho(*s)
                 ions_ = pd.concat(
-                    ions_.apply(lambda x: x.cartesian).to_dict(), axis=1, names=["S"]
+                    ions_.apply(lambda x: x.cartesian).to_dict(),
+                    axis=1,
+                    names=["S"],
+                    sort=True,
                 )
                 # print("", "<Ions>", ions, "<rhos>", rhos, sep="\n")
                 ions_ = ions_.multiply(rhos, axis=1, level="S")
@@ -856,7 +865,7 @@ class PlasmaTestBase(ABC):
         total_masses = pd.DataFrame(
             {"+".join(s): rho.loc[:, s].sum(axis=1) for s in combos}
         )
-        rho = pd.concat([rho, total_masses], axis=1).sort_index(axis=1)
+        rho = pd.concat([rho, total_masses], axis=1, sort=True)
 
         ions_ = (constants.mu_0 * rho).pow(-0.5).multiply(b, axis=0) / 1e3
         ions_.columns.names = ["S"]
@@ -965,7 +974,7 @@ class PlasmaTestBase(ABC):
             "+".join(x): n.loc[:, list(x)].multiply(masses.loc[list(x)]).sum(axis=1)
             for x in combos
         }
-        rhos = pd.concat(rhos, axis=1, names=["S"])
+        rhos = pd.concat(rhos, axis=1, names=["S"], sort=True)
 
         tk = pd.IndexSlice[["x", "y", "z"], ""]
         b = (self.data.b.loc[:, tk]).pow(2).sum(axis=1).pipe(np.sqrt) * 1e-9
@@ -1269,7 +1278,10 @@ class PlasmaTestBase(ABC):
         sc_data = base.TestData().spacecraft_data
 
         Wind = pd.concat(
-            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+            {"pos": sc_data.xs("gse", axis=1, level="M")},
+            axis=1,
+            names=["M"],
+            sort=True,
         )
         Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
 
@@ -1281,6 +1293,7 @@ class PlasmaTestBase(ABC):
             },
             axis=1,
             names=["M"],
+            sort=True,
         )
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
 
@@ -1325,16 +1338,19 @@ class PlasmaTestBase(ABC):
 
         v = self.data.v
         v = pd.concat(
-            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: v.xs(s, axis=1, level="S") for s in slist},
+            axis=1,
+            names=["S"],
+            sort=True,
+        )
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         vcom = (
@@ -1347,7 +1363,10 @@ class PlasmaTestBase(ABC):
         sc_data = base.TestData().spacecraft_data
 
         Wind = pd.concat(
-            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+            {"pos": sc_data.xs("gse", axis=1, level="M")},
+            axis=1,
+            names=["M"],
+            sort=True,
         )
         Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
         tau_exp_Wind = Wind.distance2sun.multiply(vsw.pow(-1.0), axis=0)
@@ -1360,6 +1379,7 @@ class PlasmaTestBase(ABC):
             },
             axis=1,
             names=["M"],
+            sort=True,
         )
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
         #         Rs = 695.508e6 # [m]
@@ -1483,15 +1503,15 @@ class PlasmaTestBase(ABC):
 
             wp = self.data.w.loc[:, tkw]
             npne = self.data.n.xs("", axis=1, level="C").loc[:, tkn]
-            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"])
+            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"], sort=True)
             nrat = npne.pow(exp, axis=1, level="S").product(axis=1)
             mpme = physical_constants["electron-proton mass ratio"][0] ** -1.0
             we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
 
-            tmp = pd.concat([we, we], axis=1, keys=["par", "per"])
+            tmp = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
             ne.name = ""
             electrons = pd.concat(
-                [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"]
+                [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
             )
 
             electrons = ions.Ion(electrons, "e")
@@ -1523,7 +1543,9 @@ class PlasmaTestBase(ABC):
             # Check that electrons aren't stored in plasma.
             self.assertFalse("e" in ot.species)
             comp_data = (
-                pd.concat({"e": electrons.data}, axis=1, names=["S", "M", "C"])
+                pd.concat(
+                    {"e": electrons.data}, axis=1, names=["S", "M", "C"], sort=True
+                )
                 .reorder_levels(["M", "C", "S"], axis=1)
                 .sort_index(axis=1)
             )
@@ -1568,16 +1590,19 @@ class PlasmaTestBase(ABC):
 
         v = self.data.v
         v = pd.concat(
-            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: v.xs(s, axis=1, level="S") for s in slist},
+            axis=1,
+            names=["S"],
+            sort=True,
+        )
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         #        if print_inline_debug_info:
@@ -1715,8 +1740,8 @@ class PlasmaTestBase(ABC):
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12  # [m_p] * [n] * [dv]**2 / [p]

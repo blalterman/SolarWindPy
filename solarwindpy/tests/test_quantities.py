@@ -189,9 +189,7 @@ class VectorTestBase(QuantityTestBase):
             .sum(axis=1)
             .pipe(np.sqrt)
         )
-        projected = pd.concat([par, per], axis=1, keys=["par", "per"]).sort_index(
-            axis=1
-        )
+        projected = pd.concat([par, per], axis=1, keys=["par", "per"], sort=True)
 
         # print("",
         #       "<Test>",
@@ -209,9 +207,7 @@ class VectorTestBase(QuantityTestBase):
         # Projecting a thing onto itself should return 1 for parallel
         # and 0 for perp.
         per = pd.Series(0.0, index=per.index)
-        projected = pd.concat([vmag, per], axis=1, keys=["par", "per"]).sort_index(
-            axis=1
-        )
+        projected = pd.concat([vmag, per], axis=1, keys=["par", "per"], sort=True)
         pdt.assert_frame_equal(
             projected, self.object_testing.project(self.object_testing)
         )

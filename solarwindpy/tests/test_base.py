@@ -40,12 +40,10 @@ class TestData(object):
 
     @property
     def combined_data(self):
-        sc = (
-            pd.concat({"sc": self.spacecraft_data}, axis=1, names=["S"])
-            .reorder_levels(["M", "C", "S"], axis=1)
-            .sort_index(axis=1)
-        )
-        out = pd.concat([self.plasma_data, sc], axis=1).sort_index(axis=1)
+        sc = pd.concat(
+            {"sc": self.spacecraft_data}, axis=1, names=["S"], sort=True
+        ).reorder_levels(["M", "C", "S"], axis=1)
+        out = pd.concat([self.plasma_data, sc], axis=1, sort=True)
         return out
 
     def set_spacecraft_data(self):
@@ -117,7 +115,7 @@ class SWEData(TestCase):
     @classmethod
     def setUpClass(cls):
         data = TestData()
-        cls.data = data.plasma_data
+        cls.data = data.plasma_data.sort_index(axis=1)
         cls.set_object_testing()
 
 
