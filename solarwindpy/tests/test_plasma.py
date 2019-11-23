@@ -1039,16 +1039,18 @@ class PlasmaTestBase(ABC):
     def test_lnlambda(self):
         #        print_inline_debug_info = True
 
-        if len(self.stuple) == 1:
-            # TODO: test self-collision Coulomb logarithm
-            return None
+        ot = self.object_testing
+        regex_msg = (
+            "`lnlambda` can only calculate with individual s0 " "and s1 species."
+        )
+        invalid = "Invalid species"
 
         kb_J = constants.physical_constants["Boltzmann constant"]
         kb_eV = constants.physical_constants["Boltzmann constant in eV/K"]
 
         amu = self.m_amu
         charge_states = self.charge_states
-        n = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
+        n_all = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
         m = self.mass
         # rho = n.multiply(m, axis=1, level="S")
         w = self.data.w.scalar.loc[:, self.stuple] * 1e3
@@ -1056,102 +1058,136 @@ class PlasmaTestBase(ABC):
         Tkelvin = 0.5 * w.pow(2.0).multiply(m, axis=1, level="S") / kb_J[0]
         TeV = Tkelvin * kb_eV[0]
 
-        nZsqOTeV = n.multiply(charge_states.pow(2), axis=1, level="S").divide(
-            TeV, axis=1, level="S"
-        )
-
-        # if print_inline_debug_info:
-        #     print("",
-        #           "<Test>",
-        #           "<species>: {}".format(self.stuple),
-        #           "<amu>", type(amu), amu,
-        #           "<charge_states>", type(charge_states), charge_states,
-        #           "<n>", type(n), n,
-        #           "<mass>", type(m), m,
-        #           # "<rho>", type(rho), rho,
-        #           "<w>", type(w), w,
-        #           "<kb_J>", kb_J,
-        #           "<kb_eV>", kb_eV,
-        #           "<T [K]>", type(Tkelvin), Tkelvin,
-        #           "<T [eV]>", type(TeV), TeV,
-        #           "<n Z^2 / T [eV]>", type(nZsqOTeV), nZsqOTeV,
-        #           "",
-        #           sep="\n")
-
-        regex_msg = (
-            "`lnlambda` can only calculate with individual s0 " "and s1 species."
-        )
-        invalid = "Invalid species"
-        combos2 = [x for x in self.species_combinations if len(x) == 2]
-        for combo in combos2:
-            si, sj = combo
-            ai = amu.loc[si]
-            aj = amu.loc[sj]
-            zi = charge_states.loc[si]
-            zj = charge_states.loc[sj]
-            ti = TeV.loc[:, si]
-            tj = TeV.loc[:, sj]
-
-            left = (zi * zj * (ai + aj)) / ((ai * tj) + (aj * ti))
-            right = nZsqOTeV.loc[:, list(combo)].sum(axis=1).pipe(np.sqrt)
-            ln = np.log(left * right)
-            lnlambda = 29.9 - ln
-            lnlambda.name = ",".join(sorted(combo))
-            # ln = None
-            # lnlambda = None
-
-            #            if print_inline_debug_info:
-            #                print(
-            #                      "<combo>: {}".format(combo),
-            #                      "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
-            #                          type(right), right,
-            #                      "<left>", type(left), left,
-            #                      "<ln>", type(ln), ln,
-            #                      "<lnlambda>", type(lnlambda), lnlambda,
-            #                      "",
-            #                      sep="\n")
-
-            pdt.assert_series_equal(
-                lnlambda, self.object_testing.lnlambda(combo[0], combo[1])
+        if len(self.stuple) == 1:
+            s = self.stuple[0]
+            z = charge_states.loc[s]
+            n = n_all.loc[:, s]
+            T = TeV.loc[:, s]
+            lnlambda = 29.9 - np.log(
+                np.sqrt(2) * z ** 3 * n.pipe(np.sqrt) * T.pow(-3.0 / 2.0)
             )
-            pdt.assert_series_equal(
-                lnlambda,
-                self.object_testing.lnlambda(combo[1], combo[0]),
-                check_names=False,
+            lnlambda.name = f"{s},{s}"
+
+            pdt.assert_series_equal(lnlambda, ot.lnlambda(s, s))
+            pdt.assert_series_equal(ot.lnlambda(s, s), ot.lnlambda(s, s))
+
+            s0s1 = f"{s}+{s}"
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s, s0s1)
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s0s1, s)
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s0s1, s0s1)
+
+            combo = [s, s]
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda("+".join(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), "+".join(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(",".join(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), ",".join(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), s)
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), combo[1])
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(s, list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(combo[1], list(combo))
+
+        else:
+            nZsqOTeV = n_all.multiply(charge_states.pow(2), axis=1, level="S").divide(
+                TeV, axis=1, level="S"
             )
 
-            # NOTE: The following various Invalid Species tests are excessive
-            #       and should be reduced.
-            s0s1 = "+".join(combo)  # ("+".join(combo), combo):
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(combo[0], s0s1)
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, combo[0])
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(combo[1], s0s1)
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, combo[1])
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, s0s1)
+            # if print_inline_debug_info:
+            #     print("",
+            #           "<Test>",
+            #           "<species>: {}".format(self.stuple),
+            #           "<amu>", type(amu), amu,
+            #           "<charge_states>", type(charge_states), charge_states,
+            #           "<n>", type(n), n,
+            #           "<mass>", type(m), m,
+            #           # "<rho>", type(rho), rho,
+            #           "<w>", type(w), w,
+            #           "<kb_J>", kb_J,
+            #           "<kb_eV>", kb_eV,
+            #           "<T [K]>", type(Tkelvin), Tkelvin,
+            #           "<T [eV]>", type(TeV), TeV,
+            #           "<n Z^2 / T [eV]>", type(nZsqOTeV), nZsqOTeV,
+            #           "",
+            #           sep="\n")
 
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda("+".join(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), "+".join(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(",".join(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), ",".join(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), combo[0])
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), combo[1])
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(combo[0], list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(combo[1], list(combo))
+            combos2 = [x for x in self.species_combinations if len(x) == 2]
+            for combo in combos2:
+                si, sj = combo
+                ai = amu.loc[si]
+                aj = amu.loc[sj]
+                zi = charge_states.loc[si]
+                zj = charge_states.loc[sj]
+                ti = TeV.loc[:, si]
+                tj = TeV.loc[:, sj]
+
+                left = (zi * zj * (ai + aj)) / ((ai * tj) + (aj * ti))
+                right = nZsqOTeV.loc[:, list(combo)].sum(axis=1).pipe(np.sqrt)
+                ln = np.log(left * right)
+                lnlambda = 29.9 - ln
+                lnlambda.name = ",".join(sorted(combo))
+                # ln = None
+                # lnlambda = None
+
+                #            if print_inline_debug_info:
+                #                print(
+                #                      "<combo>: {}".format(combo),
+                #                      "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
+                #                          type(right), right,
+                #                      "<left>", type(left), left,
+                #                      "<ln>", type(ln), ln,
+                #                      "<lnlambda>", type(lnlambda), lnlambda,
+                #                      "",
+                #                      sep="\n")
+
+                pdt.assert_series_equal(lnlambda, ot.lnlambda(combo[0], combo[1]))
+                pdt.assert_series_equal(
+                    lnlambda, ot.lnlambda(combo[1], combo[0]), check_names=False
+                )
+
+                # NOTE: The following various Invalid Species tests are excessive
+                #       and should be reduced.
+                s0s1 = "+".join(combo)  # ("+".join(combo), combo):
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(combo[0], s0s1)
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, combo[0])
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(combo[1], s0s1)
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, combo[1])
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, s0s1)
+
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda("+".join(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), "+".join(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(",".join(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), ",".join(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), combo[0])
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), combo[1])
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(combo[0], list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(combo[1], list(combo))
 
     def test_nuc(self):
         r"""
