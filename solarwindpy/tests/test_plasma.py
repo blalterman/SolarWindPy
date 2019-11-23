@@ -1028,10 +1028,10 @@ class PlasmaTestBase(ABC):
                 self.object_testing.caani("+".join(combo), pdynamic=True)
 
     def test_lnlambda(self):
-        # print_inline_debug_info = False
+        #        print_inline_debug_info = True
 
         if len(self.stuple) == 1:
-            # We only test plasmas w/ > 1 species.
+            # TODO: test self-collision Coulomb logarithm
             return None
 
         kb_J = constants.physical_constants["Boltzmann constant"]
@@ -1091,16 +1091,16 @@ class PlasmaTestBase(ABC):
             # ln = None
             # lnlambda = None
 
-            # if print_inline_debug_info:
-            #     print(
-            #           "<combo>: {}".format(combo),
-            #           "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
-            #               type(right), right,
-            #           "<left>", type(left), left,
-            #           "<ln>", type(ln), ln,
-            #           "<lnlambda>", type(lnlambda), lnlambda,
-            #           "",
-            #           sep="\n")
+            #            if print_inline_debug_info:
+            #                print(
+            #                      "<combo>: {}".format(combo),
+            #                      "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
+            #                          type(right), right,
+            #                      "<left>", type(left), left,
+            #                      "<ln>", type(ln), ln,
+            #                      "<lnlambda>", type(lnlambda), lnlambda,
+            #                      "",
+            #                      sep="\n")
 
             pdt.assert_series_equal(
                 lnlambda, self.object_testing.lnlambda(combo[0], combo[1])

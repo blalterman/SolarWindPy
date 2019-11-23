@@ -1211,7 +1211,7 @@ species: {}
         r"""
         Calculate the Coulomb logarithm between species s0 and s1.
 
-            :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_z}})`
+            :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
 
         Parameters
         ----------
@@ -1246,54 +1246,45 @@ species: {}
         constants = self.constants
         units = self.units
 
-        z = constants.charge_states.loc[sorted([s0, s1])]
-        z0 = z.loc[s0]
-        z1 = z.loc[s1]
+        z0 = constants.charge_states.loc[s0]
+        z1 = constants.charge_states.loc[s1]
 
         a0 = constants.m_amu.loc[s0]
         a1 = constants.m_amu.loc[s1]
 
-        #         fcn = lambda x: x.n  # .xs("", axis=1, level="C")
-        n = (
-            pd.concat({s: self.ions.loc[s].n for s in (s0, s1)}, axis=1, names=["S"])
-            * units.n
-        )
+        n0 = self.ions.loc[s0].n * units.n
+        n1 = self.ions.loc[s1].n * units.n
 
-        T = pd.concat(
-            {s: self.ions.loc[s].temperature.scalar for s in (s0, s1)},
-            axis=1,
-            names=["S"],
-        )
-        TeV = T * units.temperature * constants.kb.eV
+        T0 = self.ions.loc[s0].temperature.scalar * units.temperature * constants.kb.eV
+        T1 = self.ions.loc[s1].temperature.scalar * units.temperature * constants.kb.eV
 
-        kwargs = dict(axis=1, level="S")
-        nZsqOTeV = n.multiply(z.pow(2.0), **kwargs).multiply(TeV.pow(-1.0), **kwargs)
-        right = nZsqOTeV.sum(axis=1).pipe(np.sqrt)
+        r0 = n0.multiply(z0 ** 2.0).divide(T0, axis=0)
+        r1 = n1.multiply(z1 ** 2.0).divide(T1, axis=0)
+        right = r0.add(r1).pipe(np.sqrt)
 
-        T0 = TeV.loc[:, s0]
-        T1 = TeV.loc[:, s1]
         left = z0 * z1 * (a0 + a1) / (a0 * T1).add(a1 * T0, axis=0)
 
         lnlambda = (29.9 - np.log(left * right)) / units.lnlambda
         lnlambda.name = "%s,%s" % (s0, s1)
 
-        # print("",
-        #       "<Module>",
-        #       "<s0, s1>: %s, %s" % (s0, s1),
-        #       "<Z>", type(z), z,
-        #       "<ions>", type(self.ions), self.ions,
-        #       "<n>", type(n), n,
-        #       "<T>", type(T), T,
-        #       "<T [eV]>", type(TeV), TeV,
-        #       "<n Z^s / T [eV]>", type(nZsqOTeV), nZsqOTeV,
-        #       "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>", type(right), right,
-        #       "<T0>", type(T0), T0,
-        #       "<T1>", type(T1), T1,
-        #       "<left>", type(left), left,
-        #       "<lnlambda>", type(lnlambda), lnlambda,
-        #       "<Module Done>",
-        #       "",
-        #       sep="\n")
+        #        print("",
+        #              "<Module>",
+        #              "<ions>", type(self.ions), self.ions,
+        #              "<s0, s1>: %s, %s" % (s0, s1),
+        #              "<z0>", z0,
+        #              "<z1>", z1,
+        #              "<n0>", type(n0), n0,
+        #              "<n1>", type(n1), n1,
+        #              "<T0>", type(T0), T0,
+        #              "<T1>", type(T1), T1,
+        #              "<r0>", type(r0), r0,
+        #              "<r1>", type(r1), r1,
+        #              "<right>", type(right), right,
+        #              "<left>", type(left), left,
+        #              "<lnlambda>", type(lnlambda), lnlambda,
+        #              "<Module Done>",
+        #              "",
+        #              sep="\n")
 
         return lnlambda
 
