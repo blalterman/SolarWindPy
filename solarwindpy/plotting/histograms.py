@@ -310,47 +310,47 @@ class AggPlot(base.Base):
 
         return tk
 
-    # Old version that cuts at percentiles.
-    @staticmethod
-    def clip_data(data, clip):
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
-
-    # New version that uses binning to cut.
+    #     Old version that cuts at percentiles.
     #     @staticmethod
-    #     def clip_data(data, bins, clip):
-    #         q0 = 0.001
-    #         q1 = 0.999
+    #     def clip_data(data, clip):
+    #         q0 = 0.0001
+    #         q1 = 0.9999
     #         pct = data.quantile([q0, q1])
-    #         lo  = pct.loc[q0]
-    #         up  = pct.loc[q1]
-    #         lo = bins.iloc[0]
-    #         up = bins.iloc[-1]
-    #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo)
-    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up)
+    #         lo = pct.loc[q0]
+    #         up = pct.loc[q1]
+    #
+    #         if isinstance(data, pd.Series):
+    #             ax = 0
+    #         elif isinstance(data, pd.DataFrame):
+    #             ax = 1
     #         else:
-    #             data = data.clip(lo, up)
+    #             raise TypeError("Unexpected object %s" % type(data))
+    #
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo, axis=ax)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up, axis=ax)
+    #         else:
+    #             data = data.clip(lo, up, axis=ax)
     #         return data
+    #
+    #     New version that uses binning to cut.
+    #         @staticmethod
+    #         def clip_data(data, bins, clip):
+    #             q0 = 0.001
+    #             q1 = 0.999
+    #             pct = data.quantile([q0, q1])
+    #             lo  = pct.loc[q0]
+    #             up  = pct.loc[q1]
+    #             lo = bins.iloc[0]
+    #             up = bins.iloc[-1]
+    #             if isinstance(clip, str) and clip.lower()[0] == "l":
+    #                 data = data.clip_lower(lo)
+    #             elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #                 data = data.clip_upper(up)
+    #             else:
+    #                 data = data.clip(lo, up)
+    #             return data
 
     @abstractproperty
     def _gb_axes(self):
@@ -417,9 +417,6 @@ class Hist1D(AggPlot):
         self.set_axnorm(axnorm)
         self.set_data(x, y, clip_data)
         self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
-        #         self._labels = base.AxesLabels(
-        #             x="x", y=labels_module.Count(norm=axnorm) if y is None else "y"
-        #         )
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_path(None)
@@ -448,22 +445,14 @@ class Hist1D(AggPlot):
 
     set_path.__doc__ = base.Base.set_path.__doc__
 
-    #     def set_data(self, x, y, logx, clip):
-    #         logx = bool(logx)
-    #         data = pd.DataFrame({"x": np.log10(np.abs(x)) if logx else x})
-
     def set_data(self, x, y, clip):
         data = pd.DataFrame({"x": np.log10(np.abs(x)) if self.log.x else x})
-
-        #         if clip:
-        #             data = self.clip_data(data, clip)
 
         if y is None:
             y = pd.Series(1, index=x.index)
         data.loc[:, "y"] = y
 
         self._data = data
-        #         self._log = base.LogAxes(x=logx)
         self._clip = clip
 
     def set_axnorm(self, new):
@@ -633,7 +622,7 @@ class Hist1D(AggPlot):
         return ax
 
 
-class Hist2D(AggPlot):
+class Hist2D(base.Plot2D, AggPlot):
     r"""Create a 2D histogram with an optional z-value using an equal number
     of bins along the x and y axis.
 
@@ -695,19 +684,11 @@ class Hist2D(AggPlot):
     ):
         super(Hist2D, self).__init__()
         self.set_log(x=logx, y=logy)
-        self.set_data(
-            x,
-            y,
-            z,
-            #                       logx, logy,
-            clip_data,
-        )
+        self.set_data(x, y, z, clip_data)
         self.set_labels(
             x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
         )
-        #         self._labels = base.AxesLabels(
-        #             x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
-        #         )
+
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
@@ -760,42 +741,37 @@ class Hist2D(AggPlot):
 
         super(Hist2D, self).set_labels(z=z, **kwargs)
 
-    #     def set_data(self, x, y, z, logx, logy, clip):
-    #         logx = bool(logx)
-    #         logy = bool(logy)
+    #     def set_data(self, x, y, z, clip):
     #         data = pd.DataFrame(
     #             {
-    #                 "x": np.log10(np.abs(x)) if logx else x,
-    #                 "y": np.log10(np.abs(y)) if logy else y,
+    #                 "x": np.log10(np.abs(x)) if self.log.x else x,
+    #                 "y": np.log10(np.abs(y)) if self.log.y else y,
     #             }
     #         )
+    #
+    #
+    #         if z is None:
+    #             z = pd.Series(1, index=x.index)
+    #
+    #         data.loc[:, "z"] = z
+    #         data = data.dropna()
+    #         if not data.shape[0]:
+    #             raise ValueError(
+    #                 "You can't build a %s with data that is exclusively NaNs"
+    #                 % self.__class__.__name__
+    #             )
+    #
+    #         self._data = data
+    #         self._clip = clip
 
     def set_data(self, x, y, z, clip):
-        data = pd.DataFrame(
-            {
-                "x": np.log10(np.abs(x)) if self.log.x else x,
-                "y": np.log10(np.abs(y)) if self.log.y else y,
-            }
-        )
-
-        #         if clip:
-        #             data = self.clip_data(data, clip)
-
-        if z is None:
-            z = pd.Series(1, index=x.index)
-
-        data.loc[:, "z"] = z
-
-        data = data.dropna()
-        if not data.shape[0]:
-            raise ValueError(
-                "You can't build a %s with data that is exclusively NaNs"
-                % self.__class__.__name__
-            )
-
+        super(Hist2D, self).set_data(x, y, z, clip)
+        data = self.data
+        if self.log.x:
+            data.loc[:, "x"] = np.log10(np.abs(data.loc[:, "x"]))
+        if self.log.y:
+            data.loc[:, "y"] = np.log10(np.abs(data.loc[:, "y"]))
         self._data = data
-        #         self._log = base.LogAxes(x=logx, y=logy)
-        self._clip = clip
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
@@ -886,54 +862,60 @@ class Hist2D(AggPlot):
     #         ax.grid(True, which="major", axis="both")
 
     def _make_cbar(self, mappable, **kwargs):
-        f"""Make a colorbar on `ax` using `mappable`.
-
-        Parameters
-        ----------
-        mappable:
-            See `figure.colorbar` kwarg of same name.
-        ax: mpl.axis.Axis
-            See `figure.colorbar` kwarg of same name.
-        norm: mpl.colors.Normalize instance
-            The normalization used in the plot. Passed here to determine
-            y-ticks.
-        kwargs:
-            Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
-            row or column normalized, `ticks` defaults to
-            :py:class:`mpl.ticker.MultipleLocator(0.1)`.
-        """
-        #         logging.getLogger("main").warning("Making a cbar")
-        #         log_mem_usage()
-        ax = kwargs.pop("ax", None)
-        cax = kwargs.pop("cax", None)
-        if ax is not None and cax is not None:
-            raise ValueError("Can't pass ax and cax.")
-
-        if ax is not None:
-            try:
-                fig = ax.figure
-            except AttributeError:
-                fig = ax[0].figure
-        elif cax is not None:
-            try:
-                fig = cax.figure
-            except AttributeError:
-                fig = cax[0].figure
-        else:
-            ax = plt.gca()
-            fig = ax.figure
-
         ticks = kwargs.pop(
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
+        super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
 
-        label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(
-            mappable, label=label, ax=ax, cax=cax, ticks=ticks, **kwargs
-        )
-
-        return cbar
+    #         f"""Make a colorbar on `ax` using `mappable`.
+    #
+    #         Parameters
+    #         ----------
+    #         mappable:
+    #             See `figure.colorbar` kwarg of same name.
+    #         ax: mpl.axis.Axis
+    #             See `figure.colorbar` kwarg of same name.
+    #         norm: mpl.colors.Normalize instance
+    #             The normalization used in the plot. Passed here to determine
+    #             y-ticks.
+    #         kwargs:
+    #             Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
+    #             row or column normalized, `ticks` defaults to
+    #             :py:class:`mpl.ticker.MultipleLocator(0.1)`.
+    #         """
+    #         #         logging.getLogger("main").warning("Making a cbar")
+    #         #         log_mem_usage()
+    #         ax = kwargs.pop("ax", None)
+    #         cax = kwargs.pop("cax", None)
+    #         if ax is not None and cax is not None:
+    #             raise ValueError("Can't pass ax and cax.")
+    #
+    #         if ax is not None:
+    #             try:
+    #                 fig = ax.figure
+    #             except AttributeError:
+    #                 fig = ax[0].figure
+    #         elif cax is not None:
+    #             try:
+    #                 fig = cax.figure
+    #             except AttributeError:
+    #                 fig = cax[0].figure
+    #         else:
+    #             ax = plt.gca()
+    #             fig = ax.figure
+    #
+    #         ticks = kwargs.pop(
+    #             "ticks",
+    #             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
+    #         )
+    #
+    #         label = kwargs.pop("label", self.labels.z)
+    #         cbar = fig.colorbar(
+    #             mappable, label=label, ax=ax, cax=cax, ticks=ticks, **kwargs
+    #         )
+    #
+    #         return cbar
 
     def _limit_color_norm(self, norm):
         if self.axnorm in ("c", "r"):
