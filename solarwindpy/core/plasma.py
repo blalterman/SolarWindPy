@@ -575,8 +575,12 @@ class Plasma(base.Base):
         w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
+        w.columns = self.mi_tuples(w.columns)
 
-        data = pd.concat([data, w], axis=1, sort=True)
+        #         data = pd.concat([data, w], axis=1, sort=True)
+        data = pd.concat([data, w], axis=1, sort=False).sort_index(
+            axis=1
+        )  # .sort_idex(axis=0)
 
         data.columns = self.mi_tuples(data.columns)
         data = data.sort_index(axis=1)
