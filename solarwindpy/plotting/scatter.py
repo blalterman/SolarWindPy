@@ -4,14 +4,12 @@ r"""Aggregate, create, and save 1D and 2D plots.
 
 import pdb  # noqa: F401
 
-import pandas as pd
-
 from matplotlib import pyplot as plt
 
 from . import base
 
 
-class Scatter(base.Base):
+class Scatter(base.Plot2D):
     r"""Create a scatter plot.
 
     Properties
@@ -44,75 +42,9 @@ class Scatter(base.Base):
         """
         super(Scatter, self).__init__()
         self.set_data(x, y, z, clip_data)
-        self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else "z")
+        self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
         self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)
-
-    def set_data(self, x, y, z=None, clip_data=True):
-        data = {"x": x, "y": y}
-        data = pd.concat(data, axis=1)
-
-        if z is None:
-            z = pd.Series(1, index=data.index)
-
-        data.loc[:, "z"] = z
-        data = data.dropna()
-        self._data = data
-        self._clip = bool(clip_data)
-
-    def set_path(self, new):
-        path, x, y, z, scale_info = super(Scatter, self).set_path(new, add_scale=False)
-
-        if new == "auto":
-
-            n_unique_z = self.data.loc[:, "z"].unique().size
-
-            if (z == "z") and (n_unique_z == 1):
-                z = "count"
-
-            elif n_unique_z > 1:
-                # Expect aggregating data.
-                pass
-
-            else:
-                raise ValueError("Unable to auto set z-component of path")
-
-            path = path / x / y / z
-
-        else:
-            assert x is None
-            assert y is None
-            assert z is None
-
-        self._path = path
-
-    set_path.__doc__ = base.Base.set_path.__doc__
-
-    def set_labels(self, **kwargs):
-        z = kwargs.pop("z", self.labels.z)
-        super(Scatter, self).set_labels(z=z, **kwargs)
-
-    def _format_axis(self, ax):
-        xlbl = self.labels.x
-        if xlbl is not None:
-            ax.set_xlabel(xlbl)
-
-        ylbl = self.labels.y
-        if ylbl is not None:
-            ax.set_ylabel(ylbl)
-
-        if self.log.x:
-            ax.set_xscale("log")
-
-        if self.log.y:
-            ax.set_yscale("log")
-
-        ax.grid(True, which="major", axis="both")
-
-    def _make_cbar(self, mappable, ax, **kwargs):
-        label = kwargs.pop("label", self.labels.z)
-        cbar = ax.figure.colorbar(mappable, ax=ax, label=label, **kwargs)
-        return cbar
 
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""
@@ -134,10 +66,7 @@ class Scatter(base.Base):
 
         data = self.data
         if self.clip:
-            rng = data.quantile([0.0005, 0.9995])
-            lo = rng.loc[0.0005]
-            up = rng.loc[0.9995]
-            data = data.clip(lower=lo, upper=up, axis=1)
+            data = self.clip_data(data, self.clip)
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"
