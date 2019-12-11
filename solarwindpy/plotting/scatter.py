@@ -46,6 +46,22 @@ class Scatter(base.Plot2D):
         self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)
 
+    def _format_axis(self, ax, collection):
+        super(Scatter, self)._format_axis(ax)
+
+        x = self.data.loc[:, "x"]
+        minx, maxx = x.min(), x.max()
+
+        y = self.data.loc[:, "y"]
+        miny, maxy = y.min(), y.max()
+
+        # `pulled from the end of `ax.pcolormesh`.
+        collection.sticky_edges.x[:] = [minx, maxx]
+        collection.sticky_edges.y[:] = [miny, maxy]
+        corners = (minx, miny), (maxx, maxy)
+        ax.update_datalim(corners)
+        ax.autoscale_view()
+
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""
         Make a scatter plot on `ax` using `ax.scatter`.
@@ -73,15 +89,19 @@ class Scatter(base.Plot2D):
         else:
             zkey = None
 
-        pc = ax.scatter(x="x", y="y", c=zkey, data=data, **kwargs)
+        collection = ax.scatter(x="x", y="y", c=zkey, data=data, **kwargs)
 
         if cbar and zkey is not None:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
+            cbar = self._make_cbar(collection, **cbar_kwargs)
         else:
             cbar = None
 
-        self._format_axis(ax)
+        self._format_axis(ax, collection)
 
         return ax, cbar

@@ -13,7 +13,6 @@ from types import FunctionType
 from matplotlib import pyplot as plt
 from numbers import Number
 from abc import abstractproperty, abstractmethod
-from pathlib import Path
 from collections import namedtuple
 from scipy.signal import savgol_filter
 
@@ -556,23 +555,6 @@ class Hist1D(AggPlot):
 
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
-    #     def _format_axis(self, ax):
-    #         xlbl = self.labels.x
-    #         if xlbl is not None:
-    #             ax.set_xlabel(xlbl)
-
-    #         ylbl = self.labels.y
-    #         if ylbl is not None:
-    #             ax.set_ylabel(ylbl)
-
-    #         if self.log.x:
-    #             ax.set_xscale("log")
-
-    #         if self.log.y:
-    #             ax.set_yscale("log")
-
-    #         ax.grid(True, which="major", axis="both")
-
     def make_plot(self, ax=None, fcn=None, **kwargs):
         f"""Make a plot.
 
@@ -699,34 +681,34 @@ class Hist2D(base.Plot2D, AggPlot):
     def _gb_axes(self):
         return ("x", "y")
 
-    def set_path(self, new, add_scale=True):
-        # Bug: path doesn't auto-set log information.
-        path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
+    #     def set_path(self, new, add_scale=True):
+    #         # Bug: path doesn't auto-set log information.
+    #         path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
 
-        if new == "auto":
-            path = path / x / y / z
+    #         if new == "auto":
+    #             path = path / x / y / z
 
-        else:
-            assert x is None
-            assert y is None
-            assert z is None
+    #         else:
+    #             assert x is None
+    #             assert y is None
+    #             assert z is None
 
-        if add_scale:
-            assert scale_info is not None
+    #         if add_scale:
+    #             assert scale_info is not None
 
-            scale_info = "-".join(scale_info)
+    #             scale_info = "-".join(scale_info)
 
-            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
-                # Insert <norm> at end of path so scale order is (x, y, z).
-                path = path.parts
-                path = path[:-1] + (scale_info + "-" + path[-1],)
-                path = Path(*path)
-            else:
-                path = path / scale_info
+    #             if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
+    #                 # Insert <norm> at end of path so scale order is (x, y, z).
+    #                 path = path.parts
+    #                 path = path[:-1] + (scale_info + "-" + path[-1],)
+    #                 path = Path(*path)
+    #             else:
+    #                 path = path / scale_info
 
-        self._path = path
+    #         self._path = path
 
-    set_path.__doc__ = base.Base.set_path.__doc__
+    #     set_path.__doc__ = base.Base.set_path.__doc__
 
     def set_labels(self, **kwargs):
 
@@ -842,80 +824,12 @@ class Hist2D(base.Plot2D, AggPlot):
 
         return agg
 
-    #     def _format_axis(self, ax):
-    #         #         logging.getLogger("main").warning("Formatting an axis")
-    #         #         log_mem_usage()
-
-    #         xlbl = self.labels.x
-    #         ylbl = self.labels.y
-
-    #         if xlbl is not None:
-    #             ax.set_xlabel(xlbl)
-    #         if ylbl is not None:
-    #             ax.set_ylabel(ylbl)
-
-    #         if self.log.x:
-    #             ax.set_xscale("log")
-    #         if self.log.y:
-    #             ax.set_yscale("log")
-
-    #         ax.grid(True, which="major", axis="both")
-
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
         super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
-
-    #         f"""Make a colorbar on `ax` using `mappable`.
-    #
-    #         Parameters
-    #         ----------
-    #         mappable:
-    #             See `figure.colorbar` kwarg of same name.
-    #         ax: mpl.axis.Axis
-    #             See `figure.colorbar` kwarg of same name.
-    #         norm: mpl.colors.Normalize instance
-    #             The normalization used in the plot. Passed here to determine
-    #             y-ticks.
-    #         kwargs:
-    #             Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
-    #             row or column normalized, `ticks` defaults to
-    #             :py:class:`mpl.ticker.MultipleLocator(0.1)`.
-    #         """
-    #         #         logging.getLogger("main").warning("Making a cbar")
-    #         #         log_mem_usage()
-    #         ax = kwargs.pop("ax", None)
-    #         cax = kwargs.pop("cax", None)
-    #         if ax is not None and cax is not None:
-    #             raise ValueError("Can't pass ax and cax.")
-    #
-    #         if ax is not None:
-    #             try:
-    #                 fig = ax.figure
-    #             except AttributeError:
-    #                 fig = ax[0].figure
-    #         elif cax is not None:
-    #             try:
-    #                 fig = cax.figure
-    #             except AttributeError:
-    #                 fig = cax[0].figure
-    #         else:
-    #             ax = plt.gca()
-    #             fig = ax.figure
-    #
-    #         ticks = kwargs.pop(
-    #             "ticks",
-    #             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
-    #         )
-    #
-    #         label = kwargs.pop("label", self.labels.z)
-    #         cbar = fig.colorbar(
-    #             mappable, label=label, ax=ax, cax=cax, ticks=ticks, **kwargs
-    #         )
-    #
-    #         return cbar
 
     def _limit_color_norm(self, norm):
         if self.axnorm in ("c", "r"):

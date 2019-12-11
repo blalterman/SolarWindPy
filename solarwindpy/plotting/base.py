@@ -220,6 +220,23 @@ class Base(ABC):
         ax.grid(True, which="major", axis="both")
         ax.tick_params(axis="both", which="both", direction="inout")
 
+    #         x = self.data.loc[:, "x"]
+    #         minx, maxx = x.min(), x.max()
+    #         if self.log.x:
+    #             minx, maxx = 10.0**np.array([minx, maxx])
+
+    #         y = self.data.loc[:, "y"]
+    #         miny, maxy = y.min(), y.max()
+    #         if self.log.y:
+    #             minx, maxx = 10.0**np.array([miny, maxy])
+
+    #         # `pulled from the end of `ax.pcolormesh`.
+    #         collection.sticky_edges.x[:] = [minx, maxx]
+    #         collection.sticky_edges.y[:] = [miny, maxy]
+    #         corners = (minx, miny), (maxx, maxy)
+    #         self.update_datalim(corners)
+    #         self.autoscale_view()
+
     @abstractmethod
     def set_data(self):
         pass
