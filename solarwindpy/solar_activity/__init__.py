@@ -21,7 +21,7 @@ def get_all_indices():
     """
     Lalpha = lisird.lisird.LISIRD("Lalpha")
     CaK = lisird.lisird.LISIRD("CaK")
-    f107 = lisird.lisird.LISIRD("f107")
+    #     f107 = lisird.lisird.LISIRD("f107-penticton")
     MgII = lisird.lisird.LISIRD("MgII")
     sidc = ssn.sidc.SIDC("m13")
 
@@ -29,13 +29,13 @@ def get_all_indices():
     mgII.index = pd.DatetimeIndex(MgII.data.index.date)
 
     sa = pd.concat(
-        [
-            Lalpha.data.LymanAlpha,
-            f107.data.f107,
-            sidc.data.ssn,
-            mgII,
-            CaK.data.drop("milliseconds", axis=1),
-        ],
+        {
+            "Lalpha": Lalpha.data.loc[:, "irradiance"],
+            #             "F107": f107.data.loc[:, "adjusted_flux"],
+            "ssn": sidc.data.loc[:, "ssn"],
+            "MgII": mgII,
+            "CaK": CaK.data.drop("milliseconds", axis=1),
+        },
         axis=1,
     ).sort_index(
         axis=1

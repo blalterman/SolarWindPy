@@ -148,7 +148,7 @@ _trans_units = {
     "gamma_max": _inU["dimless"],
     "kvec": _inU["dimless"],
     # Solar Activity
-    "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
+    "Lalpha": r"\mathrm{W/m^2}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
