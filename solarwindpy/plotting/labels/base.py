@@ -245,7 +245,7 @@ _templates = {
     "kvec": r"k_{$C}\rho_{$S}",
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",
-    "Lalpha": r"\mathrm{L}-\alpha",
+    "Lalpha": r"\mathrm{L}\alpha",
     "f10.7": r"\mathrm{F}10.7",
     "CaK": r"\mathrm{CaK}",
     "MgII": r"\mathrm{MgII}",

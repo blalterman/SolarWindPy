@@ -11,7 +11,7 @@ echo $envname
 
 core="pandas scipy numpy numexpr bottleneck matplotlib pytables"
 dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy"
+use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy"
 
 pkgs="$core $dev $use"
 
