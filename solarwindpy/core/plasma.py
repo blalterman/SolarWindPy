@@ -564,11 +564,19 @@ class Plasma(base.Base):
         data = data.loc[:, ~data.columns.duplicated()]
 
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
+
         w = (
-            data.w.drop("scalar", axis=1, level="C")
+            data.loc[:, pd.IndexSlice["w", ["par", "per"]]]
             .pow(2)
             .multiply(coeff, axis=1, level="C")
         )
+
+        #         w = (
+        #         data.w.drop("scalar", axis=1, level="C")
+        #         .pow(2)
+        #         .multiply(coeff, axis=1, level="C")
+        #         )
+
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".

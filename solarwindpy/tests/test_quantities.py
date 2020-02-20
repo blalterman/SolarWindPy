@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import unittest
 import sys
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from unittest import TestCase
 from abc import ABC, abstractproperty
