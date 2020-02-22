@@ -305,7 +305,7 @@ class ActivityIndicator(Base):
         pass
 
     def _run_normalization(self, indicator, norm_fcn):
-        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="All")
+        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
         joint = pd.concat(
             [indicator, cut], axis=1, keys=["indicator", "cycle"]
         ).sort_index(axis=1)
@@ -362,7 +362,8 @@ class IndicatorExtrema(Base):
         """
         extrema = self.data
         intervals = pd.DataFrame(
-            index=extrema.index, columns=pd.Index(["Rise", "Fall", "All"], name="kind")
+            index=extrema.index,
+            columns=pd.Index(["Rise", "Fall", "Cycle"], name="kind"),
         )
 
         # Make `today` only keep the date.
@@ -379,7 +380,7 @@ class IndicatorExtrema(Base):
             fall_ = pd.Interval(t1, t2)
             all_ = pd.Interval(t0, t2)
 
-            intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "All": all_})
+            intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "Cycle": all_})
 
         intervals = intervals.sort_index(axis=1)
         self._cycle_intervals = intervals
@@ -389,7 +390,7 @@ class IndicatorExtrema(Base):
         r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
         cycle numbers.
 
-        If `kind` is not None, it should be some subset of "All", "Rise", or "Fall". If
+        If `kind` is not None, it should be some subset of "Cycle", "Rise", or "Fall". If
         `kind` is "Edges", use ["Rise", "Fall"].
         """
         if isinstance(epoch, pd.DatetimeIndex):

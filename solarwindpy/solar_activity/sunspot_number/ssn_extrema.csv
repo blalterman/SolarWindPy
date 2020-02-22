@@ -13,7 +13,7 @@
 # -----
 # pd.read_csv("extrema.csv", header=0, skiprows=15, index_col=0)
 
-cycle,Max,Min
+Number,Max,Min
 1,1761-06-01,1755-02-01
 2,1769-09-01,1766-06-01
 3,1778-05-01,1775-06-01

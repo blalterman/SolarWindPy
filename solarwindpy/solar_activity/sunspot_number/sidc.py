@@ -206,7 +206,7 @@ class SIDC(ActivityIndicator):
             return self.normalize_ssn()
 
     def _run_normalization(self, indicator, norm_fcn):
-        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="All")
+        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
         joint = pd.concat(
             [indicator, cut], axis=1, keys=["indicator", "cycle"]
         ).sort_index(axis=1)
