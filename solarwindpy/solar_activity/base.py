@@ -341,7 +341,10 @@ class IndicatorExtrema(Base):
         r"""Bands of time ($\Delta t$) about indicator extrema, where dt is specified when
         calling :py:meth:`calculate_intervals`.
         """
-        return self._extrema_bands
+        try:
+            return self._extrema_bands
+        except AttributeError:
+            raise AttributeError("Have you called `extrema.calculate_extrema_bands`?")
 
     @abstractmethod
     def load_or_set_data(self):
@@ -470,6 +473,6 @@ class IndicatorExtrema(Base):
         # TODO: verify bands shape
         intervals = pd.IntervalIndex(bands.values).sort_values()
         cut = pd.cut(epoch, intervals)
-        cut.name = "spec_by_extrema_band"
+        cut = pd.Series(cut, index=epoch, name="spec_by_extrema_band")
 
         return cut

@@ -143,11 +143,18 @@ class SIDCLoader(DataLoader):
     def load_data(self):
         super(SIDCLoader, self).load_data()
 
-        #        today = pd.to_datetime("today").strftime("%Y%m%d")
-        #        fpath = (self.data_path / today).with_suffix(".csv")
-        #        data = pd.read_csv(fpath, index_col=0, header=0)
-        #
-        #        self._data = data
+        extrema = SSNExtrema()
+        # Calculate Cycle to which each mesurement belongs
+        data = self.data
+        cut = pd.cut(data.index, pd.IntervalIndex(extrema.cycle_intervals.Cycle.values))
+        cut = pd.Series(cut, index=data.index, name="cycle")
+        cut = cut.map(
+            extrema.cycle_intervals.Cycle.reset_index().set_index("Cycle").Number
+        )
+
+        data = pd.concat([data, cut], axis=1, sort=True)
+        self._data = data
+
         self.logger.info("Load complete")
 
 
@@ -312,7 +319,7 @@ class SSNExtrema(IndicatorExtrema):
             )
 
         path = Path(__file__).parent / "ssn_extrema.csv"
-        data = pd.read_csv(path, header=0, skiprows=15, index_col=0)
+        data = pd.read_csv(path, header=0, skiprows=19, index_col=0)
         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
         data.columns.names = ["kind"]
         self._data = data

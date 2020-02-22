@@ -11,7 +11,11 @@
 #
 # Notes
 # -----
-# pd.read_csv("extrema.csv", header=0, skiprows=15, index_col=0)
+# pd.read_csv("extrema.csv", header=0, skiprows=19, index_col=0)
+#
+# TODO
+# ----
+# Update source to http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt
 
 Number,Max,Min
 1,1761-06-01,1755-02-01
