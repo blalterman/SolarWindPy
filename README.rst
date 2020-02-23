@@ -2,7 +2,7 @@
 SolarWindPy
 ###########
 
-|Build Status| |License|
+|Build Status| |License| |Black Code|
 
 Python data analysis tools for solar wind measurements.
 
@@ -52,3 +52,5 @@ See :doc:`CITATION.rst` for instructions on citing SolarWindPy.
    :target: https://travis-ci.com/blalterman/SolarWindPy
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE.rst
+.. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
