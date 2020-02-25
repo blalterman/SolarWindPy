@@ -1,5 +1,11 @@
 #! /bin/sh
 
+# If you run into mkl-fft problems, try the following 
+# 
+#   conda config --add pinned_packages conda-forge::numpy
+#
+# to pin numpy to conda-forge.
+
 if [[ "$#" -eq 0 ]]; then
     read -spt 60 "Environment name?" envname
 else
