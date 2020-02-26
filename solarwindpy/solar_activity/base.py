@@ -374,14 +374,30 @@ class IndicatorExtrema(Base):
         for c, r in extrema.iterrows():
             t0 = r.loc["Min"]
             t1 = r.loc["Max"]
+
+            if pd.isna(t1):
+                # No maximum yet, then use Today for maximum
+                t1 = today
+
             try:
+                # Get next cycle's Minimum to calculate Falling edge
                 t2 = extrema.loc[c + 1, "Min"]
             except KeyError:
-                t2 = today
+                if t1 < today:
+                    # We haven't reached next Min yet, but have current cycle Max
+                    # so use today.
+                    t2 = today
+                else:
+                    # This cycle does not have a falling edge.
+                    t2 = today
 
             rise_ = pd.Interval(t0, t1)
             fall_ = pd.Interval(t1, t2)
             all_ = pd.Interval(t0, t2)
+
+            if t1 == t2:
+                # Then no falling edge
+                fall_ = pd.NaT
 
             intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "Cycle": all_})
 
