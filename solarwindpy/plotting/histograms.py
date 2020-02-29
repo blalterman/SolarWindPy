@@ -96,6 +96,7 @@ class AggPlot(base.Base):
 
         other = self.data.loc[cut.index, tko]
 
+        #         joint = pd.concat([cut, other.to_frame(name=tko)], axis=1, sort=True)
         joint = cut.copy(deep=True)
         joint.loc[:, tko] = other
         joint.sort_index(axis=1, inplace=True)
@@ -106,7 +107,16 @@ class AggPlot(base.Base):
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes.
         """
-        gb = self.joint.groupby(list(self._gb_axes))
+        #         tko = self.agg_axes
+        #         gb = self.data.loc[:, tko].groupby([v for k, v in self.cut.items()], observed=False)
+        #         gb = self.joint.groupby(list(self._gb_axes))
+        gb_axes = list(self._gb_axes)
+        agg_axes = self.agg_axes
+        gb = (
+            self.joint.set_index(gb_axes)
+            .loc[:, agg_axes]
+            .groupby(gb_axes, axis=0, observed=False)
+        )
         return gb
 
     @property
@@ -239,11 +249,11 @@ class AggPlot(base.Base):
             else:
                 fcn = "mean"
 
-        agg = gb.agg(fcn).loc[:, tko]
+        agg = gb.agg(fcn)  # .loc[:, tko]
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            cnt = gb.agg("count").loc[:, tko]
+            cnt = gb.agg("count")  # .loc[:, tko]
             tk = pd.Series(True, index=agg.index)
             #             tk  = pd.DataFrame(True,
             #                                index=agg.index,
@@ -256,10 +266,11 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
-        # Ensure all bins are represented in the data. (20190605)
-        for k, v in self.intervals.items():
-            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+        # The following was obviated by the use of `observed=False` in `self.grouped`. (20200229)
+        #         # Ensure all bins are represented in the data. (20190605)
+        #         for k, v in self.intervals.items():
+        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
