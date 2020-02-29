@@ -89,19 +89,27 @@ class AggPlot(base.Base):
     def joint(self):
         r"""A combination of the categorical and continuous data for use in `Groupby`.
         """
+        #         cut = self.cut
+        #         tko = self.agg_axes
+
+        #         self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
+
+        #         other = self.data.loc[cut.index, tko]
+
+        #         #         joint = pd.concat([cut, other.to_frame(name=tko)], axis=1, sort=True)
+        #         joint = cut.copy(deep=True)
+        #         joint.loc[:, tko] = other
+        #         joint.sort_index(axis=1, inplace=True)
+        #         return joint
+
         cut = self.cut
-        tko = self.agg_axes
+        tk_target = self.agg_axes
+        target = self.data.loc[cut.index, tk_target]
 
-        self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
+        mi = pd.MultiIndex.from_frame(cut)
+        target.index = mi
 
-        other = self.data.loc[cut.index, tko]
-
-        #         joint = pd.concat([cut, other.to_frame(name=tko)], axis=1, sort=True)
-        joint = cut.copy(deep=True)
-        joint.loc[:, tko] = other
-        joint.sort_index(axis=1, inplace=True)
-
-        return joint
+        return target
 
     @property
     def grouped(self):
@@ -110,13 +118,24 @@ class AggPlot(base.Base):
         #         tko = self.agg_axes
         #         gb = self.data.loc[:, tko].groupby([v for k, v in self.cut.items()], observed=False)
         #         gb = self.joint.groupby(list(self._gb_axes))
+
+        #         cut = self.cut
+        #         tk_target = self.agg_axes
+        #         target = self.data.loc[cut.index, tk_target]
+
+        #         mi = pd.MultiIndex.from_frame(cut)
+        #         target.index = mi
+
+        target = self.joint
         gb_axes = list(self._gb_axes)
-        agg_axes = self.agg_axes
-        gb = (
-            self.joint.set_index(gb_axes)
-            .loc[:, agg_axes]
-            .groupby(gb_axes, axis=0, observed=False)
-        )
+        gb = target.groupby(gb_axes, axis=0, observed=True)
+
+        #         agg_axes = self.agg_axes
+        #         gb = (
+        #             self.joint.set_index(gb_axes)
+        #             .loc[:, agg_axes]
+        #             .groupby(gb_axes, axis=0, observed=False)
+        #         )
         return gb
 
     @property
@@ -266,11 +285,11 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
-        # The following was obviated by the use of `observed=False` in `self.grouped`. (20200229)
-        #         # Ensure all bins are represented in the data. (20190605)
-        #         for k, v in self.intervals.items():
-        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+        #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
+        # Ensure all bins are represented in the data. (20190605)
+        for k, v in self.intervals.items():
+            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
