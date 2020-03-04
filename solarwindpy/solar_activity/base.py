@@ -389,7 +389,7 @@ class IndicatorExtrema(Base):
                     t2 = today
                 else:
                     # This cycle does not have a falling edge.
-                    t2 = today
+                    t2 = t1 + pd.to_timedelta(6 * 365, unit="D")
 
             rise_ = pd.Interval(t0, t1)
             fall_ = pd.Interval(t1, t2)
