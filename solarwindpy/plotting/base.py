@@ -49,47 +49,47 @@ class Base(ABC):
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
-    # Old version that cuts at percentiles.
-    @staticmethod
-    def clip_data(data, clip):
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
-
-    # New version that uses binning to cut.
+    #     # Old version that cuts at percentiles.
     #     @staticmethod
-    #     def clip_data(data, bins, clip):
-    #         q0 = 0.001
-    #         q1 = 0.999
+    #     def clip_data(data, clip):
+    #         q0 = 0.0001
+    #         q1 = 0.9999
     #         pct = data.quantile([q0, q1])
-    #         lo  = pct.loc[q0]
-    #         up  = pct.loc[q1]
-    #         lo = bins.iloc[0]
-    #         up = bins.iloc[-1]
-    #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo)
-    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up)
+    #         lo = pct.loc[q0]
+    #         up = pct.loc[q1]
+
+    #         if isinstance(data, pd.Series):
+    #             ax = 0
+    #         elif isinstance(data, pd.DataFrame):
+    #             ax = 1
     #         else:
-    #             data = data.clip(lo, up)
+    #             raise TypeError("Unexpected object %s" % type(data))
+
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo, axis=ax)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up, axis=ax)
+    #         else:
+    #             data = data.clip(lo, up, axis=ax)
     #         return data
+
+    #     # New version that uses binning to cut.
+    #     #     @staticmethod
+    #     #     def clip_data(data, bins, clip):
+    #     #         q0 = 0.001
+    #     #         q1 = 0.999
+    #     #         pct = data.quantile([q0, q1])
+    #     #         lo  = pct.loc[q0]
+    #     #         up  = pct.loc[q1]
+    #     #         lo = bins.iloc[0]
+    #     #         up = bins.iloc[-1]
+    #     #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #     #             data = data.clip_lower(lo)
+    #     #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #     #             data = data.clip_upper(up)
+    #     #         else:
+    #     #             data = data.clip(lo, up)
+    #     #         return data
 
     @property
     def data(self):

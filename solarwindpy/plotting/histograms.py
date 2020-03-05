@@ -147,6 +147,48 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
+    # Old version that cuts at percentiles.
+    @staticmethod
+    def clip_data(data, clip):
+        q0 = 0.0001
+        q1 = 0.9999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+
+        if isinstance(data, pd.Series):
+            ax = 0
+        elif isinstance(data, pd.DataFrame):
+            ax = 1
+        else:
+            raise TypeError("Unexpected object %s" % type(data))
+
+        if isinstance(clip, str) and clip.lower()[0] == "l":
+            data = data.clip_lower(lo, axis=ax)
+        elif isinstance(clip, str) and clip.lower()[0] == "u":
+            data = data.clip_upper(up, axis=ax)
+        else:
+            data = data.clip(lo, up, axis=ax)
+        return data
+
+    # New version that uses binning to cut.
+    #     @staticmethod
+    #     def clip_data(data, bins, clip):
+    #         q0 = 0.001
+    #         q1 = 0.999
+    #         pct = data.quantile([q0, q1])
+    #         lo  = pct.loc[q0]
+    #         up  = pct.loc[q1]
+    #         lo = bins.iloc[0]
+    #         up = bins.iloc[-1]
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up)
+    #         else:
+    #             data = data.clip(lo, up)
+    #         return data
+
     def set_clim(self, lower=None, upper=None):
         f"""Set the minimum (lower) and maximum (upper) alowed number of
         counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
