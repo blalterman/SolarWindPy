@@ -48,6 +48,34 @@ class Vsw(ArbitraryLabel):
         pass
 
 
+class CarringtonRotation(ArbitraryLabel):
+    def __init__(self, short_label=True):
+        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation".
+        """
+        self._short_label = bool(short_label)
+
+    def __str__(self):
+        return r"$%s \; [\#]$" % self.tex
+
+    @property
+    def short_label(self):
+        return self._short_label
+
+    @property
+    def tex(self):
+        if self.short_label:
+            return r"\mathrm{CR}"
+        else:
+            return r"\mathrm{Carrington \; Rotation}"
+
+    @property
+    def path(self):
+        return Path("CarrRot")
+
+    def build_label(self):
+        pass
+
+
 class Count(ArbitraryLabel):
     def __init__(self, norm=None):
         self.set_axnorm(norm)
