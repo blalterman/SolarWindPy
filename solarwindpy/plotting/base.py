@@ -126,6 +126,7 @@ class Base(ABC):
         r"""Set or update x, y, or z labels. Any label not specified in kwargs
         is propagated from `self.labels.<x, y, or z>`.
         """
+        auto_update_path = kwargs.pop("auto_update_path", True)
 
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
@@ -136,6 +137,9 @@ class Base(ABC):
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
         self._labels = AxesLabels(x, y, z)
+
+        if auto_update_path:
+            self.set_path("auto")
 
     @abstractmethod
     def set_path(self, new, add_scale=False):

@@ -4,7 +4,7 @@ r"""Special labels not handled by :py:class:`TeXlabel`.
 import pdb  # noqa: F401
 from pathlib import Path
 from abc import abstractproperty, abstractmethod
-
+from pandas.tseries.frequencies import to_offset
 from . import base
 
 
@@ -131,6 +131,71 @@ class Count(ArbitraryLabel):
     def build_label(self):
         self._tex = self._build_tex()
         self._path = self._build_path()
+
+
+class Frequency(ArbitraryLabel):
+    def __init__(self, other):
+        self.set_other(other)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [{}]$".format(self.tex, self.units)
+
+    @property
+    def other(self):
+        return self._other
+
+    @property
+    def tex(self):
+        return r"\mathrm{Frequency}"
+
+    @property
+    def units(self):
+        return f"({self.other.units})^{-1}"
+
+    @property
+    def path(self):
+        return self._path
+
+    def set_other(self, other):
+        if not isinstance(other, Timedelta):
+            other = Timedelta(other)
+
+        self._other = other
+
+    def _build_path(self):
+        units = self.units
+        if "??" in units:
+            units = "UNK"
+
+        path = Path(f"frequency_of_{units}")
+        return path
+
+    def build_label(self):
+        self._path = self._build_path()
+
+
+class Power(ArbitraryLabel):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+
+    @property
+    def tex(self):
+        return r"\mathrm{Power}"
+
+    @property
+    def units(self):
+        return base._inU["dimless"]
+
+    @property
+    def path(self):
+        return Path("power")
+
+    def build_label(self):
+        pass
 
 
 class Probability(ArbitraryLabel):
@@ -286,11 +351,12 @@ class CountOther(ArbitraryLabel):
 
 
 class MathFcn(ArbitraryLabel):
-    def __init__(self, fcn, other_label):
+    def __init__(self, fcn, other_label, dimensionless=True):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
         """
         self.set_other_label(other_label)
         self.set_function(fcn)
+        self.set_dimensionless(dimensionless)
         self.build_label()
 
     def __str__(self):
@@ -302,6 +368,9 @@ class MathFcn(ArbitraryLabel):
 
     @property
     def units(self):
+        if self.dimensionless:
+            return base._inU["dimless"]
+
         return r"\mathrm{%s}(%s)" % (self.function, self.other_label.units)
 
     @property
@@ -316,6 +385,10 @@ class MathFcn(ArbitraryLabel):
     def function(self):
         return self._function
 
+    @property
+    def dimensionless(self):
+        return self._dimensionless
+
     def set_other_label(self, other):
         assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
         self._other_label = other
@@ -324,6 +397,9 @@ class MathFcn(ArbitraryLabel):
         if new is None:
             new = ""
         self._function = str(new)
+
+    def set_dimensionless(self, new):
+        self._dimensionless = bool(new)
 
     def _build_tex(self):
         #         try:
@@ -348,35 +424,54 @@ class MathFcn(ArbitraryLabel):
 
 
 class Timedelta(ArbitraryLabel):
-    def __init__(self, dt):
+    def __init__(self, offset):
         r"""
         Parameters
         ----------
-        dt: str
-            Classifies the `timedelta` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+        offset: str
+            pd.Offset or covertable string
         """
-        self.set_dt(dt)
+        self.set_offset(offset)
 
     def __str__(self):
-        return r"$%s$" % self.tex
+        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+
+    #     @property
+    #     def dt(self):
+    #         return self._dt
 
     @property
-    def dt(self):
-        return self._dt
+    def offset(self):
+        return self._offset
 
     @property
     def tex(self):
-        return r"\mathrm{%s}" % self.dt.replace(" ", r" \, ")
+        return r"\Delta t"
 
     @property
     def path(self):
-        return Path(self.dt.lower())
+        try:
+            return Path("dt") / self.offset.freqstr
+        except AttributeError:
+            return Path("dt") / "UNK"
+
+    @property
+    def units(self):
+        try:
+            return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
+        except AttributeError:
+            return base._inU["unknown"]
 
     def build_label(self):
         pass
 
-    def set_dt(self, new):
-        self._dt = new
+    def set_offset(self, new):
+        try:
+            new = to_offset(new)
+        except ValueError:
+            pass
+
+        self._offset = new
 
 
 class DateTime(ArbitraryLabel):
