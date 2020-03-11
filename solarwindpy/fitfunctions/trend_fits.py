@@ -242,11 +242,17 @@ class TrendFit(object):
 
         legend_title = "${}={}$\n{}"
 
+        xlbl = self.labels.x
+        try:
+            xlbl = xlbl.tex
+        except AttributeError:
+            pass
+
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plot_raw_used_fit_resid(**kwargs)
             hax.legend_.set_title(
                 legend_title.format(
-                    self.labels.x.tex,
+                    xlbl,
                     (legend_title_fmt % k.mid),
                     "In Fit" if in_trend.loc[k] else "Not In Fit",
                 )

@@ -1117,7 +1117,12 @@ class FitFunction(ABC):
         return ax
 
     def plot_raw_used_fit_resid(
-        self, annotate=True, fit_resid_axes=None, resid_kwargs=None, **kwargs
+        self,
+        annotate=True,
+        fit_resid_axes=None,
+        figsize=(6, 4),
+        resid_kwargs=None,
+        **kwargs,
     ):
         f"""Make a stacked fit, residual plot.
 
@@ -1131,10 +1136,14 @@ class FitFunction(ABC):
             a pair of axes where the `raw_used_fit` axis is 3 times the `resid_axis`.
             Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share
             an x-axis and `hax`'s x-ticks and label will be set invisible.
+        figsize:
+            Any valid argument for :py:meth:`plt.figure(figsize=figsize)`. This code
+            was developed with default size 6x4 and this size helps accomodate annotation.
+            So we persist it here.
         resid_kwargs: dict, None
             Passed to :py:meth:`{self.__class__.__name__}.plot_residuals`.
         kwargs:
-            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_in_fit`.
+            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_used_fit`.
 
         Returns
         -------
@@ -1148,7 +1157,7 @@ class FitFunction(ABC):
             hax, rax = fit_resid_axes
 
         else:
-            fig = plt.figure()
+            fig = plt.figure(figsize=figsize)
             gs = mpl.gridspec.GridSpec(2, 1, height_ratios=[3, 1], hspace=0.1)
             # sharex in this code requires that I pass the axis object with which the x-axis is being shared.
             # Source for sharex option: http://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python

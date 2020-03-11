@@ -958,8 +958,14 @@ class Hist2D(base.Plot2D, AggPlot):
         x = self.edges["x"]
         y = self.edges["y"]
 
-        assert x.size == agg.shape[1] + 1
-        assert y.size == agg.shape[0] + 1
+        #         assert x.size == agg.shape[1] + 1
+        #         assert y.size == agg.shape[0] + 1
+
+        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
+        if not x.size == agg.shape[1] + 1:
+            agg = agg.reindex(columns=self.intervals["x"])
+        if not y.size == agg.shape[0] + 1:
+            agg = agg.reindex(index=self.intervals["y"])
 
         if ax is None:
             fig, ax = plt.subplots()
