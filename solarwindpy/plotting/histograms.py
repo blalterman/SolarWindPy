@@ -753,6 +753,14 @@ class Hist2D(base.Plot2D, AggPlot):
     def _gb_axes(self):
         return ("x", "y")
 
+    def _maybe_convert_to_log_scale(self, x, y):
+        if self.log.x:
+            x = 10.0 ** x
+        if self.log.y:
+            y = 10.0 ** y
+
+        return x, y
+
     #     def set_path(self, new, add_scale=True):
     #         # Bug: path doesn't auto-set log information.
     #         path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
@@ -990,6 +998,7 @@ class Hist2D(base.Plot2D, AggPlot):
         XX, YY = np.meshgrid(x, y)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
+        cbar_or_mappable = pc
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
@@ -999,13 +1008,9 @@ class Hist2D(base.Plot2D, AggPlot):
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
 
         self._format_axis(ax)
-
-        if cbar:
-            cbar_or_mappable = cbar
-        else:
-            cbar_or_mappable = pc
 
         return ax, cbar_or_mappable
 
@@ -1094,9 +1099,45 @@ class Hist2D(base.Plot2D, AggPlot):
 
         return etop, ebottom
 
+    def _get_contour_levels(self, levels):
+        if (levels is not None) or (self.axnorm is None):
+            pass
+
+        elif (levels is None) and (self.axnorm == "t"):
+            levels = [0.01, 0.1, 0.3, 0.7, 0.99]
+
+        elif (levels is None) and (self.axnorm == "d"):
+            levels = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+
+        elif (levels is None) and (self.axnorm in ["r", "c"]):
+            levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+        else:
+            raise ValueError(
+                f"Unrecognized axis normalization {self.axnorm} for default levels."
+            )
+
+        return levels
+
+    def _verify_contour_passthrough_kwargs(
+        self, ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+    ):
+        if clabel_kwargs is None:
+            clabel_kwargs = dict()
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
+        if edges_kwargs is None:
+            edges_kwargs = dict()
+        if cbar_kwargs is None:
+            cbar_kwargs = dict()
+
+        return clabel_kwargs, edges_kwargs, cbar_kwargs
+
     def plot_contours(
         self,
         ax=None,
+        label_levels=True,
         cbar=True,
         limit_color_norm=False,
         cbar_kwargs=None,
@@ -1105,6 +1146,8 @@ class Hist2D(base.Plot2D, AggPlot):
         edges_kwargs=None,
         clabel_kwargs=None,
         skip_max_clbl=True,
+        use_contourf=False,
+        gaussian_filter_std=0,
         **kwargs,
     ):
         f"""Make a contour plot on `ax` using `ax.contour`.
@@ -1113,6 +1156,8 @@ class Hist2D(base.Plot2D, AggPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
+        label_levels: bool
+            If True, add labels to contours with `ax.clabel`.
         cbar: bool
             If True, create color bar with `labels.z`.
         limit_color_norm: bool
@@ -1133,10 +1178,48 @@ class Hist2D(base.Plot2D, AggPlot):
             contour is, effectively, a point.
         maximum_color:
             The color for the maximum of the PDF.
+        use_contourf: bool
+            If True, use `ax.contourf`. Else use `ax.contour`.
+        gaussian_filter_std: int
+            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
+            standard deviation specified by `gaussian_filter_std`.
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
+        levels = kwargs.pop("levels", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop(
+            "norm",
+            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+            if self.axnorm in ("c", "r")
+            else None,
+        )
+        linestyles = kwargs.pop(
+            "linestyles",
+            [
+                "-",
+                ":",
+                "--",
+                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+                "--",
+                ":",
+                "-",
+                (0, (7, 3, 1, 3, 1, 3)),
+            ],
+        )
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        clabel_kwargs, edges_kwargs, cbar_kwargs = self._verify_contour_passthrough_kwargs(
+            ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+        )
+
+        inline = clabel_kwargs.pop("inline", True)
+        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
+        fmt = clabel_kwargs.pop("fmt", "%s")
+
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.intervals["x"].mid
         y = self.intervals["y"].mid
@@ -1144,12 +1227,23 @@ class Hist2D(base.Plot2D, AggPlot):
         assert x.size == agg.shape[1]
         assert y.size == agg.shape[0]
 
-        x = 10.0 ** x
-        y = 10.0 ** y
+        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
+        if not x.size == agg.shape[1]:
+            agg = agg.reindex(columns=self.intervals["x"])
+        if not y.size == agg.shape[0]:
+            agg = agg.reindex(index=self.intervals["y"])
+
+        x, y = self._maybe_convert_to_log_scale(x, y)
 
         XX, YY = np.meshgrid(x, y)
 
-        C = np.ma.masked_invalid(agg.values)
+        C = agg.values
+        if gaussian_filter_std:
+            from scipy.ndimage import gaussian_filter
+
+            C = gaussian_filter(C, gaussian_filter_std)
+
+        C = np.ma.masked_invalid(C)
 
         assert XX.shape == C.shape
         assert YY.shape == C.shape
@@ -1161,47 +1255,44 @@ class Hist2D(base.Plot2D, AggPlot):
             def __repr__(self):
                 return str(self).rstrip("0")
 
-        if self.axnorm == "t":
-            levels = [0.01, 0.1, 0.3, 0.7, 0.99]
+        levels = self._get_contour_levels(levels)
 
-        elif self.axnorm == "d":
-            levels = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+        contour_fcn = ax.contour
+        if use_contourf:
+            contour_fcn = ax.contourf
 
+        if levels is None:
+            args = [XX, YY, C]
         else:
-            raise ValueError("Unrecognized axis normalization {}".format(self.axnorm))
+            args = [XX, YY, C, levels]
 
-        linestyles = kwargs.pop(
-            "linestyles", ["-", ":", "--", (0, (7, 3, 1, 3, 1, 3)), "--", ":", "-"]
-        )
-        cmap = kwargs.pop("cmap", None)
-
-        qset = ax.contour(XX, YY, C, levels, linestyles=linestyles, cmap=cmap, **kwargs)
-
+        qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
         qset.levels = [nf(l) for l in qset.levels]
 
-        if clabel_kwargs is None:
-            clabel_kwargs = dict()
+        try:
+            args = (qset, levels[:-1] if skip_max_clbl else levels)
+        except TypeError:
+            # None can't be subscripted.
+            args = (qset,)
 
-        inline = clabel_kwargs.pop("inline", True)
-        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
-        fmt = clabel_kwargs.pop("fmt", "%s")
-
-        lbls = ax.clabel(
-            qset,
-            levels[:-1] if skip_max_clbl else levels,
-            inline=inline,
-            inline_spacing=inline_spacing,
-            fmt=fmt,
-        )
+        lbls = None
+        if label_levels:
+            lbls = ax.clabel(
+                *args, inline=inline, inline_spacing=inline_spacing, fmt=fmt
+            )
 
         if plot_edges:
-
-            if edges_kwargs is None:
-                edges_kwargs = dict()
-
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
-        return ax, lbls
+        cbar_or_mappable = qset
+        if cbar:
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
+
+        self._format_axis(ax)
+
+        return ax, lbls, cbar_or_mappable
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         f"""Make a `Hist1D` from the data stored in this `His2D`.
