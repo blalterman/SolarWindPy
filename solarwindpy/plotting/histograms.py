@@ -978,10 +978,11 @@ class Hist2D(base.Plot2D, AggPlot):
         if ax is None:
             fig, ax = plt.subplots()
 
-        if self.log.x:
-            x = 10.0 ** x
-        if self.log.y:
-            y = 10.0 ** y
+        #         if self.log.x:
+        #             x = 10.0 ** x
+        #         if self.log.y:
+        #             y = 10.0 ** y
+        x, y = self._maybe_convert_to_log_scale(x, y)
 
         axnorm = self.axnorm
         norm = kwargs.pop(
@@ -1124,13 +1125,12 @@ class Hist2D(base.Plot2D, AggPlot):
     ):
         if clabel_kwargs is None:
             clabel_kwargs = dict()
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
-
         if edges_kwargs is None:
             edges_kwargs = dict()
         if cbar_kwargs is None:
             cbar_kwargs = dict()
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
@@ -1292,7 +1292,7 @@ class Hist2D(base.Plot2D, AggPlot):
 
         self._format_axis(ax)
 
-        return ax, lbls, cbar_or_mappable
+        return ax, lbls, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         f"""Make a `Hist1D` from the data stored in this `His2D`.
