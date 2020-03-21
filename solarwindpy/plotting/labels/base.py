@@ -475,7 +475,11 @@ class TeXlabel(Base):
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
-        units = _trans_units.get(m, "???")
+        ukey = m
+        if c in ("lat", "colat", "lon"):
+            ukey = c
+
+        units = _trans_units.get(ukey, "???")
 
         self.logger.debug(
             r"""Built TeX label

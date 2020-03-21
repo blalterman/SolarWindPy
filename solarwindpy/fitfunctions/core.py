@@ -57,8 +57,7 @@ class FitFunction(ABC):
         logx=False,
         logy=False,
     ):
-
-        #         self._init_logger()
+        self._init_logger()
         self._set_argnames()
         self._set_raw_obs(xobs, yobs, weights)
         self._log = LogAxes(x=logx, y=logy)
@@ -101,6 +100,15 @@ class FitFunction(ABC):
         # Therefore, we access the function directly.
         y = self.function(x, *popt_)
         return y
+
+    @property
+    def logger(self):
+        return self._logger
+
+    def _init_logger(self):
+        # return None
+        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
+        self._logger = logger
 
     @abstractproperty
     def function(self):
@@ -606,7 +614,12 @@ class FitFunction(ABC):
             return e
 
         #         assert "p0" not in kwargs
-        p0 = kwargs.pop("p0", self.p0)
+        # Avoid issuing a `logger.warning` with `p0 = kwargs.pop("p0", self.p0)`.
+        try:
+            p0 = kwargs.pop("p0")
+        except KeyError:
+            p0 = self.p0
+
         try:
             result = curve_fit(
                 self.function,
@@ -749,6 +762,7 @@ class FitFunction(ABC):
         chisq=False,
         convert_pow_10=True,
         strip_uncertainties=False,
+        simplify_info_for_paper=False,
         additional_info=None,
         annotate_fcn=None,
     ):
@@ -761,8 +775,14 @@ class FitFunction(ABC):
             If True, include chisq/dof in the info.
         convert_pow_10: bool
             If True, use 10^{X} format. Otherwise, use eX format.
+            Note that `simplify_info_for_paper` must be disabled.
         strip_uncertaintites: bool
             If True, strip fit uncertainties from reported parameters.
+        simplify_info_for_paper: bool
+            If True, simplify the printout to only print the quantities
+            to their uncertainty in standard decimal (not expoential)
+            notation.
+            This option overrides `convert_pow_10`.
         additional_info: str or iterable of strings
             Additional info added to the fit info annotation box.
         annotate_fcn: FunctionType
@@ -771,14 +791,14 @@ class FitFunction(ABC):
 
         template = "%s = %s"
         info = [template % kv for kv in self.TeX_popt.items()]
-        info = [self.TeX_function] + info
-
-        # pdb.set_trace()
+        # `.split("\n")` guarantees function is a list, irrespecitve
+        # of whether or not it contians 1 or more lines
+        info = self.TeX_function.split("\n") + info
 
         if chisq:
             info += [self.TeX_chisqdof]
 
-        if convert_pow_10:
+        if convert_pow_10 and (not simplify_info_for_paper):
             # Convert to 10^X notation.
             info = [x.replace(r"e+", r" \times 10^{+") for x in info]
             info = [x.replace(r"e-", r" \times 10^{-") for x in info]
@@ -792,21 +812,66 @@ class FitFunction(ABC):
             info, p_sub_cnt = re.subn(r"\+0", r"+", info)
             info, m_sub_cnt = re.subn(r"\-0", r"-", info)
 
+            # Then re-split b/c we assume a lsit in all other pieces.
             info = info.split("\n")
+
+        if strip_uncertainties or simplify_info_for_paper:
+            #             info = info.split("\n")
+            info = [x.split(r"\pm")[0] for x in info]
+        #             info = "\n".join(info).replace("$$", "$")
+
+        if simplify_info_for_paper:
+            #             info = info.split("\n")
+            text_info = []
+            numeric_info = []
+            for ii in info:
+                ii = ii.strip("$")
+                try:
+                    # (1) Right strip trailing zeros.
+                    # (2) Right strip trailing decimals.
+                    tmp = ii.replace(" ", "").split("=")
+                    ii = f"""{tmp[0]} = {str(float(tmp[1])).rstrip("0").rstrip(".")}"""
+                    numeric_info.append(ii)
+
+                except ValueError:
+                    text_info.append(ii)
+
+            info = text_info + numeric_info
+        #             breakpoint()
+        #             info = [f"$ {ii} $" for ii in (text_info + numeric_info)]
+        #             info = "\n".join(info)
 
         # TODO: convert_to_decimal
         #       option to convert an exponential number to a decimal.
         #       Probably can update val_uncert_2_string to accomplish that.
 
-        info = [r"$ %s $" % x for x in info]
+        #         print(*info, sep="\n")
+        info = [r"$ %s $" % x.replace("$", "") for x in info]
         info = "\n".join(info)
 
         info = info.replace(r"inf", r"\infty")
 
-        if strip_uncertainties:
-            info = info.split("\n")
-            info = [x.split(r"\pm")[0] + "$" for x in info]
-            info = "\n".join(info).replace("$$", "$")
+        #         if strip_uncertainties or simplify_info_for_paper:
+        #             info = info.split("\n")
+        #             info = [x.split(r"\pm")[0] + "$" for x in info]
+        #             info = "\n".join(info).replace("$$", "$")
+
+        #         if simplify_info_for_paper:
+        #             info = info.split("\n")
+        #             text_info = []
+        #             numeric_info = []
+        #             for ii in info:
+        #                 ii = ii.strip("$")
+        #                 try:
+        #                     # (1) Right strip trailing zeros.
+        #                     # (2) Right strip trailing decimals.
+        #                     ii = str(float(ii)).rstrip("0").rstrip(".")
+        #                     numeric_info.append(ii)
+        #                 except ValueError:
+        #                     text_info.append(ii)
+
+        #             info = [f"$ {ii} $" for ii in (text_info + numeric_info)]
+        #             info = "\n".join(info)
 
         if additional_info is not None:
             if hasattr(additional_info, "__iter__") and not isinstance(
@@ -856,7 +921,7 @@ class FitFunction(ABC):
         """
         info = self.TeX_info()
 
-        bbox = dict(color="wheat", alpha=0.75)
+        bbox = kwargs.pop("bbox", dict(color="wheat", alpha=0.75))
         xloc = kwargs.pop("xloc", 0.05)
         yloc = kwargs.pop("yloc", 0.9)
         horizontalalignment = kwargs.pop("ha", "left")

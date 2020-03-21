@@ -20,7 +20,8 @@ class Line(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the line parameters.
+        r"""Calculate the initial guess for the line parameters. If this
+        fails, return :py:meth:`curve_fit`'s default value `None`.
 
         Return
         ------
@@ -30,19 +31,25 @@ class Line(FitFunction):
         assert self.sufficient_data
 
         dy, dx = np.ediff1d(self.yobs), np.ediff1d(self.xobs)
-        assert np.all(np.isfinite(dx)), "dx = 0 -> m = infty"
 
         m = dy / dx
         m = np.median(m)
-        assert np.all(np.isfinite(m))
-
         b = (m * self.xobs) - self.yobs
         b = np.median(b)
 
         p0 = [m, b]
+
+        if not (np.all(np.isfinite(dx)) and (np.all(np.abs(dx) > 0))):
+            self.logger.warning(f"Slope estimate failed (dx = {dx}).\nReturning None.")
+            p0 = None
+
         return p0
 
     @property
     def TeX_function(self):
         TeX = r"f(x)=m \cdot x + b"
         return TeX
+
+    @property
+    def x_intercept(self):
+        return -self.popt["b"] / self.popt["m"]

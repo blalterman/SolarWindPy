@@ -392,3 +392,5 @@ class TrendFit(object):
             fit_kwargs=fit_kwargs,
             **kwargs,
         )
+
+        return ax
