@@ -74,6 +74,7 @@ _inU = {
     "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
+    "Hz": r"\mathrm{Hz}",
 }
 
 _trans_units = {
@@ -143,9 +144,10 @@ _trans_units = {
     "re": _inU["dimless"],
     # Nyquist things
     "Wn": _inU["dimless"],
-    "omegaR": _inU["dimless"],
-    "gamma": _inU["dimless"],
-    "gamma_max": _inU["dimless"],
+    "omegaR": _inU["Hz"],
+    "gamma": _inU["Hz"],
+    "gamma_max": _inU["Hz"],
+    "gyro_freq": _inU["Hz"],
     "kvec": _inU["dimless"],
     # Solar Activity
     "Lalpha": r"\mathrm{W/m^2}",
@@ -238,9 +240,10 @@ _templates = {
     "re": r"r_{E;{$S}}",
     # Instability things
     "Wn": r"\mathrm{W_n}",
-    "gamma": r"\gamma/\Omega_{{$S}}",
-    "gamma_max": r"\gamma_\mathrm{max}/\Omega_{{$S}}",
-    "omegaR": r"\omega_R/\Omega_{{$S}}",
+    "gamma": r"\gamma",
+    "gamma_max": r"\gamma_\mathrm{max}",
+    "omegaR": r"\omega_R",
+    "gyro_freq": r"\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
     "kvec": r"k_{$C}\rho_{$S}",
     # Solar Activity

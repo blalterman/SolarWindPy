@@ -29,6 +29,48 @@ class ArbitraryLabel(base.Base):
         pass
 
 
+class ManualLabel(ArbitraryLabel):
+    r"""Build a manual label out of `tex` and `unit`.
+
+    `unit` can be a key for :py:class:`base._inU`.
+
+    :py:class:`ManualLabel` assumes `tex` is a string of words.
+    """
+
+    def __init__(self, tex, unit):
+        self.set_tex(tex)
+        self.set_unit(unit)
+        self.build_label()
+
+    def __str__(self):
+        return r"$\mathrm{%s} \; [%s]$" % (
+            self.tex.replace(" ", " \, "),
+            self.unit,
+        )  # noqa: W605
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @property
+    def path(self):
+        return Path(self.tex.replace(" ", "-"))
+
+    def set_tex(self, tex):
+        self._tex = tex.strip("$")
+
+    def set_unit(self, unit):
+        unit = base._inU.get(unit, unit)
+        self._unit = unit.strip("$")
+
+    def build_label(self):
+        pass
+
+
 class Vsw(ArbitraryLabel):
     def __init__(self):
         pass
