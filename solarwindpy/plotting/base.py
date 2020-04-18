@@ -7,6 +7,7 @@ import logging
 import pandas as pd
 
 from pathlib import Path
+from numbers import Number
 from collections import namedtuple
 from abc import ABC, abstractmethod
 
@@ -251,6 +252,10 @@ class Base(ABC):
 
 
 class Plot2D(Base):
+    @property
+    def clim(self):
+        return self._clim
+
     def set_data(self, x, y, z=None, clip_data=True):
         data = pd.DataFrame({"x": x, "y": y})
 
@@ -266,6 +271,14 @@ class Plot2D(Base):
             )
         self._data = data
         self._clip = bool(clip_data)
+
+    def set_clim(self, lower=None, upper=None):
+        f"""Set the minimum (lower) and maximum (upper) alowed number of
+        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._clim = (lower, upper)
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.

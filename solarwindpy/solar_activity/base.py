@@ -405,12 +405,33 @@ class IndicatorExtrema(Base):
         self._cycle_intervals = intervals
         return intervals
 
-    def cut_spec_by_interval(self, epoch, kind=None):
+    def cut_spec_by_interval(self, epoch, kind=None, tk_cycles=None):
         r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
         cycle numbers.
 
-        If `kind` is not None, it should be some subset of "Cycle", "Rise", or "Fall". If
-        `kind` is "Edges", use ["Rise", "Fall"].
+        Parameters
+        ----------
+        epoch: pd.Series or pd.DatetimeIndex
+            Data to cut.
+        kind: str, None
+            If `kind` is not None, it should be some subset of
+
+                ========= ===============================
+                   Key              Description
+                ========= ===============================
+                 None      Cut by all available options.
+                 "Cycle"   Cut by solar cycle
+                 "Rise"    Cut by rising edge
+                 "Fall"    Cut by falling edge
+                 "Edges"   Cut by `["Fall", "Rise"]`.
+                           Exclusive option.
+                ========= ===============================
+
+            Note that "Edges" is exclusive and will specify
+            `["Fall", "Rise"]` alone.
+        tk_cycles: None, list, slice
+            If not None, an object that can be used for index
+            slicing to select the target solar cycles.
         """
         if isinstance(epoch, pd.DatetimeIndex):
             epoch = epoch.to_series()
@@ -434,7 +455,10 @@ class IndicatorExtrema(Base):
         else:
             raise ValueError(f"""Interval `{kind!s}` is unavailable""")
 
-        ii = pd.IntervalIndex(intervals.stack().sort_values())
+        if tk_cycles is not None:
+            intervals = intervals.loc[tk_cycles]
+
+        ii = pd.IntervalIndex(intervals.stack()).sort_values()
         if not (ii.is_unique and ii.is_monotonic_increasing):
             raise ValueError
 

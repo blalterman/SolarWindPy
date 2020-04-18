@@ -11,7 +11,6 @@ import matplotlib as mpl
 
 from types import FunctionType
 from matplotlib import pyplot as plt
-from numbers import Number
 from abc import abstractproperty, abstractmethod
 from collections import namedtuple
 from scipy.signal import savgol_filter
@@ -72,9 +71,9 @@ class AggPlot(base.Base):
     def cut(self):
         return self._cut
 
-    @property
-    def clim(self):
-        return self._clim
+    #     @property
+    #     def clim(self):
+    #         return self._clim
 
     @property
     def agg_axes(self):
@@ -189,13 +188,13 @@ class AggPlot(base.Base):
     #             data = data.clip(lo, up)
     #         return data
 
-    def set_clim(self, lower=None, upper=None):
-        f"""Set the minimum (lower) and maximum (upper) alowed number of
-        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
-        """
-        assert isinstance(lower, Number) or lower is None
-        assert isinstance(upper, Number) or upper is None
-        self._clim = (lower, upper)
+    #     def set_clim(self, lower=None, upper=None):
+    #         f"""Set the minimum (lower) and maximum (upper) alowed number of
+    #         counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+    #         """
+    #         assert isinstance(lower, Number) or lower is None
+    #         assert isinstance(upper, Number) or upper is None
+    #         self._clim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
@@ -232,8 +231,8 @@ class AggPlot(base.Base):
             nbins = {k: v for k, v in zip(gb_axes, nbins)}
 
         else:
-            msg = "Unrecognized `nbins`\ntype: {}\n bins:{}"
-            raise ValueError(msg.format(type(nbins), nbins))
+            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins:{nbins}"
+            raise ValueError(msg)
 
         for k in self._gb_axes:
             b = nbins[k]
@@ -909,7 +908,7 @@ class Hist2D(base.Plot2D, AggPlot):
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
-        super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
+        return super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
 
     def _limit_color_norm(self, norm):
         if self.axnorm in ("c", "r"):
