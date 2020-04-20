@@ -930,6 +930,7 @@ class Hist2D(base.Plot2D, AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
+        alpha_fcn=None,
         **kwargs,
     ):
         r"""
@@ -948,6 +949,9 @@ class Hist2D(base.Plot2D, AggPlot):
             If not None, kwargs passed to `self._make_cbar`.
         fcn: FunctionType, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
+        alpha_fcn: None, str
+            If not None, the function used to aggregate the data for setting alpha
+            value.
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
@@ -1010,6 +1014,30 @@ class Hist2D(base.Plot2D, AggPlot):
             cbar_or_mappable = cbar
 
         self._format_axis(ax)
+
+        color_plot = self.data.loc[:, self.agg_axes].dropna().unique().size > 1
+        if (alpha_fcn is not None) and color_plot:
+            self.logger.warning(
+                "Make sure you verify alpha actually set. I don't yet trust this."
+            )
+            alpha_agg = self.agg(fcn=alpha_fcn)
+            alpha_agg = alpha_agg.unstack("x")
+            alpha_agg = np.ma.masked_invalid(alpha_agg.values.ravel())
+            # Feature scale then invert so smallest STD
+            # is most opaque.
+            alpha = 1 - mpl.colors.Normalize()(alpha_agg)
+
+            # Must draw to initialize `facecolor`s
+            plt.draw()
+            # Remove `pc` from axis so we can redraw with std
+            #             pc.remove()
+            colors = pc.get_facecolors()
+            colors[:, 3] = alpha
+            pc.set_facecolor(colors)
+        #             ax.add_collection(pc)
+
+        elif alpha_fcn is not None:
+            self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
 
         return ax, cbar_or_mappable
 
