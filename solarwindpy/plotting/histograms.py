@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib as mpl
 
 from types import FunctionType
+from numbers import Number
 from matplotlib import pyplot as plt
 from abc import abstractproperty, abstractmethod
 from collections import namedtuple
@@ -71,9 +72,9 @@ class AggPlot(base.Base):
     def cut(self):
         return self._cut
 
-    #     @property
-    #     def clim(self):
-    #         return self._clim
+    @property
+    def clim(self):
+        return self._clim
 
     @property
     def agg_axes(self):
@@ -188,13 +189,13 @@ class AggPlot(base.Base):
     #             data = data.clip(lo, up)
     #         return data
 
-    #     def set_clim(self, lower=None, upper=None):
-    #         f"""Set the minimum (lower) and maximum (upper) alowed number of
-    #         counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
-    #         """
-    #         assert isinstance(lower, Number) or lower is None
-    #         assert isinstance(upper, Number) or upper is None
-    #         self._clim = (lower, upper)
+    def set_clim(self, lower=None, upper=None):
+        f"""Set the minimum (lower) and maximum (upper) alowed number of
+        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._clim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
@@ -489,7 +490,6 @@ class Hist1D(AggPlot):
         self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self.set_path(None)
         self.set_clim(None, None)
 
     @property
@@ -745,7 +745,6 @@ class Hist2D(base.Plot2D, AggPlot):
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self.set_path(None)
         self.set_clim(None, None)
 
     @property
