@@ -2,11 +2,20 @@
 r"""Plotting utilities for :py:mod:`solarwindpy`.
 """
 
-from . import labels, histograms, scatter, orbits, tools
+__all__ = [
+    "labels",
+    "histograms",
+    "scatter",
+    "spiral",
+    "orbits",
+    "tools",
+    "subplots",
+    "save",
+]
+
+from . import labels, histograms, scatter, spiral, orbits, tools
 
 subplots = tools.subplots
 
 subplots = tools.subplots
 save = tools.save
-
-__all__ = ["labels", "histograms", "scatter", "orbits", "tools", "subplots", "save"]

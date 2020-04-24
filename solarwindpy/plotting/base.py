@@ -253,7 +253,7 @@ class Base(ABC):
 
 
 class Plot2D(Base):
-    def set_data(self, x, y, z=None, clip_data=True):
+    def set_data(self, x, y, z=None, clip_data=False):
         data = pd.DataFrame({"x": x, "y": y})
 
         if z is None:

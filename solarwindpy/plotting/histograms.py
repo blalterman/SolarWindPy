@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D plots.
+r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
 """
 
 import pdb  # noqa: F401
@@ -1072,8 +1072,7 @@ class Hist2D(base.Plot2D, AggPlot):
         border = Border(top, bottom)
         return border
 
-    @staticmethod
-    def _plot_one_edge(ax, edge, smooth=False, sg_kwargs=None, **kwargs):
+    def _plot_one_edge(self, ax, edge, smooth=False, sg_kwargs=None, **kwargs):
         x = edge.index.get_level_values("x").mid
         y = edge.index.get_level_values("y").mid
 
@@ -1089,8 +1088,10 @@ class Hist2D(base.Plot2D, AggPlot):
 
             y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
-        x = 10.0 ** x
-        y = 10.0 ** y
+        if self.log.x:
+            x = 10.0 ** x
+        if self.log.y:
+            y = 10.0 ** y
         return ax.plot(x, y, **kwargs)
 
     def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
