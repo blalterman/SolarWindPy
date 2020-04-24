@@ -22,6 +22,9 @@ from . import labels as labels_module
 InitialSpiralEdges = namedtuple("InitialSpiralEdges", "x,y")
 # SpiralMeshData = namedtuple("SpiralMeshData", "x,y")
 SpiralMeshBinID = namedtuple("SpiralMeshBinID", "id,fill,visited")
+SpiralFilterThresholds = namedtuple(
+    "SpiralFilterThresholds", "density,size", defaults=(False,)
+)
 
 
 @njit(parallel=True)
@@ -48,7 +51,7 @@ def calculate_bin_number_with_numba(mesh, x, y):
 
     nbins = mesh.shape[0]
     bin_visited = np.zeros(nbins, dtype=np.int64)
-    for i in prange(nbins):  # Because fill is 0.
+    for i in prange(nbins):
         x0, x1, y0, y1 = mesh[i]
 
         # Assume that largest x- and y-edges are extended by larger of 1% and 0.01
@@ -67,6 +70,7 @@ class SpiralMesh(object):
         self.set_data(x, y)
         self.set_min_per_bin(min_per_bin)
         self.set_initial_edges(initial_xedges, initial_yedges)
+        self._cell_filter_thresholds = SpiralFilterThresholds(density=False, size=False)
 
     @property
     def bin_id(self):
@@ -93,6 +97,57 @@ class SpiralMesh(object):
     @property
     def min_per_bin(self):
         return self._min_per_bin
+
+    @property
+    def cell_filter_thresholds(self):
+        return self._cell_filter_thresholds
+
+    @property
+    def _build_cell_filter(self):
+        r"""Build a boolean :py:class:`Series` selecting mesh cells that meet
+        density and area criteria specified by `mesh_cell_filter_thresholds`.
+
+        Notes
+        ----
+        Neither `density` nor `size` convert log-scale edges into linear scale.
+        Doing so would overweight the area of mesh cells at larger values on a given axis.
+        """
+        density = self.cell_filter_thresholds.density
+        size = self.cell_filter_thresholds.size
+
+        x = self.mesh[:, [0, 1]]
+        y = self.mesh[:, [2, 3]]
+
+        dx = x[:, 1] - x[:, 0]
+        dy = y[:, 1] - y[:, 0]
+        dA = dx * dy
+
+        tk = np.full_like(dx, True, dtype=bool)
+        if size:
+            size_quantile = np.quantile(dA, size)
+            tk[dA > size_quantile] = False
+        if density:
+            cnt = np.bincount(self.bin_id.id)
+            assert cnt.shape == tk.shape
+            cell_density = cnt / dA
+            pdb.set_trace()  # Is this a numpy array?
+            density_quantile = np.quantile(cell_density, density)
+            tk[density_quantile < cell_density] = False
+
+        return tk
+
+    def set_cell_filter_thresholds(self, **kwargs):
+        r"""Set or update the :py:meth:`mesh_cell_filter_thresholds`.
+        """
+        density = kwargs.pop("density", False)
+        size = kwargs.pop("size", False)
+        if len(kwargs.keys()):
+            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+            raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+        self._mesh_cell_filter_thresholds = SpiralFilterThresholds(
+            density=density, size=size
+        )
 
     def set_initial_edges(self, xedges, yedges):
         self._initial_edges = InitialSpiralEdges(xedges, yedges)
@@ -364,6 +419,11 @@ They will be replaced by NaNs and excluded from the aggregation.
         if (bin_visited > 1).any():
             logger.warning(f"({(bin_visited > 1).sum()} bins visted more than once.")
 
+        if nbins - bin_frequency.shape[0] > 0:
+            raise ValueError(
+                f"{nbins - bin_frequency.shape[0]} mesh cells do not have an associated z-value"
+            )
+
         # zbin = _pd.Series(zbin, index=self.data.index, name="zbin")
         # # Pandas groupby will treat NaN as not belonging to a bin.
         # zbin.replace(fill, _np.nan, inplace=True)
@@ -438,11 +498,11 @@ splot.initialize_mesh()
                 fcn = "mean"
 
         gb = self.grouped
-        agg = gb.agg(fcn)  # .loc[:, tko]
+        agg = gb.agg(fcn)
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            cnt = gb.agg("count")  # .loc[:, tko]
+            cnt = gb.agg("count")
             tk = pd.Series(True, index=agg.index)
 
             if c0 is not None:
@@ -451,6 +511,13 @@ splot.initialize_mesh()
                 tk = tk & (cnt <= c1)
 
             agg = agg.where(tk)
+
+        # reindex to ensure we have a z-value for every bin.
+        reindex = pd.RangeIndex(start=0, stop=self.mesh.mesh.shape[0], step=1)
+        agg = agg.reindex(reindex)
+
+        cell_filter = self._build_cell_filter()
+        agg = agg.where(cell_filter)
 
         #         stop = datetime.now()
         #         self.logger.warning(f"Stop {stop}")
@@ -491,16 +558,9 @@ data : {z.size}
             raise ValueError(msg)
 
         for k, b in nbins.items():
-            #             b = nbins[k]
             # Numpy and Astropy don't like NaNs when calculating bins.
             # Infinities in bins (typically from log10(0)) also create problems.
             d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
-            #             log = self.log._asdict()[k]
-
-            #             pdb.set_trace()
-
-            #                         if log:
-            #                             d = d.apply(np.log10)
 
             if not isinstance(b, (int, np.ndarray)):
                 raise TypeError("Only want in integer or np.ndarrays for initial edges")
@@ -592,6 +652,10 @@ data : {z.size}
         C = np.ma.masked_invalid(C.values)
         assert isinstance(C, np.ndarray)
         assert C.ndim == 1
+        if C.shape[0] != self.mesh.mesh.shape[0]:
+            raise ValueError(
+                f"""{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned."""
+            )
 
         xmesh = self.mesh.mesh[:, [0, 1]]
         ymesh = self.mesh.mesh[:, [2, 3]]
