@@ -103,7 +103,7 @@ class SpiralMesh(object):
         return self._cell_filter_thresholds
 
     @property
-    def _build_cell_filter(self):
+    def cell_filter(self):
         r"""Build a boolean :py:class:`Series` selecting mesh cells that meet
         density and area criteria specified by `mesh_cell_filter_thresholds`.
 
@@ -125,19 +125,31 @@ class SpiralMesh(object):
         tk = np.full_like(dx, True, dtype=bool)
         if size:
             size_quantile = np.quantile(dA, size)
-            tk[dA > size_quantile] = False
+            tk_size = dA < size_quantile
+            tk = tk & (tk_size)
         if density:
             cnt = np.bincount(self.bin_id.id)
             assert cnt.shape == tk.shape
             cell_density = cnt / dA
-            pdb.set_trace()  # Is this a numpy array?
             density_quantile = np.quantile(cell_density, density)
-            tk[density_quantile < cell_density] = False
+            tk_density = cell_density > density_quantile
+            tk = tk & tk_density
 
         return tk
 
     def set_cell_filter_thresholds(self, **kwargs):
         r"""Set or update the :py:meth:`mesh_cell_filter_thresholds`.
+
+        Parameters
+        ----------
+        density: scalar
+            The density quantile above which we want to select bins, e.g.
+            above the 0.01 quantile. This ensures that each bin meets some
+            sufficient fill factor.
+        size: scalar
+            The size quantile below which we want to select bins, e.g.
+            below the 0.99 quantile. This ensures that the bin isn't so large
+            that it will appear as an outlier.
         """
         density = kwargs.pop("density", False)
         size = kwargs.pop("size", False)
@@ -145,7 +157,7 @@ class SpiralMesh(object):
             extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
-        self._mesh_cell_filter_thresholds = SpiralFilterThresholds(
+        self._cell_filter_thresholds = SpiralFilterThresholds(
             density=density, size=size
         )
 
@@ -516,8 +528,15 @@ splot.initialize_mesh()
         reindex = pd.RangeIndex(start=0, stop=self.mesh.mesh.shape[0], step=1)
         agg = agg.reindex(reindex)
 
-        cell_filter = self._build_cell_filter()
-        agg = agg.where(cell_filter)
+        cell_filter = self.mesh.cell_filter
+        if agg.shape != cell_filter.shape:
+            raise ValueError(
+                f"""Unable to algin `agg` and `cell_filter.
+agg    : {agg.shape}
+filter : {cell_filter.shape}"""
+            )
+        #         pdb.set_trace()
+        agg = agg.where(cell_filter, axis=0)
 
         #         stop = datetime.now()
         #         self.logger.warning(f"Stop {stop}")
@@ -735,6 +754,7 @@ data : {z.size}
             # is most opaque.
             alpha_agg = mpl.colors.Normalize()(alpha_agg)
             alpha = 1 - alpha_agg
+            #             alpha = np.sqrt(alpha)
 
             # Must draw to initialize `facecolor`s
             plt.draw()
