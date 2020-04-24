@@ -754,7 +754,12 @@ data : {z.size}
             # is most opaque.
             alpha_agg = mpl.colors.Normalize()(alpha_agg)
             alpha = 1 - alpha_agg
-            #             alpha = np.sqrt(alpha)
+            self.logger.warning("Scaling alpha filter as alpha**0.25")
+            alpha = alpha ** 0.25
+
+            # Set masked values to zero. Otherwise, masked
+            # values are rendered as black.
+            alpha = alpha.filled(0)
 
             # Must draw to initialize `facecolor`s
             plt.draw()

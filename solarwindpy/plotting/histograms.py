@@ -1026,7 +1026,12 @@ class Hist2D(base.Plot2D, AggPlot):
             # Feature scale then invert so smallest STD
             # is most opaque.
             alpha = 1 - mpl.colors.Normalize()(alpha_agg)
+            self.logger.warning("Scaling alpha filter as alpha**0.25")
+            alpha = alpha ** 0.25
 
+            # Set masked values to zero. Otherwise, masked
+            # values are rendered as black.
+            alpha = alpha.filled(0)
             # Must draw to initialize `facecolor`s
             plt.draw()
             # Remove `pc` from axis so we can redraw with std
