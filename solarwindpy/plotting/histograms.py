@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D plots.
+r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
 """
 
 import pdb  # noqa: F401
@@ -10,8 +10,8 @@ import pandas as pd
 import matplotlib as mpl
 
 from types import FunctionType
-from matplotlib import pyplot as plt
 from numbers import Number
+from matplotlib import pyplot as plt
 from abc import abstractproperty, abstractmethod
 from collections import namedtuple
 from scipy.signal import savgol_filter
@@ -89,24 +89,53 @@ class AggPlot(base.Base):
     def joint(self):
         r"""A combination of the categorical and continuous data for use in `Groupby`.
         """
+        #         cut = self.cut
+        #         tko = self.agg_axes
+
+        #         self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
+
+        #         other = self.data.loc[cut.index, tko]
+
+        #         #         joint = pd.concat([cut, other.to_frame(name=tko)], axis=1, sort=True)
+        #         joint = cut.copy(deep=True)
+        #         joint.loc[:, tko] = other
+        #         joint.sort_index(axis=1, inplace=True)
+        #         return joint
+
         cut = self.cut
-        tko = self.agg_axes
+        tk_target = self.agg_axes
+        target = self.data.loc[cut.index, tk_target]
 
-        self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
+        mi = pd.MultiIndex.from_frame(cut)
+        target.index = mi
 
-        other = self.data.loc[cut.index, tko]
-
-        joint = cut.copy(deep=True)
-        joint.loc[:, tko] = other
-        joint.sort_index(axis=1, inplace=True)
-
-        return joint
+        return target
 
     @property
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes.
         """
-        gb = self.joint.groupby(list(self._gb_axes))
+        #         tko = self.agg_axes
+        #         gb = self.data.loc[:, tko].groupby([v for k, v in self.cut.items()], observed=False)
+        #         gb = self.joint.groupby(list(self._gb_axes))
+
+        #         cut = self.cut
+        #         tk_target = self.agg_axes
+        #         target = self.data.loc[cut.index, tk_target]
+
+        #         mi = pd.MultiIndex.from_frame(cut)
+        #         target.index = mi
+
+        target = self.joint
+        gb_axes = list(self._gb_axes)
+        gb = target.groupby(gb_axes, axis=0, observed=True)
+
+        #         agg_axes = self.agg_axes
+        #         gb = (
+        #             self.joint.set_index(gb_axes)
+        #             .loc[:, agg_axes]
+        #             .groupby(gb_axes, axis=0, observed=False)
+        #         )
         return gb
 
     @property
@@ -117,6 +146,48 @@ class AggPlot(base.Base):
         `make_plot`.
         """
         return self._axnorm
+
+    # Old version that cuts at percentiles.
+    @staticmethod
+    def clip_data(data, clip):
+        q0 = 0.0001
+        q1 = 0.9999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+
+        if isinstance(data, pd.Series):
+            ax = 0
+        elif isinstance(data, pd.DataFrame):
+            ax = 1
+        else:
+            raise TypeError("Unexpected object %s" % type(data))
+
+        if isinstance(clip, str) and clip.lower()[0] == "l":
+            data = data.clip_lower(lo, axis=ax)
+        elif isinstance(clip, str) and clip.lower()[0] == "u":
+            data = data.clip_upper(up, axis=ax)
+        else:
+            data = data.clip(lo, up, axis=ax)
+        return data
+
+    # New version that uses binning to cut.
+    #     @staticmethod
+    #     def clip_data(data, bins, clip):
+    #         q0 = 0.001
+    #         q1 = 0.999
+    #         pct = data.quantile([q0, q1])
+    #         lo  = pct.loc[q0]
+    #         up  = pct.loc[q1]
+    #         lo = bins.iloc[0]
+    #         up = bins.iloc[-1]
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up)
+    #         else:
+    #             data = data.clip(lo, up)
+    #         return data
 
     def set_clim(self, lower=None, upper=None):
         f"""Set the minimum (lower) and maximum (upper) alowed number of
@@ -161,8 +232,8 @@ class AggPlot(base.Base):
             nbins = {k: v for k, v in zip(gb_axes, nbins)}
 
         else:
-            msg = "Unrecognized `nbins`\ntype: {}\n bins:{}"
-            raise ValueError(msg.format(type(nbins), nbins))
+            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins:{nbins}"
+            raise ValueError(msg)
 
         for k in self._gb_axes:
             b = nbins[k]
@@ -239,11 +310,11 @@ class AggPlot(base.Base):
             else:
                 fcn = "mean"
 
-        agg = gb.agg(fcn).loc[:, tko]
+        agg = gb.agg(fcn)  # .loc[:, tko]
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            cnt = gb.agg("count").loc[:, tko]
+            cnt = gb.agg("count")  # .loc[:, tko]
             tk = pd.Series(True, index=agg.index)
             #             tk  = pd.DataFrame(True,
             #                                index=agg.index,
@@ -256,6 +327,7 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
+        #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
         # Ensure all bins are represented in the data. (20190605)
         for k, v in self.intervals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
@@ -418,7 +490,6 @@ class Hist1D(AggPlot):
         self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self.set_path(None)
         self.set_clim(None, None)
 
     @property
@@ -674,12 +745,19 @@ class Hist2D(base.Plot2D, AggPlot):
         self.set_axnorm(axnorm)
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
-        self.set_path(None)
         self.set_clim(None, None)
 
     @property
     def _gb_axes(self):
         return ("x", "y")
+
+    def _maybe_convert_to_log_scale(self, x, y):
+        if self.log.x:
+            x = 10.0 ** x
+        if self.log.y:
+            y = 10.0 ** y
+
+        return x, y
 
     #     def set_path(self, new, add_scale=True):
     #         # Bug: path doesn't auto-set log information.
@@ -829,7 +907,7 @@ class Hist2D(base.Plot2D, AggPlot):
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
-        super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
+        return super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
 
     def _limit_color_norm(self, norm):
         if self.axnorm in ("c", "r"):
@@ -852,6 +930,7 @@ class Hist2D(base.Plot2D, AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
+        alpha_fcn=None,
         **kwargs,
     ):
         r"""
@@ -870,6 +949,9 @@ class Hist2D(base.Plot2D, AggPlot):
             If not None, kwargs passed to `self._make_cbar`.
         fcn: FunctionType, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
+        alpha_fcn: None, str
+            If not None, the function used to aggregate the data for setting alpha
+            value.
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
@@ -886,16 +968,23 @@ class Hist2D(base.Plot2D, AggPlot):
         x = self.edges["x"]
         y = self.edges["y"]
 
-        assert x.size == agg.shape[1] + 1
-        assert y.size == agg.shape[0] + 1
+        #         assert x.size == agg.shape[1] + 1
+        #         assert y.size == agg.shape[0] + 1
+
+        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
+        if not x.size == agg.shape[1] + 1:
+            agg = agg.reindex(columns=self.intervals["x"])
+        if not y.size == agg.shape[0] + 1:
+            agg = agg.reindex(index=self.intervals["y"])
 
         if ax is None:
             fig, ax = plt.subplots()
 
-        if self.log.x:
-            x = 10.0 ** x
-        if self.log.y:
-            y = 10.0 ** y
+        #         if self.log.x:
+        #             x = 10.0 ** x
+        #         if self.log.y:
+        #             y = 10.0 ** y
+        x, y = self._maybe_convert_to_log_scale(x, y)
 
         axnorm = self.axnorm
         norm = kwargs.pop(
@@ -912,6 +1001,7 @@ class Hist2D(base.Plot2D, AggPlot):
         XX, YY = np.meshgrid(x, y)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
+        cbar_or_mappable = pc
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
@@ -921,13 +1011,38 @@ class Hist2D(base.Plot2D, AggPlot):
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
 
         self._format_axis(ax)
 
-        if cbar:
-            cbar_or_mappable = cbar
-        else:
-            cbar_or_mappable = pc
+        color_plot = self.data.loc[:, self.agg_axes].dropna().unique().size > 1
+        if (alpha_fcn is not None) and color_plot:
+            self.logger.warning(
+                "Make sure you verify alpha actually set. I don't yet trust this."
+            )
+            alpha_agg = self.agg(fcn=alpha_fcn)
+            alpha_agg = alpha_agg.unstack("x")
+            alpha_agg = np.ma.masked_invalid(alpha_agg.values.ravel())
+            # Feature scale then invert so smallest STD
+            # is most opaque.
+            alpha = 1 - mpl.colors.Normalize()(alpha_agg)
+            self.logger.warning("Scaling alpha filter as alpha**0.25")
+            alpha = alpha ** 0.25
+
+            # Set masked values to zero. Otherwise, masked
+            # values are rendered as black.
+            alpha = alpha.filled(0)
+            # Must draw to initialize `facecolor`s
+            plt.draw()
+            # Remove `pc` from axis so we can redraw with std
+            #             pc.remove()
+            colors = pc.get_facecolors()
+            colors[:, 3] = alpha
+            pc.set_facecolor(colors)
+        #             ax.add_collection(pc)
+
+        elif alpha_fcn is not None:
+            self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
 
         return ax, cbar_or_mappable
 
@@ -962,8 +1077,7 @@ class Hist2D(base.Plot2D, AggPlot):
         border = Border(top, bottom)
         return border
 
-    @staticmethod
-    def _plot_one_edge(ax, edge, smooth=False, sg_kwargs=None, **kwargs):
+    def _plot_one_edge(self, ax, edge, smooth=False, sg_kwargs=None, **kwargs):
         x = edge.index.get_level_values("x").mid
         y = edge.index.get_level_values("y").mid
 
@@ -979,8 +1093,10 @@ class Hist2D(base.Plot2D, AggPlot):
 
             y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
-        x = 10.0 ** x
-        y = 10.0 ** y
+        if self.log.x:
+            x = 10.0 ** x
+        if self.log.y:
+            y = 10.0 ** y
         return ax.plot(x, y, **kwargs)
 
     def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
@@ -1016,9 +1132,44 @@ class Hist2D(base.Plot2D, AggPlot):
 
         return etop, ebottom
 
+    def _get_contour_levels(self, levels):
+        if (levels is not None) or (self.axnorm is None):
+            pass
+
+        elif (levels is None) and (self.axnorm == "t"):
+            levels = [0.01, 0.1, 0.3, 0.7, 0.99]
+
+        elif (levels is None) and (self.axnorm == "d"):
+            levels = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+
+        elif (levels is None) and (self.axnorm in ["r", "c"]):
+            levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+        else:
+            raise ValueError(
+                f"Unrecognized axis normalization {self.axnorm} for default levels."
+            )
+
+        return levels
+
+    def _verify_contour_passthrough_kwargs(
+        self, ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+    ):
+        if clabel_kwargs is None:
+            clabel_kwargs = dict()
+        if edges_kwargs is None:
+            edges_kwargs = dict()
+        if cbar_kwargs is None:
+            cbar_kwargs = dict()
+            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+                cbar_kwargs["ax"] = ax
+
+        return clabel_kwargs, edges_kwargs, cbar_kwargs
+
     def plot_contours(
         self,
         ax=None,
+        label_levels=True,
         cbar=True,
         limit_color_norm=False,
         cbar_kwargs=None,
@@ -1027,6 +1178,8 @@ class Hist2D(base.Plot2D, AggPlot):
         edges_kwargs=None,
         clabel_kwargs=None,
         skip_max_clbl=True,
+        use_contourf=False,
+        gaussian_filter_std=0,
         **kwargs,
     ):
         f"""Make a contour plot on `ax` using `ax.contour`.
@@ -1035,6 +1188,8 @@ class Hist2D(base.Plot2D, AggPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
+        label_levels: bool
+            If True, add labels to contours with `ax.clabel`.
         cbar: bool
             If True, create color bar with `labels.z`.
         limit_color_norm: bool
@@ -1055,10 +1210,48 @@ class Hist2D(base.Plot2D, AggPlot):
             contour is, effectively, a point.
         maximum_color:
             The color for the maximum of the PDF.
+        use_contourf: bool
+            If True, use `ax.contourf`. Else use `ax.contour`.
+        gaussian_filter_std: int
+            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
+            standard deviation specified by `gaussian_filter_std`.
         kwargs:
             Passed to `ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
+        levels = kwargs.pop("levels", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop(
+            "norm",
+            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+            if self.axnorm in ("c", "r")
+            else None,
+        )
+        linestyles = kwargs.pop(
+            "linestyles",
+            [
+                "-",
+                ":",
+                "--",
+                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+                "--",
+                ":",
+                "-",
+                (0, (7, 3, 1, 3, 1, 3)),
+            ],
+        )
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        clabel_kwargs, edges_kwargs, cbar_kwargs = self._verify_contour_passthrough_kwargs(
+            ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+        )
+
+        inline = clabel_kwargs.pop("inline", True)
+        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
+        fmt = clabel_kwargs.pop("fmt", "%s")
+
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.intervals["x"].mid
         y = self.intervals["y"].mid
@@ -1066,12 +1259,23 @@ class Hist2D(base.Plot2D, AggPlot):
         assert x.size == agg.shape[1]
         assert y.size == agg.shape[0]
 
-        x = 10.0 ** x
-        y = 10.0 ** y
+        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
+        if not x.size == agg.shape[1]:
+            agg = agg.reindex(columns=self.intervals["x"])
+        if not y.size == agg.shape[0]:
+            agg = agg.reindex(index=self.intervals["y"])
+
+        x, y = self._maybe_convert_to_log_scale(x, y)
 
         XX, YY = np.meshgrid(x, y)
 
-        C = np.ma.masked_invalid(agg.values)
+        C = agg.values
+        if gaussian_filter_std:
+            from scipy.ndimage import gaussian_filter
+
+            C = gaussian_filter(C, gaussian_filter_std)
+
+        C = np.ma.masked_invalid(C)
 
         assert XX.shape == C.shape
         assert YY.shape == C.shape
@@ -1083,47 +1287,44 @@ class Hist2D(base.Plot2D, AggPlot):
             def __repr__(self):
                 return str(self).rstrip("0")
 
-        if self.axnorm == "t":
-            levels = [0.01, 0.1, 0.3, 0.7, 0.99]
+        levels = self._get_contour_levels(levels)
 
-        elif self.axnorm == "d":
-            levels = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+        contour_fcn = ax.contour
+        if use_contourf:
+            contour_fcn = ax.contourf
 
+        if levels is None:
+            args = [XX, YY, C]
         else:
-            raise ValueError("Unrecognized axis normalization {}".format(self.axnorm))
+            args = [XX, YY, C, levels]
 
-        linestyles = kwargs.pop(
-            "linestyles", ["-", ":", "--", (0, (7, 3, 1, 3, 1, 3)), "--", ":", "-"]
-        )
-        cmap = kwargs.pop("cmap", None)
-
-        qset = ax.contour(XX, YY, C, levels, linestyles=linestyles, cmap=cmap, **kwargs)
-
+        qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
         qset.levels = [nf(l) for l in qset.levels]
 
-        if clabel_kwargs is None:
-            clabel_kwargs = dict()
+        try:
+            args = (qset, levels[:-1] if skip_max_clbl else levels)
+        except TypeError:
+            # None can't be subscripted.
+            args = (qset,)
 
-        inline = clabel_kwargs.pop("inline", True)
-        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
-        fmt = clabel_kwargs.pop("fmt", "%s")
-
-        lbls = ax.clabel(
-            qset,
-            levels[:-1] if skip_max_clbl else levels,
-            inline=inline,
-            inline_spacing=inline_spacing,
-            fmt=fmt,
-        )
+        lbls = None
+        if label_levels:
+            lbls = ax.clabel(
+                *args, inline=inline, inline_spacing=inline_spacing, fmt=fmt
+            )
 
         if plot_edges:
-
-            if edges_kwargs is None:
-                edges_kwargs = dict()
-
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
-        return ax, lbls
+        cbar_or_mappable = qset
+        if cbar:
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
+
+        self._format_axis(ax)
+
+        return ax, lbls, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         f"""Make a `Hist1D` from the data stored in this `His2D`.

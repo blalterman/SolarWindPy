@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import unittest
 import sys
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from unittest import TestCase
 from abc import ABC, abstractproperty
@@ -63,7 +63,13 @@ class QuantityTestBase(ABC):
             object_testing, object_testing.__class__(object_testing.data * 4)
         )
         # Type isn't equal
-        for other in ([], tuple(), np.array([]), pd.Series(), pd.DataFrame()):
+        for other in (
+            [],
+            tuple(),
+            np.array([]),
+            pd.Series(dtype=np.float64),
+            pd.DataFrame(dtype=np.float64),
+        ):
             self.assertNotEqual(object_testing, other)
 
     def test_empty_data_catch(self):

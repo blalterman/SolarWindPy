@@ -18,7 +18,7 @@ import pandas as pd
 import unittest
 import sys
 import itertools
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from abc import ABC, abstractproperty, abstractmethod
 
@@ -510,7 +510,7 @@ class PlasmaTestBase(ABC):
                 # Test list of and sums of sums of species.
                 pth = {sprime: self.object_testing.ions.loc[sprime].pth for sprime in s}
                 pth = pd.concat(pth, axis=1, names=["S"], sort=True)
-                pth = pth.drop("scalar", axis=1, level="C")
+                pth = pth.drop("scalar", axis=1, level="C", errors="ignore")
 
                 coeff = pd.Series({"par": -1, "per": 1})
                 ani_s = pth.pow(coeff, axis=1, level="C").product(axis=1, level="S")
@@ -901,7 +901,11 @@ class PlasmaTestBase(ABC):
 
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
-        w = self.data.w.loc[:, tk].drop("scalar", axis=1, level="C") * 1e3
+
+        w = (
+            self.data.w.loc[:, tk].drop("scalar", axis=1, level="C", errors="ignore")
+            * 1e3
+        )
         n = self.data.n.loc[:, ""].loc[:, slist] * 1e6
         m = self.mass.loc[slist]
         rho = n.multiply(m, axis=1, level="S")
@@ -983,7 +987,10 @@ class PlasmaTestBase(ABC):
 
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
-        w = self.data.w.loc[:, tk].drop("scalar", axis=1, level="C") * 1e3
+        w = (
+            self.data.w.loc[:, tk].drop("scalar", axis=1, level="C", errors="ignore")
+            * 1e3
+        )
         n = self.data.n.loc[:, ""].loc[:, slist] * 1e6
         m = self.mass.loc[slist]
         rho = n.multiply(m, axis=1, level="S")
@@ -1574,6 +1581,7 @@ class PlasmaTestBase(ABC):
             # Check electrons are properly calculated.
             ot = self.object_testing
             pdt.assert_frame_equal(electrons.data, ot.estimate_electrons().data)
+
             self.assertEqual(electrons, ot.estimate_electrons())
 
             # Check that electrons aren't stored in plasma.
@@ -2220,11 +2228,19 @@ class PlasmaTestBase(ABC):
             ni = self.data.loc[:, ("n", "", si)]
             nj = self.data.loc[:, ("n", "", sj)]
 
-            wi = self.data.loc[:, "w"].xs(si, axis=1, level="S").drop("scalar", axis=1)
+            wi = (
+                self.data.loc[:, "w"]
+                .xs(si, axis=1, level="S")
+                .drop("scalar", axis=1, errors="ignore")
+            )
             wi_par = wi.loc[:, "par"]
             wi_per = wi.loc[:, "per"]
 
-            wj = self.data.loc[:, "w"].xs(sj, axis=1, level="S").drop("scalar", axis=1)
+            wj = (
+                self.data.loc[:, "w"]
+                .xs(sj, axis=1, level="S")
+                .drop("scalar", axis=1, errors="ignore")
+            )
             wj_par = wj.loc[:, "par"]
             wj_per = wj.loc[:, "per"]
 

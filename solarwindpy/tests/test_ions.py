@@ -15,7 +15,7 @@ import unittest
 # from pandas import MultiIndex as MI
 
 # import numpy.testing as npt
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from abc import ABC, abstractproperty
 

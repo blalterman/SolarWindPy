@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
 
 class Base(ABC):
@@ -36,6 +37,7 @@ class Base(ABC):
         self._init_logger()
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
+        self.set_path(None)
 
     def __str__(self):
         return self.__class__.__name__
@@ -49,47 +51,47 @@ class Base(ABC):
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
-    # Old version that cuts at percentiles.
-    @staticmethod
-    def clip_data(data, clip):
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
-
-    # New version that uses binning to cut.
+    #     # Old version that cuts at percentiles.
     #     @staticmethod
-    #     def clip_data(data, bins, clip):
-    #         q0 = 0.001
-    #         q1 = 0.999
+    #     def clip_data(data, clip):
+    #         q0 = 0.0001
+    #         q1 = 0.9999
     #         pct = data.quantile([q0, q1])
-    #         lo  = pct.loc[q0]
-    #         up  = pct.loc[q1]
-    #         lo = bins.iloc[0]
-    #         up = bins.iloc[-1]
-    #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo)
-    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up)
+    #         lo = pct.loc[q0]
+    #         up = pct.loc[q1]
+
+    #         if isinstance(data, pd.Series):
+    #             ax = 0
+    #         elif isinstance(data, pd.DataFrame):
+    #             ax = 1
     #         else:
-    #             data = data.clip(lo, up)
+    #             raise TypeError("Unexpected object %s" % type(data))
+
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo, axis=ax)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up, axis=ax)
+    #         else:
+    #             data = data.clip(lo, up, axis=ax)
     #         return data
+
+    #     # New version that uses binning to cut.
+    #     #     @staticmethod
+    #     #     def clip_data(data, bins, clip):
+    #     #         q0 = 0.001
+    #     #         q1 = 0.999
+    #     #         pct = data.quantile([q0, q1])
+    #     #         lo  = pct.loc[q0]
+    #     #         up  = pct.loc[q1]
+    #     #         lo = bins.iloc[0]
+    #     #         up = bins.iloc[-1]
+    #     #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #     #             data = data.clip_lower(lo)
+    #     #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #     #             data = data.clip_upper(up)
+    #     #         else:
+    #     #             data = data.clip(lo, up)
+    #     #         return data
 
     @property
     def data(self):
@@ -126,6 +128,7 @@ class Base(ABC):
         r"""Set or update x, y, or z labels. Any label not specified in kwargs
         is propagated from `self.labels.<x, y, or z>`.
         """
+        auto_update_path = kwargs.pop("auto_update_path", True)
 
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
@@ -136,6 +139,9 @@ class Base(ABC):
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
         self._labels = AxesLabels(x, y, z)
+
+        if auto_update_path:
+            self.set_path("auto")
 
     @abstractmethod
     def set_path(self, new, add_scale=False):
@@ -247,7 +253,7 @@ class Base(ABC):
 
 
 class Plot2D(Base):
-    def set_data(self, x, y, z=None, clip_data=True):
+    def set_data(self, x, y, z=None, clip_data=False):
         data = pd.DataFrame({"x": x, "y": y})
 
         if z is None:

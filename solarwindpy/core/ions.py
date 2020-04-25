@@ -51,20 +51,26 @@ class Ion(base.Base):
             return False
         else:
             try:
-                eq_data = self.data == other.data
-            except ValueError as e:
-                # print(dir(e), flush=True)
-                msg = "Can only compare identically-labeled DataFrame objects"
-                if msg in str(e):
-                    return False
-                else:
-                    raise e
-
-            while isinstance(eq_data, pd.core.generic.NDFrame):
-                eq_data = eq_data.all()
-            if eq_data:
-                return True
-        return False
+                pd.testing.assert_frame_equal(self.data, other.data)
+            except AssertionError:
+                return False
+        #            try:
+        #                # eq_data = self.data == other.data
+        #                pd.testing.assert_frame_equal(self.data, other.data)
+        #            except ValueError as e:
+        #                # print(dir(e), flush=True)
+        #                msg = "Can only compare identically-labeled DataFrame objects"
+        #                if msg in str(e):
+        #                    return False
+        #                else:
+        #                    raise e
+        #
+        #            while isinstance(eq_data, pd.core.generic.NDFrame):
+        #                eq_data = eq_data.all()
+        #            if eq_data:
+        #                return True
+        #
+        return True
 
     def set_species(self, species):
         assert isinstance(species, str)

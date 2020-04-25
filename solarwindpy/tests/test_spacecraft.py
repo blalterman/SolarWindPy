@@ -5,7 +5,7 @@ import pdb
 import numpy as np
 import pandas as pd
 import unittest
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
