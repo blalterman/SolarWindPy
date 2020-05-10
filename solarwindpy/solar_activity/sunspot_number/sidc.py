@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from pathlib import Path
+from collections import namedtuple
 
 from .. import base
 
@@ -41,6 +42,122 @@ _d_dtypes_columns = _Loader_Dtypes_Columns(
     ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
 )
 
+# Column 3: Date in fraction of year for the middle of the corresponding month (~ day 15)
+
+_hm13_dtypes_columns = _Loader_Dtypes_Columns(
+    {
+        0: int,
+        1: int,
+        2: float,
+        3: float,
+        4: float,
+        5: float,
+        6: float,
+        7: float,
+        8: float,
+        9: int,
+        10: int,
+        11: int,
+        12: bool,
+    },
+    (
+        "year",
+        "month",
+        "year_fraction",
+        "total_ssn",
+        "north_ssn",
+        "south_ssn",
+        "total_std",
+        "north_std",
+        "south_std",
+        "n_total",
+        "n_north",
+        "n_south",
+        "definitive",
+    ),
+)
+
+_hm_dtypes_columns = _Loader_Dtypes_Columns(
+    {
+        0: int,
+        1: int,
+        2: float,
+        3: float,
+        4: float,
+        5: float,
+        6: float,
+        7: float,
+        8: float,
+        9: int,
+        10: int,
+        11: int,
+        12: bool,
+    },
+    (
+        "year",
+        "month",
+        "year_fraction",
+        "total_ssn",
+        "north_ssn",
+        "south_ssn",
+        "total_std",
+        "north_std",
+        "south_std",
+        "n_total",
+        "n_north",
+        "n_south",
+        "definitive",
+    ),
+)
+
+_hd_dtypes_columns = _Loader_Dtypes_Columns(
+    {
+        0: int,
+        1: int,
+        2: int,
+        3: float,
+        4: float,
+        5: float,
+        6: float,
+        7: float,
+        8: float,
+        9: float,
+        10: int,
+        11: int,
+        12: int,
+        13: bool,
+    },
+    (
+        "year",
+        "month",
+        "day",
+        "year_fraction",
+        "total_ssn",
+        "north_ssn",
+        "south_ssn",
+        "total_std",
+        "north_std",
+        "south_std",
+        "n_total",
+        "n_north",
+        "n_south",
+        "definitive",
+    ),
+)
+
+
+_Dtypes_Columns = namedtuple("Dtypes_Columns", "d,m,m13,y,hd,hm,hm13", defaults=(None,))
+
+_Dtypes_Columns = (
+    _d_dtypes_columns,
+    _m_dtypes_columns,
+    _m13_dtypes_columns,
+    None,
+    _hd_dtypes_columns,
+    _hm_dtypes_columns,
+    _hm13_dtypes_columns,
+)
+
 
 class SIDC_ID(ID):
     def __init__(self, key):
@@ -53,6 +170,10 @@ class SIDC_ID(ID):
         m      Monthly total       snmtotcsv.php
         m13    13-month smoothed   snmstotcsv.php
         y      Yearly total        snytotcsv.php
+        hd     Hemispheric Daily   sndhemcsv.php
+        hm     Hemispheric Monthly snmhemcsv.php
+        hm13   13-Month Smoothed   snmshemcsv.php
+               Hemispheric
         ====== =================== ================
 
         URLs replace the wild card in <http://www.sidc.be/silso/INFO/*>.
@@ -70,6 +191,9 @@ class SIDC_ID(ID):
             ("m", r"snmtotcsv.php"),
             ("m13", r"snmstotcsv.php"),
             ("y", r"snytotcsv.php"),
+            ("hd", r"sndhemcsv.php"),
+            ("hm", r"snmhemcsv.php"),
+            ("hm13", r"snmshemcsv.php"),
         )
         return dict(trans_url)
 
@@ -90,43 +214,81 @@ class SIDCLoader(DataLoader):
         self.logger.info("Downloading from SIDC sunspot number\nurl: %s", url)
 
         key = self.key
-        if key == "m13":
-            dtypes_columns = _m13_dtypes_columns
-            csv = pd.read_csv(
-                self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
+        dtypes_columns = _Dtypes_Columns._asdict().get(key)
+        if dtypes_columns is None:
+            raise NotImplementedError(
+                f"""You have not yet used the SSN specified by your key ({key}). Please verify the column labels before continuing."""
             )
-            csv.columns = dtypes_columns.columns
+
+        csv = pd.read_csv(self.url, sep=";", header=None, dtype=dtypes_columns.dtypes)
+        csv.columns = dtypes_columns.columns
+
+        if key in ("m13", "m", "hm", "hm13"):
             dt = csv.loc[:, ["year", "month"]]
             dt.loc[:, "day"] = 1
 
-        elif key == "m":
-            dtypes_columns = _m_dtypes_columns
-            csv = pd.read_csv(
-                self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
-            )
-            csv.columns = dtypes_columns.columns
-            dt = csv.loc[:, ["year", "month"]]
-            dt.loc[:, "day"] = 1
-
-        elif key == "d":
-            dtypes_columns = _d_dtypes_columns
-            csv = pd.read_csv(
-                self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
-            )
-            csv.columns = dtypes_columns.columns
-
+        elif key in ("d", "hd"):
             dt = csv.loc[:, ["year", "month", "day"]]
 
         else:
-            msg = (
-                "You have not yet used the SSN specified by your key (%s). "
-                "Please verify the column labels before continuing."
+            raise NotImplementedError(
+                f"Please specify how to build {key} datetime column"
             )
-            raise NotImplementedError(msg % key)
 
-        std_error = csv.loc[:, "std"].divide(csv.loc[:, "n_obs"].apply(np.sqrt), axis=0)
-        csv.loc[:, "std_error"] = std_error
-        csv.sort_index(axis=1, inplace=True)
+        #         if key == "m13":
+        #             dtypes_columns = _m13_dtypes_columns
+        #             csv = pd.read_csv(
+        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
+        #             )
+        #             csv.columns = dtypes_columns.columns
+        #             dt = csv.loc[:, ["year", "month"]]
+        #             dt.loc[:, "day"] = 1
+        #
+        #         elif key == "m":
+        #             dtypes_columns = _m_dtypes_columns
+        #             csv = pd.read_csv(
+        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
+        #             )
+        #             csv.columns = dtypes_columns.columns
+        #             dt = csv.loc[:, ["year", "month"]]
+        #             dt.loc[:, "day"] = 1
+        #
+        #         elif key == "d":
+        #             dtypes_columns = _d_dtypes_columns
+        #             csv = pd.read_csv(
+        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
+        #             )
+        #             csv.columns = dtypes_columns.columns
+        #
+        #             dt = csv.loc[:, ["year", "month", "day"]]
+        #
+        #         else:
+        #             msg = (
+        #                 "You have not yet used the SSN specified by your key (%s). "
+        #                 "Please verify the column labels before continuing."
+        #             )
+        #             raise NotImplementedError(msg % key)
+
+        if key.startswith("h"):
+            std = csv.loc[:, ["total_std", "north_std", "south_std"]]
+            cnt = csv.loc[:, ["n_total", "n_north", "n_south"]]
+
+            std.columns = (
+                std.columns.to_series().str.split("_").apply(lambda x: x[0]).values
+            )
+            cnt.columns = cnt.columns.to_series().str.split("_").apply(lambda x: x[1])
+            std_error = std.divide(cnt.apply(np.sqrt), axis=1)
+
+            std_error.columns = (std_error.columns.to_series() + "std_error").values
+
+            csv = pd.concat([csv, std_error], axis=1, sort=True)
+
+        else:
+            std_error = csv.loc[:, "std"].divide(
+                csv.loc[:, "n_obs"].apply(np.sqrt), axis=0
+            )
+            csv.loc[:, "std_error"] = std_error
+            csv.sort_index(axis=1, inplace=True)
 
         ts = pd.to_datetime(dt)
         csv.set_index(ts, inplace=True)

@@ -1067,10 +1067,37 @@ species: {}
         return pdv
 
     def pdv(self, *species, project_m2q=False):
-        r"""
-        Shortcut to :py:meth:`pdynamic`.
+        r"""Shortcut to :py:meth:`pdynamic`.
         """
         return self.pdynamic(*species, project_m2q=project_m2q)
+
+    def sound_speed(self, *species):
+        r"""Calculate the sound speed.
+
+        Parameters
+        ----------
+        species: str
+            TODO: What controls species?
+
+        Returns
+        -------
+        cs: pd.DataFrame or pd.Series depending on `species` inputs.
+        """
+        raise NotImplementedError
+
+        rho = self.mass_density(*species)
+        w = self.thermal_speed(*species)
+
+        gamma = self.units_constants.misc.loc["gamma"] # should be 5.0/3.0
+        coeff = gamma / 2.0
+        cs = w.pow(2).multiply(1.0/coeff)
+        cs.name = "IDK YET"
+        return cs
+
+    def cs(self, *species):
+        r""" Shortcut to :py:meth:`sound_speed`.
+        """
+        return self.sound_speed(*species)
 
     def ca(self, *species):
         r"""
