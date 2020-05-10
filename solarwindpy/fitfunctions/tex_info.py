@@ -5,7 +5,8 @@ and render information in TeX format. Primary target is `matplotlib` annotation.
 
 import pdb  # noqa: F401
 import re
-import numpy as np
+
+# import numpy as np
 
 # from collections import namedtuple
 # from inspect import getargspec
@@ -107,14 +108,12 @@ class TeXinfo(object):
 
         self._info = info
 
+    def __str__(self):
+        return self.info
+
     @property
     def info(self):
         return self._info
-        # try:
-
-    #             return self._info
-    #         except AttributeError:
-    #             return self.set_info()
 
     @staticmethod
     def _check_and_add_math_escapes(x):
@@ -137,20 +136,20 @@ class TeXinfo(object):
 
         return x
 
-    @staticmethod
-    def _calc_precision(value):
-        r"""Primarily for use with the `val_uncert_2_string` and other methods
-        that may require this.
-        """
-        # Convert the fractional part to an exponential string.
-        # E.g. 0.0009865 -> 9.865000e-04
-        precision = "%e" % value  # (value - int(value))
-
-        # Split the exponential notation at the `e`,  a la
-        # "1.250000e-04"; take the exponent "4", excluding the sign.
-        precision = int(precision.partition("e")[2])
-
-        return precision
+    #     @staticmethod
+    #     def _calc_precision(value):
+    #         r"""Primarily for use with the `val_uncert_2_string` and other methods
+    #         that may require this.
+    #         """
+    #         # Convert the fractional part to an exponential string.
+    #         # E.g. 0.0009865 -> 9.865000e-04
+    #         precision = "%e" % value  # (value - int(value))
+    #
+    #         # Split the exponential notation at the `e`,  a la
+    #         # "1.250000e-04"; take the exponent "4", excluding the sign.
+    #         precision = int(precision.partition("e")[2])
+    #
+    #         return precision
 
     @staticmethod
     def _simplify_for_paper(info):
@@ -222,48 +221,48 @@ class TeXinfo(object):
     #
     #         return TeX_popt
 
-    def val_uncert_2_string(self, value, uncertainty):
-        r"""
-        Convert a value, uncertainty pair to a string in which the
-        value is reported to the first non-zero digit of the uncertainty.
-
-        Require that value > uncertainty.
-
-        Example
-        -------
-        >>> a = 3.1415
-        >>> b = 0.01
-        >>> val_uncert_2_string(a, b)
-        "3.14 \pm 0.01"
-        """
-
-        # if np.isfinite(uncertainty) and value <= uncertainty:
-        #     msg = ("Must be that value > uncertainty\n"
-        #            "value = %s\nuncertainty = %s")
-        #     raise ValueError(msg % (value, uncertainty))
-
-        vprecision = 3
-        if np.isfinite(uncertainty):
-            uprecision = self._calc_precision(uncertainty)
-            vprecision = self._calc_precision(value)
-            vprecision = vprecision - uprecision
-
-        #         else:
-        #             self.logger.warning(
-        #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
-        #             )
-
-        template = r"{:.%se} \pm {:.0e}"
-        template = template % abs(vprecision)
-
-        out = template.format(value, uncertainty)
-
-        # Clean out unnecessary
-        # pdb.set_trace()
-        # out = re.subn(_remove_exponential_pattern, "", out)
-        # out = out[0] # Drop the number of repetitions removed.
-        # pdb.set_trace()
-        return out
+    #     def val_uncert_2_string(self, value, uncertainty):
+    #         r"""
+    #         Convert a value, uncertainty pair to a string in which the
+    #         value is reported to the first non-zero digit of the uncertainty.
+    #
+    #         Require that value > uncertainty.
+    #
+    #         Example
+    #         -------
+    #         >>> a = 3.1415
+    #         >>> b = 0.01
+    #         >>> val_uncert_2_string(a, b)
+    #         "3.14 \pm 0.01"
+    #         """
+    #
+    #         # if np.isfinite(uncertainty) and value <= uncertainty:
+    #         #     msg = ("Must be that value > uncertainty\n"
+    #         #            "value = %s\nuncertainty = %s")
+    #         #     raise ValueError(msg % (value, uncertainty))
+    #
+    #         vprecision = 3
+    #         if np.isfinite(uncertainty):
+    #             uprecision = self._calc_precision(uncertainty)
+    #             vprecision = self._calc_precision(value)
+    #             vprecision = vprecision - uprecision
+    #
+    #         #         else:
+    #         #             self.logger.warning(
+    #         #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
+    #         #             )
+    #
+    #         template = r"{:.%se} \pm {:.0e}"
+    #         template = template % abs(vprecision)
+    #
+    #         out = template.format(value, uncertainty)
+    #
+    #         # Clean out unnecessary
+    #         # pdb.set_trace()
+    #         # out = re.subn(_remove_exponential_pattern, "", out)
+    #         # out = out[0] # Drop the number of repetitions removed.
+    #         # pdb.set_trace()
+    #         return out
 
     def set_argnames(self, **kwargs):
         r"""Define the mapping to format LaTeX function argnames.
