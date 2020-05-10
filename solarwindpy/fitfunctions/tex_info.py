@@ -264,11 +264,11 @@ class TeXinfo(object):
     #         # pdb.set_trace()
     #         return out
 
-    def set_argnames(self, **kwargs):
-        r"""Define the mapping to format LaTeX function argnames.
-        """
-        # Save a tuple so immutable.
-        self._argnames = kwargs.items()
+    #     def set_argnames(self, **kwargs):
+    #         r"""Define the mapping to format LaTeX function argnames.
+    #         """
+    #         # Save a tuple so immutable.
+    #         self._argnames = kwargs.items()
 
     def annotate_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
