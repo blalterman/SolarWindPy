@@ -5,11 +5,7 @@ and render information in TeX format. Primary target is `matplotlib` annotation.
 
 import pdb  # noqa: F401
 import re
-
 import numpy as np
-
-# from collections import namedtuple
-# from inspect import getargspec
 
 # # Compile this once on import to save time.
 _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.

@@ -5,7 +5,6 @@ r""":py:mod:`~solarwindpy.fitfunctions` plotter.
 import pdb  # noqa: F401
 import logging  # noqa: F401
 
-# import re
 import numpy as np
 import matplotlib as mpl
 
