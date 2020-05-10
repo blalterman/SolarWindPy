@@ -200,7 +200,7 @@ class FitFunction(ABC):
     def nobs(self):
         r"""The total number of observations used in the fit.
         """
-        return self.tk_observed.sum()
+        return self.observations.tk_observed.sum()
 
     @property
     def sufficient_data(self):
@@ -222,60 +222,10 @@ class FitFunction(ABC):
         return self._argnames
 
     #     @property
-    #     def xobs_raw(self):
-    #         r"""Independent values for the fit, not accounting for extrema,
-    #         finite data, etc.
+    #     def tk_observed(self):
+    #         r"""The mask used to take the observed data from the raw data.
     #         """
-    #         #         return self._xobs_raw
-    #         return self.observations.raw.x
-    #
-    #     @property
-    #     def yobs_raw(self):
-    #         r"""Dependent values for the fit, not accounting for extrema,
-    #         finite data, etc.
-    #         """
-    #         #         return self._yobs_raw
-    #         return self.observations.raw.y
-    #
-    #     @property
-    #     def weights_raw(self):
-    #         r"""Weights used by `curve_fit`, not including extrema, finite
-    #         data, etc.
-    #         """
-    #         #         return self._weights_raw
-    #         return self.observations.raw.w
-    #
-    #     @property
-    #     def xobs(self):
-    #         r"""x-values, accounting for extrema, finite data, etc.
-    #
-    #         These are the values actually fit.
-    #         """
-    #         #         return self._xobs
-    #         return self.observations.used.x
-    #
-    #     @property
-    #     def yobs(self):
-    #         r"""y-values, accounting for extrema, finite data, etc.
-    #
-    #         These are the values actually fit.
-    #         """
-    #         #         return self._yobs
-    #         return self.observations.used.y
-    #
-    #     @property
-    #     def weights(self):
-    #         r"""
-    #         The weights, having accounted for xlim, ylim, and wlim.
-    #         """
-    #         #         return self._weights
-    #         return self.observations.used.w
-
-    @property
-    def tk_observed(self):
-        r"""The mask used to take the observed data from the raw data.
-        """
-        return self._tk_observed
+    #         return self.observations.tk_observed
 
     # @property
     # def binsigma_raw(self):
@@ -329,20 +279,6 @@ class FitFunction(ABC):
         """
         return self._log
 
-    #     @staticmethod
-    #     def _check_raw_obs(arr, name):
-    # #         if not isinstance(arr, np.ndarray):
-    # #             try:
-    # #                 arr = arr.values
-    # #             except AttributeError:
-    # #                 raise TypeError(f"Can't set {name}_raw with a {type(arr)}.")
-    # #
-    # #         arr = arr.squeeze()
-    # #         try:
-    #         arr = np.asarray(arr).squeeze()
-    #         return arr
-
-    #     def _set_raw_obs(self, xobs, yobs, weights=None):
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
         Set the raw x- and y-values along with weights for the fit.
@@ -367,15 +303,6 @@ yobs: {yobs.shape}"""
 weighs: {weights.shape}",
 xobs: {xobs.shape}"""
             )
-
-        #         xobs = self._check_raw_obs(xobs, "xobs")
-        #         yobs = self._check_raw_obs(yobs, "obs")
-        #         if weights is not None:
-        #             weights = self._check_raw_obs(weights, "weights")
-
-        #         self._xobs_raw = xobs
-        #         self._yobs_raw = yobs
-        #         self._weights_raw = weights
 
         return xobs, yobs, weights
 
@@ -473,9 +400,6 @@ xobs: {xobs.shape}"""
         xobs_raw, yobs_raw, weights_raw = self._clean_raw_obs(
             xobs_raw, yobs_raw, weights_raw
         )
-        #         xobs = self.observations.used.x_raw
-        #         yobs = self.observations.raw.y
-        #         weights = self.observations.raw.w
 
         xmask = self._build_one_obs_mask("xobs", xobs_raw, xmin, xmax)
         ymask = self._build_one_obs_mask("yobs", yobs_raw, ymin, ymax)
@@ -500,18 +424,12 @@ xobs: {xobs.shape}"""
             weights = weights_raw[mask]
 
         Observations = namedtuple("Observations", "x,y,w")
-        UsedRawObs = namedtuple("UsedRawObs", "used,raw")
+        UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
         used = Observations(xobs, yobs, weights)
         raw = Observations(xobs_raw, yobs_raw, weights_raw)
-        usedrawobs = UsedRawObs(used, raw)
+        usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
-        #         self._xobs_raw = xobs_raw
-        #         self._yobs_raw = yobs_raw
-        #         self._weights_raw = weights_raw
-        #         self._xobs = xobs
-        #         self._yobs = yobs
-        #         self._weights = weights
-        self._tk_observed = mask
+        #         self._tk_observed = mask
         self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
 
     def _set_popt(self, new):
