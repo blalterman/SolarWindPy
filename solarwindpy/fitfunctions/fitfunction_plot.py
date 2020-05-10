@@ -24,6 +24,9 @@ class FitFunctionPlot(object):
         self._log = LogAxes(x=False, y=False)
         self._labels = AxesLabels("x", "y")
 
+    def __str__(self):
+        return self.__class__.__name__
+
     @property
     def labels(self):
         return self._labels
@@ -38,7 +41,7 @@ class FitFunctionPlot(object):
 
     @property
     def path(self):
-        base = Path(str(self))
+        base = Path(self.__class__.__name__)
 
         try:
             base /= self.labels.x.path

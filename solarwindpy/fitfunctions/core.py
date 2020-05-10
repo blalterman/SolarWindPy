@@ -120,7 +120,7 @@ class FitFunction(ABC):
 
     def _init_logger(self):
         # return None
-        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
+        logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._logger = logger
 
     @abstractproperty
