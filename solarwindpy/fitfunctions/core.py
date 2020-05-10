@@ -20,19 +20,20 @@ from collections import namedtuple
 # from matplotlib import pyplot as plt
 from inspect import getargspec
 from scipy.optimize import curve_fit
-from pathlib import Path
 
-import solarwindpy as swp
+# from pathlib import Path
+
+# import solarwindpy as swp
 
 from .tex_info import TeXinfo
-from .fitunction_plot import FitFunctionPlot
+from .fitfunction_plot import FitFunctionPlot
 
 # # Compile this once on import to save time.
 # _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
 # _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
-AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
-LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
+# AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+# LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw")
@@ -69,8 +70,8 @@ class FitFunction(ABC):
         self._init_logger()
         self._set_argnames()
         #         self._set_raw_obs(xobs, yobs, weights)
-        self._log = LogAxes(x=logx, y=logy)
-        self._labels = AxesLabels("x", "y")
+        #         self._log = LogAxes(x=logx, y=logy)
+        #         self._labels = AxesLabels("x", "y")
 
         if weights is None:
             assert wmin is None
@@ -152,9 +153,9 @@ class FitFunction(ABC):
         """
         return self._argnames
 
-    @property
-    def labels(self):
-        return self._labels
+    #     @property
+    #     def labels(self):
+    #         return self._labels
 
     @property
     def nobs(self):
@@ -166,32 +167,32 @@ class FitFunction(ABC):
     def observations(self):
         return self._observations
 
-    @property
-    def path(self):
-        base = Path(str(self))
-
-        try:
-            base /= self.labels.x.path
-        except AttributeError:
-            base /= str(self.labels.x)
-
-        try:
-            base /= self.labels.y.path
-        except AttributeError:
-            base /= str(self.labels.y)
-
-        if self.labels.z is not None:
-            try:
-                base = base / self.labels.z.path
-            except AttributeError:
-                base = base / str(self.labels.z)
-
-        x_scale = "logX" if self.log.x else "linX"
-        y_scale = "logY" if self.log.y else "logY"
-        scale_info = "_".join([x_scale, y_scale])
-
-        path = base / scale_info
-        return path
+    #     @property
+    #     def path(self):
+    #         base = Path(str(self))
+    #
+    #         try:
+    #             base /= self.labels.x.path
+    #         except AttributeError:
+    #             base /= str(self.labels.x)
+    #
+    #         try:
+    #             base /= self.labels.y.path
+    #         except AttributeError:
+    #             base /= str(self.labels.y)
+    #
+    #         if self.labels.z is not None:
+    #             try:
+    #                 base = base / self.labels.z.path
+    #             except AttributeError:
+    #                 base = base / str(self.labels.z)
+    #
+    #         x_scale = "logX" if self.log.x else "linX"
+    #         y_scale = "logY" if self.log.y else "logY"
+    #         scale_info = "_".join([x_scale, y_scale])
+    #
+    #         path = base / scale_info
+    #         return path
 
     @property
     def popt(self):
@@ -361,20 +362,20 @@ xobs: {xobs.shape}"""
         args = getargspec(self.function).args[1:]
         self._argnames = args
 
-    def set_labels(self, **kwargs):
-        r"""Set or update x, y, or z labels. Any label not specified in kwargs
-        is propagated from `self.labels.<x, y, or z>`.
-        """
-
-        x = kwargs.pop("x", self.labels.x)
-        y = kwargs.pop("y", self.labels.y)
-        z = kwargs.pop("z", self.labels.z)
-
-        if len(kwargs.keys()):
-            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
-            raise KeyError("Unexpected kwarg\n{}".format(extra))
-
-        self._labels = AxesLabels(x, y, z)
+    #     def set_labels(self, **kwargs):
+    #         r"""Set or update x, y, or z labels. Any label not specified in kwargs
+    #         is propagated from `self.labels.<x, y, or z>`.
+    #         """
+    #
+    #         x = kwargs.pop("x", self.labels.x)
+    #         y = kwargs.pop("y", self.labels.y)
+    #         z = kwargs.pop("z", self.labels.z)
+    #
+    #         if len(kwargs.keys()):
+    #             extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+    #             raise KeyError("Unexpected kwarg\n{}".format(extra))
+    #
+    #         self._labels = AxesLabels(x, y, z)
 
     def set_fit_obs(
         self,
@@ -434,7 +435,8 @@ xobs: {xobs.shape}"""
         usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
         #         self._tk_observed = mask
-        self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
+
+    #         self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
 
     def _set_popt(self, new):
         r"""Save as a tuple of (k, v) pairs so immutable. Convert to a dictionary i
@@ -597,16 +599,16 @@ xobs: {xobs.shape}"""
             msg = "Unrecgonized binsigma: %s\ntype: %s" % (new, type(new))
             raise TypeError(msg)
 
-    def set_log(self, **kwargs):
-        r"""Set :py:class:`LogAxes`.
-
-        Only used for determining if weights should be :math:`w/(y \ln(10))`.
-        """
-        log = self._log._asdict()
-        for k, v in kwargs.items():
-            log[k] = v
-
-        self._log = LogAxes(**log)
+    #     def set_log(self, **kwargs):
+    #         r"""Set :py:class:`LogAxes`.
+    #
+    #         Only used for determining if weights should be :math:`w/(y \ln(10))`.
+    #         """
+    #         log = self._log._asdict()
+    #         for k, v in kwargs.items():
+    #             log[k] = v
+    #
+    #         self._log = LogAxes(**log)
 
     def build_TeX_info(self):
         chisq_dof = False

@@ -9,21 +9,59 @@ import logging  # noqa: F401
 import numpy as np
 import matplotlib as mpl
 
+from pathlib import Path
+from collections import namedtuple
 from matplotlib import pyplot as plt
 
-# from pathlib import Path
-
-import solarwindpy as swp
+AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunctionPlot(object):
     def __init__(self, observations, y_fit, TeX_info):
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
+        self._log = LogAxes(x=False, y=False)
+        self._labels = AxesLabels("x", "y")
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @property
+    def log(self):
+        return self._log
 
     @property
     def observations(self):
         return self._observations
+
+    @property
+    def path(self):
+        base = Path(str(self))
+
+        try:
+            base /= self.labels.x.path
+        except AttributeError:
+            base /= str(self.labels.x)
+
+        try:
+            base /= self.labels.y.path
+        except AttributeError:
+            base /= str(self.labels.y)
+
+        if self.labels.z is not None:
+            try:
+                base = base / self.labels.z.path
+            except AttributeError:
+                base = base / str(self.labels.z)
+
+        x_scale = "logX" if self.log.x else "linX"
+        y_scale = "logY" if self.log.y else "logY"
+        scale_info = "_".join([x_scale, y_scale])
+
+        path = base / scale_info
+        return path
 
     @property
     def TeX_info(self):
@@ -71,11 +109,18 @@ class FitFunctionPlot(object):
 
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
+        if self.log.x:
+            ax.set_xscale("log")
+        if self.log.y:
+            ax.set_yscale("log")
 
     def _format_rax(self, ax, pct):
         ax.grid(True, which="major", axis="both")
 
         ax.set_xlabel(self.labels.x)
+        if self.log.x:
+            ax.set_xscale("log")
+
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
             ax.set_yscale("symlog", linthreshy=10)
@@ -96,7 +141,7 @@ class FitFunctionPlot(object):
         :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.
         """
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = plt.subplots()
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "k")
@@ -122,7 +167,7 @@ class FitFunctionPlot(object):
         :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
         """
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = plt.subplots()
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "darkgreen")
@@ -163,7 +208,7 @@ class FitFunctionPlot(object):
         r"""Plot the fit.
         """
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = plt.subplots()
 
         if annotate_kwargs is None:
             annotate_kwargs = {}
@@ -176,7 +221,7 @@ class FitFunctionPlot(object):
         # Overplot the fit.
         ax.plot(
             self.observations.raw.x,
-            self(self.observations.raw.x),
+            self.y_fit,
             label=label,
             color=color,
             linestyle=linestyle,
@@ -230,7 +275,7 @@ class FitFunctionPlot(object):
         """
 
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = plt.subplots()
 
         if raw_kwargs is None:
             raw_kwargs = (
@@ -363,3 +408,51 @@ class FitFunctionPlot(object):
             hax.xaxis.label.set_visible(False)
 
         return hax, rax
+
+    def residuals(self, pct=False):
+        r"""
+        Calculate the fit residuals.
+        If pct, normalize by fit yvalues.
+        """
+
+        # TODO: calculate with all values
+        # Make it an option to calculate with either
+        # the values used in the fit or all the values,
+        # including those excluded by `set_extrema`.
+
+        y_fit_used = self.y_fit[self.observations.tk_observed]
+        r = y_fit_used - self.observations.used.y
+
+        if pct:
+            r = 100.0 * (r / y_fit_used)
+
+        return r
+
+    def set_labels(self, **kwargs):
+        r"""Set or update x, y, or z labels. Any label not specified in kwargs
+        is propagated from `self.labels.<x, y, or z>`.
+        """
+
+        x = kwargs.pop("x", self.labels.x)
+        y = kwargs.pop("y", self.labels.y)
+        z = kwargs.pop("z", self.labels.z)
+
+        if len(kwargs.keys()):
+            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+            raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+        self._labels = AxesLabels(x, y, z)
+
+    def set_log(self, **kwargs):
+        r"""Set :py:class:`LogAxes`.
+
+        Only used for determining if weights should be :math:`w/(y \ln(10))`.
+        """
+        log = self._log._asdict()
+        for k, v in kwargs.items():
+            log[k] = v
+
+        self._log = LogAxes(**log)
+
+    def set_TeX_info(self, new):
+        self._TeX_info = new
