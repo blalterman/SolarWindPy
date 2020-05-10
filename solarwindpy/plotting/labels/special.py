@@ -597,8 +597,25 @@ class SSN(ArbitraryLabel):
         return self._path
 
     @property
+    def pretty_kind(self):
+        kind = self.kind
+        transform = {
+            "M": "Monthly",
+            "M13": "13 Month Smoothed",
+            "D": "Daily",
+            "Y": "Yearly",
+            "NM": "Normalized Monthly",
+            "NM13": "Normalized 13 Month Smoothed",
+            "ND": "Normalized Daily",
+            "NY": "Normalized Yearly",
+        }
+        return transform[kind]
+
+    @property
     def tex(self):
-        return r"\mathrm{%s} \, \mathrm{SSN}" % self.kind
+        return r"\mathrm{%s} \, \mathrm{SSN}" % self.pretty_kind.replace(
+            " ", "\,"
+        )  # noqa: W605
 
     @property
     def kind(self):

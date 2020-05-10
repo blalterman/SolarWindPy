@@ -16,6 +16,7 @@ def _mathrm(x):
     return r"\mathrm{%s}" % x
 
 
+__composition_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
     "e": r"e",
     "a": r"\alpha",
@@ -24,6 +25,18 @@ _trans_species = {
     "p2": r"p_2",
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
+    "H": r"\mathrm{H}",
+    "3He": __composition_species % (3, "He"),
+    "4He": __composition_species % (4, "He"),
+    "12C": __composition_species % (12, "C"),
+    "14N": __composition_species % (14, "N"),
+    "16O": __composition_species % (16, "O"),
+    "20Ne": __composition_species % (20, "Ne"),
+    "24Mg": __composition_species % (24, "Mg"),
+    "28Si": __composition_species % (28, "Si"),
+    "32S": __composition_species % (32, "S"),
+    "40Ca": __composition_species % (40, "Ca"),
+    "Fe": r"\mathrm{Fe}",
 }
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
