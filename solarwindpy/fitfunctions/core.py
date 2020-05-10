@@ -19,8 +19,7 @@ from .tex_info import TeXinfo
 from .fitfunction_plot import FitFunctionPlot
 
 Observations = namedtuple("Observations", "x,y,w")
-UsedRawObs = namedtuple("UsedRawObs", "used,raw")
-
+UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 
 class FitFunction(ABC):
     r"""Assuming that you don't want any special formatting, the typical call
@@ -349,8 +348,6 @@ xobs: {xobs.shape}"""
         if weights_raw is not None:
             weights = weights_raw[mask]
 
-        Observations = namedtuple("Observations", "x,y,w")
-        UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
         used = Observations(xobs, yobs, weights)
         raw = Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = UsedRawObs(used, raw, mask)
