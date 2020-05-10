@@ -221,55 +221,55 @@ class FitFunction(ABC):
         """
         return self._argnames
 
-    @property
-    def xobs_raw(self):
-        r"""Independent values for the fit, not accounting for extrema,
-        finite data, etc.
-        """
-        #         return self._xobs_raw
-        return self.observations.raw.x
-
-    @property
-    def yobs_raw(self):
-        r"""Dependent values for the fit, not accounting for extrema,
-        finite data, etc.
-        """
-        #         return self._yobs_raw
-        return self.observations.raw.y
-
-    @property
-    def weights_raw(self):
-        r"""Weights used by `curve_fit`, not including extrema, finite
-        data, etc.
-        """
-        #         return self._weights_raw
-        return self.observations.raw.w
-
-    @property
-    def xobs(self):
-        r"""x-values, accounting for extrema, finite data, etc.
-
-        These are the values actually fit.
-        """
-        #         return self._xobs
-        return self.observations.used.x
-
-    @property
-    def yobs(self):
-        r"""y-values, accounting for extrema, finite data, etc.
-
-        These are the values actually fit.
-        """
-        #         return self._yobs
-        return self.observations.used.y
-
-    @property
-    def weights(self):
-        r"""
-        The weights, having accounted for xlim, ylim, and wlim.
-        """
-        #         return self._weights
-        return self.observations.used.w
+    #     @property
+    #     def xobs_raw(self):
+    #         r"""Independent values for the fit, not accounting for extrema,
+    #         finite data, etc.
+    #         """
+    #         #         return self._xobs_raw
+    #         return self.observations.raw.x
+    #
+    #     @property
+    #     def yobs_raw(self):
+    #         r"""Dependent values for the fit, not accounting for extrema,
+    #         finite data, etc.
+    #         """
+    #         #         return self._yobs_raw
+    #         return self.observations.raw.y
+    #
+    #     @property
+    #     def weights_raw(self):
+    #         r"""Weights used by `curve_fit`, not including extrema, finite
+    #         data, etc.
+    #         """
+    #         #         return self._weights_raw
+    #         return self.observations.raw.w
+    #
+    #     @property
+    #     def xobs(self):
+    #         r"""x-values, accounting for extrema, finite data, etc.
+    #
+    #         These are the values actually fit.
+    #         """
+    #         #         return self._xobs
+    #         return self.observations.used.x
+    #
+    #     @property
+    #     def yobs(self):
+    #         r"""y-values, accounting for extrema, finite data, etc.
+    #
+    #         These are the values actually fit.
+    #         """
+    #         #         return self._yobs
+    #         return self.observations.used.y
+    #
+    #     @property
+    #     def weights(self):
+    #         r"""
+    #         The weights, having accounted for xlim, ylim, and wlim.
+    #         """
+    #         #         return self._weights
+    #         return self.observations.used.w
 
     @property
     def tk_observed(self):
@@ -302,8 +302,8 @@ class FitFunction(ABC):
     def chisqdof(self):
         r"""Calculate the chisq/dof for the fit.
         """
-        yvals = self.yobs
-        yfits = self(self.xobs)
+        yvals = self.observations.used.y
+        yfits = self(self.observations.used.x)
         binsigma = self.binsigma
 
         # Assign the 0 counts that become negative with -1 to 0.
@@ -473,9 +473,9 @@ xobs: {xobs.shape}"""
         xobs_raw, yobs_raw, weights_raw = self._clean_raw_obs(
             xobs_raw, yobs_raw, weights_raw
         )
-        #         xobs = self.xobs_raw
-        #         yobs = self.yobs_raw
-        #         weights = self.weights_raw
+        #         xobs = self.observations.used.x_raw
+        #         yobs = self.observations.raw.y
+        #         weights = self.observations.raw.w
 
         xmask = self._build_one_obs_mask("xobs", xobs_raw, xmin, xmax)
         ymask = self._build_one_obs_mask("yobs", yobs_raw, ymin, ymax)
@@ -532,7 +532,9 @@ xobs: {xobs.shape}"""
     def _estimate_markevery(self):
         try:
             # Estimate marker density for readability
-            markevery = int(10.0 ** (np.floor(np.log10(self.xobs.size) - 1)))
+            markevery = int(
+                10.0 ** (np.floor(np.log10(self.observations.used.x.size) - 1))
+            )
         except OverflowError:
             # Or we have a huge number of data points, so lets only
             # mark a few of them.
@@ -592,10 +594,10 @@ xobs: {xobs.shape}"""
         try:
             result = curve_fit(
                 self.function,
-                self.xobs,
-                self.yobs,
+                self.observations.used.x,
+                self.observations.used.y,
                 p0=p0,
-                sigma=self.weights,
+                sigma=self.observations.used.w,
                 method=method,
                 loss=loss,
                 max_nfev=max_nfev,
@@ -637,10 +639,10 @@ xobs: {xobs.shape}"""
         # the values used in the fit or all the values,
         # including those excluded by `set_extrema`.
 
-        r = self(self.xobs) - self.yobs
+        r = self(self.observations.used.x) - self.observations.used.y
 
         if pct:
-            r = 100.0 * (r / self(self.xobs))
+            r = 100.0 * (r / self(self.observations.used.x))
 
         return r
 
@@ -655,12 +657,12 @@ xobs: {xobs.shape}"""
 
         if isinstance(new, np.ndarray):
             assert new.ndim == 1
-            assert new.shape == self.xobs.shape
+            assert new.shape == self.observations.used.x.shape
             self._binsigma = new
 
         elif isinstance(new, str):
             assert new.lower().startswith("count"), "Unrecognized new string: %s" % new
-            self._binsigma = np.sqrt(self.yobs - 1)
+            self._binsigma = np.sqrt(self.observations.used.y - 1)
 
         else:
             msg = "Unrecgonized binsigma: %s\ntype: %s" % (new, type(new))
@@ -707,15 +709,16 @@ xobs: {xobs.shape}"""
 
         # Copied from plt.hist. (20161107_0112)
         ax.update_datalim(
-            [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
+            [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)],
+            updatey=False,
         )
 
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
 
     def plot_raw(self, ax=None, **kwargs):
-        r"""Plot the observations used in the fit from :py:meth:`self.xobs_raw`,
-        :py:meth:`self.yobs_raw`, :py:meth:`self.weights_raw`.
+        r"""Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,
+        :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.
         """
         if ax is None:
             fig, ax = swp.pp.subplots()
@@ -724,9 +727,9 @@ xobs: {xobs.shape}"""
         color = kwargs.pop("color", "k")
         label = kwargs.pop("label", r"$\mathrm{Obs}$")
 
-        x = self.xobs_raw
-        y = self.yobs_raw
-        w = self.weights_raw
+        x = self.observations.raw.x
+        y = self.observations.raw.y
+        w = self.observations.raw.w
         if self.log.y and w is not None:
             w = w / (y * np.log(10.0))
 
@@ -740,8 +743,8 @@ xobs: {xobs.shape}"""
         return ax, plotline, caplines, barlines
 
     def plot_used(self, ax=None, **kwargs):
-        r"""Plot the observations used in the fit from :py:meth:`self.xobs`,
-        :py:meth:`self.yobs`, and :py:meth:`self.weights`.
+        r"""Plot the observations used in the fit from :py:meth:`self.observations.used.x`,
+        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
         """
         if ax is None:
             fig, ax = swp.pp.subplots()
@@ -754,9 +757,9 @@ xobs: {xobs.shape}"""
         markevery = kwargs.pop("markevery", None)
         label = kwargs.pop("label", r"$\mathrm{Used}$")
 
-        x = self.xobs
-        y = self.yobs
-        w = self.weights
+        x = self.observations.used.x
+        y = self.observations.used.y
+        w = self.observations.used.w
         if self.log.y and w is not None:
             w = w / (y * np.log(10.0))
 
@@ -797,8 +800,8 @@ xobs: {xobs.shape}"""
 
         # Overplot the fit.
         ax.plot(
-            self.xobs_raw,
-            self(self.xobs_raw),
+            self.observations.raw.x,
+            self(self.observations.raw.x),
             label=label,
             color=color,
             linestyle=linestyle,
@@ -878,7 +881,7 @@ xobs: {xobs.shape}"""
 
         #         # Copied from plt.hist. (20161107_0112)
         #         ax.update_datalim(
-        #             [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
+        #             [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)], updatey=False
         #         )
 
         self._format_hax(ax)
@@ -911,7 +914,7 @@ xobs: {xobs.shape}"""
             markevery = self._estimate_markevery()
 
         ax.plot(
-            self.xobs,
+            self.observations.used.x,
             self.residuals(pct=pct),
             drawstyle=drawstyle,
             color=color,
@@ -934,9 +937,10 @@ xobs: {xobs.shape}"""
             ax.set_ylabel(r"$\mathrm{Residual} \; [\#]$")
 
         ax.update_datalim(
-            [(self.xobs_raw[0], 0), (self.xobs_raw[-1], 0)], updatey=False
+            [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)],
+            updatey=False,
         )
-        # ax.set_xlim(self.xobs_raw[0], self.xobs_raw[-1])
+        # ax.set_xlim(self.observations.raw.x[0], self.observations.raw.x[-1])
 
         return ax
 
