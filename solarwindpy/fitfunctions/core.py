@@ -31,6 +31,9 @@ from .tex_info import TeXinfo
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
+Observations = namedtuple("Observations", "x,y,w")
+UsedRawObs = namedtuple("UsedRawObs", "used,raw")
+
 
 class FitFunction(ABC):
     r"""Assuming that you don't want any special formatting, the typical call order
@@ -62,7 +65,7 @@ class FitFunction(ABC):
     ):
         self._init_logger()
         self._set_argnames()
-        self._set_raw_obs(xobs, yobs, weights)
+        #         self._set_raw_obs(xobs, yobs, weights)
         self._log = LogAxes(x=logx, y=logy)
         self._labels = AxesLabels("x", "y")
 
@@ -71,6 +74,9 @@ class FitFunction(ABC):
             assert wmax is None
 
         self.set_fit_obs(
+            xobs,
+            yobs,
+            weights,
             xmin=xmin,
             xmax=xmax,
             xoutside=xoutside,
@@ -139,6 +145,10 @@ class FitFunction(ABC):
     @property
     def labels(self):
         return self._labels
+
+    @property
+    def observations(self):
+        return self._observations
 
     @property
     def path(self):
@@ -216,21 +226,24 @@ class FitFunction(ABC):
         r"""Independent values for the fit, not accounting for extrema,
         finite data, etc.
         """
-        return self._xobs_raw
+        #         return self._xobs_raw
+        return self.observations.raw.x
 
     @property
     def yobs_raw(self):
         r"""Dependent values for the fit, not accounting for extrema,
         finite data, etc.
         """
-        return self._yobs_raw
+        #         return self._yobs_raw
+        return self.observations.raw.y
 
     @property
     def weights_raw(self):
         r"""Weights used by `curve_fit`, not including extrema, finite
         data, etc.
         """
-        return self._weights_raw
+        #         return self._weights_raw
+        return self.observations.raw.w
 
     @property
     def xobs(self):
@@ -238,7 +251,8 @@ class FitFunction(ABC):
 
         These are the values actually fit.
         """
-        return self._xobs
+        #         return self._xobs
+        return self.observations.used.x
 
     @property
     def yobs(self):
@@ -246,14 +260,16 @@ class FitFunction(ABC):
 
         These are the values actually fit.
         """
-        return self._yobs
+        #         return self._yobs
+        return self.observations.used.y
 
     @property
     def weights(self):
         r"""
         The weights, having accounted for xlim, ylim, and wlim.
         """
-        return self._weights
+        #         return self._weights
+        return self.observations.used.w
 
     @property
     def tk_observed(self):
@@ -313,98 +329,55 @@ class FitFunction(ABC):
         """
         return self._log
 
-    #     @property
-    #     def TeX_argnames(self):
-    #         try:
-    #             # Saved as tuple, so convert from tuple.
-    #             out = self._TeX_argnames
-    #             out = dict(out)
-    #             return out
-    #
-    #         except AttributeError:
-    #             return None
-
-    #     @property
-    #     def TeX_popt(self):
-    #         r"""Create a dictionary with (k, v) pairs corresponding to
-    #         (self.argnames, popt \pm psigma) with the appropriate uncertainty.
-    #
-    #         See `set_TeX_trans_argnames` to translate the argnames for TeX.
-    #         """
-    #         psigma = self.psigma
-    #         popt = self.popt.items()
-    #         TeX_popt = {k: self.val_uncert_2_string(v, psigma[k]) for k, v in popt}
-    #
-    #         translate = self.TeX_argnames
-    #         if translate is not None:
-    #             for k0, k1 in translate.items():
-    #                 TeX_popt[k1] = TeX_popt.pop(k0)
-    #
-    #         return TeX_popt
-
     #     @staticmethod
-    #     def _calc_precision(value):
-    #         r"""Primarily for use with the `val_uncert_2_string` and other methods that may
-    #         require this.
-    #         """
-    #         # assert 1 > value > 0, \
-    #         #     "Only written to deal with 0 < X < 1 numbers.\nX = %s" % value
-    #
-    #         # Convert the fractional part to an exponential string.
-    #         # E.g. 0.0009865 -> 9.865000e-04
-    #         precision = "%e" % value  # (value - int(value))
-    #
-    #         # Split the exponential notation at the `e`,  a la
-    #         # "1.250000e-04"; take the exponent "4", excluding the sign.
-    #         precision = int(precision.partition("e")[2])
-    #
-    #         return precision
+    #     def _check_raw_obs(arr, name):
+    # #         if not isinstance(arr, np.ndarray):
+    # #             try:
+    # #                 arr = arr.values
+    # #             except AttributeError:
+    # #                 raise TypeError(f"Can't set {name}_raw with a {type(arr)}.")
+    # #
+    # #         arr = arr.squeeze()
+    # #         try:
+    #         arr = np.asarray(arr).squeeze()
+    #         return arr
 
-    @staticmethod
-    def _check_raw_obs(arr, name):
-        if not isinstance(arr, np.ndarray):
-            try:
-                arr = arr.values
-            except AttributeError:
-                msg = r"Can't set %s_raw with a `%s`." % (name, type(arr))
-                raise TypeError(msg)
-
-        arr = arr.squeeze()
-
-        return arr
-
-    def _set_raw_obs(self, xobs, yobs, weights=None):
+    #     def _set_raw_obs(self, xobs, yobs, weights=None):
+    def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
         Set the raw x- and y-values along with weights for the fit.
 
         Doesn't account for extrema, finite data, etc.
         """
+        xobs = np.asarray(xobs)
+        yobs = np.asarray(yobs)
+        if weights is not None:
+            weights = np.asarray(weights)
+
         if xobs.shape != yobs.shape:
-            msg = (
-                "xobs and yobs must have the same shape.",
-                "xobs: {}".format(xobs.shape),
-                "yobs: {}".format(yobs.shape),
+            raise ValueError(
+                f"""xobs and yobs must have the same shape.,
+xobs: {xobs.shape},
+yobs: {yobs.shape}"""
             )
-            msg = "\n".join(msg)
-            raise ValueError(msg)
 
         if weights is not None and weights.shape != xobs.shape:
-            msg = (
-                "weights and xobs must have the same shape.",
-                "weighs: {}".format(weights.shape),
-                "xobs: {}".format(xobs.shape),
+            raise ValueError(
+                f"""weights and xobs must have the same shape.,
+weighs: {weights.shape}",
+xobs: {xobs.shape}"""
             )
-            msg = "\n".join(msg)
-            raise ValueError(msg)
 
-        xobs = self._check_raw_obs(xobs, "xobs")
-        yobs = self._check_raw_obs(yobs, "obs")
-        if weights is not None:
-            weights = self._check_raw_obs(weights, "weights")
+        #         xobs = self._check_raw_obs(xobs, "xobs")
+        #         yobs = self._check_raw_obs(yobs, "obs")
+        #         if weights is not None:
+        #             weights = self._check_raw_obs(weights, "weights")
 
-        self._xobs_raw = xobs
-        self._yobs_raw = yobs
-        self._weights_raw = weights
+        #         self._xobs_raw = xobs
+        #         self._yobs_raw = yobs
+        #         self._weights_raw = weights
+
+        return xobs, yobs, weights
 
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
         #         mask = np.full_like(x, True, dtype=bool)
@@ -474,6 +447,9 @@ class FitFunction(ABC):
 
     def set_fit_obs(
         self,
+        xobs_raw,
+        yobs_raw,
+        weights_raw,
         xmin=None,
         xmax=None,
         xoutside=None,
@@ -494,34 +470,47 @@ class FitFunction(ABC):
         If logy, then make selection of `wmin` and `wmax` based on :math:`w/(y \ln(10))`.
         """
 
-        xobs = self.xobs_raw
-        yobs = self.yobs_raw
-        weights = self.weights_raw
+        xobs_raw, yobs_raw, weights_raw = self._clean_raw_obs(
+            xobs_raw, yobs_raw, weights_raw
+        )
+        #         xobs = self.xobs_raw
+        #         yobs = self.yobs_raw
+        #         weights = self.weights_raw
 
-        xmask = self._build_one_obs_mask("xobs", xobs, xmin, xmax)
-        ymask = self._build_one_obs_mask("yobs", yobs, ymin, ymax)
-        xout_mask = self._build_outside_mask("xobs", xobs, xoutside)
-        yout_mask = self._build_outside_mask("yobs", yobs, youtside)
+        xmask = self._build_one_obs_mask("xobs", xobs_raw, xmin, xmax)
+        ymask = self._build_one_obs_mask("yobs", yobs_raw, ymin, ymax)
+        xout_mask = self._build_outside_mask("xobs", xobs_raw, xoutside)
+        yout_mask = self._build_outside_mask("yobs", yobs_raw, youtside)
 
         mask = xmask & ymask & xout_mask & yout_mask
-        if weights is not None:
-            weights_for_mask = weights
+        if weights_raw is not None:
+            weights_for_mask = weights_raw
 
             if logy:
                 # Enables picking weights based on normalized scale for log stuff
-                weights_for_mask = weights_for_mask / (yobs * np.log(10))
+                weights_for_mask = weights_for_mask / (yobs_raw * np.log(10))
 
             wmask = self._build_one_obs_mask("weights", weights_for_mask, wmin, wmax)
             mask = mask & wmask
 
-        xobs = xobs[mask]
-        yobs = yobs[mask]
-        if weights is not None:
-            weights = weights[mask]
+        xobs = xobs_raw[mask]
+        yobs = yobs_raw[mask]
+        weights = None
+        if weights_raw is not None:
+            weights = weights_raw[mask]
 
-        self._xobs = xobs
-        self._yobs = yobs
-        self._weights = weights
+        Observations = namedtuple("Observations", "x,y,w")
+        UsedRawObs = namedtuple("UsedRawObs", "used,raw")
+        used = Observations(xobs, yobs, weights)
+        raw = Observations(xobs_raw, yobs_raw, weights_raw)
+        usedrawobs = UsedRawObs(used, raw)
+        self._observations = usedrawobs
+        #         self._xobs_raw = xobs_raw
+        #         self._yobs_raw = yobs_raw
+        #         self._weights_raw = weights_raw
+        #         self._xobs = xobs
+        #         self._yobs = yobs
+        #         self._weights = weights
         self._tk_observed = mask
         self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
 
@@ -687,60 +676,6 @@ class FitFunction(ABC):
             log[k] = v
 
         self._log = LogAxes(**log)
-
-    #     def val_uncert_2_string(self, value, uncertainty):
-    #         r"""
-    #         Convert a value, uncertainty pair to a string in which the
-    #         value is reported to the first non-zero digit of the uncertainty.
-    #
-    #         Require that value > uncertainty.
-    #
-    #         Example
-    #         -------
-    #         >>> a = 3.1415
-    #         >>> b = 0.01
-    #         >>> val_uncert_2_string(a, b)
-    #         "3.14 \pm 0.01"
-    #         """
-    #
-    #         # if np.isfinite(uncertainty) and value <= uncertainty:
-    #         #     msg = ("Must be that value > uncertainty\n"
-    #         #            "value = %s\nuncertainty = %s")
-    #         #     raise ValueError(msg % (value, uncertainty))
-    #
-    #         vprecision = 3
-    #         if np.isfinite(uncertainty):
-    #             uprecision = self._calc_precision(uncertainty)
-    #             vprecision = self._calc_precision(value)
-    #             vprecision = vprecision - uprecision
-    #
-    #         #         else:
-    #         #             self.logger.warning(
-    #         #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
-    #         #             )
-    #
-    #         template = r"{:.%se} \pm {:.0e}"
-    #         template = template % abs(vprecision)
-    #
-    #         out = template.format(value, uncertainty)
-    #
-    #         # Clean out unnecessary
-    #         # pdb.set_trace()
-    #         # out = re.subn(_remove_exponential_pattern, "", out)
-    #         # out = out[0] # Drop the number of repetitions removed.
-    #         # pdb.set_trace()
-    #         return out
-
-    #     def set_TeX_argnames(self, **kwargs):
-    #         r"""Define the mapping to format LaTeX function argnames.
-    #         """
-    #         # Save a tuple so immutable.
-    #         for k, v in kwargs.items():
-    #             if k not in self.argnames:
-    #                 raise ValueError(
-    #                     f"The TeX_argname {k} has no comparable pair in the TeX_function"
-    #                 )
-    #         self._TeX_argnames = kwargs.items()
 
     def build_TeX_info(self):
         chisq_dof = False

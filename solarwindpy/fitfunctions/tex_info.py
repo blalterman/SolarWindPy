@@ -156,33 +156,6 @@ class TeXinfo(object):
     #         # TODO: What is this? How do I use it?
     #         return self.fitfunction.function.func_name.title()
 
-    #     @property
-    #     def argnames(self):
-    #         try:
-    #             # Saved as tuple, so convert from tuple.
-    #             return dict(self._argnames)
-    #
-    #         except AttributeError:
-    #             return None
-
-    #     @property
-    #     def popt(self):
-    #         r"""Create a dictionary with (k, v) pairs corresponding to
-    #         (self.argnames, popt \pm psigma) with the appropriate uncertainty.
-    #
-    #         See `set_TeX_trans_argnames` to translate the argnames for TeX.
-    #         """
-    #         psigma = self.fitfunction.psigma
-    #         popt = self.fitfunction.items()
-    #         TeX_popt = {k: self.val_uncert_2_string(v, psigma[k]) for k, v in popt}
-    #
-    #         translate = self.TeX_argnames
-    #         if translate is not None:
-    #             for k0, k1 in translate.items():
-    #                 TeX_popt[k1] = TeX_popt.pop(k0)
-    #
-    #         return TeX_popt
-
     def annotate_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
 
