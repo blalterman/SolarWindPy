@@ -12,7 +12,7 @@ import numpy as np
 
 from abc import ABC, abstractproperty
 from collections import namedtuple
-from inspect import getargspec
+from inspect import getfullargspec
 from scipy.optimize import curve_fit
 
 from .tex_info import TeXinfo
@@ -20,6 +20,7 @@ from .fitfunction_plot import FitFunctionPlot
 
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
+
 
 class FitFunction(ABC):
     r"""Assuming that you don't want any special formatting, the typical call
@@ -126,7 +127,7 @@ class FitFunction(ABC):
     @property
     def argnames(self):
         r"""
-        The names of the actual function arguments pulled by getargspec.
+        The names of the actual function arguments pulled by getfullargspec.
         """
         return self._argnames
 
@@ -294,7 +295,7 @@ xobs: {xobs.shape}"""
 
         Should be called after function is set.
         """
-        args = getargspec(self.function).args[1:]
+        args = getfullargspec(self.function).args[1:]
         self._argnames = args
 
     def set_fit_obs(
