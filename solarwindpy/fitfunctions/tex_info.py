@@ -290,7 +290,7 @@ class TeXinfo(object):
         """
 
         if np.all([np.isnan(v) for v in self.popt.values()]):
-            info = "Fit Failed\n" + self.TeX_function
+            info = f"Fit Failed\n${self.TeX_function}$"
 
         else:
             info = self._build_fit_parameter_info(
@@ -299,54 +299,6 @@ class TeXinfo(object):
                 strip_uncertainties=strip_uncertainties,
                 simplify_info_for_paper=simplify_info_for_paper,
             )
-        #
-        #         TeX_popt = self.TeX_popt
-        #         template = "%s = %s"
-        #         info = [template % kv for kv in TeX_popt.items()]
-        #         # `.split("\n")` guarantees function is a list, irrespecitve
-        #         # of whether or not it contians 1 or more lines
-        #         info = TeX_function.split("\n") + info
-        #
-        #         if chisq_dof:
-        #             info += [fr"\chi^2_\nu = {chisq_dof:.2f}"]
-        #
-        #         if convert_pow_10 and (not simplify_info_for_paper):
-        #             # Convert to 10^X notation.
-        #             info = "\n".join(info)
-        #             info, eplus_cnt = re.subn(r"e\+", r" \\times 10^{+", info)
-        #             info, eminus_cnt = re.subn(r"e-", r" \\times 10^{-", info)
-        #
-        #             # Conver +0X and -0X to +X and -X. Improves readability.
-        #             info, p_sub_cnt = re.subn(r"\+0", r"+", info)
-        #             info, m_sub_cnt = re.subn(r"\-0", r"-", info)
-        #
-        #             # Re-split b/c we assume a lsit in all other pieces.
-        #             info = info.split("\n")
-        #
-        #             # Account for NaNs that don't have an exponential form to convert.
-        #             # NaNs are present when a fit fails
-        #             for idx, this_info in enumerate(info):
-        #                 this_info = [
-        #                     x + "}" if "{" in x else x for x in this_info.split(r"\pm")
-        #                 ]
-        #                 this_info = r"\pm".join(this_info)
-        #                 info[idx] = this_info
-        #
-        #         if strip_uncertainties or simplify_info_for_paper:
-        #             info = [x.split(r"\pm")[0] for x in info]
-        #
-        #         if simplify_info_for_paper:
-        #             info = self._simplify_for_paper(info)
-        #
-        #         #             breakpoint()
-        #         #             info = [f"$ {ii} $" for ii in (text_info + numeric_info)]
-        #         #             info = "\n".join(info)
-        #
-        #         #         print(*info, sep="\n")
-        #         info = [r"$ %s $" % x.replace("$", "") for x in info]
-        #         info = "\n".join(info)
-        #
-        #         info = info.replace(r"inf", r"\infty")
 
         if additional_info is not None:
             info = self._add_additional_info(info, additional_info)
