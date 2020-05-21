@@ -17,9 +17,10 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunctionPlot(object):
-    def __init__(self, observations, y_fit, TeX_info):
+    def __init__(self, observations, y_fit, TeX_info, fitfunction_name=""):
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
+        self.set_fitfunction_name(fitfunction_name)
         self._log = LogAxes(x=False, y=False)
         self._labels = AxesLabels("x", "y")
 
@@ -39,8 +40,12 @@ class FitFunctionPlot(object):
         return self._observations
 
     @property
+    def fitfunction_name(self):
+        return self._fitfunction_name
+
+    @property
     def path(self):
-        base = Path(self.__class__.__name__)
+        base = Path(self.__class__.__name__) / self.fitfunction_name
 
         try:
             base /= self.labels.x.path
@@ -72,6 +77,9 @@ class FitFunctionPlot(object):
     @property
     def y_fit(self):
         return self._y_fit
+
+    def set_fitfunction_name(self, new):
+        self._fitfunction_name = str(new)
 
     def set_observations(self, observations, y_fit):
         assert y_fit.shape == observations.raw.x.shape

@@ -358,7 +358,7 @@ class TeXlabel(Base):
     identical quantities hash identically.
     """
 
-    def __init__(self, mcs0, mcs1=None, axnorm=None):
+    def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
         r"""        Parameters
         ----------
         mcs0: tuple of strings
@@ -375,10 +375,14 @@ class TeXlabel(Base):
         axnorm: str or None
             If not None, axis normalization on plot. Primarily used for
             creating colorbar labels.
+        new_line_for_units: bool
+            If True, :py:meth:`tex` and :py:meth:`units` are separated by a
+            new line. Otherwise, they are separated by "\;".
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
+        self.set_new_line_for_units(new_line_for_units)
         self.build_label()
 
     @property
@@ -388,6 +392,10 @@ class TeXlabel(Base):
     @property
     def mcs1(self):
         return self._mcs1
+
+    @property
+    def new_line_for_units(self):
+        return self._new_line_for_units
 
     @property
     def tex(self):
@@ -418,6 +426,9 @@ class TeXlabel(Base):
 
         self._mcs0 = mcs0_
         self._mcs1 = mcs1_
+
+    def set_new_line_for_units(self, new):
+        self._new_line_for_units = bool(new)
 
     def set_axnorm(self, new):
         if isinstance(new, str):
@@ -450,7 +461,11 @@ class TeXlabel(Base):
         #         mcs = MCS(m, c, s)
         path = (
             "_".join(
-                [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
+                [
+                    m.replace(r"/", "-OV-"),
+                    c.replace(r"/", "-OV-"),
+                    s.replace(r"/", "-OV-"),
+                ]
             )
             .replace(",", "")
             .replace(",{", "{")
@@ -534,10 +549,14 @@ template   : %s
         tex_norm = _trans_axnorm[axnorm]
         if tex_norm:
             units = r"\#"
-            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)
+            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
             path = path / (axnorm.upper() + "norm")
 
-        with_units = r"${tex} \; \left[{units}\right]$".format(tex=tex, units=units)
+        with_units = r"${tex} {sep} \left[{units}\right]$".format(
+            tex=tex,
+            sep="$\n$" if self.new_line_for_units else "\;",  # noqa: W605
+            units=units,
+        )
 
         return tex, path, units, with_units
 

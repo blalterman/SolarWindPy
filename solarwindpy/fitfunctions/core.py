@@ -413,7 +413,9 @@ xobs: {xobs.shape}"""
         #             if "'ULEISPowerLaw' object has no attribute '_popt'" in str(e):
         #                 tex_info = None
 
-        plotter = FitFunctionPlot(obs, yfit, tex_info)
+        plotter = FitFunctionPlot(
+            obs, yfit, tex_info, fitfunction_name=self.__class__.__name__
+        )
         self._plotter = plotter
         return plotter
 
