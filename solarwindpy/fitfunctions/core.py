@@ -20,6 +20,7 @@ from .fitfunction_plot import FitFunctionPlot
 
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
+InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 
 
 class FitFunction(ABC):
@@ -233,6 +234,27 @@ class FitFunction(ABC):
             return self._plotter
         except AttributeError:
             return self.build_plotter()
+
+    @property
+    def initial_guess_info(self):
+
+        # If failed to make an initial guess, then don't build the info.
+        try:
+            p0 = self.p0
+            bounds = self.fit_bounds
+        except AttributeError:
+            return None
+
+        names = self.argnames
+        info = {
+            name: InitialGuessInfo(guess, lim)
+            for name, guess, lim in zip(names, p0, bounds)
+        }
+
+        #         info = ["\n".join(param) for param in info]
+        #         info = "\n\n".join(info)
+
+        return info
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
@@ -537,7 +559,13 @@ xobs: {xobs.shape}"""
         except AttributeError:
             psigma = {k: np.nan for k in self.argnames}
 
-        tex_info = TeXinfo(popt, psigma, self.TeX_function, chisq_dof=chisq_dof)
+        tex_info = TeXinfo(
+            popt,
+            psigma,
+            self.TeX_function,
+            chisq_dof=chisq_dof,
+            initial_guess_info=self.initial_guess_info,
+        )
         self._TeX_info = tex_info
         return tex_info
 

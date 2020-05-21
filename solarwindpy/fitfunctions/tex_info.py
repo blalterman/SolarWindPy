@@ -13,12 +13,25 @@ _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 
 class TeXinfo(object):
-    def __init__(
-        self, popt, psigma, TeX_function, chisq_dof,
-    ):
+    def __init__(self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None):
+        r"""A container for printing :py:class:`FitFunction` info on a figure.
+
+        Parameters
+        ----------
+        popt, psigma: dict
+            Optimized fit parameters and their uncertainties.
+        TeX_function: str
+            TeX-formatted function for printing
+        chisq_dof: scalar, None
+            If not None, chisq per degree of freedom for the fit.
+        initial_guess_info: dict, None
+            If not None, a dict with keys corresponding to function arg names
+            and values that are (p0, fit_bounds) for that fit parameter.
+        """
         self.set_popt_psigma(popt, psigma)
         self.set_TeX_function(TeX_function)
         self.set_chisq_dof(chisq_dof)
+        self.set_initial_guess_info(initial_guess_info)
 
     def __str__(self):
         return self.info
@@ -29,6 +42,35 @@ class TeXinfo(object):
             return self._info
         except AttributeError:
             return self.build_info()
+
+    @property
+    def initial_guess_info(self):
+        info = self._initial_guess_info
+        if info is None:
+            # Fit failed to make a guess
+            return None
+
+        translate = self.TeX_argnames
+        if translate is not None:
+            for k0, k1 in translate.items():
+                info[k1] = info.pop(k0)
+
+        info = [
+            (
+                k,
+                f"guess = {v.p0:.3e}",
+                f"upper = {v.bounds[1]:.3e}",
+                f"lower = {v.bounds[0]:.3e}",
+            )
+            for k, v in info.items()
+        ]
+
+        info = ["\n".join(param) for param in info]
+        info = "\n\n" + "\n\n".join(info)
+
+        return info
+
+        return self._initial_guess_info
 
     @property
     def chisq_dof(self):
@@ -256,6 +298,7 @@ class TeXinfo(object):
         convert_pow_10=True,
         strip_uncertainties=False,
         simplify_info_for_paper=False,
+        add_initial_guess=False,
         additional_info=None,
         annotate_fcn=None,
     ):
@@ -283,6 +326,9 @@ class TeXinfo(object):
             to their uncertainty in standard decimal (not expoential)
             notation.
             This option overrides `convert_pow_10`.
+        add_initial_guess: dict, None
+            If not None, a dict with keys corresponding to function arg names
+            and values that are (p0, fit_bounds) for that fit parameter.
         additional_info: str or iterable of strings
             Additional info added to the fit info annotation box.
         annotate_fcn: FunctionType
@@ -290,7 +336,7 @@ class TeXinfo(object):
         """
 
         if np.all([np.isnan(v) for v in self.popt.values()]):
-            info = f"Fit Failed\n${self.TeX_function}$"
+            info = f"${self.TeX_function}$\n\nFit Failed"
 
         else:
             info = self._build_fit_parameter_info(
@@ -300,6 +346,12 @@ class TeXinfo(object):
                 simplify_info_for_paper=simplify_info_for_paper,
             )
 
+        if add_initial_guess:
+            initial_guess = self.initial_guess_info
+            if initial_guess is None:
+                initial_guess = "\nInitial Guess Failed"
+            info = self._add_additional_info(info, initial_guess)
+
         if additional_info is not None:
             info = self._add_additional_info(info, additional_info)
 
@@ -308,6 +360,14 @@ class TeXinfo(object):
 
         self._info = info
         return info
+
+    def set_initial_guess_info(self, new):
+        if not (isinstance(new, dict) or new is None):
+            raise TypeError(
+                f"Unsure how to parse `initial_guess_info` of type {type(new)}"
+            )
+
+        self._initial_guess_info = new
 
     def set_popt_psigma(self, popt, psigma):
         for k in popt:
@@ -320,11 +380,19 @@ class TeXinfo(object):
         r"""Define the mapping to format LaTeX function argnames.
         """
         # Save a tuple so immutable.
+        popt = self.popt
+        initial_guess = self.initial_guess_info
         for k, v in kwargs.items():
-            if k not in self.popt:
+            if k not in popt:
                 raise ValueError(
                     f"The TeX_argname {k} has no comparable pair in the popt"
                 )
+
+            if (initial_guess is not None) and k not in initial_guess:
+                raise ValueError(
+                    f"The TeX_argname {k} has no comparable pair in the initial_guess_info"
+                )
+
         self._TeX_argnames = kwargs.items()
 
     def set_TeX_function(self, TeX_function):
