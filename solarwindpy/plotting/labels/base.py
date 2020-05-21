@@ -12,10 +12,6 @@ from collections import namedtuple
 MCS = namedtuple("MCS", "m,c,s")
 
 
-def _mathrm(x):
-    return r"\mathrm{%s}" % x
-
-
 __composition_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
     "e": r"e",
@@ -169,6 +165,11 @@ _trans_units = {
     "MgII": _inU["dimless"],
     # MISC
     "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
+    # Spectral things
+    "spectral_exponent": _inU["dimless"],
+    "MeV/nuc": r"\mathrm{MeV/nuc}",
+    #     "differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
+    "differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
 }
 
 _trans_component = {
@@ -181,8 +182,8 @@ _trans_component = {
     "colat": r"\lambda",
     "lat": r"\theta",
     "lon": r"\phi",
-    "R": _mathrm("R"),
-    "scalar": _mathrm("scalar"),
+    "R": r"\mathrm{R}",
+    "scalar": r"\mathrm{scalar}",
     "theta": r"\theta",
     "phi": r"\phi",
     "per": r"\perp",
@@ -214,8 +215,7 @@ _templates = {
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
     "Q": r"Q_{{$C};{$S}}",  # heating rate
-    #     "count": _mathrm("Count"),
-    "ratio": _mathrm("Ratio"),
+    "ratio": r"\mathrm{Ratio}",
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
     "cos_phi": r"\cos \phi_{{$C}_{$S}}",
@@ -267,6 +267,11 @@ _templates = {
     "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
+    # Spectral Exponents
+    "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
+    "MeV/nuc": r"\mathrm{Energy}",
+    #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
+    "differential_flux": r"{{$S}} \: dJ/dE",
 }
 
 
@@ -453,6 +458,10 @@ class TeXlabel(Base):
             .replace("__", "_")
             .replace(".", "")
             .strip("_")
+            # The following two work jointly to remove cases
+            # where the species leads the label and it is empty.
+            .strip(r"{} \\")
+            .strip(r", ")
         )
 
         err = False
@@ -528,7 +537,7 @@ template   : %s
             tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)
             path = path / (axnorm.upper() + "norm")
 
-        with_units = r"${tex} \; [{units}]$".format(tex=tex, units=units)
+        with_units = r"${tex} \; \left[{units}\right]$".format(tex=tex, units=units)
 
         return tex, path, units, with_units
 
