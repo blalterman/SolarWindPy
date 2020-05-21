@@ -29,7 +29,8 @@ class FitFunction(ABC):
         fit_function = FitFunction(function, TeX_string)
         fit_function.make_fit()
 
-    Instances are callable.
+    Instances are callable. If the fit fails, calling the instance will return
+    an array of NaNs the same shape as the x-values.
     """
 
     def __init__(
@@ -82,14 +83,21 @@ class FitFunction(ABC):
 
         # Sort the parameter keywords into the proper order to pass to the
         # numerical function.
-        popt_ = self.popt
-        popt_ = [popt_[k] for k in self.argnames]
 
-        # NOTE
-        # An instance of FitFunction is for a given function. To change the
-        # function itself, a new instance of FitFunction should be required.
-        # Therefore, we access the function directly.
-        y = self.function(x, *popt_)
+        try:
+            popt_ = self.popt
+            popt_ = [popt_[k] for k in self.argnames]
+
+            # NOTE
+            # An instance of FitFunction is for a given function. To change the
+            # function itself, a new instance of FitFunction should be required.
+            # Therefore, we access the function directly.
+            y = self.function(x, *popt_)
+
+        except AttributeError as e:
+            if "'ULEISPowerLaw' object has no attribute '_popt'" in str(e):
+                y = np.full_like(x, np.nan, dtype=np.float64)
+
         return y
 
     @property
@@ -373,9 +381,17 @@ xobs: {xobs.shape}"""
         self._pcov = new
 
     def build_plotter(self):
-        plotter = FitFunctionPlot(
-            self.observations, self(self.observations.raw.x), self.TeX_info
-        )
+        obs = self.observations
+        yfit = self(self.observations.raw.x)
+        tex_info = self.TeX_info
+
+        #         try:
+        #             tex_info = self.TeX_info
+        #         except AttributeError as e:
+        #             if "'ULEISPowerLaw' object has no attribute '_popt'" in str(e):
+        #                 tex_info = None
+
+        plotter = FitFunctionPlot(obs, yfit, tex_info)
         self._plotter = plotter
         return plotter
 
@@ -509,9 +525,19 @@ xobs: {xobs.shape}"""
         except AttributeError:
             pass
 
-        tex_info = TeXinfo(
-            self.popt, self.psigma, self.TeX_function, chisq_dof=chisq_dof
-        )
+        # Allows annotating of TeX_info when fit fails in a manner
+        # that is easily identifiable.
+        try:
+            popt = self.popt
+        except AttributeError:
+            popt = {k: np.nan for k in self.argnames}
+
+        try:
+            psigma = self.psigma
+        except AttributeError:
+            psigma = {k: np.nan for k in self.argnames}
+
+        tex_info = TeXinfo(popt, psigma, self.TeX_function, chisq_dof=chisq_dof)
         self._TeX_info = tex_info
         return tex_info
 
