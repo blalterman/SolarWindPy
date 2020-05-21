@@ -104,10 +104,9 @@ class FitFunctionPlot(object):
         #         ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.
 
         # Copied from plt.hist. (20161107_0112)
-        ax.update_datalim(
-            [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)],
-            updatey=False,
-        )
+        x = self.observations.raw.x
+        if x.size:
+            ax.update_datalim([(x[0], 0), (x[-1], 0)], updatey=False)
 
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
@@ -131,10 +130,9 @@ class FitFunctionPlot(object):
         else:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\#]$")
 
-        ax.update_datalim(
-            [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)],
-            updatey=False,
-        )
+        x = self.observations.raw.x
+        if x.size:
+            ax.update_datalim([(x[0], 0), (x[-1], 0)], updatey=False)
 
         return ax
 
