@@ -402,7 +402,7 @@ class MathFcn(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        return rf"${self.tex} \; \left[{self.units}\right]$"
 
     @property
     def tex(self):
@@ -413,7 +413,7 @@ class MathFcn(ArbitraryLabel):
         if self.dimensionless:
             return base._inU["dimless"]
 
-        return r"\mathrm{%s}(%s)" % (self.function, self.other_label.units)
+        return r"\mathrm{%s}\left(%s\right)" % (self.function, self.other_label.units)
 
     @property
     def path(self):
