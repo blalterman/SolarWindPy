@@ -241,14 +241,14 @@ class FitFunction(ABC):
         # If failed to make an initial guess, then don't build the info.
         try:
             p0 = self.p0
-            bounds = self.fit_bounds
+            lower, upper = self.fit_bounds
         except AttributeError:
             return None
 
         names = self.argnames
         info = {
-            name: InitialGuessInfo(guess, lim)
-            for name, guess, lim in zip(names, p0, bounds)
+            name: InitialGuessInfo(guess, (lb, ub))
+            for name, guess, lb, ub in zip(names, p0, lower, upper)
         }
 
         #         info = ["\n".join(param) for param in info]

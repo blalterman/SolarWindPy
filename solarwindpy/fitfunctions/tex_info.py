@@ -66,7 +66,7 @@ class TeXinfo(object):
         ]
 
         info = ["\n".join(param) for param in info]
-        info = "\n\n" + "\n\n".join(info)
+        info = "\n\n".join(info)
 
         return info
 
@@ -350,6 +350,9 @@ class TeXinfo(object):
             initial_guess = self.initial_guess_info
             if initial_guess is None:
                 initial_guess = "\nInitial Guess Failed"
+            else:
+                initial_guess = "\n\n" + initial_guess
+
             info = self._add_additional_info(info, initial_guess)
 
         if additional_info is not None:
