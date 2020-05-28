@@ -204,7 +204,11 @@ class TeXinfo(object):
         info = TeX_function.split("\n") + info
 
         if chisq_dof:
-            info += [fr"\chi^2_\nu = {chisq_dof:.2f}"]
+            info += [
+                fr"\chi^2_\nu = {self.chisq_dof.linear:.2f}",
+                #                      r"\widehat{\chi}^2_\nu = {%.2f}" % self.chisq_dof.robust,
+                r"\chi^2_{\nu;R} = {%.2f}" % self.chisq_dof.robust,
+            ]
 
         if convert_pow_10 and (not simplify_info_for_paper):
             # Convert to 10^X notation.
@@ -294,7 +298,7 @@ class TeXinfo(object):
 
     def build_info(
         self,
-        chisq_dof=False,
+        chisq_dof=True,
         convert_pow_10=True,
         strip_uncertainties=False,
         simplify_info_for_paper=False,

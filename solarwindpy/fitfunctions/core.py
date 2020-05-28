@@ -8,12 +8,17 @@ well-formatted LaTeX that describes the fit.
 
 import pdb  # noqa: F401
 import logging  # noqa: F401
+import warnings
 import numpy as np
 
 from abc import ABC, abstractproperty
 from collections import namedtuple
 from inspect import getfullargspec
 from scipy.optimize import curve_fit
+from scipy.optimize import least_squares, OptimizeWarning
+from scipy.optimize.minpack import _wrap_func, _wrap_jac, _initialize_feasible
+from scipy.optimize._lsq.least_squares import prepare_bounds
+from scipy.linalg import svd, cholesky, LinAlgError
 
 from .tex_info import TeXinfo
 from .fitfunction_plot import FitFunctionPlot
@@ -21,6 +26,7 @@ from .fitfunction_plot import FitFunctionPlot
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
+ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
 
 
 class FitFunction(ABC):
@@ -140,9 +146,56 @@ class FitFunction(ABC):
         """
         return self._argnames
 
-    #     @property
-    #     def labels(self):
-    #         return self._labels
+    @property
+    def chisq_dof(self):
+        r"""Chisq per degree of freedom :math:`\chi^2_\nu`.
+
+        If None, not calculated by `make_fit_old`. If `np.nan`, fit failed.
+        """
+        #         r = self.residuals(pct=False)
+        #         sigma = self.observations.used.w
+        #         if sigma is not None:
+        #             r = r / sigma
+        #
+        #         chisq = (r ** 2).sum()
+        #         dof = r.size - len(self.p0)
+        #         chisq_dof = chisq / dof
+        #         return chisq_dof
+        try:
+            return self._chisq_dof
+        except AttributeError:
+            return None
+
+    @property
+    def dof(self):
+        r"""Degrees of freedom in the fit.
+        """
+        return self.observations.used.y.size - len(self.p0)
+
+    @property
+    def fit_result(self):
+        return self._fit_result
+
+    @property
+    def initial_guess_info(self):
+
+        # If failed to make an initial guess, then don't build the info.
+        try:
+            p0 = self.p0
+            lower, upper = self.fit_bounds
+        except AttributeError:
+            return None
+
+        names = self.argnames
+        info = {
+            name: InitialGuessInfo(guess, (lb, ub))
+            for name, guess, lb, ub in zip(names, p0, lower, upper)
+        }
+
+        #         info = ["\n".join(param) for param in info]
+        #         info = "\n\n".join(info)
+
+        return info
 
     @property
     def nobs(self):
@@ -153,6 +206,13 @@ class FitFunction(ABC):
     @property
     def observations(self):
         return self._observations
+
+    @property
+    def plotter(self):
+        try:
+            return self._plotter
+        except AttributeError:
+            return self.build_plotter()
 
     @property
     def popt(self):
@@ -185,76 +245,12 @@ class FitFunction(ABC):
         else:
             return True
 
-    # @property
-    # def binsigma_raw(self):
-    #     r"""
-    #     The std of the data in each bin, not accounting for the extrema
-    #     limits.
-    #     """
-    #     try:
-    #         return self._binsigma_raw
-    #     except AttributeError:
-    #         msg = "Please set binsigma."
-    #         raise AttributeError(msg)
-
     @property
-    def binsigma(self):
-        r"""
-        The std of the data in each bin.
-
-        Only used for the bins meeting the extrema conditions.
-        """
-        return self._binsigma
-
-    @property
-    def chisqdof(self):
-        r"""Calculate the chisq/dof for the fit.
-        """
-        yvals = self.observations.used.y
-        yfits = self(self.observations.used.x)
-        binsigma = self.binsigma
-
-        # Assign the 0 counts that become negative with -1 to 0.
-        # binsigma[~yvals.astype(bool)] = 0
-
-        msg = "Not finite: %s"
-        assert np.isfinite(yvals).all(), msg % (~np.isfinite(yvals)).sum()
-        assert np.isfinite(yfits).all(), msg % (~np.isfinite(yfits)).sum()
-        assert np.isfinite(binsigma).all(), msg % (~np.isfinite(binsigma)).sum()
-
-        chisq = ((yvals - yfits) / binsigma) ** 2.0
-        ddof = len(yvals) - len(self.p0) - 1
-        chisqdof = chisq.sum() / ddof
-
-        return chisqdof
-
-    @property
-    def plotter(self):
+    def TeX_info(self):
         try:
-            return self._plotter
+            return self._TeX_info
         except AttributeError:
-            return self.build_plotter()
-
-    @property
-    def initial_guess_info(self):
-
-        # If failed to make an initial guess, then don't build the info.
-        try:
-            p0 = self.p0
-            lower, upper = self.fit_bounds
-        except AttributeError:
-            return None
-
-        names = self.argnames
-        info = {
-            name: InitialGuessInfo(guess, (lb, ub))
-            for name, guess, lb, ub in zip(names, p0, lower, upper)
-        }
-
-        #         info = ["\n".join(param) for param in info]
-        #         info = "\n\n".join(info)
-
-        return info
+            return self.build_TeX_info()
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
@@ -298,11 +294,6 @@ xobs: {xobs.shape}"""
 
         return mask
 
-    #     def _init_logger(self):
-    #         self._logger = logging.getLogger(
-    #             "{}.{}".format(__file__, self.__class__.__name__)
-    #         )
-
     def _build_outside_mask(self, axis, x, outside):
         r"""Take data outside of the range `outside[0]:outside[1]`.
         """
@@ -328,6 +319,48 @@ xobs: {xobs.shape}"""
         args = getfullargspec(self.function).args[1:]
         self._argnames = args
 
+    def build_TeX_info(self):
+
+        # Allows annotating of TeX_info when fit fails in a manner
+        # that is easily identifiable.
+        try:
+            popt = self.popt
+        except AttributeError:
+            popt = {k: np.nan for k in self.argnames}
+
+        try:
+            psigma = self.psigma
+        except AttributeError:
+            psigma = {k: np.nan for k in self.argnames}
+
+        tex_info = TeXinfo(
+            popt,
+            psigma,
+            self.TeX_function,
+            chisq_dof=self.chisq_dof,
+            initial_guess_info=self.initial_guess_info,
+        )
+        self._TeX_info = tex_info
+        return tex_info
+
+    def residuals(self, pct=False):
+        r"""
+        Calculate the fit residuals.
+        If pct, normalize by fit yvalues.
+        """
+
+        # TODO: calculate with all values
+        # Make it an option to calculate with either
+        # the values used in the fit or all the values,
+        # including those excluded by `set_extrema`.
+
+        r = self(self.observations.used.x) - self.observations.used.y
+
+        if pct:
+            r = 100.0 * (r / self(self.observations.used.x))
+
+        return r
+
     def set_fit_obs(
         self,
         xobs_raw,
@@ -344,9 +377,8 @@ xobs: {xobs.shape}"""
         logx=False,
         logy=False,
     ):
-        r"""
-        Set the observed values we'll actually use in the fit by applying limits
-        to xobs_raw and yobs_raw and checking for finite values.
+        r"""Set the observed values we'll actually use in the fit by applying
+        limits to xobs_raw and yobs_raw and checking for finite values.
 
         All boundaries are inclusive <= or >=.
 
@@ -383,35 +415,11 @@ xobs: {xobs.shape}"""
         raw = Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
-        #         self._tk_observed = mask
-
-    #         self._labels = AxesLabels(x="x", y=swp.pp.labels.Count())
-
-    def _set_popt(self, new):
-        r"""Save as a tuple of (k, v) pairs so immutable. Convert to a dictionary i
-        before returning the actual data with `pcov` method.
-        """
-        self._popt = list(zip(self.argnames, new))
-
-    def _set_psigma(self, new):
-        assert isinstance(new, np.ndarray)
-        self._psigma = list(zip(self.argnames, new))
-
-    def _set_pcov(self, new):
-        assert isinstance(new, np.ndarray)
-        # assert new.shape[0] == new.shape[1] square matrix?
-        self._pcov = new
 
     def build_plotter(self):
         obs = self.observations
         yfit = self(self.observations.raw.x)
         tex_info = self.TeX_info
-
-        #         try:
-        #             tex_info = self.TeX_info
-        #         except AttributeError as e:
-        #             if "'ULEISPowerLaw' object has no attribute '_popt'" in str(e):
-        #                 tex_info = None
 
         plotter = FitFunctionPlot(
             obs, yfit, tex_info, fitfunction_name=self.__class__.__name__
@@ -419,7 +427,7 @@ xobs: {xobs.shape}"""
         self._plotter = plotter
         return plotter
 
-    def make_fit(self, **kwargs):
+    def make_fit_old(self, **kwargs):
         f"""Fit the function with the independent values `xobs` and dependent
         values `yobs` using `curve_fit`.
 
@@ -445,6 +453,12 @@ xobs: {xobs.shape}"""
         loss = kwargs.pop("loss", "huber")
         max_nfev = kwargs.pop("max_nfev", 10000)
         f_scale = kwargs.pop("f_scale", 0.1)
+        absolute_sigma = kwargs.pop("absolute_sigma", True)
+
+        if not absolute_sigma:
+            raise ValueError(
+                "Always use `absolute_sigma` so we can calcualte chisq_dof and then renormalize here."
+            )
 
         # This line is legacy. Not sure why it's here, but I'm copying it over
         # assuming I had a good reason to include it. (20170309 0011)
@@ -458,20 +472,17 @@ xobs: {xobs.shape}"""
         except ValueError as e:
             return e
 
-        #         #         assert "p0" not in kwargs
-        #         # Avoid issuing a `logger.warning` with `p0 = kwargs.pop("p0", self.p0)`.
-        #         try:
-        #             p0 = kwargs.pop("p0")
-        #         except KeyError:
-        #             p0 = self.p0
+        xdata = self.observations.used.x
+        ydata = self.observations.used.y
+        sigma = self.observations.used.w
 
         try:
             result = curve_fit(
                 self.function,
-                self.observations.used.x,
-                self.observations.used.y,
+                xdata,
+                ydata,
                 p0=p0,
-                sigma=self.observations.used.w,
+                sigma=sigma,
                 method=method,
                 loss=loss,
                 max_nfev=max_nfev,
@@ -482,98 +493,191 @@ xobs: {xobs.shape}"""
             return e
 
         popt, pcov = result[:2]
-        sigma = np.sqrt(np.diag(pcov))
+        #         psigma = np.sqrt(np.diag(pcov))
 
-        # Need to figure out how/where to save the full output.
+        dof = ydata.size - len(p0)
+        chisq_dof = np.inf  # Divide by zero => infinity
+        if dof:
+            r = (self.function(xdata, *popt) - ydata) / sigma
+            chisq_dof = (r ** 2).sum() / dof
 
-        #         # Check that he sigma values are finite.
-        #         if not np.isfinite(sigma).all():
-        #             msg = (
-        #                 "Negative covariances lead to NaN uncertainties. "
-        #                 "I don't trust them and don't know if the optimized "
-        #                 "parameters are meaningful.\n\nsigma\n-----\n%s\n\npcov\n----\n%s\n\n"
-        #             )
-        #             self.logger.warning(msg, sigma, pcov)
+        pcov = pcov * chisq_dof
+        psigma = np.sqrt(np.diag(pcov))
+        self._popt = list(zip(self.argnames, popt))
+        self._psigma = list(zip(self.argnames, psigma))
+        self._pcov = pcov
+        #         self._chisq_dof = chisq_dof
+        all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, np.nan)
+        self._chisq_dof = all_chisq
 
-        self._set_popt(popt)
-        self._set_psigma(sigma)
-        self._set_pcov(pcov)
+    def _run_least_squares(self, **kwargs):
+        p0 = kwargs.pop("p0", self.p0)
+        bounds = kwargs.pop("bounds", (-np.inf, np.inf))
+        method = kwargs.pop("method", "trf")
+        loss = kwargs.pop("loss", "huber")
+        max_nfev = kwargs.pop("max_nfev", 10000)
+        f_scale = kwargs.pop("f_scale", 0.1)
+        jac = kwargs.pop("jac", "2-point")
 
-        # pdb.set_trace()
-        # self._fitinfo = fitinfo
+        # Copied from `curve_fit` (20200527)
+        if p0 is None:
+            # determine number of parameters by inspecting the function
+            from scipy._lib._util import getargspec_no_self as _getargspec
 
-    def residuals(self, pct=False):
-        r"""
-        Calculate the fit residuals.
-        If pct, normalize by fit yvalues.
-        """
-
-        # TODO: calculate with all values
-        # Make it an option to calculate with either
-        # the values used in the fit or all the values,
-        # including those excluded by `set_extrema`.
-
-        r = self(self.observations.used.x) - self.observations.used.y
-
-        if pct:
-            r = 100.0 * (r / self(self.observations.used.x))
-
-        return r
-
-    def set_binsigma(self, new):
-        r"""Set the binsigma to new.
-
-        If new is str, it can be "count", in which case we estimate
-        sigma as sqrt(yvals - 1).
-        Otherwise, new can be a numpy array of the same shape as
-        xobs_raw.
-        """
-
-        if isinstance(new, np.ndarray):
-            assert new.ndim == 1
-            assert new.shape == self.observations.used.x.shape
-            self._binsigma = new
-
-        elif isinstance(new, str):
-            assert new.lower().startswith("count"), "Unrecognized new string: %s" % new
-            self._binsigma = np.sqrt(self.observations.used.y - 1)
-
+            args, varargs, varkw, defaults = _getargspec(self.function)
+            if len(args) < 2:
+                raise ValueError("Unable to determine number of fit parameters.")
+            n = len(args) - 1
         else:
-            msg = "Unrecgonized binsigma: %s\ntype: %s" % (new, type(new))
-            raise TypeError(msg)
+            p0 = np.atleast_1d(p0)
+            n = p0.size
 
-    def build_TeX_info(self):
-        chisq_dof = False
-        try:
-            chisq_dof = self.chisqdof
-        except AttributeError:
-            pass
+        # Copied from `curve_fit` (20200527)
+        lb, ub = prepare_bounds(bounds, n)
+        if p0 is None:
+            p0 = _initialize_feasible(lb, ub)
 
-        # Allows annotating of TeX_info when fit fails in a manner
-        # that is easily identifiable.
-        try:
-            popt = self.popt
-        except AttributeError:
-            popt = {k: np.nan for k in self.argnames}
+        if "args" in kwargs:
+            raise ValueError(
+                "Adopted `curve_fit` convention for which'args' is not a supported keyword argument."
+            )
 
-        try:
-            psigma = self.psigma
-        except AttributeError:
-            psigma = {k: np.nan for k in self.argnames}
+        xdata = self.observations.used.x
+        ydata = self.observations.used.y
+        sigma = self.observations.used.w
 
-        tex_info = TeXinfo(
-            popt,
-            psigma,
-            self.TeX_function,
-            chisq_dof=chisq_dof,
-            initial_guess_info=self.initial_guess_info,
+        # Copied from `curve_fit` (20200527)
+        # Determine type of sigma
+        if sigma is not None:
+            sigma = np.asarray(sigma)
+            # sigma = sigma / np.nansum(sigma)
+
+            # if 1-d, sigma are errors, define transform = 1/sigma
+            if sigma.shape == (ydata.size,):
+                transform = 1.0 / sigma
+            # if 2-d, sigma is the covariance matrix,
+            # define transform = L such that L L^T = C
+            elif sigma.shape == (ydata.size, ydata.size):
+                try:
+                    # scipy.linalg.cholesky requires lower=True to return L L^T = A
+                    transform = cholesky(sigma, lower=True)
+                except LinAlgError:
+                    raise ValueError("`sigma` must be positive definite.")
+            else:
+                raise ValueError("`sigma` has incorrect shape.")
+        else:
+            transform = None
+
+        # Copied from `curve_fit` (20200527)
+        loss_func = _wrap_func(self.function, xdata, ydata, transform)
+        # Need to call `_wrap_jac` because we already build loss function
+        # with `_wrap_func`.
+        if callable(jac):
+            jac = _wrap_jac(jac, xdata, transform)
+
+        res = least_squares(
+            loss_func,
+            p0,
+            jac=jac,
+            bounds=bounds,
+            method=method,
+            loss=loss,
+            max_nfev=max_nfev,
+            f_scale=f_scale,
+            **kwargs,
         )
-        self._TeX_info = tex_info
-        return tex_info
 
-    @property
-    def TeX_info(self):
+        if not res.success:
+            raise RuntimeError("Optimal parameters not found: " + res.message)
+
+        return res, p0
+
+    def _calc_popt_pcov_psigma_chisq(self, res, p0):
+        xdata = self.observations.used.x
+        ydata = self.observations.used.y
+        sigma = self.observations.used.w
+        # `cost` is the robust loss, i.e. residuals passed through loss funciton.
+        ysize = len(res.fun)
+        cost = 2 * res.cost  # res.cost is half sum of squares!
+        popt = res.x
+
+        # Linear chisq_dof value.
+        dof = ydata.size - len(p0)
+        chisq_dof = np.inf  # Divide by zero => infinity
+        if dof:
+            r = (self.function(xdata, *popt) - ydata) / sigma
+            chisq_dof = (r ** 2).sum() / dof
+
+        # Do Moore-Penrose inverse discarding zero singular values.
+        _, s, VT = svd(res.jac, full_matrices=False)
+        threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
+        s = s[s > threshold]
+        VT = VT[: s.size]
+        pcov = np.dot(VT.T / s ** 2, VT)
+
+        warn_cov = False
+        if ysize > p0.size:
+            # Cost is robust residuals, so this is robust chisq per dof.
+            s_sq = cost / (ysize - p0.size)
+            pcov = pcov * s_sq
+        else:
+            s_sq = np.nan
+            pcov.fill(np.inf)
+            warn_cov = True
+
+        if warn_cov:
+            warnings.warn(
+                "Covariance of the parameters could not be estimated",
+                category=OptimizeWarning,
+            )
+
+        psigma = np.sqrt(np.diag(pcov))
+        all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
+
+        return popt, pcov, psigma, all_chisq
+
+    def make_fit(self, **kwargs):
+        f"""Fit the function with the independent values `xobs` and dependent
+        values `yobs` using `least_squares` and returning the `OptimizeResult`
+        object, but treating weights as in `curve_fit`.
+
+        Parameters
+        ----------
+        kwargs:
+            Unless specified here, defaults are as defined by `curve_fit`.
+
+                ============= ======================================
+                    kwarg                    default
+                ============= ======================================
+                 p0            Setup by `{self.__class__.__name__}`
+                 return_full   False
+                 method        "trf"
+                 loss          "huber"
+                 max_nfev      10000
+                 f_scale       0.1
+                ============= ======================================
+
+        """
         try:
-            return self._TeX_info
-        except AttributeError:
-            return self.build_TeX_info()
+            assert self.sufficient_data  # Check we have enough data to fit.
+        except ValueError as e:
+            return e
+
+        try:
+            res, p0 = self._run_least_squares(**kwargs)
+        except (RuntimeError, ValueError) as e:
+            return e
+
+        popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+
+        self._popt = list(zip(self.argnames, popt))
+        self._psigma = list(zip(self.argnames, psigma))
+        self._pcov = pcov
+        # Based on `curve_fit`'s `absolute_sigma` documentation and reading
+        # `least_square`, `s_sq` should be chisq_nu based on robust residuals
+        # that account for `f_scale`(20200527).
+        #         all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
+        self._chisq_dof = all_chisq
+        self._fit_result = res
+
+        return res
