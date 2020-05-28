@@ -319,6 +319,17 @@ xobs: {xobs.shape}"""
         args = getfullargspec(self.function).args[1:]
         self._argnames = args
 
+    def build_plotter(self):
+        obs = self.observations
+        yfit = self(self.observations.raw.x)
+        tex_info = self.TeX_info
+
+        plotter = FitFunctionPlot(
+            obs, yfit, tex_info, fitfunction_name=self.__class__.__name__
+        )
+        self._plotter = plotter
+        return plotter
+
     def build_TeX_info(self):
 
         # Allows annotating of TeX_info when fit fails in a manner
@@ -415,17 +426,6 @@ xobs: {xobs.shape}"""
         raw = Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
-
-    def build_plotter(self):
-        obs = self.observations
-        yfit = self(self.observations.raw.x)
-        tex_info = self.TeX_info
-
-        plotter = FitFunctionPlot(
-            obs, yfit, tex_info, fitfunction_name=self.__class__.__name__
-        )
-        self._plotter = plotter
-        return plotter
 
     def make_fit_old(self, **kwargs):
         f"""Fit the function with the independent values `xobs` and dependent
@@ -632,6 +632,10 @@ xobs: {xobs.shape}"""
             )
 
         psigma = np.sqrt(np.diag(pcov))
+
+        # Based on `curve_fit`'s `absolute_sigma` documentation and reading
+        # `least_square`, `s_sq` should be chisq_nu based on robust residuals
+        # that account for `f_scale`(20200527).
         all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
 
         return popt, pcov, psigma, all_chisq
@@ -666,6 +670,7 @@ xobs: {xobs.shape}"""
         try:
             res, p0 = self._run_least_squares(**kwargs)
         except (RuntimeError, ValueError) as e:
+            print("fitting failed", flush=True)
             return e
 
         popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
@@ -673,11 +678,5 @@ xobs: {xobs.shape}"""
         self._popt = list(zip(self.argnames, popt))
         self._psigma = list(zip(self.argnames, psigma))
         self._pcov = pcov
-        # Based on `curve_fit`'s `absolute_sigma` documentation and reading
-        # `least_square`, `s_sq` should be chisq_nu based on robust residuals
-        # that account for `f_scale`(20200527).
-        #         all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
         self._chisq_dof = all_chisq
         self._fit_result = res
-
-        return res

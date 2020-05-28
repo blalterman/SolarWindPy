@@ -70,8 +70,6 @@ class TeXinfo(object):
 
         return info
 
-        return self._initial_guess_info
-
     @property
     def chisq_dof(self):
         return self._chisq_dof
