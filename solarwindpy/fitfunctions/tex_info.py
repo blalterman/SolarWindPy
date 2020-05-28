@@ -57,7 +57,7 @@ class TeXinfo(object):
 
         info = [
             (
-                k,
+                f"${k}$",
                 f"guess = {v.p0:.3e}",
                 f"upper = {v.bounds[1]:.3e}",
                 f"lower = {v.bounds[0]:.3e}",

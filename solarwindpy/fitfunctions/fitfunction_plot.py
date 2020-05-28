@@ -84,8 +84,11 @@ class FitFunctionPlot(object):
     def set_observations(self, observations, y_fit):
         assert y_fit.shape == observations.raw.x.shape
         assert y_fit[observations.tk_observed].shape == observations.used.x.shape
+        #         assert y_fit[observations.tk_observed].shape == robust_residuals.shape
         self._observations = observations
         self._y_fit = y_fit
+
+    #         self._robust_residuals = robust_residuals
 
     def _estimate_markevery(self):
         try:
@@ -141,6 +144,8 @@ class FitFunctionPlot(object):
         x = self.observations.raw.x
         if x.size:
             ax.update_datalim([(x[0], 0), (x[-1], 0)], updatey=False)
+
+        #         ax.legend(loc=0, framealpha=0, ncol=2)
 
         return ax
 
@@ -344,14 +349,30 @@ class FitFunctionPlot(object):
         ax.plot(
             self.observations.used.x,
             self.residuals(pct=pct),
+            label=r"$\mathrm{Resid}$",
             drawstyle=drawstyle,
             color=color,
             marker=marker,
+            linestyle="-",
             markerfacecolor=markerfacecolor,
             markersize=markersize,
             markevery=markevery,
             **kwargs,
         )
+
+        #         ax.plot(
+        #             self.observations.used.x,
+        #             self.robust_residuals(pct=pct),
+        #             label=r"$\mathrm{Robust}$",
+        #             drawstyle=drawstyle,
+        #             color=color,
+        #             marker=marker,
+        #             linestyle=(0, (7, 3, 1, 3, 1, 3, 1, 3)),
+        #             markerfacecolor=markerfacecolor,
+        #             markersize=markersize,
+        #             markevery=markevery,
+        #             **kwargs,
+        #         )
 
         self._format_rax(ax, pct)
 
@@ -418,15 +439,9 @@ class FitFunctionPlot(object):
         return hax, rax
 
     def residuals(self, pct=False):
-        r"""
-        Calculate the fit residuals.
+        r"""Calculate the fit residuals.
         If pct, normalize by fit yvalues.
         """
-
-        # TODO: calculate with all values
-        # Make it an option to calculate with either
-        # the values used in the fit or all the values,
-        # including those excluded by `set_extrema`.
 
         y_fit_used = self.y_fit[self.observations.tk_observed]
         r = y_fit_used - self.observations.used.y
@@ -435,6 +450,18 @@ class FitFunctionPlot(object):
             r = 100.0 * (r / y_fit_used)
 
         return r
+
+    #     def robust_residuals(self, pct=False):
+    #         r"""Return the fit residuals.
+    #         If pct, normalize by fit yvalues.
+    #         """
+    #         r = self._robust_residuals
+    #
+    #         if pct:
+    #             y_fit_used = self.y_fit[self.observations.tk_observed]
+    #             r = 100.0 * (r / y_fit_used)
+    #
+    #         return r
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels. Any label not specified in kwargs

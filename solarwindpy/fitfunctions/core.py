@@ -322,10 +322,15 @@ xobs: {xobs.shape}"""
     def build_plotter(self):
         obs = self.observations
         yfit = self(self.observations.raw.x)
+        #         robust_residuals = self.fit_result.fun
         tex_info = self.TeX_info
 
         plotter = FitFunctionPlot(
-            obs, yfit, tex_info, fitfunction_name=self.__class__.__name__
+            obs,
+            yfit,
+            #             robust_residuals,
+            tex_info,
+            fitfunction_name=self.__class__.__name__,
         )
         self._plotter = plotter
         return plotter
