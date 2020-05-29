@@ -14,15 +14,35 @@ fi
 
 echo $envname
 
+function run_script() {
 
-core="pandas scipy numpy numexpr bottleneck matplotlib pytables cython"
-dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba"
 
-pkgs="$core $dev $use"
-#pkgs="$core $dev"
+    core="pandas scipy numpy numexpr bottleneck matplotlib pytables cython"
+    dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
+    use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
 
-conda create -n $envname python=3.7 $pkgs
+    pkgs="$core $dev $use"
+    #pkgs="$core $dev"
+
+    conda create -n $1 python=3.7 $pkgs
+
+#    conda init zsh
+#
+#    conda activate $1
+#    pip install blackcellmagic
+
+}
+
+run_script $envname
+
+#core="pandas scipy numpy numexpr bottleneck matplotlib pytables cython"
+#dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
+#use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
+#
+#pkgs="$core $dev $use"
+##pkgs="$core $dev"
+#
+#conda create -n $envname python=3.7 $pkgs
 
 # conda activate $envname
 # pip install blackcellmagic

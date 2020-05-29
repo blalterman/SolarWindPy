@@ -317,17 +317,23 @@ class Probability(ArbitraryLabel):
 
 
 class CountOther(ArbitraryLabel):
-    def __init__(self, other_label, comparison=None):
+    def __init__(self, other_label, comparison=None, new_line_for_units=False):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
 
         The `comparison`, if passed, is something like "> 0".
         """
         self.set_other_label(other_label)
         self.set_comparison(comparison)
+        self.set_new_line_for_units(new_line_for_units)
+
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        return r"${tex} {sep} [{units}]$".format(
+            tex=self.tex,
+            sep="$\n$" if self.new_line_for_units else "\;",  # noqa: W605
+            units=self.units,
+        )
 
     @property
     def tex(self):
@@ -348,6 +354,13 @@ class CountOther(ArbitraryLabel):
     @property
     def comparison(self):
         return self._comparison
+
+    @property
+    def new_line_for_units(self):
+        return self._new_line_for_units
+
+    def set_new_line_for_units(self, new):
+        self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
         assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
@@ -393,16 +406,18 @@ class CountOther(ArbitraryLabel):
 
 
 class MathFcn(ArbitraryLabel):
-    def __init__(self, fcn, other_label, dimensionless=True):
+    def __init__(self, fcn, other_label, dimensionless=True, new_line_for_units=False):
         r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
         """
         self.set_other_label(other_label)
         self.set_function(fcn)
         self.set_dimensionless(dimensionless)
+        self.set_new_line_for_units(new_line_for_units)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        sep = "$\n$" if self.new_line_for_units else "\;"  # noqa: W605
+        return rf"""${self.tex} {sep} \left[{self.units}\right]$"""
 
     @property
     def tex(self):
@@ -413,7 +428,7 @@ class MathFcn(ArbitraryLabel):
         if self.dimensionless:
             return base._inU["dimless"]
 
-        return r"\mathrm{%s}(%s)" % (self.function, self.other_label.units)
+        return r"\mathrm{%s}\left(%s\right)" % (self.function, self.other_label.units)
 
     @property
     def path(self):
@@ -430,6 +445,13 @@ class MathFcn(ArbitraryLabel):
     @property
     def dimensionless(self):
         return self._dimensionless
+
+    @property
+    def new_line_for_units(self):
+        return self._new_line_for_units
+
+    def set_new_line_for_units(self, new):
+        self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
         assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
@@ -454,7 +476,14 @@ class MathFcn(ArbitraryLabel):
     def _build_path(self):
         other = self.other_label
         other = str(other.path)
-        fcn = self.function
+        #         fcn = self.function
+        fcn = (
+            self.function.replace(r"\mathrm", "")
+            .replace("{", "")
+            .replace("}", "")
+            .replace("\\", "")
+            .replace(r"/", "-OV-")
+        )
 
         path = Path(f"{fcn}-{other}")
 
@@ -597,8 +626,25 @@ class SSN(ArbitraryLabel):
         return self._path
 
     @property
+    def pretty_kind(self):
+        kind = self.kind
+        transform = {
+            "M": "Monthly",
+            "M13": "13 Month Smoothed",
+            "D": "Daily",
+            "Y": "Yearly",
+            "NM": "Normalized Monthly",
+            "NM13": "Normalized 13 Month Smoothed",
+            "ND": "Normalized Daily",
+            "NY": "Normalized Yearly",
+        }
+        return transform[kind]
+
+    @property
     def tex(self):
-        return r"\mathrm{%s} \, \mathrm{SSN}" % self.kind
+        return r"\mathrm{%s} \, \mathrm{SSN}" % self.pretty_kind.replace(
+            " ", "\,"
+        )  # noqa: W605
 
     @property
     def kind(self):
