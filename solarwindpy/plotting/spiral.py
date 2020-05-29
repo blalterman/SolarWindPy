@@ -128,7 +128,7 @@ class SpiralMesh(object):
             tk_size = dA < size_quantile
             tk = tk & (tk_size)
         if density:
-            cnt = np.bincount(self.bin_id.id)
+            cnt = np.bincount(self.bin_id.id, minlength=self.mesh.shape[0])
             assert cnt.shape == tk.shape
             cell_density = cnt / dA
             density_quantile = np.quantile(cell_density, density)
@@ -418,7 +418,8 @@ They will be replaced by NaNs and excluded from the aggregation.
         #         print(zbin.min())
         #         zbin += 1
         #         print(zbin.min())
-        bin_frequency = np.bincount(zbin[~is_fill])
+        # `minlength=nbins` forces us to include empty bins at the end of the array.
+        bin_frequency = np.bincount(zbin[~is_fill], minlength=nbins)
         n_empty = (bin_frequency == 0).sum()
         logger.warning(
             f"""Largest bin population is {bin_frequency.max()}
@@ -431,7 +432,7 @@ They will be replaced by NaNs and excluded from the aggregation.
         if (bin_visited > 1).any():
             logger.warning(f"({(bin_visited > 1).sum()} bins visted more than once.")
 
-        if nbins - bin_frequency.shape[0] > 0:
+        if nbins - bin_frequency.shape[0] != 0:
             raise ValueError(
                 f"{nbins - bin_frequency.shape[0]} mesh cells do not have an associated z-value"
             )

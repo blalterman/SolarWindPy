@@ -148,7 +148,7 @@ _hd_dtypes_columns = _Loader_Dtypes_Columns(
 
 _Dtypes_Columns = namedtuple("Dtypes_Columns", "d,m,m13,y,hd,hm,hm13", defaults=(None,))
 
-_Dtypes_Columns = (
+_Dtypes_Columns = _Dtypes_Columns(
     _d_dtypes_columns,
     _m_dtypes_columns,
     _m13_dtypes_columns,

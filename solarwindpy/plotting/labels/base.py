@@ -116,6 +116,7 @@ _trans_units = {
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
+    "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
     # Flux
     "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
     # Collisional things
@@ -201,6 +202,7 @@ _templates = {
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
     "Q": r"Q_{{$C};{$S}}",  # heating rate
+    "lnS": r"\ln(S_{$S})",  # Natural logarithm of specific entropy
     #     "count": _mathrm("Count"),
     "ratio": _mathrm("Ratio"),
     "cos": r"\cos",
