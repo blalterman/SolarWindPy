@@ -58,8 +58,8 @@ class TeXinfo(object):
         info = [
             (
                 f"${k}$",
-                f"guess = {v.p0:.3e}",
                 f"upper = {v.bounds[1]:.3e}",
+                f"guess = {v.p0:.3e}",
                 f"lower = {v.bounds[0]:.3e}",
             )
             for k, v in info.items()
@@ -203,6 +203,7 @@ class TeXinfo(object):
 
         if chisq_dof:
             info += [
+                "",  # blank line for visual cue
                 fr"\chi^2_\nu = {self.chisq_dof.linear:.2f}",
                 #                      r"\widehat{\chi}^2_\nu = {%.2f}" % self.chisq_dof.robust,
                 r"\chi^2_{\nu;R} = {%.2f}" % self.chisq_dof.robust,
@@ -241,7 +242,9 @@ class TeXinfo(object):
         #             info = "\n".join(info)
 
         #         print(*info, sep="\n")
-        info = [r"$ %s $" % x.replace("$", "") for x in info]
+
+        # IF statement to add blank lines for spacing chisq_nu and other stats.
+        info = [r"$ %s $" % x.replace("$", "") if x else "\n" for x in info]
         info = "\n".join(info)
 
         info = info.replace(r"inf", r"\infty")
@@ -296,13 +299,14 @@ class TeXinfo(object):
 
     def build_info(
         self,
-        chisq_dof=True,
-        convert_pow_10=True,
-        strip_uncertainties=False,
-        simplify_info_for_paper=False,
-        add_initial_guess=False,
-        additional_info=None,
-        annotate_fcn=None,
+        **kwargs,
+        #         chisq_dof=True,
+        #         convert_pow_10=True,
+        #         strip_uncertainties=False,
+        #         simplify_info_for_paper=False,
+        #         add_initial_guess=False,
+        #         additional_info=None,
+        #         annotate_fcn=None,
     ):
         r"""
         Generate a TeX-formatted string with the desired info
@@ -336,6 +340,14 @@ class TeXinfo(object):
         annotate_fcn: FunctionType
            Function that manipulates the final TeX_info str before returning.
         """
+
+        chisq_dof = kwargs.pop("chisq_dof", True)
+        convert_pow_10 = kwargs.pop("convert_pow_10", True)
+        strip_uncertainties = kwargs.pop("strip_uncertainties", False)
+        simplify_info_for_paper = kwargs.pop("simplify_info_for_paper", False)
+        add_initial_guess = kwargs.pop("add_initial_guess", False)
+        additional_info = kwargs.pop("additional_info", None)
+        annotate_fcn = kwargs.pop("annotate_fcn", None)
 
         if np.all([np.isnan(v) for v in self.popt.values()]):
             info = f"${self.TeX_function}$\n\nFit Failed"

@@ -28,6 +28,22 @@ UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
 
+# def __huber(z):
+#     cost = np.array(z)
+#     mask = z <= 1
+#     cost[~mask] = 2 * z[~mask]**0.5 - 1
+#     return cost
+#
+# def __soft_l1(z):
+#     t = 1 + z
+#     cost = 2 * (t**0.5 - 1)
+#     return cost
+#
+# _loss_fcns = {"huber": __huber,
+# "soft_l1": __soft_l1,
+# "cauchy": np.log1p,
+# "arctan": np.arctan}
+
 
 class FitFunction(ABC):
     r"""Assuming that you don't want any special formatting, the typical call
@@ -324,12 +340,14 @@ xobs: {xobs.shape}"""
         yfit = self(self.observations.raw.x)
         #         robust_residuals = self.fit_result.fun
         tex_info = self.TeX_info
+        fit_result = self.fit_result
 
         plotter = FitFunctionPlot(
             obs,
             yfit,
             #             robust_residuals,
             tex_info,
+            fit_result,
             fitfunction_name=self.__class__.__name__,
         )
         self._plotter = plotter
@@ -371,6 +389,7 @@ xobs: {xobs.shape}"""
         # including those excluded by `set_extrema`.
 
         r = self(self.observations.used.x) - self.observations.used.y
+        #         r = self.fit_result.fun
 
         if pct:
             r = 100.0 * (r / self(self.observations.used.x))
@@ -524,6 +543,8 @@ xobs: {xobs.shape}"""
         f_scale = kwargs.pop("f_scale", 0.1)
         jac = kwargs.pop("jac", "2-point")
 
+        #         loss_fcn = _loss_fcns.pop(loss, loss)
+
         # Copied from `curve_fit` (20200527)
         if p0 is None:
             # determine number of parameters by inspecting the function
@@ -595,6 +616,7 @@ xobs: {xobs.shape}"""
         if not res.success:
             raise RuntimeError("Optimal parameters not found: " + res.message)
 
+        #         self._loss_fcn = loss_fcn
         return res, p0
 
     def _calc_popt_pcov_psigma_chisq(self, res, p0):

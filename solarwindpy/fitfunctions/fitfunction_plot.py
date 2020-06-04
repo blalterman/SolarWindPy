@@ -17,9 +17,10 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FitFunctionPlot(object):
-    def __init__(self, observations, y_fit, TeX_info, fitfunction_name=""):
+    def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
+        self.set_fit_result(fit_result)
         self.set_fitfunction_name(fitfunction_name)
         self._log = LogAxes(x=False, y=False)
         self._labels = AxesLabels("x", "y")
@@ -42,6 +43,10 @@ class FitFunctionPlot(object):
     @property
     def fitfunction_name(self):
         return self._fitfunction_name
+
+    @property
+    def fit_result(self):
+        return self._fit_result
 
     @property
     def path(self):
@@ -80,6 +85,9 @@ class FitFunctionPlot(object):
 
     def set_fitfunction_name(self, new):
         self._fitfunction_name = str(new)
+
+    def set_fit_result(self, new):
+        self._fit_result = new
 
     def set_observations(self, observations, y_fit):
         assert y_fit.shape == observations.raw.x.shape
@@ -337,28 +345,48 @@ class FitFunctionPlot(object):
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        color = kwargs.pop("color", "darkgreen")
-        marker = kwargs.pop("marker", "P")
+        #         color = kwargs.pop("color", "darkgreen")
+        #         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
         markersize = kwargs.pop("markersize", 8)
         markevery = kwargs.pop("markevery", None)
+        #         label = kwargs.pop("label", r"$\mathrm{Resid}")
 
         if markevery is None:
             markevery = self._estimate_markevery()
 
         ax.plot(
             self.observations.used.x,
-            self.residuals(pct=pct),
-            label=r"$\mathrm{Resid}$",
+            self.residuals(pct=pct, robust=False),
+            label=r"$\mathrm{Simple}$",
             drawstyle=drawstyle,
-            color=color,
-            marker=marker,
+            color="darkgreen",
+            marker="P",
             linestyle="-",
             markerfacecolor=markerfacecolor,
             markersize=markersize,
             markevery=markevery,
             **kwargs,
         )
+
+        try:
+            r = self.residuals(pct=pct, robust=True)
+            ax.plot(
+                self.observations.used.x,
+                r,
+                label=r"$\mathrm{Robust}$",
+                drawstyle=drawstyle,
+                color="darkorange",
+                marker="X",
+                linestyle="-",
+                markerfacecolor=markerfacecolor,
+                markersize=markersize,
+                markevery=markevery,
+                **kwargs,
+            )
+        except AttributeError as e:
+            if "NoneType" in str(e):
+                pass
 
         #         ax.plot(
         #             self.observations.used.x,
@@ -375,6 +403,7 @@ class FitFunctionPlot(object):
         #         )
 
         self._format_rax(ax, pct)
+        return ax
 
     def plot_raw_used_fit_resid(
         self,
@@ -438,13 +467,17 @@ class FitFunctionPlot(object):
 
         return hax, rax
 
-    def residuals(self, pct=False):
+    def residuals(self, pct=False, robust=False):
         r"""Calculate the fit residuals.
         If pct, normalize by fit yvalues.
         """
 
         y_fit_used = self.y_fit[self.observations.tk_observed]
-        r = y_fit_used - self.observations.used.y
+
+        if robust:
+            r = self.fit_result.fun
+        else:
+            r = y_fit_used - self.observations.used.y
 
         if pct:
             r = 100.0 * (r / y_fit_used)
