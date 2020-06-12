@@ -17,6 +17,7 @@ _trans_species = {
     "e": r"e",
     "a": r"\alpha",
     "p": r"p",
+    "p_bimax": r"p",
     "p1": r"p_1",
     "p2": r"p_2",
     "he": r"\mathrm{He}",
@@ -65,7 +66,8 @@ _trans_measurement = {
     "beta": r"\beta",
     "dbeta": r"\Delta \beta",
     "dv": r"\Delta v",
-    "qbar": r"\bar{q}",
+    "qhat": r"\widehat{q}",
+    "Qhat": r"\widehat{q}",
     "ab": r"A",
     "theta": r"\theta",
     "cos_theta": r"\cos\theta",
@@ -118,16 +120,16 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "q": r"\mathrm{mW \, cm^{-2}}",  # heatflux,
+    "q": r"\mathrm{mW \, cm^{-2}}",  # heat flux,
+    "qhat": _inU["dimless"],  # normalized heat flux
     "Q": r"\mathrm{mW \, cm^{-2}}",  # Heating rate,
-    "qbar": _inU["dimless"],
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
     "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
     # Flux
-    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
+    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
     "lnlambda": _inU["dimless"],
     # TODO: verify that these units are Hertz.
@@ -237,7 +239,7 @@ _templates = {
     "edv": r"P_{\Delta v}/P_\mathrm{th}|_{$S}",
     "pdv": r"P_{\Delta v_{$S}}",
     "ab": r"A_{$S}",
-    "e": r"e_{{$C}_{$S}}",
+    "e": r"e\left({$C}_{$S}\right)",
     "entropy": r"\mathrm{S}_{$S}",
     # Alfvenic Turbulence
     "zp": r"Z^+_{{$S}}",

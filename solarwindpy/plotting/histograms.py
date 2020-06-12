@@ -65,8 +65,13 @@ class AggPlot(base.Base):
         return {k: v.left.union(v.right) for k, v in self.intervals.items()}
 
     @property
+    def categoricals(self):
+        return dict(self._categoricals)
+
+    @property
     def intervals(self):
-        return dict(self._intervals)
+        #         return dict(self._intervals)
+        return {k: pd.IntervalIndex(v) for k, v in self.categoricals.items()}
 
     @property
     def cut(self):
@@ -271,11 +276,13 @@ class AggPlot(base.Base):
             i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
 
             bins[k] = b
-            intervals[k] = pd.IntervalIndex(i)
+            #             intervals[k] = pd.IntervalIndex(i)
+            intervals[k] = pd.CategoricalIndex(i)
 
         bins = tuple(bins.items())
         intervals = tuple(intervals.items())
-        self._intervals = intervals
+        #         self._intervals = intervals
+        self._categoricals = intervals
 
     def make_cut(self):
         r"""Calculate the `Categorical` quantities for the aggregation axes.
@@ -297,7 +304,7 @@ class AggPlot(base.Base):
         cut = pd.DataFrame.from_dict(cut, orient="columns")
         self._cut = cut
 
-    def _agg_runner(self, cut, tko, gb, fcn):
+    def _agg_runner(self, cut, tko, gb, fcn, **kwargs):
         r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
         can aggregate (Inbound, Outbound, and Both).
         """
@@ -310,7 +317,7 @@ class AggPlot(base.Base):
             else:
                 fcn = "mean"
 
-        agg = gb.agg(fcn)  # .loc[:, tko]
+        agg = gb.agg(fcn, **kwargs)  # .loc[:, tko]
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
@@ -327,15 +334,26 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
+        #         #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
+        #         # Ensure all bins are represented in the data. (20190605)
+        # #         for k, v in self.intervals.items():
+        #         for k, v in self.categoricals.items():
+        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
+        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+
+        return agg
+
+    def _agg_reindexer(self, agg):
         #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
         # Ensure all bins are represented in the data. (20190605)
-        for k, v in self.intervals.items():
+        #         for k, v in self.intervals.items():
+        for k, v in self.categoricals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
 
         return agg
 
-    def agg(self, fcn=None):
+    def agg(self, fcn=None, **kwargs):
         r"""Perform the aggregation along the agg axes.
 
         If either of the count limits specified in `clim` are not None, apply them.
@@ -354,7 +372,7 @@ class AggPlot(base.Base):
 
         gb = self.grouped
 
-        agg = self._agg_runner(cut, tko, gb, fcn)
+        agg = self._agg_runner(cut, tko, gb, fcn, **kwargs)
 
         return agg
 
@@ -372,7 +390,11 @@ class AggPlot(base.Base):
 
         tk = pd.Series(True, index=cut.index)
         for k, v in cut.items():
-            tk_ax = v.isin(agg.index.get_level_values(k))
+            chk = agg.index.get_level_values(k)
+            # Use the codes directly because the categoricals are
+            # failing with some Pandas numpy ufunc use. (20200611)
+            chk = pd.CategoricalIndex(chk)
+            tk_ax = v.cat.codes.isin(chk.codes)
             tk = tk & tk_ax
 
         self.logger.info(
@@ -611,6 +633,7 @@ class Hist1D(AggPlot):
 
         agg = super(Hist1D, self).agg(**kwargs)
         agg = self._axis_normalizer(agg)
+        agg = self._agg_reindexer(agg)
 
         return agg
 
@@ -891,14 +914,23 @@ class Hist2D(base.Plot2D, AggPlot):
 
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
+        elif hasattr(axnorm, "__iter__"):
+            kind, fcn = axnorm
+            if kind == "c":
+                agg = agg.divide(agg.agg(fcn, level="x"), level="x")
+            elif kind == "r":
+                agg = agg.divide(agg.agg(fcn, level="y"), level="y")
+            else:
+                raise ValueError(f"Unrecognized axnorm with function ({kind}, {fcn})")
         else:
-            raise ValueError("Unrecognized axnorm: %s" % axnorm)
+            raise ValueError(f"Unrecognized axnorm ({axnorm})")
 
         return agg
 
     def agg(self, **kwargs):
         agg = super(Hist2D, self).agg(**kwargs)
         agg = self._axis_normalizer(agg)
+        agg = self._agg_reindexer(agg)
 
         return agg
 
@@ -973,9 +1005,11 @@ class Hist2D(base.Plot2D, AggPlot):
 
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
         if not x.size == agg.shape[1] + 1:
-            agg = agg.reindex(columns=self.intervals["x"])
+            #             agg = agg.reindex(columns=self.intervals["x"])
+            agg = agg.reindex(columns=self.categoricals["x"])
         if not y.size == agg.shape[0] + 1:
-            agg = agg.reindex(index=self.intervals["y"])
+            #             agg = agg.reindex(index=self.intervals["y"])
+            agg = agg.reindex(index=self.categoricals["y"])
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -1261,9 +1295,11 @@ class Hist2D(base.Plot2D, AggPlot):
 
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
         if not x.size == agg.shape[1]:
-            agg = agg.reindex(columns=self.intervals["x"])
+            #             agg = agg.reindex(columns=self.intervals["x"])
+            agg = agg.reindex(columns=self.categoricals["x"])
         if not y.size == agg.shape[0]:
-            agg = agg.reindex(index=self.intervals["y"])
+            #             agg = agg.reindex(index=self.intervals["y"])
+            agg = agg.reindex(columns=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
@@ -1299,7 +1335,7 @@ class Hist2D(base.Plot2D, AggPlot):
             args = [XX, YY, C, levels]
 
         qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
-        qset.levels = [nf(l) for l in qset.levels]
+        qset.levels = [nf(level) for level in qset.levels]
 
         try:
             args = (qset, levels[:-1] if skip_max_clbl else levels)
@@ -1387,6 +1423,7 @@ class Hist2D(base.Plot2D, AggPlot):
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,
+            **kwargs,
         )
 
         h1.set_log(y=logy)  # Need to propagate logy.

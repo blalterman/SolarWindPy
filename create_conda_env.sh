@@ -16,6 +16,7 @@ echo $envname
 
 function run_script() {
 
+    echo pwd
 
     core="pandas scipy numpy numexpr bottleneck matplotlib pytables cython"
     dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
