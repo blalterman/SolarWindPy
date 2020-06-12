@@ -3,6 +3,8 @@ r"""Special labels not handled by :py:class:`TeXlabel`.
 """
 import pdb  # noqa: F401
 from pathlib import Path
+from string import Template as StringTemplate
+from string import Formatter as StringFormatter
 from abc import abstractproperty, abstractmethod
 from pandas.tseries.frequencies import to_offset
 from . import base
@@ -43,8 +45,8 @@ class ManualLabel(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        return r"$\mathrm{%s} \; [%s]$" % (
-            self.tex.replace(" ", " \, "),
+        return r"$\mathrm{%s} \; [%s]$" % (  # noqa: W605
+            self.tex.replace(" ", " \, "),  # noqa: W605
             self.unit,
         )  # noqa: W605
 
@@ -643,7 +645,7 @@ class SSN(ArbitraryLabel):
     @property
     def tex(self):
         return r"\mathrm{%s} \, \mathrm{SSN}" % self.pretty_kind.replace(
-            " ", "\,"
+            " ", "\,"  # noqa: W605
         )  # noqa: W605
 
     @property
@@ -658,6 +660,150 @@ class SSN(ArbitraryLabel):
         assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
         self._kind = new
         self._path = Path(f"""{new.lower()!s}-ssn""")
+
+
+class ComparisonLable(ArbitraryLabel):
+    def __init__(self, labelA, labelB, fcn_name, fcn=None):
+        r"""Function label comparing labelA and labelB.
+
+        Label is built as
+
+            >>> fcn.format(labelA=labelA, labelB=labelB)
+
+        """
+        self.set_constituents(labelA, labelB)
+        self.set_function(fcn_name, fcn)
+        self.build_label()
+
+    def __str__(self):
+        return r"${} \; [{}]$".format(self.tex, self.units)
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def labelA(self):
+        return self._labelA
+
+    @property
+    def labelB(self):
+        return self._labelB
+
+    @property
+    def function(self):
+        return self._function
+
+    @property
+    def function_name(self):
+        r"""Basically for use with building :py:meth:`path`.
+        """
+        return self._function_name
+
+    def set_constituents(self, labelA, labelB):
+        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+            raise TypeError
+        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+            raise TypeError
+
+        if (
+            hasattr(labelA, "units")
+            and hasattr(labelB, "units")
+            and not (labelA.units == labelB.units)
+        ):
+            raise ValueError(
+                rf"""If both {self.__class__.__name__} labels have units, they must be the same.
+labelA : {labelA.units}
+labelB : {labelB.units}
+"""
+            )
+        elif hasattr(labelA, "units") and hasattr(labelB, "units"):
+            units = labelA.units
+
+        else:
+            units = "???"
+
+        self._labelA = labelA
+        self._labelB = labelB
+        self._units = units
+
+    def set_function(self, fcn_name, fcn):
+
+        if fcn is None:
+            get_fcn = fcn_name.lower()
+            translate = {
+                "subtract": r"{$labelA} - {$labelB}",
+                "add": r"{$labelA} + {$labelB}",
+                "multiply": r"{$labelA} \times {$labelB}",
+            }
+            fcn = translate.get(get_fcn)
+
+        keys = [x[1] for x in StringFormatter().parse(fcn)]
+        if not (("$labelA" in keys) and ("$labelB" in keys)):
+            raise ValueError(
+                rf"""{self.__class__.__name__}'s function must have the keys "$labelA" and "$labelB".
+keys : {",".join(keys)}
+"""
+            )
+        self._function = fcn
+        self._function_name = fcn_name
+
+    def _build_tex(self):
+        labelA = self.labelA
+        labelB = self.labelB
+        function = self.function
+
+        try:
+            texA = labelA.tex
+        except AttributeError:
+            texA = labelA
+
+        try:
+            texB = labelB.tex
+        except AttributeError:
+            texB = labelB
+
+        template = StringTemplate(function)
+        tex = template.safe_substitute(labelA=texA, labelB=texB)
+
+        while tex.find(r"\,\,") >= 0:
+            tex = tex.replace(r"\,\,", r"\,")
+
+        self._tex = tex
+
+    def _build_path(self):
+        labelA = self.labelA
+        labelB = self.labelB
+
+        try:
+            pathA = labelA.path
+        except AttributeError:
+            pathA = labelA
+
+        try:
+            pathB = labelB.path
+        except AttributeError:
+            pathB = labelB
+
+        pathA = str(pathA).replace(" ", "-")
+        pathB = str(pathB).replace(" ", "-")
+
+        function = self.function_name
+        path = Path(f"{function}-{pathA}-{pathB}")
+
+        self._path = path
+
+    def build_label(self):
+        self._build_tex()
+        self._build_path()
 
 
 class Xcorr(ArbitraryLabel):
