@@ -21,7 +21,7 @@ from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
 from .tex_info import TeXinfo
-from .fitfunction_plot import FitFunctionPlot
+from .plots import FFPlot
 
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
@@ -107,19 +107,19 @@ class FitFunction(ABC):
         # Sort the parameter keywords into the proper order to pass to the
         # numerical function.
 
-        try:
-            popt_ = self.popt
-            popt_ = [popt_[k] for k in self.argnames]
+        #         try:
+        popt_ = self.popt
+        popt_ = [popt_[k] for k in self.argnames]
 
-            # NOTE
-            # An instance of FitFunction is for a given function. To change the
-            # function itself, a new instance of FitFunction should be required.
-            # Therefore, we access the function directly.
-            y = self.function(x, *popt_)
+        # NOTE
+        # An instance of FitFunction is for a given function. To change the
+        # function itself, a new instance of FitFunction should be required.
+        # Therefore, we access the function directly.
+        y = self.function(x, *popt_)
 
-        except AttributeError as e:
-            if "'ULEISPowerLaw' object has no attribute '_popt'" in str(e):
-                y = np.full_like(x, np.nan, dtype=np.float64)
+        #         except AttributeError as e:
+        #             if "'PowerLaw' object has no attribute '_popt'" in str(e):
+        #                 y = np.full_like(x, np.nan, dtype=np.float64)
 
         return y
 
@@ -342,7 +342,7 @@ xobs: {xobs.shape}"""
         tex_info = self.TeX_info
         fit_result = self.fit_result
 
-        plotter = FitFunctionPlot(
+        plotter = FFPlot(
             obs,
             yfit,
             #             robust_residuals,
@@ -697,7 +697,7 @@ xobs: {xobs.shape}"""
         try:
             res, p0 = self._run_least_squares(**kwargs)
         except (RuntimeError, ValueError) as e:
-            print("fitting failed", flush=True)
+            #             print("fitting failed", flush=True)
             return e
 
         popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)

@@ -16,7 +16,7 @@ AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
-class FitFunctionPlot(object):
+class FFPlot(object):
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)

@@ -201,6 +201,8 @@ class TeXinfo(object):
         # of whether or not it contians 1 or more lines
         info = TeX_function.split("\n") + info
 
+        #         pdb.set_trace()
+
         if chisq_dof:
             info += [
                 "",  # blank line for visual cue
@@ -226,7 +228,8 @@ class TeXinfo(object):
             # NaNs are present when a fit fails
             for idx, this_info in enumerate(info):
                 this_info = [
-                    x + "}" if "{" in x else x for x in this_info.split(r"\pm")
+                    x + "}" if x.count("{") > x.count("}") else x
+                    for x in this_info.split(r"\pm")
                 ]
                 this_info = r"\pm".join(this_info)
                 info[idx] = this_info
