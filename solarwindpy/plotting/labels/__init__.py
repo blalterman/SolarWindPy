@@ -8,6 +8,7 @@ __all__ = [
     "base",
     "special",
     "available_TeXlabel_measurements",
+    "species_translation",
 ]
 
 import pdb  # noqa: F401
@@ -18,6 +19,7 @@ from . import base
 from . import special
 
 TeXlabel = base.TeXlabel
+species_translation = base._run_species_substitution
 Vsw = special.Vsw
 Count = special.Count
 

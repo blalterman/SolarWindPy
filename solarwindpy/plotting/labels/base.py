@@ -12,18 +12,28 @@ from collections import namedtuple
 MCS = namedtuple("MCS", "m,c,s")
 
 
-def _mathrm(x):
-    return r"\mathrm{%s}" % x
-
-
+__composition_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
     "e": r"e",
     "a": r"\alpha",
     "p": r"p",
+    "p_bimax": r"p",
     "p1": r"p_1",
     "p2": r"p_2",
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
+    "H": r"\mathrm{H}",
+    "3He": __composition_species % (3, "He"),
+    "4He": __composition_species % (4, "He"),
+    "12C": __composition_species % (12, "C"),
+    "14N": __composition_species % (14, "N"),
+    "16O": __composition_species % (16, "O"),
+    "20Ne": __composition_species % (20, "Ne"),
+    "24Mg": __composition_species % (24, "Mg"),
+    "28Si": __composition_species % (28, "Si"),
+    "32S": __composition_species % (32, "S"),
+    "40Ca": __composition_species % (40, "Ca"),
+    "Fe": r"\mathrm{Fe}",
 }
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
@@ -56,7 +66,8 @@ _trans_measurement = {
     "beta": r"\beta",
     "dbeta": r"\Delta \beta",
     "dv": r"\Delta v",
-    "qbar": r"\bar{q}",
+    "qhat": r"\widehat{q}",
+    "Qhat": r"\widehat{q}",
     "ab": r"A",
     "theta": r"\theta",
     "cos_theta": r"\cos\theta",
@@ -74,6 +85,7 @@ _inU = {
     "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
+    "Hz": r"\mathrm{Hz}",
 }
 
 _trans_units = {
@@ -108,14 +120,16 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "q": r"\mathrm{mW \, cm^{-2}}",  # heatflux,
-    "qbar": _inU["dimless"],
+    "q": r"\mathrm{mW \, cm^{-2}}",  # heat flux,
+    "qhat": _inU["dimless"],  # normalized heat flux
+    "Q": r"\mathrm{mW \, cm^{-2}}",  # Heating rate,
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
+    "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
     # Flux
-    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
+    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
     "lnlambda": _inU["dimless"],
     # TODO: verify that these units are Hertz.
@@ -142,16 +156,23 @@ _trans_units = {
     "re": _inU["dimless"],
     # Nyquist things
     "Wn": _inU["dimless"],
-    "gamma": _inU["dimless"],
-    "gamma_max": _inU["dimless"],
+    "omegaR": _inU["Hz"],
+    "gamma": _inU["Hz"],
+    "gamma_max": _inU["Hz"],
+    "gyro_freq": _inU["Hz"],
     "kvec": _inU["dimless"],
     # Solar Activity
-    "Lalpha": r"10^{11} \, \mathrm{photons/cm^2/sec}",
+    "Lalpha": r"\mathrm{W/m^2}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
     "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
     "MgII": _inU["dimless"],
     # MISC
     "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
+    # Spectral things
+    "spectral_exponent": _inU["dimless"],
+    "MeV/nuc": r"\mathrm{MeV/nuc}",
+    #     "differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
+    "differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
 }
 
 _trans_component = {
@@ -164,8 +185,8 @@ _trans_component = {
     "colat": r"\lambda",
     "lat": r"\theta",
     "lon": r"\phi",
-    "R": _mathrm("R"),
-    "scalar": _mathrm("scalar"),
+    "R": r"\mathrm{R}",
+    "scalar": r"\mathrm{scalar}",
     "theta": r"\theta",
     "phi": r"\phi",
     "per": r"\perp",
@@ -195,9 +216,10 @@ _templates = {
     "b": "B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
-    "q": r"q_{$S}",  # charge density
-    #     "count": _mathrm("Count"),
-    "ratio": _mathrm("Ratio"),
+    "q": r"q_{{$C};{$S}}",  # heat flux
+    "Q": r"Q_{{$C};{$S}}",  # heating rate
+    "lnS": r"\ln(S_{$S})",  # Natural logarithm of specific entropy
+    "ratio": r"\mathrm{Ratio}",
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
     "cos_phi": r"\cos \phi_{{$C}_{$S}}",
@@ -217,7 +239,7 @@ _templates = {
     "edv": r"P_{\Delta v}/P_\mathrm{th}|_{$S}",
     "pdv": r"P_{\Delta v_{$S}}",
     "ab": r"A_{$S}",
-    "e": r"e_{{$C}_{$S}}",
+    "e": r"e\left({$C}_{$S}\right)",
     "entropy": r"\mathrm{S}_{$S}",
     # Alfvenic Turbulence
     "zp": r"Z^+_{{$S}}",
@@ -235,18 +257,25 @@ _templates = {
     "re": r"r_{E;{$S}}",
     # Instability things
     "Wn": r"\mathrm{W_n}",
-    "gamma": r"\gamma/\Omega_{{$S}}",
-    "gamma_max": r"\gamma_\mathrm{max}/\Omega_{{$S}}",
+    "gamma": r"\gamma",
+    "gamma_max": r"\gamma_\mathrm{max}",
+    "omegaR": r"\omega_R",
+    "gyro_freq": r"\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
     "kvec": r"k_{$C}\rho_{$S}",
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",
-    "Lalpha": r"\mathrm{L}-\alpha",
+    "Lalpha": r"\mathrm{L}\alpha",
     "f10.7": r"\mathrm{F}10.7",
     "CaK": r"\mathrm{CaK}",
     "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
+    # Spectral Exponents
+    "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
+    "MeV/nuc": r"\mathrm{Energy}",
+    #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
+    "differential_flux": r"{{$S}} \: dJ/dE",
 }
 
 
@@ -333,7 +362,7 @@ class TeXlabel(Base):
     identical quantities hash identically.
     """
 
-    def __init__(self, mcs0, mcs1=None, axnorm=None):
+    def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
         r"""        Parameters
         ----------
         mcs0: tuple of strings
@@ -350,10 +379,14 @@ class TeXlabel(Base):
         axnorm: str or None
             If not None, axis normalization on plot. Primarily used for
             creating colorbar labels.
+        new_line_for_units: bool
+            If True, :py:meth:`tex` and :py:meth:`units` are separated by a
+            new line. Otherwise, they are separated by "\;".
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
+        self.set_new_line_for_units(new_line_for_units)
         self.build_label()
 
     @property
@@ -363,6 +396,10 @@ class TeXlabel(Base):
     @property
     def mcs1(self):
         return self._mcs1
+
+    @property
+    def new_line_for_units(self):
+        return self._new_line_for_units
 
     @property
     def tex(self):
@@ -393,6 +430,9 @@ class TeXlabel(Base):
 
         self._mcs0 = mcs0_
         self._mcs1 = mcs1_
+
+    def set_new_line_for_units(self, new):
+        self._new_line_for_units = bool(new)
 
     def set_axnorm(self, new):
         if isinstance(new, str):
@@ -425,7 +465,11 @@ class TeXlabel(Base):
         #         mcs = MCS(m, c, s)
         path = (
             "_".join(
-                [m.replace(r"/", "OV"), c.replace(r"/", "OV"), s.replace(r"/", "OV")]
+                [
+                    m.replace(r"/", "-OV-"),
+                    c.replace(r"/", "-OV-"),
+                    s.replace(r"/", "-OV-"),
+                ]
             )
             .replace(",", "")
             .replace(",{", "{")
@@ -433,6 +477,10 @@ class TeXlabel(Base):
             .replace("__", "_")
             .replace(".", "")
             .strip("_")
+            # The following two work jointly to remove cases
+            # where the species leads the label and it is empty.
+            .strip(r"{} \\")
+            .strip(r", ")
         )
 
         err = False
@@ -471,7 +519,11 @@ class TeXlabel(Base):
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
-        units = _trans_units.get(m, "???")
+        ukey = m
+        if c in ("lat", "colat", "lon"):
+            ukey = c
+
+        units = _trans_units.get(ukey, "???")
 
         self.logger.debug(
             r"""Built TeX label
@@ -501,10 +553,14 @@ template   : %s
         tex_norm = _trans_axnorm[axnorm]
         if tex_norm:
             units = r"\#"
-            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)
+            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
             path = path / (axnorm.upper() + "norm")
 
-        with_units = r"${tex} \; [{units}]$".format(tex=tex, units=units)
+        with_units = r"${tex} {sep} \left[{units}\right]$".format(
+            tex=tex,
+            sep="$\n$" if self.new_line_for_units else "\;",  # noqa: W605
+            units=units,
+        )
 
         return tex, path, units, with_units
 

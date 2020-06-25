@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import unittest
 import sys
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from unittest import TestCase
 from abc import ABC, abstractproperty
@@ -63,7 +63,13 @@ class QuantityTestBase(ABC):
             object_testing, object_testing.__class__(object_testing.data * 4)
         )
         # Type isn't equal
-        for other in ([], tuple(), np.array([]), pd.Series(), pd.DataFrame()):
+        for other in (
+            [],
+            tuple(),
+            np.array([]),
+            pd.Series(dtype=np.float64),
+            pd.DataFrame(dtype=np.float64),
+        ):
             self.assertNotEqual(object_testing, other)
 
     def test_empty_data_catch(self):
@@ -189,9 +195,7 @@ class VectorTestBase(QuantityTestBase):
             .sum(axis=1)
             .pipe(np.sqrt)
         )
-        projected = pd.concat([par, per], axis=1, keys=["par", "per"]).sort_index(
-            axis=1
-        )
+        projected = pd.concat([par, per], axis=1, keys=["par", "per"], sort=True)
 
         # print("",
         #       "<Test>",
@@ -209,9 +213,7 @@ class VectorTestBase(QuantityTestBase):
         # Projecting a thing onto itself should return 1 for parallel
         # and 0 for perp.
         per = pd.Series(0.0, index=per.index)
-        projected = pd.concat([vmag, per], axis=1, keys=["par", "per"]).sort_index(
-            axis=1
-        )
+        projected = pd.concat([vmag, per], axis=1, keys=["par", "per"], sort=True)
         pdt.assert_frame_equal(
             projected, self.object_testing.project(self.object_testing)
         )

@@ -212,8 +212,7 @@ class Spacecraft(base.Base):
         except KeyError:
             pass
 
-        target = pd.concat(target, axis=1, names=["M"]).sort_index(axis=1)
+        target = pd.concat(target, axis=1, names=["M"], sort=False).sort_index(axis=1)
 
         assert isinstance(target.index, pd.DatetimeIndex)
-
         self._data = target

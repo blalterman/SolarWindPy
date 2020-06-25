@@ -42,14 +42,15 @@ pd.set_option("mode.chained_assignment", "raise")
 class LISIRD_ID(ID):
     def __init__(self, key):
         r"""
-        ======== ======================== =======================
-          Key          Description                  URL
-        ======== ======================== =======================
-         Lalpha   Lyman-alpha              composite_lyman_alpha.jsond
-         CaK      Calcium K line           cak.jsond
-         f107     F10.7 flux               noaa_radio_flux.jsond
-         MgII     Composite Magnesium II   composite_mg_index.jsond
-        ======== ======================== =======================
+         =========== ======================== =============================
+             Key           Description                     URL
+         =========== ======================== =============================
+          Lalpha      Lyman-alpha              composite_lyman_alpha.jsond
+          CaK         Calcium K line           cak.jsond
+          f107-noaa   NOAA F10.7 flux          noaa_radio_flux.jsond
+          f107-pen    Penticton F10.7 flux     penticton_radio_flux.jsond
+          MgII        Composite Magnesium II   composite_mg_index.jsond
+         =========== ======================== =============================
 
         URLs replace the wild card in <http://lasp.colorado.edu/lisird/latis/*>.
 
@@ -82,7 +83,9 @@ class LISIRD_ID(ID):
         trans_url = (
             ("Lalpha", "composite_lyman_alpha.jsond"),
             ("CaK", "cak.jsond"),
-            ("f107", "noaa_radio_flux.jsond"),
+            #             ("f107", "noaa_radio_flux.jsond"),
+            ("f107-penticton", "penticton_radio_flux.jsond"),
+            ("f107-noaa", "noaa_radio_flux.jsond"),
             (
                 "MgII",
                 "composite_mg_index.jsond",
@@ -103,18 +106,44 @@ class LISIRDLoader(DataLoader):
 
     def convert_nans(self, data, meta):
         key = self.key
-        if key in ("CaK", "MgII"):
+        if key in ("CaK", "MgII", "f107-noaa", "f107-penticton"):
             self.logger.info("Prior inspection shows no missing data in `%s`.", key)
             return
 
         elif key == "Lalpha":
-            mv = np.float64(meta["type"]["missing_value"])
-        elif key == "f107":
-            mv = np.float64(meta["f107"]["missing_value"])
+            mv0 = np.float64(meta["irradiance"]["missing_value"])
+            mv1 = np.float64(meta["uncertainty"]["missing_value"])
+            if not mv0 == mv1:
+                raise NotImplementedError(
+                    f"Unsure how to handle mv0 ({mv0:.0f}) != mv1 ({mv1:.0f})"
+                )
+            mv = mv0
+        #         elif key == "f107":
+        #             mv = np.float64(meta["f107"]["missing_value"])
         else:
             raise NotImplementedError("Haven't inspected other data to convert.")
 
         data.replace(to_replace=mv, value=np.nan, inplace=True)
+
+    def verify_monotonic_epoch(self, df):
+        epoch = df.index
+        assert isinstance(epoch, pd.DatetimeIndex)
+        epoch = epoch.to_series()
+
+        ms = df.loc[:, "milliseconds"]
+        drop = ms.duplicated()
+
+        if self.key == "f107-penticton":
+            manually_identified_bad_timestamps = [
+                1_061_657_971_200,
+                1_277_073_820_800,
+                1_568_685_597_120,
+            ]
+            manual_bad = ms.isin(manually_identified_bad_timestamps)
+            drop = drop | manual_bad
+
+        df = df.loc[~drop]
+        return df
 
     def download_data(self, new_data_path, old_data_path):
         key = self.key
@@ -136,6 +165,7 @@ class LISIRDLoader(DataLoader):
         df = df.sort_index(axis=1)
 
         self.convert_nans(df, meta)
+        df = self.verify_monotonic_epoch(df)
 
         d = new_data_path.with_suffix(".csv")
         m = new_data_path.with_suffix(".json")
@@ -259,10 +289,12 @@ quantity"""
 
     def interpolate_data(self, target_index):
         trans = {
-            "Lalpha": "LymanAlpha",
+            "Lalpha": "irradiance",
             "MgII": "mg_index",
             "CaK": "emdx",  # Other CaK data is available, but unsure how to use.
-            "f107": "f107",
+            # Per <https://www.spaceweather.gc.ca/solarflux/sx-3-en.php>, adjusted value is scaled for variation in Earth-Sun distance
+            "f107-noaa": "adjusted_flux",
+            "f107-penticton": "adjusted_flux",
         }
 
         source = self.data.loc[:, trans[self.id.key]].dropna(how="any", axis=0)

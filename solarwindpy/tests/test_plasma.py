@@ -18,7 +18,7 @@ import pandas as pd
 import unittest
 import sys
 import itertools
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from abc import ABC, abstractproperty, abstractmethod
 
@@ -50,7 +50,7 @@ class PlasmaTestBase(ABC):
         scalar = ((2.0 * per) + par).multiply(1.0 / 3.0).pipe(np.sqrt)
         cols = scalar.columns.to_series().apply(lambda x: ("w", "scalar", x))
         scalar.columns = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
-        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
+        data = pd.concat([data, scalar], axis=1, sort=True)
 
         cls.object_testing = plas
         cls.data = data
@@ -246,7 +246,10 @@ class PlasmaTestBase(ABC):
 
         # print_inline_debug_info = False
         ions_ = pd.concat(
-            {s: ot.ions[s].number_density for s in self.stuple}, axis=1, names=["S"]
+            {s: ot.ions[s].number_density for s in self.stuple},
+            axis=1,
+            names=["S"],
+            sort=True,
         )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
@@ -291,7 +294,10 @@ class PlasmaTestBase(ABC):
 
         # print_inline_debug_info = False
         ions_ = pd.concat(
-            {s: ot.ions[s].mass_density for s in self.stuple}, axis=1, names=["S"]
+            {s: ot.ions[s].mass_density for s in self.stuple},
+            axis=1,
+            names=["S"],
+            sort=True,
         )
         total_ions = ions_.sum(axis=1)
         total_ions.name = "+".join(self.stuple)
@@ -334,7 +340,7 @@ class PlasmaTestBase(ABC):
     def test_thermal_speed(self):
         ot = self.object_testing
         ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         for s in self.species_combinations:
@@ -369,7 +375,7 @@ class PlasmaTestBase(ABC):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
         ions_ = {s: self.object_testing.ions[s].pth for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         # print("<Ions>", ions, sep="\n")
 
@@ -401,7 +407,7 @@ class PlasmaTestBase(ABC):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
         ions_ = {s: self.object_testing.ions[s].temperature for s in self.stuple}
-        ions_ = pd.concat(ions_, axis=1, names=["S"]).sort_index(axis=1)
+        ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         # print("<Ions>", ions, sep="\n")
 
@@ -434,7 +440,7 @@ class PlasmaTestBase(ABC):
 
     def test_beta(self):
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
-        pth = pd.concat(pth, axis=1, names=["S"]).sort_index(axis=1)
+        pth = pd.concat(pth, axis=1, names=["S"], sort=True)
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         bsq = self.data.loc[:, pd.IndexSlice["b", ["x", "y", "z"], ""]]
@@ -503,8 +509,8 @@ class PlasmaTestBase(ABC):
             else:
                 # Test list of and sums of sums of species.
                 pth = {sprime: self.object_testing.ions.loc[sprime].pth for sprime in s}
-                pth = pd.concat(pth, axis=1, names=["S"])
-                pth = pth.drop("scalar", axis=1, level="C")
+                pth = pd.concat(pth, axis=1, names=["S"], sort=True)
+                pth = pth.drop("scalar", axis=1, level="C", errors="ignore")
 
                 coeff = pd.Series({"par": -1, "per": 1})
                 ani_s = pth.pow(coeff, axis=1, level="C").product(axis=1, level="S")
@@ -584,7 +590,10 @@ class PlasmaTestBase(ABC):
                 # Test species = "s0+s1+...+sn"
                 rhos = ot.rho(*s)
                 ions_ = pd.concat(
-                    ions_.apply(lambda x: x.cartesian).to_dict(), axis=1, names=["S"]
+                    ions_.apply(lambda x: x.cartesian).to_dict(),
+                    axis=1,
+                    names=["S"],
+                    sort=True,
                 )
                 # print("", "<Ions>", ions, "<rhos>", rhos, sep="\n")
                 ions_ = ions_.multiply(rhos, axis=1, level="S")
@@ -856,7 +865,7 @@ class PlasmaTestBase(ABC):
         total_masses = pd.DataFrame(
             {"+".join(s): rho.loc[:, s].sum(axis=1) for s in combos}
         )
-        rho = pd.concat([rho, total_masses], axis=1).sort_index(axis=1)
+        rho = pd.concat([rho, total_masses], axis=1, sort=True)
 
         ions_ = (constants.mu_0 * rho).pow(-0.5).multiply(b, axis=0) / 1e3
         ions_.columns.names = ["S"]
@@ -892,7 +901,11 @@ class PlasmaTestBase(ABC):
 
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
-        w = self.data.w.loc[:, tk].drop("scalar", axis=1, level="C") * 1e3
+
+        w = (
+            self.data.w.loc[:, tk].drop("scalar", axis=1, level="C", errors="ignore")
+            * 1e3
+        )
         n = self.data.n.loc[:, ""].loc[:, slist] * 1e6
         m = self.mass.loc[slist]
         rho = n.multiply(m, axis=1, level="S")
@@ -965,7 +978,7 @@ class PlasmaTestBase(ABC):
             "+".join(x): n.loc[:, list(x)].multiply(masses.loc[list(x)]).sum(axis=1)
             for x in combos
         }
-        rhos = pd.concat(rhos, axis=1, names=["S"])
+        rhos = pd.concat(rhos, axis=1, names=["S"], sort=True)
 
         tk = pd.IndexSlice[["x", "y", "z"], ""]
         b = (self.data.b.loc[:, tk]).pow(2).sum(axis=1).pipe(np.sqrt) * 1e-9
@@ -974,7 +987,10 @@ class PlasmaTestBase(ABC):
 
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
-        w = self.data.w.loc[:, tk].drop("scalar", axis=1, level="C") * 1e3
+        w = (
+            self.data.w.loc[:, tk].drop("scalar", axis=1, level="C", errors="ignore")
+            * 1e3
+        )
         n = self.data.n.loc[:, ""].loc[:, slist] * 1e6
         m = self.mass.loc[slist]
         rho = n.multiply(m, axis=1, level="S")
@@ -1028,18 +1044,20 @@ class PlasmaTestBase(ABC):
                 self.object_testing.caani("+".join(combo), pdynamic=True)
 
     def test_lnlambda(self):
-        # print_inline_debug_info = False
+        #        print_inline_debug_info = True
 
-        if len(self.stuple) == 1:
-            # We only test plasmas w/ > 1 species.
-            return None
+        ot = self.object_testing
+        regex_msg = (
+            "`lnlambda` can only calculate with individual s0 " "and s1 species."
+        )
+        invalid = "Invalid species"
 
         kb_J = constants.physical_constants["Boltzmann constant"]
         kb_eV = constants.physical_constants["Boltzmann constant in eV/K"]
 
         amu = self.m_amu
         charge_states = self.charge_states
-        n = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
+        n_all = self.data.n.xs("", axis=1, level="C").loc[:, self.stuple] * 1e6
         m = self.mass
         # rho = n.multiply(m, axis=1, level="S")
         w = self.data.w.scalar.loc[:, self.stuple] * 1e3
@@ -1047,102 +1065,136 @@ class PlasmaTestBase(ABC):
         Tkelvin = 0.5 * w.pow(2.0).multiply(m, axis=1, level="S") / kb_J[0]
         TeV = Tkelvin * kb_eV[0]
 
-        nZsqOTeV = n.multiply(charge_states.pow(2), axis=1, level="S").divide(
-            TeV, axis=1, level="S"
-        )
+        if len(self.stuple) == 1:
+            s = self.stuple[0]
+            z = charge_states.loc[s]
+            n = n_all.loc[:, s]
+            T = TeV.loc[:, s]
+            lnlambda = 29.9 - np.log(
+                np.sqrt(2) * z ** 3 * n.pipe(np.sqrt) * T.pow(-3.0 / 2.0)
+            )
+            lnlambda.name = f"{s},{s}"
 
-        # if print_inline_debug_info:
-        #     print("",
-        #           "<Test>",
-        #           "<species>: {}".format(self.stuple),
-        #           "<amu>", type(amu), amu,
-        #           "<charge_states>", type(charge_states), charge_states,
-        #           "<n>", type(n), n,
-        #           "<mass>", type(m), m,
-        #           # "<rho>", type(rho), rho,
-        #           "<w>", type(w), w,
-        #           "<kb_J>", kb_J,
-        #           "<kb_eV>", kb_eV,
-        #           "<T [K]>", type(Tkelvin), Tkelvin,
-        #           "<T [eV]>", type(TeV), TeV,
-        #           "<n Z^2 / T [eV]>", type(nZsqOTeV), nZsqOTeV,
-        #           "",
-        #           sep="\n")
+            pdt.assert_series_equal(lnlambda, ot.lnlambda(s, s))
+            pdt.assert_series_equal(ot.lnlambda(s, s), ot.lnlambda(s, s))
 
-        regex_msg = (
-            "`lnlambda` can only calculate with individual s0 " "and s1 species."
-        )
-        invalid = "Invalid species"
-        combos2 = [x for x in self.species_combinations if len(x) == 2]
-        for combo in combos2:
-            si, sj = combo
-            ai = amu.loc[si]
-            aj = amu.loc[sj]
-            zi = charge_states.loc[si]
-            zj = charge_states.loc[sj]
-            ti = TeV.loc[:, si]
-            tj = TeV.loc[:, sj]
+            s0s1 = f"{s}+{s}"
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s, s0s1)
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s0s1, s)
+            with self.assertRaisesRegex(ValueError, regex_msg):
+                ot.lnlambda(s0s1, s0s1)
 
-            left = (zi * zj * (ai + aj)) / ((ai * tj) + (aj * ti))
-            right = nZsqOTeV.loc[:, list(combo)].sum(axis=1).pipe(np.sqrt)
-            ln = np.log(left * right)
-            lnlambda = 29.9 - ln
-            lnlambda.name = ",".join(sorted(combo))
-            # ln = None
-            # lnlambda = None
+            combo = [s, s]
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda("+".join(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), "+".join(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(",".join(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), ",".join(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), s)
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(list(combo), combo[1])
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(s, list(combo))
+            with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                ot.lnlambda(combo[1], list(combo))
+
+        else:
+            nZsqOTeV = n_all.multiply(charge_states.pow(2), axis=1, level="S").divide(
+                TeV, axis=1, level="S"
+            )
 
             # if print_inline_debug_info:
-            #     print(
-            #           "<combo>: {}".format(combo),
-            #           "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
-            #               type(right), right,
-            #           "<left>", type(left), left,
-            #           "<ln>", type(ln), ln,
-            #           "<lnlambda>", type(lnlambda), lnlambda,
+            #     print("",
+            #           "<Test>",
+            #           "<species>: {}".format(self.stuple),
+            #           "<amu>", type(amu), amu,
+            #           "<charge_states>", type(charge_states), charge_states,
+            #           "<n>", type(n), n,
+            #           "<mass>", type(m), m,
+            #           # "<rho>", type(rho), rho,
+            #           "<w>", type(w), w,
+            #           "<kb_J>", kb_J,
+            #           "<kb_eV>", kb_eV,
+            #           "<T [K]>", type(Tkelvin), Tkelvin,
+            #           "<T [eV]>", type(TeV), TeV,
+            #           "<n Z^2 / T [eV]>", type(nZsqOTeV), nZsqOTeV,
             #           "",
             #           sep="\n")
 
-            pdt.assert_series_equal(
-                lnlambda, self.object_testing.lnlambda(combo[0], combo[1])
-            )
-            pdt.assert_series_equal(
-                lnlambda,
-                self.object_testing.lnlambda(combo[1], combo[0]),
-                check_names=False,
-            )
+            combos2 = [x for x in self.species_combinations if len(x) == 2]
+            for combo in combos2:
+                si, sj = combo
+                ai = amu.loc[si]
+                aj = amu.loc[sj]
+                zi = charge_states.loc[si]
+                zj = charge_states.loc[sj]
+                ti = TeV.loc[:, si]
+                tj = TeV.loc[:, sj]
 
-            # NOTE: The following various Invalid Species tests are excessive
-            #       and should be reduced.
-            s0s1 = "+".join(combo)  # ("+".join(combo), combo):
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(combo[0], s0s1)
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, combo[0])
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(combo[1], s0s1)
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, combo[1])
-            with self.assertRaisesRegex(ValueError, regex_msg):
-                self.object_testing.lnlambda(s0s1, s0s1)
+                left = (zi * zj * (ai + aj)) / ((ai * tj) + (aj * ti))
+                right = nZsqOTeV.loc[:, list(combo)].sum(axis=1).pipe(np.sqrt)
+                ln = np.log(left * right)
+                lnlambda = 29.9 - ln
+                lnlambda.name = ",".join(sorted(combo))
+                # ln = None
+                # lnlambda = None
 
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda("+".join(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), "+".join(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(",".join(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), ",".join(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), combo[0])
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(list(combo), combo[1])
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(combo[0], list(combo))
-            with self.assertRaisesRegex((TypeError, ValueError), invalid):
-                self.object_testing.lnlambda(combo[1], list(combo))
+                #            if print_inline_debug_info:
+                #                print(
+                #                      "<combo>: {}".format(combo),
+                #                      "<sqrt( sum(n_i Z_i^s / T_i [eV]) )>",
+                #                          type(right), right,
+                #                      "<left>", type(left), left,
+                #                      "<ln>", type(ln), ln,
+                #                      "<lnlambda>", type(lnlambda), lnlambda,
+                #                      "",
+                #                      sep="\n")
+
+                pdt.assert_series_equal(lnlambda, ot.lnlambda(combo[0], combo[1]))
+                pdt.assert_series_equal(
+                    lnlambda, ot.lnlambda(combo[1], combo[0]), check_names=False
+                )
+
+                # NOTE: The following various Invalid Species tests are excessive
+                #       and should be reduced.
+                s0s1 = "+".join(combo)  # ("+".join(combo), combo):
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(combo[0], s0s1)
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, combo[0])
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(combo[1], s0s1)
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, combo[1])
+                with self.assertRaisesRegex(ValueError, regex_msg):
+                    ot.lnlambda(s0s1, s0s1)
+
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda("+".join(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), "+".join(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(",".join(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), ",".join(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), combo[0])
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(list(combo), combo[1])
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(combo[0], list(combo))
+                with self.assertRaisesRegex((TypeError, ValueError), invalid):
+                    ot.lnlambda(combo[1], list(combo))
 
     def test_nuc(self):
         r"""
@@ -1269,7 +1321,10 @@ class PlasmaTestBase(ABC):
         sc_data = base.TestData().spacecraft_data
 
         Wind = pd.concat(
-            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+            {"pos": sc_data.xs("gse", axis=1, level="M")},
+            axis=1,
+            names=["M"],
+            sort=True,
         )
         Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
 
@@ -1281,6 +1336,7 @@ class PlasmaTestBase(ABC):
             },
             axis=1,
             names=["M"],
+            sort=True,
         )
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
 
@@ -1325,16 +1381,19 @@ class PlasmaTestBase(ABC):
 
         v = self.data.v
         v = pd.concat(
-            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: v.xs(s, axis=1, level="S") for s in slist},
+            axis=1,
+            names=["S"],
+            sort=True,
+        )
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         vcom = (
@@ -1347,7 +1406,10 @@ class PlasmaTestBase(ABC):
         sc_data = base.TestData().spacecraft_data
 
         Wind = pd.concat(
-            {"pos": sc_data.xs("gse", axis=1, level="M")}, axis=1, names=["M"]
+            {"pos": sc_data.xs("gse", axis=1, level="M")},
+            axis=1,
+            names=["M"],
+            sort=True,
         )
         Wind = spacecraft.Spacecraft(Wind, "Wind", "GSE")
         tau_exp_Wind = Wind.distance2sun.multiply(vsw.pow(-1.0), axis=0)
@@ -1360,6 +1422,7 @@ class PlasmaTestBase(ABC):
             },
             axis=1,
             names=["M"],
+            sort=True,
         )
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
         #         Rs = 695.508e6 # [m]
@@ -1483,15 +1546,15 @@ class PlasmaTestBase(ABC):
 
             wp = self.data.w.loc[:, tkw]
             npne = self.data.n.xs("", axis=1, level="C").loc[:, tkn]
-            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"])
+            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"], sort=True)
             nrat = npne.pow(exp, axis=1, level="S").product(axis=1)
             mpme = physical_constants["electron-proton mass ratio"][0] ** -1.0
             we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
 
-            tmp = pd.concat([we, we], axis=1, keys=["par", "per"])
+            tmp = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
             ne.name = ""
             electrons = pd.concat(
-                [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"]
+                [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
             )
 
             electrons = ions.Ion(electrons, "e")
@@ -1518,12 +1581,15 @@ class PlasmaTestBase(ABC):
             # Check electrons are properly calculated.
             ot = self.object_testing
             pdt.assert_frame_equal(electrons.data, ot.estimate_electrons().data)
+
             self.assertEqual(electrons, ot.estimate_electrons())
 
             # Check that electrons aren't stored in plasma.
             self.assertFalse("e" in ot.species)
             comp_data = (
-                pd.concat({"e": electrons.data}, axis=1, names=["S", "M", "C"])
+                pd.concat(
+                    {"e": electrons.data}, axis=1, names=["S", "M", "C"], sort=True
+                )
                 .reorder_levels(["M", "C", "S"], axis=1)
                 .sort_index(axis=1)
             )
@@ -1568,16 +1634,19 @@ class PlasmaTestBase(ABC):
 
         v = self.data.v
         v = pd.concat(
-            {s: v.xs(s, axis=1, level="S") for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: v.xs(s, axis=1, level="S") for s in slist},
+            axis=1,
+            names=["S"],
+            sort=True,
+        )
 
         # Neither `n` nor `rho` units b/c Vcom divides out
         # the [rho].
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         #        if print_inline_debug_info:
@@ -1715,8 +1784,8 @@ class PlasmaTestBase(ABC):
         m = self.mass_in_mp
         n = self.data.n.xs("", axis=1, level="C")
         n = pd.concat(
-            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"]
-        ).sort_index(axis=1)
+            {s: n.xs(s, axis=1) for s in slist}, axis=1, names=["S"], sort=True
+        )
         rho = n.multiply(m, axis=1, level="S")
 
         const = 0.5 * constants.m_p * 1e6 * 1e6 / 1e-12  # [m_p] * [n] * [dv]**2 / [p]
@@ -2159,11 +2228,19 @@ class PlasmaTestBase(ABC):
             ni = self.data.loc[:, ("n", "", si)]
             nj = self.data.loc[:, ("n", "", sj)]
 
-            wi = self.data.loc[:, "w"].xs(si, axis=1, level="S").drop("scalar", axis=1)
+            wi = (
+                self.data.loc[:, "w"]
+                .xs(si, axis=1, level="S")
+                .drop("scalar", axis=1, errors="ignore")
+            )
             wi_par = wi.loc[:, "par"]
             wi_per = wi.loc[:, "per"]
 
-            wj = self.data.loc[:, "w"].xs(sj, axis=1, level="S").drop("scalar", axis=1)
+            wj = (
+                self.data.loc[:, "w"]
+                .xs(sj, axis=1, level="S")
+                .drop("scalar", axis=1, errors="ignore")
+            )
             wj_par = wj.loc[:, "par"]
             wj_per = wj.loc[:, "per"]
 

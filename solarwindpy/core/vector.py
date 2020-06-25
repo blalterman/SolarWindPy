@@ -140,7 +140,7 @@ class Vector(base.Base):
             .sum(axis=1)
             .pipe(np.sqrt)
         )
-        out = pd.concat([par, per], axis=1, keys=("par", "per")).sort_index(axis=1)
+        out = pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
         # print("",
         #       "<Module>",

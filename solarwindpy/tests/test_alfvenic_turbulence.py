@@ -39,7 +39,7 @@ import numpy as np
 import pandas as pd
 import unittest
 
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 
 from abc import ABC, abstractproperty
 
@@ -73,6 +73,7 @@ class AlfvenicTrubulenceTestBase(ABC):
             )
             .swaplevel(i="M", j="S", axis=1)
             .swaplevel(i="S", j="C", axis=1)
+            .sort_index(axis=1)
         )
 
         tkb = ["x", "y", "z"]

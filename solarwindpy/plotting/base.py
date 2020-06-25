@@ -4,6 +4,7 @@ r"""Contains plotting :py:class:`Base` class.
 
 import pdb  # noqa: F401
 import logging
+import pandas as pd
 
 from pathlib import Path
 from collections import namedtuple
@@ -11,6 +12,7 @@ from abc import ABC, abstractmethod
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
 
 class Base(ABC):
@@ -33,6 +35,9 @@ class Base(ABC):
     @abstractmethod
     def __init__(self):
         self._init_logger()
+        self._labels = AxesLabels(x="x", y="y")
+        self._log = LogAxes(x=False)
+        self.set_path(None)
 
     def __str__(self):
         return self.__class__.__name__
@@ -42,8 +47,51 @@ class Base(ABC):
         return self._logger
 
     def _init_logger(self):
+        # return None
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
+
+    #     # Old version that cuts at percentiles.
+    #     @staticmethod
+    #     def clip_data(data, clip):
+    #         q0 = 0.0001
+    #         q1 = 0.9999
+    #         pct = data.quantile([q0, q1])
+    #         lo = pct.loc[q0]
+    #         up = pct.loc[q1]
+
+    #         if isinstance(data, pd.Series):
+    #             ax = 0
+    #         elif isinstance(data, pd.DataFrame):
+    #             ax = 1
+    #         else:
+    #             raise TypeError("Unexpected object %s" % type(data))
+
+    #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #             data = data.clip_lower(lo, axis=ax)
+    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #             data = data.clip_upper(up, axis=ax)
+    #         else:
+    #             data = data.clip(lo, up, axis=ax)
+    #         return data
+
+    #     # New version that uses binning to cut.
+    #     #     @staticmethod
+    #     #     def clip_data(data, bins, clip):
+    #     #         q0 = 0.001
+    #     #         q1 = 0.999
+    #     #         pct = data.quantile([q0, q1])
+    #     #         lo  = pct.loc[q0]
+    #     #         up  = pct.loc[q1]
+    #     #         lo = bins.iloc[0]
+    #     #         up = bins.iloc[-1]
+    #     #         if isinstance(clip, str) and clip.lower()[0] == "l":
+    #     #             data = data.clip_lower(lo)
+    #     #         elif isinstance(clip, str) and clip.lower()[0] == "u":
+    #     #             data = data.clip_upper(up)
+    #     #         else:
+    #     #             data = data.clip(lo, up)
+    #     #         return data
 
     @property
     def data(self):
@@ -72,13 +120,15 @@ class Base(ABC):
             x = self.log.x
         if y is None:
             y = self.log.y
-        log = LogAxes(x, y)
+
+        log = LogAxes(bool(x), bool(y))
         self._log = log
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels. Any label not specified in kwargs
         is propagated from `self.labels.<x, y, or z>`.
         """
+        auto_update_path = kwargs.pop("auto_update_path", True)
 
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
@@ -89,6 +139,9 @@ class Base(ABC):
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
         self._labels = AxesLabels(x, y, z)
+
+        if auto_update_path:
+            self.set_path("auto")
 
     @abstractmethod
     def set_path(self, new, add_scale=False):
@@ -152,14 +205,141 @@ class Base(ABC):
 
         return path, x, y, z, scale_info
 
+    def _add_axis_labels(self, ax):
+        xlbl = self.labels.x
+        if xlbl is not None:
+            ax.set_xlabel(xlbl)
+
+        ylbl = self.labels.y
+        if ylbl is not None:
+            ax.set_ylabel(ylbl)
+
+    def _set_axis_scale(self, ax):
+        if self.log.x:
+            ax.set_xscale("log")
+        if self.log.y:
+            ax.set_yscale("log")
+
+    def _format_axis(self, ax):
+        self._add_axis_labels(ax)
+        self._set_axis_scale(ax)
+        ax.grid(True, which="major", axis="both")
+        ax.tick_params(axis="both", which="both", direction="inout")
+
+    #         x = self.data.loc[:, "x"]
+    #         minx, maxx = x.min(), x.max()
+    #         if self.log.x:
+    #             minx, maxx = 10.0**np.array([minx, maxx])
+
+    #         y = self.data.loc[:, "y"]
+    #         miny, maxy = y.min(), y.max()
+    #         if self.log.y:
+    #             minx, maxx = 10.0**np.array([miny, maxy])
+
+    #         # `pulled from the end of `ax.pcolormesh`.
+    #         collection.sticky_edges.x[:] = [minx, maxx]
+    #         collection.sticky_edges.y[:] = [miny, maxy]
+    #         corners = (minx, miny), (maxx, maxy)
+    #         self.update_datalim(corners)
+    #         self.autoscale_view()
+
     @abstractmethod
     def set_data(self):
         pass
 
     @abstractmethod
-    def _format_axis(self, ax):
-        pass
-
-    @abstractmethod
     def make_plot(self):
         pass
+
+
+class Plot2D(Base):
+    def set_data(self, x, y, z=None, clip_data=False):
+        data = pd.DataFrame({"x": x, "y": y})
+
+        if z is None:
+            z = pd.Series(1, index=data.index)
+
+        data.loc[:, "z"] = z
+        data = data.dropna()
+        if not data.shape[0]:
+            raise ValueError(
+                "You can't build a %s with data that is exclusively NaNs"
+                % self.__class__.__name__
+            )
+        self._data = data
+        self._clip = bool(clip_data)
+
+    def set_path(self, new, add_scale=True):
+        # Bug: path doesn't auto-set log information.
+        path, x, y, z, scale_info = super(Plot2D, self).set_path(new, add_scale)
+
+        if new == "auto":
+            path = path / x / y / z
+
+        else:
+            assert x is None
+            assert y is None
+            assert z is None
+
+        if add_scale:
+            assert scale_info is not None
+
+            scale_info = "-".join(scale_info)
+
+            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
+                # Insert <norm> at end of path so scale order is (x, y, z).
+                path = path.parts
+                path = path[:-1] + (scale_info + "-" + path[-1],)
+                path = Path(*path)
+            else:
+                path = path / scale_info
+
+        self._path = path
+
+    set_path.__doc__ = Base.set_path.__doc__
+
+    def set_labels(self, **kwargs):
+        z = kwargs.pop("z", self.labels.z)
+        super(Plot2D, self).set_labels(z=z, **kwargs)
+
+    def _make_cbar(self, mappable, **kwargs):
+        f"""Make a colorbar on `ax` using `mappable`.
+
+        Parameters
+        ----------
+        mappable:
+            See `figure.colorbar` kwarg of same name.
+        ax: mpl.axis.Axis
+            See `figure.colorbar` kwarg of same name.
+        norm: mpl.colors.Normalize instance
+            The normalization used in the plot. Passed here to determine
+            y-ticks.
+        kwargs:
+            Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
+            row or column normalized, `ticks` defaults to
+            :py:class:`mpl.ticker.MultipleLocator(0.1)`.
+        """
+        ax = kwargs.pop("ax", None)
+        cax = kwargs.pop("cax", None)
+        if ax is not None and cax is not None:
+            raise ValueError("Can't pass ax and cax.")
+
+        if ax is not None:
+            try:
+                fig = ax.figure
+            except AttributeError:
+                fig = ax[0].figure
+        elif cax is not None:
+            try:
+                fig = cax.figure
+            except AttributeError:
+                fig = cax[0].figure
+        else:
+            raise ValueError(
+                "You must pass `ax` or `cax`. We don't want to rely on `plt.gca()`."
+            )
+
+        label = kwargs.pop("label", self.labels.z)
+        cbar = fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
+
+        return cbar

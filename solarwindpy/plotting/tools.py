@@ -23,7 +23,17 @@ def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
     return plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
 
 
-def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
+def save(
+    fig,
+    spath,
+    add_info=True,
+    info_x=0,
+    info_y=0,
+    log=True,
+    pdf=True,
+    png=True,
+    **kwargs
+):
     r"""Save `fig` at `spath` as png and eps, tracking the save at alog.
 
     Note that we add `B.L. Alterman` and the datetime to the bottom left
@@ -36,8 +46,6 @@ def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
 
     assert isinstance(fig, mpl.figure.Figure)
     assert isinstance(spath, Path)
-
-    alog = logging.getLogger(__name__)
 
     tight_layout = kwargs.pop("tight_layout", True)
     bbox_inches = kwargs.pop("bbox_inches", "tight")
@@ -58,29 +66,37 @@ def save(fig, spath, add_info=True, info_x=0, info_y=0, **kwargs):
     # Add the datetime stamp to the PNG as those are what we render most often when
     # working, drafting, etc.
 
-    alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
+    if pdf:
+        if log:
+            alog = logging.getLogger(__name__)
+            alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
 
-    fig.savefig(
-        spath.with_suffix(".pdf"),
-        bbox_inches=bbox_inches,
-        format="pdf",
-        meta=meta,
-        **kwargs
-    )
-    alog.info("Suffix saved: pdf")
+        fig.savefig(
+            spath.with_suffix(".pdf"),
+            bbox_inches=bbox_inches,
+            format="pdf",
+            meta=meta,
+            **kwargs
+        )
 
-    if add_info:
-        info = "B. L. Alterman {}".format(datetime.now().strftime("%Y%m%dT%H%M%S"))
-        fig.text(info_x, info_y, info)
+        if log:
+            alog.info("Suffix saved: pdf")
 
-    fig.savefig(
-        spath.with_suffix(".png"),
-        bbox_inches=bbox_inches,
-        format="png",
-        meta=meta,
-        **kwargs
-    )
-    alog.info("Suffix saved: png")
+    if png:
+        if add_info:
+            info = "B. L. Alterman {}".format(datetime.now().strftime("%Y%m%dT%H%M%S"))
+            fig.text(info_x, info_y, info)
+
+        fig.savefig(
+            spath.with_suffix(".png"),
+            bbox_inches=bbox_inches,
+            format="png",
+            meta=meta,
+            **kwargs
+        )
+
+        if log:
+            alog.info("Suffix saved: png")
 
 
 def joint_legend(*axes, idx_for_legend=-1, **kwargs):

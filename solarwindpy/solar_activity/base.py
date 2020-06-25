@@ -305,7 +305,7 @@ class ActivityIndicator(Base):
         pass
 
     def _run_normalization(self, indicator, norm_fcn):
-        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="All")
+        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
         joint = pd.concat(
             [indicator, cut], axis=1, keys=["indicator", "cycle"]
         ).sort_index(axis=1)
@@ -341,7 +341,10 @@ class IndicatorExtrema(Base):
         r"""Bands of time ($\Delta t$) about indicator extrema, where dt is specified when
         calling :py:meth:`calculate_intervals`.
         """
-        return self._extrema_bands
+        try:
+            return self._extrema_bands
+        except AttributeError:
+            raise AttributeError("Have you called `extrema.calculate_extrema_bands`?")
 
     @abstractmethod
     def load_or_set_data(self):
@@ -362,7 +365,8 @@ class IndicatorExtrema(Base):
         """
         extrema = self.data
         intervals = pd.DataFrame(
-            index=extrema.index, columns=pd.Index(["Rise", "Fall", "All"], name="kind")
+            index=extrema.index,
+            columns=pd.Index(["Rise", "Fall", "Cycle"], name="kind"),
         )
 
         # Make `today` only keep the date.
@@ -370,27 +374,64 @@ class IndicatorExtrema(Base):
         for c, r in extrema.iterrows():
             t0 = r.loc["Min"]
             t1 = r.loc["Max"]
+
+            if pd.isna(t1):
+                # No maximum yet, then use Today for maximum
+                t1 = today
+
             try:
+                # Get next cycle's Minimum to calculate Falling edge
                 t2 = extrema.loc[c + 1, "Min"]
             except KeyError:
-                t2 = today
+                if t1 < today:
+                    # We haven't reached next Min yet, but have current cycle Max
+                    # so use today.
+                    t2 = today
+                else:
+                    # This cycle does not have a falling edge.
+                    t2 = t1 + pd.to_timedelta(6 * 365, unit="D")
 
             rise_ = pd.Interval(t0, t1)
             fall_ = pd.Interval(t1, t2)
             all_ = pd.Interval(t0, t2)
 
-            intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "All": all_})
+            if t1 == t2:
+                # Then no falling edge
+                fall_ = pd.NaT
+
+            intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "Cycle": all_})
 
         intervals = intervals.sort_index(axis=1)
         self._cycle_intervals = intervals
         return intervals
 
-    def cut_spec_by_interval(self, epoch, kind=None):
+    def cut_spec_by_interval(self, epoch, kind=None, tk_cycles=None):
         r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
         cycle numbers.
 
-        If `kind` is not None, it should be some subset of "All", "Rise", or "Fall". If
-        `kind` is "Edges", use ["Rise", "Fall"].
+        Parameters
+        ----------
+        epoch: pd.Series or pd.DatetimeIndex
+            Data to cut.
+        kind: str, None
+            If `kind` is not None, it should be some subset of
+
+                ========= ===============================
+                   Key              Description
+                ========= ===============================
+                 None      Cut by all available options.
+                 "Cycle"   Cut by solar cycle
+                 "Rise"    Cut by rising edge
+                 "Fall"    Cut by falling edge
+                 "Edges"   Cut by `["Fall", "Rise"]`.
+                           Exclusive option.
+                ========= ===============================
+
+            Note that "Edges" is exclusive and will specify
+            `["Fall", "Rise"]` alone.
+        tk_cycles: None, list, slice
+            If not None, an object that can be used for index
+            slicing to select the target solar cycles.
         """
         if isinstance(epoch, pd.DatetimeIndex):
             epoch = epoch.to_series()
@@ -414,7 +455,10 @@ class IndicatorExtrema(Base):
         else:
             raise ValueError(f"""Interval `{kind!s}` is unavailable""")
 
-        ii = pd.IntervalIndex(intervals.stack().sort_values())
+        if tk_cycles is not None:
+            intervals = intervals.loc[tk_cycles]
+
+        ii = pd.IntervalIndex(intervals.stack()).sort_values()
         if not (ii.is_unique and ii.is_monotonic_increasing):
             raise ValueError
 
@@ -469,6 +513,6 @@ class IndicatorExtrema(Base):
         # TODO: verify bands shape
         intervals = pd.IntervalIndex(bands.values).sort_values()
         cut = pd.cut(epoch, intervals)
-        cut.name = "spec_by_extrema_band"
+        cut = pd.Series(cut, index=epoch, name="spec_by_extrema_band")
 
         return cut

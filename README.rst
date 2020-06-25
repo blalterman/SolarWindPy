@@ -2,7 +2,7 @@
 SolarWindPy
 ###########
 
-|Build Status| |License|
+|Build Status| |License| |Black Code|
 
 Python data analysis tools for solar wind measurements.
 
@@ -28,7 +28,8 @@ Development
       >>> python setup.py sdist bdist_wheel
       >>> python setup.py develop
       
-4) Execute ``pre-commit install`` to install ``flake8`` and ``black``. 
+4) Intall ``flake8`` and ``black``
+      >>> ``pre-commit install`` 
    These are tools for checking code style, variable definitions, etc.
 5) Verify the current tests pass.
 
@@ -52,3 +53,5 @@ See :doc:`CITATION.rst` for instructions on citing SolarWindPy.
    :target: https://travis-ci.com/blalterman/SolarWindPy
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE.rst
+.. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
