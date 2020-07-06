@@ -63,7 +63,7 @@ class TestData(object):
 
         test_data = pd.DataFrame.from_dict(
             test_data, orient="columns", dtype=np.float64
-        )
+        ).sort_index(axis=1)
         test_data.columns.names = ["M", "C", "S"]
         test_data.index = self.epoch
         self._spacecraft_data = test_data.xs("", axis=1, level="S")
@@ -101,7 +101,9 @@ class TestData(object):
             ("w", "per", "e"): {0: 6.0, 1: 22.0, 2: 15.0},
         }
 
-        test_plasma = pd.DataFrame.from_dict(test_plasma, orient="columns")
+        test_plasma = pd.DataFrame.from_dict(test_plasma, orient="columns").sort_index(
+            axis=1
+        )
         test_plasma = test_plasma.astype(np.float64)
         test_plasma.columns.names = ["M", "C", "S"]
 
