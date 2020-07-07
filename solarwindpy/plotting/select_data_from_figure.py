@@ -98,11 +98,17 @@ class SelectFromPlot2D(object):
             x0, x1 = mpl.dates.num2date([x0, x1])
             x0 = x0.strftime("%Y-%m-%d %H:%M:%s")
             x1 = x1.strftime("%Y-%m-%d %H:%M:%s")
+        else:
+            x0 = f"{x0:.3e}"
+            x1 = f"{x1:.3e}"
 
         if self.date_axes.y:
             y0, y1 = mpl.dates.num2date([y0, y1])
             y0 = y0.strftime("%Y-%m-%d %H:%M:%s")
             y1 = y1.strftime("%Y-%m-%d %H:%M:%s")
+        else:
+            y0 = f"{y0:.3e}"
+            y1 = f"{y1:.3e}"
 
         tx = f"""Patch {self.num_selection_patches}
 Lower Left  {x0, y0}
@@ -229,7 +235,7 @@ y : ({self.ax.yaxis.get_label().get_text()}).
             sample = idx.sample(n=n, random_state=random_state, **kwargs)
             indices.extend(sample.values)
 
-        self._sampled_indices = pd.Index(indices)
+        self._sampled_indices = pd.Index(indices).sort_values()
         self._failed_samples = tuple(failed)
         self._sampled_per_patch = n
 
@@ -240,17 +246,25 @@ y : ({self.ax.yaxis.get_label().get_text()}).
         ylim = self.ax.get_ylim()
 
         data = plotter.data.loc[self.sampled_indices].drop("z", axis=1)
+
+        x = data.loc[:, "x"]
+        y = data.loc[:, "y"]
+        if self.plotter.log.x:
+            x = 10.0 ** x
+        if self.plotter.log.y:
+            y = 10.0 ** y
+
         ax.scatter(
-            "x",
-            "y",
+            x,
+            y,
             label="Sample",
             s=20,
-            c="lime",
-            edgecolors="k",
+            c="fuchsia",
+            #             edgecolors="k",
             linewidths=1,
-            marker="P",
-            alpha=0.75,
-            data=data,
+            marker=".",
+            #             alpha=0.75,
+            #             data=data,
         )
 
         ax.set_xlim(*xlim)
