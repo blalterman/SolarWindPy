@@ -14,8 +14,10 @@ MCS = namedtuple("MCS", "m,c,s")
 
 __composition_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
-    "e": r"e",
+    "e": r"e^-",
     "a": r"\alpha",
+    "a1": r"\alpha_1",
+    "a2": r"\alpha_2",
     "p": r"p",
     "p_bimax": r"p",
     "p1": r"p_1",

@@ -11,9 +11,18 @@ __all__ = [
     "tools",
     "subplots",
     "save",
+    "select_data_from_figure",
 ]
 
-from . import labels, histograms, scatter, spiral, orbits, tools
+from . import (
+    labels,
+    histograms,
+    scatter,
+    spiral,
+    orbits,
+    tools,
+    select_data_from_figure,
+)
 
 subplots = tools.subplots
 
