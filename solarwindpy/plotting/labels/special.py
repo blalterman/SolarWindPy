@@ -307,7 +307,7 @@ class Probability(ArbitraryLabel):
             .replace(r"\eq", "EQ")
             .replace(r"==", "EQ")
             .replace(r"!=", "NEQ")
-            .replace(r" ", "-")
+            .replace(r" ", "_")
         )
 
         path = Path(f"prob-{other}-{comp}")
