@@ -30,7 +30,7 @@ class Gaussian(FitFunction):
         """
         assert self.sufficient_data
 
-        x, y = self.xobs, self.yobs
+        x, y = self.observations.used.x, self.observations.used.y
         mean = (x * y).sum() / y.sum()
         std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
 
@@ -88,7 +88,7 @@ class GaussianLn(FitFunction):
         """
         assert self.sufficient_data
 
-        x, y = self.xobs, self.yobs
+        x, y = self.observations.used.x, self.observations.used.y
 
         mean = (x * y).sum() / y.sum()
         std = ((x - mean) ** 2.0 * y).sum() / y.sum()

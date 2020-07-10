@@ -522,7 +522,10 @@ xobs: {xobs.shape}"""
         dof = ydata.size - len(p0)
         chisq_dof = np.inf  # Divide by zero => infinity
         if dof:
-            r = (self.function(xdata, *popt) - ydata) / sigma
+            r = self.function(xdata, *popt) - ydata
+            if sigma is not None:
+                r /= sigma
+
             chisq_dof = (r ** 2).sum() / dof
 
         pcov = pcov * chisq_dof
@@ -632,7 +635,9 @@ xobs: {xobs.shape}"""
         dof = ydata.size - len(p0)
         chisq_dof = np.inf  # Divide by zero => infinity
         if dof:
-            r = (self.function(xdata, *popt) - ydata) / sigma
+            r = self.function(xdata, *popt) - ydata
+            if sigma is not None:
+                r /= sigma
             chisq_dof = (r ** 2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.
