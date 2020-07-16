@@ -268,7 +268,10 @@ class AggPlot(base.Base):
                     c, b = np.histogram(d, b)
 
             assert np.unique(b).size == b.size
-            assert not np.isnan(b).any()
+            try:
+                assert not np.isnan(b).any()
+            except TypeError:
+                assert not b.isna().any()
 
             b = b.round(precision)
 
