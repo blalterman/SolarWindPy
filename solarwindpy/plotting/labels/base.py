@@ -154,6 +154,7 @@ _trans_units = {
     "sigma_m": _inU["dimless"],
     "sigma_c": _inU["dimless"],
     "sigma_r": _inU["dimless"],
+    "sigma_xy": _inU["dimless"],
     "ra": _inU["dimless"],
     "re": _inU["dimless"],
     # Nyquist things
@@ -255,6 +256,7 @@ _templates = {
     "sigma_c": r"\sigma_{c;{$S}}",
     "sigma_r": r"\sigma_{r;{$S}}",
     "sigma_m": r"\sigma_{m}",
+    "sigma_xy": r"\sigma_{\parallel}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
     # Instability things

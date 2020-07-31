@@ -39,11 +39,11 @@ import matplotlib as mpl
 from collections import namedtuple
 from matplotlib import pyplot as plt
 
-_inst_type_idx = pd.Index([u"AIC", u"FMW", u"MM", u"OFI"], name=u"Intability")
-_param_idx = pd.Index([u"a", u"b", u"c"], name=u"Fit Parameter")
+_inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
+_param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
-_inst_type_idx = pd.Index([u"AIC", u"FMW", u"MM", u"OFI"], name=u"Intability")
-_param_idx = pd.Index([u"a", u"b", u"c"], name=u"Fit Parameter")
+_inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
+_param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
 insta_params = pd.concat(
     {
@@ -84,18 +84,18 @@ insta_params = pd.concat(
 
 _plot_contour_kwargs = pd.DataFrame(
     [
-        ["#ffcb05", "--", "x"],
+        ["#ffcb05", "--", "X"],
         ["#00B2A9", "--", "d"],
         ["#00274c", "--", "o"],
-        ["#D86018", "--", "+"],
-        ["#ffcb05", ":", "x"],
+        ["#D86018", "--", "P"],
+        ["#ffcb05", ":", "X"],
         ["#00B2A9", ":", "d"],
         ["#00274c", ":", "o"],
-        ["#D86018", ":", "+"],
-        ["#ffcb05", "-.", "x"],
+        ["#D86018", ":", "P"],
+        ["#ffcb05", "-.", "X"],
         ["#00B2A9", "-.", "d"],
         ["#00274c", "-.", "o"],
-        ["#D86018", "-.", "+"],
+        ["#D86018", "-.", "P"],
     ],
     index=pd.MultiIndex.from_tuples(
         [
@@ -495,7 +495,7 @@ class StabilityContours(object):
     def contours(self):
         return self._contours
 
-    def plot_contours(self, ax, fix_scale=True, plot_gamma=None):
+    def plot_contours(self, ax, fix_scale=True, plot_gamma=None, **kwargs):
         r"""
         Add the instability contours to the plot.
 
@@ -512,6 +512,11 @@ class StabilityContours(object):
         images_for_table_legend = pd.DataFrame(
             index=self.contours.index, columns=self.contours.columns
         )
+
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        ms = kwargs.pop("markersize", 10)
+        mew = kwargs.pop("markeredgewidth", 0.5)
+        mec = kwargs.pop("markeredgecolor", "k")
 
         for k, v in self.contours.stack().iteritems():
             gamma, itype = k
@@ -531,7 +536,11 @@ class StabilityContours(object):
                 v,
                 # label=k,
                 markevery=10,
-                **plot_kwargs
+                ms=ms,
+                mew=mew,
+                mec=mec,
+                **plot_kwargs,
+                **kwargs,
             )
             # only want line object, not list of them. so im[0].
             images_for_table_legend.loc[gamma, itype] = im[0]

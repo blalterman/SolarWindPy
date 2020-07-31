@@ -1198,8 +1198,8 @@ class Hist2D(base.Plot2D, AggPlot):
             edges_kwargs = dict()
         if cbar_kwargs is None:
             cbar_kwargs = dict()
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
+        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+            cbar_kwargs["ax"] = ax
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 

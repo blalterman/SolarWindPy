@@ -499,7 +499,7 @@ splot.initialize_mesh()
     def agg(self, fcn=None):
         r"""Aggregate the z-values into their bins.
         """
-        self.logger.debug(f"aggregating z-data")
+        self.logger.debug("aggregating z-data")
 
         #         start = datetime.now()
         #         self.logger.warning(f"Start {start}")
@@ -714,7 +714,9 @@ data : {z.size}
 
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", None)
-        assert not kwargs
+        if len(kwargs):
+            raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
+        #         assert not kwargs
 
         if limit_color_norm and norm is not None:
             self._limit_color_norm(norm)
