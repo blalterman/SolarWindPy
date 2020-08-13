@@ -116,12 +116,15 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
         for i, l in enumerate(lbl):
             if l not in labels:
                 h = hdl[i]
-                try:
-                    if len(h) == 3:
-                        # Used `ax.errorbar`, not `ax.plot`.
-                        h = h[0]
-                except TypeError:
-                    pass
+                if isinstance(h, mpl.container.ErrorbarContainer):
+                    h = h[0]
+                #                 h = hdl[i]
+                #                 try:
+                #                     if len(h) == 3:
+                #                         # Used `ax.errorbar`, not `ax.plot`.
+                #                         h = h[0]
+                #                 except TypeError:
+                #                     pass
 
                 labels.append(l)
                 handles.append(h)
