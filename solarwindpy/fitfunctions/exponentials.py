@@ -31,7 +31,7 @@ class Exponential(FitFunction):
         """
         assert self.sufficient_data
 
-        y = self.yobs
+        y = self.observations.used.y
 
         c = 1.0
         try:
@@ -79,7 +79,7 @@ class ExponentialPlusC(FitFunction):
         """
         assert self.sufficient_data
 
-        y = self.yobs
+        y = self.observations.used.y
 
         c = 1.0
         d = 0.0
@@ -138,7 +138,7 @@ class ExponentialCDF(FitFunction):
         """
         assert self.sufficient_data
 
-        y = self.yobs
+        y = self.observations.used.y
 
         c = y.mean()
 

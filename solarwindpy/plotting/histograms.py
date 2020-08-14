@@ -268,7 +268,10 @@ class AggPlot(base.Base):
                     c, b = np.histogram(d, b)
 
             assert np.unique(b).size == b.size
-            assert not np.isnan(b).any()
+            try:
+                assert not np.isnan(b).any()
+            except TypeError:
+                assert not b.isna().any()
 
             b = b.round(precision)
 
@@ -1004,10 +1007,10 @@ class Hist2D(base.Plot2D, AggPlot):
         #         assert y.size == agg.shape[0] + 1
 
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
-        if not x.size == agg.shape[1] + 1:
+        if x.size != agg.shape[1] + 1:
             #             agg = agg.reindex(columns=self.intervals["x"])
             agg = agg.reindex(columns=self.categoricals["x"])
-        if not y.size == agg.shape[0] + 1:
+        if y.size != agg.shape[0] + 1:
             #             agg = agg.reindex(index=self.intervals["y"])
             agg = agg.reindex(index=self.categoricals["y"])
 
@@ -1111,7 +1114,16 @@ class Hist2D(base.Plot2D, AggPlot):
         border = Border(top, bottom)
         return border
 
-    def _plot_one_edge(self, ax, edge, smooth=False, sg_kwargs=None, **kwargs):
+    def _plot_one_edge(
+        self,
+        ax,
+        edge,
+        smooth=False,
+        sg_kwargs=None,
+        xlim=(None, None),
+        ylim=(None, None),
+        **kwargs,
+    ):
         x = edge.index.get_level_values("x").mid
         y = edge.index.get_level_values("y").mid
 
@@ -1131,6 +1143,24 @@ class Hist2D(base.Plot2D, AggPlot):
             x = 10.0 ** x
         if self.log.y:
             y = 10.0 ** y
+
+        x0, x1 = xlim
+        y0, y1 = ylim
+
+        tk = np.full_like(x, True, dtype=bool)
+        if x0 is not None:
+            tk = tk & (x0 <= x)
+        if x1 is not None:
+            tk = tk & (x <= x1)
+        if y0 is not None:
+            tk = tk & (y0 <= y)
+        if y1 is not None:
+            tk = tk & (y <= y1)
+
+        #         if (~tk).any():
+        x = x[tk]
+        y = y[tk]
+
         return ax.plot(x, y, **kwargs)
 
     def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
@@ -1195,8 +1225,8 @@ class Hist2D(base.Plot2D, AggPlot):
             edges_kwargs = dict()
         if cbar_kwargs is None:
             cbar_kwargs = dict()
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
+        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+            cbar_kwargs["ax"] = ax
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
@@ -1214,6 +1244,7 @@ class Hist2D(base.Plot2D, AggPlot):
         skip_max_clbl=True,
         use_contourf=False,
         gaussian_filter_std=0,
+        gaussian_filter_kwargs=None,
         **kwargs,
     ):
         f"""Make a contour plot on `ax` using `ax.contour`.
@@ -1249,8 +1280,10 @@ class Hist2D(base.Plot2D, AggPlot):
         gaussian_filter_std: int
             If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
             standard deviation specified by `gaussian_filter_std`.
+        gaussian_filter_kwargs: None, dict
+            If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
         kwargs:
-            Passed to `ax.pcolormesh`.
+            Passed to :py:meth:`ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
         levels = kwargs.pop("levels", None)
@@ -1290,16 +1323,16 @@ class Hist2D(base.Plot2D, AggPlot):
         x = self.intervals["x"].mid
         y = self.intervals["y"].mid
 
-        assert x.size == agg.shape[1]
-        assert y.size == agg.shape[0]
+        #         assert x.size == agg.shape[1]
+        #         assert y.size == agg.shape[0]
 
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
-        if not x.size == agg.shape[1]:
+        if x.size != agg.shape[1]:
             #             agg = agg.reindex(columns=self.intervals["x"])
             agg = agg.reindex(columns=self.categoricals["x"])
-        if not y.size == agg.shape[0]:
+        if y.size != agg.shape[0]:
             #             agg = agg.reindex(index=self.intervals["y"])
-            agg = agg.reindex(columns=self.categoricals["y"])
+            agg = agg.reindex(index=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
@@ -1309,7 +1342,10 @@ class Hist2D(base.Plot2D, AggPlot):
         if gaussian_filter_std:
             from scipy.ndimage import gaussian_filter
 
-            C = gaussian_filter(C, gaussian_filter_std)
+            if gaussian_filter_kwargs is None:
+                gaussian_filter_kwargs = dict()
+
+            C = gaussian_filter(C, gaussian_filter_std, **gaussian_filter_kwargs)
 
         C = np.ma.masked_invalid(C)
 
@@ -1335,7 +1371,6 @@ class Hist2D(base.Plot2D, AggPlot):
             args = [XX, YY, C, levels]
 
         qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
-        qset.levels = [nf(level) for level in qset.levels]
 
         try:
             args = (qset, levels[:-1] if skip_max_clbl else levels)
@@ -1345,6 +1380,7 @@ class Hist2D(base.Plot2D, AggPlot):
 
         lbls = None
         if label_levels:
+            qset.levels = [nf(level) for level in qset.levels]
             lbls = ax.clabel(
                 *args, inline=inline, inline_spacing=inline_spacing, fmt=fmt
             )

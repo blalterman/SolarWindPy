@@ -14,7 +14,8 @@ import numpy as np
 from abc import ABC, abstractproperty
 from collections import namedtuple
 from inspect import getfullargspec
-from scipy.optimize import curve_fit
+
+# from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
 from scipy.optimize.minpack import _wrap_func, _wrap_jac, _initialize_feasible
 from scipy.optimize._lsq.least_squares import prepare_bounds
@@ -451,88 +452,88 @@ xobs: {xobs.shape}"""
         usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
 
-    def make_fit_old(self, **kwargs):
-        f"""Fit the function with the independent values `xobs` and dependent
-        values `yobs` using `curve_fit`.
-
-        Parameters
-        ----------
-        kwargs:
-            Unless specified here, defaults are as defined by `curve_fit`.
-
-                ============= ======================================
-                    kwarg                    default
-                ============= ======================================
-                 p0            Setup by `{self.__class__.__name__}`
-                 return_full   False
-                 method        "trf"
-                 loss          "huber"
-                 max_nfev      10000
-                 f_scale       0.1
-                ============= ======================================
-
-        """
-        p0 = kwargs.pop("p0", self.p0)
-        method = kwargs.pop("method", "trf")
-        loss = kwargs.pop("loss", "huber")
-        max_nfev = kwargs.pop("max_nfev", 10000)
-        f_scale = kwargs.pop("f_scale", 0.1)
-        absolute_sigma = kwargs.pop("absolute_sigma", True)
-
-        if not absolute_sigma:
-            raise ValueError(
-                "Always use `absolute_sigma` so we can calcualte chisq_dof and then renormalize here."
-            )
-
-        # This line is legacy. Not sure why it's here, but I'm copying it over
-        # assuming I had a good reason to include it. (20170309 0011)
-        return_full = kwargs.get("full_output", False)
-        if return_full:
-            msg = "You haven't decided how to save `return_full` output."
-            raise NotImplementedError(msg)
-
-        try:
-            assert self.sufficient_data  # Check we have enough data to fit.
-        except ValueError as e:
-            return e
-
-        xdata = self.observations.used.x
-        ydata = self.observations.used.y
-        sigma = self.observations.used.w
-
-        try:
-            result = curve_fit(
-                self.function,
-                xdata,
-                ydata,
-                p0=p0,
-                sigma=sigma,
-                method=method,
-                loss=loss,
-                max_nfev=max_nfev,
-                f_scale=f_scale,
-                **kwargs,
-            )
-        except (RuntimeError, ValueError) as e:
-            return e
-
-        popt, pcov = result[:2]
-        #         psigma = np.sqrt(np.diag(pcov))
-
-        dof = ydata.size - len(p0)
-        chisq_dof = np.inf  # Divide by zero => infinity
-        if dof:
-            r = (self.function(xdata, *popt) - ydata) / sigma
-            chisq_dof = (r ** 2).sum() / dof
-
-        pcov = pcov * chisq_dof
-        psigma = np.sqrt(np.diag(pcov))
-        self._popt = list(zip(self.argnames, popt))
-        self._psigma = list(zip(self.argnames, psigma))
-        self._pcov = pcov
-        #         self._chisq_dof = chisq_dof
-        all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, np.nan)
-        self._chisq_dof = all_chisq
+    #     def make_fit_old(self, **kwargs):
+    #         f"""Fit the function with the independent values `xobs` and dependent
+    #         values `yobs` using `curve_fit`.
+    #
+    #         Parameters
+    #         ----------
+    #         kwargs:
+    #             Unless specified here, defaults are as defined by `curve_fit`.
+    #
+    #                 ============= ======================================
+    #                     kwarg                    default
+    #                 ============= ======================================
+    #                  p0            Setup by `{self.__class__.__name__}`
+    #                  return_full   False
+    #                  method        "trf"
+    #                  loss          "huber"
+    #                  max_nfev      10000
+    #                  f_scale       0.1
+    #                 ============= ======================================
+    #
+    #         """
+    #         p0 = kwargs.pop("p0", self.p0)
+    #         method = kwargs.pop("method", "trf")
+    #         loss = kwargs.pop("loss", "huber")
+    #         max_nfev = kwargs.pop("max_nfev", 10000)
+    #         f_scale = kwargs.pop("f_scale", 0.1)
+    #         absolute_sigma = kwargs.pop("absolute_sigma", False)
+    #
+    #         if absolute_sigma:
+    #             raise ValueError(
+    #                 "Always use `absolute_sigma` False so we can calcualte chisq_dof and then renormalize here."
+    #             )
+    #
+    #         # This line is legacy. Not sure why it's here, but I'm copying it over
+    #         # assuming I had a good reason to include it. (20170309 0011)
+    #         return_full = kwargs.get("full_output", False)
+    #         if return_full:
+    #             msg = "You haven't decided how to save `return_full` output."
+    #             raise NotImplementedError(msg)
+    #
+    #         try:
+    #             assert self.sufficient_data  # Check we have enough data to fit.
+    #         except ValueError as e:
+    #             return e
+    #
+    #         xdata = self.observations.used.x
+    #         ydata = self.observations.used.y
+    #         sigma = self.observations.used.w
+    #
+    #         try:
+    #             result = curve_fit(
+    #                 self.function,
+    #                 xdata,
+    #                 ydata,
+    #                 p0=p0,
+    #                 sigma=sigma,
+    #                 method=method,
+    #                 loss=loss,
+    #                 max_nfev=max_nfev,
+    #                 f_scale=f_scale,
+    #                 **kwargs,
+    #             )
+    #         except (RuntimeError, ValueError) as e:
+    #             return e
+    #
+    #         popt, pcov = result[:2]
+    #         #         psigma = np.sqrt(np.diag(pcov))
+    #
+    #         dof = ydata.size - len(p0)
+    #         chisq_dof = np.inf  # Divide by zero => infinity
+    #         if dof:
+    #             r = (self.function(xdata, *popt) - ydata) / sigma
+    #             chisq_dof = (r ** 2).sum() / dof
+    #
+    #         pcov = pcov * chisq_dof
+    #         psigma = np.sqrt(np.diag(pcov))
+    #         self._popt = list(zip(self.argnames, popt))
+    #         self._psigma = list(zip(self.argnames, psigma))
+    #         self._pcov = pcov
+    #         #         self._chisq_dof = chisq_dof
+    #         all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, np.nan)
+    #         self._chisq_dof = all_chisq
 
     def _run_least_squares(self, **kwargs):
         p0 = kwargs.pop("p0", self.p0)
@@ -545,7 +546,7 @@ xobs: {xobs.shape}"""
 
         #         loss_fcn = _loss_fcns.pop(loss, loss)
 
-        # Copied from `curve_fit` (20200527)
+        # Copied from `curve_fit` line 704 (20200527)
         if p0 is None:
             # determine number of parameters by inspecting the function
             from scipy._lib._util import getargspec_no_self as _getargspec
@@ -558,7 +559,7 @@ xobs: {xobs.shape}"""
             p0 = np.atleast_1d(p0)
             n = p0.size
 
-        # Copied from `curve_fit` (20200527)
+        # Copied from `curve_fit` line 715 (20200527)
         lb, ub = prepare_bounds(bounds, n)
         if p0 is None:
             p0 = _initialize_feasible(lb, ub)
@@ -572,7 +573,7 @@ xobs: {xobs.shape}"""
         ydata = self.observations.used.y
         sigma = self.observations.used.w
 
-        # Copied from `curve_fit` (20200527)
+        # Copied from `curve_fit` line 749 (20200527)
         # Determine type of sigma
         if sigma is not None:
             sigma = np.asarray(sigma)
@@ -594,10 +595,9 @@ xobs: {xobs.shape}"""
         else:
             transform = None
 
-        # Copied from `curve_fit` (20200527)
+        # Copied from `curve_fit` line 769 (20200527)
         loss_func = _wrap_func(self.function, xdata, ydata, transform)
-        # Need to call `_wrap_jac` because we already build loss function
-        # with `_wrap_func`.
+        # Already define default `jac` with `kwargs`. Don't need ELSE clause.
         if callable(jac):
             jac = _wrap_jac(jac, xdata, transform)
 
@@ -623,6 +623,8 @@ xobs: {xobs.shape}"""
         xdata = self.observations.used.x
         ydata = self.observations.used.y
         sigma = self.observations.used.w
+
+        # The following is from `curve_fit` line 801 and following. (20200625)
         # `cost` is the robust loss, i.e. residuals passed through loss funciton.
         ysize = len(res.fun)
         cost = 2 * res.cost  # res.cost is half sum of squares!
@@ -632,7 +634,9 @@ xobs: {xobs.shape}"""
         dof = ydata.size - len(p0)
         chisq_dof = np.inf  # Divide by zero => infinity
         if dof:
-            r = (self.function(xdata, *popt) - ydata) / sigma
+            r = self.function(xdata, *popt) - ydata
+            if sigma is not None:
+                r /= sigma
             chisq_dof = (r ** 2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.
@@ -640,7 +644,7 @@ xobs: {xobs.shape}"""
         threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
         s = s[s > threshold]
         VT = VT[: s.size]
-        pcov = np.dot(VT.T / s ** 2, VT)
+        pcov = np.dot(VT.T / (s ** 2), VT)
 
         warn_cov = False
         if ysize > p0.size:
@@ -693,6 +697,10 @@ xobs: {xobs.shape}"""
             assert self.sufficient_data  # Check we have enough data to fit.
         except ValueError as e:
             return e
+
+        absolute_sigma = kwargs.pop("absolute_sigma", False)
+        if absolute_sigma:
+            raise NotImplementedError("We want to rescale fit errors by chisq_dof")
 
         try:
             res, p0 = self._run_least_squares(**kwargs)
