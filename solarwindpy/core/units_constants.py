@@ -15,6 +15,90 @@ from scipy.constants import physical_constants
 # accidentally cause a problem.
 pd.set_option("mode.chained_assignment", "raise")
 
+_misc_constants = {
+    "e0": constants.epsilon_0,
+    "mu0": constants.mu_0,
+    "c": constants.c,
+    #     "gamma": 5.0 / 3.0,
+    "hbar": physical_constants["Planck constant over 2 pi"][0],
+    "1AU [m]": constants.au,
+    "Re [m]": 6378.1e3,  # Earth Radius in meters
+    "Rs [m]": 695.508e6,  # Sun Radius in meters
+    "gas constant": constants.R,
+}
+
+_kBoltzmann = {
+    "J": constants.k,
+    "eV": physical_constants["Boltzmann constant in eV/K"][0],
+}
+
+_polytropic_index = dict(par=3.0, per=2.0, iso=5.0 / 3.0, scalar=5.0 / 3.0)
+
+_m_in_mp = {
+    "p": 1.0,
+    "p1": 1.0,
+    "p2": 1.0,
+    "pm": 1.0,
+    "p_bimax": 1.0,
+    "a": physical_constants["alpha particle-proton mass ratio"][0],
+    "a1": physical_constants["alpha particle-proton mass ratio"][0],
+    "a2": physical_constants["alpha particle-proton mass ratio"][0],
+    "a_bimax": physical_constants["alpha particle-proton mass ratio"][0],
+    "e": physical_constants["electron-proton mass ratio"][0],
+}
+
+_charges = {
+    "e": -constants.e,
+    "p": constants.e,
+    "p1": constants.e,
+    "p2": constants.e,
+    "pm": constants.e,
+    "p_bimax": constants.e,
+    "a": 2.0 * constants.e,
+    "a1": 2.0 * constants.e,
+    "a2": 2.0 * constants.e,
+    "a_bimax": 2.0 * constants.e,
+}
+
+_charge_states = {
+    "e": -1.0,
+    "p": 1.0,
+    "p1": 1.0,
+    "p2": 1.0,
+    "pm": 1.0,
+    "p_bimax": 1.0,
+    "a": 2.0,
+    "a1": 2.0,
+    "a2": 2.0,
+    "a_bimax": 2.0,
+}
+
+_masses = {
+    "e": constants.m_e,
+    "p": constants.m_p,
+    "p1": constants.m_p,
+    "p2": constants.m_p,
+    "pm": constants.m_p,  # proton moment
+    "p_bimax": constants.m_p,
+    "a_bimax": physical_constants["alpha particle mass"][0],
+    "a": physical_constants["alpha particle mass"][0],
+    "a1": physical_constants["alpha particle mass"][0],
+    "a2": physical_constants["alpha particle mass"][0],
+}
+
+_m_amu = {
+    "a": physical_constants["alpha particle mass in u"][0],
+    "a1": physical_constants["alpha particle mass in u"][0],
+    "a2": physical_constants["alpha particle mass in u"][0],
+    "a_bimax": physical_constants["alpha particle mass in u"][0],
+    "p": physical_constants["proton mass in u"][0],
+    "p1": physical_constants["proton mass in u"][0],
+    "p2": physical_constants["proton mass in u"][0],
+    "pm": physical_constants["proton mass in u"][0],
+    "p_bimax": physical_constants["proton mass in u"][0],
+    "e": physical_constants["electron mass in u"][0],
+}
+
 
 class Constants(object):
     def __init__(self):
@@ -22,116 +106,37 @@ class Constants(object):
 
     @property
     def misc(self):
-        return pd.Series(
-            {
-                "e0": constants.epsilon_0,
-                "mu0": constants.mu_0,
-                "c": constants.c,
-                "gamma": 5.0 / 3.0,
-                "hbar": physical_constants["Planck constant over 2 pi"][0],
-                "1AU [m]": constants.au,
-                "Re [m]": 6378.1e3,  # Earth Radius in meters
-                "Rs [m]": 695.508e6,  # Sun Radius in meters
-            }
-        )
+        return pd.Series(_misc_constants)
 
     @property
     def kb(self):
-        ev = "Boltzmann constant in eV/K"
-        return pd.Series({"J": constants.k, "eV": physical_constants[ev][0]})
+        return pd.Series(_kBoltzmann)
 
     @property
     def m_in_mp(self):
-        mamp = physical_constants["alpha particle-proton mass ratio"][0]
-        memp = physical_constants["electron-proton mass ratio"][0]
-        return pd.Series(
-            {
-                "p": 1.0,
-                "p1": 1.0,
-                "p2": 1.0,
-                "pm": 1.0,
-                "p_bimax": 1.0,
-                "a": mamp,
-                "a1": mamp,
-                "a2": mamp,
-                "a_bimax": mamp,
-                "e": memp,
-            }
-        )
+        return pd.Series(_m_in_mp)
 
     @property
     def m(self):
-        ma = physical_constants["alpha particle mass"][0]
-        out = {
-            "e": constants.m_e,
-            "p": constants.m_p,
-            "p1": constants.m_p,
-            "p2": constants.m_p,
-            "pm": constants.m_p,  # proton moment
-            "p_bimax": constants.m_p,
-            "a_bimax": ma,
-            "a": ma,
-            "a1": ma,
-            "a2": ma,
-        }
-        return pd.Series(out)
+        return pd.Series(_masses)
 
     @property
     def m_amu(self):
-        r"""
-        Masses in amu.
+        r"""Masses in amu.
         """
-        a = physical_constants["alpha particle mass in u"][0]
-        p = physical_constants["proton mass in u"][0]
-        e = physical_constants["electron mass in u"][0]
-        out = {
-            "a": a,
-            "a1": a,
-            "a2": a,
-            "a_bimax": a,
-            "p": p,
-            "p1": p,
-            "p2": p,
-            "pm": p,
-            "e": e,
-            "p_bimax": p,
-        }
-        return pd.Series(out)
+        return pd.Series(_m_amu)
 
     @property
     def charges(self):
-        a = 2.0 * constants.e
-        p = constants.e
-        e = -constants.e
-        out = {
-            "e": e,
-            "p": p,
-            "p1": p,
-            "p2": p,
-            "pm": p,
-            "p_bimax": p,
-            "a": a,
-            "a1": a,
-            "a2": a,
-            "a_bimax": a,
-        }
-        return pd.Series(out)
+        return pd.Series(_charges)
 
     @property
     def charge_states(self):
-        out = {
-            "e": -1.0,
-            "p": 1.0,
-            "p1": 1.0,
-            "p2": 1.0,
-            "pm": 1.0,
-            "p_bimax": 1.0,
-            "a": 2.0,
-            "a1": 2.0,
-            "a2": 2.0,
-            "a_bimax": 2.0,
-        }
-        return pd.Series(out)
+        return pd.Series(_charge_states)
+
+    @property
+    def polytropic_index(self):
+        return pd.Series(_polytropic_index)
 
 
 class Units(object):

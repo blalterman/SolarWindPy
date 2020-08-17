@@ -6,6 +6,7 @@ Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:cla
 """
 
 import pdb  # noqa: F401
+import numpy as np
 import pandas as pd
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
@@ -198,3 +199,63 @@ class Ion(base.Base):
         pth = (0.5 / self.units.pth) * w.pow(2).multiply(rho, axis=0)
         pth.name = "pth"
         return pth
+
+    def specific_entropy(self, gamma=5.0 / 3.0, only_argument=True):
+        r"""Calculate the specific entropy, where the form depends on `argument`. See [1] for a derivation of the equations.
+
+
+        Parameters
+        ----------
+        gamma: scalar
+            Polytropic index. Some example cases are [1, pg 27]. String
+            aliases are given as well.
+
+                ======= =========================== =================
+                 gamma              use                   alias
+                ======= =========================== =================
+                 3       Motion parallel to B        "par"
+                 2       Motion perpendicular to B   "per"
+                 5/3     Isotropic plasma            "scalar", "iso"
+                ======= =========================== =================
+
+        only_argument: bool
+            If True:
+                :math:`ln(p) - \gamma \ln(\rho) = \ln(T) - (\gamma - 1) \ln(n)`
+            else:
+                :math:`\frac{R}{1-\gamma} \left(\ln(p) - (\gamma - 1) \ln(\rho))`
+                where
+
+        References
+        ----------
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp. 11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+        """
+        ln_T = np.log(self.temperature * self.units.temperature)
+        ln_n = np.log(self.number_density * self.units.n)
+
+        polytropic_index = self.polytropic_index
+        if isinstance(gamma, str):
+            gamma = gamma.lower()
+            try:
+                gamma = polytropic_index.get(gamma)
+            except KeyError:
+                raise KeyError(f"Unexpected polytropic gamma alias ({gamma})")
+
+        chk = polytropic_index.subtract(gamma).abs()
+        comp, chk = chk.idxmin(), chk.min()
+        if chk:
+            self.logger.warning(
+                "Atypical polytropic gamma ({gamma}). Selecting scalar component."
+            )
+            comp = "scalar"
+
+        gamma = polytropic_index.loc[comp]
+        arg = ln_T - ((gamma - 1) * ln_n)
+        out = arg
+
+        if not only_argument:
+            R = self.units_constants.misc.loc["gas constant"]
+            coef = R / (1.0 - gamma)
+            out = coef * arg
+
+        out.name = "lnS"
+        return out

@@ -580,7 +580,19 @@ class Plasma(base.Base):
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".
+        #         try:
+        #             w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        #         except ValueError as e:
+        #             print(e)
+        #             pdb.set_trace()
+
+        # Workaround for `skipna=False` bug. (20200814)
         w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        #         w_is_finite = w.notna().all(axis=1, level="S")
+        #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
+        #         pdb.set_trace()
+        #         w = w.where(w_is_finite, axis=1, level="S")
+
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
         w.columns = self.mi_tuples(w.columns)
@@ -1083,15 +1095,19 @@ species: {}
         -------
         cs: pd.DataFrame or pd.Series depending on `species` inputs.
         """
-        raise NotImplementedError
+        rho = self.mass_density(*species) * self.units.mass_density
+        pth = self.pth(*species) * self.units.pth
 
-        rho = self.mass_density(*species)
-        w = self.thermal_speed(*species)
+        #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
+        gamma = self.units_constants.polytropic_index["scalar"]  # should be 5/3
+        cs = pth.divide(rho).multiply(gamma).pow(0.5)
 
-        gamma = self.units_constants.misc.loc["gamma"] # should be 5.0/3.0
-        coeff = gamma / 2.0
-        cs = w.pow(2).multiply(1.0/coeff)
-        cs.name = "IDK YET"
+        raise NotImplementedError(
+            "How do we name this species? Need to figure out species processing up top."
+        )
+        if len(species) == 1:
+            cs.name = species[0]
+
         return cs
 
     def cs(self, *species):
