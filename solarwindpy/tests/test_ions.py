@@ -154,6 +154,90 @@ class IonTestBase(ABC):
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.temperature)
 
+    def test_specific_entropy(self):
+        # if only_argument: ln(T) - (gamma - 1) * ln(n)
+        # else: (R / (1 - gamma)) * (ln(pth) - gamma * ln(rho))
+
+        m = self.mass
+        n = self.data.n * 1e6
+        rho = n * m
+
+        kb = physical_constants["Boltzmann constant"][0]
+        w = self.data.w * 1e3
+        T = (0.5 * m / kb) * w.pow(2)
+
+        pth = w.pow(2).multiply(0.5 * rho, axis=0)
+
+        ln_T = np.log(T)
+        ln_n = np.log(n)
+        ln_pth = np.log(pth)  # noqa: F841
+        ln_rho = np.log(rho)  # noqa: F841
+
+        print(
+            "<specific_entropy>",
+            "<s>",
+            self.species,
+            "<test>",
+            "<ln_T>",
+            ln_T,
+            "<ln_n>",
+            ln_n,
+            sep="\n",
+        )
+
+        ot = self.object_testing
+        # `only_argument == True`, scalar case
+        case = ln_T.loc[:, "scalar"].subtract(ln_n.multiply((5.0 / 3.0) - 1))
+        case.name = "lnS"
+        pdt.assert_series_equal(
+            case, ot.specific_entropy(gamma="scalar", only_argument=True)
+        )
+        pdt.assert_series_equal(
+            ot.specific_entropy(gamma="scalar", only_argument=True),
+            ot.lnS(gamma="scalar", only_argument=True),
+        )
+        # `only_argument == True`, parallel case
+        case = ln_T.loc[:, "par"].subtract(ln_n.multiply(3 - 1))
+        case.name = "lnS"
+        pdt.assert_series_equal(
+            case, ot.specific_entropy(gamma="par", only_argument=True)
+        )
+        pdt.assert_series_equal(
+            ot.specific_entropy(gamma="par", only_argument=True),
+            ot.lnS(gamma="par", only_argument=True),
+        )
+        # `only_argument == True`, perpendicular case
+        case = ln_T.loc[:, "per"].subtract(ln_n.multiply(2 - 1))
+        case.name = "lnS"
+        pdt.assert_series_equal(
+            case, ot.specific_entropy(gamma="per", only_argument=True)
+        )
+        pdt.assert_series_equal(
+            ot.specific_entropy(gamma="per", only_argument=True),
+            ot.lnS(gamma="per", only_argument=True),
+        )
+
+        for comp in ("iso", "lala"):
+            with self.assertRaisesRegex(KeyError, "Unexpected polytropic gamma alias"):
+                ot.lnS(gamma=comp)
+
+        # `only_argument == True` with unequal components
+        with self.assertRaisesRegex(AssertionError, "Series are different"):
+            pdt.assert_series_equal(
+                ot.specific_entropy(gamma="scalar", only_argument=True),
+                ot.specific_entropy(gamma="par", only_argument=True),
+            )
+        with self.assertRaisesRegex(AssertionError, "Series are different"):
+            pdt.assert_series_equal(
+                ot.specific_entropy(gamma="scalar", only_argument=True),
+                ot.specific_entropy(gamma="per", only_argument=True),
+            )
+        with self.assertRaisesRegex(AssertionError, "Series are different"):
+            pdt.assert_series_equal(
+                ot.specific_entropy(gamma="par", only_argument=True),
+                ot.specific_entropy(gamma="per", only_argument=True),
+            )
+
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
     pass
@@ -297,7 +381,9 @@ if __name__ == "__main__":
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
     try:
-        unittest.main(verbosity=2)
+        run_this_test = None
+        run_this_test = "TestIonA"
+        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
 
     except (  # noqa: F841
         AssertionError,

@@ -1095,12 +1095,12 @@ species: {}
         -------
         cs: pd.DataFrame or pd.Series depending on `species` inputs.
         """
-        rho = self.mass_density(*species) * self.units.mass_density
+        rho = self.mass_density(*species) * self.units.rho
         pth = self.pth(*species) * self.units.pth
 
         #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
         gamma = self.units_constants.polytropic_index["scalar"]  # should be 5/3
-        cs = pth.divide(rho).multiply(gamma).pow(0.5)
+        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
 
         raise NotImplementedError(
             "How do we name this species? Need to figure out species processing up top."
@@ -1854,3 +1854,36 @@ species: {}
         turb = alf_turb.AlfvenicTurbulence(v, b, r, species, **kwargs)
 
         return turb
+
+    def specific_entropy(self, *species, gamma="iso", only_argument=True):
+        r"""Calculate the specific entropy, where the form depends on
+        `only_argument`. See [1] for a derivation of the equations.
+
+        Parameters
+        ----------
+        gamma: scalar
+            Polytropic index. Some example cases are [1, pg 27]. String
+            aliases are given as well.
+
+                ======= =========================== =================
+                 gamma              use                   alias
+                ======= =========================== =================
+                 3       Motion parallel to B        "par"
+                 2       Motion perpendicular to B   "per"
+                 5/3     Isotropic plasma            "scalar", "iso"
+                ======= =========================== =================
+
+        only_argument: bool
+            If True:
+                :math:`ln(p) - \gamma \ln(\rho) = \ln(T) - (\gamma - 1) \ln(n)`
+            else:
+                :math:`\frac{R}{1-\gamma} \left(\ln(p) - (\gamma - 1) \ln(\rho))`
+                where
+
+        References
+        ----------
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
+            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+        """
+
+        raise NotImplementedError("How to handle various species inputs?")

@@ -200,9 +200,21 @@ class Ion(base.Base):
         pth.name = "pth"
         return pth
 
-    def specific_entropy(self, gamma=5.0 / 3.0, only_argument=True):
-        r"""Calculate the specific entropy, where the form depends on `argument`. See [1] for a derivation of the equations.
+    @property
+    def cs(self):
+        r"""Species' sound speed.
+        """
+        pth = self.pth * self.units.pth
+        rho = self.rho * self.units.rho
+        gamma = self.constants.polytropic_index["scalar"]
 
+        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
+        cs.name = "cs"
+        return cs
+
+    def specific_entropy(self, gamma="scalar", only_argument=True):
+        r"""Calculate the specific entropy, where the form depends on
+        `only_argument`. See [1] for a derivation of the equations.
 
         Parameters
         ----------
@@ -215,32 +227,38 @@ class Ion(base.Base):
                 ======= =========================== =================
                  3       Motion parallel to B        "par"
                  2       Motion perpendicular to B   "per"
-                 5/3     Isotropic plasma            "scalar", "iso"
+                 5/3     Isotropic plasma            "scalar"
                 ======= =========================== =================
 
         only_argument: bool
             If True:
                 :math:`ln(p) - \gamma \ln(\rho) = \ln(T) - (\gamma - 1) \ln(n)`
             else:
-                :math:`\frac{R}{1-\gamma} \left(\ln(p) - (\gamma - 1) \ln(\rho))`
+                :math:`\frac{R}{1-\gamma} \left(\ln(p) - \gamma \ln(\rho))`
                 where
 
         References
         ----------
-        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp. 11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
+            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
         """
-        ln_T = np.log(self.temperature * self.units.temperature)
-        ln_n = np.log(self.number_density * self.units.n)
-
-        polytropic_index = self.polytropic_index
+        polytropic_index = self.constants.polytropic_index
         if isinstance(gamma, str):
+            #             print(1, gamma)
             gamma = gamma.lower()
             try:
-                gamma = polytropic_index.get(gamma)
+                gamma = polytropic_index[gamma]
             except KeyError:
                 raise KeyError(f"Unexpected polytropic gamma alias ({gamma})")
+        #             print(2, gamma)
+        #             print()
 
-        chk = polytropic_index.subtract(gamma).abs()
+        #         pdb.set_trace()
+        try:
+            chk = polytropic_index.subtract(gamma).abs()
+        except TypeError as e:
+            print(e)
+            pdb.set_trace()
         comp, chk = chk.idxmin(), chk.min()
         if chk:
             self.logger.warning(
@@ -249,13 +267,38 @@ class Ion(base.Base):
             comp = "scalar"
 
         gamma = polytropic_index.loc[comp]
-        arg = ln_T - ((gamma - 1) * ln_n)
-        out = arg
 
-        if not only_argument:
+        if only_argument:
+            ln_T = np.log(self.temperature.loc[:, comp] * self.units.temperature)
+            ln_n = np.log(self.number_density * self.units.n)
+            out = ln_T.subtract(ln_n.multiply(gamma - 1))
+
+            print(
+                "<module>",
+                "<gamma>",
+                gamma,
+                "<ln_T>",
+                ln_T,
+                "<ln_n>",
+                ln_n,
+                sep="\n",
+                end="\n\n",
+            )
+
+        else:
+            ln_pth = np.log(self.pth.loc[:, comp] * self.units.pth)
+            ln_rho = np.log(self.rho * self.units.rho)
+            arg = ln_pth.subtract(ln_rho.multiply(gamma))
+
             R = self.units_constants.misc.loc["gas constant"]
             coef = R / (1.0 - gamma)
-            out = coef * arg
+            out = arg.multiply(coef)
 
+        out /= self.units.specific_entropy
         out.name = "lnS"
         return out
+
+    def lnS(self, **kwargs):
+        r"""Shortuct to :py:meth:`~specific_entropy`.
+        """
+        return self.specific_entropy(**kwargs)

@@ -32,7 +32,7 @@ _kBoltzmann = {
     "eV": physical_constants["Boltzmann constant in eV/K"][0],
 }
 
-_polytropic_index = dict(par=3.0, per=2.0, iso=5.0 / 3.0, scalar=5.0 / 3.0)
+_polytropic_index = dict(par=3.0, per=2.0, scalar=5.0 / 3.0)
 
 _m_in_mp = {
     "p": 1.0,
@@ -214,3 +214,7 @@ class Units(object):
     @property
     def distance2sun(self):
         return 1.0  # unit stored in [m]
+
+    @property
+    def specific_entropy(self):
+        return 1.0
