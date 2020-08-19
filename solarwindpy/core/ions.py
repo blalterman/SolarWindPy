@@ -269,30 +269,36 @@ class Ion(base.Base):
         gamma = polytropic_index.loc[comp]
 
         if only_argument:
+            print("T/n")
             ln_T = np.log(self.temperature.loc[:, comp] * self.units.temperature)
             ln_n = np.log(self.number_density * self.units.n)
             out = ln_T.subtract(ln_n.multiply(gamma - 1))
 
-            print(
-                "<module>",
-                "<gamma>",
-                gamma,
-                "<ln_T>",
-                ln_T,
-                "<ln_n>",
-                ln_n,
-                sep="\n",
-                end="\n\n",
-            )
+        #             print(
+        #                 "<module>",
+        #                 "<gamma>",
+        #                 gamma,
+        #                 "<ln_T>",
+        #                 ln_T,
+        #                 "<ln_n>",
+        #                 ln_n,
+        #                 sep="\n",
+        #                 end="\n\n",
+        #             )
 
         else:
+            print("p/rho")
             ln_pth = np.log(self.pth.loc[:, comp] * self.units.pth)
             ln_rho = np.log(self.rho * self.units.rho)
             arg = ln_pth.subtract(ln_rho.multiply(gamma))
 
-            R = self.units_constants.misc.loc["gas constant"]
-            coef = R / (1.0 - gamma)
-            out = arg.multiply(coef)
+            #             R = self.constants.misc.# loc["gas constant"]
+            #             coef = R / (1.0 - gamma)
+            #             out = arg.multiply(coef)
+            out = arg
+
+        print(out)
+        print()
 
         out /= self.units.specific_entropy
         out.name = "lnS"
