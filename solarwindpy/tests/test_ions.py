@@ -158,165 +158,36 @@ class IonTestBase(ABC):
         # if only_argument: ln(T) - (gamma - 1) * ln(n)
         # else: (R / (1 - gamma)) * (ln(pth) - gamma * ln(rho))
 
-        m = self.mass
-        n = self.data.n * 1e6
-        rho = n * m
-
-        kb = physical_constants["Boltzmann constant"][0]
+        rho = self.mass * self.data.n * 1e6
         w = self.data.w * 1e3
-        T = (0.5 * m / kb) * w.pow(2)
 
         pth = w.pow(2).multiply(0.5 * rho, axis=0)
 
-        ln_T = np.log(T)
-        ln_n = np.log(n)
         ln_pth = np.log(pth)
         ln_rho = np.log(rho)
 
+        gamma = 5.0 / 3.0
+
+        lnS = ln_pth - (gamma * ln_rho)
+        lnS.name = lnS
         #         print(
         #             "<specific_entropy>",
         #             "<s>",
         #             self.species,
         #             "<test>",
-        #             "<ln_T>",
-        #             ln_T,
-        #             "<ln_n>",
-        #             ln_n,
         #             "<ln_pth>",
         #             ln_pth,
         #             "<ln_rho>",
         #             ln_rho,
+        #             "<lnS>",
+        #             lnS,
         #             sep="\n",
         #         )
 
         ot = self.object_testing
-        # `only_argument == True`, scalar case
-        case = ln_T.loc[:, "scalar"].subtract(ln_n.multiply((5.0 / 3.0) - 1))
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="scalar", only_argument=True)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="scalar", only_argument=True),
-            ot.lnS(gamma="scalar", only_argument=True),
-        )
-        # `only_argument == True`, parallel case
-        case = ln_T.loc[:, "par"].subtract(ln_n.multiply(3 - 1))
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="par", only_argument=True)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="par", only_argument=True),
-            ot.lnS(gamma="par", only_argument=True),
-        )
-        # `only_argument == True`, perpendicular case
-        case = ln_T.loc[:, "per"].subtract(ln_n.multiply(2 - 1))
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="per", only_argument=True)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="per", only_argument=True),
-            ot.lnS(gamma="per", only_argument=True),
-        )
-
-        #         R = physical_constants["molar gas constant"][0]
-        # `only_argument == False`, scalar case
-        gamma = 5.0 / 3.0
-        #         coef = R / (1 - gamma)
-        case = ln_pth.loc[:, "scalar"].subtract(
-            ln_rho.multiply(gamma)
-        )  # .multiply(coef)
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="scalar", only_argument=False)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="scalar", only_argument=False),
-            ot.lnS(gamma="scalar", only_argument=False),
-        )
-        # `only_argument == False`, parallel case
-        gamma = 3.0
-        #         coef = R / (1 - gamma)
-        case = ln_pth.loc[:, "par"].subtract(ln_rho.multiply(gamma))  # .multiply(coef)
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="par", only_argument=False)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="par", only_argument=False),
-            ot.lnS(gamma="par", only_argument=False),
-        )
-        # `only_argument == False`, perpendicular case
-        gamma = 2.0
-        #         coef = R / (1 - gamma)
-        case = ln_pth.loc[:, "per"].subtract(ln_rho.multiply(gamma))  # .multiply(coef)
-        case.name = "lnS"
-        pdt.assert_series_equal(
-            case, ot.specific_entropy(gamma="per", only_argument=False)
-        )
-        pdt.assert_series_equal(
-            ot.specific_entropy(gamma="per", only_argument=False),
-            ot.lnS(gamma="per", only_argument=False),
-        )
-
-        for comp in ("iso", "lala"):
-            with self.assertRaisesRegex(KeyError, "Unexpected polytropic gamma alias"):
-                ot.lnS(gamma=comp, only_argument=True)
-            with self.assertRaisesRegex(KeyError, "Unexpected polytropic gamma alias"):
-                ot.lnS(gamma=comp)
-
-        # `only_argument == True` with unequal components
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="scalar", only_argument=True),
-                ot.specific_entropy(gamma="par", only_argument=True),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="scalar", only_argument=True),
-                ot.specific_entropy(gamma="per", only_argument=True),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="par", only_argument=True),
-                ot.specific_entropy(gamma="per", only_argument=True),
-            )
-
-        # `only_argument == False` with unequal components
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="scalar", only_argument=False),
-                ot.specific_entropy(gamma="par", only_argument=False),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="scalar", only_argument=False),
-                ot.specific_entropy(gamma="per", only_argument=False),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="par", only_argument=False),
-                ot.specific_entropy(gamma="per", only_argument=False),
-            )
-
-        # `only_argument == False` and `only_argument == True`
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="scalar", only_argument=True),
-                ot.specific_entropy(gamma="scalar", only_argument=False),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="per", only_argument=True),
-                ot.specific_entropy(gamma="per", only_argument=False),
-            )
-        with self.assertRaisesRegex(AssertionError, "Series are different"):
-            pdt.assert_series_equal(
-                ot.specific_entropy(gamma="par", only_argument=True),
-                ot.specific_entropy(gamma="par", only_argument=False),
-            )
+        pdt.assert_series_equal(lnS, ot.specific_entropy)
+        pdt.assert_series_equal(lnS, ot.lnS)
+        pdt.assert_series_equal(ot.lnS, ot.specific_entropy)
 
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):

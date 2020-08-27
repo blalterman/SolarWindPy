@@ -136,6 +136,21 @@ class Constants(object):
 
     @property
     def polytropic_index(self):
+        r"""The polytropic index. Some example cases are [1, pg 27].
+
+            ======= =========================== ==========
+             gamma              use               alias
+            ======= =========================== ==========
+             3       Motion parallel to B        "par"
+             2       Motion perpendicular to B   "per"
+             5/3     Isotropic plasma            "scalar"
+            ======= =========================== ==========
+
+        References
+        ----------
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
+            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+        """
         return pd.Series(_polytropic_index)
 
 

@@ -212,99 +212,32 @@ class Ion(base.Base):
         cs.name = "cs"
         return cs
 
-    def specific_entropy(self, gamma="scalar", only_argument=True):
-        r"""Calculate the specific entropy, where the form depends on
-        `only_argument`. See [1] for a derivation of the equations.
+    @property
+    def specific_entropy(self):
+        r"""Calculate the specific entropy following [1] as
 
-        Parameters
-        ----------
-        gamma: scalar
-            Polytropic index. Some example cases are [1, pg 27]. String
-            aliases are given as well.
+            :math:`\ln(p) - \gamma \ln(\rho)`
 
-                ======= =========================== =================
-                 gamma              use                   alias
-                ======= =========================== =================
-                 3       Motion parallel to B        "par"
-                 2       Motion perpendicular to B   "per"
-                 5/3     Isotropic plasma            "scalar"
-                ======= =========================== =================
-
-        only_argument: bool
-            If True:
-                :math:`ln(p) - \gamma \ln(\rho) = \ln(T) - (\gamma - 1) \ln(n)`
-            else:
-                :math:`\frac{R}{1-\gamma} \left(\ln(p) - \gamma \ln(\rho))`
-                where
+        where :math:`gamma=5/3`, :math:`p` is the thermal presure, and :math:`rho` is the mass density.
 
         References
         ----------
         [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
             11–100). https://doi.org/10.1007/978-94-009-7194-3_2
         """
-        polytropic_index = self.constants.polytropic_index
-        if isinstance(gamma, str):
-            #             print(1, gamma)
-            gamma = gamma.lower()
-            try:
-                gamma = polytropic_index[gamma]
-            except KeyError:
-                raise KeyError(f"Unexpected polytropic gamma alias ({gamma})")
-        #             print(2, gamma)
-        #             print()
+        comp = "scalar"
+        gamma = self.constants.polytropic_index.loc[comp]
 
-        #         pdb.set_trace()
-        try:
-            chk = polytropic_index.subtract(gamma).abs()
-        except TypeError as e:
-            print(e)
-            pdb.set_trace()
-        comp, chk = chk.idxmin(), chk.min()
-        if chk:
-            self.logger.warning(
-                "Atypical polytropic gamma ({gamma}). Selecting scalar component."
-            )
-            comp = "scalar"
+        ln_pth = np.log(self.pth.loc[:, comp] * self.units.pth)
+        ln_rho = np.log(self.rho * self.units.rho)
+        arg = ln_pth.subtract(ln_rho.multiply(gamma))
 
-        gamma = polytropic_index.loc[comp]
-
-        if only_argument:
-            print("T/n")
-            ln_T = np.log(self.temperature.loc[:, comp] * self.units.temperature)
-            ln_n = np.log(self.number_density * self.units.n)
-            out = ln_T.subtract(ln_n.multiply(gamma - 1))
-
-        #             print(
-        #                 "<module>",
-        #                 "<gamma>",
-        #                 gamma,
-        #                 "<ln_T>",
-        #                 ln_T,
-        #                 "<ln_n>",
-        #                 ln_n,
-        #                 sep="\n",
-        #                 end="\n\n",
-        #             )
-
-        else:
-            print("p/rho")
-            ln_pth = np.log(self.pth.loc[:, comp] * self.units.pth)
-            ln_rho = np.log(self.rho * self.units.rho)
-            arg = ln_pth.subtract(ln_rho.multiply(gamma))
-
-            #             R = self.constants.misc.# loc["gas constant"]
-            #             coef = R / (1.0 - gamma)
-            #             out = arg.multiply(coef)
-            out = arg
-
-        print(out)
-        print()
-
-        out /= self.units.specific_entropy
+        out = arg.divide(self.units.specific_entropy)
         out.name = "lnS"
         return out
 
-    def lnS(self, **kwargs):
+    @property
+    def lnS(self):
         r"""Shortuct to :py:meth:`~specific_entropy`.
         """
-        return self.specific_entropy(**kwargs)
+        return self.specific_entropy()
