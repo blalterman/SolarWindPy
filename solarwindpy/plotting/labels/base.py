@@ -129,7 +129,8 @@ _trans_units = {
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
-    "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
+    "lnS": r"\mathrm{\ln(%s \, m_p^{-5/3} \, cm^5)}"
+    % _inU["pPa"],  # Natural log of specific entropy
     # Flux
     "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
