@@ -1867,6 +1867,7 @@ species: {}
             :math:`\left(\ln(p) - (\gamma - 1) \ln(\rho))`
 
         where :math:`p` is the thermal pressure, :math:`\rho` is the mass density, and :math:`\gamma` is the polytropic index (5/3).
+        The calculation is performed in units :math:`[pPa km^{-1} cm^{-3}]`
 
         Parameters
         ----------
@@ -1887,8 +1888,8 @@ species: {}
         )
         rho = self.rho(*species)
 
-        pth *= self.units.pth
-        rho *= self.units.rho
+        #         pth *= self.units.pth
+        #         rho *= self.units.rho
 
         out = np.log(pth).subtract(
             gamma * np.log(rho),

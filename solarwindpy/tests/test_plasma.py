@@ -2321,8 +2321,8 @@ class PlasmaTestBase(ABC):
             pth = ot.pth(*s).xs("scalar", axis=1, level="C" if multi_species else None)
             rho = ot.rho(*s)
 
-            pth *= 1e-12
-            rho *= 1e6 * constants.m_p
+            #             pth *= 1e-12
+            #             rho *= 1e6 * constants.m_p
 
             by_species = np.log(pth).subtract(
                 gamma * np.log(rho),

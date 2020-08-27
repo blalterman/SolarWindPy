@@ -156,11 +156,13 @@ class IonTestBase(ABC):
 
     def test_specific_entropy(self):
         # Quantity is dimensionless
+        # Perform calculaton in :math:`[pPa km^{-1} cm^{-3}]`
 
         rho = self.mass * self.data.n * 1e6
         w = self.data.w.xs("scalar", axis=1) * 1e3
+        pth = w.pow(2).multiply(0.5 * rho, axis=0) / 1e-12
 
-        pth = w.pow(2).multiply(0.5 * rho, axis=0)
+        rho /= physical_constants["proton mass"][0] * 1e6
 
         ln_pth = np.log(pth)
         ln_rho = np.log(rho)

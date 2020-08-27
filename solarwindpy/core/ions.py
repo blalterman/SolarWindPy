@@ -219,6 +219,7 @@ class Ion(base.Base):
             :math:`\ln(p) - \gamma \ln(\rho)`
 
         where :math:`gamma=5/3`, :math:`p` is the thermal presure, and :math:`rho` is the mass density.
+        The calculation is performed in units :math:`[pPa km^{-1} cm^{-3}]`
 
         References
         ----------
@@ -228,8 +229,8 @@ class Ion(base.Base):
         comp = "scalar"
         gamma = self.constants.polytropic_index.loc[comp]
 
-        ln_pth = np.log(self.pth.loc[:, comp] * self.units.pth)
-        ln_rho = np.log(self.rho * self.units.rho)
+        ln_pth = np.log(self.pth.loc[:, comp])
+        ln_rho = np.log(self.rho)
         arg = ln_pth.subtract(ln_rho.multiply(gamma))
 
         out = arg.divide(self.units.specific_entropy)
