@@ -159,7 +159,7 @@ class IonTestBase(ABC):
         # else: (R / (1 - gamma)) * (ln(pth) - gamma * ln(rho))
 
         rho = self.mass * self.data.n * 1e6
-        w = self.data.w * 1e3
+        w = self.data.w.xs("scalar", axis=1) * 1e3
 
         pth = w.pow(2).multiply(0.5 * rho, axis=0)
 
@@ -169,7 +169,7 @@ class IonTestBase(ABC):
         gamma = 5.0 / 3.0
 
         lnS = ln_pth - (gamma * ln_rho)
-        lnS.name = lnS
+        lnS.name = "lnS"
         #         print(
         #             "<specific_entropy>",
         #             "<s>",

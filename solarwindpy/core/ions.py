@@ -240,4 +240,4 @@ class Ion(base.Base):
     def lnS(self):
         r"""Shortuct to :py:meth:`~specific_entropy`.
         """
-        return self.specific_entropy()
+        return self.specific_entropy
