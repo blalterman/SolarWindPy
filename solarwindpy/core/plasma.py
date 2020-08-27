@@ -1855,35 +1855,44 @@ species: {}
 
         return turb
 
-    def specific_entropy(self, *species, gamma="iso", only_argument=True):
+    def lnS(self, *species):
+        r"""Shortcut to :py:meth:`specific_entropy`.
+        """
+        return self.specific_entropy(*species)
+
+    def specific_entropy(self, *species):
         r"""Calculate the specific entropy, where the form depends on
         `only_argument`. See [1] for a derivation of the equations.
 
+            :math:`\left(\ln(p) - (\gamma - 1) \ln(\rho))`
+
+        where :math:`p` is the thermal pressure, :math:`\rho` is the mass density, and :math:`\gamma` is the polytropic index (5/3).
+
         Parameters
         ----------
-        gamma: scalar
-            Polytropic index. Some example cases are [1, pg 27]. String
-            aliases are given as well.
-
-                ======= =========================== =================
-                 gamma              use                   alias
-                ======= =========================== =================
-                 3       Motion parallel to B        "par"
-                 2       Motion perpendicular to B   "per"
-                 5/3     Isotropic plasma            "scalar", "iso"
-                ======= =========================== =================
-
-        only_argument: bool
-            If True:
-                :math:`ln(p) - \gamma \ln(\rho) = \ln(T) - (\gamma - 1) \ln(n)`
-            else:
-                :math:`\frac{R}{1-\gamma} \left(\ln(p) - (\gamma - 1) \ln(\rho))`
-                where
+        species: str or list-like of str
+            Comma separated strings ("a,p1") are invalid. Comma separated lists
+            ("a", "p1") are valid.
 
         References
         ----------
         [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
             11–100). https://doi.org/10.1007/978-94-009-7194-3_2
         """
+        multi_species = len(species) > 1
+        gamma = self.constants.polytropic_index["scalar"]
 
-        raise NotImplementedError("How to handle various species inputs?")
+        pth = self.pth(*species).xs(
+            "scalar", axis=1, level="C" if multi_species else None
+        )
+        rho = self.rho(*species)
+
+        out = np.log(pth).subtract(
+            gamma * np.log(rho),
+            axis=1 if multi_species else 0,
+            level="S" if multi_species else None,
+        )
+        out /= self.units.specific_entropy
+        out.name = "lnS"
+
+        return out

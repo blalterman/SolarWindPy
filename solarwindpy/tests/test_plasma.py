@@ -2007,7 +2007,6 @@ class PlasmaTestBase(ABC):
         pdt.assert_index_equal(epoch, ot.epoch)
         pdt.assert_index_equal(ot.epoch, ot.data.index)
 
-    # @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
         species = self.species
         slist = species.split("+")
@@ -2311,6 +2310,46 @@ class PlasmaTestBase(ABC):
                 ot.vdf_ratio(ssum, scomma)
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
+
+    def test_specific_entropy(self):
+        # print_inline_debug_info = False
+        ot = self.object_testing
+
+        gamma = 5.0 / 3.0
+        for s in self.species_combinations:
+            multi_species = len(s) > 1
+            pth = ot.pth(*s).xs("scalar", axis=1, level="C" if multi_species else None)
+            rho = ot.rho(*s)
+
+            by_species = np.log(pth).subtract(
+                gamma * np.log(rho),
+                axis=1 if multi_species else 0,
+                level="S" if multi_species else None,
+            )
+            by_species.name = "lnS"
+
+            test_fcn = (
+                pdt.assert_frame_equal if multi_species else pdt.assert_series_equal
+            )
+            test_fcn(by_species, ot.specific_entropy(*s))
+            test_fcn(ot.specific_entropy(*s), ot.lnS(*s))
+
+            if multi_species:
+                stotal = "+".join(s)
+                pth_total = pth.sum(axis=1)
+                rho_total = rho.sum(axis=1)
+                total = np.log(pth_total).subtract(gamma * np.log(rho_total), axis=0)
+                total.name = "lnS"
+
+                pdt.assert_series_equal(total, ot.specific_entropy(stotal))
+                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.lnS(stotal))
+                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.lnS(stotal))
+
+                # comma-separated species list fails
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.specific_entropy(",".join(s))
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.lnS(",".join(s))
 
 
 #####

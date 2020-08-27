@@ -155,8 +155,7 @@ class IonTestBase(ABC):
         pdt.assert_frame_equal(t, self.object_testing.temperature)
 
     def test_specific_entropy(self):
-        # if only_argument: ln(T) - (gamma - 1) * ln(n)
-        # else: (R / (1 - gamma)) * (ln(pth) - gamma * ln(rho))
+        # Quantity is dimensionless
 
         rho = self.mass * self.data.n * 1e6
         w = self.data.w.xs("scalar", axis=1) * 1e3
