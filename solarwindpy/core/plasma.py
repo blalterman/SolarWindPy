@@ -1887,6 +1887,9 @@ species: {}
         )
         rho = self.rho(*species)
 
+        pth *= self.units.pth
+        rho *= self.units.rho
+
         out = np.log(pth).subtract(
             gamma * np.log(rho),
             axis=1 if multi_species else 0,
