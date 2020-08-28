@@ -6,7 +6,8 @@ Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:cla
 """
 
 import pdb  # noqa: F401
-import numpy as np
+
+# import numpy as np
 import pandas as pd
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
@@ -216,10 +217,10 @@ class Ion(base.Base):
     def specific_entropy(self):
         r"""Calculate the specific entropy following [1] as
 
-            :math:`\ln(p) - \gamma \ln(\rho)`
+            :math:`p_\mathrm{th} \rho^{-\gamma}`
 
-        where :math:`gamma=5/3`, :math:`p` is the thermal presure, and :math:`rho` is the mass density.
-        The calculation is performed in units :math:`[pPa km^{-1} cm^{-3}]`
+        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
+        and :math:`rho` is the mass density.
 
         References
         ----------
@@ -229,16 +230,15 @@ class Ion(base.Base):
         comp = "scalar"
         gamma = self.constants.polytropic_index.loc[comp]
 
-        ln_pth = np.log(self.pth.loc[:, comp])
-        ln_rho = np.log(self.rho)
-        arg = ln_pth.subtract(ln_rho.multiply(gamma))
+        pth = self.pth.loc[:, comp] * self.units.pth
+        rho = self.rho * self.units.rho
+        out = pth.multiply(rho.pow(-gamma)) / self.units.specific_entropy
 
-        out = arg.divide(self.units.specific_entropy)
-        out.name = "lnS"
+        out.name = "S"
         return out
 
     @property
-    def lnS(self):
+    def S(self):
         r"""Shortuct to :py:meth:`~specific_entropy`.
         """
         return self.specific_entropy

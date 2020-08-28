@@ -124,12 +124,12 @@ _trans_units = {
     "T": r"10^5 \, \mathrm{K}",
     "q": r"\mathrm{mW \, cm^{-2}}",  # heat flux,
     "qhat": _inU["dimless"],  # normalized heat flux
-    "Q": r"\mathrm{mW \, cm^{-2}}",  # Heating rate,
+    "Q": r"\mathrm{mW \, cm^{-2}}",  # heating rate
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
-    "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
+    "S": r"\mathrm{eV \, cm^2)}",  # Specific Entropy
     # Flux
     "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things

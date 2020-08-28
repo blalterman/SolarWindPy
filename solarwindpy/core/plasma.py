@@ -1351,8 +1351,7 @@ species: {}
 
     def nuc(self, sa, sb, both_species=True):
         r"""
-        Calculate the momentum collision rate following Hernandez & Marsch
-        (JGR 1985; doi:10.1029/JA090iA11p11062).
+        Calculate the momentum collision rate following [1].
 
         Parameters
         ----------
@@ -1376,6 +1375,13 @@ species: {}
         See Also
         --------
         lnlambda, nc
+
+        References
+        ----------
+        [1] Hernández, R., & Marsch, E. (1985). Collisional time scales for
+            temperature and velocity exchange between drifting Maxwellians.
+            Journal of Geophysical Research, 90(A11), 11062.
+            <https://doi.org/10.1029/JA090iA11p11062>.
         """
         from scipy.special import erf
 
@@ -1855,30 +1861,33 @@ species: {}
 
         return turb
 
-    def lnS(self, *species):
+    def S(self, *species):
         r"""Shortcut to :py:meth:`specific_entropy`.
         """
         return self.specific_entropy(*species)
 
     def specific_entropy(self, *species):
-        r"""Calculate the specific entropy, where the form depends on
-        `only_argument`. See [1] for a derivation of the equations.
+        r"""Calculate the specific entropy following [1] as
 
-            :math:`\left(\ln(p) - (\gamma - 1) \ln(\rho))`
+            :math:`p_\mathrm{th} \rho^{-\gamma}`
 
-        where :math:`p` is the thermal pressure, :math:`\rho` is the mass density, and :math:`\gamma` is the polytropic index (5/3).
-        The calculation is performed in units :math:`[pPa km^{-1} cm^{-3}]`
+        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
+        and :math:`rho` is the mass density.
 
         Parameters
         ----------
         species: str or list-like of str
-            Comma separated strings ("a,p1") are invalid. Comma separated lists
-            ("a", "p1") are valid.
+            Comma separated strings ("a,p1") are invalid.
+            Comma separated lists ("a", "p1") are valid.
+            Total effective species ("a+p1") are valid and use
+
+                :math:`p_\mathrm{th} = \sum_s p_{\mathrm{th},s}`
+                :math:`\rho = \sum_s \rho_s`.
 
         References
         ----------
         [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
-            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+            11–100). <https://doi.org/10.1007/978-94-009-7194-3_2>.
         """
         multi_species = len(species) > 1
         gamma = self.constants.polytropic_index["scalar"]
@@ -1888,15 +1897,15 @@ species: {}
         )
         rho = self.rho(*species)
 
-        #         pth *= self.units.pth
-        #         rho *= self.units.rho
+        pth *= self.units.pth
+        rho *= self.units.rho
 
-        out = np.log(pth).subtract(
-            gamma * np.log(rho),
+        out = pth.multiply(
+            rho.pow(-gamma),
             axis=1 if multi_species else 0,
             level="S" if multi_species else None,
         )
         out /= self.units.specific_entropy
-        out.name = "lnS"
+        out.name = "S"
 
         return out

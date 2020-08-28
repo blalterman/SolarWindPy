@@ -22,7 +22,7 @@ from abc import ABC, abstractproperty
 # from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
 # from unittest import TestCase
 
-# from scipy import constants
+from scipy import constants
 from scipy.constants import physical_constants
 
 # try:
@@ -155,22 +155,17 @@ class IonTestBase(ABC):
         pdt.assert_frame_equal(t, self.object_testing.temperature)
 
     def test_specific_entropy(self):
-        # Quantity is dimensionless
-        # Perform calculaton in :math:`[pPa km^{-1} cm^{-3}]`
-
         rho = self.mass * self.data.n * 1e6
         w = self.data.w.xs("scalar", axis=1) * 1e3
-        pth = w.pow(2).multiply(0.5 * rho, axis=0) / 1e-12
+        pth = w.pow(2).multiply(0.5 * rho, axis=0)
 
-        rho /= physical_constants["proton mass"][0] * 1e6
-
-        ln_pth = np.log(pth)
-        ln_rho = np.log(rho)
-
+        #         ln_pth = np.log(pth)
+        #         ln_rho = np.log(rho)
+        #
         gamma = 5.0 / 3.0
-
-        lnS = ln_pth - (gamma * ln_rho)
-        lnS.name = "lnS"
+        units = 1e4 / constants.e
+        S = pth.multiply(rho.pow(-gamma)) / units
+        S.name = "S"
         #         print(
         #             "<specific_entropy>",
         #             "<s>",
@@ -186,9 +181,9 @@ class IonTestBase(ABC):
         #         )
 
         ot = self.object_testing
-        pdt.assert_series_equal(lnS, ot.specific_entropy)
-        pdt.assert_series_equal(lnS, ot.lnS)
-        pdt.assert_series_equal(ot.lnS, ot.specific_entropy)
+        pdt.assert_series_equal(S, ot.specific_entropy)
+        pdt.assert_series_equal(S, ot.S)
+        pdt.assert_series_equal(ot.S, ot.specific_entropy)
 
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):

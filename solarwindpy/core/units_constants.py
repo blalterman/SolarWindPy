@@ -160,76 +160,95 @@ class Units(object):
 
     @property
     def bfield(self):
+        r""":math:`[\mathrm{nT}]`"""
         return 1e-9
 
     @property
     def b(self):
+        r""":math:`[\mathrm{nT}]`"""
         return self.bfield
 
     @property
     def v(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return 1e3
 
     @property
     def w(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return self.v
 
     @property
     def dv(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return self.v
 
     @property
     def ca(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return self.v
 
     @property
     def cs(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return self.v
 
     @property
     def cfms(self):
+        r""":math:`[\mathrm{km \, s^{-1}}]`"""
         return self.v
 
     @property
     def pth(self):
+        r""":math:`[\mathrm{pPa}]`"""
         return 1e-12
 
     @property
     def temperature(self):
+        r""":math:`[10^{5} \mathrm{K}]`"""
         return 1e5
 
     @property
     def n(self):
+        r""":math:`[\mathrm{cm^{-3}}]`"""
         return 1e6
 
     @property
     def rho(self):
+        r""":math:`[\mathrm{cm^{-3}} m_p]`"""
         return self.n * constants.m_p
 
     @property
     def beta(self):
+        r""":math:`[\#]`"""
         return 1.0
 
     @property
     def lnlambda(self):
+        r""":math:`[\#]`"""
         return 1.0
 
     @property
     def nuc(self):
+        r""":math:`[10^{-7} \mathrm{Hz}]`"""
         return 1e-7
 
     @property
     def nc(self):
+        r""":math:`[\#]`"""
         return 1.0
 
     @property
     def qpar(self):
+        r""":math:`[\mathrm{mW \, cm^{-2}}]`"""
         return 1e-7
 
     @property
     def distance2sun(self):
-        return 1.0  # unit stored in [m]
+        r""":math:`[m]`"""
+        return 1.0
 
     @property
     def specific_entropy(self):
-        return 1.0
+        r""":math:`[eV cm^2]`"""
+        return 1e4 / constants.e
