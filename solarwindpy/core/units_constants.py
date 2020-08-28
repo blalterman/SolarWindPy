@@ -215,7 +215,7 @@ class Units(object):
 
     @property
     def rho(self):
-        r""":math:`[\mathrm{cm^{-3}} m_p]`"""
+        r""":math:`[\mathrm{cm^{-3} \, m_p}]`"""
         return self.n * constants.m_p
 
     @property
@@ -250,5 +250,5 @@ class Units(object):
 
     @property
     def specific_entropy(self):
-        r""":math:`[eV cm^2]`"""
+        r""":math:`[\mathrm{eV \, cm^2 \, m_p^{-5/3}}]`"""
         return 1e4 / constants.e

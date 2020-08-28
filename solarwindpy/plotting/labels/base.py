@@ -129,7 +129,7 @@ _trans_units = {
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
-    "S": r"\mathrm{eV \, cm^2)}",  # Specific Entropy
+    "S": r"\mathrm{eV \, cm^2 \, m_p^{-5/3}}",  # Specific Entropy
     # Flux
     "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
@@ -221,7 +221,7 @@ _templates = {
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
     "Q": r"Q_{{$C};{$S}}",  # heating rate
-    "lnS": r"\ln(S_{$S})",  # Natural logarithm of specific entropy
+    "S": r"S_{$S}",  # Specific entropy logarithm
     "ratio": r"\mathrm{Ratio}",
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
