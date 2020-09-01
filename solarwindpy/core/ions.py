@@ -6,6 +6,8 @@ Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:cla
 """
 
 import pdb  # noqa: F401
+
+# import numpy as np
 import pandas as pd
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
@@ -198,3 +200,45 @@ class Ion(base.Base):
         pth = (0.5 / self.units.pth) * w.pow(2).multiply(rho, axis=0)
         pth.name = "pth"
         return pth
+
+    @property
+    def cs(self):
+        r"""Species' sound speed.
+        """
+        pth = self.pth * self.units.pth
+        rho = self.rho * self.units.rho
+        gamma = self.constants.polytropic_index["scalar"]
+
+        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
+        cs.name = "cs"
+        return cs
+
+    @property
+    def specific_entropy(self):
+        r"""Calculate the specific entropy following [1] as
+
+            :math:`p_\mathrm{th} \rho^{-\gamma}`
+
+        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
+        and :math:`rho` is the mass density.
+
+        References
+        ----------
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
+            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
+        """
+        comp = "scalar"
+        gamma = self.constants.polytropic_index.loc[comp]
+
+        pth = self.pth.loc[:, comp] * self.units.pth
+        rho = self.rho * self.units.rho
+        out = pth.multiply(rho.pow(-gamma)) / self.units.specific_entropy
+
+        out.name = "S"
+        return out
+
+    @property
+    def S(self):
+        r"""Shortuct to :py:meth:`~specific_entropy`.
+        """
+        return self.specific_entropy

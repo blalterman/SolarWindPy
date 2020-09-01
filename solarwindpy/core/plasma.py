@@ -580,7 +580,19 @@ class Plasma(base.Base):
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".
+        #         try:
+        #             w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        #         except ValueError as e:
+        #             print(e)
+        #             pdb.set_trace()
+
+        # Workaround for `skipna=False` bug. (20200814)
         w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        #         w_is_finite = w.notna().all(axis=1, level="S")
+        #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
+        #         pdb.set_trace()
+        #         w = w.where(w_is_finite, axis=1, level="S")
+
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
         w.columns = self.mi_tuples(w.columns)
@@ -1083,15 +1095,19 @@ species: {}
         -------
         cs: pd.DataFrame or pd.Series depending on `species` inputs.
         """
-        raise NotImplementedError
+        rho = self.mass_density(*species) * self.units.rho
+        pth = self.pth(*species) * self.units.pth
 
-        rho = self.mass_density(*species)
-        w = self.thermal_speed(*species)
+        #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
+        gamma = self.units_constants.polytropic_index["scalar"]  # should be 5/3
+        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
 
-        gamma = self.units_constants.misc.loc["gamma"] # should be 5.0/3.0
-        coeff = gamma / 2.0
-        cs = w.pow(2).multiply(1.0/coeff)
-        cs.name = "IDK YET"
+        raise NotImplementedError(
+            "How do we name this species? Need to figure out species processing up top."
+        )
+        if len(species) == 1:
+            cs.name = species[0]
+
         return cs
 
     def cs(self, *species):
@@ -1335,8 +1351,7 @@ species: {}
 
     def nuc(self, sa, sb, both_species=True):
         r"""
-        Calculate the momentum collision rate following Hernandez & Marsch
-        (JGR 1985; doi:10.1029/JA090iA11p11062).
+        Calculate the momentum collision rate following [1].
 
         Parameters
         ----------
@@ -1360,6 +1375,13 @@ species: {}
         See Also
         --------
         lnlambda, nc
+
+        References
+        ----------
+        [1] Hernández, R., & Marsch, E. (1985). Collisional time scales for
+            temperature and velocity exchange between drifting Maxwellians.
+            Journal of Geophysical Research, 90(A11), 11062.
+            <https://doi.org/10.1029/JA090iA11p11062>.
         """
         from scipy.special import erf
 
@@ -1838,3 +1860,52 @@ species: {}
         turb = alf_turb.AlfvenicTurbulence(v, b, r, species, **kwargs)
 
         return turb
+
+    def S(self, *species):
+        r"""Shortcut to :py:meth:`specific_entropy`.
+        """
+        return self.specific_entropy(*species)
+
+    def specific_entropy(self, *species):
+        r"""Calculate the specific entropy following [1] as
+
+            :math:`p_\mathrm{th} \rho^{-\gamma}`
+
+        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
+        and :math:`rho` is the mass density.
+
+        Parameters
+        ----------
+        species: str or list-like of str
+            Comma separated strings ("a,p1") are invalid.
+            Comma separated lists ("a", "p1") are valid.
+            Total effective species ("a+p1") are valid and use
+
+                :math:`p_\mathrm{th} = \sum_s p_{\mathrm{th},s}`
+                :math:`\rho = \sum_s \rho_s`.
+
+        References
+        ----------
+        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
+            11–100). <https://doi.org/10.1007/978-94-009-7194-3_2>.
+        """
+        multi_species = len(species) > 1
+        gamma = self.constants.polytropic_index["scalar"]
+
+        pth = self.pth(*species).xs(
+            "scalar", axis=1, level="C" if multi_species else None
+        )
+        rho = self.rho(*species)
+
+        pth *= self.units.pth
+        rho *= self.units.rho
+
+        out = pth.multiply(
+            rho.pow(-gamma),
+            axis=1 if multi_species else 0,
+            level="S" if multi_species else None,
+        )
+        out /= self.units.specific_entropy
+        out.name = "S"
+
+        return out

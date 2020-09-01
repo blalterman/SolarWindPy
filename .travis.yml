@@ -13,7 +13,7 @@ python:
 notifications:
     email:
         recipients:
-            - balterma@umich.edu
+            - blaltermanphd@gmail.com
         on_success: change  # always|never|change
         on_failure: always
 

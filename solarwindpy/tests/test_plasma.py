@@ -2007,7 +2007,6 @@ class PlasmaTestBase(ABC):
         pdt.assert_index_equal(epoch, ot.epoch)
         pdt.assert_index_equal(ot.epoch, ot.data.index)
 
-    # @unittest.skip("Code under dev. Not ready to test.")
     def test_build_alfvenic_turbulence(self):
         species = self.species
         slist = species.split("+")
@@ -2311,6 +2310,53 @@ class PlasmaTestBase(ABC):
                 ot.vdf_ratio(ssum, scomma)
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
+
+    def test_specific_entropy(self):
+        # print_inline_debug_info = False
+        ot = self.object_testing
+
+        gamma = 5.0 / 3.0
+        units = 1e4 / constants.e
+        for s in self.species_combinations:
+            multi_species = len(s) > 1
+            pth = ot.pth(*s).xs("scalar", axis=1, level="C" if multi_species else None)
+            rho = ot.rho(*s)
+
+            pth *= 1e-12
+            rho *= 1e6 * constants.m_p
+
+            by_species = (
+                pth.multiply(
+                    rho.pow(-gamma),
+                    axis=1 if multi_species else 0,
+                    level="S" if multi_species else None,
+                )
+                / units
+            )
+            by_species.name = "S"
+
+            test_fcn = (
+                pdt.assert_frame_equal if multi_species else pdt.assert_series_equal
+            )
+            test_fcn(by_species, ot.specific_entropy(*s))
+            test_fcn(ot.specific_entropy(*s), ot.S(*s))
+
+            if multi_species:
+                stotal = "+".join(s)
+                pth_total = pth.sum(axis=1)
+                rho_total = rho.sum(axis=1)
+                total = pth_total.multiply(rho_total.pow(-gamma), axis=0) / units
+                total.name = "S"
+
+                pdt.assert_series_equal(total, ot.specific_entropy(stotal))
+                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.S(stotal))
+                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.S(stotal))
+
+                # comma-separated species list fails
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.specific_entropy(",".join(s))
+                with self.assertRaisesRegex(ValueError, "Invalid species"):
+                    ot.S(",".join(s))
 
 
 #####
