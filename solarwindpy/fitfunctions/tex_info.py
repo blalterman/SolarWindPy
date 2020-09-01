@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
+__all__ = ["TeXinfo"]
+
 r"""Extract information from :py:class:`solarwindpy.fitufunctions.FitFunction`
 and render information in TeX format. Primary target is `matplotlib` annotation.
 """
@@ -6,14 +8,17 @@ and render information in TeX format. Primary target is `matplotlib` annotation.
 import pdb  # noqa: F401
 import re
 import numpy as np
+from numbers import Number
 
-# # Compile this once on import to save time.
+# Compile this once on import to save time.
 _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
 _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 
 class TeXinfo(object):
-    def __init__(self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None):
+    def __init__(
+        self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None, npts=None,
+    ):
         r"""A container for printing :py:class:`FitFunction` info on a figure.
 
         Parameters
@@ -27,11 +32,15 @@ class TeXinfo(object):
         initial_guess_info: dict, None
             If not None, a dict with keys corresponding to function arg names
             and values that are (p0, fit_bounds) for that fit parameter.
+        npts: scalar, None
+            If not None, the number of data points in the fit. If not None,
+            cast to int.
         """
         self.set_popt_psigma(popt, psigma)
         self.set_TeX_function(TeX_function)
         self.set_chisq_dof(chisq_dof)
         self.set_initial_guess_info(initial_guess_info)
+        self.set_npts(npts)
 
     def __str__(self):
         return self.info
@@ -55,13 +64,18 @@ class TeXinfo(object):
             for k0, k1 in translate.items():
                 info[k1] = info.pop(k0)
 
+        #         info = [
+        #             (
+        #                 f"${k}$",
+        #                 f"upper = {v.bounds[1]:.3e}",
+        #                 f"guess = {v.p0:.3e}",
+        #                 f"lower = {v.bounds[0]:.3e}",
+        #             )
+        #             for k, v in info.items()
+        #         ]
+
         info = [
-            (
-                f"${k}$",
-                f"upper = {v.bounds[1]:.3e}",
-                f"guess = {v.p0:.3e}",
-                f"lower = {v.bounds[0]:.3e}",
-            )
+            (f"${k}$", f"{v.bounds[0]:.3e}  {v.p0:.3e}  {v.bounds[1]:.3e}")
             for k, v in info.items()
         ]
 
@@ -73,6 +87,10 @@ class TeXinfo(object):
     @property
     def chisq_dof(self):
         return self._chisq_dof
+
+    @property
+    def npts(self):
+        return self._npts
 
     @property
     def popt(self):
@@ -191,6 +209,7 @@ class TeXinfo(object):
         convert_pow_10=True,
         strip_uncertainties=False,
         simplify_info_for_paper=False,
+        npts=False,
     ):
         TeX_function = self.TeX_function
         TeX_popt = self.TeX_popt
@@ -203,13 +222,34 @@ class TeXinfo(object):
 
         #         pdb.set_trace()
 
-        if chisq_dof:
+        if npts and self.npts is not None:
             info += [
                 "",  # blank line for visual cue
-                fr"\chi^2_\nu = {self.chisq_dof.linear:.2f}",
-                #                      r"\widehat{\chi}^2_\nu = {%.2f}" % self.chisq_dof.robust,
-                r"\chi^2_{\nu;R} = {%.2f}" % self.chisq_dof.robust,
+                r"N_\mathrm{pts} = {%.0f}" % self.npts,
             ]
+
+        if chisq_dof:
+            #             info += [
+            #                 "",  # blank line for visual cue
+            #                 fr"\chi^2_\nu = {self.chisq_dof.linear:.2f}",
+            #                 #                      r"\widehat{\chi}^2_\nu = {%.2f}" % self.chisq_dof.robust,
+            #                 r"\chi^2_{\nu;R} = {%.2f}" % self.chisq_dof.robust,
+            #             ]
+
+            chisq_info = (
+                r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
+                % (self.chisq_dof.linear, self.chisq_dof.robust)
+            )
+            if (not npts) or (self.npts is None):
+                chisq_info = ["", chisq_info]  # blank line for visual cue
+            #             info += [
+            #                 "",  # blank line for visual cue
+            #                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}" % (self.chisq_dof.linear, self.chisq_dof.robust),
+            #             ]
+            else:
+                chisq_info = [chisq_info]
+
+            info += chisq_info
 
         if convert_pow_10 and (not simplify_info_for_paper):
             # Convert to 10^X notation.
@@ -322,9 +362,11 @@ class TeXinfo(object):
         TeX_function: str
             :py:meth:`FitFunction.TeX_function` contents giving the functional
             form in TeX.
-        chisq_dof: bool, scalar
+        chisq_dof: bool
             If True, include chisq/dof in the info. It is printed to 2 decimal
             places.
+        npts: bool
+            If True, include the number of points in the fit.
         convert_pow_10: bool
             If True, use 10^{X} format. Otherwise, use eX format.
             Note that `simplify_info_for_paper` must be disabled.
@@ -345,6 +387,7 @@ class TeXinfo(object):
         """
 
         chisq_dof = kwargs.pop("chisq_dof", True)
+        npts = kwargs.pop("npts", False)
         convert_pow_10 = kwargs.pop("convert_pow_10", True)
         strip_uncertainties = kwargs.pop("strip_uncertainties", False)
         simplify_info_for_paper = kwargs.pop("simplify_info_for_paper", False)
@@ -361,6 +404,7 @@ class TeXinfo(object):
                 convert_pow_10=convert_pow_10,
                 strip_uncertainties=strip_uncertainties,
                 simplify_info_for_paper=simplify_info_for_paper,
+                npts=npts,
             )
 
         if add_initial_guess:
@@ -368,7 +412,7 @@ class TeXinfo(object):
             if initial_guess is None:
                 initial_guess = "\nInitial Guess Failed"
             else:
-                initial_guess = "\n\n" + initial_guess
+                initial_guess = "\n" + initial_guess
 
             info = self._add_additional_info(info, initial_guess)
 
@@ -388,6 +432,14 @@ class TeXinfo(object):
             )
 
         self._initial_guess_info = new
+
+    def set_npts(self, new):
+        if not isinstance(new, Number) and (new is not None):
+            raise TypeError(f"Unexpected npts type ({type(new)})")
+
+        if new is not None:
+            new = int(new)
+        self._npts = new
 
     def set_popt_psigma(self, popt, psigma):
         for k in popt:
