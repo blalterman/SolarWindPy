@@ -495,7 +495,9 @@ class StabilityContours(object):
     def contours(self):
         return self._contours
 
-    def plot_contours(self, ax, fix_scale=True, plot_gamma=None, **kwargs):
+    def plot_contours(
+        self, ax, fix_scale=True, plot_gamma=None, tk_kind=None, **kwargs
+    ):
         r"""
         Add the instability contours to the plot.
 
@@ -506,6 +508,9 @@ class StabilityContours(object):
             If True, make x- and y-axes log scaled.
         plot_gamma: None, -2, -3, -4
             If not None, the instability parameter to plot.
+        tk_kind: None, str, list-like of str
+            Contours to plot. Valid options are "MM", "AIC", "FMW", "OFI",
+            and any combination thereof.
         """
         assert isinstance(ax, mpl.axes.Axes)
 
@@ -517,8 +522,24 @@ class StabilityContours(object):
         ms = kwargs.pop("markersize", 10)
         mew = kwargs.pop("markeredgewidth", 0.5)
         mec = kwargs.pop("markeredgecolor", "k")
+        markevery = kwargs.pop("markevery", 10)
 
-        for k, v in self.contours.stack().iteritems():
+        if tk_kind is not None:
+            if isinstance(tk_kind, str):
+                tk_kind = [tk_kind]
+            if not np.all([isinstance(x, str) for x in tk_kind]):
+                raise TypeError(f"""Unexpected types for `tk_kind` ({tk_kind})""")
+
+            tk_kind = [x.upper() for x in tk_kind]
+            if not np.all([x in self.contours.columns for x in tk_kind]):
+                raise ValueError(f"""Unexpected values for `tk_kind` ({tk_kind})""")
+
+        target_contours = self.contours
+        if tk_kind is not None:
+            target_contours = target_contours.loc[:, tk_kind]
+        target_contours = target_contours.stack()
+
+        for k, v in target_contours.iteritems():
             gamma, itype = k
 
             if plot_gamma is not None:
@@ -535,7 +556,7 @@ class StabilityContours(object):
                 self.beta,
                 v,
                 # label=k,
-                markevery=10,
+                markevery=markevery,
                 ms=ms,
                 mew=mew,
                 mec=mec,
