@@ -116,9 +116,13 @@ Upper Right {x1, y1}"""
 
         self.text.set_text(tx)
 
-    def disconnect(self, other_SelectFromPlot2D=None, **kwargs):
+    def disconnect(self, other_SelectFromPlot2D=None, scatter_kwargs=None, **kwargs):
+
+        if scatter_kwargs is None:
+            scatter_kwargs = dict()
+
         self.sample_data(other_SelectFromPlot2D=other_SelectFromPlot2D, **kwargs)
-        self.scatter_sample()
+        self.scatter_sample(**scatter_kwargs)
         self.plot_failed_samples()
         self._finalize_text()
 
@@ -232,14 +236,30 @@ y : ({self.ax.yaxis.get_label().get_text()}).
                 continue
 
             idx = tk.loc[tk].index.to_series()
-            sample = idx.sample(n=n, random_state=random_state, **kwargs)
+            try:
+                sample = idx.sample(n=n, random_state=random_state, **kwargs)
+            except ValueError as e:
+                if (
+                    str(e)
+                    == "Cannot take a larger sample than population when 'replace=False'"
+                ):
+                    self.logger.warning(
+                        "Sample failed without replacement. Attempting with replacement and then dropping duplicates."
+                    )
+                    sample = idx.sample(
+                        n=n, random_state=random_state, replace=True, **kwargs
+                    )
+                    sample.drop_duplicates(inplace=True)
+                else:
+                    raise e
+
             indices.extend(sample.values)
 
         self._sampled_indices = pd.Index(indices).sort_values()
         self._failed_samples = tuple(failed)
         self._sampled_per_patch = n
 
-    def scatter_sample(self):
+    def scatter_sample(self, **kwargs):
         plotter = self.plotter
         ax = self.ax
         xlim = self.ax.get_xlim()
@@ -254,15 +274,23 @@ y : ({self.ax.yaxis.get_label().get_text()}).
         if self.plotter.log.y:
             y = 10.0 ** y
 
+        kwargs = mpl.cbook.normalize_kwargs(
+            kwargs, mpl.collections.PatchCollection._alias_map
+        )
+        label = kwargs.pop("label", "Sample")
+        s = kwargs.pop("s", 20)
+        c = kwargs.pop("c", "fuchsia")
+        marker = kwargs.pop("marker", ".")
         ax.scatter(
             x,
             y,
-            label="Sample",
-            s=20,
-            c="fuchsia",
+            label=label,
+            s=s,
+            c=c,
             #             edgecolors="k",
-            linewidths=1,
-            marker=".",
+            #             linewidths=1,
+            marker=marker,
+            **kwargs,
             #             alpha=0.75,
             #             data=data,
         )
