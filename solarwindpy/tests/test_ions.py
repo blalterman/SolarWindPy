@@ -22,7 +22,7 @@ from abc import ABC, abstractproperty
 # from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
 # from unittest import TestCase
 
-# from scipy import constants
+from scipy import constants
 from scipy.constants import physical_constants
 
 # try:
@@ -153,6 +153,37 @@ class IonTestBase(ABC):
         kb = physical_constants["Boltzmann constant"][0]
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.temperature)
+
+    def test_specific_entropy(self):
+        rho = self.mass * self.data.n * 1e6
+        w = self.data.w.xs("scalar", axis=1) * 1e3
+        pth = w.pow(2).multiply(0.5 * rho, axis=0)
+
+        #         ln_pth = np.log(pth)
+        #         ln_rho = np.log(rho)
+        #
+        gamma = 5.0 / 3.0
+        units = 1e4 / constants.e
+        S = pth.multiply(rho.pow(-gamma)) / units
+        S.name = "S"
+        #         print(
+        #             "<specific_entropy>",
+        #             "<s>",
+        #             self.species,
+        #             "<test>",
+        #             "<ln_pth>",
+        #             ln_pth,
+        #             "<ln_rho>",
+        #             ln_rho,
+        #             "<lnS>",
+        #             lnS,
+        #             sep="\n",
+        #         )
+
+        ot = self.object_testing
+        pdt.assert_series_equal(S, ot.specific_entropy)
+        pdt.assert_series_equal(S, ot.S)
+        pdt.assert_series_equal(ot.S, ot.specific_entropy)
 
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
@@ -297,7 +328,9 @@ if __name__ == "__main__":
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
     try:
-        unittest.main(verbosity=2)
+        run_this_test = None
+        run_this_test = "TestIonA"
+        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
 
     except (  # noqa: F841
         AssertionError,

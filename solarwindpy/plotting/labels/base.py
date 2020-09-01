@@ -124,12 +124,12 @@ _trans_units = {
     "T": r"10^5 \, \mathrm{K}",
     "q": r"\mathrm{mW \, cm^{-2}}",  # heat flux,
     "qhat": _inU["dimless"],  # normalized heat flux
-    "Q": r"\mathrm{mW \, cm^{-2}}",  # Heating rate,
+    "Q": r"\mathrm{mW \, cm^{-2}}",  # heating rate
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
-    "lnS": r"\mathrm{\ln(K cm^{-3/2})}",  # Natural log of specific entropy
+    "S": r"\mathrm{eV \, cm^2 \, m_p^{-5/3}}",  # Specific Entropy
     # Flux
     "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
@@ -154,6 +154,7 @@ _trans_units = {
     "sigma_m": _inU["dimless"],
     "sigma_c": _inU["dimless"],
     "sigma_r": _inU["dimless"],
+    "sigma_xy": _inU["dimless"],
     "ra": _inU["dimless"],
     "re": _inU["dimless"],
     # Nyquist things
@@ -220,7 +221,7 @@ _templates = {
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
     "Q": r"Q_{{$C};{$S}}",  # heating rate
-    "lnS": r"\ln(S_{$S})",  # Natural logarithm of specific entropy
+    "S": r"S_{$S}",  # Specific entropy logarithm
     "ratio": r"\mathrm{Ratio}",
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
@@ -255,6 +256,7 @@ _templates = {
     "sigma_c": r"\sigma_{c;{$S}}",
     "sigma_r": r"\sigma_{r;{$S}}",
     "sigma_m": r"\sigma_{m}",
+    "sigma_xy": r"\sigma_{\parallel}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
     # Instability things
