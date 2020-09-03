@@ -140,7 +140,7 @@ Upper Right {x1, y1}"""
         self.ax.figure.canvas.draw_idle()
 
     def set_ax(self, ax, has_colorbar):
-        is_multipanel = len(ax.figure.axes) > (2 - bool(has_colorbar))
+        is_multipanel = (len(ax.figure.axes) - bool(has_colorbar)) > 1
 
         self._ax = ax
         self._is_multipanel = is_multipanel
@@ -151,8 +151,8 @@ Upper Right {x1, y1}"""
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.text.Text._alias_map)
 
-        xloc = kwargs.pop("x", 0.015 if is_multipanel else 0)
-        yloc = kwargs.pop("y", 0.975 if is_multipanel else 1.01)
+        xloc = kwargs.pop("x", 0.015 if is_multipanel else 0.00)
+        yloc = kwargs.pop("y", 0.975 if is_multipanel else 1.05)
         va = kwargs.pop("va", "top" if is_multipanel else "bottom")
         ha = kwargs.pop("ha", "left")
         transform = kwargs.pop("transform", ax.transAxes)
