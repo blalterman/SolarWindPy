@@ -131,6 +131,22 @@ class TeXinfo(object):
 
         return TeX_popt
 
+    @property
+    def TeX_relative_error(self):
+        r"""Create a dictionary with (k, v) pairs corresponding to
+        (self.argnames, psigma/popt).
+        """
+        psigma = self.psigma
+        popt = self.popt
+        TeX = {k: v / popt[k] for k, v in psigma.items()}
+
+        translate = self.TeX_argnames
+        if translate is not None:
+            for k0, k1 in translate.items():
+                TeX[k1] = TeX.pop(k0)
+
+        return TeX
+
     @staticmethod
     def _check_and_add_math_escapes(x):
         r"""
@@ -210,6 +226,7 @@ class TeXinfo(object):
         strip_uncertainties=False,
         simplify_info_for_paper=False,
         npts=False,
+        relative_error=False,
     ):
         TeX_function = self.TeX_function
         TeX_popt = self.TeX_popt
@@ -221,6 +238,12 @@ class TeXinfo(object):
         info = TeX_function.split("\n") + info
 
         #         pdb.set_trace()
+
+        if relative_error:
+            template = r"\Delta({0})/{0} = {1:.1e}"
+            rel_err = self.TeX_relative_error
+            rel_err = [template.format(k, v) for k, v in rel_err.items()]
+            info += [""] + rel_err  # blank for visual cue
 
         if npts and self.npts is not None:
             info += [
@@ -237,7 +260,7 @@ class TeXinfo(object):
             #             ]
 
             chisq_info = (
-                r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
+                r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
                 % (self.chisq_dof.linear, self.chisq_dof.robust)
             )
             if (not npts) or (self.npts is None):
@@ -365,6 +388,9 @@ class TeXinfo(object):
         chisq_dof: bool
             If True, include chisq/dof in the info. It is printed to 2 decimal
             places.
+        relative_error: bool
+            If True, print out relative error as :math:`\Delta(x)/x` for all
+            fit parameters x.
         npts: bool
             If True, include the number of points in the fit.
         convert_pow_10: bool
@@ -388,12 +414,16 @@ class TeXinfo(object):
 
         chisq_dof = kwargs.pop("chisq_dof", True)
         npts = kwargs.pop("npts", False)
+        relative_error = kwargs.pop("relative_error", False)
         convert_pow_10 = kwargs.pop("convert_pow_10", True)
         strip_uncertainties = kwargs.pop("strip_uncertainties", False)
         simplify_info_for_paper = kwargs.pop("simplify_info_for_paper", False)
         add_initial_guess = kwargs.pop("add_initial_guess", False)
         additional_info = kwargs.pop("additional_info", None)
         annotate_fcn = kwargs.pop("annotate_fcn", None)
+
+        if kwargs:
+            raise ValueError(f"Unused kwargs {kwargs.keys()}")
 
         if np.all([np.isnan(v) for v in self.popt.values()]):
             info = f"${self.TeX_function}$\n\nFit Failed"
@@ -404,6 +434,7 @@ class TeXinfo(object):
                 convert_pow_10=convert_pow_10,
                 strip_uncertainties=strip_uncertainties,
                 simplify_info_for_paper=simplify_info_for_paper,
+                relative_error=relative_error,
                 npts=npts,
             )
 
