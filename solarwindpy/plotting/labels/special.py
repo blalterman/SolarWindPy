@@ -39,10 +39,11 @@ class ManualLabel(ArbitraryLabel):
     :py:class:`ManualLabel` assumes `tex` is a string of words.
     """
 
-    def __init__(self, tex, unit):
+    def __init__(self, tex, unit, path=None):
         self.set_tex(tex)
         self.set_unit(unit)
         self.build_label()
+        self._path = path
 
     def __str__(self):
         return r"$\mathrm{%s} \; [%s]$" % (  # noqa: W605
@@ -60,7 +61,11 @@ class ManualLabel(ArbitraryLabel):
 
     @property
     def path(self):
-        return Path(self.tex.replace(" ", "-"))
+        path = self._path
+        if path is None:
+            path = self.tex.replace(" ", "-")
+        path = Path(path)
+        return path
 
     def set_tex(self, tex):
         self._tex = tex.strip("$")
