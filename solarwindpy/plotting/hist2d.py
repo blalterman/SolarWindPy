@@ -640,7 +640,11 @@ class Hist2D(base.Plot2D, AggPlot):
         if ax is None:
             fig, ax = plt.subplots()
 
-        clabel_kwargs, edges_kwargs, cbar_kwargs = self._verify_contour_passthrough_kwargs(
+        (
+            clabel_kwargs,
+            edges_kwargs,
+            cbar_kwargs,
+        ) = self._verify_contour_passthrough_kwargs(
             ax, clabel_kwargs, edges_kwargs, cbar_kwargs
         )
 
@@ -799,3 +803,57 @@ class Hist2D(base.Plot2D, AggPlot):
         h1.set_path("auto")
 
         return h1
+
+    def make_joint_h2_h1_plot(self, **kwargs):
+        figsize = kwargs.pop("figsize", (5, 6))
+        height_ratios = kwargs.pop("height_ratios", [0.25, 1, 0.2, 0.1])
+        width_ratios = kwargs.pop("width_ratios", [1, 0.25])
+        hspace = kwargs.pop("hspace", 0)
+        wspace = kwargs.pop("wspace", 0)
+
+        fig = plt.figure(figsize=figsize)
+        gs = mpl.gridspec.GridSpec(
+            4,
+            2,
+            height_ratios=height_ratios,
+            width_ratios=width_ratios,
+            hspace=hspace,
+            wspace=wspace,
+        )
+
+        hax = fig.add_subplot(gs[1, 0])
+        xax = fig.add_subplot(gs[0, 0], sharex=hax)
+        yax = fig.add_subplot(gs[1, 1], sharey=hax)
+        cax = fig.add_subplot(gs[3, 0])
+
+        cbar_kwargs = kwargs.pop("cbar_kwargs", dict())
+        cax = cbar_kwargs.pop("cax", cax)
+        orientation = cbar_kwargs.pop("orientation", "horizontal")
+        self.make_plot(
+            ax=hax,
+            cbar_kwargs=dict(cax=cax, orientation=orientation, **cbar_kwargs),
+            **kwargs,
+        )
+
+        self.project_1d("x", project_counts=True).make_plot(ax=xax)
+        self.project_1d("y", project_counts=True).make_plot(ax=yax, transpose_axes=True)
+
+        xax.label_outer()
+        # Mimic `ax.label_outer` for `yax`.
+        for label in yax.get_yticklabels(which="both"):
+            label.set_visible(False)
+        yax.get_yaxis().get_offset_text().set_visible(False)
+        yax.set_ylabel("")
+
+        hax.xaxis.set_major_locator(
+            mpl.ticker.MaxNLocator(
+                nbins=hax.xaxis.get_ticklocs().size - 1, prune="upper"
+            )
+        )
+        hax.yaxis.set_major_locator(
+            mpl.ticker.MaxNLocator(
+                nbins=hax.yaxis.get_ticklocs().size - 1, prune="upper"
+            )
+        )
+
+        return hax, xax, yax, cax

@@ -205,24 +205,34 @@ class Base(ABC):
 
         return path, x, y, z, scale_info
 
-    def _add_axis_labels(self, ax):
+    def _add_axis_labels(self, ax, transpose_axes=False):
         xlbl = self.labels.x
+        ylbl = self.labels.y
+
+        if transpose_axes:
+            xlbl, ylbl = ylbl, xlbl
+
         if xlbl is not None:
             ax.set_xlabel(xlbl)
 
-        ylbl = self.labels.y
         if ylbl is not None:
             ax.set_ylabel(ylbl)
 
-    def _set_axis_scale(self, ax):
-        if self.log.x:
+    def _set_axis_scale(self, ax, transpose_axes=False):
+        logx = self.log.x
+        logy = self.log.y
+
+        if transpose_axes:
+            logx, logy = logy, logx
+
+        if logx:
             ax.set_xscale("log")
-        if self.log.y:
+        if logy:
             ax.set_yscale("log")
 
-    def _format_axis(self, ax):
-        self._add_axis_labels(ax)
-        self._set_axis_scale(ax)
+    def _format_axis(self, ax, transpose_axes=False):
+        self._add_axis_labels(ax, transpose_axes=transpose_axes)
+        self._set_axis_scale(ax, transpose_axes=transpose_axes)
         ax.grid(True, which="major", axis="both")
         ax.tick_params(axis="both", which="both", direction="inout")
 
