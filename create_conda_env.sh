@@ -18,7 +18,7 @@ function run_script() {
 
     echo pwd
 
-    core="pandas=1.0.3 scipy numpy numexpr bottleneck matplotlib pytables cython"
+    core="pandas scipy numpy numexpr bottleneck matplotlib pytables cython"
     dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
     use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
 
