@@ -1,7 +1,7 @@
 #! /bin/sh
 
-# If you run into mkl-fft problems, try the following 
-# 
+# If you run into mkl-fft problems, try the following
+#
 #   conda config --add pinned_packages conda-forge::numpy
 #
 # to pin numpy to conda-forge.
@@ -25,7 +25,7 @@ function run_script() {
     pkgs="$core $dev $use"
     #pkgs="$core $dev"
 
-    conda create -n $1 python=3.7 $pkgs
+    conda create -n $1 python=3 $pkgs
 
 #    conda init zsh
 #

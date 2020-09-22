@@ -215,7 +215,7 @@ class Hist1D(AggPlot):
 
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
-    def make_plot(self, ax=None, fcn=None, **kwargs):
+    def make_plot(self, ax=None, fcn=None, transpose_axes=False, **kwargs):
         f"""Make a plot.
 
         Parameters
@@ -226,12 +226,17 @@ class Hist1D(AggPlot):
             Passed directly to `{self.__class__.__name__}.agg`. If
             None, use the default aggregation function. If str or a
             single aggregative function, use it.
+        transpose_axes: bool
+            If True, plot independent values on y-axis and dependent
+            values on x-axis. Primary use case is plotting 1D projection
+            of 2D plot adjascent to 2D axis.
         kwargs:
             Passed directly to `ax.plot`.
         """
         agg = self.agg(fcn=fcn)
         x = pd.IntervalIndex(agg.index).mid
 
+        dx = None  # Initialize default value. Necessary for `transpose_axes`.
         if fcn is None or isinstance(fcn, str):
             y = agg
             dy = None
@@ -257,8 +262,13 @@ class Hist1D(AggPlot):
             x = 10.0 ** x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        pl, cl, bl = ax.errorbar(x, y, yerr=dy, drawstyle=drawstyle, **kwargs)
 
-        self._format_axis(ax)
+        if transpose_axes:
+            x, y = y, x
+            dx, dy = dy, dx
+
+        pl, cl, bl = ax.errorbar(x, y, xerr=dx, yerr=dy, drawstyle=drawstyle, **kwargs)
+
+        self._format_axis(ax, transpose_axes=transpose_axes)
 
         return ax
