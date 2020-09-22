@@ -240,9 +240,9 @@ class TeXinfo(object):
         #         pdb.set_trace()
 
         if relative_error:
-            template = r"\Delta({0})/{0} = {1:.1e}"
+            template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
             rel_err = self.TeX_relative_error
-            rel_err = [template.format(k, v) for k, v in rel_err.items()]
+            rel_err = [template.format(k, np.abs(v)) for k, v in rel_err.items()]
             info += [""] + rel_err  # blank for visual cue
 
         if npts and self.npts is not None:
