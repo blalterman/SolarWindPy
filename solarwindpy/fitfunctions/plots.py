@@ -143,7 +143,7 @@ class FFPlot(object):
 
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
-            ax.set_yscale("symlog", linthreshy=10)
+            ax.set_yscale("symlog", linthresh=10)
             ax.set_ylim(-100, 100)
 
         else:
@@ -226,8 +226,7 @@ class FFPlot(object):
         return ax, plotline, caplines, barlines
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
-        r"""Plot the fit.
-        """
+        r"""Plot the fit."""
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -334,7 +333,7 @@ class FFPlot(object):
         but are limited to data included in the fit.
 
         Residuals are plotted as a percentage, both positive and negative, on
-        a symlog scale with `linthreshy=10`.
+        a symlog scale with `linthresh=10`.
         """
 
         if subplots_kwargs is None:
