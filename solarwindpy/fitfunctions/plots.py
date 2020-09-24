@@ -171,8 +171,9 @@ class FFPlot(object):
         x = self.observations.raw.x
         y = self.observations.raw.y
         w = self.observations.raw.w
-        if self.log.y and w is not None:
-            w = w / (y * np.log(10.0))
+        #         if self.log.y and w is not None:
+        #             w = w / (y * np.log(10.0))
+        #             w = np.log10(np.exp(1)) * w / y
 
         # Plot the raw data histograms.
         plotline, caplines, barlines = ax.errorbar(
@@ -201,8 +202,9 @@ class FFPlot(object):
         x = self.observations.used.x
         y = self.observations.used.y
         w = self.observations.used.w
-        if self.log.y and w is not None:
-            w = w / (y * np.log(10.0))
+        #         if self.log.y and w is not None:
+        #             w = w / (y * np.log(10.0))
+        #             w = np.log10(np.exp(1)) * w / y
 
         if markevery is None:
             markevery = self._estimate_markevery()
