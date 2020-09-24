@@ -130,16 +130,16 @@ class FFPlot(object):
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
         if self.log.x:
-            ax.set_xscale("log")
+            ax.set_xscale("log", nonpositive="clip")
         if self.log.y:
-            ax.set_yscale("log")
+            ax.set_yscale("log", nonpositive="clip")
 
     def _format_rax(self, ax, pct):
         ax.grid(True, which="major", axis="both")
 
         ax.set_xlabel(self.labels.x)
         if self.log.x:
-            ax.set_xscale("log")
+            ax.set_xscale("log", nonpositive="clip")
 
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
