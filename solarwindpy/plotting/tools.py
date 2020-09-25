@@ -53,14 +53,6 @@ def save(
     if tight_layout:
         fig.tight_layout()
 
-    meta = kwargs.pop("metadata", {})
-    if "Author" not in meta.keys():
-        meta["Author"] = "B. L. Alterman"
-    #    pdf_meta = {k: v for k, v in meta.items()}
-    #    png_meta = {k: v for k, v in meta.items()}
-    #    if "Author" not in pdf_meta:
-    #        pdf_meta["Author"] = "B. L. Alterman"
-
     # Save the PDF without the timestamp so we can create the final LaTeX file
     # without them.
     # Add the datetime stamp to the PNG as those are what we render most often when
@@ -72,11 +64,7 @@ def save(
             alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
 
         fig.savefig(
-            spath.with_suffix(".pdf"),
-            bbox_inches=bbox_inches,
-            format="pdf",
-            meta=meta,
-            **kwargs
+            spath.with_suffix(".pdf"), bbox_inches=bbox_inches, format="pdf", **kwargs
         )
 
         if log:
@@ -88,11 +76,7 @@ def save(
             fig.text(info_x, info_y, info)
 
         fig.savefig(
-            spath.with_suffix(".png"),
-            bbox_inches=bbox_inches,
-            format="png",
-            meta=meta,
-            **kwargs
+            spath.with_suffix(".png"), bbox_inches=bbox_inches, format="png", **kwargs
         )
 
         if log:
