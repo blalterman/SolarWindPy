@@ -152,8 +152,7 @@ class FitFunction(ABC):
 
     @abstractproperty
     def TeX_function(self):
-        r"""Function written in LaTeX.
-        """
+        r"""Function written in LaTeX."""
         pass
 
     @property
@@ -185,8 +184,7 @@ class FitFunction(ABC):
 
     @property
     def dof(self):
-        r"""Degrees of freedom in the fit.
-        """
+        r"""Degrees of freedom in the fit."""
         return self.observations.used.y.size - len(self.p0)
 
     @property
@@ -216,8 +214,7 @@ class FitFunction(ABC):
 
     @property
     def nobs(self):
-        r"""The total number of observations used in the fit.
-        """
+        r"""The total number of observations used in the fit."""
         return self.observations.tk_observed.sum()
 
     @property
@@ -226,15 +223,15 @@ class FitFunction(ABC):
 
     @property
     def plotter(self):
-        try:
-            return self._plotter
-        except AttributeError:
-            return self.build_plotter()
+        #         try:
+        return self._plotter
+
+    #         except AttributeError:
+    #             return self.build_plotter()
 
     @property
     def popt(self):
-        r"""Optimized fit parameters.
-        """
+        r"""Optimized fit parameters."""
         return dict(self._popt)
 
     @property
@@ -264,10 +261,11 @@ class FitFunction(ABC):
 
     @property
     def TeX_info(self):
-        try:
-            return self._TeX_info
-        except AttributeError:
-            return self.build_TeX_info()
+        #         try:
+        return self._TeX_info
+
+    #         except AttributeError:
+    #             return self.build_TeX_info()
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
@@ -312,8 +310,7 @@ xobs: {xobs.shape}"""
         return mask
 
     def _build_outside_mask(self, axis, x, outside):
-        r"""Take data outside of the range `outside[0]:outside[1]`.
-        """
+        r"""Take data outside of the range `outside[0]:outside[1]`."""
 
         if outside is None:
             return np.full_like(x, True, dtype=bool)
@@ -715,3 +712,6 @@ xobs: {xobs.shape}"""
         self._pcov = pcov
         self._chisq_dof = all_chisq
         self._fit_result = res
+
+        self.build_TeX_info()
+        self.build_plotter()

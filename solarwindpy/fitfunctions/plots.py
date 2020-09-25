@@ -130,20 +130,20 @@ class FFPlot(object):
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
         if self.log.x:
-            ax.set_xscale("log")
+            ax.set_xscale("log", nonpositive="clip")
         if self.log.y:
-            ax.set_yscale("log")
+            ax.set_yscale("log", nonpositive="clip")
 
     def _format_rax(self, ax, pct):
         ax.grid(True, which="major", axis="both")
 
         ax.set_xlabel(self.labels.x)
         if self.log.x:
-            ax.set_xscale("log")
+            ax.set_xscale("log", nonpositive="clip")
 
         if pct:
             ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
-            ax.set_yscale("symlog", linthreshy=10)
+            ax.set_yscale("symlog", linthresh=10)
             ax.set_ylim(-100, 100)
 
         else:
@@ -171,8 +171,9 @@ class FFPlot(object):
         x = self.observations.raw.x
         y = self.observations.raw.y
         w = self.observations.raw.w
-        if self.log.y and w is not None:
-            w = w / (y * np.log(10.0))
+        #         if self.log.y and w is not None:
+        #             w = w / (y * np.log(10.0))
+        #             w = np.log10(np.exp(1)) * w / y
 
         # Plot the raw data histograms.
         plotline, caplines, barlines = ax.errorbar(
@@ -201,8 +202,9 @@ class FFPlot(object):
         x = self.observations.used.x
         y = self.observations.used.y
         w = self.observations.used.w
-        if self.log.y and w is not None:
-            w = w / (y * np.log(10.0))
+        #         if self.log.y and w is not None:
+        #             w = w / (y * np.log(10.0))
+        #             w = np.log10(np.exp(1)) * w / y
 
         if markevery is None:
             markevery = self._estimate_markevery()
@@ -226,8 +228,7 @@ class FFPlot(object):
         return ax, plotline, caplines, barlines
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
-        r"""Plot the fit.
-        """
+        r"""Plot the fit."""
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -334,7 +335,7 @@ class FFPlot(object):
         but are limited to data included in the fit.
 
         Residuals are plotted as a percentage, both positive and negative, on
-        a symlog scale with `linthreshy=10`.
+        a symlog scale with `linthresh=10`.
         """
 
         if subplots_kwargs is None:
