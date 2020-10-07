@@ -17,7 +17,13 @@ _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 class TeXinfo(object):
     def __init__(
-        self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None, npts=None,
+        self,
+        popt,
+        psigma,
+        TeX_function,
+        chisq_dof,
+        initial_guess_info=None,
+        npts=None,
     ):
         r"""A container for printing :py:class:`FitFunction` info on a figure.
 
@@ -59,6 +65,7 @@ class TeXinfo(object):
             # Fit failed to make a guess
             return None
 
+        info = dict(info)
         translate = self.TeX_argnames
         if translate is not None:
             for k0, k1 in translate.items():
@@ -171,8 +178,8 @@ class TeXinfo(object):
     @staticmethod
     def _calc_precision(value):
         r"""Primarily for use with the `val_uncert_2_string` and other methods
-         that may require this.
-         """
+        that may require this.
+        """
         # Convert the fractional part to an exponential string.
         # E.g. 0.0009865 -> 9.865000e-04
         precision = "%e" % value  # (value - int(value))
@@ -462,6 +469,11 @@ class TeXinfo(object):
                 f"Unsure how to parse `initial_guess_info` of type {type(new)}"
             )
 
+        try:
+            new = tuple(new.items())
+        except AttributeError:
+            pass
+
         self._initial_guess_info = new
 
     def set_npts(self, new):
@@ -476,12 +488,11 @@ class TeXinfo(object):
         for k in popt:
             if k not in psigma:
                 raise ValueError(f"key ({k}) must be in both 'popt' and 'psigma' ")
-        self._popt = popt.items()
-        self._psigma = psigma.items()
+        self._popt = tuple(popt.items())
+        self._psigma = tuple(psigma.items())
 
     def set_TeX_argnames(self, **kwargs):
-        r"""Define the mapping to format LaTeX function argnames.
-        """
+        r"""Define the mapping to format LaTeX function argnames."""
         # Save a tuple so immutable.
         popt = self.popt
         initial_guess = self.initial_guess_info
