@@ -72,28 +72,6 @@ class TeXinfo(object):
             for k0, k1 in translate.items():
                 info[k1] = info.pop(k0)
 
-        #         info = [
-        #             (
-        #                 f"${k}$",
-        #                 f"upper = {v.bounds[1]:.3e}",
-        #                 f"guess = {v.p0:.3e}",
-        #                 f"lower = {v.bounds[0]:.3e}",
-        #             )
-        #             for k, v in info.items()
-        #         ]
-
-        #         char_width = np.nanmax([len(k) for k in info.keys()])
-        #         l_width = np.nanmax([len(f"{v.bounds[0]:.3e}") for v in info.values()])
-        #         u_width = np.nanmax([len(f"{v.bounds[1]:.3e}") for v in info.values()])
-        #         p_width = np.nanmax([len(f"{v.p0:.3e}") for v in info.values()])
-        #
-        #         print(l_width, p_width, u_width)
-        #         def make_info(k, v):
-        #             lower = f"{v.bounds[0]:.3e}".rjust(l_width)
-        #             param = f"{v.p0:.3e}".rjust(p_width)
-        #             upper = f"{v.bounds[1]:.3e}".rjust(u_width)
-        #             return f"""${k.ljust(char_width)}$  {lower}  {param}  {upper}"""
-
         tbl = []
         for k, v in info.items():
             tbl.append([f"${k}$", v.bounds[0], v.p0, v.bounds[1]])
@@ -107,15 +85,6 @@ class TeXinfo(object):
             .replace("-inf", r"$-\infty$")
             .replace(" inf", r" $+\infty$")
         )
-
-        #         info = [make_info(k, v) for k, v in info.items()]
-        #         info = "\n".join(info)
-        #         info = [
-        #             (f"${k}$", f"{v.bounds[0]:.3e}  {v.p0:.3e}  {v.bounds[1]:.3e}")
-        #             for k, v in info.items()
-        #         ]
-        #         info = ["\n".join(param) for param in info]
-        #         info = "\n\n".join(info)
 
         return info
 
@@ -311,10 +280,7 @@ class TeXinfo(object):
             )
             if (not npts) or (self.npts is None):
                 chisq_info = ["", chisq_info]  # blank line for visual cue
-            #             info += [
-            #                 "",  # blank line for visual cue
-            #                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}" % (self.chisq_dof.linear, self.chisq_dof.robust),
-            #             ]
+
             else:
                 chisq_info = [chisq_info]
 
@@ -349,12 +315,6 @@ class TeXinfo(object):
         if simplify_info_for_paper:
             info = self._simplify_for_paper(info)
 
-        #             breakpoint()
-        #             info = [f"$ {ii} $" for ii in (text_info + numeric_info)]
-        #             info = "\n".join(info)
-
-        #         print(*info, sep="\n")
-
         # IF statement to add blank lines for spacing chisq_nu and other stats.
         info = [r"$ %s $" % x.replace("$", "") if x else "\n" for x in info]
         info = "\n".join(info)
@@ -362,13 +322,6 @@ class TeXinfo(object):
         info = info.replace(r"inf", r"\infty").replace("\n\n\n", "\n\n")
 
         return info
-
-    #     @property
-    #     def label(self):
-    #         r"""The label for use when plotting.
-    #         """
-    #         # TODO: What is this? How do I use it?
-    #         return self.fitfunction.function.func_name.title()
 
     def annotate_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
@@ -412,13 +365,6 @@ class TeXinfo(object):
     def build_info(
         self,
         **kwargs,
-        #         chisq_dof=True,
-        #         convert_pow_10=True,
-        #         strip_uncertainties=False,
-        #         simplify_info_for_paper=False,
-        #         add_initial_guess=False,
-        #         additional_info=None,
-        #         annotate_fcn=None,
     ):
         r"""
         Generate a TeX-formatted string with the desired info
@@ -569,21 +515,11 @@ class TeXinfo(object):
         "3.14 \pm 0.01"
         """
 
-        # if np.isfinite(uncertainty) and value <= uncertainty:
-        #     msg = ("Must be that value > uncertainty\n"
-        #            "value = %s\nuncertainty = %s")
-        #     raise ValueError(msg % (value, uncertainty))
-
         vprecision = 3
         if np.isfinite(uncertainty):
             uprecision = self._calc_precision(uncertainty)
             vprecision = self._calc_precision(value)
             vprecision = vprecision - uprecision
-
-        #         else:
-        #             self.logger.warning(
-        #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
-        #             )
 
         template = r"{:.%se} \pm {:.0e}"
         template = template % abs(vprecision)
