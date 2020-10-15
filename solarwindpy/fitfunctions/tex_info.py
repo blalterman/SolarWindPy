@@ -9,6 +9,7 @@ import pdb  # noqa: F401
 import re
 import numpy as np
 from numbers import Number
+from tabulate import tabulate
 
 # Compile this once on import to save time.
 _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
@@ -81,13 +82,40 @@ class TeXinfo(object):
         #             for k, v in info.items()
         #         ]
 
-        info = [
-            (f"${k}$", f"{v.bounds[0]:.3e}  {v.p0:.3e}  {v.bounds[1]:.3e}")
-            for k, v in info.items()
-        ]
+        #         char_width = np.nanmax([len(k) for k in info.keys()])
+        #         l_width = np.nanmax([len(f"{v.bounds[0]:.3e}") for v in info.values()])
+        #         u_width = np.nanmax([len(f"{v.bounds[1]:.3e}") for v in info.values()])
+        #         p_width = np.nanmax([len(f"{v.p0:.3e}") for v in info.values()])
+        #
+        #         print(l_width, p_width, u_width)
+        #         def make_info(k, v):
+        #             lower = f"{v.bounds[0]:.3e}".rjust(l_width)
+        #             param = f"{v.p0:.3e}".rjust(p_width)
+        #             upper = f"{v.bounds[1]:.3e}".rjust(u_width)
+        #             return f"""${k.ljust(char_width)}$  {lower}  {param}  {upper}"""
 
-        info = ["\n".join(param) for param in info]
-        info = "\n\n".join(info)
+        tbl = []
+        for k, v in info.items():
+            tbl.append([f"${k}$", v.bounds[0], v.p0, v.bounds[1]])
+        info = (
+            tabulate(
+                tbl,
+                #                         headers=["Param", "Lower", "Guess", "Upper"],
+                floatfmt=".3e",
+                tablefmt="plain",
+            )
+            .replace("-inf", r"$-\infty$")
+            .replace(" inf", r" $+\infty$")
+        )
+
+        #         info = [make_info(k, v) for k, v in info.items()]
+        #         info = "\n".join(info)
+        #         info = [
+        #             (f"${k}$", f"{v.bounds[0]:.3e}  {v.p0:.3e}  {v.bounds[1]:.3e}")
+        #             for k, v in info.items()
+        #         ]
+        #         info = ["\n".join(param) for param in info]
+        #         info = "\n\n".join(info)
 
         return info
 
@@ -152,7 +180,17 @@ class TeXinfo(object):
             for k0, k1 in translate.items():
                 TeX[k1] = TeX.pop(k0)
 
-        return TeX
+        #         template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
+        #         rel_err = [template.format(k, np.abs(v)) for k, v in TeX.items()]
+
+        rel_err = tabulate(
+            [[f"{k} \;\;\; ", np.abs(v)] for k, v in TeX.items()],  # noqa: W605
+            floatfmt=".3e",
+            tablefmt="plain",
+        )
+        rel_err = r"$X \; \; \; \left|\sigma(X)/X\right|$" "\n" + rel_err
+
+        return rel_err
 
     @staticmethod
     def _check_and_add_math_escapes(x):
@@ -247,10 +285,11 @@ class TeXinfo(object):
         #         pdb.set_trace()
 
         if relative_error:
-            template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
-            rel_err = self.TeX_relative_error
-            rel_err = [template.format(k, np.abs(v)) for k, v in rel_err.items()]
-            info += [""] + rel_err  # blank for visual cue
+            #             template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
+            #             rel_err = self.TeX_relative_error
+            #             rel_err = [template.format(k, np.abs(v)) for k, v in rel_err.items()]
+            #             info += [""] + rel_err  # blank for visual cue
+            info += ["", self.TeX_relative_error]  # blank for visual cue
 
         if npts and self.npts is not None:
             info += [
@@ -320,7 +359,7 @@ class TeXinfo(object):
         info = [r"$ %s $" % x.replace("$", "") if x else "\n" for x in info]
         info = "\n".join(info)
 
-        info = info.replace(r"inf", r"\infty")
+        info = info.replace(r"inf", r"\infty").replace("\n\n\n", "\n\n")
 
         return info
 
