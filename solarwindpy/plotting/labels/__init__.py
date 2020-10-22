@@ -17,11 +17,14 @@ import pandas as pd
 
 from . import base
 from . import special
+from . import composition
 
 TeXlabel = base.TeXlabel
 species_translation = base._run_species_substitution
 Vsw = special.Vsw
 Count = special.Count
+Ion = composition.Ion
+ChargeState = composition.ChargeState
 
 
 def _clean_str_list_for_printing(data):

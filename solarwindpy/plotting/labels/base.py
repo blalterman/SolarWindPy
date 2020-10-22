@@ -12,7 +12,7 @@ from collections import namedtuple
 MCS = namedtuple("MCS", "m,c,s")
 
 
-__composition_species = r"^{%s}\mathrm{%s}"
+__isotope_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
     "e": r"e^-",
     "a": r"\alpha",
@@ -25,16 +25,16 @@ _trans_species = {
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
     "H": r"\mathrm{H}",
-    "3He": __composition_species % (3, "He"),
-    "4He": __composition_species % (4, "He"),
-    "12C": __composition_species % (12, "C"),
-    "14N": __composition_species % (14, "N"),
-    "16O": __composition_species % (16, "O"),
-    "20Ne": __composition_species % (20, "Ne"),
-    "24Mg": __composition_species % (24, "Mg"),
-    "28Si": __composition_species % (28, "Si"),
-    "32S": __composition_species % (32, "S"),
-    "40Ca": __composition_species % (40, "Ca"),
+    "3He": __isotope_species % (3, "He"),
+    "4He": __isotope_species % (4, "He"),
+    "12C": __isotope_species % (12, "C"),
+    "14N": __isotope_species % (14, "N"),
+    "16O": __isotope_species % (16, "O"),
+    "20Ne": __isotope_species % (20, "Ne"),
+    "24Mg": __isotope_species % (24, "Mg"),
+    "28Si": __isotope_species % (28, "Si"),
+    "32S": __isotope_species % (32, "S"),
+    "40Ca": __isotope_species % (40, "Ca"),
     "Fe": r"\mathrm{Fe}",
 }
 
@@ -48,7 +48,7 @@ _default_template_string = "{$M}_{{$C};{$S}}"
 
 
 def _run_species_substitution(pattern):
-    r""" Basic substitution of any species within a species string so long
+    r"""Basic substitution of any species within a species string so long
     as the species has a substitution in the ion_species dictionary.
     Note: this equation might only work because a->\alpha is the only
     actual translation made and, based on lexsort order, would be the
@@ -288,7 +288,7 @@ class Base(ABC):
         self._init_logger()
 
     def __str__(self):
-        return self._with_units
+        return self.with_units
 
     def __repr__(self):
         # Makes debugging easier.
@@ -322,6 +322,22 @@ class Base(ABC):
         """
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
+
+    @property
+    def with_units(self):
+        return rf"${self.tex} \; \left[{self.units}\right]$"
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def path(self):
+        return self._path
 
 
 class TeXlabel(Base):
@@ -367,7 +383,7 @@ class TeXlabel(Base):
     """
 
     def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
-        r"""        Parameters
+        r"""Parameters
         ----------
         mcs0: tuple of strings
             Form is `("M", "C", "S")` where m = measurement, c=component, and
@@ -446,7 +462,7 @@ class TeXlabel(Base):
         self._axnorm = new
 
     def make_species(self, pattern):
-        r""" Basic substitution of any species within a species string so long
+        r"""Basic substitution of any species within a species string so long
         as the species has a substitution in the ion_species dictionary.
         Note: this equation might only work because a->\alpha is the only
         actual translation made and, based on lexsort order, would be the

@@ -5,30 +5,27 @@ import pdb  # noqa: F401
 from pathlib import Path
 from string import Template as StringTemplate
 from string import Formatter as StringFormatter
-from abc import abstractproperty, abstractmethod
+from abc import abstractmethod
 from pandas.tseries.frequencies import to_offset
 from . import base
 
 
 class ArbitraryLabel(base.Base):
     def __init__(self):
-        pass
+        super().__init__()
 
     @abstractmethod
     def __str__(self):
         pass
 
-    @abstractproperty
-    def tex(self):
-        pass
 
-    @abstractproperty
-    def path(self):
-        pass
+#     @abstractproperty
+#     def tex(self):
+#         pass
 
-    @abstractmethod
-    def build_label(self):
-        pass
+#     @abstractproperty
+#     def path(self):
+#         pass
 
 
 class ManualLabel(ArbitraryLabel):
@@ -40,6 +37,7 @@ class ManualLabel(ArbitraryLabel):
     """
 
     def __init__(self, tex, unit, path=None):
+        super().__init__()
         self.set_tex(tex)
         self.set_unit(unit)
         self.build_label()
@@ -74,13 +72,10 @@ class ManualLabel(ArbitraryLabel):
         unit = base._inU.get(unit, unit)
         self._unit = unit.strip("$")
 
-    def build_label(self):
-        pass
-
 
 class Vsw(ArbitraryLabel):
     def __init__(self):
-        pass
+        super().__init__()
 
     def __str__(self):
         return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
@@ -93,14 +88,11 @@ class Vsw(ArbitraryLabel):
     def path(self):
         return Path("vsw")
 
-    def build_label(self):
-        pass
-
 
 class CarringtonRotation(ArbitraryLabel):
     def __init__(self, short_label=True):
-        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation".
-        """
+        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation"."""
+        super().__init__()
         self._short_label = bool(short_label)
 
     def __str__(self):
@@ -121,12 +113,10 @@ class CarringtonRotation(ArbitraryLabel):
     def path(self):
         return Path("CarrRot")
 
-    def build_label(self):
-        pass
-
 
 class Count(ArbitraryLabel):
     def __init__(self, norm=None):
+        super().__init__()
         self.set_axnorm(norm)
         self.build_label()
 
@@ -184,6 +174,7 @@ class Count(ArbitraryLabel):
 
 class Frequency(ArbitraryLabel):
     def __init__(self, other):
+        super().__init__()
         self.set_other(other)
         self.build_label()
 
@@ -226,7 +217,7 @@ class Frequency(ArbitraryLabel):
 
 class Power(ArbitraryLabel):
     def __init__(self):
-        pass
+        super().__init__()
 
     def __str__(self):
         return f"${self.tex} \; [{self.units}]$"  # noqa: W605
@@ -243,9 +234,6 @@ class Power(ArbitraryLabel):
     def path(self):
         return Path("power")
 
-    def build_label(self):
-        pass
-
 
 class Probability(ArbitraryLabel):
     def __init__(self, other_label, comparison=None):
@@ -253,6 +241,7 @@ class Probability(ArbitraryLabel):
 
         The `comparison`, if passed, is something like "> 0".
         """
+        super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.build_label()
@@ -330,6 +319,7 @@ class CountOther(ArbitraryLabel):
 
         The `comparison`, if passed, is something like "> 0".
         """
+        super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.set_new_line_for_units(new_line_for_units)
@@ -415,8 +405,8 @@ class CountOther(ArbitraryLabel):
 
 class MathFcn(ArbitraryLabel):
     def __init__(self, fcn, other_label, dimensionless=True, new_line_for_units=False):
-        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
-        """
+        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function."""
+        super().__init__()
         self.set_other_label(other_label)
         self.set_function(fcn)
         self.set_dimensionless(dimensionless)
@@ -510,6 +500,7 @@ class Timedelta(ArbitraryLabel):
         offset: str
             pd.Offset or covertable string
         """
+        super().__init__()
         self.set_offset(offset)
 
     def __str__(self):
@@ -541,9 +532,6 @@ class Timedelta(ArbitraryLabel):
         except AttributeError:
             return base._inU["unknown"]
 
-    def build_label(self):
-        pass
-
     def set_offset(self, new):
         try:
             new = to_offset(new)
@@ -561,6 +549,7 @@ class DateTime(ArbitraryLabel):
         dt: str
             Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
         """
+        super().__init__()
         self.set_kind(kind)
 
     def __str__(self):
@@ -578,15 +567,13 @@ class DateTime(ArbitraryLabel):
     def path(self):
         return Path(self.kind.lower())
 
-    def build_label(self):
-        pass
-
     def set_kind(self, new):
         self._kind = new
 
 
 class Distance2Sun(ArbitraryLabel):
     def __init__(self, units):
+        super().__init__()
         self.set_units(units)
 
     def __str__(self):
@@ -614,12 +601,10 @@ class Distance2Sun(ArbitraryLabel):
 
         self._units = units
 
-    def build_label(self):
-        pass
-
 
 class SSN(ArbitraryLabel):
     def __init__(self, key):
+        super().__init__()
         self.set_kind(key)
 
     def __str__(self):
@@ -658,9 +643,6 @@ class SSN(ArbitraryLabel):
     def kind(self):
         return self._kind
 
-    def build_label(self):
-        pass
-
     def set_kind(self, new):
         new = new.upper()
         assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
@@ -677,6 +659,7 @@ class ComparisonLable(ArbitraryLabel):
             >>> fcn.format(labelA=labelA, labelB=labelB)
 
         """
+        super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
         self.build_label()
@@ -710,8 +693,7 @@ class ComparisonLable(ArbitraryLabel):
 
     @property
     def function_name(self):
-        r"""Basically for use with building :py:meth:`path`.
-        """
+        r"""Basically for use with building :py:meth:`path`."""
         return self._function_name
 
     def set_constituents(self, labelA, labelB):
@@ -814,9 +796,8 @@ keys : {",".join(keys)}
 
 class Xcorr(ArbitraryLabel):
     def __init__(self, labelA, labelB, method, short_tex=False):
-        r"""Cross correlation coefficeint between labelA and labelB.
-
-        """
+        r"""Cross correlation coefficeint between labelA and labelB."""
+        super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)
         self.set_short_tex(short_tex)
