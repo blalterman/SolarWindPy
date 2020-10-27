@@ -14,7 +14,7 @@ cfgv==3.0.0
 chardet==3.0.4
 Click==7.0
 cmarkgfm==0.4.2
-cryptography==2.8
+cryptography==3.2
 cycler==0.10.0
 docutils==0.16
 editdistance==0.5.3
