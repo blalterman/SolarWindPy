@@ -270,7 +270,7 @@ class Probability(ArbitraryLabel):
         return self._comparison
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_comparison(self, new):
@@ -361,7 +361,7 @@ class CountOther(ArbitraryLabel):
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_comparison(self, new):
@@ -452,7 +452,7 @@ class MathFcn(ArbitraryLabel):
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_function(self, new):
@@ -697,9 +697,9 @@ class ComparisonLable(ArbitraryLabel):
         return self._function_name
 
     def set_constituents(self, labelA, labelB):
-        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelA, (str, base.Base)):
             raise TypeError
-        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelB, (str, base.Base)):
             raise TypeError
 
         if (
@@ -835,9 +835,9 @@ class Xcorr(ArbitraryLabel):
         return self._method
 
     def set_constituents(self, labelA, labelB):
-        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelA, (str, base.Base)):
             raise TypeError
-        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelB, (str, base.Base)):
             raise TypeError
 
         self._labelA = labelA
