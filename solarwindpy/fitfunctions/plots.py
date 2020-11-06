@@ -507,8 +507,8 @@ class FFPlot(object):
         z = kwargs.pop("z", self.labels.z)
 
         if len(kwargs.keys()):
-            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
-            raise KeyError("Unexpected kwarg\n{}".format(extra))
+            extra = "\n".join([f"{k}: {v}" for k, v in kwargs.items()])
+            raise KeyError(f"Unexpected kwarg\n{extra}")
 
         self._labels = AxesLabels(x, y, z)
 

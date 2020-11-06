@@ -73,16 +73,20 @@ class ManualLabel(ArbitraryLabel):
         self._unit = unit.strip("$")
 
 
-class Vsw(ArbitraryLabel):
+class Vsw(base.Base):
     def __init__(self):
         super().__init__()
 
-    def __str__(self):
-        return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
+    #     def __str__(self):
+    #         return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
 
     @property
     def tex(self):
         return r"V_\mathrm{SW}"
+
+    @property
+    def units(self):
+        return r"\mathrm{km \, s^{-1}}"
 
     @property
     def path(self):

@@ -9,8 +9,9 @@ known_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
 
 
 class ElementalAbundance(base.Base):
-    def __init__(self, species, reference_species):
+    def __init__(self, species, reference_species, pct_unit=False):
         self.set_species(species, reference_species)
+        self._pct_unit = bool(pct_unit)
 
     @property
     def species(self):
@@ -22,7 +23,10 @@ class ElementalAbundance(base.Base):
 
     @property
     def units(self):
-        return r"\#"  # noqa: W605
+        if self.pct_unit:
+            return r"\%"
+        else:
+            return r"\#"  # noqa: W605
 
     @property
     def tex(self):
@@ -33,6 +37,10 @@ class ElementalAbundance(base.Base):
     @property
     def path(self):
         return Path(f"{self.species}-OV-{self.reference_species}_photospheric-ratio")
+
+    @property
+    def pct_unit(self):
+        return self._pct_unit
 
     def set_species(self, species, reference_species):
         species = species.title()
