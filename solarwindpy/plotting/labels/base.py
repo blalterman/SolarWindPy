@@ -87,6 +87,7 @@ _inU = {
     "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
+    #     "deg": r"\degree",
     "Hz": r"\mathrm{Hz}",
 }
 

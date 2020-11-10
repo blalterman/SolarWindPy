@@ -199,8 +199,9 @@ class TeXinfo(object):
 
     @staticmethod
     def _simplify_for_paper(info):
-        text_info = []
-        numeric_info = []
+        #         text_info = []
+        #         numeric_info = []
+        formatted_info = []
         for ii in info:
             ii = ii.strip("$")
             try:
@@ -208,13 +209,13 @@ class TeXinfo(object):
                 # (2) Right strip trailing decimals.
                 tmp = ii.replace(" ", "").split("=")
                 ii = f"""{tmp[0]} = {str(float(tmp[1])).rstrip("0").rstrip(".")}"""
-                numeric_info.append(ii)
+                formatted_info.append(ii)
 
-            except ValueError:
-                text_info.append(ii)
+            except (ValueError, IndexError):
+                formatted_info.append(ii)
 
-        all_info = text_info + numeric_info
-        return all_info
+        #         all_info = text_info + numeric_info
+        return formatted_info
 
     def _add_additional_info(self, info, additional_info):
         if additional_info is not None:

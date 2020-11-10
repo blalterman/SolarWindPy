@@ -191,15 +191,14 @@ class Hist2D(base.Plot2D, AggPlot):
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
 
-===== =============================================================
- key                           description
-===== =============================================================
- c     Column normalize
- d     Density normalize
- r     Row normalize
- t     Total normalize
-===== =============================================================
-"""
+        ===== =============================================================
+         key                           description
+        ===== =============================================================
+         c     Column normalize
+         d     Density normalize
+         r     Row normalize
+         t     Total normalize
+        ===== ============================================================="""
         if new is not None:
             new = new.lower()[0]
             assert new in ("c", "r", "t", "d")
@@ -376,7 +375,7 @@ class Hist2D(base.Plot2D, AggPlot):
                 cbar_kwargs["ax"] = ax
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
             cbar_or_mappable = cbar
 
         self._format_axis(ax)
