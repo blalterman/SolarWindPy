@@ -24,19 +24,45 @@ _trans_species = {
     "p2": r"p_2",
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
-    "H": r"\mathrm{H}",
-    "3He": __isotope_species % (3, "He"),
-    "4He": __isotope_species % (4, "He"),
-    "12C": __isotope_species % (12, "C"),
-    "14N": __isotope_species % (14, "N"),
-    "16O": __isotope_species % (16, "O"),
-    "20Ne": __isotope_species % (20, "Ne"),
-    "24Mg": __isotope_species % (24, "Mg"),
-    "28Si": __isotope_species % (28, "Si"),
-    "32S": __isotope_species % (32, "S"),
-    "40Ca": __isotope_species % (40, "Ca"),
-    "Fe": r"\mathrm{Fe}",
+    #     "H": r"\mathrm{H}",
+    #     "C": r"\mathrm{Fe}",
+    #     "Fe": ,
+    #     "He": ,
+    #     "Mg": ,
+    #     "Ne": ,
+    #     "N": ,
+    #     "O": ,
+    #     "Si": ,
+    #     "S": ,
+    #     "3He": __isotope_species % (3, "He"),
+    #     "4He": __isotope_species % (4, "He"),
+    #     "12C": __isotope_species % (12, "C"),
+    #     "14N": __isotope_species % (14, "N"),
+    #     "16O": __isotope_species % (16, "O"),
+    #     "20Ne": __isotope_species % (20, "Ne"),
+    #     "24Mg": __isotope_species % (24, "Mg"),
+    #     "28Si": __isotope_species % (28, "Si"),
+    #     "32S": __isotope_species % (32, "S"),
+    #     "40Ca": __isotope_species % (40, "Ca"),
+    #     "Fe": r"\mathrm{Fe}",
 }
+
+for s in ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S"):
+    _trans_species[s] = r"\mathrm{%s}" % s
+
+for i, s in (
+    (3, "He"),
+    (4, "He"),
+    (12, "C"),
+    (14, "N"),
+    (16, "O"),
+    (20, "Ne"),
+    (24, "Mg"),
+    (28, "Si"),
+    (32, "S"),
+    (40, "Ca"),
+):
+    _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
 
@@ -175,8 +201,9 @@ _trans_units = {
     # Spectral things
     "spectral_exponent": _inU["dimless"],
     "MeV/nuc": r"\mathrm{MeV/nuc}",
-    #     "differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
-    "differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
+    #     "SEP_differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
+    "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
+    "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
 }
 
 _trans_component = {
@@ -201,11 +228,6 @@ _trans_component = {
     # These will be replaced by dot products and regex.
     "bv": r"{\vec{B} \cdot \vec{v}}",
     "dv": r"\Delta v",  # For "e" terms
-    # Solar Activity
-    #     "monthly-13": r"\mathrm{M13}",
-    #     "monthly": r"\mathrm{M}",
-    #     "daily": r"\mathrm{D}",
-    #     "yearly": r"\mathrm{Y}",
 }
 
 _templates = {
@@ -280,7 +302,8 @@ _templates = {
     "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
     "MeV/nuc": r"\mathrm{Energy}",
     #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
-    "differential_flux": r"{{$S}} \: dJ/dE",
+    "SEP_differential_flux": r"{{$S}} \: dJ/dE",
+    "SEP_intensity": r"{{$S}}",
 }
 
 

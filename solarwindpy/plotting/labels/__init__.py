@@ -19,6 +19,7 @@ from . import base
 from . import special
 from . import composition
 from . import elemental_abundance
+from . import datetime  # noqa: F401
 
 TeXlabel = base.TeXlabel
 species_translation = base._run_species_substitution

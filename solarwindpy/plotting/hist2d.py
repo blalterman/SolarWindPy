@@ -799,8 +799,6 @@ class Hist2D(base.Plot2D, AggPlot):
         if not project_counts:
             h1.set_labels(y=self.labels._asdict()[other])
 
-        h1.set_path("auto")
-
         return h1
 
     def make_joint_h2_h1_plot(self, **kwargs):
