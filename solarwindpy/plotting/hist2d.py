@@ -566,7 +566,7 @@ class Hist2D(base.Plot2D, AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
-        plot_edges=True,
+        plot_edges=False,
         edges_kwargs=None,
         clabel_kwargs=None,
         skip_max_clbl=True,
