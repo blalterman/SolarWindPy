@@ -157,7 +157,7 @@ class TeXinfo(object):
             floatfmt=".3e",
             tablefmt="plain",
         )
-        rel_err = r"$X \; \; \; \left|\sigma(X)/X\right|$" "\n" + rel_err
+        rel_err = r"$X \; \; \; \left|\sigma(X)/X\right|$" "\n" + "----------" + rel_err
 
         return rel_err
 
