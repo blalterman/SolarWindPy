@@ -39,7 +39,6 @@ class ManualLabel(ArbitraryLabel):
         super().__init__()
         self.set_tex(tex)
         self.set_unit(unit)
-        self.build_label()
         self._path = path
 
     def __str__(self):
