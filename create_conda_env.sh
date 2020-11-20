@@ -19,13 +19,13 @@ function run_script() {
     echo pwd
 
     core="pandas scipy numpy numexpr bottleneck matplotlib pytables tqdm"
-    dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-    use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
+    dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit tqdm"
+    use="jupyter nbdime ipywidgets yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
 
     pkgs="$core $dev $use"
     #pkgs="$core $dev"
 
-    conda create -n $1 python=3 $pkgs
+    conda create -n $1 python=3.8 $pkgs
 
 #    conda init zsh
 #
