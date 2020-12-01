@@ -28,6 +28,7 @@ Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
+FitBounds = namedtuple("FitBounds", "lower,upper")
 
 # def __huber(z):
 #     cost = np.array(z)
@@ -163,6 +164,11 @@ class FitFunction(ABC):
         return self._argnames
 
     @property
+    def fit_bounds(self):
+        r"""Bounds used when running the fit."""
+        return dict(self._fit_bounds)
+
+    @property
     def chisq_dof(self):
         r"""Chisq per degree of freedom :math:`\chi^2_\nu`.
 
@@ -197,14 +203,14 @@ class FitFunction(ABC):
         # If failed to make an initial guess, then don't build the info.
         try:
             p0 = self.p0
-            lower, upper = self.fit_bounds
+            bounds = self.fit_bounds
         except AttributeError:
             return None
 
         names = self.argnames
         info = {
-            name: InitialGuessInfo(guess, (lb, ub))
-            for name, guess, lb, ub in zip(names, p0, lower, upper)
+            name: InitialGuessInfo(guess, tuple(bounds[name]))
+            for name, guess in zip(names, p0)
         }
 
         #         info = ["\n".join(param) for param in info]
@@ -529,6 +535,11 @@ xobs: {xobs.shape}"""
 
         if not res.success:
             raise RuntimeError("Optimal parameters not found: " + res.message)
+
+        fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
+        fit_bounds = {k: FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
+        fit_bounds = tuple(fit_bounds.items())
+        self._fit_bounds = fit_bounds
 
         #         self._loss_fcn = loss_fcn
         return res, p0

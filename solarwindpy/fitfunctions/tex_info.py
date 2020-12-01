@@ -398,9 +398,9 @@ class TeXinfo(object):
             to their uncertainty in standard decimal (not expoential)
             notation.
             This option overrides `convert_pow_10`.
-        add_initial_guess: dict, None
-            If not None, a dict with keys corresponding to function arg names
-            and values that are (p0, fit_bounds) for that fit parameter.
+        add_initial_guess: bool
+            If True and :pymeth:`initial_guess_info` is not None, add
+            `(p0, fit_bounds)` table to info.
         additional_info: str or iterable of strings
             Additional info added to the fit info annotation box.
         annotate_fcn: FunctionType
