@@ -479,6 +479,12 @@ xobs: {xobs.shape}"""
             p0 = np.atleast_1d(p0)
             n = p0.size
 
+        if isinstance(bounds, dict):
+            # Monkey patch to work with bounds being stored as
+            # dict for TeX_info. (20201202)
+            bounds = [bounds[k] for k in self.argnames]
+            bounds = np.array(bounds).T
+
         # Copied from `curve_fit` line 715 (20200527)
         lb, ub = prepare_bounds(bounds, n)
         if p0 is None:
@@ -621,6 +627,7 @@ xobs: {xobs.shape}"""
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
         except ValueError as e:
+            #             raise
             return e
 
         absolute_sigma = kwargs.pop("absolute_sigma", False)
@@ -631,6 +638,7 @@ xobs: {xobs.shape}"""
             res, p0 = self._run_least_squares(**kwargs)
         except (RuntimeError, ValueError) as e:
             #             print("fitting failed", flush=True)
+            #             raise
             return e
 
         popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
