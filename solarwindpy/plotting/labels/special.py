@@ -83,11 +83,15 @@ class Vsw(ArbitraryLabel):
         pass
 
     def __str__(self):
-        return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
+        return r"$%s \; [%s]$" % (self.tex, self.units)
 
     @property
     def tex(self):
         return r"V_\mathrm{SW}"
+
+    @property
+    def units(self):
+        return base._inU["kms"]
 
     @property
     def path(self):

@@ -9,6 +9,7 @@ import pdb  # noqa: F401
 import re
 import numpy as np
 from numbers import Number
+from tabulate import tabulate
 
 # Compile this once on import to save time.
 _remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
@@ -17,7 +18,7 @@ _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 class TeXinfo(object):
     def __init__(
-        self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None, npts=None,
+        self, popt, psigma, TeX_function, chisq_dof, initial_guess_info=None, npts=None
     ):
         r"""A container for printing :py:class:`FitFunction` info on a figure.
 
@@ -59,28 +60,25 @@ class TeXinfo(object):
             # Fit failed to make a guess
             return None
 
+        info = dict(info)
         translate = self.TeX_argnames
         if translate is not None:
             for k0, k1 in translate.items():
                 info[k1] = info.pop(k0)
 
-        #         info = [
-        #             (
-        #                 f"${k}$",
-        #                 f"upper = {v.bounds[1]:.3e}",
-        #                 f"guess = {v.p0:.3e}",
-        #                 f"lower = {v.bounds[0]:.3e}",
-        #             )
-        #             for k, v in info.items()
-        #         ]
-
-        info = [
-            (f"${k}$", f"{v.bounds[0]:.3e}  {v.p0:.3e}  {v.bounds[1]:.3e}")
-            for k, v in info.items()
-        ]
-
-        info = ["\n".join(param) for param in info]
-        info = "\n\n".join(info)
+        tbl = []
+        for k, v in info.items():
+            tbl.append([f"${k}$", v.bounds[0], v.p0, v.bounds[1]])
+        info = (
+            tabulate(
+                tbl,
+                #                         headers=["Param", "Lower", "Guess", "Upper"],
+                floatfmt=".3e",
+                tablefmt="plain",
+            )
+            .replace("-inf", r"$-\infty$")
+            .replace(" inf", r" $+\infty$")
+        )
 
         return info
 
@@ -145,7 +143,19 @@ class TeXinfo(object):
             for k0, k1 in translate.items():
                 TeX[k1] = TeX.pop(k0)
 
-        return TeX
+        #         template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
+        #         rel_err = [template.format(k, np.abs(v)) for k, v in TeX.items()]
+
+        rel_err = tabulate(
+            [[f"{k} \;\;\; ", np.abs(v)] for k, v in TeX.items()],  # noqa: W605
+            floatfmt=".3e",
+            tablefmt="plain",
+        )
+        rel_err = (
+            r"$X \; \; \; \left|\sigma(X)/X\right|$" "\n" + "-------" + "\n" + rel_err
+        )
+
+        return rel_err
 
     @staticmethod
     def _check_and_add_math_escapes(x):
@@ -171,8 +181,8 @@ class TeXinfo(object):
     @staticmethod
     def _calc_precision(value):
         r"""Primarily for use with the `val_uncert_2_string` and other methods
-         that may require this.
-         """
+        that may require this.
+        """
         # Convert the fractional part to an exponential string.
         # E.g. 0.0009865 -> 9.865000e-04
         precision = "%e" % value  # (value - int(value))
@@ -185,8 +195,9 @@ class TeXinfo(object):
 
     @staticmethod
     def _simplify_for_paper(info):
-        text_info = []
-        numeric_info = []
+        #         text_info = []
+        #         numeric_info = []
+        formatted_info = []
         for ii in info:
             ii = ii.strip("$")
             try:
@@ -194,13 +205,13 @@ class TeXinfo(object):
                 # (2) Right strip trailing decimals.
                 tmp = ii.replace(" ", "").split("=")
                 ii = f"""{tmp[0]} = {str(float(tmp[1])).rstrip("0").rstrip(".")}"""
-                numeric_info.append(ii)
+                formatted_info.append(ii)
 
-            except ValueError:
-                text_info.append(ii)
+            except (ValueError, IndexError):
+                formatted_info.append(ii)
 
-        all_info = text_info + numeric_info
-        return all_info
+        #         all_info = text_info + numeric_info
+        return formatted_info
 
     def _add_additional_info(self, info, additional_info):
         if additional_info is not None:
@@ -240,10 +251,11 @@ class TeXinfo(object):
         #         pdb.set_trace()
 
         if relative_error:
-            template = r"\Delta({0})/{0} = {1:.1e}"
-            rel_err = self.TeX_relative_error
-            rel_err = [template.format(k, v) for k, v in rel_err.items()]
-            info += [""] + rel_err  # blank for visual cue
+            #             template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
+            #             rel_err = self.TeX_relative_error
+            #             rel_err = [template.format(k, np.abs(v)) for k, v in rel_err.items()]
+            #             info += [""] + rel_err  # blank for visual cue
+            info += ["", self.TeX_relative_error]  # blank for visual cue
 
         if npts and self.npts is not None:
             info += [
@@ -265,10 +277,7 @@ class TeXinfo(object):
             )
             if (not npts) or (self.npts is None):
                 chisq_info = ["", chisq_info]  # blank line for visual cue
-            #             info += [
-            #                 "",  # blank line for visual cue
-            #                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}" % (self.chisq_dof.linear, self.chisq_dof.robust),
-            #             ]
+
             else:
                 chisq_info = [chisq_info]
 
@@ -303,26 +312,13 @@ class TeXinfo(object):
         if simplify_info_for_paper:
             info = self._simplify_for_paper(info)
 
-        #             breakpoint()
-        #             info = [f"$ {ii} $" for ii in (text_info + numeric_info)]
-        #             info = "\n".join(info)
-
-        #         print(*info, sep="\n")
-
         # IF statement to add blank lines for spacing chisq_nu and other stats.
         info = [r"$ %s $" % x.replace("$", "") if x else "\n" for x in info]
         info = "\n".join(info)
 
-        info = info.replace(r"inf", r"\infty")
+        info = info.replace(r"inf", r"\infty").replace("\n\n\n", "\n\n")
 
         return info
-
-    #     @property
-    #     def label(self):
-    #         r"""The label for use when plotting.
-    #         """
-    #         # TODO: What is this? How do I use it?
-    #         return self.fitfunction.function.func_name.title()
 
     def annotate_info(self, ax, **kwargs):
         r"""Add the `TeX_info` annotation to ax.
@@ -363,17 +359,7 @@ class TeXinfo(object):
             **kwargs,
         )
 
-    def build_info(
-        self,
-        **kwargs,
-        #         chisq_dof=True,
-        #         convert_pow_10=True,
-        #         strip_uncertainties=False,
-        #         simplify_info_for_paper=False,
-        #         add_initial_guess=False,
-        #         additional_info=None,
-        #         annotate_fcn=None,
-    ):
+    def build_info(self, **kwargs):
         r"""
         Generate a TeX-formatted string with the desired info
 
@@ -462,6 +448,11 @@ class TeXinfo(object):
                 f"Unsure how to parse `initial_guess_info` of type {type(new)}"
             )
 
+        try:
+            new = tuple(new.items())
+        except AttributeError:
+            pass
+
         self._initial_guess_info = new
 
     def set_npts(self, new):
@@ -476,12 +467,11 @@ class TeXinfo(object):
         for k in popt:
             if k not in psigma:
                 raise ValueError(f"key ({k}) must be in both 'popt' and 'psigma' ")
-        self._popt = popt.items()
-        self._psigma = psigma.items()
+        self._popt = tuple(popt.items())
+        self._psigma = tuple(psigma.items())
 
     def set_TeX_argnames(self, **kwargs):
-        r"""Define the mapping to format LaTeX function argnames.
-        """
+        r"""Define the mapping to format LaTeX function argnames."""
         # Save a tuple so immutable.
         popt = self.popt
         initial_guess = self.initial_guess_info
@@ -519,21 +509,11 @@ class TeXinfo(object):
         "3.14 \pm 0.01"
         """
 
-        # if np.isfinite(uncertainty) and value <= uncertainty:
-        #     msg = ("Must be that value > uncertainty\n"
-        #            "value = %s\nuncertainty = %s")
-        #     raise ValueError(msg % (value, uncertainty))
-
         vprecision = 3
         if np.isfinite(uncertainty):
             uprecision = self._calc_precision(uncertainty)
             vprecision = self._calc_precision(value)
             vprecision = vprecision - uprecision
-
-        #         else:
-        #             self.logger.warning(
-        #                 "1-sigma fit uncertainty is %s.\nSetting to -3.", uncertainty
-        #             )
 
         template = r"{:.%se} \pm {:.0e}"
         template = template % abs(vprecision)

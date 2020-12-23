@@ -152,8 +152,7 @@ class FitFunction(ABC):
 
     @abstractproperty
     def TeX_function(self):
-        r"""Function written in LaTeX.
-        """
+        r"""Function written in LaTeX."""
         pass
 
     @property
@@ -185,8 +184,7 @@ class FitFunction(ABC):
 
     @property
     def dof(self):
-        r"""Degrees of freedom in the fit.
-        """
+        r"""Degrees of freedom in the fit."""
         return self.observations.used.y.size - len(self.p0)
 
     @property
@@ -216,8 +214,7 @@ class FitFunction(ABC):
 
     @property
     def nobs(self):
-        r"""The total number of observations used in the fit.
-        """
+        r"""The total number of observations used in the fit."""
         return self.observations.tk_observed.sum()
 
     @property
@@ -226,15 +223,15 @@ class FitFunction(ABC):
 
     @property
     def plotter(self):
-        try:
-            return self._plotter
-        except AttributeError:
-            return self.build_plotter()
+        #         try:
+        return self._plotter
+
+    #         except AttributeError:
+    #             return self.build_plotter()
 
     @property
     def popt(self):
-        r"""Optimized fit parameters.
-        """
+        r"""Optimized fit parameters."""
         return dict(self._popt)
 
     @property
@@ -264,10 +261,11 @@ class FitFunction(ABC):
 
     @property
     def TeX_info(self):
-        try:
-            return self._TeX_info
-        except AttributeError:
-            return self.build_TeX_info()
+        #         try:
+        return self._TeX_info
+
+    #         except AttributeError:
+    #             return self.build_TeX_info()
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""
@@ -312,8 +310,7 @@ xobs: {xobs.shape}"""
         return mask
 
     def _build_outside_mask(self, axis, x, outside):
-        r"""Take data outside of the range `outside[0]:outside[1]`.
-        """
+        r"""Take data outside of the range `outside[0]:outside[1]`."""
 
         if outside is None:
             return np.full_like(x, True, dtype=bool)
@@ -451,89 +448,6 @@ xobs: {xobs.shape}"""
         raw = Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
-
-    #     def make_fit_old(self, **kwargs):
-    #         f"""Fit the function with the independent values `xobs` and dependent
-    #         values `yobs` using `curve_fit`.
-    #
-    #         Parameters
-    #         ----------
-    #         kwargs:
-    #             Unless specified here, defaults are as defined by `curve_fit`.
-    #
-    #                 ============= ======================================
-    #                     kwarg                    default
-    #                 ============= ======================================
-    #                  p0            Setup by `{self.__class__.__name__}`
-    #                  return_full   False
-    #                  method        "trf"
-    #                  loss          "huber"
-    #                  max_nfev      10000
-    #                  f_scale       0.1
-    #                 ============= ======================================
-    #
-    #         """
-    #         p0 = kwargs.pop("p0", self.p0)
-    #         method = kwargs.pop("method", "trf")
-    #         loss = kwargs.pop("loss", "huber")
-    #         max_nfev = kwargs.pop("max_nfev", 10000)
-    #         f_scale = kwargs.pop("f_scale", 0.1)
-    #         absolute_sigma = kwargs.pop("absolute_sigma", False)
-    #
-    #         if absolute_sigma:
-    #             raise ValueError(
-    #                 "Always use `absolute_sigma` False so we can calcualte chisq_dof and then renormalize here."
-    #             )
-    #
-    #         # This line is legacy. Not sure why it's here, but I'm copying it over
-    #         # assuming I had a good reason to include it. (20170309 0011)
-    #         return_full = kwargs.get("full_output", False)
-    #         if return_full:
-    #             msg = "You haven't decided how to save `return_full` output."
-    #             raise NotImplementedError(msg)
-    #
-    #         try:
-    #             assert self.sufficient_data  # Check we have enough data to fit.
-    #         except ValueError as e:
-    #             return e
-    #
-    #         xdata = self.observations.used.x
-    #         ydata = self.observations.used.y
-    #         sigma = self.observations.used.w
-    #
-    #         try:
-    #             result = curve_fit(
-    #                 self.function,
-    #                 xdata,
-    #                 ydata,
-    #                 p0=p0,
-    #                 sigma=sigma,
-    #                 method=method,
-    #                 loss=loss,
-    #                 max_nfev=max_nfev,
-    #                 f_scale=f_scale,
-    #                 **kwargs,
-    #             )
-    #         except (RuntimeError, ValueError) as e:
-    #             return e
-    #
-    #         popt, pcov = result[:2]
-    #         #         psigma = np.sqrt(np.diag(pcov))
-    #
-    #         dof = ydata.size - len(p0)
-    #         chisq_dof = np.inf  # Divide by zero => infinity
-    #         if dof:
-    #             r = (self.function(xdata, *popt) - ydata) / sigma
-    #             chisq_dof = (r ** 2).sum() / dof
-    #
-    #         pcov = pcov * chisq_dof
-    #         psigma = np.sqrt(np.diag(pcov))
-    #         self._popt = list(zip(self.argnames, popt))
-    #         self._psigma = list(zip(self.argnames, psigma))
-    #         self._pcov = pcov
-    #         #         self._chisq_dof = chisq_dof
-    #         all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, np.nan)
-    #         self._chisq_dof = all_chisq
 
     def _run_least_squares(self, **kwargs):
         p0 = kwargs.pop("p0", self.p0)
@@ -715,3 +629,6 @@ xobs: {xobs.shape}"""
         self._pcov = pcov
         self._chisq_dof = all_chisq
         self._fit_result = res
+
+        self.build_TeX_info()
+        self.build_plotter()

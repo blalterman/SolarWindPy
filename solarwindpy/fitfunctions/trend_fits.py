@@ -62,7 +62,8 @@ class TrendFit(object):
         self.set_fitfunctions(ffunc1d, trendfunc)
         self._trend_logx = bool(trend_logx)
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
-        self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
+
+    #         self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
 
     def __str__(self):
         return self.__class__.__name__
@@ -73,8 +74,7 @@ class TrendFit(object):
 
     @property
     def ffunc1d_class(self):
-        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin.
-        """
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin."""
         return self._ffunc1d_class
 
     @property
@@ -86,14 +86,12 @@ class TrendFit(object):
 
     @property
     def ffuncs(self):
-        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin
-        """
+        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin"""
         return self._ffuncs
 
     @property
     def popt_1d(self):
-        r"""Optimized parameters from 1D fits.
-        """
+        r"""Optimized parameters from 1D fits."""
         #         return self._popt_1d
         return pd.DataFrame.from_dict(
             self.ffuncs.apply(lambda x: x.popt).to_dict(), orient="index"
@@ -101,22 +99,19 @@ class TrendFit(object):
 
     @property
     def psigma_1d(self):
-        r"""Fit uncertainties from 1D fits.
-        """
+        r"""Fit uncertainties from 1D fits."""
         return pd.DataFrame.from_dict(
             self.ffuncs.apply(lambda x: x.psigma).to_dict(), orient="index"
         )
 
     @property
     def trend_func(self):
-        r"""`trendfunc_class` applied along the x-axis.
-        """
+        r"""`trendfunc_class` applied along the x-axis."""
         return self._trend_func
 
     @property
     def bad_fits(self):
-        r"""Bad 1D fits identifyied when running `make_1dfits`.
-        """
+        r"""Bad 1D fits identifyied when running `make_1dfits`."""
         return self._bad_fits
 
     @property
@@ -135,78 +130,27 @@ class TrendFit(object):
     def labels(self):
         return self._labels
 
-    def set_agged(self, new):
-        assert isinstance(new, pd.DataFrame)
-        self._agged = new
-
-    def set_labels(self, **kwargs):
-        r"""Set or update x, y, or z labels. Any label not specified in kwargs
-        is propagated from `self.labels.<x, y, or z>`.
-        """
-
-        x = kwargs.pop("x", self.labels.x)
-        y = kwargs.pop("y", self.labels.y)
-        z = kwargs.pop("z", self.labels.z)
-
-        if len(kwargs.keys()):
-            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
-            raise KeyError("Unexpected kwarg\n{}".format(extra))
-
-        self._labels = core.AxesLabels(x, y, z)
-
-        # log = logging.getLogger()
-        try:
-            # Update ffunc1d labels
-            self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))
-        #             log.warning("Set ffunc1d labels {}".format(self.ffuncs.iloc[0].labels))
-        except AttributeError:
-            #             log.warning("Skipping setting ffunc 1d labels")
-            pass
-
-        try:
-            # Update trendfunc labels
-            self.trend_func.set_labels(x=x, y=y, z=z)
-        #             log.warning("Set trend_func labels {}".format(self.trend_func.labels))
-
-        except AttributeError:
-            #             log.warning("Skipping setting trend_func labels")
-            pass
-
-    def set_fitfunctions(self, ffunc1d, trendfunc):
-        if ffunc1d is None:
-            ffunc1d = gaussians.Gaussian
-
-        if not issubclass(ffunc1d, core.FitFunction):
-            raise TypeError
-        if not issubclass(trendfunc, core.FitFunction):
-            raise TypeError
-
-        self._ffunc1d_class = ffunc1d
-        self._trendfunc_class = trendfunc
-
     def make_ffunc1ds(self, **kwargs):
-        r"""kwargs passed to `self.ffunc1d(x, y, **kwargs)`.
-        """
+        r"""kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""
         agg = self.agged
         x = pd.IntervalIndex(agg.index).mid.values
 
-        ylbl = self.labels.y
-        zlbl = self.labels.z
+        #         ylbl = self.labels.y
+        #         zlbl = self.labels.z
 
         ffuncs = {}
         for k, y in agg.items():
             ff1d = self.ffunc1d_class(x, y.values, **kwargs)
             # These are slices along y traversing the x-axis, so we
             # rotate labels accordingly.
-            ff1d.set_labels(x=ylbl, y=zlbl)
+            #             ff1d.set_labels(x=ylbl, y=zlbl)
             ffuncs[k] = ff1d
 
         ffuncs = pd.Series(ffuncs)
         self._ffuncs = ffuncs
 
     def make_1dfits(self, **kwargs):
-        r"""Removes bad fits from `ffuncs` and saves them in `bad_fits`.
-        """
+        r"""Removes bad fits from `ffuncs` and saves them in `bad_fits`."""
         # Successful fits return None, which pandas treats as NaN.
         fit_success = self.ffuncs.apply(lambda x: x.make_fit(**kwargs))
         bad_idx = fit_success.dropna().index
@@ -232,28 +176,35 @@ class TrendFit(object):
         yv = popt.loc[:, yk]
         wv = popt.loc[:, wk]
 
-        y0, y1 = self.trend_func.yobs.min(), self.trend_func.yobs.max()
+        y0, y1 = (
+            self.trend_func.observations.used.y.min(),
+            self.trend_func.observations.used.y.max(),
+        )
         y_ok = (y0 <= yv) & (yv <= y1)
 
-        w0, w1 = self.trend_func.weights.min(), self.trend_func.weights.max()
+        w0, w1 = (
+            self.trend_func.observations.used.w.min(),
+            self.trend_func.observations.used.w.max(),
+        )
         w_ok = (w0 <= wv) & (wv <= w1)
 
         in_trend = y_ok & w_ok
 
-        legend_title = "${}={}$\n{}"
+        legend_title = "${}={} \; {}$\n{}"  # noqa: W605
 
-        xlbl = self.labels.x
-        try:
-            xlbl = xlbl.tex
-        except AttributeError:
-            pass
+        #         xlbl = self.labels.x
+        #         try:
+        #             xlbl = xlbl.tex
+        #         except AttributeError:
+        #             pass
 
         for k, ff in self.ffuncs.items():
-            hax, rax = ff.plot_raw_used_fit_resid(**kwargs)
+            hax, rax = ff.plotter.plot_raw_used_fit_resid(**kwargs)
             hax.legend_.set_title(
                 legend_title.format(
-                    xlbl,
+                    self.trend_func.plotter.labels.x.tex,
                     (legend_title_fmt % k.mid),
+                    self.trend_func.plotter.labels.x.units,
                     "In Fit" if in_trend.loc[k] else "Not In Fit",
                 )
             )
@@ -297,7 +248,7 @@ class TrendFit(object):
             logx=self.trend_logx,
             **kwargs,
         )
-        trend.set_labels(**self.labels._asdict())
+        #         trend.set_labels(**self.labels._asdict())
 
         self._trend_func = trend
 
@@ -333,8 +284,8 @@ class TrendFit(object):
 
         bl[0].set_linestyle(linestyle)
 
-        ax.set_xlabel(self.labels.x)
-        ax.set_ylabel(self.labels.y)
+        #         ax.set_xlabel(self.labels.x)
+        #         ax.set_ylabel(self.labels.y)
 
         return pl, cl, bl
 
@@ -344,7 +295,7 @@ class TrendFit(object):
         )
         used_kwargs = kwargs.pop("used_kwargs", dict(color="k"))
         drawstyle = kwargs.pop("drawstyle", "default")
-        hax, rax = self.trend_func.plot_raw_used_fit_resid(
+        hax, rax = self.trend_func.plotter.plot_raw_used_fit_resid(
             drawstyle=drawstyle,
             annotate_kwargs=annotate_kwargs,
             used_kwargs=used_kwargs,
@@ -356,8 +307,7 @@ class TrendFit(object):
         return hax, rax
 
     def plot_trend_and_resid_on_ffuncs(self, trend_kwargs=None, fit1d_kwargs=None):
-        r"""Plot the trend fit on the 1D popt and the trend fit residuals.
-        """
+        r"""Plot the trend fit on the 1D popt and the trend fit residuals."""
         if trend_kwargs is None:
             trend_kwargs = {}
         if fit1d_kwargs is None:
@@ -374,8 +324,7 @@ class TrendFit(object):
         return hax, rax
 
     def plot_1d_popt_and_trend(self, ax=None, **kwargs):
-        r"""Plot the trend and 1D popt, without trend residuals, on `ax`
-        """
+        r"""Plot the trend and 1D popt, without trend residuals, on `ax`"""
         if ax is None:
             fig, ax = swp.pp.subplots()
 
@@ -385,7 +334,7 @@ class TrendFit(object):
         annotate_kwargs = kwargs.pop("annotate_kwargs", dict())
         fit_kwargs = kwargs.pop("fit_kwargs", dict(color="limegreen"))
 
-        self.trend_func.plot_raw_used_fit(
+        self.trend_func.plotter.plot_raw_used_fit(
             ax,
             annotate_kwargs=annotate_kwargs,
             #             color=color,
@@ -394,3 +343,75 @@ class TrendFit(object):
         )
 
         return ax
+
+    def set_agged(self, new):
+        assert isinstance(new, pd.DataFrame)
+        self._agged = new
+
+    #     def set_labels(self, **kwargs):
+    #         r"""Set or update x, y, or z labels. Any label not specified in kwargs
+    #         is propagated from `self.labels.<x, y, or z>`.
+    #         """
+
+    #         x = kwargs.pop("x", self.labels.x)
+    #         y = kwargs.pop("y", self.labels.y)
+    #         z = kwargs.pop("z", self.labels.z)
+
+    #         if len(kwargs.keys()):
+    #             extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+    #             raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+    #         self._labels = core.AxesLabels(x, y, z)
+
+    #         # log = logging.getLogger()
+    #         try:
+    #             # Update ffunc1d labels
+    #             self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))
+    #         #             log.warning("Set ffunc1d labels {}".format(self.ffuncs.iloc[0].labels))
+    #         except AttributeError:
+    #             #             log.warning("Skipping setting ffunc 1d labels")
+    #             pass
+
+    #         try:
+    #             # Update trendfunc labels
+    #             self.trend_func.set_labels(x=x, y=y, z=z)
+    #         #             log.warning("Set trend_func labels {}".format(self.trend_func.labels))
+
+    #         except AttributeError:
+    #             #             log.warning("Skipping setting trend_func labels")
+    #             pass
+
+    def set_fitfunctions(self, ffunc1d, trendfunc):
+        if ffunc1d is None:
+            ffunc1d = gaussians.Gaussian
+
+        if not issubclass(ffunc1d, core.FitFunction):
+            raise TypeError
+        if not issubclass(trendfunc, core.FitFunction):
+            raise TypeError
+
+        self._ffunc1d_class = ffunc1d
+        self._trendfunc_class = trendfunc
+
+    def set_shared_labels(self, **kwargs):
+        r"""Axis labels are shared between the :pymeth:`trend_func` and entries in :pymeth:`ffuncs`.
+        Here, we update them according to placement in :pymeth:`trend_func`, but properly locating
+        them for :pymeth:`ffuncs`.
+
+        Parameters
+        ----------
+        x:
+            :pymeth:`trend_func` x-label. Maps to :pymeth:`ffuncs` legend label.
+        y:
+            :pymeth:`trend_func` y-label. Maps to :pymeth:`ffuncs` x-label.
+        z:
+            :pymeth:`trend_func` z-label. Maps to :pymeth:`ffuncs` y-label.
+        """
+
+        tf = self.trend_func
+        tf.plotter.set_labels(**kwargs)
+
+        y = tf.plotter.labels.y
+        z = tf.plotter.labels.z
+        for k, ff in self.ffuncs.items():
+            ff.plotter.set_labels(x=y, y=z)
