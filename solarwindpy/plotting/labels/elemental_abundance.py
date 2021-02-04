@@ -5,17 +5,23 @@ import logging
 from pathlib import Path
 from . import base
 
-known_species = ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S")
+# known_species = ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S")
+known_species = base._trans_species.keys()
 
 
 class ElementalAbundance(base.Base):
-    def __init__(self, species, reference_species, pct_unit=False):
+    def __init__(self, species, reference_species, pct_unit=False, photospheric=True):
         self.set_species(species, reference_species)
         self._pct_unit = bool(pct_unit)
+        self._photospheric = bool(photospheric)
 
     @property
     def species(self):
         return self._species
+
+    @property
+    def photospheric(self):
+        return self._photospheric
 
     @property
     def reference_species(self):
@@ -30,8 +36,13 @@ class ElementalAbundance(base.Base):
 
     @property
     def tex(self):
-        ratio = r"\mathrm{%s}/\mathrm{%s}" % (self.species, self.reference_species)
-        tex = f"{ratio}:{ratio}_" r"\mathrm{photo}"  # noqa: W605
+        num = base._trans_species.get(self.species, self.species)
+        den = base._trans_species.get(self.reference_species, self.reference_species)
+        ratio = r"\mathrm{%s}/\mathrm{%s}" % (num, den)
+        if self.photospheric:
+            tex = f"{ratio}:{ratio}_" r"\mathrm{photo}"  # noqa: W605
+        else:
+            tex = ratio
         return tex
 
     @property

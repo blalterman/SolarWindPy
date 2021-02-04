@@ -348,8 +348,8 @@ class TeXinfo(object):
         info = self  # .info()
 
         bbox = kwargs.pop("bbox", dict(color="wheat", alpha=0.75))
-        xloc = kwargs.pop("xloc", 0.05)
-        yloc = kwargs.pop("yloc", 0.9)
+        xloc = kwargs.pop("xloc", 1.1)
+        yloc = kwargs.pop("yloc", 0.95)
         horizontalalignment = kwargs.pop("ha", "left")
         verticalalignment = kwargs.pop("va", "top")
         axtrans = kwargs.pop("transform", ax.transAxes)

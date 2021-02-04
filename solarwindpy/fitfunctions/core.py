@@ -249,8 +249,25 @@ class FitFunction(ABC):
         return {k: v / self.popt[k] for k, v in self.psigma.items()}
 
     @property
+    def combined_popt_psigma(self):
+        r"""Convenience to extract all versions of the optimized parameters."""
+        #         try:
+        popt = self.popt
+        psigma = self.psigma
+        prel = self.psigma_relative
+        #         except AttributeError:
+        #             popt = {k: np.nan for k in self.argnames}
+        #             psigma = {k: np.nan for k in self.argnames}
+        #             prel = {k: np.nan for k in self.argnames}
+
+        return {"popt": popt, "psigma": psigma, "psigma_relative": prel}
+
+    @property
     def pcov(self):
-        # Return a copy to protect the values.
+        r"""A copy of the covariance matrix.
+
+        Returns a copy so that the matrix isn't accidentally edited.
+        """
         return self._pcov.copy()
 
     @property
@@ -341,10 +358,18 @@ xobs: {xobs.shape}"""
 
     def build_plotter(self):
         obs = self.observations
-        yfit = self(self.observations.raw.x)
+        try:
+            yfit = self(self.observations.raw.x)
+        except AttributeError:
+            yfit = np.full_like(self.observations.raw.x, np.nan)
         #         robust_residuals = self.fit_result.fun
         tex_info = self.TeX_info
         fit_result = self.fit_result
+
+        #         try:
+        #             fit_result = self.fit_result
+        #         except AttributeError:
+        #             fit_result = None
 
         plotter = FFPlot(
             obs,
@@ -602,13 +627,18 @@ xobs: {xobs.shape}"""
 
         return popt, pcov, psigma, all_chisq
 
-    def make_fit(self, **kwargs):
+    def make_fit(self, return_exception=False, **kwargs):
         f"""Fit the function with the independent values `xobs` and dependent
         values `yobs` using `least_squares` and returning the `OptimizeResult`
         object, but treating weights as in `curve_fit`.
 
         Parameters
         ----------
+        return_exception: bool
+            If True, return exceptions from fitting routine, instead of raising.
+            This is useful when looping through many fits and wanting to
+            identify failed fits after the fact.
+
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
@@ -639,7 +669,10 @@ xobs: {xobs.shape}"""
         except (RuntimeError, ValueError) as e:
             #             print("fitting failed", flush=True)
             #             raise
-            return e
+            if return_exception:
+                return e
+            else:
+                raise
 
         popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
 
