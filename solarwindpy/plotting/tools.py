@@ -121,4 +121,4 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     handles = handles[sorter]
 
     loc = kwargs.pop("loc", (1.05, 0.1))
-    axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
+    return axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
