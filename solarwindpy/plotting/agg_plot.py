@@ -75,8 +75,7 @@ class AggPlot(base.Base):
 
     @property
     def agg_axes(self):
-        r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.
-        """
+        r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
         tko = [c for c in self.data.columns if c not in self._gb_axes]
         assert len(tko) == 1
         tko = tko[0]
@@ -84,8 +83,7 @@ class AggPlot(base.Base):
 
     @property
     def joint(self):
-        r"""A combination of the categorical and continuous data for use in `Groupby`.
-        """
+        r"""A combination of the categorical and continuous data for use in `Groupby`."""
         #         cut = self.cut
         #         tko = self.agg_axes
 
@@ -110,8 +108,7 @@ class AggPlot(base.Base):
 
     @property
     def grouped(self):
-        r"""`joint.groupby` with appropriate axes passes.
-        """
+        r"""`joint.groupby` with appropriate axes passes."""
         #         tko = self.agg_axes
         #         gb = self.data.loc[:, tko].groupby([v for k, v in self.cut.items()], observed=False)
         #         gb = self.joint.groupby(list(self._gb_axes))
@@ -280,8 +277,7 @@ class AggPlot(base.Base):
         self._categoricals = intervals
 
     def make_cut(self):
-        r"""Calculate the `Categorical` quantities for the aggregation axes.
-        """
+        r"""Calculate the `Categorical` quantities for the aggregation axes."""
         intervals = self.intervals
         data = self.data
 
@@ -385,11 +381,18 @@ class AggPlot(base.Base):
 
         tk = pd.Series(True, index=cut.index)
         for k, v in cut.items():
-            chk = agg.index.get_level_values(k)
+            idx = agg.index.get_level_values(k)
             # Use the codes directly because the categoricals are
             # failing with some Pandas numpy ufunc use. (20200611)
-            chk = pd.CategoricalIndex(chk)
-            tk_ax = v.cat.codes.isin(chk.codes)
+            # Also need to ensure codes are consistent between the
+            # two objects. (20201111)
+            cat = v.unique()
+            codes = cat.codes
+            mapper = pd.Series(codes, index=cat)
+            mapped_idx = idx.map(mapper)
+            mapped_v = v.map(mapper)
+
+            tk_ax = mapped_v.isin(mapped_idx)
             tk = tk & tk_ax
 
         self.logger.info(
@@ -450,6 +453,5 @@ class AggPlot(base.Base):
 
     @abstractmethod
     def set_axnorm(self, new):
-        r"""The method by which the gridded data is normalized.
-        """
+        r"""The method by which the gridded data is normalized."""
         pass

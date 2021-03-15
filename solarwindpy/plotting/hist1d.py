@@ -116,13 +116,12 @@ class Hist1D(AggPlot):
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
 
-===== =============================================================
- key                           description
-===== =============================================================
- d     Density normalize
- t     Total normalize
-===== =============================================================
-"""
+        ===== =============================================================
+         key                           description
+        ===== =============================================================
+         d     Density normalize
+         t     Total normalize
+        ===== ============================================================="""
         if new is not None:
             new = new.lower()[0]
             assert new == "d"
@@ -237,7 +236,7 @@ class Hist1D(AggPlot):
         x = pd.IntervalIndex(agg.index).mid
 
         dx = None  # Initialize default value. Necessary for `transpose_axes`.
-        if fcn is None or isinstance(fcn, str):
+        if fcn is None or isinstance(fcn, (str, FunctionType)):
             y = agg
             dy = None
 
@@ -271,4 +270,4 @@ class Hist1D(AggPlot):
 
         self._format_axis(ax, transpose_axes=transpose_axes)
 
-        return ax
+        return ax, (pl, cl, bl)

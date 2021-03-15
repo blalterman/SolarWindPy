@@ -78,8 +78,7 @@ class SpiralMesh(object):
 
     @property
     def cat(self):
-        r""":py:class:`pd.Categorical` version of `bin_id`, with fill bin removed.
-        """
+        r""":py:class:`pd.Categorical` version of `bin_id`, with fill bin removed."""
         return self._cat
 
     @property
@@ -462,13 +461,12 @@ They will be replaced by NaNs and excluded from the aggregation.
         self._cat = cat
 
 
-class SpiralPlot2D(base.Plot2D):
+class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
     r"""
-Call Signature
-==============
-splot = SpiralPlot2D(...)
-splot.initialize_mesh()
-"""
+    Call Signature
+    ==============
+    splot = SpiralPlot2D(...)
+    splot.initialize_mesh()"""
 
     def __init__(
         self, x, y, z=None, logx=False, logy=False, initial_bins=5, clip_data=False
@@ -497,8 +495,7 @@ splot.initialize_mesh()
         return self._mesh
 
     def agg(self, fcn=None):
-        r"""Aggregate the z-values into their bins.
-        """
+        r"""Aggregate the z-values into their bins."""
         self.logger.debug("aggregating z-data")
 
         #         start = datetime.now()

@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from . import base
 
 
-class Scatter(base.Plot2D):
+class Scatter(base.PlotWithZdata, base.CbarMaker):
     r"""Create a scatter plot.
 
     Properties
@@ -47,7 +47,7 @@ class Scatter(base.Plot2D):
         self.set_path(None)
 
     def _format_axis(self, ax, collection):
-        super(Scatter, self)._format_axis(ax)
+        super()._format_axis(ax)
 
         x = self.data.loc[:, "x"]
         minx, maxx = x.min(), x.max()

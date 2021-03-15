@@ -74,6 +74,10 @@ class SelectFromPlot2D(object):
     def num_selection_patches(self):
         return len(self.ax.patches) - self.num_initial_patches
 
+    @property
+    def logger(self):
+        return logging.getLogger(f"analysis.{__name__}")
+
     def _init_corners(self):
         self._corners = tuple()
 
@@ -210,7 +214,7 @@ Upper Right {x1, y1}"""
                 xdata = xdata.drop(already_selected, axis=0)
                 ydata = ydata.drop(already_selected, axis=0)
             except KeyError:
-                logging.getLogger(f"analysis.{__name__}").warning(
+                self.logger.warning(
                     f"""None of `already_selected` found in xdata or ydata
 x : ({self.ax.xaxis.get_label().get_text()})
 y : ({self.ax.yaxis.get_label().get_text()}).
