@@ -20,7 +20,7 @@ function run_script() {
 
     core="pandas scipy numpy numexpr bottleneck matplotlib pytables tqdm"
     dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit tqdm"
-    use="jupyter nbdime ipywidgets yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
+    use="jupyter nbdime ipywidgets yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess blackcellmagic"
 
     pkgs="$core $dev $use"
     #pkgs="$core $dev"
