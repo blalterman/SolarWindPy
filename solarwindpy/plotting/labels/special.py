@@ -42,10 +42,15 @@ class ManualLabel(ArbitraryLabel):
         self._path = path
 
     def __str__(self):
-        return r"$\mathrm{%s} \; [%s]$" % (  # noqa: W605
-            self.tex.replace(" ", " \, "),  # noqa: W605
-            self.unit,
-        )  # noqa: W605
+        return (
+            r"$\mathrm{%s} \; [%s]$"
+            % (  # noqa: W605
+                self.tex.replace(" ", " \, "),  # noqa: W605
+                self.unit,
+            )
+        ).replace(
+            "\; []", ""  # noqa: W605
+        )
 
     @property
     def tex(self):
