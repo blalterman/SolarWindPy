@@ -207,7 +207,7 @@ class SIDC_ID(ID):
 class SIDCLoader(DataLoader):
     @property
     def data_path(self):
-        return super(SIDCLoader, self).data_path / "sidc" / self.key
+        return super().data_path / "sidc" / self.key
 
     def convert_nans(self, data):
         data.replace(-1, np.nan, inplace=True)
@@ -282,7 +282,7 @@ class SIDCLoader(DataLoader):
             pass
 
     def load_data(self):
-        super(SIDCLoader, self).load_data()
+        super().load_data()
 
         extrema = SSNExtrema()
         # Calculate Cycle to which each mesurement belongs
@@ -314,6 +314,7 @@ class SIDC(ActivityIndicator):
         self.set_id(SIDC_ID(key))
         self.load_data()
         self.set_extrema()
+        self.calculate_extrema_kind()
 
     #     @property
     #     def extrema(self):
@@ -335,12 +336,40 @@ class SIDC(ActivityIndicator):
     def set_extrema(self):
         self._extrema = SSNExtrema()
 
-    def interpolate_data(self, target_index):
+    def interpolate_data(self, target_index, key="ssn"):
         interpolated = super(SIDC, self).interpolate_data(
-            self.data.loc[:, "ssn"].dropna(how="any", axis=0), target_index
+            self.data.loc[:, key].dropna(how="any", axis=0), target_index
         )
         self._interpolated = interpolated
         return interpolated
+
+    def calculate_extrema_kind(self):
+        r"""Determine whether an SSN observation belongs to a cycle Minimum or Maximum.
+
+            Min: ssn < cycle mean
+            Max: ssn >= cycle mean
+
+        Labels for the extremum kind include indicators for which cycle the extremum
+        belongs to. These can be easily stripped with string manipulations, but are
+        difficult to calculate after the fact.
+        """
+        extrema = self.extrema.data
+        kind = pd.Series(np.nan, index=self.data.index, dtype=str)
+        for k, g in self.data.loc[:, ["cycle", "ssn"]].groupby("cycle"):
+            g = g.loc[:, "ssn"]
+            mid = 0.5 * g.max()
+            max_date = extrema.loc[k, "Max"]
+            before_max = g.index <= max_date
+            after_max = g.index > max_date
+
+            case = pd.Series(index=g.index, dtype=str)
+            case.loc[g >= mid] = f"{k}-Max"
+            case.loc[(g < mid) & before_max] = f"{k}-Min"
+            case.loc[(g < mid) & after_max] = f"{k + 1}-Min"
+
+            kind.update(case)
+
+        self.data.loc[:, "extremum"] = kind
 
     #################
     # Normalize SSN #
@@ -406,31 +435,23 @@ class SIDC(ActivityIndicator):
 
     run_normalization.__doc__ = ActivityIndicator.run_normalization
 
-    def cut_spec_by_ssn_band(self, dssn=2.0):
-        r"""Cut the sunspot number at each spectrum in intervals of 10 with a width +/- dssn."""
+    def cut_spec_by_ssn_band(self, key="ssn", dssn=2.0):
+        r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn."""
 
-        #         raise NotImplementedError(
-        #             r"""Do you want this to apply to `SIDC` data or something
-        #         you've interpolated?"""
-        #         )
-
-        # TODO: need to update this for a normalized SSN option.
         dssn = float(dssn)
-        #         mids = np.linspace(30, 180, 16)
-        mids = np.arange(
-            0,
-            self.data.ssn.max(),  # TODO: change to account for normalized ssn
-            2.0 * dssn,
-        )
+        if (key == "nssn") and (dssn >= 1):
+            raise ValueError("Normalized SSN requires that dssn < 1")
 
-        #         mids = np.linspace(0, 180, 37)
+        data = self.data.loc[:, key]
+        mids = np.arange(0, data, 2.0 * dssn)
+
         left = mids - dssn
         right = mids + dssn
         intervals = [pd.Interval(ll, rr) for ll, rr in zip(left, right)]
         intervals = pd.IntervalIndex(intervals, name="ssn_intervals")
         try:
             cut = pd.cut(
-                self.interpolated.loc[:, "ssn"],  # TODO: Fix this generalized hack
+                self.interpolated.loc[:, key],  # TODO: Fix this generalized hack
                 intervals,
             )
         except KeyError as e:
@@ -440,12 +461,15 @@ class SIDC(ActivityIndicator):
                     l_upper = ll.right
                     r_lower = rr.left
                     if l_upper > r_lower:
-                        msg = f"Your intervals can't overlap.\nInterval 0: {ll}\nInterval 1: {rr}\nIt causes a KeyError in `pd.cut`."
+                        msg = f"""Your intervals can't overlap.
+Interval 0: {ll}
+Interval 1: {rr}
+It causes a KeyError in `pd.cut`."""
                         raise ValueError(msg)
             else:
                 raise
 
-        cut.name = "ssn_band"
+        cut.name = f"{key}_band"
         self._spec_by_ssn_band = cut
         self._ssn_band_intervals = intervals
         return cut
@@ -459,7 +483,7 @@ class SSNExtrema(IndicatorExtrema):
             )
 
         path = Path(__file__).parent / "ssn_extrema.csv"
-        data = pd.read_csv(path, header=0, skiprows=19, index_col=0)
+        data = pd.read_csv(path, header=0, skiprows=45, index_col=0)
         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
         data.columns.names = ["kind"]
         self._data = data
