@@ -315,6 +315,7 @@ class SIDC(ActivityIndicator):
         self.load_data()
         self.set_extrema()
         self.calculate_extrema_kind()
+        self.calculate_edge()
 
     #     @property
     #     def extrema(self):
@@ -370,6 +371,27 @@ class SIDC(ActivityIndicator):
             kind.update(case)
 
         self.data.loc[:, "extremum"] = kind
+
+    def calculate_edge(self):
+        r"""Determine whether an SSN observation belongs to a rising or falling
+        edge.
+        """
+        extrema = self.extrema.data
+        kind = pd.Series(np.nan, index=self.data.index, dtype=str)
+
+        for k, g in self.data.loc[:, ["cycle", "ssn"]].groupby("cycle"):
+            g = g.loc[:, "ssn"]
+            max_date = extrema.loc[k, "Max"]
+            before_max = g.index <= max_date
+            after_max = g.index > max_date
+
+            case = pd.Series(index=g.index, dtype=str)
+            case.loc[before_max] = "Rise"
+            case.loc[after_max] = "Fall"
+
+            kind.update(case)
+
+        self.data.loc[:, "edge"] = kind
 
     #################
     # Normalize SSN #
