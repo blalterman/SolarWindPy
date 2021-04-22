@@ -589,7 +589,7 @@ class SSN(ArbitraryLabel):
             "M": "Monthly",
             "M13": "13 Month Smoothed",
             "D": "Daily",
-            "Y": "Yearly",
+            "Y": "Annual",
             "NM": "Normalized Monthly",
             "NM13": "Normalized 13 Month Smoothed",
             "ND": "Normalized Daily",

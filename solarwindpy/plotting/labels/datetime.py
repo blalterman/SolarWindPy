@@ -200,3 +200,23 @@ class Frequency(special.ArbitraryLabel):
 
     def build_label(self):
         self._path = self._build_path()
+
+
+class January1st(special.ArbitraryLabel):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return self.with_units
+
+    @property
+    def with_units(self):
+        return r"$%s$" % self.tex
+
+    @property
+    def tex(self):
+        return r"\mathrm{January 1^{st} of Year}".replace(" ", " \; ")  # noqa: W605
+
+    @property
+    def path(self):
+        return Path("January-1st-of-Year")
