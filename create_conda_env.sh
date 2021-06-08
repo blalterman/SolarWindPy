@@ -25,7 +25,7 @@ function run_script() {
     pkgs="$core $dev $use"
     # pkgs="$core $dev"
 
-    conda create -n $1 python=3 $pkgs
+    conda create -n $1 python=3.8 $pkgs
 
 #    conda init zsh
 #
