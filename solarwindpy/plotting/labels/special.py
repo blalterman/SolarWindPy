@@ -5,30 +5,26 @@ import pdb  # noqa: F401
 from pathlib import Path
 from string import Template as StringTemplate
 from string import Formatter as StringFormatter
-from abc import abstractproperty, abstractmethod
-from pandas.tseries.frequencies import to_offset
+from abc import abstractmethod
 from . import base
 
 
 class ArbitraryLabel(base.Base):
     def __init__(self):
-        pass
+        super().__init__()
 
     @abstractmethod
     def __str__(self):
         pass
 
-    @abstractproperty
-    def tex(self):
-        pass
 
-    @abstractproperty
-    def path(self):
-        pass
+#     @abstractproperty
+#     def tex(self):
+#         pass
 
-    @abstractmethod
-    def build_label(self):
-        pass
+#     @abstractproperty
+#     def path(self):
+#         pass
 
 
 class ManualLabel(ArbitraryLabel):
@@ -40,9 +36,9 @@ class ManualLabel(ArbitraryLabel):
     """
 
     def __init__(self, tex, unit, path=None):
+        super().__init__()
         self.set_tex(tex)
         self.set_unit(unit)
-        self.build_label()
         self._path = path
 
     def __str__(self):
@@ -74,16 +70,13 @@ class ManualLabel(ArbitraryLabel):
         unit = base._inU.get(unit, unit)
         self._unit = unit.strip("$")
 
-    def build_label(self):
-        pass
 
-
-class Vsw(ArbitraryLabel):
+class Vsw(base.Base):
     def __init__(self):
-        pass
+        super().__init__()
 
-    def __str__(self):
-        return r"$%s \; [%s]$" % (self.tex, self.units)
+    #     def __str__(self):
+    #         return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
 
     @property
     def tex(self):
@@ -91,20 +84,17 @@ class Vsw(ArbitraryLabel):
 
     @property
     def units(self):
-        return base._inU["kms"]
+        return r"\mathrm{km \, s^{-1}}"
 
     @property
     def path(self):
         return Path("vsw")
 
-    def build_label(self):
-        pass
-
 
 class CarringtonRotation(ArbitraryLabel):
     def __init__(self, short_label=True):
-        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation".
-        """
+        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation"."""
+        super().__init__()
         self._short_label = bool(short_label)
 
     def __str__(self):
@@ -125,12 +115,10 @@ class CarringtonRotation(ArbitraryLabel):
     def path(self):
         return Path("CarrRot")
 
-    def build_label(self):
-        pass
-
 
 class Count(ArbitraryLabel):
     def __init__(self, norm=None):
+        super().__init__()
         self.set_axnorm(norm)
         self.build_label()
 
@@ -186,51 +174,9 @@ class Count(ArbitraryLabel):
         self._path = self._build_path()
 
 
-class Frequency(ArbitraryLabel):
-    def __init__(self, other):
-        self.set_other(other)
-        self.build_label()
-
-    def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
-
-    @property
-    def other(self):
-        return self._other
-
-    @property
-    def tex(self):
-        return r"\mathrm{Frequency}"
-
-    @property
-    def units(self):
-        return f"({self.other.units})^{-1}"
-
-    @property
-    def path(self):
-        return self._path
-
-    def set_other(self, other):
-        if not isinstance(other, Timedelta):
-            other = Timedelta(other)
-
-        self._other = other
-
-    def _build_path(self):
-        units = self.units
-        if "??" in units:
-            units = "UNK"
-
-        path = Path(f"frequency_of_{units}")
-        return path
-
-    def build_label(self):
-        self._path = self._build_path()
-
-
 class Power(ArbitraryLabel):
     def __init__(self):
-        pass
+        super().__init__()
 
     def __str__(self):
         return f"${self.tex} \; [{self.units}]$"  # noqa: W605
@@ -247,9 +193,6 @@ class Power(ArbitraryLabel):
     def path(self):
         return Path("power")
 
-    def build_label(self):
-        pass
-
 
 class Probability(ArbitraryLabel):
     def __init__(self, other_label, comparison=None):
@@ -257,6 +200,7 @@ class Probability(ArbitraryLabel):
 
         The `comparison`, if passed, is something like "> 0".
         """
+        super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.build_label()
@@ -285,7 +229,7 @@ class Probability(ArbitraryLabel):
         return self._comparison
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_comparison(self, new):
@@ -334,6 +278,7 @@ class CountOther(ArbitraryLabel):
 
         The `comparison`, if passed, is something like "> 0".
         """
+        super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.set_new_line_for_units(new_line_for_units)
@@ -375,7 +320,7 @@ class CountOther(ArbitraryLabel):
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_comparison(self, new):
@@ -419,8 +364,8 @@ class CountOther(ArbitraryLabel):
 
 class MathFcn(ArbitraryLabel):
     def __init__(self, fcn, other_label, dimensionless=True, new_line_for_units=False):
-        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function.
-        """
+        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function."""
+        super().__init__()
         self.set_other_label(other_label)
         self.set_function(fcn)
         self.set_dimensionless(dimensionless)
@@ -466,7 +411,7 @@ class MathFcn(ArbitraryLabel):
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        assert isinstance(other, (str, base.TeXlabel, ArbitraryLabel))
+        assert isinstance(other, (str, base.Base))
         self._other_label = other
 
     def set_function(self, new):
@@ -506,91 +451,88 @@ class MathFcn(ArbitraryLabel):
         self._path = self._build_path()
 
 
-class Timedelta(ArbitraryLabel):
-    def __init__(self, offset):
-        r"""
-        Parameters
-        ----------
-        offset: str
-            pd.Offset or covertable string
-        """
-        self.set_offset(offset)
+# class Timedelta(ArbitraryLabel):
+#     def __init__(self, offset):
+#         r"""
+#         Parameters
+#         ----------
+#         offset: str
+#             pd.Offset or covertable string
+#         """
+#         super().__init__()
+#         self.set_offset(offset)
 
-    def __str__(self):
-        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+#     def __str__(self):
+#         return f"${self.tex} \; [{self.units}]$"  # noqa: W605
 
-    #     @property
-    #     def dt(self):
-    #         return self._dt
+#     #     @property
+#     #     def dt(self):
+#     #         return self._dt
 
-    @property
-    def offset(self):
-        return self._offset
+#     @property
+#     def offset(self):
+#         return self._offset
 
-    @property
-    def tex(self):
-        return r"\Delta t"
+#     @property
+#     def tex(self):
+#         return r"\Delta t"
 
-    @property
-    def path(self):
-        try:
-            return Path("dt") / self.offset.freqstr
-        except AttributeError:
-            return Path("dt") / "UNK"
+#     @property
+#     def path(self):
+#         try:
+#             return Path("dt") / self.offset.freqstr
+#         except AttributeError:
+#             return Path("dt") / "UNK"
 
-    @property
-    def units(self):
-        try:
-            return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
-        except AttributeError:
-            return base._inU["unknown"]
+#     @property
+#     def units(self):
+#         try:
+#             return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
+#         except AttributeError:
+#             return base._inU["unknown"]
 
-    def build_label(self):
-        pass
+#     def set_offset(self, new):
+#         try:
+#             new = to_offset(new)
+#         except ValueError:
+#             pass
 
-    def set_offset(self, new):
-        try:
-            new = to_offset(new)
-        except ValueError:
-            pass
-
-        self._offset = new
+#         self._offset = new
 
 
-class DateTime(ArbitraryLabel):
-    def __init__(self, kind):
-        r"""
-        Parameters
-        ----------
-        dt: str
-            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
-        """
-        self.set_kind(kind)
+# class DateTime(ArbitraryLabel):
+#     def __init__(self, kind):
+#         r"""
+#         Parameters
+#         ----------
+#         dt: str
+#             Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+#         """
+#         super().__init__()
+#         self.set_kind(kind)
 
-    def __str__(self):
-        return r"$%s$" % self.tex
+#     def __str__(self):
+#         return r"$%s$" % self.tex
 
-    @property
-    def kind(self):
-        return self._kind
+#     @property
+#     def kind(self):
+#         return self._kind
 
-    @property
-    def tex(self):
-        return r"\mathrm{%s}" % self.kind
+#     @property
+#     def tex(self):
+#         return r"\mathrm{%s}" % self.kind
 
-    @property
-    def path(self):
-        return Path(self.kind.lower())
+#     @property
+#     def path(self):
+#         return Path(self.kind.lower())
 
-    def build_label(self):
-        pass
-
-    def set_kind(self, new):
-        self._kind = new
+#     def set_kind(self, new):
+#         self._kind = new
 
 
 class Distance2Sun(ArbitraryLabel):
     def __init__(self, units):
+        super().__init__()
         self.set_units(units)
 
     def __str__(self):
@@ -618,12 +560,10 @@ class Distance2Sun(ArbitraryLabel):
 
         self._units = units
 
-    def build_label(self):
-        pass
-
 
 class SSN(ArbitraryLabel):
     def __init__(self, key):
+        super().__init__()
         self.set_kind(key)
 
     def __str__(self):
@@ -654,16 +594,13 @@ class SSN(ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s} \, \mathrm{SSN}" % self.pretty_kind.replace(
-            " ", "\,"  # noqa: W605
+        return r"\mathrm{%s} \; \mathrm{SSN}" % self.pretty_kind.replace(
+            " ", "\;"  # noqa: W605
         )  # noqa: W605
 
     @property
     def kind(self):
         return self._kind
-
-    def build_label(self):
-        pass
 
     def set_kind(self, new):
         new = new.upper()
@@ -681,6 +618,7 @@ class ComparisonLable(ArbitraryLabel):
             >>> fcn.format(labelA=labelA, labelB=labelB)
 
         """
+        super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
         self.build_label()
@@ -714,14 +652,13 @@ class ComparisonLable(ArbitraryLabel):
 
     @property
     def function_name(self):
-        r"""Basically for use with building :py:meth:`path`.
-        """
+        r"""Basically for use with building :py:meth:`path`."""
         return self._function_name
 
     def set_constituents(self, labelA, labelB):
-        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelA, (str, base.Base)):
             raise TypeError
-        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelB, (str, base.Base)):
             raise TypeError
 
         if (
@@ -818,9 +755,8 @@ keys : {",".join(keys)}
 
 class Xcorr(ArbitraryLabel):
     def __init__(self, labelA, labelB, method, short_tex=False):
-        r"""Cross correlation coefficeint between labelA and labelB.
-
-        """
+        r"""Cross correlation coefficeint between labelA and labelB."""
+        super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)
         self.set_short_tex(short_tex)
@@ -858,9 +794,9 @@ class Xcorr(ArbitraryLabel):
         return self._method
 
     def set_constituents(self, labelA, labelB):
-        if not isinstance(labelA, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelA, (str, base.Base)):
             raise TypeError
-        if not isinstance(labelB, (str, base.TeXlabel, ArbitraryLabel)):
+        if not isinstance(labelB, (str, base.Base)):
             raise TypeError
 
         self._labelA = labelA

@@ -104,8 +104,7 @@ class PowerLawPlusC(FitFunction):
 
 class PowerLawOffCenter(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        f""":py:class:`Fitfunction` for a power law centered at (x - x_0) with no constant offset.
-        """
+        r""":py:class:`Fitfunction` for a power law centered at (x - x_0) with no constant offset."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property

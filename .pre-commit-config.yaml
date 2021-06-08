@@ -1,10 +1,17 @@
 repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    - id: trailing-whitespace
+    - id: check-merge-conflict
+    - id: check-added-large-files
+      args: [--maxkb=5000]
 -   repo: https://github.com/ambv/black
-    rev: stable
+    rev: 20.8b1
     hooks:
     - id: black
-      language_version: python3.7
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.1.0  # Use the ref you want to point at
+      language_version: python3.8
+-   repo: https://gitlab.com/pycqa/flake8.git
+    rev: 3.8.3
     hooks:
     - id: flake8

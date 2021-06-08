@@ -114,7 +114,7 @@ class FFPlot(object):
 
         return markevery
 
-    def _format_hax(self, ax):
+    def _format_hax(self, ax, with_rax=False):
         r"""Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and
         :py:meth:`plot_fit` results.
         """
@@ -133,6 +133,10 @@ class FFPlot(object):
             ax.set_xscale("log", nonpositive="clip")
         if self.log.y:
             ax.set_yscale("log", nonpositive="clip")
+
+        if with_rax:
+            ax.xaxis.get_label().set_visible(False)
+            [t.set_visible(False) for t in ax.xaxis.get_ticklabels()]
 
     def _format_rax(self, ax, pct):
         ax.grid(True, which="major", axis="both")
@@ -192,7 +196,7 @@ class FFPlot(object):
             fig, ax = plt.subplots()
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
-        color = kwargs.pop("color", "darkgreen")
+        color = kwargs.pop("color", "forestgreen")
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
         markersize = kwargs.pop("markersize", 8)
@@ -239,6 +243,7 @@ class FFPlot(object):
         color = kwargs.pop("color", "darkorange")
         label = kwargs.pop("label", r"$\mathrm{Fit}$")
         linestyle = kwargs.pop("linestyle", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
+        #         zorder = kwargs.pop("zorder", 2.005) # Ensure it's the top line
 
         # Overplot the fit.
         ax.plot(
@@ -247,6 +252,7 @@ class FFPlot(object):
             label=label,
             color=color,
             linestyle=linestyle,
+            #             zorder=zorder,
             **kwargs,
         )
 
@@ -330,12 +336,37 @@ class FFPlot(object):
 
         return ax
 
-    def plot_residuals(self, ax=None, pct=True, subplots_kwargs=None, **kwargs):
+    def plot_residuals(
+        self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
+    ):
         r"""Make a plot of the fit function that includes the data and fit,
-        but are limited to data included in the fit.
+                but are limited to data included in the fit.
 
-        Residuals are plotted as a percentage, both positive and negative, on
-        a symlog scale with `linthresh=10`.
+                Residuals are plotted as a percentage, both positive and negative, on
+                a symlog scale with `linthresh=10`.
+        <<<<<<< HEAD
+        =======
+
+                Parameters
+                ----------
+                ax: None, mpl.axis.Axis
+                    If not None, mpl.axis.Axis.
+                pct: bool
+                    If True, plot in units of percent.
+                subplots_kwargs: dict, None
+                    If not None, passed to `plt.subplots`. Disabled if `ax` is not
+                    None.
+                kind: str
+                    Specify type of residuals to plot.
+
+                        ======== ======================
+                         Value        Description
+                        ======== ======================
+                         simple   Use simple residuals
+                         robust   Use robust residuals
+                         both     Use both
+                        ======== ======================
+        >>>>>>> c8b5d9bfe4c7ce53d00e5d0773d27dcc8b8f258c
         """
 
         if subplots_kwargs is None:
@@ -351,57 +382,79 @@ class FFPlot(object):
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
         markersize = kwargs.pop("markersize", 8)
         markevery = kwargs.pop("markevery", None)
-        #         label = kwargs.pop("label", r"$\mathrm{Resid}")
+        label = kwargs.pop("label", r"").strip("$")
+        kind = kind.lower()
 
         if markevery is None:
             markevery = self._estimate_markevery()
 
-        ax.plot(
-            self.observations.used.x,
-            self.residuals(pct=pct, robust=False),
-            label=r"$\mathrm{Simple}$",
-            drawstyle=drawstyle,
-            color="darkgreen",
-            marker="P",
-            linestyle="-",
-            markerfacecolor=markerfacecolor,
-            markersize=markersize,
-            markevery=markevery,
-            **kwargs,
-        )
+        if kind in ("simple", "robust"):
+            residuals = self.residuals(
+                pct=pct, robust=True if kind == "robust" else False
+            )
 
-        try:
-            r = self.residuals(pct=pct, robust=True)
+            color = kwargs.pop("color", "forestgreen")
+            marker = kwargs.pop("marker", "P")
+            linestyle = kwargs.pop("linestyle", "-")
+
+            label = " \; ".join([label, kind.title()]).lstrip(  # noqa: W605
+                " \; "  # noqa: W605
+            )
+            label = r"$\mathrm{%s}$" % label
+            #             label = (r"$\mathrm{%s \; %s}$" % (label, kind.title()).replace(" \; ", "")
+
             ax.plot(
                 self.observations.used.x,
-                r,
-                label=r"$\mathrm{Robust}$",
+                residuals,
+                label=label,
                 drawstyle=drawstyle,
-                color="darkorange",
-                marker="X",
+                color=color,
+                marker=marker,
+                linestyle=linestyle,
+                markerfacecolor=markerfacecolor,
+                markersize=markersize,
+                markevery=markevery,
+                **kwargs,
+            )
+
+        elif kind == "both":
+
+            ax.plot(
+                self.observations.used.x,
+                self.residuals(pct=pct, robust=False),
+                label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(  # noqa: W605
+                    " \; "  # noqa: W605
+                ),
+                drawstyle=drawstyle,
+                color="forestgreen",
+                marker="P",
                 linestyle="-",
                 markerfacecolor=markerfacecolor,
                 markersize=markersize,
                 markevery=markevery,
                 **kwargs,
             )
-        except AttributeError as e:
-            if "NoneType" in str(e):
-                pass
 
-        #         ax.plot(
-        #             self.observations.used.x,
-        #             self.robust_residuals(pct=pct),
-        #             label=r"$\mathrm{Robust}$",
-        #             drawstyle=drawstyle,
-        #             color=color,
-        #             marker=marker,
-        #             linestyle=(0, (7, 3, 1, 3, 1, 3, 1, 3)),
-        #             markerfacecolor=markerfacecolor,
-        #             markersize=markersize,
-        #             markevery=markevery,
-        #             **kwargs,
-        #         )
+            try:
+                r = self.residuals(pct=pct, robust=True)
+                ax.plot(
+                    self.observations.used.x,
+                    r,
+                    label=(r"$\mathrm{%s \; Robust}$" % label).lstrip(  # noqa: W605
+                        " \; "  # noqa: W605
+                    ),
+                    drawstyle=drawstyle,
+                    color="darkorange",
+                    marker="X",
+                    linestyle="-",
+                    markerfacecolor=markerfacecolor,
+                    markersize=markersize,
+                    markevery=markevery,
+                    **kwargs,
+                )
+            except AttributeError as e:
+                if "NoneType" in str(e):
+                    pass
 
         self._format_rax(ax, pct)
         return ax
@@ -462,9 +515,9 @@ class FFPlot(object):
         self.plot_raw_used_fit(ax=hax, annotate=annotate, **kwargs)
         self.plot_residuals(ax=rax, pct=resid_pct, **resid_kwargs)
 
-        if fit_resid_axes is None:
-            hax.tick_params(labelbottom=False)
-            hax.xaxis.label.set_visible(False)
+        #         if fit_resid_axes is None:
+        hax.xaxis.get_label().set_visible(False)
+        [t.set_visible(False) for t in hax.xaxis.get_ticklabels()]
 
         return hax, rax
 

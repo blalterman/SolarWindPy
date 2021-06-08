@@ -28,6 +28,7 @@ Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
+FitBounds = namedtuple("FitBounds", "lower,upper")
 
 # def __huber(z):
 #     cost = np.array(z)
@@ -163,6 +164,11 @@ class FitFunction(ABC):
         return self._argnames
 
     @property
+    def fit_bounds(self):
+        r"""Bounds used when running the fit."""
+        return dict(self._fit_bounds)
+
+    @property
     def chisq_dof(self):
         r"""Chisq per degree of freedom :math:`\chi^2_\nu`.
 
@@ -197,14 +203,14 @@ class FitFunction(ABC):
         # If failed to make an initial guess, then don't build the info.
         try:
             p0 = self.p0
-            lower, upper = self.fit_bounds
+            bounds = self.fit_bounds
         except AttributeError:
             return None
 
         names = self.argnames
         info = {
-            name: InitialGuessInfo(guess, (lb, ub))
-            for name, guess, lb, ub in zip(names, p0, lower, upper)
+            name: InitialGuessInfo(guess, tuple(bounds[name]))
+            for name, guess in zip(names, p0)
         }
 
         #         info = ["\n".join(param) for param in info]
@@ -243,9 +249,41 @@ class FitFunction(ABC):
         return {k: v / self.popt[k] for k, v in self.psigma.items()}
 
     @property
+    def combined_popt_psigma(self):
+        r"""Convenience to extract all versions of the optimized parameters."""
+        #         try:
+        popt = self.popt
+        psigma = self.psigma
+        prel = self.psigma_relative
+        #         except AttributeError:
+        #             popt = {k: np.nan for k in self.argnames}
+        #             psigma = {k: np.nan for k in self.argnames}
+        #             prel = {k: np.nan for k in self.argnames}
+
+        return {"popt": popt, "psigma": psigma, "psigma_relative": prel}
+
+    @property
     def pcov(self):
-        # Return a copy to protect the values.
+        r"""A copy of the covariance matrix.
+
+        Returns a copy so that the matrix isn't accidentally edited.
+        """
         return self._pcov.copy()
+
+    @property
+    def rsq(self):
+        r"""Coefficient of determination.
+
+        Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
+        """
+        y = self.observations.used.y
+        ybar = y.mean()
+        yfit = self(self.observations.used.x)
+        sum_squares_total = ((y - ybar) ** 2).sum()
+        sum_squares_residual = ((y - yfit) ** 2).sum()
+        rsq = 1 - (sum_squares_residual / sum_squares_total)
+
+        return rsq
 
     @property
     def sufficient_data(self):
@@ -335,10 +373,18 @@ xobs: {xobs.shape}"""
 
     def build_plotter(self):
         obs = self.observations
-        yfit = self(self.observations.raw.x)
+        try:
+            yfit = self(self.observations.raw.x)
+        except AttributeError:
+            yfit = np.full_like(self.observations.raw.x, np.nan)
         #         robust_residuals = self.fit_result.fun
         tex_info = self.TeX_info
         fit_result = self.fit_result
+
+        #         try:
+        #             fit_result = self.fit_result
+        #         except AttributeError:
+        #             fit_result = None
 
         plotter = FFPlot(
             obs,
@@ -369,15 +415,15 @@ xobs: {xobs.shape}"""
             popt,
             psigma,
             self.TeX_function,
-            chisq_dof=self.chisq_dof,
+            self.chisq_dof,
+            self.rsq,
             initial_guess_info=self.initial_guess_info,
         )
         self._TeX_info = tex_info
         return tex_info
 
     def residuals(self, pct=False):
-        r"""
-        Calculate the fit residuals.
+        r"""Calculate the fit residuals.
         If pct, normalize by fit yvalues.
         """
 
@@ -473,6 +519,12 @@ xobs: {xobs.shape}"""
             p0 = np.atleast_1d(p0)
             n = p0.size
 
+        if isinstance(bounds, dict):
+            # Monkey patch to work with bounds being stored as
+            # dict for TeX_info. (20201202)
+            bounds = [bounds[k] for k in self.argnames]
+            bounds = np.array(bounds).T
+
         # Copied from `curve_fit` line 715 (20200527)
         lb, ub = prepare_bounds(bounds, n)
         if p0 is None:
@@ -530,6 +582,11 @@ xobs: {xobs.shape}"""
         if not res.success:
             raise RuntimeError("Optimal parameters not found: " + res.message)
 
+        fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
+        fit_bounds = {k: FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
+        fit_bounds = tuple(fit_bounds.items())
+        self._fit_bounds = fit_bounds
+
         #         self._loss_fcn = loss_fcn
         return res, p0
 
@@ -585,13 +642,18 @@ xobs: {xobs.shape}"""
 
         return popt, pcov, psigma, all_chisq
 
-    def make_fit(self, **kwargs):
+    def make_fit(self, return_exception=False, **kwargs):
         f"""Fit the function with the independent values `xobs` and dependent
         values `yobs` using `least_squares` and returning the `OptimizeResult`
         object, but treating weights as in `curve_fit`.
 
         Parameters
         ----------
+        return_exception: bool
+            If True, return exceptions from fitting routine, instead of raising.
+            This is useful when looping through many fits and wanting to
+            identify failed fits after the fact.
+
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
@@ -610,6 +672,7 @@ xobs: {xobs.shape}"""
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
         except ValueError as e:
+            #             raise
             return e
 
         absolute_sigma = kwargs.pop("absolute_sigma", False)
@@ -620,7 +683,11 @@ xobs: {xobs.shape}"""
             res, p0 = self._run_least_squares(**kwargs)
         except (RuntimeError, ValueError) as e:
             #             print("fitting failed", flush=True)
-            return e
+            #             raise
+            if return_exception:
+                return e
+            else:
+                raise
 
         popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
 

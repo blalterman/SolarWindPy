@@ -17,11 +17,17 @@ import pandas as pd
 
 from . import base
 from . import special
+from . import composition
+from . import elemental_abundance
+from . import datetime  # noqa: F401
 
 TeXlabel = base.TeXlabel
 species_translation = base._run_species_substitution
 Vsw = special.Vsw
 Count = special.Count
+Ion = composition.Ion
+ChargeState = composition.ChargeState
+ElementalAbundance = elemental_abundance.ElementalAbundance
 
 
 def _clean_str_list_for_printing(data):

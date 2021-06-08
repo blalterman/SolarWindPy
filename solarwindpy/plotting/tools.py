@@ -53,14 +53,6 @@ def save(
     if tight_layout:
         fig.tight_layout()
 
-    meta = kwargs.pop("metadata", {})
-    if "Author" not in meta.keys():
-        meta["Author"] = "B. L. Alterman"
-    #    pdf_meta = {k: v for k, v in meta.items()}
-    #    png_meta = {k: v for k, v in meta.items()}
-    #    if "Author" not in pdf_meta:
-    #        pdf_meta["Author"] = "B. L. Alterman"
-
     # Save the PDF without the timestamp so we can create the final LaTeX file
     # without them.
     # Add the datetime stamp to the PNG as those are what we render most often when
@@ -76,7 +68,6 @@ def save(
             spath.with_suffix(".pdf"),
             bbox_inches=bbox_inches,
             format="pdf",
-            meta=meta,
             **kwargs,
         )
 
@@ -92,7 +83,6 @@ def save(
             spath.with_suffix(".png"),
             bbox_inches=bbox_inches,
             format="png",
-            meta=meta,
             **kwargs,
         )
 
@@ -138,7 +128,7 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     handles = handles[sorter]
 
     loc = kwargs.pop("loc", (1.05, 0.1))
-    axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
+    return axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
 
 
 def build_ax_array_with_common_colorbar(

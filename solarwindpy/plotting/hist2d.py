@@ -30,7 +30,8 @@ from .hist1d import Hist1D
 #    logging.getLogger("main").warning("Memory usage\n%s", usage)
 
 
-class Hist2D(base.Plot2D, AggPlot):
+# class Hist2D(base.Plot2D, AggPlot):
+class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     r"""Create a 2D histogram with an optional z-value using an equal number
     of bins along the x and y axis.
 
@@ -90,7 +91,7 @@ class Hist2D(base.Plot2D, AggPlot):
         nbins=101,
         bin_precision=None,
     ):
-        super(Hist2D, self).__init__()
+        super().__init__()
         self.set_log(x=logx, y=logy)
         self.set_data(x, y, z, clip_data)
         self.set_labels(
@@ -116,7 +117,7 @@ class Hist2D(base.Plot2D, AggPlot):
 
     #     def set_path(self, new, add_scale=True):
     #         # Bug: path doesn't auto-set log information.
-    #         path, x, y, z, scale_info = super(Hist2D, self).set_path(new, add_scale)
+    #         path, x, y, z, scale_info = super().set_path(new, add_scale)
 
     #         if new == "auto":
     #             path = path / x / y / z
@@ -154,7 +155,7 @@ class Hist2D(base.Plot2D, AggPlot):
 
             z.build_label()
 
-        super(Hist2D, self).set_labels(z=z, **kwargs)
+        super().set_labels(z=z, **kwargs)
 
     #     def set_data(self, x, y, z, clip):
     #         data = pd.DataFrame(
@@ -180,7 +181,7 @@ class Hist2D(base.Plot2D, AggPlot):
     #         self._clip = clip
 
     def set_data(self, x, y, z, clip):
-        super(Hist2D, self).set_data(x, y, z, clip)
+        super().set_data(x, y, z, clip)
         data = self.data
         if self.log.x:
             data.loc[:, "x"] = np.log10(np.abs(data.loc[:, "x"]))
@@ -191,15 +192,14 @@ class Hist2D(base.Plot2D, AggPlot):
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
 
-===== =============================================================
- key                           description
-===== =============================================================
- c     Column normalize
- d     Density normalize
- r     Row normalize
- t     Total normalize
-===== =============================================================
-"""
+        ===== =============================================================
+         key                           description
+        ===== =============================================================
+         c     Column normalize
+         d     Density normalize
+         r     Row normalize
+         t     Total normalize
+        ===== ============================================================="""
         if new is not None:
             new = new.lower()[0]
             assert new in ("c", "r", "t", "d")
@@ -260,7 +260,7 @@ class Hist2D(base.Plot2D, AggPlot):
         return agg
 
     def agg(self, **kwargs):
-        agg = super(Hist2D, self).agg(**kwargs)
+        agg = super().agg(**kwargs)
         agg = self._axis_normalizer(agg)
         agg = self._agg_reindexer(agg)
 
@@ -271,7 +271,7 @@ class Hist2D(base.Plot2D, AggPlot):
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
-        return super(Hist2D, self)._make_cbar(mappable, ticks=ticks, **kwargs)
+        return super()._make_cbar(mappable, ticks=ticks, **kwargs)
 
     def _limit_color_norm(self, norm):
         if self.axnorm in ("c", "r"):
@@ -376,7 +376,7 @@ class Hist2D(base.Plot2D, AggPlot):
                 cbar_kwargs["ax"] = ax
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(pc, norm=norm, **cbar_kwargs)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
             cbar_or_mappable = cbar
 
         self._format_axis(ax)
@@ -567,7 +567,7 @@ class Hist2D(base.Plot2D, AggPlot):
         limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
-        plot_edges=True,
+        plot_edges=False,
         edges_kwargs=None,
         clabel_kwargs=None,
         skip_max_clbl=True,
@@ -799,8 +799,6 @@ class Hist2D(base.Plot2D, AggPlot):
         h1.set_labels(x=self.labels._asdict()[axis])
         if not project_counts:
             h1.set_labels(y=self.labels._asdict()[other])
-
-        h1.set_path("auto")
 
         return h1
 

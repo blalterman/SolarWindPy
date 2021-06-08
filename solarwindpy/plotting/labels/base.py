@@ -12,7 +12,7 @@ from collections import namedtuple
 MCS = namedtuple("MCS", "m,c,s")
 
 
-__composition_species = r"^{%s}\mathrm{%s}"
+__isotope_species = r"^{%s}\mathrm{%s}"
 _trans_species = {
     "e": r"e^-",
     "a": r"\alpha",
@@ -24,19 +24,45 @@ _trans_species = {
     "p2": r"p_2",
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
-    "H": r"\mathrm{H}",
-    "3He": __composition_species % (3, "He"),
-    "4He": __composition_species % (4, "He"),
-    "12C": __composition_species % (12, "C"),
-    "14N": __composition_species % (14, "N"),
-    "16O": __composition_species % (16, "O"),
-    "20Ne": __composition_species % (20, "Ne"),
-    "24Mg": __composition_species % (24, "Mg"),
-    "28Si": __composition_species % (28, "Si"),
-    "32S": __composition_species % (32, "S"),
-    "40Ca": __composition_species % (40, "Ca"),
-    "Fe": r"\mathrm{Fe}",
+    #     "H": r"\mathrm{H}",
+    #     "C": r"\mathrm{Fe}",
+    #     "Fe": ,
+    #     "He": ,
+    #     "Mg": ,
+    #     "Ne": ,
+    #     "N": ,
+    #     "O": ,
+    #     "Si": ,
+    #     "S": ,
+    #     "3He": __isotope_species % (3, "He"),
+    #     "4He": __isotope_species % (4, "He"),
+    #     "12C": __isotope_species % (12, "C"),
+    #     "14N": __isotope_species % (14, "N"),
+    #     "16O": __isotope_species % (16, "O"),
+    #     "20Ne": __isotope_species % (20, "Ne"),
+    #     "24Mg": __isotope_species % (24, "Mg"),
+    #     "28Si": __isotope_species % (28, "Si"),
+    #     "32S": __isotope_species % (32, "S"),
+    #     "40Ca": __isotope_species % (40, "Ca"),
+    #     "Fe": r"\mathrm{Fe}",
 }
+
+for s in ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S"):
+    _trans_species[s] = r"\mathrm{%s}" % s
+
+for i, s in (
+    (3, "He"),
+    (4, "He"),
+    (12, "C"),
+    (14, "N"),
+    (16, "O"),
+    (20, "Ne"),
+    (24, "Mg"),
+    (28, "Si"),
+    (32, "S"),
+    (40, "Ca"),
+):
+    _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
 
 _trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
 
@@ -48,7 +74,7 @@ _default_template_string = "{$M}_{{$C};{$S}}"
 
 
 def _run_species_substitution(pattern):
-    r""" Basic substitution of any species within a species string so long
+    r"""Basic substitution of any species within a species string so long
     as the species has a substitution in the ion_species dictionary.
     Note: this equation might only work because a->\alpha is the only
     actual translation made and, based on lexsort order, would be the
@@ -87,6 +113,7 @@ _inU = {
     "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
+    #     "deg": r"\degree",
     "Hz": r"\mathrm{Hz}",
 }
 
@@ -176,8 +203,9 @@ _trans_units = {
     # Spectral things
     "spectral_exponent": _inU["dimless"],
     "MeV/nuc": r"\mathrm{MeV/nuc}",
-    #     "differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
-    "differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
+    #     "SEP_differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
+    "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
+    "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
 }
 
 _trans_component = {
@@ -202,11 +230,6 @@ _trans_component = {
     # These will be replaced by dot products and regex.
     "bv": r"{\mathbf{B} \cdot \mathbf{v}}",
     "dv": r"\Delta v",  # For "e" terms
-    # Solar Activity
-    #     "monthly-13": r"\mathrm{M13}",
-    #     "monthly": r"\mathrm{M}",
-    #     "daily": r"\mathrm{D}",
-    #     "yearly": r"\mathrm{Y}",
 }
 
 _templates = {
@@ -283,7 +306,8 @@ _templates = {
     "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
     "MeV/nuc": r"\mathrm{Energy}",
     #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
-    "differential_flux": r"{{$S}} \: dJ/dE",
+    "SEP_differential_flux": r"{{$S}} \: dJ/dE",
+    "SEP_intensity": r"{{$S}}",
 }
 
 
@@ -292,7 +316,7 @@ class Base(ABC):
         self._init_logger()
 
     def __str__(self):
-        return self._with_units
+        return self.with_units
 
     def __repr__(self):
         # Makes debugging easier.
@@ -326,6 +350,22 @@ class Base(ABC):
         """
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
+
+    @property
+    def with_units(self):
+        return rf"${self.tex} \; \left[{self.units}\right]$"
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        return self._units
+
+    @property
+    def path(self):
+        return self._path
 
 
 class TeXlabel(Base):
@@ -371,7 +411,7 @@ class TeXlabel(Base):
     """
 
     def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
-        r"""        Parameters
+        r"""Parameters
         ----------
         mcs0: tuple of strings
             Form is `("M", "C", "S")` where m = measurement, c=component, and
@@ -450,7 +490,7 @@ class TeXlabel(Base):
         self._axnorm = new
 
     def make_species(self, pattern):
-        r""" Basic substitution of any species within a species string so long
+        r"""Basic substitution of any species within a species string so long
         as the species has a substitution in the ion_species dictionary.
         Note: this equation might only work because a->\alpha is the only
         actual translation made and, based on lexsort order, would be the

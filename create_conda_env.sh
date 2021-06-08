@@ -1,7 +1,7 @@
 #! /bin/sh
 
-# If you run into mkl-fft problems, try the following 
-# 
+# If you run into mkl-fft problems, try the following
+#
 #   conda config --add pinned_packages conda-forge::numpy
 #
 # to pin numpy to conda-forge.
@@ -18,14 +18,14 @@ function run_script() {
 
     echo pwd
 
-    core="pandas=1.0.3 scipy numpy numexpr bottleneck matplotlib pytables cython"
-    dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-    use="jupyter nbdime widgetsnbextension yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess"
+    core="pandas scipy numpy numexpr bottleneck matplotlib pytables tqdm"
+    dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit tqdm"
+    use="jupyter nbdime ipywidgets yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess blackcellmagic"
 
     pkgs="$core $dev $use"
     #pkgs="$core $dev"
 
-    conda create -n $1 python=3.7 $pkgs
+    conda create -n $1 python=3.8 $pkgs
 
 #    conda init zsh
 #

@@ -30,11 +30,13 @@ class Line(FitFunction):
         """
         assert self.sufficient_data
 
-        dy, dx = np.ediff1d(self.yobs), np.ediff1d(self.xobs)
+        x = self.observations.used.x
+        y = self.observations.used.y
+        dy, dx = np.ediff1d(y), np.ediff1d(x)
 
         m = dy / dx
         m = np.median(m)
-        b = (m * self.xobs) - self.yobs
+        b = (m * x) - y
         b = np.median(b)
 
         p0 = [m, b]
