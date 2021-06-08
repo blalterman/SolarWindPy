@@ -594,8 +594,8 @@ class SSN(ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s} \, \mathrm{SSN}" % self.pretty_kind.replace(
-            " ", "\,"  # noqa: W605
+        return r"\mathrm{%s} \; \mathrm{SSN}" % self.pretty_kind.replace(
+            " ", "\;"  # noqa: W605
         )  # noqa: W605
 
     @property

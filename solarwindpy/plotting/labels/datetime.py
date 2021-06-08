@@ -85,11 +85,11 @@ class DateTime(special.ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s}" % self.kind
+        return r"\mathrm{%s}" % self.kind.replace(" ", " \; ")  # noqa: W605
 
     @property
     def path(self):
-        return Path(self.kind.lower())
+        return Path(self.kind.lower().replace(" ", "-"))
 
     def set_kind(self, new):
         self._kind = new

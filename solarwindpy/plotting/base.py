@@ -262,8 +262,8 @@ class Base(ABC):
 
 
 class DataLimFormatter(ABC):
-    def _format_axis(self, ax, collection):
-        super()._format_axis(ax)
+    def _format_axis(self, ax, collection, **kwargs):
+        super()._format_axis(ax, **kwargs)
 
         x = self.data.loc[:, "x"]
         minx, maxx = x.min(), x.max()

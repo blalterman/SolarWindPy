@@ -23,6 +23,7 @@ class TeXinfo(object):
         psigma,
         TeX_function,
         chisq_dof,
+        rsq,
         initial_guess_info=None,
         npts=None,
     ):
@@ -36,6 +37,8 @@ class TeXinfo(object):
             TeX-formatted function for printing
         chisq_dof: scalar, None
             If not None, chisq per degree of freedom for the fit.
+        rsq: scalar, None
+            If not None, :math:`R^2` coefficient of determination for the fit.
         initial_guess_info: dict, None
             If not None, a dict with keys corresponding to function arg names
             and values that are (p0, fit_bounds) for that fit parameter.
@@ -46,6 +49,7 @@ class TeXinfo(object):
         self.set_popt_psigma(popt, psigma)
         self.set_TeX_function(TeX_function)
         self.set_chisq_dof(chisq_dof)
+        self.set_rsq(rsq)
         self.set_initial_guess_info(initial_guess_info)
         self.set_npts(npts)
 
@@ -103,6 +107,11 @@ class TeXinfo(object):
     @property
     def psigma(self):
         return dict(self._psigma)
+
+    @property
+    def rsq(self):
+        r""":math:`R^2` coefficient of determination."""
+        return self._rsq
 
     @property
     def TeX_argnames(self):
@@ -239,6 +248,7 @@ class TeXinfo(object):
     def _build_fit_parameter_info(
         self,
         chisq_dof=False,
+        rsq=False,
         convert_pow_10=True,
         strip_uncertainties=False,
         simplify_info_for_paper=False,
@@ -318,6 +328,10 @@ class TeXinfo(object):
         if simplify_info_for_paper:
             info = self._simplify_for_paper(info)
 
+        # Rsq here so it always reports to 2 decimal places.
+        if rsq:
+            info += [f"R^2 = {self.rsq:.2f}"]
+
         # IF statement to add blank lines for spacing chisq_nu and other stats.
         info = [r"$ %s $" % x.replace("$", "") if x else "\n" for x in info]
         info = "\n".join(info)
@@ -348,8 +362,8 @@ class TeXinfo(object):
         info = self  # .info()
 
         bbox = kwargs.pop("bbox", dict(color="wheat", alpha=0.75))
-        xloc = kwargs.pop("xloc", 0.05)
-        yloc = kwargs.pop("yloc", 0.9)
+        xloc = kwargs.pop("xloc", 1.1)
+        yloc = kwargs.pop("yloc", 0.95)
         horizontalalignment = kwargs.pop("ha", "left")
         verticalalignment = kwargs.pop("va", "top")
         axtrans = kwargs.pop("transform", ax.transAxes)
@@ -386,6 +400,8 @@ class TeXinfo(object):
         relative_error: bool
             If True, print out relative error as :math:`\Delta(x)/x` for all
             fit parameters x.
+        rsq: bool
+            If True, include :math:`R^2` coefficient of determination.
         npts: bool
             If True, include the number of points in the fit.
         convert_pow_10: bool
@@ -408,6 +424,7 @@ class TeXinfo(object):
         """
 
         chisq_dof = kwargs.pop("chisq_dof", True)
+        rsq = kwargs.pop("rsq", False)
         npts = kwargs.pop("npts", False)
         relative_error = kwargs.pop("relative_error", False)
         convert_pow_10 = kwargs.pop("convert_pow_10", True)
@@ -426,6 +443,7 @@ class TeXinfo(object):
         else:
             info = self._build_fit_parameter_info(
                 chisq_dof=chisq_dof,
+                rsq=rsq,
                 convert_pow_10=convert_pow_10,
                 strip_uncertainties=strip_uncertainties,
                 simplify_info_for_paper=simplify_info_for_paper,
@@ -502,6 +520,9 @@ class TeXinfo(object):
 
     def set_chisq_dof(self, new):
         self._chisq_dof = new
+
+    def set_rsq(self, new):
+        self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):
         r"""

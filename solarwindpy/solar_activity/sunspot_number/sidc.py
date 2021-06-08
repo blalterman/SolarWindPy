@@ -27,9 +27,10 @@ ActivityIndicator = base.ActivityIndicator
 
 pd.set_option("mode.chained_assignment", "raise")
 
-_m13_dtypes_columns = _Loader_Dtypes_Columns(
-    {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
-    ("year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"),
+
+_d_dtypes_columns = _Loader_Dtypes_Columns(
+    {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
+    ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
 )
 
 _m_dtypes_columns = _Loader_Dtypes_Columns(
@@ -37,9 +38,14 @@ _m_dtypes_columns = _Loader_Dtypes_Columns(
     ["year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"],
 )
 
-_d_dtypes_columns = _Loader_Dtypes_Columns(
-    {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
-    ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
+_m13_dtypes_columns = _Loader_Dtypes_Columns(
+    {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
+    ("year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"),
+)
+
+_y_dtypes_columns = _Loader_Dtypes_Columns(
+    {0: float, 1: float, 2: float, 3: int, 4: bool},
+    ["year", "ssn", "std", "n_obs", "definitive"],
 )
 
 # Column 3: Date in fraction of year for the middle of the corresponding month (~ day 15)
@@ -152,7 +158,7 @@ _Dtypes_Columns = _Dtypes_Columns(
     _d_dtypes_columns,
     _m_dtypes_columns,
     _m13_dtypes_columns,
-    None,
+    _y_dtypes_columns,
     _hd_dtypes_columns,
     _hm_dtypes_columns,
     _hm13_dtypes_columns,
@@ -226,48 +232,22 @@ class SIDCLoader(DataLoader):
         if key in ("m13", "m", "hm", "hm13"):
             dt = csv.loc[:, ["year", "month"]]
             dt.loc[:, "day"] = 1
+            ts = pd.to_datetime(dt)
 
         elif key in ("d", "hd"):
             dt = csv.loc[:, ["year", "month", "day"]]
+            ts = pd.to_datetime(dt)
+
+        elif key in ("y",):
+            import astropy.time
+
+            dt = astropy.time.Time(csv.loc[:, "year"], format="decimalyear")
+            ts = pd.DatetimeIndex(dt.datetime)
 
         else:
             raise NotImplementedError(
                 f"Please specify how to build {key} datetime column"
             )
-
-        #         if key == "m13":
-        #             dtypes_columns = _m13_dtypes_columns
-        #             csv = pd.read_csv(
-        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
-        #             )
-        #             csv.columns = dtypes_columns.columns
-        #             dt = csv.loc[:, ["year", "month"]]
-        #             dt.loc[:, "day"] = 1
-        #
-        #         elif key == "m":
-        #             dtypes_columns = _m_dtypes_columns
-        #             csv = pd.read_csv(
-        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
-        #             )
-        #             csv.columns = dtypes_columns.columns
-        #             dt = csv.loc[:, ["year", "month"]]
-        #             dt.loc[:, "day"] = 1
-        #
-        #         elif key == "d":
-        #             dtypes_columns = _d_dtypes_columns
-        #             csv = pd.read_csv(
-        #                 self.url, sep=";", header=None, dtype=dtypes_columns.dtypes
-        #             )
-        #             csv.columns = dtypes_columns.columns
-        #
-        #             dt = csv.loc[:, ["year", "month", "day"]]
-        #
-        #         else:
-        #             msg = (
-        #                 "You have not yet used the SSN specified by your key (%s). "
-        #                 "Please verify the column labels before continuing."
-        #             )
-        #             raise NotImplementedError(msg % key)
 
         if key.startswith("h"):
             std = csv.loc[:, ["total_std", "north_std", "south_std"]]
@@ -290,7 +270,6 @@ class SIDCLoader(DataLoader):
             csv.loc[:, "std_error"] = std_error
             csv.sort_index(axis=1, inplace=True)
 
-        ts = pd.to_datetime(dt)
         csv.set_index(ts, inplace=True)
         self.convert_nans(csv)
 
@@ -428,8 +407,7 @@ class SIDC(ActivityIndicator):
     run_normalization.__doc__ = ActivityIndicator.run_normalization
 
     def cut_spec_by_ssn_band(self, dssn=2.0):
-        r"""Cut the sunspot number at each spectrum in intervals of 10 with a width +/- dssn.
-        """
+        r"""Cut the sunspot number at each spectrum in intervals of 10 with a width +/- dssn."""
 
         #         raise NotImplementedError(
         #             r"""Do you want this to apply to `SIDC` data or something
@@ -448,7 +426,7 @@ class SIDC(ActivityIndicator):
         #         mids = np.linspace(0, 180, 37)
         left = mids - dssn
         right = mids + dssn
-        intervals = [pd.Interval(l, r) for l, r in zip(left, right)]
+        intervals = [pd.Interval(ll, rr) for ll, rr in zip(left, right)]
         intervals = pd.IntervalIndex(intervals, name="ssn_intervals")
         try:
             cut = pd.cut(
@@ -458,12 +436,12 @@ class SIDC(ActivityIndicator):
         except KeyError as e:
             if np.isnan(e.args[0]):
                 # Check that intervals don't overlap.
-                for l, r in zip(intervals[:-1], intervals[1:]):
-                    l_upper = l.right
-                    r_lower = r.left
+                for ll, rr in zip(intervals[:-1], intervals[1:]):
+                    l_upper = ll.right
+                    r_lower = rr.left
                     if l_upper > r_lower:
-                        msg = "Your intervals can't overlap.\nInterval 0: %s\nInterval 1: %s\nIt causes a KeyError in `pd.cut`."
-                        raise ValueError(msg % (l, r))
+                        msg = f"Your intervals can't overlap.\nInterval 0: {ll}\nInterval 1: {rr}\nIt causes a KeyError in `pd.cut`."
+                        raise ValueError(msg)
             else:
                 raise
 
