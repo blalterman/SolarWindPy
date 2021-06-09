@@ -16,14 +16,12 @@ echo $envname
 
 function run_script() {
 
-    echo pwd
-
-    core="pandas scipy numpy numexpr bottleneck matplotlib pytables tqdm"
+    core="pandas scipy numpy numexpr bottleneck matplotlib pytables tabulate h5py numba astropy"
     dev="setuptools twine wheel flake8 black sphinx sphinx_rtd_theme pre_commit"
-    use="jupyter nbdime ipywidgets yaml pyyaml astropy sunpy heliopy cdflib tabulate zlib numba multiprocess blackcellmagic"
+    use="jupyter nbdime ipywidgets yaml pyyaml sunpy heliopy cdflib zlib multiprocess blackcellmagic tqdm"
 
-    pkgs="$core $dev $use"
-    # pkgs="$core $dev"
+#     pkgs="$core $dev $use"
+    pkgs="$core $dev"
 
     conda create -n $1 python=3.8 $pkgs
 
