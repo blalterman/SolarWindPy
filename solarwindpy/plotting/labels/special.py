@@ -532,7 +532,7 @@ class SSN(ArbitraryLabel):
         new = new.upper()
         assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
         self._kind = new
-        self._path = Path(f"""{new.lower()!s}-ssn""")
+        self._path = Path(f"""{new.upper()!s}ssn""")
 
 
 class ComparisonLable(ArbitraryLabel):

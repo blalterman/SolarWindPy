@@ -47,7 +47,10 @@ class ElementalAbundance(base.Base):
 
     @property
     def path(self):
-        return Path(f"{self.species}-OV-{self.reference_species}_photospheric-ratio")
+        path = f"{self.species}-OV-{self.reference_species}"
+        if self.photospheric:
+            path += "_photospheric-ratio"
+        return Path(path)
 
     @property
     def pct_unit(self):
