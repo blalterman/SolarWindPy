@@ -48,14 +48,15 @@ def available_labels():
     c = sorted(base._trans_component.keys())
     s = sorted(base._trans_species.keys())
     a = []
-    for x in dir(special):
-        x = getattr(special, x)
-        if (
-            isclass(x)
-            and issubclass(x, special.ArbitraryLabel)
-            and x != special.ArbitraryLabel
-        ):
-            a.append(x.__name__)
+    for case in (special, composition, elemental_abundance, datetime):
+        for x in dir(case):
+            x = getattr(case, x)
+            if (
+                isclass(x)
+                and issubclass(x, special.ArbitraryLabel)
+                and x != special.ArbitraryLabel
+            ):
+                a.append(x.__name__)
 
     m = _clean_str_list_for_printing(m)
     c = _clean_str_list_for_printing(c)
