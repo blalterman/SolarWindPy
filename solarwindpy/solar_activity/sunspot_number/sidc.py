@@ -10,6 +10,7 @@ website. Per the website, standard error is std/sqrt(n_obs) for each SSN value.
 import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 
 from pathlib import Path
 from collections import namedtuple
@@ -495,6 +496,39 @@ It causes a KeyError in `pd.cut`."""
         self._spec_by_ssn_band = cut
         self._ssn_band_intervals = intervals
         return cut
+
+    def plot_on_colorbar(self, cax, t0, t1):
+        r"""Plot SSN on the color bar.
+
+        TODO
+        ----
+        Refactor and abstract to :pyclass:`ActivityIndicator`.
+        """
+        ssn = self.data.loc[t0:t1, "ssn"]
+
+        x = mpl.dates.date2num(ssn.index)
+        y = ssn  # .values
+        #         print("SSN values", y.min(), y.max())
+
+        y0, y1 = cax.get_xlim()
+        dy = y1 - y0
+        #         s0, s1 = 0, 200
+        s0, s1 = np.array([0, np.round(ssn.max(), -2)], dtype=int)
+        y = ((y / s1) * dy) + y0
+        #       print("Map Range", y0, y1)
+        #       print("Scaled SSN", y.min(), y.max())
+
+        cax.plot(y, x, ls="-", color="w", lw=1)
+        cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+        cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
+        t0, t1 = cax.get_xlim()
+
+        # We force the maximum value to be even and minimum value to be odd,
+        # so the mid-point must be an even integer.
+        cax.xaxis.set_ticks([t0, 0.5 * (t0 + t1), t1])
+        cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
+        cax.xaxis.set_tick_params(rotation=25)
+        cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
 
 
 class SSNExtrema(IndicatorExtrema):
