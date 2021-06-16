@@ -521,11 +521,11 @@ It causes a KeyError in `pd.cut`."""
         cax.plot(y, x, ls="-", color="w", lw=1)
         cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
         cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
-        t0, t1 = cax.get_xlim()
+        x0, x1 = cax.get_xlim()
 
         # We force the maximum value to be even and minimum value to be odd,
         # so the mid-point must be an even integer.
-        cax.xaxis.set_ticks([t0, 0.5 * (t0 + t1), t1])
+        cax.xaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
         cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
         cax.xaxis.set_tick_params(rotation=25)
         cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
