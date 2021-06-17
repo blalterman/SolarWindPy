@@ -47,11 +47,11 @@ def save(
     assert isinstance(fig, mpl.figure.Figure)
     assert isinstance(spath, Path)
 
-    tight_layout = kwargs.pop("tight_layout", True)
+    #     tight_layout = kwargs.pop("tight_layout", True)
     bbox_inches = kwargs.pop("bbox_inches", "tight")
 
-    if tight_layout:
-        fig.tight_layout()
+    #     if tight_layout:
+    #         fig.tight_layout()
 
     # Save the PDF without the timestamp so we can create the final LaTeX file
     # without them.
