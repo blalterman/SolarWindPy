@@ -205,6 +205,7 @@ _trans_units = {
     "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
     "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
     "SEP_energy": r"\mathrm{MeV/nuc}",
+    "SEP_spectrum_index": _inU["dimless"],
 }
 
 _trans_component = {
@@ -306,6 +307,7 @@ _templates = {
     "SEP_differential_flux": r"{{$S}} \: dJ/dE",
     "SEP_intensity": r"{{$S}}",
     "SEP_energy": r"{{$S}} \: \mathrm{Energy}",
+    "SEP_spectrum_index": r"\gamma_{{$S}}",
 }
 
 
@@ -563,9 +565,10 @@ class TeXlabel(Base):
             .replace("};}", "}}")
             .replace(";}", "}")
             .replace("_{}", "")
+            .rstrip("_")
             .strip(" ")
-            .strip("\:")  # noqa: W605
-            .strip("\;")  # noqa: W605
+            #             .strip("\:")  # noqa: W605
+            #             .strip("\;")  # noqa: W605
             .strip(" ")
         )
 

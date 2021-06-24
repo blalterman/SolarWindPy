@@ -497,7 +497,7 @@ It causes a KeyError in `pd.cut`."""
         self._ssn_band_intervals = intervals
         return cut
 
-    def plot_on_colorbar(self, cax, t0, t1):
+    def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
         r"""Plot SSN on the color bar.
 
         TODO
@@ -510,7 +510,12 @@ It causes a KeyError in `pd.cut`."""
         y = ssn  # .values
         #         print("SSN values", y.min(), y.max())
 
-        y0, y1 = cax.get_xlim()
+        if vertical_cbar:
+            y0, y1 = cax.get_xlim()
+        else:
+            raise NotImplementedError("Need to test horizontal cbar plots")
+            y0, y1 = cax.get_ylim()
+
         dy = y1 - y0
         #         s0, s1 = 0, 200
         s0, s1 = np.array([0, np.round(ssn.max(), -2)], dtype=int)
@@ -518,17 +523,31 @@ It causes a KeyError in `pd.cut`."""
         #       print("Map Range", y0, y1)
         #       print("Scaled SSN", y.min(), y.max())
 
-        cax.plot(y, x, ls="-", color="w", lw=1)
-        cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
-        cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
-        x0, x1 = cax.get_xlim()
+        if vertical_cbar:
+            cax.plot(y, x, ls="-", color="w", lw=1)
+            cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+            cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
+            x0, x1 = cax.get_xlim()
 
-        # We force the maximum value to be even and minimum value to be odd,
-        # so the mid-point must be an even integer.
-        cax.xaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
-        cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
-        cax.xaxis.set_tick_params(rotation=25)
-        cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
+            # We force the maximum value to be even and minimum value to be
+            # odd, so the mid-point must be an even integer.
+            cax.xaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
+            cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
+            cax.xaxis.set_tick_params(rotation=25)
+            cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
+
+        else:
+            cax.plot(x, y, ls="-", color="w", lw=1)
+            cax.plot(x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+            cax.set_ylabel(r"$\mathrm{SSN} \; [\#]$")
+            x0, x1 = cax.get_ylim()
+
+            # We force the maximum value to be even and minimum value to be
+            # odd, so the mid-point must be an even integer.
+            cax.yaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
+            cax.yaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
+            cax.yaxis.set_tick_params(rotation=25)
+            cax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
 
 
 class SSNExtrema(IndicatorExtrema):
