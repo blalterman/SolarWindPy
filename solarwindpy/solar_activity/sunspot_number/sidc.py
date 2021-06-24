@@ -513,7 +513,6 @@ It causes a KeyError in `pd.cut`."""
         if vertical_cbar:
             y0, y1 = cax.get_xlim()
         else:
-            raise NotImplementedError("Need to test horizontal cbar plots")
             y0, y1 = cax.get_ylim()
 
         dy = y1 - y0
