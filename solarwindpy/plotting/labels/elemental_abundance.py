@@ -5,8 +5,7 @@ import logging
 from pathlib import Path
 from . import base
 
-# known_species = ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S")
-known_species = base._trans_species.keys()
+known_species = tuple(base._trans_species.keys()) + ("X",)
 
 
 class ElementalAbundance(base.Base):
