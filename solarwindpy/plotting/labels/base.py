@@ -305,7 +305,7 @@ _templates = {
     "MeV/nuc": r"\mathrm{Energy}",
     #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
     "SEP_differential_flux": r"{{$S}} \: dJ/dE",
-    "SEP_intensity": r"{{$S}}",
+    "SEP_intensity": r"{{$S}} \: \mathrm{Intensity}",
     "SEP_energy": r"{{$S}} \: \mathrm{Energy}",
     "SEP_spectrum_index": r"\gamma_{{$S}}",
 }
