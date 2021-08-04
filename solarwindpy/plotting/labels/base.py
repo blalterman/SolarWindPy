@@ -567,8 +567,8 @@ class TeXlabel(Base):
             .replace("_{}", "")
             .rstrip("_")
             .strip(" ")
-            .lstrip("\:")  # noqa: W605
-            .rstrip("\:")  # noqa: W605
+            #             .lstrip("\:")  # noqa: W605
+            #             .rstrip("\:")  # noqa: W605
             #             .strip("\:")  # noqa: W605
             #             .strip("\;")  # noqa: W605
             .strip(" ")

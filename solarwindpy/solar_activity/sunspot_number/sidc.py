@@ -534,6 +534,7 @@ It causes a KeyError in `pd.cut`."""
             cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
             cax.xaxis.set_tick_params(rotation=25)
             cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
+            cax.yaxis.set_tick_params(left=True)
 
         else:
             cax.plot(x, y, ls="-", color="w", lw=1)
@@ -547,6 +548,9 @@ It causes a KeyError in `pd.cut`."""
             cax.yaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
             cax.yaxis.set_tick_params(rotation=25)
             cax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
+            cax.xaxis.set_tick_params(top=True)
+            cax.xaxis.set_ticks_position("top")
+            cax.xaxis.set_label_position("top")
 
 
 class SSNExtrema(IndicatorExtrema):
