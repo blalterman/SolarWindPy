@@ -235,6 +235,7 @@ Created  : {axes.shape}
     #     print(list(col_range))
     #     print(width_ratios)
 
+    axes = axes.squeeze()
     return fig, axes, cax
 
 
