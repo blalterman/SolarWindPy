@@ -133,7 +133,11 @@ class TrendFit(object):
     def make_ffunc1ds(self, **kwargs):
         r"""kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""
         agg = self.agged
-        x = pd.IntervalIndex(agg.index).mid.values
+        x = agg.index
+        try:
+            x = pd.IntervalIndex(agg.index).mid.values
+        except TypeError:
+            x = x.values
 
         #         ylbl = self.labels.y
         #         zlbl = self.labels.z
@@ -232,7 +236,11 @@ class TrendFit(object):
         if not popt.shape[0]:
             raise ValueError("Insufficient 1D fits to build trend function")
 
-        x = pd.IntervalIndex(popt.index).mid
+        try:
+            x = pd.IntervalIndex(popt.index).mid
+        except TypeError:
+            x = popt.index
+
         if self.trend_logx:
             x = 10.0 ** x
 

@@ -843,15 +843,18 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         yax.get_yaxis().get_offset_text().set_visible(False)
         yax.set_ylabel("")
 
-        hax.xaxis.set_major_locator(
-            mpl.ticker.MaxNLocator(
-                nbins=hax.xaxis.get_ticklocs().size - 1, prune="upper"
+        log = self.log
+        if not log.x:
+            hax.xaxis.set_major_locator(
+                mpl.ticker.MaxNLocator(
+                    nbins=hax.xaxis.get_ticklocs().size - 1, prune="upper"
+                )
             )
-        )
-        hax.yaxis.set_major_locator(
-            mpl.ticker.MaxNLocator(
-                nbins=hax.yaxis.get_ticklocs().size - 1, prune="upper"
+        if not log.y:
+            hax.yaxis.set_major_locator(
+                mpl.ticker.MaxNLocator(
+                    nbins=hax.yaxis.get_ticklocs().size - 1, prune="upper"
+                )
             )
-        )
 
         return hax, xax, yax, cax
