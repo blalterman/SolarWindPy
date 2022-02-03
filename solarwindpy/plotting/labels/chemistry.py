@@ -6,7 +6,7 @@ mass_per_charge = ManualLabel(
     path="M-OV-Q",
 )
 
-fip = ManualLabel(r"\mathrm{FIP}", r"\mathrm{eV}")
+fip = ManualLabel(r"\mathrm{FIP}", r"\mathrm{eV}", path="FIP")
 
 charge = ManualLabel(
     r"\mathrm{Q}",
