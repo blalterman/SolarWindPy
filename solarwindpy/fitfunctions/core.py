@@ -271,6 +271,21 @@ class FitFunction(ABC):
         return self._pcov.copy()
 
     @property
+    def rsq(self):
+        r"""Coefficient of determination.
+
+        Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
+        """
+        y = self.observations.used.y
+        ybar = y.mean()
+        yfit = self(self.observations.used.x)
+        sum_squares_total = ((y - ybar) ** 2).sum()
+        sum_squares_residual = ((y - yfit) ** 2).sum()
+        rsq = 1 - (sum_squares_residual / sum_squares_total)
+
+        return rsq
+
+    @property
     def sufficient_data(self):
         r"""A check to ensure that we can fit the data before doing any
         computations.
@@ -400,15 +415,15 @@ xobs: {xobs.shape}"""
             popt,
             psigma,
             self.TeX_function,
-            chisq_dof=self.chisq_dof,
+            self.chisq_dof,
+            self.rsq,
             initial_guess_info=self.initial_guess_info,
         )
         self._TeX_info = tex_info
         return tex_info
 
     def residuals(self, pct=False):
-        r"""
-        Calculate the fit residuals.
+        r"""Calculate the fit residuals.
         If pct, normalize by fit yvalues.
         """
 

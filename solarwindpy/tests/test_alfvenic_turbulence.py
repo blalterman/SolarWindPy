@@ -112,7 +112,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         data = pd.concat(
             {"v": vcom, "b": b_ca_units, "r": rtot.to_frame(name="+".join(species))},
             axis=1,
-            names=["M"],
+            names=["M", "C"],
         ).sort_index(axis=1)
         # rolled = data.rolling(window=2, min_periods=1, center=True).agg("mean")
         rolled = data.rolling(window=test_window, min_periods=test_periods).agg("mean")
@@ -207,6 +207,7 @@ class AlfvenicTrubulenceTestBase(ABC):
     def test_data(self):
         data = self.data.drop("r", axis=1, level="M")
         ot = self.object_testing
+
         pdt.assert_frame_equal(data, ot.data)
 
     def test_meaurements(self):

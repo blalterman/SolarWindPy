@@ -344,30 +344,33 @@ class FFPlot(object):
         self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
     ):
         r"""Make a plot of the fit function that includes the data and fit,
-        but are limited to data included in the fit.
+                but are limited to data included in the fit.
 
-        Residuals are plotted as a percentage, both positive and negative, on
-        a symlog scale with `linthresh=10`.
+                Residuals are plotted as a percentage, both positive and negative, on
+                a symlog scale with `linthresh=10`.
+        <<<<<<< HEAD
+        =======
 
-        Parameters
-        ----------
-        ax: None, mpl.axis.Axis
-            If not None, mpl.axis.Axis.
-        pct: bool
-            If True, plot in units of percent.
-        subplots_kwargs: dict, None
-            If not None, passed to `plt.subplots`. Disabled if `ax` is not
-            None.
-        kind: str
-            Specify type of residuals to plot.
+                Parameters
+                ----------
+                ax: None, mpl.axis.Axis
+                    If not None, mpl.axis.Axis.
+                pct: bool
+                    If True, plot in units of percent.
+                subplots_kwargs: dict, None
+                    If not None, passed to `plt.subplots`. Disabled if `ax` is not
+                    None.
+                kind: str
+                    Specify type of residuals to plot.
 
-                ======== ======================
-                 Value        Description
-                ======== ======================
-                 simple   Use simple residuals
-                 robust   Use robust residuals
-                 both     Use both
-                ======== ======================
+                        ======== ======================
+                         Value        Description
+                        ======== ======================
+                         simple   Use simple residuals
+                         robust   Use robust residuals
+                         both     Use both
+                        ======== ======================
+        >>>>>>> c8b5d9bfe4c7ce53d00e5d0773d27dcc8b8f258c
         """
 
         if subplots_kwargs is None:

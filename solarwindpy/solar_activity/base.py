@@ -472,8 +472,17 @@ class IndicatorExtrema(Base):
         dt = pd.to_timedelta(dt)
         extrema = self.data.stack()
 
-        left = extrema.subtract(dt)
-        right = extrema.add(dt)
+        dt = pd.to_timedelta(dt)
+        dt = np.atleast_1d(dt)
+        if dt.size == 2:
+            dl, dr = dt
+        elif dt.size == 1:
+            dl = dr = dt[0]
+        else:
+            raise ValueError("Only know how to handle 1 or 2 dt options.")
+
+        left = extrema.subtract(dl)
+        right = extrema.add(dr)
         lr = pd.DataFrame({"left": left, "right": right})
 
         def make_interval(x):

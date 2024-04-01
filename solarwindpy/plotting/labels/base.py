@@ -191,6 +191,8 @@ _trans_units = {
     "gamma_max": _inU["Hz"],
     "gyro_freq": _inU["Hz"],
     "kvec": _inU["dimless"],
+    "k": _inU["dimless"],
+    "insta_power": _inU["unknown"],
     # Solar Activity
     "Lalpha": r"\mathrm{W/m^2}",
     "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
@@ -228,7 +230,7 @@ _trans_component = {
     "p": r"p",  # For use with pressure anisotropy.
     "const": r"\mathrm{const}",  # constant for ("w", "const", "") label.
     # These will be replaced by dot products and regex.
-    "bv": r"{\vec{B} \cdot \vec{v}}",
+    "bv": r"{\mathbf{B} \cdot \mathbf{v}}",
     "dv": r"\Delta v",  # For "e" terms
 }
 
@@ -291,7 +293,9 @@ _templates = {
     "omegaR": r"\omega_R",
     "gyro_freq": r"\Omega_{{$S}}",
     "eth": r"\eth",  # "_{{$C;$S}}"
-    "kvec": r"k_{$C}\rho_{$S}",
+    "kvec": r"\mathbf{k}_{$C}\rho_{$S}",
+    "k": r"k_{$C}\rho_{$S}",
+    "insta_power": r"\mathcal{P}_{{$S}}",
     # Solar Activity
     #     "ssn": r"{{$C}} \; \mathrm{SSN}",
     "Lalpha": r"\mathrm{L}\alpha",
