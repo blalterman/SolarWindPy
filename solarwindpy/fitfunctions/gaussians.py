@@ -54,25 +54,108 @@ class Gaussian(FitFunction):
     @property
     def TeX_function(self):
         #         TeX = r"f(x)=\frac{1}{\sqrt{2 \pi} \sigma} A\cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
-        TeX = r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
+        TeX = r"f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
+
+    def make_fit(self, *args, **kwargs):
+        super().make_fit(*args, **kwargs)
+        try:
+            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
+        except AttributeError:  # Fit failed
+            pass
+
+
+class GaussianNormalized(FitFunction):
+    def __init__(self, xobs, yobs, **kwargs):
+        super(GaussianNormalized, self).__init__(xobs, yobs, **kwargs)
+
+    @property
+    def function(self):
+        def gaussian_normalized(x, mu, sigma, n):
+            arg = -0.5 * (((x - mu) / sigma) ** 2.0)
+            A = n / (np.sqrt(2 * np.pi) * sigma)
+            return A * np.exp(arg)
+
+        return gaussian_normalized
+
+    @property
+    def p0(self):
+        r"""Calculate the initial guess for the Gaussian parameters.
+
+        Return
+        ------
+        p0 : list
+            The initial guesses as [mu, sigma, n].
+        """
+        assert self.sufficient_data
+
+        x, y = self.observations.used.x, self.observations.used.y
+        mean = (x * y).sum() / y.sum()
+        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+
+        try:
+            peak = y.max()
+        except ValueError as e:
+            chk = (
+                r"zero-size array to reduction operation maximum "
+                "which has no identity"
+            )
+            if e.message.startswith(chk):
+                msg = (
+                    "There is no maximum of a zero-size array. "
+                    "Please check input data."
+                )
+                raise ValueError(msg)
+
+        n = peak * std * np.sqrt(2 * np.pi)
+        p0 = [mean, std, n]
+        return p0
+
+    @property
+    def TeX_function(self):
+        TeX = r"f(x)=\frac{n}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
+        #         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
+        return TeX
+
+    def make_fit(self, *args, **kwargs):
+        super().make_fit(*args, **kwargs)
+        try:
+            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
+        except AttributeError:  # Fit failed
+            pass
 
 
 class GaussianLn(FitFunction):
     r"""Gaussian where taking `$ln(x)$`.
+
+    [1] https://mathworld.wolfram.com/LogNormalDistribution.html
     """
 
     def __init__(self, xobs, yobs, **kwargs):
-        super(GaussianLn, self).__init__(xobs, yobs, **kwargs)
+        super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
 
     @property
     def function(self):
+        #         def gaussian_ln(x, m, s, A):
+        #             x = np.log(x)
+        #             coeff = (np.sqrt(2.0 * np.pi) * s) ** (-1.0)
+        #             arg = -0.5 * (((x - m) / s) ** 2.0)
+        #             return A * coeff * np.exp(arg)
+
         def gaussian_ln(x, m, s, A):
-            x = np.log(x)
-            coeff = (np.sqrt(2.0 * np.pi) * s) ** (-1.0)
-            arg = -0.5 * (((x - m) / s) ** 2.0)
-            return A * coeff * np.exp(arg)
+            lnx = np.log(x)
+
+            coeff = A
+            #             coeff *= (np.sqrt(2.0 * np.pi) * s * x) ** (-1.0)
+
+            arg = -0.5 * (((lnx - m) / s) ** 2.0)
+
+            return coeff * np.exp(arg)
+
+        #         def gaussian_ln(x, m, s, A):
+        #             arg = m + (s * x)
+        #             return A * np.exp(arg)
 
         return gaussian_ln
 
@@ -115,8 +198,16 @@ class GaussianLn(FitFunction):
     def TeX_function(self):
         TeX = (
             r"f(x) = A \cdot  "
-            r"\mathrm{exp}[-\frac{1}{2}  "
-            r"(\frac{\mathrm{ln}(x)-m}{s})^2]"
+            r"\mathrm{exp}\left[-\frac{1}{2}  "
+            r"(\frac{\mathrm{ln}(x)-m}{s})^2\right]"
+        )
+        TeX = (
+            r"f(x) ="
+            r"A \cdot"
+            #                r"\frac{1}{\sqrt{2\pi} s x}"
+            r"\exp\left["
+            r"\frac{\left(\ln x - m\right)^2}{2 s^2}"
+            r"\right]"
         )
         return TeX
 
