@@ -59,8 +59,10 @@ class QuantityTestBase(ABC):
     def test_neq(self):
         object_testing = self.object_testing
         # Data isn't equal
+
         self.assertNotEqual(
-            object_testing, object_testing.__class__(object_testing.data * 4)
+            object_testing, 
+            object_testing.__class__(object_testing.data * 4)
         )
         # Type isn't equal
         for other in (
@@ -86,6 +88,7 @@ class VectorTestBase(QuantityTestBase):
     def test_components(self):
         # print("test_components")
         # print(self.data.iloc[:, :7], flush=True)
+
         v = self.data
         # print(v, file=sys.stdout)
         pdt.assert_series_equal(v.x, self.object_testing.x)
@@ -218,7 +221,7 @@ class VectorTestBase(QuantityTestBase):
             projected, self.object_testing.project(self.object_testing)
         )
 
-        msg = "`project` method needs"
+        msg = "method not implemented"
         with self.assertRaisesRegex(NotImplementedError, msg):
             self.object_testing.project(b.data)
 
@@ -266,7 +269,7 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(par, self.object_testing.cos_theta(v))
         pdt.assert_series_equal(par, self.object_testing.cos_theta(vuv))
 
-        msg = "`project` method needs"
+        msg = "method not implemented"
         with self.assertRaisesRegex(NotImplementedError, msg):
             self.object_testing.project(b.data)
 
@@ -427,7 +430,10 @@ class TestQuantitySubclassEquality(TestCase):
         scalar = data.w.pow(2).multiply(coeff, axis=1, level="C")
         # print(scalar)
         # print()
-        scalar = scalar.sum(axis=1, level="S").pipe(np.sqrt)
+
+        scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
+        # scalar = scalar.sum(axis=1, level="S").pipe(np.sqrt)
+        
         cols = pd.MultiIndex.from_tuples(
             scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
             names=data.columns.names,
@@ -512,7 +518,7 @@ if __name__ == "__main__":
     # Just make recursion stacks smaller in Terminal.
     # Comment this line if it causes problems with other
     # tests or decrease the denominator.
-    # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
+    sys.setrecursionlimit(sys.getrecursionlimit() // 25)
 
     try:
         run_this_test = "TestBField"

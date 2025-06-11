@@ -25,7 +25,7 @@ from . import core, plotting, solar_activity, tools, fitfunctions
 from . import instabilities  # noqa: F401
 
 pd.set_option("mode.chained_assignment", "raise")
-pd.set_option("mode.use_inf_as_na", True)
+# pd.set_option("mode.use_inf_as_na", True)
 
 Plasma = core.plasma.Plasma
 at = alfvenic_turbulence

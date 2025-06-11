@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 """A Vector class and subclasses.
 
-:py:class:`Vector` inherets :py:class:`~solarwindpy.core.Base`. The subclass
-:py:class:`BField:` inheretes :py:class:`Vector`.
+This module provides a Vector class and its subclass BField for handling
+vector operations and magnetic field calculations.
 """
-import pdb  # noqa: F401
+
+from typing import Union
 import numpy as np
 import pandas as pd
 
-
-# We rely on views via DataFrame.xs to reduce memory size and do not
-# `.copy(deep=True)`, so we want to make sure that this doesn't
-# accidentally cause a problem.
 pd.set_option("mode.chained_assignment", "raise")
 
 try:
@@ -21,117 +18,186 @@ except ImportError:
 
 
 class Vector(base.Base):
-    def __init__(self, data):
-        # print("Vector.__init__", data)
-        super(Vector, self).__init__(data)
+    """A class representing a 3D vector.
 
-    def __call__(self, component):
-        assert isinstance(component, str)
-        return self.__getattr__(component)  # getattr(self, component)
+    This class provides methods for vector operations and coordinate transformations.
 
-    def set_data(self, new):
-        # print("Vector.set_data", new)
-        super(Vector, self).set_data(new)
-        chk = pd.Index(["x", "y", "z"])
-        assert not isinstance(new.columns, pd.MultiIndex)
-        if not chk.isin(new.columns).all():
-            msg = "\nTarget columns:\n%s\nAttempted:\n%s"
-            msg = msg % (chk, new.columns)
-            raise ValueError(msg)
+    Attributes:
+        data (pd.DataFrame): The vector data with 'x', 'y', and 'z' components.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        """Initialize a Vector object.
+
+        Args:
+            data (pd.DataFrame): The vector data with 'x', 'y', and 'z' components.
+        """
+        super().__init__(data)
+
+    def __call__(self, component: str) -> pd.Series:
+        """Return the specified component of the vector.
+
+        Args:
+            component (str): The component to return ('x', 'y', or 'z').
+
+        Returns:
+            pd.Series: The specified component of the vector.
+        """
+        return self.__getattr__(component)
+
+    def set_data(self, new: pd.DataFrame):
+        """Set new data for the vector.
+
+        Args:
+            new (pd.DataFrame): The new vector data.
+
+        Raises:
+            ValueError: If the new data doesn't have the required columns.
+        """
+        super().set_data(new)
+        required_columns = pd.Index(["x", "y", "z"])
+        if not isinstance(new.columns, pd.MultiIndex) and not required_columns.isin(new.columns).all():
+            raise ValueError(f"Required columns: {required_columns}\nProvided: {new.columns}")
         self._data = new
 
+    # @property
+    # def x(self) -> pd.Series:
+    #     return self.data['x']
+
+    # @property
+    # def y(self) -> pd.Series:
+    #     return self.data['y']
+
+    # @property
+    # def z(self) -> pd.Series:
+    #     return self.data['z']
+
     @property
-    def mag(self):
+    def mag(self) -> pd.Series:
+        """Calculate the magnitude of the vector.
+
+        Returns:
+            pd.Series: The magnitude of the vector.
+        """
         mag = self.data.loc[:, ["x", "y", "z"]]
-        assert mag.shape[1] == 3
-        # TOOD: test for skipna behavior in mag propagation.
-        #          Want to ensure we don't create valid data points when they don't exist.
-        mag = mag.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
+        mag = mag.pow(2).sum(axis=1, skipna=False).pow(0.5)
         mag.name = "mag"
         return mag
 
     @property
-    def magnitude(self):
-        r"""
-        Alias for `mag`.
+    def magnitude(self) -> pd.Series:
+        """Alias for `mag`.
+
+        Returns:
+            pd.Series: The magnitude of the vector.
         """
         return self.mag
 
     @property
-    def rho(self):
+    def rho(self) -> pd.Series:
+        """Calculate the magnitude of the vector in the xy-plane.
+
+        Returns:
+            pd.Series: The magnitude of the vector in the xy-plane.
+        """
         rho = self.data.loc[:, ["x", "y"]]
-        assert rho.shape[1] == 2
-        # TODO: test `skipna=False` behvior.
-        rho = rho.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
+        rho = rho.pow(2).sum(axis=1, skipna=False).pow(0.5)
         rho.name = "rho"
         return rho
 
     @property
-    def colat(self):
+    def colat(self) -> pd.Series:
+        """Calculate the colatitude of the vector.
+
+        Returns:
+            pd.Series: The colatitude of the vector in degrees.
+        """
         colat = np.rad2deg(np.arctan2(self.data.z, self.rho))
         colat.name = "colat"
         return colat
 
     @property
-    def longitude(self):
+    def longitude(self) -> pd.Series:
+        """Calculate the longitude of the vector.
+
+        Returns:
+            pd.Series: The longitude of the vector in degrees.
+        """
         lon = np.rad2deg(np.arctan2(self.data.y, self.data.x))
         lon.name = "longitude"
         return lon
 
     @property
-    def lon(self):
-        r"""
-        Sortcut for `self.longitude`.
+    def lon(self) -> pd.Series:
+        """Shortcut for `longitude`.
+
+        Returns:
+            pd.Series: The longitude of the vector in degrees.
         """
         return self.longitude
 
     @property
-    def r(self):
-        r"""
-        Shortcut to `mag` property.
+    def r(self) -> pd.Series:
+        """Shortcut to `mag` property.
 
-        Useful when thinking in spherical coordinates, not
-        magnitudes.
+        Useful when thinking in spherical coordinates, not magnitudes.
+
+        Returns:
+            pd.Series: The magnitude of the vector.
         """
         r = self.mag
         r.name = "r"
         return r
 
     @property
-    def cartesian(self):
-        r"""
-        Cartesian coordinates: (x, y, z).
+    def cartesian(self) -> pd.DataFrame:
+        """Return the Cartesian coordinates of the vector.
+
+        Returns:
+            pd.DataFrame: The Cartesian coordinates (x, y, z) of the vector.
         """
         return self.data.loc[:, ["x", "y", "z"]]
 
     @property
-    def unit_vector(self):
-        r"""
-        Cartesian unit vector.
+    def unit_vector(self) -> "Vector":
+        """Calculate the Cartesian unit vector.
+
+        Returns:
+            Vector: The unit vector.
         """
-        v = self.cartesian
-        m = self.mag
-        uv = v.divide(m, axis=0)
+        uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
         return Vector(uv)
 
     @property
-    def uv(self):
-        r"""
-        Shortcut to `unit_vector` property.
+    def uv(self) -> "Vector":
+        """Shortcut to `unit_vector` property.
+
+        Returns:
+            Vector: The unit vector.
         """
         return self.unit_vector
 
-    def project(self, other):
-        r"""
-        Project self onto `other`.
+    def project(self, other: Union["Vector", pd.DataFrame]) -> pd.DataFrame:
+        """Project self onto `other`.
+
+        Args:
+            other (Union[Vector, pd.DataFrame]): The vector to project onto.
+
+        Returns:
+            pd.DataFrame: The parallel and perpendicular components of the projection.
+
+        Raises:
+            NotImplementedError: If `other` is not a Vector or DataFrame.
         """
         if isinstance(other, Vector):
             other = other.uv.data
+        # elif isinstance(other, pd.DataFrame):
+        #     other = Vector(other).uv.data
         else:
-            msg = "`project` method needs algo development to use a `%s`."
-            raise NotImplementedError(msg % type(other))
+            raise NotImplementedError(f"Project method not implemented for {type(other)}")
 
+        # TODO: Verify math for projection with new other definition
         cart = self.cartesian
         par = cart.multiply(other, axis=1).sum(axis=1)
         per = (
@@ -140,48 +206,47 @@ class Vector(base.Base):
             .sum(axis=1)
             .pipe(np.sqrt)
         )
-        out = pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
+        return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
-        # print("",
-        #       "<Module>",
-        #       "<uv>", type(other), other,
-        #       "<cartesian>", type(cart), cart,
-        #       "<projected>", type(out), out,
-        #       "",
-        #       sep="\n")
+    def cos_theta(self, other: Union["Vector", pd.DataFrame]) -> pd.Series:
+        """Calculate the cosine of the angle between self and `other`.
 
-        return out
+        Args:
+            other (Union[Vector, pd.DataFrame]): The vector to calculate the angle with.
 
-    def cos_theta(self, other):
-        r"""
-        Project self onto `other`.
+        Returns:
+            pd.Series: The cosine of the angle between the vectors.
+
+        Raises:
+            NotImplementedError: If `other` is not a Vector or DataFrame.
         """
         if isinstance(other, Vector):
             other = other.uv.data
+        # elif isinstance(other, pd.DataFrame):
+        #     other = Vector(other).uv.data
         else:
-            msg = "`project` method needs algo development to use a `%s`."
-            raise NotImplementedError(msg % type(other))
+            raise NotImplementedError(f"cos_theta method not implemented for {type(other)}")
 
-        uv = self.uv
-        out = uv.multiply(other, axis=1).sum(axis=1)
-
-        # print("",
-        #       "<Module>",
-        #       "<other>", type(other), other,
-        #       "<uv>", type(uv), uv,
-        #       "<out>", type(out), out,
-        #       "",
-        #       sep="\n")
-
-        return out
+        return self.uv.multiply(other, axis=1).sum(axis=1)
 
 
 class BField(Vector):
-    @property
-    def pressure(self):
-        r"""Magnetic pressure or energy density in same units as thermal pressure.
+    """A class representing a magnetic field, inheriting from Vector."""
 
-            :math:`p_B = \frac{1}{2\mu_0} B^2`
+    @property
+    def pressure(self) -> pd.Series:
+        """Calculate the magnetic pressure or energy density.
+
+        Returns
+        -------
+        pd.Series
+            The magnetic pressure.
+        Notes
+        -----
+        The magnetic pressure is calculated using the equation:
+
+        .. math::
+            p_B = \frac{1}{2\mu_0} B^2
         """
         bsq = self.mag.pow(2.0)
         const = self.units.b ** 2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
@@ -190,8 +255,10 @@ class BField(Vector):
         return pb
 
     @property
-    def pb(self):
-        r"""
-        Shortcut to :py:meth:`pressure`.
+    def pb(self) -> pd.Series:
+        """Shortcut to `pressure` property.
+
+        Returns:
+            pd.Series: The magnetic pressure.
         """
         return self.pressure

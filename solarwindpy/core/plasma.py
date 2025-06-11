@@ -587,7 +587,10 @@ class Plasma(base.Base):
         #             pdb.set_trace()
 
         # Workaround for `skipna=False` bug. (20200814)
-        w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # Changed to new groupby method (20250611)
+        # pdb.set_trace()
+        w = w.T.groupby("S").sum().T.pow(0.5)
         #         w_is_finite = w.notna().all(axis=1, level="S")
         #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
         #         pdb.set_trace()

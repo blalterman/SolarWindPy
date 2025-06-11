@@ -17,7 +17,7 @@ from inspect import getfullargspec
 
 # from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
-from scipy.optimize.minpack import _wrap_func, _wrap_jac, _initialize_feasible
+from scipy.optimize._minpack_py import _wrap_func, _wrap_jac, _initialize_feasible
 from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
