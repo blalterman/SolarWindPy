@@ -103,6 +103,7 @@ class Core(ABC):
 
     def _init_constants(self) -> None:
         self._constants = uc.Constants()
+
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:
         """
@@ -138,6 +139,7 @@ class Core(ABC):
 
         slist = species[0].split("+") if len(species) == 1 else species
         return tuple(sorted(slist))
+    
     @abstractmethod
     def _clean_species_for_setting(self, *species: str) -> Tuple[str, ...]:
         if not species:
@@ -181,24 +183,24 @@ class Base(Core):
 
     def __init__(self, data: pd.DataFrame) -> None:
         super().__init__()
-        self._cache = {}
+        # self._cache = {}
         self.set_data(data)
 
-    def __getattr__(self, attr: str) -> Any:
-        if attr in self._cache:
-            return self._cache[attr]       
+    # def __getattr__(self, attr: str) -> Any:
+    #     if attr in self._cache:
+    #         return self._cache[attr]       
 
-        if hasattr(self._data, attr):
-            value = getattr(self._data, attr)
-            if callable(value):
-                def wrapped_method(*args, **kwargs):
-                    return value(*args, **kwargs)
-                self._cache[attr] = wrapped_method
-            else:
-                self._cache[attr] = value
-            return self._cache[attr]
+    #     if hasattr(self._data, attr):
+    #         value = getattr(self._data, attr)
+    #         if callable(value):
+    #             def wrapped_method(*args, **kwargs):
+    #                 return value(*args, **kwargs)
+    #             self._cache[attr] = wrapped_method
+    #         else:
+    #             self._cache[attr] = value
+    #         return self._cache[attr]
 
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
+    #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
      
         # try:
         #     out = getattr(self.data, attr)

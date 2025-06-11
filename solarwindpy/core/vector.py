@@ -227,7 +227,7 @@ class Vector(base.Base):
         else:
             raise NotImplementedError(f"cos_theta method not implemented for {type(other)}")
 
-        return self.uv.multiply(other, axis=1).sum(axis=1)
+        return self.uv.data.multiply(other, axis=1).sum(axis=1)
 
 
 class BField(Vector):

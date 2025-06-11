@@ -28,6 +28,7 @@ class Tensor(base.Base):
         """
         super().__init__(data)
         self._validate_data(data)
+        self._data = data
 
     def __call__(self, component: str) -> Union[pd.Series, pd.DataFrame]:
         """Access a specific component of the tensor.

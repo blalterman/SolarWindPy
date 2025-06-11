@@ -90,10 +90,11 @@ class VectorTestBase(QuantityTestBase):
         # print(self.data.iloc[:, :7], flush=True)
 
         v = self.data
+        ot = self.object_testing.data
         # print(v, file=sys.stdout)
-        pdt.assert_series_equal(v.x, self.object_testing.x)
-        pdt.assert_series_equal(v.y, self.object_testing.y)
-        pdt.assert_series_equal(v.z, self.object_testing.z)
+        pdt.assert_series_equal(v.x, ot.x)
+        pdt.assert_series_equal(v.y, ot.y)
+        pdt.assert_series_equal(v.z, ot.z)
 
     def test_mag(self):
         # print("test_mag")
@@ -369,9 +370,10 @@ class TestVelocityP2(base.P2Test, VelocityTestBase, base.SWEData):
 class TensorTestBase(QuantityTestBase):
     def test_components(self):
         t = self.data
-        pdt.assert_series_equal(t.par, self.object_testing.par)
-        pdt.assert_series_equal(t.per, self.object_testing.per)
-        pdt.assert_series_equal(t.scalar, self.object_testing.scalar)
+        ot = self.object_testing.data
+        pdt.assert_series_equal(t.par, ot.par)
+        pdt.assert_series_equal(t.per, ot.per)
+        pdt.assert_series_equal(t.scalar, ot.scalar)
 
 
 class ThermalSpeedTestBase(TensorTestBase):
