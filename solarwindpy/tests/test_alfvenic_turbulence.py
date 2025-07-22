@@ -90,7 +90,9 @@ class AlfvenicTrubulenceTestBase(ABC):
         rtot = r.sum(axis=1)
 
         vcom = (
-            v.multiply(r, axis=1, level="S").sum(axis=1, level="C").divide(rtot, axis=0)
+            v.multiply(r, axis=1, level="S").T.groupby(level="C").sum().T
+            # sum(axis=1, level="C")
+            .divide(rtot, axis=0)
         )
 
         coef = 1e-9 / (np.sqrt(constants.mu_0 * constants.m_p * 1e6) * 1e3)

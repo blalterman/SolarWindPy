@@ -33,5 +33,5 @@ if __name__ == "__main__":
     # tests or decrease the denominator.
     # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
 
-    verbose = 1
+    verbose = 2
     unittest.main(verbosity=verbose)
