@@ -78,7 +78,7 @@ sphinxcontrib-serializinghtml==1.1.5
 tables==3.6.1
 tabulate==0.8.9
 toml==0.10.2
-tornado==6.1
+tornado==6.5
 tqdm==4.61.0
 twine==3.4.1
 typed-ast==1.4.3
