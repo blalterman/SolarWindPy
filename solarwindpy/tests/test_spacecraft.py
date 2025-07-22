@@ -72,7 +72,7 @@ class TestBase(ABC):
     def test_position(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.position.columns)
+        pdt.assert_index_equal(cols, ot.position.data.columns)
         self.assertIsInstance(ot.position, vector.Vector)
         self.assertEqual(ot.position, ot.r)
         self.assertEqual(ot.position, ot.pos)
@@ -81,7 +81,7 @@ class TestBase(ABC):
     def test_velocity(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.velocity.columns)
+        pdt.assert_index_equal(cols, ot.velocity.data.columns)
         self.assertIsInstance(ot.velocity, vector.Vector)
         self.assertEqual(ot.velocity, ot.v)
         return ot
