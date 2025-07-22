@@ -64,7 +64,7 @@ requests==2.25.1
 requests-toolbelt==0.9.1
 rfc3986==1.5.0
 scipy==1.6.3
-setuptools==49.6.0.post20210108
+setuptools==78.1.1
 six==1.16.0
 snowballstemmer==2.1.0
 Sphinx==4.0.2
