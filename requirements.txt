@@ -60,7 +60,7 @@ pytz==2021.1
 PyYAML==5.4.1
 readme-renderer==27.0
 regex==2021.4.4
-requests==2.25.1
+requests==2.32.4
 requests-toolbelt==0.9.1
 rfc3986==1.5.0
 scipy==1.6.3
