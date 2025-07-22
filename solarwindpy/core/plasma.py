@@ -735,7 +735,8 @@ class Plasma(base.Base):
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            w = w.sum(axis=1, level="C")
+            # w = w.sum(axis=1, level="C")
+            w = w.T.groupby(level="C").sum().T
 
         return w
 
@@ -771,7 +772,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.sum(axis=1, level="C")
+            pth = pth.T.groupby("S").sum().T
             # pth["S"] = species[0]
             # pth = pth.set_index("S", append=True).unstack()
             # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -927,7 +928,7 @@ class Plasma(base.Base):
                 m2q = np.sqrt(
                     self.constants.m_in_mp[s] / self.constants.charge_states[s]
                 )
-                v = v.multiply(m2q)
+                v = v.data.multiply(m2q)
                 v = vector.Vector(v)
 
         elif project_m2q:
@@ -950,7 +951,7 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                rv = v.multiply(rhos, axis=1, level="S").sum(axis=1, level="C")
+                rv = v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T #sum(axis=1, level="C")
                 v = rv.divide(rhos.sum(axis=1), axis=0)
                 v = vector.Vector(v)
 
@@ -1193,7 +1194,9 @@ species: {}
 
         bsq = self.bfield.cartesian.pow(2.0).sum(axis=1)
 
-        pth = self.pth(*species).drop("scalar", axis=1)
+        pth = self.pth(*species)
+        pth = pth.drop("scalar", axis=1)
+
         sum_coeff = pd.Series({"per": 1, "par": -1})
         dp = pth.multiply(sum_coeff, axis=1, level="C" if multi_species else None)
 
@@ -1412,7 +1415,7 @@ species: {}
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]}, axis=1, sort=True)
+        w = pd.concat({s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True)
         wab = w.pow(2.0).sum(axis=1).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).magnitude * units.dv
@@ -1603,8 +1606,8 @@ species: {}
         beam = beam[0]
         core = core[0]
 
-        n1 = self.xs(("n", "", core), axis=1)
-        n2 = self.xs(("n", "", beam), axis=1)
+        n1 = self.data.xs(("n", "", core), axis=1)
+        n2 = self.data.xs(("n", "", beam), axis=1)
 
         w = self.w(beam, core).drop("scalar", axis=1, level="C")
         w1_par = w.par.loc[:, core]
@@ -1700,7 +1703,8 @@ species: {}
             )
             niqi = ni.multiply(qi, axis=1, level="S")
             ne = niqi.sum(axis=1)
-            niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
+            # niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
+            niqivi = vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T #sum(axis=1, level="C")
 
         ve = niqivi.divide(ne, axis=0)
 

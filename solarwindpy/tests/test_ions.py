@@ -329,7 +329,7 @@ if __name__ == "__main__":
 
     try:
         run_this_test = None
-        run_this_test = "TestIonA"
+        run_this_test = "TestIonP2"
         unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
 
     except (  # noqa: F841

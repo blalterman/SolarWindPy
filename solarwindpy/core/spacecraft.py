@@ -137,7 +137,7 @@ class Spacecraft(base.Base):
     def distance2sun(self):
         r"""Radial distance to Sun in meters.
         """
-        pos = self.position
+        pos = self.position.data
         frame = self.frame
 
         if frame == "GSE":

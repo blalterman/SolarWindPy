@@ -215,7 +215,7 @@ class Ion(base.Base):
             Thermal pressure.
         """
         rho = self.rho * self.units.rho
-        w = self.w.multiply(self.units.w)
+        w = self.w.data.multiply(self.units.w)
         pth = (0.5 / self.units.pth) * w.pow(2).multiply(rho, axis=0)
         pth.name = "pth"
         return pth
