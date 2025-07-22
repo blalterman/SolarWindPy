@@ -801,7 +801,7 @@ class Plasma(base.Base):
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            temp = temp.sum(axis=1, level="C")
+            temp = temp.T.groupby("C").sum().T
             # temp["S"] = species[0]
             # temp = temp.set_index("S", append=True).unstack()
             # temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -1039,7 +1039,7 @@ species: {}
                 names="S",
                 sort=True,
             )
-            dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
+            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum().T
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
             pdv = dvsq_rho_i.sum(axis=1)
 

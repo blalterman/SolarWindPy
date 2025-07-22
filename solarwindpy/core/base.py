@@ -72,8 +72,11 @@ class Core(ABC):
         if not isinstance(other, type(self)):
             return False
         try:
-            eq_data = self.data == other.data
-            return eq_data.all().all()
+            # eq_data = self.data.equals() == other.data
+            # return eq_data.all().all()
+            eq_data = self.data.equals(other.data)
+            return eq_data
+        
         except ValueError as e:
             if "Can only compare identically-labeled DataFrame objects" in str(e):
                 return False
