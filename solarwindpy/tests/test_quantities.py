@@ -7,8 +7,7 @@ import pytest
 import pandas as pd
 import pandas.testing as pdt
 
-from unittest import TestCase
-from abc import ABC, abstractproperty
+from abc import ABC
 from scipy import constants
 
 # import test_base as base
@@ -18,6 +17,47 @@ from solarwindpy import vector
 from solarwindpy import tensor
 
 pd.set_option("mode.chained_assignment", "raise")
+
+
+@pytest.fixture(scope="module")
+def quantity_subclass_data():
+    data = base.TestData().plasma_data
+    coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
+    scalar = data.w.pow(2).multiply(coeff, axis=1, level="C")
+    scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
+    cols = pd.MultiIndex.from_tuples(
+        scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
+        names=data.columns.names,
+    )
+    scalar.columns = cols
+    scalar.name = "scalar"
+    data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
+    return data
+
+
+@pytest.fixture(scope="class")
+def species(request):
+    return request.param
+
+
+@pytest.fixture(scope="class")
+def velocity_setup(request, species):
+    data = base.TestData().plasma_data.sort_index(axis=1)
+    vdata = data.v.xs(species, axis=1, level="S")
+    request.cls.object_testing = vector.Vector(vdata)
+    request.cls.data = vdata
+
+
+@pytest.fixture(scope="class")
+def thermal_setup(request, species):
+    data = base.TestData().plasma_data.sort_index(axis=1)
+    tdata = data.w.xs(species, axis=1, level="S")
+    coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
+    scalar = tdata.pow(2).multiply(coeff, axis=1, level="C").sum(axis=1).pipe(np.sqrt)
+    scalar.name = "scalar"
+    tdata = pd.concat([tdata, scalar], axis=1).sort_index(axis=1)
+    request.cls.object_testing = tensor.Tensor(tdata)
+    request.cls.data = tdata
 
 
 class QuantityTestBase(ABC):
@@ -32,7 +72,7 @@ class QuantityTestBase(ABC):
         print_inline_debug = False
         object_testing = self.object_testing
         # ID should be equal.
-        self.assertEqual(object_testing, object_testing)
+        assert object_testing == object_testing
         # Data and type should be equal.
         new_object = object_testing.__class__(object_testing.data)
 
@@ -51,15 +91,13 @@ class QuantityTestBase(ABC):
                 sep="\n",
             )
 
-        self.assertEqual(object_testing, new_object)
+        assert object_testing == new_object
 
     def test_neq(self):
         object_testing = self.object_testing
         # Data isn't equal
 
-        self.assertNotEqual(
-            object_testing, object_testing.__class__(object_testing.data * 4)
-        )
+        assert object_testing != object_testing.__class__(object_testing.data * 4)
         # Type isn't equal
         for other in (
             [],
@@ -68,11 +106,11 @@ class QuantityTestBase(ABC):
             pd.Series(dtype=np.float64),
             pd.DataFrame(dtype=np.float64),
         ):
-            self.assertNotEqual(object_testing, other)
+            assert object_testing != other
 
     def test_empty_data_catch(self):
-        with self.assertRaisesRegex(
-            ValueError, "You can't set an object with empty data."
+        with pytest.raises(
+            ValueError, match="You can't set an object with empty data."
         ):
             self.object_testing.__class__(pd.DataFrame())
 
@@ -164,9 +202,9 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_frame_equal(
             self.object_testing.uv.data, self.object_testing.unit_vector.data
         )
-        self.assertEqual(uv, self.object_testing.unit_vector)
-        self.assertEqual(uv, self.object_testing.uv)
-        self.assertEqual(self.object_testing.unit_vector, self.object_testing.uv)
+        assert uv == self.object_testing.unit_vector
+        assert uv == self.object_testing.uv
+        assert self.object_testing.unit_vector == self.object_testing.uv
 
     def test_project(self):
         b = (
@@ -219,7 +257,7 @@ class VectorTestBase(QuantityTestBase):
         )
 
         msg = "method not implemented"
-        with self.assertRaisesRegex(NotImplementedError, msg):
+        with pytest.raises(NotImplementedError, match=msg):
             self.object_testing.project(b.data)
 
     def test_cos_theta(self):
@@ -267,7 +305,7 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(par, self.object_testing.cos_theta(vuv))
 
         msg = "method not implemented"
-        with self.assertRaisesRegex(NotImplementedError, msg):
+        with pytest.raises(NotImplementedError, match=msg):
             self.object_testing.project(b.data)
 
 
@@ -334,29 +372,12 @@ class TestBField(VectorTestBase, base.SWEData):
 
 
 class VelocityTestBase(VectorTestBase):
-    @classmethod
-    def set_object_testing(cls):
-        # print("VelocityTestBase.set_object_testing", flush=True)
-        data = cls.data.v.xs(cls().species, axis=1, level="S")
-        v = vector.Vector(data)
-        cls.object_testing = v
-        cls.data = data
-        # print("Done with VelocityTestBase.set_object_testing", flush=True)
-
-    @abstractproperty
-    def species(self):
-        pass
-
-
-class TestVelocityAlpha(base.AlphaTest, VelocityTestBase, base.SWEData):
     pass
 
 
-class TestVelocityP1(base.P1Test, VelocityTestBase, base.SWEData):
-    pass
-
-
-class TestVelocityP2(base.P2Test, VelocityTestBase, base.SWEData):
+@pytest.mark.parametrize("species", ["a", "p1", "p2"], indirect=True)
+@pytest.mark.usefixtures("velocity_setup")
+class TestVelocity(VelocityTestBase):
     pass
 
 
@@ -373,139 +394,87 @@ class TensorTestBase(QuantityTestBase):
 
 
 class ThermalSpeedTestBase(TensorTestBase):
-    @classmethod
-    def set_object_testing(cls):
-        # print(cls.__class__, "set_object_testing", flush=True)
-        # print("Data", cls.data, sep="\n")
-        data = cls.data.w.xs(cls().species, axis=1, level="S")
-        # print("Species", data, sep="\n")
-        coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
-        scalar = (
-            data.pow(2).multiply(coeff, axis=1, level="C").sum(axis=1).pipe(np.sqrt)
-        )
-        scalar.name = "scalar"
-        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
-        # print("With Scalar", sep="\n")
-        w = tensor.Tensor(data)
-        cls.object_testing = w
-        cls.data = data
-        # print("Done with ThermalSpeedTestBase.set_object_testing", flush=True)
-
-    @abstractproperty
-    def species(self):
-        pass
-
-
-class TestThermalSpeedAlpha(base.AlphaTest, ThermalSpeedTestBase, base.SWEData):
     pass
 
 
-class TestThermalSpeedP1(base.P1Test, ThermalSpeedTestBase, base.SWEData):
-    pass
-
-
-class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
+@pytest.mark.parametrize("species", ["a", "p1", "p2"], indirect=True)
+@pytest.mark.usefixtures("thermal_setup")
+class TestThermalSpeed(ThermalSpeedTestBase):
     pass
 
 
 # @unittest.skip
-class TestQuantitySubclassEquality(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        r"""
-        Override `setUpClass` so that it doesn't call `set_object_testing`.
-        """
-        # print("TestQuantitySubclassEquality.setUpClass", flush=True)
-        #         super(TestQuantitySubclassEquality, cls).setUpClass()
-        #         # print(cls.data.iloc[:, :7])
-        #         # print(cls.data.columns.values)
-        #         pdb.set_trace()
-        data = base.TestData().plasma_data
-        #         data = cls.data.xs("", axis=1, level="N")
-        # print(data.w)
-        # print()
-        coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
-        scalar = data.w.pow(2).multiply(coeff, axis=1, level="C")
-        # print(scalar)
-        # print()
+def test_quantity_subclass_v(quantity_subclass_data):
+    data = quantity_subclass_data.v.xs("a", axis=1, level="S")
+    va0 = vector.Vector(data)
+    va1 = vector.Vector(data)
+    assert va0 == va0
+    assert va0 == va1
 
-        scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
-        # scalar = scalar.sum(axis=1, level="S").pipe(np.sqrt)
 
-        cols = pd.MultiIndex.from_tuples(
-            scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
-            names=data.columns.names,
-        )
-        scalar.columns = cols
-        # print(scalar)
-        # print()
-        scalar.name = "scalar"
-        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
-        # print(data)
-        # print()
-        cls.data = data
+def test_quantity_subclass_b(quantity_subclass_data):
+    data = quantity_subclass_data.b.xs("", axis=1, level="S")
+    b0 = vector.BField(data)
+    b1 = vector.BField(data)
+    assert b0 == b0
+    assert b0 == b1
 
-    def test_v(self):
-        data = self.data.v.xs("a", axis=1, level="S")
-        va0 = vector.Vector(data)
-        va1 = vector.Vector(data)
-        self.assertEqual(va0, va0)
-        self.assertEqual(va0, va1)
 
-    def test_b(self):
-        data = self.data.b.xs("", axis=1, level="S")
-        b0 = vector.BField(data)
-        b1 = vector.BField(data)
-        self.assertEqual(b0, b0)
-        self.assertEqual(b0, b1)
+def test_quantity_subclass_b_v(quantity_subclass_data):
+    b = vector.BField(quantity_subclass_data.b.xs("", axis=1, level="S"))
+    v = vector.Vector(quantity_subclass_data.v.xs("p2", axis=1, level="S"))
+    assert b != v
 
-    def test_b_v(self):
-        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
-        v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(b, v)
 
-    def test_b_w(self):
-        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
-        w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
-        self.assertNotEqual(b, w)
+def test_quantity_subclass_b_w(quantity_subclass_data):
+    b = vector.BField(quantity_subclass_data.b.xs("", axis=1, level="S"))
+    w = tensor.Tensor(quantity_subclass_data.w.xs("a", axis=1, level="S"))
+    assert b != w
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
-    def test_gse(self):
-        data = self.data.gse.xs("", axis=1, level="S")
-        gse0 = vector.Vector(data)
-        gse1 = vector.Vector(data)
-        self.assertEqual(gse0, gse0)
-        self.assertEqual(gse0, gse1)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
-    def test_b_gse(self):
-        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
-        self.assertNotEqual(b, gse)
+@pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
+def test_quantity_subclass_gse(quantity_subclass_data):
+    data = quantity_subclass_data.gse.xs("", axis=1, level="S")
+    gse0 = vector.Vector(data)
+    gse1 = vector.Vector(data)
+    assert gse0 == gse0
+    assert gse0 == gse1
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
-    def test_gse_v(self):
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
-        v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(gse, v)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
-    def test_gse_w(self):
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
-        w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
-        self.assertNotEqual(gse, w)
+@pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
+def test_quantity_subclass_b_gse(quantity_subclass_data):
+    b = vector.BField(quantity_subclass_data.b.xs("", axis=1, level="S"))
+    gse = vector.Vector(quantity_subclass_data.gse.xs("", axis=1, level="S"))
+    assert b != gse
 
-    def test_va_vp1(self):
-        va = vector.Vector(self.data.v.xs("a", axis=1, level="S"))
-        vp1 = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
-        self.assertNotEqual(va, vp1)
 
-    def test_v_w(self):
-        v = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
-        w = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
-        self.assertNotEqual(v, w)
+@pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
+def test_quantity_subclass_gse_v(quantity_subclass_data):
+    gse = vector.Vector(quantity_subclass_data.gse.xs("", axis=1, level="S"))
+    v = vector.Vector(quantity_subclass_data.v.xs("p2", axis=1, level="S"))
+    assert gse != v
 
-    def test_wp1_wp2(self):
-        wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
-        wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(wp1, wp2)
+
+@pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
+def test_quantity_subclass_gse_w(quantity_subclass_data):
+    gse = vector.Vector(quantity_subclass_data.gse.xs("", axis=1, level="S"))
+    w = tensor.Tensor(quantity_subclass_data.w.xs("a", axis=1, level="S"))
+    assert gse != w
+
+
+def test_quantity_subclass_va_vp1(quantity_subclass_data):
+    va = vector.Vector(quantity_subclass_data.v.xs("a", axis=1, level="S"))
+    vp1 = vector.Vector(quantity_subclass_data.v.xs("p1", axis=1, level="S"))
+    assert va != vp1
+
+
+def test_quantity_subclass_v_w(quantity_subclass_data):
+    v = vector.Vector(quantity_subclass_data.v.xs("p1", axis=1, level="S"))
+    w = tensor.Tensor(quantity_subclass_data.w.xs("p1", axis=1, level="S"))
+    assert v != w
+
+
+def test_quantity_subclass_wp1_wp2(quantity_subclass_data):
+    wp1 = tensor.Tensor(quantity_subclass_data.w.xs("p1", axis=1, level="S"))
+    wp2 = tensor.Tensor(quantity_subclass_data.w.xs("p2", axis=1, level="S"))
+    assert wp1 != wp2
