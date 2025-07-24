@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-r"""Test :py:class:`~solarwindpy.core.ions.Ion`.
 """
-import pdb
-
-# import re as re
+Tests for the :class:`Ion` object.
+"""
 import numpy as np
 import pandas as pd
-import unittest
 
 # import sys
 # import itertools
@@ -319,29 +316,3 @@ class TestIonSpecificsOptions(base.TestData):
         i0 = ions.Ion(self.data, s0)
         i1 = ions.Ion(self.data, s1)
         self.assertNotEqual(i0, i1)
-
-
-if __name__ == "__main__":
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
-
-    try:
-        run_this_test = None
-        run_this_test = "TestIonP2"
-        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
-
-    except (  # noqa: F841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
-        import sys
-        import traceback as tb
-
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])

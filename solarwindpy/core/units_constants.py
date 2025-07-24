@@ -15,7 +15,6 @@ from scipy.constants import physical_constants
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
 _misc_constants = {
     "e0": constants.epsilon_0,
