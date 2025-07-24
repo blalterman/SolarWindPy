@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-r"""Test :py:class:`~solarwindpy.core.vector.Vector` and :py:class:`~solarwindpy.core.tensor.Tensor`.
 """
-import pdb
-
-# import re as re
+Tests for Vector and Tensor objects.
+"""
 import numpy as np
+import pytest
 import pandas as pd
-import unittest
-import sys
 import pandas.testing as pdt
 
 from unittest import TestCase
@@ -61,8 +58,7 @@ class QuantityTestBase(ABC):
         # Data isn't equal
 
         self.assertNotEqual(
-            object_testing, 
-            object_testing.__class__(object_testing.data * 4)
+            object_testing, object_testing.__class__(object_testing.data * 4)
         )
         # Type isn't equal
         for other in (
@@ -435,7 +431,7 @@ class TestQuantitySubclassEquality(TestCase):
 
         scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
         # scalar = scalar.sum(axis=1, level="S").pipe(np.sqrt)
-        
+
         cols = pd.MultiIndex.from_tuples(
             scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
             names=data.columns.names,
@@ -473,7 +469,7 @@ class TestQuantitySubclassEquality(TestCase):
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
         self.assertNotEqual(b, w)
 
-    @unittest.skip("Need to update with new `spacecraft` position vectors")
+    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse(self):
         data = self.data.gse.xs("", axis=1, level="S")
         gse0 = vector.Vector(data)
@@ -481,19 +477,19 @@ class TestQuantitySubclassEquality(TestCase):
         self.assertEqual(gse0, gse0)
         self.assertEqual(gse0, gse1)
 
-    @unittest.skip("Need to update with new `spacecraft` position vectors")
+    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_b_gse(self):
         b = vector.BField(self.data.b.xs("", axis=1, level="S"))
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
         self.assertNotEqual(b, gse)
 
-    @unittest.skip("Need to update with new `spacecraft` position vectors")
+    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_v(self):
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
         v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
         self.assertNotEqual(gse, v)
 
-    @unittest.skip("Need to update with new `spacecraft` position vectors")
+    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_w(self):
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
@@ -513,29 +509,3 @@ class TestQuantitySubclassEquality(TestCase):
         wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
         wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
         self.assertNotEqual(wp1, wp2)
-
-
-if __name__ == "__main__":
-
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    sys.setrecursionlimit(sys.getrecursionlimit() // 25)
-
-    try:
-        run_this_test = "TestBField"
-        run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test)
-
-    except (  # noqa: F841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
-        import traceback as tb
-
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])
