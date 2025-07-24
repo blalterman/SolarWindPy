@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-r"""Contais :py:class:`~solarwindpy.core.spacecraft.Spacecraft` class.
+"""Spacecraft class handling vector data.
 
-Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` objects.
+This class inherits from :class:`solarwindpy.core.base.Base` and
+contains :class:`solarwindpy.core.vector.Vector` objects.
 """
 
 import pdb  # noqa: F401
@@ -85,14 +86,12 @@ class Spacecraft(base.Base):
 
     @property
     def frame(self):
-        r"""Spacecraft's frame of reference (e.g. GSE, HCI, etc.).
-        """
+        r"""Spacecraft's frame of reference (e.g. GSE, HCI, etc.)."""
         return self._frame
 
     @property
     def name(self):
-        r"""Spacecraft name (e.g. WIND, PSP)
-        """
+        r"""Spacecraft name (e.g. WIND, PSP)"""
         return self._name
 
     @property
@@ -107,8 +106,7 @@ class Spacecraft(base.Base):
 
     @property
     def r(self):
-        r"""Shortcut to :py:meth:`position`.
-        """
+        r"""Shortcut to :py:meth:`position`."""
         return self.position
 
     @property
@@ -126,8 +124,7 @@ class Spacecraft(base.Base):
 
     @property
     def carrington(self):
-        r"""Carrington latitude and longitude.
-        """
+        r"""Carrington latitude and longitude."""
         try:
             return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
         except KeyError as e:  # noqa: F841
@@ -135,8 +132,7 @@ class Spacecraft(base.Base):
 
     @property
     def distance2sun(self):
-        r"""Radial distance to Sun in meters.
-        """
+        r"""Radial distance to Sun in meters."""
         pos = self.position.data
         frame = self.frame
 
