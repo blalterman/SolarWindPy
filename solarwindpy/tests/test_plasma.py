@@ -26,23 +26,7 @@ pd.set_option("mode.chained_assignment", "raise")
 
 
 class PlasmaTestBase(ABC):
-    @classmethod
-    def set_object_testing(cls):
-        # print(cls.__class__, "set_object_testing", flush=True)
-        # print("Data", cls.data, sep="\n")
-        data = cls.data
-        plas = plasma.Plasma(data, *cls().species.split("+"))
-
-        par = data.w.par.pow(2)
-        per = data.w.per.pow(2)
-        scalar = ((2.0 * per) + par).multiply(1.0 / 3.0).pipe(np.sqrt)
-        cols = scalar.columns.to_series().apply(lambda x: ("w", "scalar", x))
-        scalar.columns = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
-        data = pd.concat([data, scalar], axis=1, sort=True)
-
-        cls.object_testing = plas
-        cls.data = data
-        # print("Done with", cls.__class__, flush=True)
+    pass
 
     @abstractproperty
     def species(self):
@@ -1375,7 +1359,6 @@ class PlasmaTestBase(ABC):
                 ot.nc(sa, sb)
 
     def test_nc_with_spacecraft(self):
-
         if len(self.stuple) == 1:
             # We only test plasmas w/ > 1 species.
             return None
@@ -1457,7 +1440,6 @@ class PlasmaTestBase(ABC):
             sa, sb = combo
 
             for sc, tau_exp in zip((Wind, PSP), (tau_exp_Wind, tau_exp_PSP)):
-
                 ot.set_spacecraft(sc)
 
                 nuab = ot.nuc(sa, sb, both_species=False)
@@ -1527,7 +1509,6 @@ class PlasmaTestBase(ABC):
                 self.object_testing.estimate_electrons()
 
         else:
-
             qi = self.charge_states
             ni = self.data.n.xs("", axis=1, level="C").loc[:, list(stuple)]
             niqi = ni.multiply(qi, axis=1, level="S")
@@ -1677,7 +1658,6 @@ class PlasmaTestBase(ABC):
 
         ot = self.object_testing
         for combo in self.species_combinations:
-
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
@@ -1777,7 +1757,6 @@ class PlasmaTestBase(ABC):
                 ot.pdynamic(",".join(combo), scom)
 
     def test_pdynamic_with_m2q_projection(self):
-
         slist = list(self.stuple)
 
         if len(slist) == 1:
@@ -2044,7 +2023,6 @@ class PlasmaTestBase(ABC):
             self.assertEqual(alf_turb, built)
 
         elif ns == 2:
-
             # Check CoM velocity case.
             vcom = (
                 v.multiply(r, axis=1, level="S")
@@ -2101,7 +2079,6 @@ class PlasmaTestBase(ABC):
             self.assertEqual(alf_turb, built)
 
         elif ns == 3:
-
             # Check CoM velocity case.
             vcom = (
                 v.multiply(r, axis=1, level="S")
