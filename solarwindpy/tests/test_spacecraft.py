@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pandas.testing as pdt
 from scipy import constants
-from unittest import TestCase
-from abc import ABC, abstractclassmethod, abstractproperty
+import pytest
+from abc import ABC, abstractmethod, abstractproperty
 
 # import test_base as base
 from solarwindpy.tests import test_base as base
@@ -20,7 +20,7 @@ pd.set_option("mode.chained_assignment", "raise")
 
 class TestBase(ABC):
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         data = base.TestData()
         #         pdb.set_trace()
         cls.data = data.spacecraft_data
@@ -56,7 +56,8 @@ class TestBase(ABC):
     #         del cls.spacecraft_data
     #         cls.set_object_testing()
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def set_object_testing(cls):
         pass
 
@@ -72,17 +73,17 @@ class TestBase(ABC):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
         pdt.assert_index_equal(cols, ot.position.data.columns)
-        self.assertIsInstance(ot.position, vector.Vector)
-        self.assertEqual(ot.position, ot.r)
-        self.assertEqual(ot.position, ot.pos)
+        assert isinstance(ot.position, vector.Vector)
+        assert ot.position == ot.r
+        assert ot.position == ot.pos
         return ot
 
     def test_velocity(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
         pdt.assert_index_equal(cols, ot.velocity.data.columns)
-        self.assertIsInstance(ot.velocity, vector.Vector)
-        self.assertEqual(ot.velocity, ot.v)
+        assert isinstance(ot.velocity, vector.Vector)
+        assert ot.velocity == ot.v
         return ot
 
     def test_data(self):
@@ -91,11 +92,11 @@ class TestBase(ABC):
 
     def test_name(self):
         ot = self.object_testing
-        self.assertEqual(self.name, ot.name)
+        assert self.name == ot.name
 
     def test_frame(self):
         ot = self.object_testing
-        self.assertEqual(self.frame, ot.frame)
+        assert self.frame == ot.frame
 
     def test_distance2sun(self):
         ot = self.object_testing
@@ -129,7 +130,7 @@ class TestBase(ABC):
         pdt.assert_series_equal(dist, ot.distance2sun)
 
 
-class TestWind(TestBase, TestCase):
+class TestWind(TestBase):
     @classmethod
     def set_object_testing(cls):
         data = cls.data.xs("gse", axis=1, level="M")
@@ -156,17 +157,17 @@ class TestWind(TestBase, TestCase):
         pdt.assert_frame_equal(pos, ot.position.data)
 
     def test_velocity(self):
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             self.object_testing.velocity
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             self.object_testing.v
 
     def test_carrington(self):
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             self.object_testing.carrington
 
 
-class TestPSP(TestBase, TestCase):
+class TestPSP(TestBase):
     @classmethod
     def set_object_testing(cls):
         p = cls.data.xs("pos_HCI", axis=1, level="M")
@@ -207,6 +208,6 @@ class TestPSP(TestBase, TestCase):
         carr = self.data.xs("carr", axis=1, level="M")
 
         ot = self.object_testing
-        self.assertIsInstance(ot.carrington, pd.DataFrame)
+        assert isinstance(ot.carrington, pd.DataFrame)
         pdt.assert_index_equal(cols, ot.carrington.columns)
         pdt.assert_frame_equal(carr, ot.carrington)
