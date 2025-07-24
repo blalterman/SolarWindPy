@@ -1,6 +1,5 @@
 __all__ = ["BetaRPlot"]
 
-import pdb  # noqa: F401
 
 import solarwindpy as swp
 

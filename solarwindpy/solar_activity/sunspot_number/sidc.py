@@ -7,7 +7,6 @@ Available SSN listed in :py:class:`SIDC_ID`. Descriptions are available at the S
 website. Per the website, standard error is std/sqrt(n_obs) for each SSN value.
 """
 
-import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 import matplotlib as mpl

@@ -1,6 +1,5 @@
 __all__ = ["ElementalAbundance"]
 
-import pdb  # noqa: F401
 import logging
 from pathlib import Path
 from . import base

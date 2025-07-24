@@ -5,7 +5,6 @@ r"""Extract information from :py:class:`solarwindpy.fitufunctions.FitFunction`
 and render information in TeX format. Primary target is `matplotlib` annotation.
 """
 
-import pdb  # noqa: F401
 import re
 import numpy as np
 from numbers import Number

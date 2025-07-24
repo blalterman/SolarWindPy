@@ -36,18 +36,11 @@ import itertools
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 
-try:
-    from . import base
-    from . import vector
-    from . import ions
-    from . import spacecraft
-    from . import alfvenic_turbulence as alf_turb
-except ImportError:
-    import base
-    import vector
-    import ions
-    import spacecraft
-    import alfvenic_turbulence as alf_turb
+from . import alfvenic_turbulence as alf_turb
+from . import base
+from . import ions
+from . import spacecraft
+from . import vector
 
 
 class Plasma(base.Base):

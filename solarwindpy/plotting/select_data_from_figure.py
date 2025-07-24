@@ -1,5 +1,4 @@
 __all__ = ["SelectFromPlot2D"]
-import pdb  # noqa: F401
 import logging
 
 import numpy as np
@@ -274,9 +273,9 @@ y : ({self.ax.yaxis.get_label().get_text()}).
         x = data.loc[:, "x"]
         y = data.loc[:, "y"]
         if self.plotter.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.plotter.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         kwargs = mpl.cbook.normalize_kwargs(
             kwargs, mpl.collections.PatchCollection._alias_map

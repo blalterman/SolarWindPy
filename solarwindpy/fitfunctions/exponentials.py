@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`Exponential` and similar `FitFunction` subclasses.
-"""
-import pdb  # noqa: F401
+r""":py:mod:`Exponential` and similar `FitFunction` subclasses."""
 import numpy as np
 
 from numbers import Number
@@ -119,8 +117,7 @@ class ExponentialCDF(FitFunction):
 
     @property
     def y0(self):
-        r"""Amplitude of the CDF.
-        """
+        r"""Amplitude of the CDF."""
         return self._y0
 
     def set_y0(self, new):

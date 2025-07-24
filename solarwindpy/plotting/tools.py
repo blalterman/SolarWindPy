@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.plotting` helper functions.
-"""
+r""":py:mod:`~solarwindpy.plotting` helper functions."""
 
-import pdb  # noqa: F401
 import logging
 import numpy as np
 import matplotlib as mpl

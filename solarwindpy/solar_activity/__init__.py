@@ -6,7 +6,6 @@ Inclues utilities for downloading and analyzing indices from various sources.
 
 __all__ = ["sunspot_number", "ssn", "lisird", "plots"]
 
-import pdb  # noqa: F401
 import pandas as pd
 
 from . import sunspot_number  # noqa: F401
@@ -17,8 +16,7 @@ ssn = sunspot_number
 
 
 def get_all_indices():
-    r"""Convenience function to collect Lyman-alpha, CA-K, F10.7, and M13 SSN data.
-    """
+    r"""Convenience function to collect Lyman-alpha, CA-K, F10.7, and M13 SSN data."""
     Lalpha = lisird.lisird.LISIRD("Lalpha")
     CaK = lisird.lisird.LISIRD("CaK")
     #     f107 = lisird.lisird.LISIRD("f107-penticton")

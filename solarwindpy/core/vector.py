@@ -9,10 +9,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-try:
-    from . import base
-except ImportError:
-    import base
+from . import base
 
 
 class Vector(base.Base):
