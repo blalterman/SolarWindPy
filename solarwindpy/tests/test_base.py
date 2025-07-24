@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from unittest import TestCase
+import pytest
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -64,12 +65,11 @@ class TestData(object):
         self._plasma_data = test_plasma
 
 
-class SWEData(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        data = TestData()
-        cls.data = data.plasma_data.sort_index(axis=1)
-        cls.set_object_testing()
+@pytest.mark.usefixtures("swe_data")
+class SWEData:
+    """Mixin providing plasma data for test classes."""
+
+    pass
 
 
 class AlphaTest(object):

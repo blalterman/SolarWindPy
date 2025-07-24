@@ -15,6 +15,7 @@ import pandas as pd
 import pandas.testing as pdt
 
 from abc import ABC, abstractproperty
+from unittest import TestCase
 
 # from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
 # from unittest import TestCase
@@ -35,7 +36,7 @@ from solarwindpy import ions
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class IonTestBase(ABC):
+class IonTestBase(ABC, TestCase):
     @classmethod
     def set_object_testing(cls):
         # print(cls.__class__, "set_object_testing", flush=True)
@@ -195,7 +196,7 @@ class TestIonP2(base.P2Test, IonTestBase, base.SWEData):
     pass
 
 
-class TestIonSpecificsOptions(base.TestData):
+class TestIonSpecificsOptions(TestCase):
     @classmethod
     def setUpClass(cls):
         r"""
@@ -203,10 +204,8 @@ class TestIonSpecificsOptions(base.TestData):
         doesn't rely on `object_testing`.
         """
         # print("SWEData.setUpClass", flush=True)
-        super(TestIonSpecificsOptions, cls).setUpClass()
-        # print(cls.data.iloc[:, :7])
-        # print(cls.data.columns.values)
-        cls.data = cls.data.xs("", axis=1, level="N")
+        data = base.TestData().plasma_data
+        cls.data = data.xs("", axis=1, level="N")
 
     #     def test_init_with_species(self):
     #         species = "a"

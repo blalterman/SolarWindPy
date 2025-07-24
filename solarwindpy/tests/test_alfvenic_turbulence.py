@@ -10,6 +10,7 @@ import pandas as pd
 import pandas.testing as pdt
 
 from abc import ABC, abstractproperty
+from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
@@ -22,7 +23,7 @@ from solarwindpy import alfvenic_turbulence as turb
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class AlfvenicTrubulenceTestBase(ABC):
+class AlfvenicTrubulenceTestBase(ABC, TestCase):
     #    def setUp(self):
     #        self.object_testing.set_agg("mean")
     #        self.object_testing.update_rolling(window=2,
