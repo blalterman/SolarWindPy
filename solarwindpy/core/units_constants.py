@@ -4,7 +4,6 @@
 All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
 """
 
-import pdb  # noqa: F401
 import pandas as pd
 
 from scipy import constants
@@ -122,8 +121,7 @@ class Constants(object):
 
     @property
     def m_amu(self):
-        r"""Masses in amu.
-        """
+        r"""Masses in amu."""
         return pd.Series(_m_amu)
 
     @property

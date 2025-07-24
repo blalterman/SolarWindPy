@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-"""Tools for calculating Alfvenic turbulence quantities derived from Elasser variables.
+"""Alfvenic turbulence diagnostics using Elsasser variables.
 
-Bibliography
-------------
-[1] Bruno, R., & Carbone, V. (2013). The solar wind as a turbulence laboratory.
-    Living Reviews in Solar Physics, 10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2
-[2] Telloni, D., & Bruno, R. (2016). Linking fluid and kinetic scales in solar
-    wind turbulence. Monthly Notices of the Royal Astronomical Society: Letters,
-    463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
-[3] Woodham, L. D., Wicks, R. T., Verscharen, D. & Owen, C. J. The Role of Proton-
-    Cyclotron Resonance as a Dissipation Mechanism in Solar Wind Turbulence: A
-    Statistical Study at Ion-Kinetic Scales. Astrophys. J. 856, 49 (2018).
+Notes
+-----
+The implementation follows the formalism outlined in Bruno & Carbone [1].
+
+References
+----------
+[1] Bruno, R., & Carbone, V. (2013). *Living Reviews in Solar Physics*,
+    10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2
+[2] Telloni, D., & Bruno, R. (2016). *Monthly Notices of the Royal Astronomical
+    Society: Letters*, 463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
+[3] Woodham, L. D., Wicks, R. T., Verscharen, D., & Owen, C. J. (2018).
+    *Astrophys. J.*, 856, 49.
 """
 
-import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd
@@ -90,18 +91,13 @@ class AlfvenicTurbulence(base.Core):
         kwargs:
             Passed to `rolling` method when mean-subtracing in `set_data`.
         """
-        #         print("<Module>",
-        #               "__init__",
-        #               sep="\n",
-        #               end="\n")
 
         super(AlfvenicTurbulence, self).__init__()
         self.set_data(velocity, bfield, rho, species, **kwargs)
 
     @property
     def data(self):
-        r"""Mean-subtracted quantities used to calculated Elsasser variables.
-        """
+        r"""Mean-subtracted quantities used to calculated Elsasser variables."""
         return self._data
 
     @property
@@ -113,20 +109,17 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def measurements(self):
-        r"""Measurements used to calcualte mean-subtracted `data`.
-        """
+        r"""Measurements used to calcualte mean-subtracted `data`."""
         return self._measurements
 
     @property
     def velocity(self):
-        r"""Velocity in Plasma's v-units.
-        """
+        r"""Velocity in Plasma's v-units."""
         return self.data.loc[:, "v"]
 
     @property
     def v(self):
-        r"""Shortcut for `AlfvenicTurbulence.velocity`
-        """
+        r"""Shortcut for `AlfvenicTurbulence.velocity`"""
         return self.velocity
 
     @property
@@ -138,8 +131,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def b(self):
-        r"""Shortcut for `AlfvenicTurbulence.bfield`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.bfield`."""
         return self.bfield
 
     @property
@@ -151,36 +143,29 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def z_plus(self):
-        r"""Z+ Elsasser variable.
-        """
+        r"""Z+ Elsasser variable."""
         zp = self.v.add(self.b, axis=1)
         return zp
 
     @property
     def zp(self):
-        r"""Shortcut for `AlfvenicTurbulence.z_plus`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.z_plus`."""
         return self.z_plus
 
     @property
     def z_minus(self):
-        r"""Z- Elsasser variable.
-        """
+        r"""Z- Elsasser variable."""
         zm = self.v.subtract(self.b, axis=1)
         return zm
 
     @property
     def zm(self):
-        r"""Shortcut for `AlfvenicTurbulence.z_minus`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.z_minus`."""
         return self.z_minus
 
     @property
     def e_plus(self):
-        # I took the averages before I created the +/-z quantities in my
-        # previous test cases. Based on a more detailed read of Bruno and
-        # Carbone, I calculate +/-z before I take averages. Note that because
-        # I am adding v and b, the differene shouldn't matter.
+        """Energy contained in :math:`z^+`."""
         ep = 0.5 * self.zp.pow(2).sum(axis=1)
         return ep
 
@@ -303,10 +288,8 @@ class AlfvenicTurbulence(base.Core):
                 """v and rho have unequal indices. Results may be
 unexpected."""
             )
-        # auto_reindex = bool(auto_reindex)
-
-        # assert rho.ndim == 1
-
+        # Convert b -> Alfven units before averaging as in Bruno and Carbone
+        # [2013], Section B.3.1.
         # Based on my read of Bruno and Carbone's definition in B.3.1 (p.166),
         # we first define the magnetic field in Alfven units. Then we calculate
         # averages. Note that I took the other option in my test cases in

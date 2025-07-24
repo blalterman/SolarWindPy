@@ -7,7 +7,7 @@ contains Vector and Tensor objects.
 
 from __future__ import annotations
 import pandas as pd
-from typing import Union
+
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -57,7 +57,7 @@ class Ion(base.Base):
         Set the species of the ion.
     set_data(data: pd.DataFrame)
         Set the data for the ion.
-        """
+    """
 
     def __init__(self, data: pd.DataFrame, species: str):
         self.set_species(species)
@@ -66,10 +66,7 @@ class Ion(base.Base):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Ion):
             return NotImplemented
-        return (
-            self.species == other.species
-            and self.data.equals(other.data)
-        )
+        return self.species == other.species and self.data.equals(other.data)
 
     def set_species(self, species: str) -> None:
         """
