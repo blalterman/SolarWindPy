@@ -8,7 +8,7 @@ in solar wind physics applications.
 from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Tuple, Union
+from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
@@ -21,40 +21,21 @@ except ImportError:
 
 
 class Core(ABC):
-    """
-    Abstract base class for initializing common methods and properties.
+    """Base class for all ``solarwindpy`` objects.
+
+    This class initializes the logger, unit system, and physical constants
+    used across the package.
 
     Attributes
     ----------
-    logger : logging.Logger
-        Logger instance for the class.
-    units : uc.Units
-        Units used in the class.
-    constants : uc.Constants
-        Physical constants used in the class.
-    data : pd.DataFrame
-        Data stored in the class.
-
-    Methods
-    -------
-    __init__()
-        Initialize the Core class.
-    __str__()
-        Return the class name as a string.
-    __eq__(other)
-        Check equality with another object.
-    _init_logger()
-        Initialize the logger.
-    _init_units()
-        Initialize the units.
-    _init_constants()
-        Initialize the constants.
-    _conform_species(*species)
-        Conform the species inputs to a standard form.
-    _clean_species_for_setting(*species)
-        Clean and validate species for setting.
-    _verify_datetimeindex(data)
-        Verify if the index is a DatetimeIndex and monotonic.
+    logger : :class:`logging.Logger`
+        Logger instance for the object.
+    units : :class:`~solarwindpy.core.units_constants.Units`
+        Unit definitions.
+    constants : :class:`~solarwindpy.core.units_constants.Constants`
+        Physical constants.
+    data : :class:`pandas.DataFrame`
+        Data container used by subclasses.
     """
 
     def __init__(self) -> None:
@@ -71,8 +52,6 @@ class Core(ABC):
         if not isinstance(other, type(self)):
             return False
         try:
-            # eq_data = self.data.equals() == other.data
-            # return eq_data.all().all()
             eq_data = self.data.equals(other.data)
             return eq_data
 
@@ -163,71 +142,15 @@ class Core(ABC):
 
 
 class Base(Core):
-    """
-    Base class for handling in situ data.
+    """Common functionality for classes backed by a :class:`DataFrame`.
 
-    This class inherits from Core and adds data handling capabilities.
-
-    Attributes
-    ----------
-    data : pd.DataFrame
-        Data stored in the class.
-
-    Methods
-    -------
-    __init__(data)
-        Initialize the Base class with data.
-    __getattr__(attr)
-        Get attribute from the underlying DataFrame if not found in the class.
-    set_data(new)
-        Set new data for the class.
-    mi_tuples(x)
-        Create a MultiIndex from tuples.
+    Subclasses provide their own ``set_data`` implementations to validate the
+    underlying data structure.
     """
 
     def __init__(self, data: pd.DataFrame) -> None:
         super().__init__()
-        # self._cache = {}
         self.set_data(data)
-
-    # def __getattr__(self, attr: str) -> Any:
-    #     if attr in self._cache:
-    #         return self._cache[attr]
-
-    #     if hasattr(self._data, attr):
-    #         value = getattr(self._data, attr)
-    #         if callable(value):
-    #             def wrapped_method(*args, **kwargs):
-    #                 return value(*args, **kwargs)
-    #             self._cache[attr] = wrapped_method
-    #         else:
-    #             self._cache[attr] = value
-    #         return self._cache[attr]
-
-    #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
-
-    # try:
-    #     out = getattr(self.data, attr)
-    #     if isinstance(out, pd.core.generic.NDFrame) and out.empty:
-    #         raise ValueError(f"`{attr}` attr returns an empty NDFrame")
-    #     return out
-    # except AttributeError:
-    #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
-
-    # # Implement common DataFrame properties
-    # @property
-    # def index(self):
-    #     return self._data.index
-
-    # # Implement common DataFrame methods
-    # def loc(self, *args, **kwargs):
-    #     return self._data.loc(*args, **kwargs)
-
-    # def iloc(self, *args, **kwargs):
-    #     return self._data.iloc(*args, **kwargs)
-
-    # def xs(self, *args, **kwargs):
-    #     return self._data.xs(*args, **kwargs)
 
     @staticmethod
     def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> MI:

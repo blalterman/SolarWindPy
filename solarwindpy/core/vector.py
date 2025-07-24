@@ -63,18 +63,6 @@ class Vector(base.Base):
             )
         self._data = new
 
-    # @property
-    # def x(self) -> pd.Series:
-    #     return self.data['x']
-
-    # @property
-    # def y(self) -> pd.Series:
-    #     return self.data['y']
-
-    # @property
-    # def z(self) -> pd.Series:
-    #     return self.data['z']
-
     @property
     def mag(self) -> pd.Series:
         """Calculate the magnitude of the vector.
@@ -195,14 +183,11 @@ class Vector(base.Base):
         """
         if isinstance(other, Vector):
             other = other.uv.data
-        # elif isinstance(other, pd.DataFrame):
-        #     other = Vector(other).uv.data
         else:
             raise NotImplementedError(
                 f"Project method not implemented for {type(other)}"
             )
 
-        # TODO: Verify math for projection with new other definition
         cart = self.cartesian
         par = cart.multiply(other, axis=1).sum(axis=1)
         per = (
@@ -227,8 +212,6 @@ class Vector(base.Base):
         """
         if isinstance(other, Vector):
             other = other.uv.data
-        # elif isinstance(other, pd.DataFrame):
-        #     other = Vector(other).uv.data
         else:
             raise NotImplementedError(
                 f"cos_theta method not implemented for {type(other)}"
@@ -242,7 +225,7 @@ class BField(Vector):
 
     @property
     def pressure(self) -> pd.Series:
-        """Calculate the magnetic pressure or energy density.
+        r"""Calculate the magnetic pressure or energy density.
 
         Returns
         -------

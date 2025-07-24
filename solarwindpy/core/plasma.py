@@ -28,7 +28,6 @@ Propoded Updates
 -Moved `_conform_species` to base.Base so that it is accessable for
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
 """
-import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 import itertools
@@ -573,20 +572,13 @@ class Plasma(base.Base):
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".
-        #         try:
-        #             w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
-        #         except ValueError as e:
-        #             print(e)
-        #             pdb.set_trace()
 
         # Workaround for `skipna=False` bug. (20200814)
         # w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
         # Changed to new groupby method (20250611)
-        # pdb.set_trace()
         w = w.T.groupby("S").sum().T.pow(0.5)
         #         w_is_finite = w.notna().all(axis=1, level="S")
         #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
-        #         pdb.set_trace()
         #         w = w.where(w_is_finite, axis=1, level="S")
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`

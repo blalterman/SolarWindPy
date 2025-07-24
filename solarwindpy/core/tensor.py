@@ -70,21 +70,6 @@ class Tensor(base.Base):
             missing_columns = required_columns[~required_columns.isin(data.columns)]
             raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
-    # @property
-    # def per(self) -> Union[pd.Series, pd.DataFrame]:
-    #     """Access the 'per' component of the tensor."""
-    #     return self.data.loc[:, 'per']
-
-    # @property
-    # def par(self) -> Union[pd.Series, pd.DataFrame]:
-    #     """Access the 'par' component of the tensor."""
-    #     return self.data.loc[:, 'par']
-
-    # @property
-    # def scalar(self) -> Union[pd.Series, pd.DataFrame]:
-    #     """Access the 'scalar' component of the tensor."""
-    #     return self.data.loc[:, 'scalar']
-
     @property
     def magnitude(self) -> Union[pd.Series, pd.DataFrame]:
         """Calculate and return the magnitude of the tensor."""

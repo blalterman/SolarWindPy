@@ -4,7 +4,6 @@
 All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
 """
 
-import pdb  # noqa: F401
 from dataclasses import dataclass, field
 
 import pandas as pd

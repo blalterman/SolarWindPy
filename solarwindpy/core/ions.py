@@ -7,7 +7,7 @@ contains Vector and Tensor objects.
 
 from __future__ import annotations
 import pandas as pd
-from typing import Union
+
 
 try:
     from . import base
