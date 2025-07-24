@@ -5,8 +5,6 @@ necessary for context (e.g. solar activity indicies) and some simple plotting
 methods.
 """
 
-import pdb  # noqa: F401
-
 from pkg_resources import get_distribution, DistributionNotFound
 
 import pandas as pd

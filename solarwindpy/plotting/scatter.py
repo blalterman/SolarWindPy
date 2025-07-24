@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D plots.
-"""
+r"""Aggregate, create, and save 1D and 2D plots."""
 
-import pdb  # noqa: F401
 
 from matplotlib import pyplot as plt
 

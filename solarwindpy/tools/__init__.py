@@ -24,7 +24,6 @@ Notes
 
 """
 
-import pdb  # noqa: F401
 import logging
 import numpy as np
 import pandas as pd
@@ -105,9 +104,9 @@ def normal_parameters(m, s):
 
     Applies for both :math:`ln` and :math:`log_{10}`. (<https://stats.stackexchange.com/a/22610/203218>)
     """
-    mu = np.exp(m + ((s ** 2.0) / 2.0))
-    sigma = np.exp(s ** 2.0 + 2.0 * m)
-    sigma *= np.exp(s ** 2.0) - 1.0
+    mu = np.exp(m + ((s**2.0) / 2.0))
+    sigma = np.exp(s**2.0 + 2.0 * m)
+    sigma *= np.exp(s**2.0) - 1.0
     sigma = np.sqrt(sigma)
 
     out = pd.concat({"mu": mu, "sigma": sigma}, axis=1)

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-r"""Contains plotting :py:class:`Base` class.
-"""
+r"""Contains plotting :py:class:`Base` class."""
 
-import pdb  # noqa: F401
 import logging
 import pandas as pd
 

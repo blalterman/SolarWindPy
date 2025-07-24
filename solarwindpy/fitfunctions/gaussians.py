@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`Gaussian` and related `FitFunction` sublcasses.
-"""
-import pdb  # noqa: F401
+r""":py:mod:`Gaussian` and related `FitFunction` sublcasses."""
 import numpy as np
 
 from .core import FitFunction
@@ -215,23 +213,22 @@ class GaussianLn(FitFunction):
     def normal_parameters(self):
         r"""Calculate the normal parameters from log-normal parameters.
 
-            $\mu = \exp[m + (s^2)/2]$
-            $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
+        $\mu = \exp[m + (s^2)/2]$
+        $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
         """
         m = self.popt["m"]
         s = self.popt["s"]
 
-        mu = np.exp(m + ((s ** 2.0) / 2.0))
-        sigma = np.exp(s ** 2.0 + 2.0 * m)
-        sigma *= np.exp(s ** 2.0) - 1.0
+        mu = np.exp(m + ((s**2.0) / 2.0))
+        sigma = np.exp(s**2.0 + 2.0 * m)
+        sigma *= np.exp(s**2.0) - 1.0
         sigma = np.sqrt(sigma)
 
         return dict(mu=mu, sigma=sigma)
 
     @property
     def TeX_report_normal_parameters(self):
-        r"""Report normal parameters, not log-normal parameters in the TeX info.
-        """
+        r"""Report normal parameters, not log-normal parameters in the TeX info."""
         try:
             return self._use_normal_parameters
         except AttributeError:

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-r"""Special labels not handled by :py:class:`TeXlabel`.
-"""
-import pdb  # noqa: F401
+r"""Special labels not handled by :py:class:`TeXlabel`."""
 from pathlib import Path
 from string import Template as StringTemplate
 from string import Formatter as StringFormatter

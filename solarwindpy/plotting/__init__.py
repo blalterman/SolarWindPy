@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Plotting utilities for :py:mod:`solarwindpy`.
-"""
+r"""Plotting utilities for :py:mod:`solarwindpy`."""
 
 __all__ = [
     "labels",

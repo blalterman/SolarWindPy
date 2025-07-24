@@ -6,7 +6,6 @@ tools for plotting that fit. It also provies tools for annotating the plot with
 well-formatted LaTeX that describes the fit.
 """
 
-import pdb  # noqa: F401
 import logging  # noqa: F401
 import warnings
 import numpy as np
@@ -608,14 +607,14 @@ xobs: {xobs.shape}"""
             r = self.function(xdata, *popt) - ydata
             if sigma is not None:
                 r /= sigma
-            chisq_dof = (r ** 2).sum() / dof
+            chisq_dof = (r**2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.
         _, s, VT = svd(res.jac, full_matrices=False)
         threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
         s = s[s > threshold]
         VT = VT[: s.size]
-        pcov = np.dot(VT.T / (s ** 2), VT)
+        pcov = np.dot(VT.T / (s**2), VT)
 
         warn_cov = False
         if ysize > p0.size:

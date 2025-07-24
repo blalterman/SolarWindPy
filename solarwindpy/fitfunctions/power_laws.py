@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`Exponential` and similar `FitFunction` subclasses.
-"""
-import pdb  # noqa: F401
+r""":py:mod:`Exponential` and similar `FitFunction` subclasses."""
 
 from .core import FitFunction
 
@@ -13,7 +11,7 @@ class PowerLaw(FitFunction):
     @property
     def function(self):
         def power_law(x, A, b):
-            return A * (x ** b)
+            return A * (x**b)
 
         return power_law
 
@@ -61,7 +59,7 @@ class PowerLawPlusC(FitFunction):
     @property
     def function(self):
         def power_law(x, A, b, c):
-            return (A * (x ** b)) + c
+            return (A * (x**b)) + c
 
         return power_law
 

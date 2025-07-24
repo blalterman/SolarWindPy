@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Tools for creating physical quantity plot labels.
-"""
+r"""Tools for creating physical quantity plot labels."""
 __all__ = [
     "TeXlabel",
     "Vsw",
@@ -11,7 +10,6 @@ __all__ = [
     "species_translation",
 ]
 
-import pdb  # noqa: F401
 from inspect import isclass
 import pandas as pd
 

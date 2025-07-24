@@ -29,7 +29,6 @@ for which the Bibtex entry is:
     }
 """
 
-import pdb  # noqa: F401
 import logging
 
 import numpy as np
@@ -227,8 +226,7 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Used for building data containers and checking that all entries are visited.
-        """
+        r"""Used for building data containers and checking that all entries are visited."""
         return -9999.0
 
     @property
@@ -324,8 +322,7 @@ class StabilityCondition(object):
         self._data = data
 
     def _calc_instability_thresholds(self):
-        r"""Calculate the beta for which a given anisotropy is unstable.
-        """
+        r"""Calculate the beta for which a given anisotropy is unstable."""
         instability_thresholds = {
             k: beta_ani_inst(self.beta, **v)
             for k, v in self.instability_parameters.iterrows()
@@ -335,8 +332,7 @@ class StabilityCondition(object):
         self._instability_thresholds = instability_thresholds
 
     def _calc_is_unstable(self):
-        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`.
-        """
+        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`."""
         is_unstable = {
             k: self.instability_tests[k](self.anisotropy, v)
             for k, v in self.instability_thresholds.iteritems()

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
-"""
+r"""Aggregate, create, and save 1D and 2D histograms and binned plots."""
 
-import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd
@@ -157,7 +155,7 @@ class Hist1D(AggPlot):
         cdf = x.sort_values().reset_index(drop=True)
 
         if self.log.x:
-            cdf = 10.0 ** cdf
+            cdf = 10.0**cdf
 
         cdf = cdf.to_frame()
         cdf.loc[:, "position"] = cdf.index / cdf.index.max()
@@ -179,7 +177,7 @@ class Hist1D(AggPlot):
             n = agg.sum()
             dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
             if self.log.x:
-                dx = 10.0 ** dx
+                dx = 10.0**dx
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":
@@ -258,7 +256,7 @@ class Hist1D(AggPlot):
             fig, ax = plt.subplots()
 
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
 

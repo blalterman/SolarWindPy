@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`Line` and similar `FitFunction` sublcasses.
-"""
-import pdb  # noqa: F401
+r""":py:mod:`Line` and similar `FitFunction` sublcasses."""
 import numpy as np
 
 from .core import FitFunction

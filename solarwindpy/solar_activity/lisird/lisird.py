@@ -3,7 +3,6 @@
 <http://lasp.colorado.edu/lisird/>
 """
 
-import pdb  # noqa: F401
 import urllib
 import json
 import numpy as np
@@ -306,13 +305,11 @@ quantity"""
 class LISIRDExtrema(IndicatorExtrema):
     @property
     def extrema_calculator(self):
-        r""":py:class:`ExtremaCalculator` used to calculate the extrema.
-        """
+        r""":py:class:`ExtremaCalculator` used to calculate the extrema."""
         return self._extrema_calculator
 
     def load_or_set_data(self, *args, **kwargs):
-        r"""Get extrema from :py:class:`ExtremaCalculator`.
-        """
+        r"""Get extrema from :py:class:`ExtremaCalculator`."""
         ec = ExtremaCalculator(*args, **kwargs)
         extrema = ec.formatted_extrema
         self._data = extrema

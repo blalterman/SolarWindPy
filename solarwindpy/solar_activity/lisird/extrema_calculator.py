@@ -1,6 +1,5 @@
 __all__ = ["ExtremaCalculator"]
 
-import pdb  # noqa: F401
 
 import pandas as pd
 import matplotlib as mpl
@@ -80,8 +79,7 @@ class ExtremaCalculator(object):
 
     @property
     def name(self):
-        r"""Activity index name.
-        """
+        r"""Activity index name."""
         return self._name
 
     @property

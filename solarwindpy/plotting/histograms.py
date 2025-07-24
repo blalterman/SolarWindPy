@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
-"""
+r"""Aggregate, create, and save 1D and 2D histograms and binned plots."""
 
 from . import agg_plot
 from . import hist1d
@@ -10,7 +9,6 @@ AggPlot = agg_plot.AggPlot
 Hist1D = hist1d.Hist1D
 Hist2D = hist2d.Hist2D
 
-# import pdb  # noqa: F401
 # import logging
 
 # import numpy as np
