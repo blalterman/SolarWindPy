@@ -1,43 +1,11 @@
 #!/usr/bin/env python
 """
-Name                :   test_alfvenic_turbulence.py
-Common Alias        :
-Version             :   0.1.00
-Updated             :   20181121
-Author              :   B. L. Alterman
-e-mail              :   balterma@umich.edu
-
-Description
------------
--Tests `alfvenic_turbulence.py` modeule.
-
-Bibliography
-------------
-[1]
-
-Dependencies beyond standard distribution
------------------------------------------
--
-
-Revision History
-----------------
--Started module. (20181121)
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+Tests for Alfvenic turbulence calculations.
 """
 
-import pdb
 
 import numpy as np
 import pandas as pd
-import unittest
 
 import pandas.testing as pdt
 
@@ -90,7 +58,10 @@ class AlfvenicTrubulenceTestBase(ABC):
         rtot = r.sum(axis=1)
 
         vcom = (
-            v.multiply(r, axis=1, level="S").T.groupby(level="C").sum().T
+            v.multiply(r, axis=1, level="S")
+            .T.groupby(level="C")
+            .sum()
+            .T
             # sum(axis=1, level="C")
             .divide(rtot, axis=0)
         )
@@ -486,6 +457,7 @@ class AlfvenicTrubulenceTestBase(ABC):
 #         for other in ([], tuple(), np.array([]), pd.Series(), pd.DataFrame()):
 #             self.assertNotEqual(object_testing, other)
 
+
 #####
 # Tests
 #####
@@ -530,32 +502,3 @@ class TestAlfvenicTrubulenceAlphaP1P2(
     base.AlphaP1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):
     pass
-
-
-if __name__ == "__main__":
-    import sys
-
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    #     sys.setrecursionlimit(sys.getrecursionlimit() // 10)
-    sys.setrecursionlimit(100)
-
-    try:
-        run_this_test = "TestAlfvenicTrubulenceP1"
-        run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test)
-
-    except (  # noqa: F841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
-        import sys
-        import traceback as tb
-
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])
