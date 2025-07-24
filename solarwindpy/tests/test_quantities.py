@@ -20,7 +20,7 @@ from solarwindpy import tensor
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class QuantityTestBase(ABC):
+class QuantityTestBase(ABC, TestCase):
     def test_data(self):
         data = self.data
         if isinstance(data, pd.Series):

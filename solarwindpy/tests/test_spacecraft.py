@@ -18,7 +18,7 @@ from solarwindpy import spacecraft
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class TestBase(ABC):
+class TestBase(ABC, TestCase):
     @classmethod
     def setUpClass(cls):
         data = base.TestData()

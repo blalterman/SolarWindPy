@@ -9,6 +9,7 @@ import itertools
 import pandas.testing as pdt
 
 from abc import ABC, abstractproperty, abstractmethod
+from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
@@ -25,7 +26,7 @@ from solarwindpy import alfvenic_turbulence
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class PlasmaTestBase(ABC):
+class PlasmaTestBase(ABC, TestCase):
     @classmethod
     def set_object_testing(cls):
         # print(cls.__class__, "set_object_testing", flush=True)
