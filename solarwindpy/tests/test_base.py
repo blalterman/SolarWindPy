@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from unittest import TestCase
+import pytest
+from solarwindpy import spacecraft
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -112,3 +114,47 @@ class AlphaP1P2Test(object):
     @property
     def species(self):
         return "a+p1+p2"
+
+
+@pytest.fixture(scope="module")
+def plasma_data():
+    """Synthetic plasma data for testing."""
+    return TestData().plasma_data.sort_index(axis=1)
+
+
+@pytest.fixture(scope="module")
+def spacecraft_dataset():
+    """Synthetic spacecraft measurements."""
+    return TestData().spacecraft_data
+
+
+@pytest.fixture(scope="module")
+def wind_data(spacecraft_dataset):
+    """Prepared WIND spacecraft data."""
+    data = spacecraft_dataset.xs("gse", axis=1, level="M")
+    data = pd.concat({"pos": data}, axis=1, names=["M"], sort=True).sort_index(axis=1)
+    return data
+
+
+@pytest.fixture(scope="module")
+def wind_spacecraft(wind_data):
+    """WIND :class:`Spacecraft` instance."""
+    return spacecraft.Spacecraft(wind_data, "wind", "gse")
+
+
+@pytest.fixture(scope="module")
+def psp_data(spacecraft_dataset):
+    """Prepared PSP spacecraft data."""
+    p = spacecraft_dataset.xs("pos_HCI", axis=1, level="M")
+    v = spacecraft_dataset.xs("v_HCI", axis=1, level="M")
+    c = spacecraft_dataset.xs("Carr", axis=1, level="M")
+    data = pd.concat(
+        {"v": v, "pos": p, "carr": c}, axis=1, names=["M"], sort=True
+    ).sort_index(axis=1)
+    return data
+
+
+@pytest.fixture(scope="module")
+def psp_spacecraft(psp_data):
+    """PSP :class:`Spacecraft` instance."""
+    return spacecraft.Spacecraft(psp_data, "psp", "hci")
