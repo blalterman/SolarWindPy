@@ -1,3 +1,5 @@
+"""Common chemistry labels."""
+
 from .special import ManualLabel
 
 mass_per_charge = ManualLabel(
