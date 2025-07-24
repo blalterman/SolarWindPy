@@ -36,7 +36,6 @@ import itertools
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
 try:
     from . import base
@@ -154,14 +153,12 @@ class Plasma(base.Base):
 
     @property
     def spacecraft(self):
-        r"""`Spacecraft` object stored in `plasma`.
-        """
+        r"""`Spacecraft` object stored in `plasma`."""
         return self._spacecraft
 
     @property
     def sc(self):
-        r"""Shortcut to `spacecraft`.
-        """
+        r"""Shortcut to `spacecraft`."""
         return self.spacecraft
 
     @property
@@ -182,8 +179,7 @@ class Plasma(base.Base):
 
     @property
     def aux(self):
-        r"""Shortcut to :py:meth:`auxiliary_data`.
-        """
+        r"""Shortcut to :py:meth:`auxiliary_data`."""
         return self.auxiliary_data
 
     @property
@@ -438,14 +434,12 @@ class Plasma(base.Base):
 
     @property
     def species(self):
-        r"""Tuple of species contained in plasma.
-        """
+        r"""Tuple of species contained in plasma."""
         return self._species
 
     @property
     def ions(self):
-        r"""`pd.Series` containing the ions.
-        """
+        r"""`pd.Series` containing the ions."""
         return self._ions
 
     def _set_ions(self):
@@ -535,8 +529,7 @@ class Plasma(base.Base):
             )
 
     def set_data(self, new):
-        r"""Set the data and log statistics about it.
-        """
+        r"""Set the data and log statistics about it."""
         #         assert isinstance(new, pd.DataFrame)
         super(Plasma, self).set_data(new)
 
@@ -629,8 +622,7 @@ class Plasma(base.Base):
 
     @property
     def bfield(self):
-        r"""Magnetic field data.
-        """
+        r"""Magnetic field data."""
         return self._bfield
 
     @property
@@ -706,8 +698,7 @@ class Plasma(base.Base):
         return rho
 
     def rho(self, *species):
-        r"""Shortcut to :py:meth:`mass_density`.
-        """
+        r"""Shortcut to :py:meth:`mass_density`."""
         return self.mass_density(*species)
 
     def thermal_speed(self, *species):
@@ -741,8 +732,7 @@ class Plasma(base.Base):
         return w
 
     def w(self, *species):
-        r"""Shortcut to :py:meth:`thermal_speed`.
-        """
+        r"""Shortcut to :py:meth:`thermal_speed`."""
         return self.thermal_speed(*species)
 
     def pth(self, *species):
@@ -855,7 +845,7 @@ class Plasma(base.Base):
         bsq = self.bfield.mag.pow(2)
         beta = pth.divide(bsq, axis=0)
 
-        units = self.units.pth / (self.units.b ** 2.0)
+        units = self.units.pth / (self.units.b**2.0)
         coeff = 2.0 * self.constants.misc.mu0 * units
         beta *= coeff
         return beta
@@ -951,7 +941,9 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                rv = v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T #sum(axis=1, level="C")
+                rv = (
+                    v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T
+                )  # sum(axis=1, level="C")
                 v = rv.divide(rhos.sum(axis=1), axis=0)
                 v = vector.Vector(v)
 
@@ -1027,7 +1019,7 @@ species: {}
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
+        const = 0.5 * self.units.rho * (self.units.dv**2.0) / self.units.pth
 
         if not project_m2q:
             # Calculate as m*v
@@ -1083,8 +1075,7 @@ species: {}
         return pdv
 
     def pdv(self, *species, project_m2q=False):
-        r"""Shortcut to :py:meth:`pdynamic`.
-        """
+        r"""Shortcut to :py:meth:`pdynamic`."""
         return self.pdynamic(*species, project_m2q=project_m2q)
 
     def sound_speed(self, *species):
@@ -1115,8 +1106,7 @@ species: {}
         return cs
 
     def cs(self, *species):
-        r""" Shortcut to :py:meth:`sound_speed`.
-        """
+        r"""Shortcut to :py:meth:`sound_speed`."""
         return self.sound_speed(*species)
 
     def ca(self, *species):
@@ -1208,7 +1198,7 @@ species: {}
         dp = dp.sum(axis=1, level="S" if multi_species else None)
 
         mu0 = self.constants.misc.mu0
-        coeff = mu0 * self.units.pth / (self.units.b ** 2.0)
+        coeff = mu0 * self.units.pth / (self.units.b**2.0)
 
         afsq = 1.0 + (dp.divide(bsq, axis=0) * coeff)
 
@@ -1325,8 +1315,8 @@ species: {}
         T0 = self.ions.loc[s0].temperature.scalar * units.temperature * constants.kb.eV
         T1 = self.ions.loc[s1].temperature.scalar * units.temperature * constants.kb.eV
 
-        r0 = n0.multiply(z0 ** 2.0).divide(T0, axis=0)
-        r1 = n1.multiply(z1 ** 2.0).divide(T1, axis=0)
+        r0 = n0.multiply(z0**2.0).divide(T0, axis=0)
+        r1 = n1.multiply(z1**2.0).divide(T1, axis=0)
         right = r0.add(r1).pipe(np.sqrt)
 
         left = z0 * z1 * (a0 + a1) / (a0 * T1).add(a1 * T0, axis=0)
@@ -1410,12 +1400,14 @@ species: {}
         ma = constants.m.loc[sa]
         masses = constants.m.loc[[sa, sb]]
         mu = masses.product() / masses.sum()
-        coeff = qabsq / (4.0 * np.pi * constants.misc.e0 ** 2.0 * ma * mu)
+        coeff = qabsq / (4.0 * np.pi * constants.misc.e0**2.0 * ma * mu)
 
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat({s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True)
+        w = pd.concat(
+            {s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True
+        )
         wab = w.pow(2.0).sum(axis=1).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).magnitude * units.dv
@@ -1704,7 +1696,9 @@ species: {}
             niqi = ni.multiply(qi, axis=1, level="S")
             ne = niqi.sum(axis=1)
             # niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
-            niqivi = vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T #sum(axis=1, level="C")
+            niqivi = (
+                vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T
+            )  # sum(axis=1, level="C")
 
         ve = niqivi.divide(ne, axis=0)
 
@@ -1810,7 +1804,7 @@ species: {}
         #        print("<qpar>", type(qs), qs,
         #              sep="\n")
 
-        coeff = self.units.rho * (self.units.v ** 3.0) / self.units.qpar
+        coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
         q = coeff * qs
         return q
 
@@ -1869,8 +1863,7 @@ species: {}
         return turb
 
     def S(self, *species):
-        r"""Shortcut to :py:meth:`specific_entropy`.
-        """
+        r"""Shortcut to :py:meth:`specific_entropy`."""
         return self.specific_entropy(*species)
 
     def specific_entropy(self, *species):

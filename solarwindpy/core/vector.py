@@ -9,8 +9,6 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-pd.set_option("mode.chained_assignment", "raise")
-
 try:
     from . import base
 except ImportError:
@@ -56,8 +54,13 @@ class Vector(base.Base):
         """
         super().set_data(new)
         required_columns = pd.Index(["x", "y", "z"])
-        if not isinstance(new.columns, pd.MultiIndex) and not required_columns.isin(new.columns).all():
-            raise ValueError(f"Required columns: {required_columns}\nProvided: {new.columns}")
+        if (
+            not isinstance(new.columns, pd.MultiIndex)
+            and not required_columns.isin(new.columns).all()
+        ):
+            raise ValueError(
+                f"Required columns: {required_columns}\nProvided: {new.columns}"
+            )
         self._data = new
 
     # @property
@@ -195,7 +198,9 @@ class Vector(base.Base):
         # elif isinstance(other, pd.DataFrame):
         #     other = Vector(other).uv.data
         else:
-            raise NotImplementedError(f"Project method not implemented for {type(other)}")
+            raise NotImplementedError(
+                f"Project method not implemented for {type(other)}"
+            )
 
         # TODO: Verify math for projection with new other definition
         cart = self.cartesian
@@ -225,7 +230,9 @@ class Vector(base.Base):
         # elif isinstance(other, pd.DataFrame):
         #     other = Vector(other).uv.data
         else:
-            raise NotImplementedError(f"cos_theta method not implemented for {type(other)}")
+            raise NotImplementedError(
+                f"cos_theta method not implemented for {type(other)}"
+            )
 
         return self.uv.data.multiply(other, axis=1).sum(axis=1)
 
@@ -249,7 +256,7 @@ class BField(Vector):
             p_B = \frac{1}{2\mu_0} B^2
         """
         bsq = self.mag.pow(2.0)
-        const = self.units.b ** 2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
+        const = self.units.b**2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
         pb = bsq * const
         pb.name = "pb"
         return pb

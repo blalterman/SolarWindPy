@@ -13,7 +13,6 @@ from typing import Any, Tuple, Union
 import numpy as np
 import pandas as pd
 from pandas import MultiIndex as MI
-pd.set_option("mode.chained_assignment", "raise")
 
 try:
     from . import units_constants as uc
@@ -76,7 +75,7 @@ class Core(ABC):
             # return eq_data.all().all()
             eq_data = self.data.equals(other.data)
             return eq_data
-        
+
         except ValueError as e:
             if "Can only compare identically-labeled DataFrame objects" in str(e):
                 return False
@@ -142,11 +141,13 @@ class Core(ABC):
 
         slist = species[0].split("+") if len(species) == 1 else species
         return tuple(sorted(slist))
-    
+
     @abstractmethod
     def _clean_species_for_setting(self, *species: str) -> Tuple[str, ...]:
         if not species:
-            raise ValueError(f"You must specify a species to instantiate a {self.__class__.__name__}.")
+            raise ValueError(
+                f"You must specify a species to instantiate a {self.__class__.__name__}."
+            )
         return species
 
     def _verify_datetimeindex(self, data: pd.DataFrame) -> None:
@@ -191,7 +192,7 @@ class Base(Core):
 
     # def __getattr__(self, attr: str) -> Any:
     #     if attr in self._cache:
-    #         return self._cache[attr]       
+    #         return self._cache[attr]
 
     #     if hasattr(self._data, attr):
     #         value = getattr(self._data, attr)
@@ -204,20 +205,20 @@ class Base(Core):
     #         return self._cache[attr]
 
     #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
-     
-        # try:
-        #     out = getattr(self.data, attr)
-        #     if isinstance(out, pd.core.generic.NDFrame) and out.empty:
-        #         raise ValueError(f"`{attr}` attr returns an empty NDFrame")
-        #     return out
-        # except AttributeError:
-        #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
+
+    # try:
+    #     out = getattr(self.data, attr)
+    #     if isinstance(out, pd.core.generic.NDFrame) and out.empty:
+    #         raise ValueError(f"`{attr}` attr returns an empty NDFrame")
+    #     return out
+    # except AttributeError:
+    #     raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{attr}'")
 
     # # Implement common DataFrame properties
     # @property
     # def index(self):
     #     return self._data.index
-    
+
     # # Implement common DataFrame methods
     # def loc(self, *args, **kwargs):
     #     return self._data.loc(*args, **kwargs)
