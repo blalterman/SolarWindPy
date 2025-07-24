@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.fitfunctions` plotter.
-"""
+r""":py:mod:`~solarwindpy.fitfunctions` plotter."""
 
 import pdb  # noqa: F401
 import logging  # noqa: F401
@@ -343,34 +342,28 @@ class FFPlot(object):
     def plot_residuals(
         self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
     ):
-        r"""Make a plot of the fit function that includes the data and fit,
-                but are limited to data included in the fit.
+        r"""Plot residuals for the data used in the fit.
 
-                Residuals are plotted as a percentage, both positive and negative, on
-                a symlog scale with `linthresh=10`.
-        <<<<<<< HEAD
-        =======
+        Residuals are shown on a symlog scale with ``linthresh=10``. By default
+        they are expressed as percentages of the fitted model.
 
-                Parameters
-                ----------
-                ax: None, mpl.axis.Axis
-                    If not None, mpl.axis.Axis.
-                pct: bool
-                    If True, plot in units of percent.
-                subplots_kwargs: dict, None
-                    If not None, passed to `plt.subplots`. Disabled if `ax` is not
-                    None.
-                kind: str
-                    Specify type of residuals to plot.
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, optional
+            Axis to draw on. If ``None`` a new figure and axis are created.
+        pct : bool, default True
+            If ``True``, show residuals as percentages.
+        subplots_kwargs : dict, optional
+            Passed to ``plt.subplots`` when ``ax`` is ``None``.
+        kind : {'simple', 'robust', 'both'}, default "both"
+            Which residuals to plot.
+        **kwargs
+            Additional keyword arguments passed to ``ax.plot``.
 
-                        ======== ======================
-                         Value        Description
-                        ======== ======================
-                         simple   Use simple residuals
-                         robust   Use robust residuals
-                         both     Use both
-                        ======== ======================
-        >>>>>>> c8b5d9bfe4c7ce53d00e5d0773d27dcc8b8f258c
+        Returns
+        -------
+        ax : mpl.axes.Axes
+            Axis with residuals plotted.
         """
 
         if subplots_kwargs is None:
