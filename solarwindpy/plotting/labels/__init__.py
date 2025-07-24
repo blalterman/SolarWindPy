@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Tools for creating physical quantity plot labels.
-"""
+r"""Tools for creating physical quantity plot labels."""
 __all__ = [
     "TeXlabel",
     "Vsw",
@@ -32,7 +31,19 @@ ElementalAbundance = elemental_abundance.ElementalAbundance
 
 
 def _clean_str_list_for_printing(data):
-    # Clean and sort the measurements.
+    """Format a list of strings as grouped, sorted text.
+
+    Parameters
+    ----------
+    data : list of str
+        Strings to format.
+
+    Returns
+    -------
+    str
+        Multiline string grouping entries by their first character.
+    """
+
     upper = sorted([x for x in data if x[0].isupper()])
     [data.remove(u) for u in upper]
 
@@ -45,6 +56,8 @@ def _clean_str_list_for_printing(data):
 
 
 def available_labels():
+    """Print all available measurement, component and species labels."""
+
     m = sorted(list(base._trans_measurement.keys()) + list(base._templates.keys()))
     c = sorted(base._trans_component.keys())
     s = sorted(base._trans_species.keys())

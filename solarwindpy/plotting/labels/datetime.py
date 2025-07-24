@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Special labels not handled by :py:class:`TeXlabel`.
-"""
+r"""Special labels not handled by :py:class:`TeXlabel`."""
 import pdb  # noqa: F401
 from pathlib import Path
 from pandas.tseries.frequencies import to_offset
@@ -9,12 +8,15 @@ from . import special
 
 
 class Timedelta(special.ArbitraryLabel):
+    """Label for a time interval."""
+
     def __init__(self, offset):
-        r"""
+        """Instantiate the label.
+
         Parameters
         ----------
-        offset: str
-            pd.Offset or covertable string
+        offset : str or pandas offset
+            Value convertible via :func:`pandas.tseries.frequencies.to_offset`.
         """
         super().__init__()
         self.set_offset(offset)
@@ -62,12 +64,15 @@ class Timedelta(special.ArbitraryLabel):
 
 
 class DateTime(special.ArbitraryLabel):
+    """Generic datetime label."""
+
     def __init__(self, kind):
-        r"""
+        """Instantiate the label.
+
         Parameters
         ----------
-        dt: str
-            Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
+        kind : str
+            Text used to build the label, e.g. ``"Year"`` or ``"Month"``.
         """
         super().__init__()
         self.set_kind(kind)
@@ -96,18 +101,19 @@ class DateTime(special.ArbitraryLabel):
 
 
 class Epoch(special.ArbitraryLabel):
-    r"""Create Epoch analysis labels like :math:`\mathrm{Hour \, of \, Day}`."""
+    r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
     def __init__(self, kind, of_thing, space="\,"):  # noqa: W605
-        r"""
+        """Instantiate the label.
+
         Parameters
         ----------
-        kind: str
-            The smaller type of thing, e.g. Hour.
-        of_thing: str
-            The larger type of thing, e.g. Day.
-        space: str
-            The TeX space unit.
+        kind : str
+            The smaller time unit, e.g. ``"Hour"``.
+        of_thing : str
+            The larger time unit, e.g. ``"Day"``.
+        space : str, default ``","``
+            TeX spacing command placed between words.
         """
         super().__init__()
         self.set_smaller(kind)
@@ -160,6 +166,8 @@ class Epoch(special.ArbitraryLabel):
 
 
 class Frequency(special.ArbitraryLabel):
+    """Frequency of another quantity."""
+
     def __init__(self, other):
         super().__init__()
         self.set_other(other)
@@ -203,6 +211,8 @@ class Frequency(special.ArbitraryLabel):
 
 
 class January1st(special.ArbitraryLabel):
+    """Label for the first day of the year."""
+
     def __init__(self):
         super().__init__()
 

@@ -8,7 +8,10 @@ known_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
 
 
 class Ion(base.Base):
+    """Represent a single ion."""
+
     def __init__(self, species, charge):
+        """Instantiate the ion."""
         super().__init__()
         self.set_species_charge(species, charge)
 
@@ -53,7 +56,10 @@ class Ion(base.Base):
 
 
 class ChargeState(base.Base):
+    """Ratio of two ion abundances."""
+
     def __init__(self, ionA, ionB):
+        """Instantiate the charge-state ratio."""
         super().__init__()
         self.set_ions(ionA, ionB)
 
