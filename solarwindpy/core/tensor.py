@@ -4,8 +4,6 @@
 import pandas as pd
 from typing import Union
 
-pd.set_option("mode.chained_assignment", "raise")
-
 try:
     from . import base
 except ImportError:

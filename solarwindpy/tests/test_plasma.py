@@ -1,22 +1,10 @@
 #!/usr/bin/env python
-r"""Test :py:class:`~solarwindpy.core.plasma.Plasma`.
-
-Includes tests for making contained instances of :py:class:`~solarwindpy.core.vector.Vector`
-and :py:class:`~solarwindpy.core.tensor.Tensor`.
-
-
-Propodes Updates
-----------------
--Different test cases to catch longitudinal diffusion rates
- that don't equal 1. (Priority: High)
 """
-import pdb
-
-# import re as re
-import numpy as np
+Tests for the :class:`Plasma` container.
+"""
 import pandas as pd
-import unittest
-import sys
+import pytest
+import numpy as np
 import itertools
 import pandas.testing as pdt
 
@@ -336,7 +324,8 @@ class PlasmaTestBase(ABC):
                 pdt.assert_series_equal(
                     ot.mass_density("+".join(s)), ot.rho("+".join(s))
                 )
-    @unittest.SkipTest
+
+    @pytest.mark.skip(reason="Not implemented")
     def test_thermal_speed(self):
         ot = self.object_testing
         ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
@@ -371,7 +360,7 @@ class PlasmaTestBase(ABC):
                 with self.assertRaises(ValueError):
                     ot.thermal_speed(",".join(s))
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_pth(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
@@ -404,7 +393,7 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.pth("+".join(s)))
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_temperature(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
@@ -440,7 +429,7 @@ class PlasmaTestBase(ABC):
                     this_ion, self.object_testing.temperature("+".join(s))
                 )
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_beta(self):
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
         pth = pd.concat(pth, axis=1, names=["S"], sort=True)
@@ -451,7 +440,7 @@ class PlasmaTestBase(ABC):
 
         ions_ = pth.divide(bsq, axis=0)
 
-        coeff = 2.0 * constants.mu_0 * 1e-12 / (1e-9 ** 2.0)
+        coeff = 2.0 * constants.mu_0 * 1e-12 / (1e-9**2.0)
         ions_ *= coeff
 
         # Check that plasma returns each ion species independently.
@@ -488,7 +477,7 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_anisotropy(self):
         # Test individual components. Should return RT values.
         for s in self.stuple:
@@ -518,8 +507,9 @@ class PlasmaTestBase(ABC):
                 coeff = pd.Series({"par": -1, "per": 1})
                 ani_s = pth.pow(coeff, axis=1, level="C").product(axis=1, level="S")
                 ani_sum = (
-                    pth.T.groupby(level="C").sum().T
-                    .pow(coeff, axis=1, level="C")
+                    pth.T.groupby(level="C")
+                    .sum()
+                    .T.pow(coeff, axis=1, level="C")
                     .product(axis=1)
                 )
                 ani_sum.name = "+".join(sorted(s))
@@ -600,7 +590,9 @@ class PlasmaTestBase(ABC):
                 )
                 # print("", "<Ions>", ions, "<rhos>", rhos, sep="\n")
                 ions_ = ions_.multiply(rhos, axis=1, level="S")
-                ions_ = ions_.T.groupby(level="C").sum().T.divide(rhos.sum(axis=1), axis=0)
+                ions_ = (
+                    ions_.T.groupby(level="C").sum().T.divide(rhos.sum(axis=1), axis=0)
+                )
                 # print("<vcom>", ions, sep="\n")
                 ions_ = vector.Vector(ions_)
 
@@ -667,8 +659,7 @@ class PlasmaTestBase(ABC):
                     vs.multiply(rhos, axis=1, level="S")
                     .T.groupby(level="C")
                     .sum()
-                    .T
-                    .divide(rho_total, axis=0)
+                    .T.divide(rho_total, axis=0)
                 )
 
                 v = self.data.v.xs(s, axis=1, level="S")
@@ -728,8 +719,9 @@ class PlasmaTestBase(ABC):
             rho_total = rhos.sum(axis=1)
             vcom = (
                 vs.multiply(rhos, axis=1, level="S")
-                .T.groupby(level="C").sum().T
-                .divide(rho_total, axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(rho_total, axis=0)
             )
 
             # if print_inline_debug_info:
@@ -804,7 +796,12 @@ class PlasmaTestBase(ABC):
 
                 rho_s0s1 = n_s0s1.multiply(m_s0s1, axis=1, level="S")
                 rho_total_s0s1 = rho_s0s1.sum(axis=1)
-                rv_s0s1 = v_s0s1.multiply(rho_s0s1, axis=1, level="S").T.groupby(level="C").sum().T
+                rv_s0s1 = (
+                    v_s0s1.multiply(rho_s0s1, axis=1, level="S")
+                    .T.groupby(level="C")
+                    .sum()
+                    .T
+                )
                 vcom_s0s1 = rv_s0s1.divide(rho_total_s0s1, axis=0)
 
                 dv_s0s1 = vcom_s0s1.subtract(vcom, axis=1, level="C")
@@ -899,7 +896,7 @@ class PlasmaTestBase(ABC):
                     ions_.loc[:, "+".join(s)], self.object_testing.ca("+".join(s))
                 )
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_afsq(self):
         #        print_inline_debug_info = True
 
@@ -972,7 +969,7 @@ class PlasmaTestBase(ABC):
                 left.name = "+".join(combo)
                 pdt.assert_series_equal(left, self.object_testing.afsq("+".join(combo)))
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_caani(self):
         # print_inline_debug_info = False
 
@@ -1076,7 +1073,7 @@ class PlasmaTestBase(ABC):
             n = n_all.loc[:, s]
             T = TeV.loc[:, s]
             lnlambda = 29.9 - np.log(
-                np.sqrt(2) * z ** 3 * n.pipe(np.sqrt) * T.pow(-3.0 / 2.0)
+                np.sqrt(2) * z**3 * n.pipe(np.sqrt) * T.pow(-3.0 / 2.0)
             )
             lnlambda.name = f"{s},{s}"
 
@@ -1217,8 +1214,8 @@ class PlasmaTestBase(ABC):
             return None
 
         slist = list(self.stuple)
-        coeff = 4.0 * np.pi * constants.epsilon_0 ** 2.0
-        qsq = self.charges ** 2.0
+        coeff = 4.0 * np.pi * constants.epsilon_0**2.0
+        qsq = self.charges**2.0
         m = self.mass
         w = self.data.w.par.loc[:, slist] * 1e3
         wsq = w.pow(2.0)
@@ -1268,7 +1265,7 @@ class PlasmaTestBase(ABC):
             gauss_coeff = dvw.multiply(2.0 / np.sqrt(np.pi))
             # ldr = longitudinal diffusion rate $\hat{\nu}_L$.
             erf_dvw = erf(dvw)
-            gaussian_term = gauss_coeff * np.exp(-(dvw ** 2.0))
+            gaussian_term = gauss_coeff * np.exp(-(dvw**2.0))
             ldr = dvw.pow(-3.0) * (erf_dvw - gaussian_term)
 
             nuab = all_coeff * (nb * lnlambda / wab.pow(3.0)) * ldr / 1e-7
@@ -1322,7 +1319,7 @@ class PlasmaTestBase(ABC):
                 check_names=False,
             )
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_spacecraft_in_plasma(self):
         sc_data = base.TestData().spacecraft_data
 
@@ -1404,8 +1401,9 @@ class PlasmaTestBase(ABC):
 
         vcom = (
             v.multiply(rho, axis=1, level="S")
-            .T.groupby(level="C").sum().T
-            .divide(rho.sum(axis=1), axis=0)
+            .T.groupby(level="C")
+            .sum()
+            .T.divide(rho.sum(axis=1), axis=0)
         )
         vsw = vcom.pow(2.0).sum(axis=1).pipe(np.sqrt) * 1e3
 
@@ -1693,8 +1691,9 @@ class PlasmaTestBase(ABC):
             v_i = v.loc[:, list(combo)]
             vcom = (
                 v_i.multiply(rho_i, axis=1, level="S")
-                .T.groupby(level="C").sum().T
-                .divide(rho_t, axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(rho_t, axis=0)
             )
             dv_i = v_i.subtract(vcom, axis=1, level="C")
             dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum().T
@@ -1889,8 +1888,9 @@ class PlasmaTestBase(ABC):
         v = self.data.v.loc[:, pd.IndexSlice[:, slist]]
         vcom = (
             v.multiply(rho, axis=1, level="S")
-            .T.groupby(level="C").sum().T
-            .divide(rho.sum(axis=1), axis=0)
+            .T.groupby(level="C")
+            .sum()
+            .T.divide(rho.sum(axis=1), axis=0)
         )
         dv = v.subtract(vcom, axis=1, level="C")
 
@@ -2016,7 +2016,7 @@ class PlasmaTestBase(ABC):
         # pdt.assert_index_equal(epoch, ot.data.epoch)
         # pdt.assert_index_equal(ot.data.epoch, ot.data.index)
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_build_alfvenic_turbulence(self):
         species = self.species
         slist = species.split("+")
@@ -2048,8 +2048,9 @@ class PlasmaTestBase(ABC):
             # Check CoM velocity case.
             vcom = (
                 v.multiply(r, axis=1, level="S")
-                .T.groupby(level="C").sum().T
-                .divide(rtot, axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(rtot, axis=0)
             )
             alf_turb = AlfvenicTurbulence(
                 vcom, b, rtot, species, window=test_window, min_periods=test_periods
@@ -2104,8 +2105,9 @@ class PlasmaTestBase(ABC):
             # Check CoM velocity case.
             vcom = (
                 v.multiply(r, axis=1, level="S")
-                .T.groupby(level="C").sum().T
-                .divide(rtot, axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(rtot, axis=0)
             )
             alf_turb = AlfvenicTurbulence(
                 vcom, b, rtot, species, window=test_window, min_periods=test_periods
@@ -2151,8 +2153,9 @@ class PlasmaTestBase(ABC):
             v0v1 = (
                 v.loc[:, pd.IndexSlice[tkc, tks]]
                 .multiply(r0r1, axis=1)
-                .T.groupby(level="C").sum().T
-                .divide(r0r1.sum(axis=1), axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(r0r1.sum(axis=1), axis=0)
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
@@ -2168,8 +2171,9 @@ class PlasmaTestBase(ABC):
             v0v1 = (
                 v.loc[:, pd.IndexSlice[tkc, tks]]
                 .multiply(r0r1, axis=1)
-                .T.groupby(level="C").sum().T
-                .divide(r0r1.sum(axis=1), axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(r0r1.sum(axis=1), axis=0)
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
@@ -2185,8 +2189,9 @@ class PlasmaTestBase(ABC):
             v0v1 = (
                 v.loc[:, pd.IndexSlice[tkc, tks]]
                 .multiply(r0r1, axis=1)
-                .T.groupby(level="C").sum().T
-                .divide(r0r1.sum(axis=1), axis=0)
+                .T.groupby(level="C")
+                .sum()
+                .T.divide(r0r1.sum(axis=1), axis=0)
             )
             dv = v0v1.subtract(vcom, axis=1)
             s0s1 = ",".join(["{}+{}".format(*tks), species])
@@ -2204,7 +2209,7 @@ class PlasmaTestBase(ABC):
             msg = "Unexpected number of species in test case\nslist: %s"
             raise NotImplementedError(msg % (slist))
 
-    @unittest.skip("Not yet implemented")
+    @pytest.mark.skip(reason="Not yet implemented")
     def test_drop_species(self):
         print_inline_debug_info = True  # noqa: F841
 
@@ -2321,7 +2326,7 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_specific_entropy(self):
         # print_inline_debug_info = False
         ot = self.object_testing
@@ -2555,33 +2560,3 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing._chk_species(*s)
-
-
-if __name__ == "__main__":
-
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
-
-    try:
-        #        run_this_test = "TestPlasmaP1P2"
-        run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test, failfast=True)
-
-    #        for tc in ("TestPlasmaAlphaP1", "TestPlasmaAlphaP1P2", "TestPlasmaAlphaP2"):
-    #            unittest.main(verbosity=2, defaultTest="%s.test_VDFratio" % tc)
-    # unittest.main()
-
-    except (  # noqa: F841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
-        import traceback as tb
-
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])

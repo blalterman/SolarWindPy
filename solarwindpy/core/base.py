@@ -14,8 +14,6 @@ import numpy as np
 import pandas as pd
 from pandas import MultiIndex as MI
 
-pd.set_option("mode.chained_assignment", "raise")
-
 try:
     from . import units_constants as uc
 except ImportError:

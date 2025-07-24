@@ -9,8 +9,6 @@ from __future__ import annotations
 import pandas as pd
 
 
-pd.set_option("mode.chained_assignment", "raise")
-
 try:
     from . import base
     from . import vector
