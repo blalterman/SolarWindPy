@@ -46,6 +46,7 @@ class TestData(object):
         test_data.columns = pd.MultiIndex.from_tuples(
             [tuple(c.split("|")) for c in test_data.columns]
         )
+        test_data.columns.names = ["M", "C", "S"]
         test_data = test_data.astype(np.float64).sort_index(axis=1)
         test_data.index = self.epoch
         self._spacecraft_data = test_data.xs("", axis=1, level="S")
