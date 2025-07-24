@@ -13,7 +13,6 @@ from scipy.constants import physical_constants
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
 _misc_constants = {
     "e0": constants.epsilon_0,
@@ -122,8 +121,7 @@ class Constants(object):
 
     @property
     def m_amu(self):
-        r"""Masses in amu.
-        """
+        r"""Masses in amu."""
         return pd.Series(_m_amu)
 
     @property

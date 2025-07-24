@@ -23,7 +23,6 @@ from collections import namedtuple
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
 try:
     from . import base
@@ -100,8 +99,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def data(self):
-        r"""Mean-subtracted quantities used to calculated Elsasser variables.
-        """
+        r"""Mean-subtracted quantities used to calculated Elsasser variables."""
         return self._data
 
     @property
@@ -113,20 +111,17 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def measurements(self):
-        r"""Measurements used to calcualte mean-subtracted `data`.
-        """
+        r"""Measurements used to calcualte mean-subtracted `data`."""
         return self._measurements
 
     @property
     def velocity(self):
-        r"""Velocity in Plasma's v-units.
-        """
+        r"""Velocity in Plasma's v-units."""
         return self.data.loc[:, "v"]
 
     @property
     def v(self):
-        r"""Shortcut for `AlfvenicTurbulence.velocity`
-        """
+        r"""Shortcut for `AlfvenicTurbulence.velocity`"""
         return self.velocity
 
     @property
@@ -138,8 +133,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def b(self):
-        r"""Shortcut for `AlfvenicTurbulence.bfield`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.bfield`."""
         return self.bfield
 
     @property
@@ -151,28 +145,24 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def z_plus(self):
-        r"""Z+ Elsasser variable.
-        """
+        r"""Z+ Elsasser variable."""
         zp = self.v.add(self.b, axis=1)
         return zp
 
     @property
     def zp(self):
-        r"""Shortcut for `AlfvenicTurbulence.z_plus`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.z_plus`."""
         return self.z_plus
 
     @property
     def z_minus(self):
-        r"""Z- Elsasser variable.
-        """
+        r"""Z- Elsasser variable."""
         zm = self.v.subtract(self.b, axis=1)
         return zm
 
     @property
     def zm(self):
-        r"""Shortcut for `AlfvenicTurbulence.z_minus`.
-        """
+        r"""Shortcut for `AlfvenicTurbulence.z_minus`."""
         return self.z_minus
 
     @property

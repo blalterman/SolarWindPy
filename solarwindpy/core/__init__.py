@@ -1,2 +1,1 @@
-r""":py:mod:`solarwindpy` core classes.
-"""
+r""":py:mod:`solarwindpy` core classes."""

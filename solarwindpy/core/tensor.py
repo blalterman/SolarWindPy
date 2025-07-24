@@ -4,8 +4,6 @@
 import pandas as pd
 from typing import Union
 
-pd.set_option('mode.chained_assignment', 'raise')
-
 try:
     from . import base
 except ImportError:
@@ -20,6 +18,7 @@ class Tensor(base.Base):
     Attributes:
         _data (pd.DataFrame): The underlying tensor data.
     """
+
     def __init__(self, data: pd.DataFrame):
         """Initialize the Tensor object.
 
@@ -66,10 +65,10 @@ class Tensor(base.Base):
         Raises:
             ValueError: If the data does not contain the required columns.
         """
-        required_columns = pd.Index(['per', 'par', 'scalar'])
+        required_columns = pd.Index(["per", "par", "scalar"])
         if not required_columns.isin(data.columns).all():
             missing_columns = required_columns[~required_columns.isin(data.columns)]
-            raise ValueError(f'Missing required columns: {missing_columns.tolist()}')
+            raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     # @property
     # def per(self) -> Union[pd.Series, pd.DataFrame]:
@@ -89,4 +88,6 @@ class Tensor(base.Base):
     @property
     def magnitude(self) -> Union[pd.Series, pd.DataFrame]:
         """Calculate and return the magnitude of the tensor."""
-        return self.data.multiply({"par": 1/3, "per": 2/3}, axis=1, level="C").sum(axis=1)
+        return self.data.multiply({"par": 1 / 3, "per": 2 / 3}, axis=1, level="C").sum(
+            axis=1
+        )

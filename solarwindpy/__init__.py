@@ -24,8 +24,14 @@ from .core import (
 from . import core, plotting, solar_activity, tools, fitfunctions
 from . import instabilities  # noqa: F401
 
-pd.set_option("mode.chained_assignment", "raise")
-# pd.set_option("mode.use_inf_as_na", True)
+
+def _configure_pandas() -> None:
+    """Configure global pandas options used throughout SolarWindPy."""
+
+    pd.set_option("mode.chained_assignment", "raise")
+
+
+_configure_pandas()
 
 Plasma = core.plasma.Plasma
 at = alfvenic_turbulence
