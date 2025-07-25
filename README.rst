@@ -21,18 +21,28 @@ TODO
 Development
 -----------
 
-1) Fork the repo.
-2) Clone the repo.
-3) Build and install development repo. From ``SolarWindPy`` directiory,
-   execute
-      >>> python setup.py sdist bdist_wheel
-      >>> python setup.py develop
+1. Fork the repository and clone your fork.
+2. Create a virtual environment and install the development requirements:
 
-4) Intall ``flake8`` and ``black``
-      >>> pre-commit install
-   These are tools for checking code style, variable definitions, etc.
-5) Verify the current tests pass.
-   >>> python -m solarwindpy.tests.run_tests
+   .. code-block:: bash
+
+      python -m venv .venv
+      source .venv/bin/activate
+      pip install -r requirements-dev.txt
+
+3. Run the test suite with ``pytest``:
+
+   .. code-block:: bash
+
+      pytest -q
+
+4. Optionally install the pre-commit hooks:
+
+   .. code-block:: bash
+
+      pre-commit install
+
+   This will run ``black`` and ``flake8`` automatically when committing.
 
 License
 =======
