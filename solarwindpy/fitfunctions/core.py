@@ -17,7 +17,19 @@ from inspect import getfullargspec
 
 # from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
-from scipy.optimize._minpack_py import _wrap_func, _wrap_jac, _initialize_feasible
+
+try:
+    from scipy.optimize._minpack_py import (
+        _wrap_func,
+        _wrap_jac,
+        _initialize_feasible,
+    )
+except ImportError:  # pragma: no cover - fall back for older SciPy versions
+    from scipy.optimize.minpack import (
+        _wrap_func,
+        _wrap_jac,
+        _initialize_feasible,
+    )
 from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
@@ -608,14 +620,14 @@ xobs: {xobs.shape}"""
             r = self.function(xdata, *popt) - ydata
             if sigma is not None:
                 r /= sigma
-            chisq_dof = (r ** 2).sum() / dof
+            chisq_dof = (r**2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.
         _, s, VT = svd(res.jac, full_matrices=False)
         threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
         s = s[s > threshold]
         VT = VT[: s.size]
-        pcov = np.dot(VT.T / (s ** 2), VT)
+        pcov = np.dot(VT.T / (s**2), VT)
 
         warn_cov = False
         if ysize > p0.size:
