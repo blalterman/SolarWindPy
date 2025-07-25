@@ -137,7 +137,7 @@ class Constants:
 
 @dataclass
 class Units:
-    """Common unit conversion factors.
+    r"""Common unit conversion factors.
 
     Attributes
     ----------
