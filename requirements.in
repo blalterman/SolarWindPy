@@ -1,0 +1,12 @@
+numpy
+scipy
+pandas
+numexpr
+bottleneck
+h5py
+pyyaml
+matplotlib
+datetime
+astropy
+numba
+tabulate

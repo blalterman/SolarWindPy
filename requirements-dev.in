@@ -1,0 +1,7 @@
+black
+flake8
+pre-commit
+pytest
+sphinx
+sphinx-rtd-theme
+twine

@@ -23,15 +23,19 @@ Development
 
 1) Fork the repo.
 2) Clone the repo.
-3) Build and install development repo. From ``SolarWindPy`` directiory,
+3) Build and install development repo. From ``SolarWindPy`` directory,
    execute
       >>> python setup.py sdist bdist_wheel
       >>> python setup.py develop
-
-4) Intall ``flake8`` and ``black``
+4) Install development requirements
+      >>> pip install -r requirements-dev.in
+   ``requirements.in`` lists the runtime dependencies with no version
+   pins while ``requirements-dev.in`` contains tools such as
+   ``black`` and ``flake8``.
+5) Intall the pre-commit hooks
       >>> pre-commit install
    These are tools for checking code style, variable definitions, etc.
-5) Verify the current tests pass.
+6) Verify the current tests pass.
    >>> python -m solarwindpy.tests.run_tests
 
 License
