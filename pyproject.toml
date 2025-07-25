@@ -10,3 +10,57 @@ exclude = '''
   | dist
 )/
 '''
+
+[build-system]
+requires = ["setuptools>=61", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solarwindpy"
+description = "Python package for solar wind data analysis."
+readme = "README.rst"
+requires-python = ">=3.7,<4"
+license = {file = "LICENSE.rst"}
+authors = [
+  {name = "B. L. Alterman", email = "blaltermanphd@gmail.com"}
+]
+dynamic = ["version"]
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "numexpr",
+  "bottleneck",
+  "h5py",
+  "pyyaml",
+  "matplotlib",
+  "datetime",
+  "astropy",
+  "numba",
+  "tabulate",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Stuff :: Stuff",
+  "License :: OSI Approved :: BSD-3-Clause",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Education",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+keywords = [
+  "plasma",
+  "physics",
+  "solar wind",
+  "measurements",
+  "in situ",
+  "spacecraft",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/blalterman/SolarWindPy/issues"
+"Source" = "https://github.com/blalterman/SolarWindPy"
+
