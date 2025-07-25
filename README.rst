@@ -28,9 +28,9 @@ Development
       >>> python setup.py sdist bdist_wheel
       >>> python setup.py develop
 
-4) Intall ``flake8`` and ``black``
+4) Install ``pre-commit`` hooks
       >>> pre-commit install
-   These are tools for checking code style, variable definitions, etc.
+   This sets up automatic style checks using ``black`` and ``flake8``.
 5) Verify the current tests pass.
    >>> python -m solarwindpy.tests.run_tests
 
@@ -48,8 +48,8 @@ See :doc:`CITATION.rst` for instructions on citing SolarWindPy.
 .. _LICENSE.rst: ./LICENSE.rst
 .. _CITATION.rst: ./CITATION.rst
 
-.. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
-   :target: https://travis-ci.com/blalterman/SolarWindPy
+.. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml/badge.svg?branch=master
+   :target: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE.rst
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
