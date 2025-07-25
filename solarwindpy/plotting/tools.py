@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.plotting` helper functions.
+r"""Utility plotting helpers used throughout :mod:`solarwindpy`.
+
+This module wraps common :mod:`matplotlib` patterns for creating figures,
+saving output, and generating grids of axes.  The goal is to reduce boilerplate
+when producing publication quality plots.
 """
 
 import pdb  # noqa: F401
@@ -13,10 +17,30 @@ from itertools import product
 
 
 def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
-    r"""Wrapper for `plt.subplots` that calculates figsize from `nrows`,
-    `ncols` when `figsize` not specified. Can optionally scale the figure
-    width and hight with respect to the figsize in mpl.rcParams using
-    `scale_width` and `scale_height`.
+    r"""Create a grid of subplots with a scaled figure size.
+
+    Parameters
+    ----------
+    nrows : int, optional
+        Number of subplot rows.
+    ncols : int, optional
+        Number of subplot columns.
+    scale_width : float, optional
+        Factor applied to the default figure width.
+    scale_height : float, optional
+        Factor applied to the default figure height.
+    **kwargs
+        Additional keyword arguments passed directly to
+        :func:`matplotlib.pyplot.subplots`.
+
+    Returns
+    -------
+    fig : :class:`matplotlib.figure.Figure`
+    ax : :class:`matplotlib.axes.Axes` or array of Axes
+
+    Examples
+    --------
+    >>> fig, ax = subplots(2, 2, scale_width=1.5)
     """
     scale = np.array([scale_width * ncols, scale_height * nrows])
     figsize = scale * kwargs.pop("figsize", mpl.rcParams["figure.figsize"])
@@ -35,12 +59,39 @@ def save(
     png=True,
     **kwargs,
 ):
-    r"""Save `fig` at `spath` as png and eps, tracking the save at alog.
+    r"""Save a figure in both PDF and PNG formats.
 
-    Note that we add `B.L. Alterman` and the datetime to the bottom left
-    corner of every figure.
+    Parameters
+    ----------
+    fig : :class:`matplotlib.figure.Figure` or :class:`matplotlib.axes.Axes`
+        The figure or axis to save.
+    spath : :class:`pathlib.Path`
+        Base path for the output files.  The appropriate extension will be
+        added automatically.
+    add_info : bool, optional
+        If ``True``, add an attribution and timestamp to the bottom left of the
+        PNG version.
+    info_x : float, optional
+        X-position of the attribution text in figure coordinates.
+    info_y : float, optional
+        Y-position of the attribution text in figure coordinates.
+    log : bool, optional
+        If ``True``, write information about the saved files to ``alog``.
+    pdf : bool, optional
+        Save a PDF version of the figure.
+    png : bool, optional
+        Save a PNG version of the figure.
+    **kwargs
+        Additional keyword arguments passed to :meth:`Figure.savefig`.
 
-    kwargs are passed to `fig.savefig`.
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> fig, ax = subplots()
+    >>> save(fig, Path('my_plot'))
     """
     if isinstance(fig, mpl.axes.Axes):
         fig = fig.figure
@@ -92,11 +143,29 @@ def save(
 
 
 def joint_legend(*axes, idx_for_legend=-1, **kwargs):
-    r"""Make a single legend combining handles and labels from all axes.
+    r"""Create a combined legend for multiple axes.
 
-    Place the legend on the axis located at the raveled `idx_for_legend`.
-    Assuming the last axis is on the right hand side of the figure, the default
-    index is -1.
+    Parameters
+    ----------
+    *axes : :class:`matplotlib.axes.Axes`
+        Axes objects from which to collect legend handles and labels.
+    idx_for_legend : int, optional
+        Index of the axis (after flattening) on which to place the legend.
+        By default the legend is placed on the last axis. ``idx_for_legend=-1``
+        assumes that the last axis is on the right hand side of the figure.
+    **kwargs
+        Extra keyword arguments forwarded to :meth:`Axes.legend`.
+
+    Returns
+    -------
+    legend : :class:`matplotlib.legend.Legend`
+
+    Examples
+    --------
+    >>> fig, ax = subplots(1, 2)
+    >>> ax[0].plot([1, 2], label='a')
+    >>> ax[1].plot([2, 3], label='b')
+    >>> joint_legend(ax[0], ax[1])
     """
     axes = np.array(axes).ravel()
 
@@ -135,7 +204,31 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
 def multipanel_figure_shared_cbar(
     nrows, ncols, vertical_cbar=True, sharex=True, sharey=True, **kwargs
 ):
-    r"""Construct a figure and axes set using GridSpec."""
+    r"""Create a grid of axes that share a single colorbar.
+
+    Parameters
+    ----------
+    nrows, ncols : int
+        Shape of the axes grid.
+    vertical_cbar : bool, optional
+        If ``True`` the colorbar is placed to the right of the axes; otherwise
+        it is placed above them.
+    sharex, sharey : bool, optional
+        If ``True`` share the respective axis limits across all panels.
+    **kwargs
+        Additional arguments controlling layout such as ``figsize`` or grid
+        ratios.
+
+    Returns
+    -------
+    fig : :class:`matplotlib.figure.Figure`
+    axes : ndarray of :class:`matplotlib.axes.Axes`
+    cax : :class:`matplotlib.axes.Axes`
+
+    Examples
+    --------
+    >>> fig, axs, cax = multipanel_figure_shared_cbar(2, 2)
+    """
 
     figsize = kwargs.pop("figsize", None)
     if figsize is None:
@@ -193,6 +286,29 @@ def multipanel_figure_shared_cbar(
 def build_ax_array_with_common_colorbar(
     nrows=1, ncols=1, cbar_loc="top", fig_kwargs=None, gs_kwargs=None
 ):
+    r"""Build an array of axes that share a colour bar.
+
+    Parameters
+    ----------
+    nrows, ncols : int, optional
+        Desired grid shape.
+    cbar_loc : {"top", "bottom", "left", "right"}, optional
+        Location of the colorbar relative to the axes grid.
+    fig_kwargs : dict, optional
+        Keyword arguments forwarded to :func:`matplotlib.pyplot.figure`.
+    gs_kwargs : dict, optional
+        Additional options for :class:`matplotlib.gridspec.GridSpec`.
+
+    Returns
+    -------
+    fig : :class:`matplotlib.figure.Figure`
+    axes : ndarray of :class:`matplotlib.axes.Axes`
+    cax : :class:`matplotlib.axes.Axes`
+
+    Examples
+    --------
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')
+    """
 
     if fig_kwargs is None:
         fig_kwargs = dict()
@@ -299,21 +415,25 @@ Created  : {axes.shape}
 
 
 def calculate_nrows_ncols(n):
-    r"""Calculate the closest rectangular shape for `(nrows, ncols)` to the number
-    of axes `n` needed.
+    r"""Determine a sensible ``(nrows, ncols)`` pair for ``n`` axes.
 
-    The output prefers `ncols > nrows` when `max([nrows, ncols]) < 4`. Otherwise,
-    it preferes `ncols < nrows`. This accounts for display sizes.
+    The heuristic attempts to generate a nearly square layout while also taking
+    typical display aspect ratios into account.
 
-    Paremeters
+    Parameters
     ----------
-    n: scalar
-        Number of axes needed.
+    n : int
+        Total number of axes required.
 
     Returns
     -------
-    nrows, ncols: scalar
-        Number of rows and columns
+    nrows : int
+    ncols : int
+
+    Examples
+    --------
+    >>> calculate_nrows_ncols(5)
+    (2, 3)
     """
     root = int(np.fix(np.sqrt(n)))
     while n % root:
