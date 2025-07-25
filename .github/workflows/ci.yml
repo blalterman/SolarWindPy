@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, update-2025]
   pull_request:
-    branches: [master]
+    branches: [master, update-2025]
 
 jobs:
   build:
