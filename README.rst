@@ -22,13 +22,20 @@ Development
 -----------
 
 1. Fork the repository and clone your fork.
-2. Create a virtual environment and install the development requirements:
+2. Create a Conda environment using the provided YAML file:
 
    .. code-block:: bash
 
-      python -m venv .venv
-      source .venv/bin/activate
-      pip install -r requirements-dev.txt
+      conda env create -f solarwindpy-20250403.yml
+      conda activate solarwindpy-20250403
+
+   Alternatively generate the environment from ``requirements-dev.txt``:
+
+   .. code-block:: bash
+
+      python scripts/requirements_to_conda_env.py --name solarwindpy-dev
+      conda env create -f environment.yml
+      conda activate solarwindpy-dev
 
 3. Run the test suite with ``pytest``:
 
