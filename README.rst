@@ -21,18 +21,29 @@ TODO
 Development
 -----------
 
-1) Fork the repo.
-2) Clone the repo.
-3) Build and install development repo. From ``SolarWindPy`` directiory,
-   execute
-      >>> python setup.py sdist bdist_wheel
-      >>> python setup.py develop
+1. Fork the repository and clone your fork.
+2. Create a virtual environment and install the development requirements:
 
-4) Intall ``flake8`` and ``black``
-      >>> pre-commit install
-   These are tools for checking code style, variable definitions, etc.
-5) Verify the current tests pass.
-   >>> python -m solarwindpy.tests.run_tests
+   .. code-block:: bash
+
+      python -m venv .venv
+      source .venv/bin/activate
+      pip install -r requirements-dev.txt
+
+3. Run the test suite with ``pytest``:
+
+   .. code-block:: bash
+
+      pytest -q
+
+4. Optionally install the pre-commit hooks:
+
+   .. code-block:: bash
+
+      pre-commit install
+
+   This will run ``black`` and ``flake8`` automatically when committing.
+
 
 License
 =======
@@ -48,8 +59,8 @@ See :doc:`CITATION.rst` for instructions on citing SolarWindPy.
 .. _LICENSE.rst: ./LICENSE.rst
 .. _CITATION.rst: ./CITATION.rst
 
-.. |Build Status| image:: https://travis-ci.com/blalterman/SolarWindPy.svg?token=tsZeqtLHgqx3UJh7uvM8&branch=master
-   :target: https://travis-ci.com/blalterman/SolarWindPy
+.. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml/badge.svg?branch=master
+   :target: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE.rst
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
