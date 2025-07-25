@@ -1,7 +1,7 @@
 [tool.black]
 include = '\.pyi?$'
 exclude = '''
-/(
+/( 
     \.git
   | \.eggs
   | \.travis.yml
@@ -10,3 +10,21 @@ exclude = '''
   | dist
 )/
 '''
+
+[project]
+name = "solarwindpy"
+requires-python = ">=3.7"
+dynamic = ["version"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "numexpr",
+    "bottleneck",
+    "h5py",
+    "pyyaml",
+    "matplotlib",
+    "astropy",
+    "numba",
+    "tabulate",
+]
