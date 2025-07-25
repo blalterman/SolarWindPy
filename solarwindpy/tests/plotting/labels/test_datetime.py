@@ -63,8 +63,8 @@ def test_epoch_label(datetime_mod):
 def test_frequency_label(datetime_mod):
     """Validate ``Frequency`` label output."""
     freq = datetime_mod.Frequency("1h")
-    assert str(freq.path) == "frequency_of_(1 \\; \\mathrm{h})^-1"
-    assert str(freq) == "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{h})^-1]$"
+    assert str(freq.path) == "frequency_of_(1 \\; \\mathrm{H})^-1"
+    assert str(freq) == "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{H})^-1]$"
 
 
 def test_january1st_label(datetime_mod):
