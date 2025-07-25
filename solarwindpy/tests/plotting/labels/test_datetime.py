@@ -43,7 +43,7 @@ def test_timedelta_latex_and_path(datetime_mod):
     """Verify ``Timedelta`` LaTeX and path string."""
     td = datetime_mod.Timedelta("2h")
     assert str(td.path) == "dt-2h"
-    assert str(td) == "$\\Delta t \\; [2 \\; \\mathrm{h}]$"
+    assert str(td) == "$\\Delta t \\; [2 \\; \\mathrm{H}]$"
 
 
 def test_datetime_label(datetime_mod):
@@ -63,7 +63,7 @@ def test_epoch_label(datetime_mod):
 def test_frequency_label(datetime_mod):
     """Validate ``Frequency`` label output."""
     freq = datetime_mod.Frequency("1h")
-    assert str(freq.path) == "frequency_of_(1 \\; \\mathrm{h})^-1"
+    assert str(freq.path) == "frequency_of_(1 \\; \\mathrm{H})^-1"
     assert str(freq) == "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{h})^-1]$"
 
 
