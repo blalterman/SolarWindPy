@@ -4,14 +4,6 @@ solarwindpy.tests package
 Submodules
 ----------
 
-solarwindpy.tests.run\_tests module
------------------------------------
-
-.. automodule:: solarwindpy.tests.run_tests
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 solarwindpy.tests.test\_alfvenic\_turbulence module
 ---------------------------------------------------
 
