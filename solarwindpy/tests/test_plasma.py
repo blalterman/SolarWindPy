@@ -325,7 +325,6 @@ class PlasmaTestBase(ABC):
                     ot.mass_density("+".join(s)), ot.rho("+".join(s))
                 )
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_thermal_speed(self):
         ot = self.object_testing
         ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
@@ -393,7 +392,6 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.pth("+".join(s)))
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_temperature(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
@@ -1319,7 +1317,6 @@ class PlasmaTestBase(ABC):
                 check_names=False,
             )
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_spacecraft_in_plasma(self):
         sc_data = base.TestData().spacecraft_data
 
@@ -2016,7 +2013,6 @@ class PlasmaTestBase(ABC):
         # pdt.assert_index_equal(epoch, ot.data.epoch)
         # pdt.assert_index_equal(ot.data.epoch, ot.data.index)
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_build_alfvenic_turbulence(self):
         species = self.species
         slist = species.split("+")
