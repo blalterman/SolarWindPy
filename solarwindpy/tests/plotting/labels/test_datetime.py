@@ -42,8 +42,8 @@ def datetime_mod():
 def test_timedelta_latex_and_path(datetime_mod):
     """Verify ``Timedelta`` LaTeX and path string."""
     td = datetime_mod.Timedelta("2h")
-    assert str(td.path) == "dt-2h"
-    assert str(td) == "$\\Delta t \\; [2 \\; \\mathrm{h}]$"
+    assert str(td.path) == "dt-2H"
+    assert str(td) == "$\\Delta t \\; [2 \\; \\mathrm{H}]$"
 
 
 def test_datetime_label(datetime_mod):
