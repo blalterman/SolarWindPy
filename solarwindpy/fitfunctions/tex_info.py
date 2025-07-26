@@ -162,7 +162,7 @@ class TeXinfo(object):
         #         rel_err = [template.format(k, np.abs(v)) for k, v in TeX.items()]
 
         rel_err = tabulate(
-            [[f"{k} \;\;\; ", np.abs(v)] for k, v in TeX.items()],  # noqa: W605
+            [[f"{k} \\;\\;\\; ", np.abs(v)] for k, v in TeX.items()],  # noqa: W605
             floatfmt=".3e",
             tablefmt="plain",
         )

@@ -394,8 +394,8 @@ class FFPlot(object):
             marker = kwargs.pop("marker", "P")
             linestyle = kwargs.pop("linestyle", "-")
 
-            label = " \; ".join([label, kind.title()]).lstrip(  # noqa: W605
-                " \; "  # noqa: W605
+            label = r" \; ".join([label, kind.title()]).lstrip(  # noqa: W605
+                r" \; "  # noqa: W605
             )
             label = r"$\mathrm{%s}$" % label
             #             label = (r"$\mathrm{%s \; %s}$" % (label, kind.title()).replace(" \; ", "")
@@ -420,7 +420,7 @@ class FFPlot(object):
                 self.observations.used.x,
                 self.residuals(pct=pct, robust=False),
                 label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(  # noqa: W605
-                    " \; "  # noqa: W605
+                    r" \; "  # noqa: W605
                 ),
                 drawstyle=drawstyle,
                 color="forestgreen",
@@ -438,7 +438,7 @@ class FFPlot(object):
                     self.observations.used.x,
                     r,
                     label=(r"$\mathrm{%s \; Robust}$" % label).lstrip(  # noqa: W605
-                        " \; "  # noqa: W605
+                        r" \; "  # noqa: W605
                     ),
                     drawstyle=drawstyle,
                     color="darkorange",

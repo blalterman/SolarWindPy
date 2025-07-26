@@ -26,7 +26,7 @@ class Timedelta(special.ArbitraryLabel):
 
     @property
     def with_units(self):
-        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+        return f"${self.tex} \\; [{self.units}]$"  # noqa: W605
 
     #     @property
     #     def dt(self):
@@ -50,7 +50,10 @@ class Timedelta(special.ArbitraryLabel):
     @property
     def units(self):
         try:
-            return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
+            return "%s \\; \\mathrm{%s}" % (
+                self.offset.n,
+                self.offset.name,
+            )  # noqa: W605
         except AttributeError:
             return base._inU["unknown"]
 
@@ -90,7 +93,7 @@ class DateTime(special.ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s}" % self.kind.replace(" ", " \; ")  # noqa: W605
+        return r"\mathrm{%s}" % self.kind.replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
@@ -103,7 +106,7 @@ class DateTime(special.ArbitraryLabel):
 class Epoch(special.ArbitraryLabel):
     r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
-    def __init__(self, kind, of_thing, space="\,"):  # noqa: W605
+    def __init__(self, kind, of_thing, space=r"\,"):  # noqa: W605
         """Instantiate the label.
 
         Parameters
@@ -159,7 +162,7 @@ class Epoch(special.ArbitraryLabel):
         self._smaller = new.title()
 
     def set_space(self, new):
-        if new not in (" ", "\,", "\;", "\:"):  # noqa: W605
+        if new not in (" ", r"\,", r"\;", r"\:"):  # noqa: W605
             raise ValueError(f"Unrecognized Space {new}")
 
         self._space = new
@@ -225,7 +228,7 @@ class January1st(special.ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{January 1^{st} of Year}".replace(" ", " \; ")  # noqa: W605
+        return r"\mathrm{January 1^{st} of Year}".replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
