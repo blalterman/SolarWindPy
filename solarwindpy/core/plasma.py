@@ -754,7 +754,10 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("S").sum().T
+            if "+" in species[0]:
+                pth = pth.T.groupby(level="C").sum().T
+            else:
+                pth = pth.xs(slist[0], axis=1, level="S")
             # pth["S"] = species[0]
             # pth = pth.set_index("S", append=True).unstack()
             # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)

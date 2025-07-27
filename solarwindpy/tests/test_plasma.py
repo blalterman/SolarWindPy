@@ -2322,7 +2322,6 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_specific_entropy(self):
         # print_inline_debug_info = False
         ot = self.object_testing
