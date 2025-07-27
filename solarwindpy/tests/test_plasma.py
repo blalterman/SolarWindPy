@@ -359,7 +359,6 @@ class PlasmaTestBase(ABC):
                 with self.assertRaises(ValueError):
                     ot.thermal_speed(",".join(s))
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_pth(self):
         # print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
