@@ -967,7 +967,6 @@ class PlasmaTestBase(ABC):
                 left.name = "+".join(combo)
                 pdt.assert_series_equal(left, self.object_testing.afsq("+".join(combo)))
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_caani(self):
         # print_inline_debug_info = False
 

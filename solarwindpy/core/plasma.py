@@ -754,7 +754,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("S").sum().T
+            pth = pth.groupby(level="C", axis=1).sum()
             # pth["S"] = species[0]
             # pth = pth.set_index("S", append=True).unstack()
             # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -1177,7 +1177,7 @@ species: {}
         bsq = self.bfield.cartesian.pow(2.0).sum(axis=1)
 
         pth = self.pth(*species)
-        pth = pth.drop("scalar", axis=1)
+        pth = pth.drop("scalar", axis=1, errors="ignore")
 
         sum_coeff = pd.Series({"per": 1, "par": -1})
         dp = pth.multiply(sum_coeff, axis=1, level="C" if multi_species else None)
@@ -1187,7 +1187,7 @@ species: {}
         # My guess is that following this line, we'd insert the subtraction
         # of the dynamic pressure with the appropriate alignment of the
         # species as necessary.
-        dp = dp.sum(axis=1, level="S" if multi_species else None)
+        dp = dp.sum(axis=1, level="S") if multi_species else dp.sum(axis=1)
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
