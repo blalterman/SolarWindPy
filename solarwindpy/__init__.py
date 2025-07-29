@@ -7,7 +7,10 @@ methods.
 
 import pdb  # noqa: F401
 
-from pkg_resources import get_distribution, DistributionNotFound
+try:
+    from importlib.metadata import PackageNotFoundError, version
+except ImportError:  # pragma: no cover - Python <3.8
+    from importlib_metadata import PackageNotFoundError, version
 
 import pandas as pd
 
@@ -68,8 +71,8 @@ __author__ = "B. L. Alterman <balterma@umich.edu>"
 __name__ = "solarwindpy"
 
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
     __version__ = "unknown"
 
