@@ -2,17 +2,19 @@
 """Generate a Conda environment file from a requirements list.
 
 This script reads ``requirements.txt`` or a user-specified file and
-produces an ``environment.yml`` suitable for ``conda env create``.
+produces ``<env_name>.yml`` suitable for ``conda env create``.
 
 Examples
 --------
 Run with the default requirements file::
 
     python scripts/requirements_to_conda_env.py
+    conda env create -f solarwindpy-dev.yml
 
 Specify a different requirements file and environment name::
 
     python scripts/requirements_to_conda_env.py custom.txt --name my-env
+    conda env create -f my-env.yml
 """
 
 from __future__ import annotations
@@ -22,8 +24,9 @@ import yaml
 
 from pathlib import Path
 
+
 def generate_environment(req_path: str, env_name: str) -> None:
-    """Create ``environment.yml`` from a requirements file.
+    """Create ``<env_name>.yml`` from a requirements file.
 
     Parameters
     ----------
@@ -45,12 +48,11 @@ def generate_environment(req_path: str, env_name: str) -> None:
         "dependencies": packages,
     }
 
-
     target_name = Path(f"{env_name}.yml")
-    
+
     if target_name.exists():
-    	raise ValueError("Target environment name exists. Please pick a new name.")
-	
+        raise ValueError("Target environment name exists. Please pick a new name.")
+
     with open(target_name, "w") as out_file:
         yaml.safe_dump(env, out_file, sort_keys=False)
 
