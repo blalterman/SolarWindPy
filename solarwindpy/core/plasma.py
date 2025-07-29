@@ -754,7 +754,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("S").sum().T
+            pth = pth.T.groupby("C").sum().T
             # pth["S"] = species[0]
             # pth = pth.set_index("S", append=True).unstack()
             # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -872,7 +872,8 @@ class Plasma(base.Base):
 
         if len(species) > 1:
             # if "S" in pth.columns.names:
-            ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
+#             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
+            ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
         else:
             ani = pth.pow(exp, axis=1).product(axis=1)
             ani.name = species[0]

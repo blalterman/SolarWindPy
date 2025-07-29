@@ -359,38 +359,46 @@ class PlasmaTestBase(ABC):
                 with self.assertRaises(ValueError):
                     ot.thermal_speed(",".join(s))
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_pth(self):
-        # print_inline_debug_info = False
+        print_inline_debug_info = True
         # Test that Plasma returns each Ion plasma independently.
-        ions_ = {s: self.object_testing.ions[s].pth for s in self.stuple}
+        ot = self.object_testing
+        
+        ions_ = {s: ot.ions[s].pth for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
-        # print("<Ions>", ions, sep="\n")
+#         print("<Ions>", ions, sep="\n")
 
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
+#             print(s)
+        	
             tk_species = pd.IndexSlice[:, s[0] if len(s) == 1 else s]
             this_ion = ions_.loc[:, tk_species]
             if len(s) == 1:
                 this_ion = this_ion.xs(s[0], axis=1, level="S")
 
-            # if print_inline_debug_info:
-            #     print(s)
-            #     print("<Ion>", type(this_ion))
-            #     print(this_ion)
-            #     print("<Plasma>", type(self.object_testing.pth(*s)))
-            #     print(self.object_testing.pth(*s))
+            if print_inline_debug_info:
+                print(s)
+                print(len(s))
+                print("<Ion>", type(this_ion))
+                print(this_ion)
+                print("<Plasma>", type(ot.pth(*s)))
+                print(self.object_testing.pth(*s))
+			
+            pdt.assert_frame_equal(this_ion, ot.pth(*s))
 
-            pdt.assert_frame_equal(this_ion, self.object_testing.pth(*s))
+# 			print(this_ion)
 
             if len(s) > 1:
                 this_ion = this_ion.T.groupby(level="C").sum().T
                 # if print_inline_debug_info:
-                #     print("<Summed Ion>", this_ion,
-                #           "<Plasma sum>", self.object_testing.pth("+".join(s)),
-                #           sep="\n")
-                pdt.assert_frame_equal(this_ion, self.object_testing.pth("+".join(s)))
+#                 print("<Summed Ion>", this_ion,
+#                       "<Plasma sum>", self.object_testing.pth("+".join(s)),
+#                       sep="\n")
+                pdt.assert_frame_equal(this_ion, ot.pth("+".join(s)))
+
+# 			print(this_ion)
 
     def test_temperature(self):
         # print_inline_debug_info = False
@@ -427,7 +435,6 @@ class PlasmaTestBase(ABC):
                     this_ion, self.object_testing.temperature("+".join(s))
                 )
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_beta(self):
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
         pth = pd.concat(pth, axis=1, names=["S"], sort=True)
@@ -475,15 +482,17 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
 
-    @pytest.mark.skip(reason="Not implemented")
+
     def test_anisotropy(self):
+        ot = self.object_testing
+    
         # Test individual components. Should return RT values.
         for s in self.stuple:
             w = self.data.w.xs(s, axis=1, level="S")
             ani = (w.per / w.par).pow(2)
             ani.name = s
             # print("", ani, sep="\n")
-            right = self.object_testing.anisotropy(s)
+            right = ot.anisotropy(s)
             pdt.assert_series_equal(ani, right)
             # print("", "<ani>", ani, sep="\n")
 
@@ -498,12 +507,18 @@ class PlasmaTestBase(ABC):
                 # pdt.assert_series_equal(ani, right)
             else:
                 # Test list of and sums of sums of species.
-                pth = {sprime: self.object_testing.ions.loc[sprime].pth for sprime in s}
+                pth = {sprime: ot.ions.loc[sprime].pth for sprime in s}
                 pth = pd.concat(pth, axis=1, names=["S"], sort=True)
                 pth = pth.drop("scalar", axis=1, level="C", errors="ignore")
 
                 coeff = pd.Series({"par": -1, "per": 1})
-                ani_s = pth.pow(coeff, axis=1, level="C").product(axis=1, level="S")
+                
+                # Calculate anisotropy of each individual species.
+                ani_s = pth.pow(coeff, axis=1, level="C")
+#                 ani_s = ani_s.product(axis=1, level="S")
+                ani_s = ani_s.T.groupby("S").prod().T
+                
+                # Calculate total anisotropy.
                 ani_sum = (
                     pth.T.groupby(level="C")
                     .sum()
@@ -525,10 +540,8 @@ class PlasmaTestBase(ABC):
                 #           self.object_testing.anisotropy("+".join(s)),
                 #           sep="\n")
 
-                pdt.assert_frame_equal(ani_s, self.object_testing.anisotropy(*s))
-                pdt.assert_series_equal(
-                    ani_sum, self.object_testing.anisotropy("+".join(s))
-                )
+                pdt.assert_frame_equal(ani_s, ot.anisotropy(*s))
+                pdt.assert_series_equal(ani_sum, ot.anisotropy("+".join(s)))
 
     def test_velocity(self):
         ot = self.object_testing

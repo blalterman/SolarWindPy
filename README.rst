@@ -28,7 +28,8 @@ Development
 
       conda env create -f solarwindpy-20250403.yml
       conda activate solarwindpy-20250403
-
+      pip install -e .
+      
    Alternatively generate the environment from ``requirements-dev.txt``:
 
    .. code-block:: bash
@@ -36,6 +37,7 @@ Development
       python scripts/requirements_to_conda_env.py --name solarwindpy-dev
       conda env create -f environment.yml
       conda activate solarwindpy-dev
+      pip install -e .
 
 3. Run the test suite with ``pytest``:
 
