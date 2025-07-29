@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import yaml
 
+from pathlib import Path
 
 def generate_environment(req_path: str, env_name: str) -> None:
     """Create ``environment.yml`` from a requirements file.
@@ -44,7 +45,13 @@ def generate_environment(req_path: str, env_name: str) -> None:
         "dependencies": packages,
     }
 
-    with open("environment.yml", "w") as out_file:
+
+    target_name = Path(f"{env_name}.yml")
+    
+    if target_name.exists():
+    	raise ValueError("Target environment name exists. Please pick a new name.")
+	
+    with open(target_name, "w") as out_file:
         yaml.safe_dump(env, out_file, sort_keys=False)
 
 
