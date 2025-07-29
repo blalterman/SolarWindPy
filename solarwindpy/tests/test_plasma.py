@@ -907,7 +907,7 @@ class PlasmaTestBase(ABC):
                     ions_.loc[:, "+".join(s)], self.object_testing.ca("+".join(s))
                 )
 
-    @pytest.mark.skip(reason="Not implemented")
+#     @pytest.mark.skip(reason="Not implemented")
     def test_afsq(self):
         #        print_inline_debug_info = True
 

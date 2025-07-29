@@ -1188,7 +1188,11 @@ species: {}
         # My guess is that following this line, we'd insert the subtraction
         # of the dynamic pressure with the appropriate alignment of the
         # species as necessary.
-        dp = dp.sum(axis=1, level="S" if multi_species else None)
+#         dp = dp.sum(axis=1, level="S" if multi_species else None)
+        if multi_species:
+            dp = dp.T.groupby(level="S").sum().T
+        else:
+            dp = dp.sum(axis=1)
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
