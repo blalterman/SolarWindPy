@@ -36,18 +36,11 @@ import itertools
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 
-try:
-    from . import base
-    from . import vector
-    from . import ions
-    from . import spacecraft
-    from . import alfvenic_turbulence as alf_turb
-except ImportError:
-    import base
-    import vector
-    import ions
-    import spacecraft
-    import alfvenic_turbulence as alf_turb
+from . import base
+from . import vector
+from . import ions
+from . import spacecraft
+from . import alfvenic_turbulence as alf_turb
 
 
 class Plasma(base.Base):
@@ -917,7 +910,7 @@ class Plasma(base.Base):
 
         if len(species) > 1:
             # if "S" in pth.columns.names:
-#             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
+            #             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
             ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
         else:
             ani = pth.pow(exp, axis=1).product(axis=1)
@@ -1233,7 +1226,7 @@ species: {}
         # My guess is that following this line, we'd insert the subtraction
         # of the dynamic pressure with the appropriate alignment of the
         # species as necessary.
-#         dp = dp.sum(axis=1, level="S" if multi_species else None)
+        #         dp = dp.sum(axis=1, level="S" if multi_species else None)
         if multi_species:
             dp = dp.T.groupby(level="S").sum().T
         else:

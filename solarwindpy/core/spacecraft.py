@@ -11,12 +11,8 @@ import numpy as np
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 
-try:
-    from . import base
-    from . import vector
-except ImportError:
-    import base
-    import vector
+from . import base
+from . import vector
 
 
 class Spacecraft(base.Base):
