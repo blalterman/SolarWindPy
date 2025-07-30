@@ -45,7 +45,13 @@ Development
 
       pytest -q
 
-4. Optionally install the pre-commit hooks:
+4. Regenerate the Conda recipe if the version or dependencies change:
+
+   .. code-block:: bash
+
+      python scripts/update_conda_recipe.py
+
+5. Optionally install the pre-commit hooks:
 
    .. code-block:: bash
 
