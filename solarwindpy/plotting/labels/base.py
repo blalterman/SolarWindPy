@@ -64,7 +64,7 @@ for i, s in (
 ):
     _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
 
-_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
+_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density", "rd": "1D Probability Density", "cd": "1D Probability Density"}
 
 _all_species_re = sorted(_trans_species.keys())[
     ::-1
@@ -141,6 +141,7 @@ _trans_units = {
     "v": _inU["kms"],
     "w": _inU["kms"],
     "dv": _inU["kms"],
+    "dn": _inU["cm-3"],
     "cs": _inU["kms"],
     "ca": _inU["kms"],
     "afsq": _inU["dimless"],
@@ -284,6 +285,7 @@ _templates = {
     "sigma_xy": r"\sigma_{\parallel}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
+    "dn": r"\delta n_{{$S}}",
     # Instability things
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma",

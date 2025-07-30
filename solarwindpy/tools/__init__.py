@@ -110,5 +110,10 @@ def normal_parameters(m, s):
     sigma *= np.exp(s ** 2.0) - 1.0
     sigma = np.sqrt(sigma)
 
-    out = pd.concat({"mu": mu, "sigma": sigma}, axis=1)
+    out = {"mu": mu, "sigma": sigma}
+    try:
+        out = pd.concat(out, axis=1)
+    except TypeError:
+        out = pd.Series(out)
+
     return out

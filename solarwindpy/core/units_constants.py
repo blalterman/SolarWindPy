@@ -252,3 +252,8 @@ class Units(object):
     def specific_entropy(self):
         r""":math:`[\mathrm{eV \, cm^2 \, m_p^{-5/3}}]`"""
         return 1e4 / constants.e
+
+    @property
+    def kinetic_energy_flux(self):
+        r""":math:`[\mathrm{mW \, m^{-2}]`"""
+        return 1e-3

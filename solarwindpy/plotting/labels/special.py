@@ -151,10 +151,16 @@ class Count(ArbitraryLabel):
     def _build_tex(self):
         axnorm = self.axnorm
         if axnorm:
-            if self.axnorm in ("r", "c", "t"):
+            if axnorm in ("r", "c", "t"):
                 tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm.get(axnorm)
-            else:
+            elif axnorm == "cd":
+                tex = r"\mathrm{1D Probability Density}"
+            elif axnorm == "rd":
+                tex = r"\mathrm{1D Probability Density}"
+            elif axnorm == "d":
                 tex = r"\mathrm{Probability Density}"
+            else:
+                raise ValueError(f"Unrecognized axis normalization `{axnorm}`")
         else:
             tex = r"\mathrm{Count}"
 

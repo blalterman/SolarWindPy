@@ -242,3 +242,23 @@ class Ion(base.Base):
         r"""Shortuct to :py:meth:`~specific_entropy`.
         """
         return self.specific_entropy
+
+    @property
+    def kinetic_energy_flux(self):
+        r"""Calcualte the kinetic energy flux as
+
+            :math:`W_k = \frac{1}{2} \rho v^3`
+        """
+        rho = self.rho * self.units.rho
+        v = self.v.mag * self.units.v
+        w = rho.multiply(v.pow(3)).multiply(0.5)
+        w /= self.units.kinetic_energy_flux
+
+        w.name = "Wk"
+        return w
+
+    @property
+    def Wk(self):
+        r"""Shortcut to :py:meth:`~kinetic_energy_flux`.
+        """
+        return self.kinetic_energy_flux

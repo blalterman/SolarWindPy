@@ -1041,7 +1041,9 @@ species: {}
 
         elif len(stuple) == 2:
             # Can only have 2 species with `project_m2q`.
-            dvsq = self.dv(*stuple).cartesian.pow(2).sum(axis=1)
+            dvsq = (
+                self.dv(*stuple, project_m2q=project_m2q).cartesian.pow(2).sum(axis=1)
+            )
             rho_i = self.mass_density(*stuple)
             mu = rho_i.product(axis=1).divide(rho_i.sum(axis=1), axis=0)
             pdv = dvsq.multiply(mu, axis=0)
@@ -1095,18 +1097,23 @@ species: {}
         -------
         cs: pd.DataFrame or pd.Series depending on `species` inputs.
         """
+        slist = self._chk_species(*species)
         rho = self.mass_density(*species) * self.units.rho
         pth = self.pth(*species) * self.units.pth
 
-        #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
-        gamma = self.units_constants.polytropic_index["scalar"]  # should be 5/3
-        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
+        pth = pth.loc[:, "scalar"]
 
-        raise NotImplementedError(
-            "How do we name this species? Need to figure out species processing up top."
-        )
+        #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
+        gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
+        cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
+
+        #         raise NotImplementedError(
+        #             "How do we name this species? Need to figure out species processing up top."
+        #         )
         if len(species) == 1:
             cs.name = species[0]
+        else:
+            assert cs.columns.isin(slist).all()
 
         return cs
 
@@ -1909,3 +1916,36 @@ species: {}
         out.name = "S"
 
         return out
+
+    def kinetic_energy_flux(self, *species):
+        r"""
+        Calculate the plasma kinetic energy flux.
+
+        Parameters
+        ----------
+        species: str
+            Each species is a string. If only one string is passed, it can
+            contain "+". If this is the case, the species are summed over and
+            a pd.Series is returned. Otherwise, the individual quantities are
+            returned as a pd.DataFrame.
+
+        Returns
+        -------
+        rho: pd.Series or pd.DataFrame
+            See Parameters for more info.
+        """
+        slist = self._chk_species(*species)
+
+        w = {s: self.ions.loc[s].kinetic_energy_flux for s in slist}
+        w = pd.concat(w, axis=1, names=["S"], sort=True)
+
+        if len(species) == 1:
+            w = w.sum(axis=1)
+            w.name = species[0]
+
+        return w
+
+    def Wk(self, *species):
+        r"""Shortcut to :py:meth:`~kinetic_energy_flux`.
+        """
+        return self.kinetic_energy_flux(*species)

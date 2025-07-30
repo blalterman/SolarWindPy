@@ -68,9 +68,23 @@ class Vector(base.Base):
 
     @property
     def colat(self):
+        return self.colatitude
+
+    @property
+    def colatitude(self):
         colat = np.rad2deg(np.arctan2(self.data.z, self.rho))
-        colat.name = "colat"
+        colat.name = "colatitude"
         return colat
+
+    @property
+    def lat(self):
+        return self.latitude
+
+    @property
+    def latitude(self):
+        lat = np.rad2deg(np.arctan2(self.rho, self.data.z))
+        lat.name = "latitude"
+        return lat
 
     @property
     def longitude(self):
