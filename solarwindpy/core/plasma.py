@@ -454,6 +454,51 @@ class Plasma(base.Base):
         self._ions = ions_
         self._species = species
 
+    def drop_species(self, *species: str) -> "Plasma":
+        """Return a new :class:`Plasma` without the specified species.
+
+        Parameters
+        ----------
+        *species : str
+            Species to remove from the plasma.
+
+        Returns
+        -------
+        Plasma
+            A new plasma containing only the remaining species.
+
+        Raises
+        ------
+        ValueError
+            If all species are removed.
+        """
+
+        species_to_drop = self._chk_species(*species)
+        remaining = [s for s in self.species if s not in species_to_drop]
+        if not remaining:
+            raise ValueError("Must have >1 species. Can't have empty plasma.")
+
+        mask_keep = (
+            self.data.columns.get_level_values("S") == ""
+        ) | self.data.columns.get_level_values("S").isin(remaining)
+        data = self.data.loc[:, mask_keep]
+
+        aux = None
+        if self.auxiliary_data is not None:
+            aux_mask = (
+                self.auxiliary_data.columns.get_level_values("S") == ""
+            ) | self.auxiliary_data.columns.get_level_values("S").isin(remaining)
+            aux = self.auxiliary_data.loc[:, aux_mask]
+
+        new = Plasma(
+            data,
+            *remaining,
+            spacecraft=self.spacecraft,
+            auxiliary_data=aux,
+            log_plasma_stats=self.log_plasma_at_init,
+        )
+        return new
+
     def set_spacecraft(self, new):
         assert isinstance(new, spacecraft.Spacecraft) or new is None
 
