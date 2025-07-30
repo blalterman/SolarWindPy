@@ -201,3 +201,9 @@ class Base(Core):
         ), "%s.species can't contain '+'." % (self.__class__.__name__)
         species = tuple(sorted(species))
         return species
+    
+    def head(self):
+        return self.data.head()
+    
+    def tail(self):
+        return self.data.tail()

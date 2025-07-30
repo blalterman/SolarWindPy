@@ -370,7 +370,7 @@ class Plasma(base.Base):
 
             plasma.set_spacecraft(sc)
             plasma.logger.warning(
-                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
+                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.data.shape
             )
 
         if akey:
