@@ -18,21 +18,21 @@ from . import units_constants as uc
 
 
 class Core(ABC):
-    """Base class for all ``solarwindpy`` objects.
+    """Base class for all :mod:`solarwindpy` objects.
 
-    This class initializes the logger, unit system, and physical constants
-    used across the package.
+    The class sets up logging, unit definitions, and physical constants. It
+    provides a common interface that all other core objects inherit from.
 
     Attributes
     ----------
     logger : :class:`logging.Logger`
-        Logger instance for the object.
+        Logger instance associated with the object.
     units : :class:`~solarwindpy.core.units_constants.Units`
-        Unit definitions.
+        Conversion factors used throughout the package.
     constants : :class:`~solarwindpy.core.units_constants.Constants`
-        Physical constants.
+        Collection of physical constants.
     data : :class:`pandas.DataFrame`
-        Data container used by subclasses.
+        Container for the underlying data.
     """
 
     def __init__(self) -> None:
@@ -139,10 +139,17 @@ class Core(ABC):
 
 
 class Base(Core):
-    """Common functionality for classes backed by a :class:`DataFrame`.
+    """Base class for objects backed by a :class:`pandas.DataFrame`.
 
-    Subclasses provide their own ``set_data`` implementations to validate the
-    underlying data structure.
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame`
+        Data used to initialise the object.
+
+    Notes
+    -----
+    Subclasses override :meth:`set_data` to validate the underlying
+    :class:`DataFrame` structure.
     """
 
     def __init__(self, data: pd.DataFrame) -> None:

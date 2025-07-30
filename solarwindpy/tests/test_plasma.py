@@ -3,7 +3,6 @@
 Tests for the :class:`Plasma` container.
 """
 import pandas as pd
-import pytest
 import numpy as np
 import itertools
 import pandas.testing as pdt
@@ -363,16 +362,16 @@ class PlasmaTestBase(ABC):
         print_inline_debug_info = True
         # Test that Plasma returns each Ion plasma independently.
         ot = self.object_testing
-        
+
         ions_ = {s: ot.ions[s].pth for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
-#         print("<Ions>", ions, sep="\n")
+        #         print("<Ions>", ions, sep="\n")
 
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
-#             print(s)
-        	
+            #             print(s)
+
             tk_species = pd.IndexSlice[:, s[0] if len(s) == 1 else s]
             this_ion = ions_.loc[:, tk_species]
             if len(s) == 1:
@@ -385,20 +384,20 @@ class PlasmaTestBase(ABC):
                 print(this_ion)
                 print("<Plasma>", type(ot.pth(*s)))
                 print(self.object_testing.pth(*s))
-			
+
             pdt.assert_frame_equal(this_ion, ot.pth(*s))
 
-# 			print(this_ion)
+            # 			print(this_ion)
 
             if len(s) > 1:
                 this_ion = this_ion.T.groupby(level="C").sum().T
                 # if print_inline_debug_info:
-#                 print("<Summed Ion>", this_ion,
-#                       "<Plasma sum>", self.object_testing.pth("+".join(s)),
-#                       sep="\n")
+                #                 print("<Summed Ion>", this_ion,
+                #                       "<Plasma sum>", self.object_testing.pth("+".join(s)),
+                #                       sep="\n")
                 pdt.assert_frame_equal(this_ion, ot.pth("+".join(s)))
 
-# 			print(this_ion)
+    # 			print(this_ion)
 
     def test_temperature(self):
         # print_inline_debug_info = False
@@ -482,10 +481,9 @@ class PlasmaTestBase(ABC):
                 #           sep="\n")
                 pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
 
-
     def test_anisotropy(self):
         ot = self.object_testing
-    
+
         # Test individual components. Should return RT values.
         for s in self.stuple:
             w = self.data.w.xs(s, axis=1, level="S")
@@ -512,12 +510,12 @@ class PlasmaTestBase(ABC):
                 pth = pth.drop("scalar", axis=1, level="C", errors="ignore")
 
                 coeff = pd.Series({"par": -1, "per": 1})
-                
+
                 # Calculate anisotropy of each individual species.
                 ani_s = pth.pow(coeff, axis=1, level="C")
-#                 ani_s = ani_s.product(axis=1, level="S")
+                #                 ani_s = ani_s.product(axis=1, level="S")
                 ani_s = ani_s.T.groupby("S").prod().T
-                
+
                 # Calculate total anisotropy.
                 ani_sum = (
                     pth.T.groupby(level="C")
@@ -907,7 +905,7 @@ class PlasmaTestBase(ABC):
                     ions_.loc[:, "+".join(s)], self.object_testing.ca("+".join(s))
                 )
 
-#     @pytest.mark.skip(reason="Not implemented")
+    #     @pytest.mark.skip(reason="Not implemented")
     def test_afsq(self):
         #        print_inline_debug_info = True
 

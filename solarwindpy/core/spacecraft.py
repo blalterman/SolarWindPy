@@ -16,15 +16,17 @@ from . import vector
 
 
 class Spacecraft(base.Base):
-    r"""Spacecraft class.
+    r"""Representation of a spacecraft trajectory.
 
-    Properties
+    Parameters
     ----------
-    name, frame, data, position, velocity, carrington
-
-    Methods
-    -------
-    set_<>
+    data : :class:`pandas.DataFrame`
+        Vector position (and optionally velocity) with MultiIndex columns
+        ``("M", "C")``.
+    name : str
+        Identifier of the spacecraft.
+    frame : str
+        Reference frame of the vectors, e.g. ``"HCI"`` or ``"GSE"``.
     """
 
     def __init__(self, data, name, frame):

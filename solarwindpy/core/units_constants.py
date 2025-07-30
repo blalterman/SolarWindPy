@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-"""Units and constants for transforming into and out of SI units.
+"""Definitions of common units and physical constants.
 
-All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
+The values are derived from :mod:`scipy.constants`. All quantities stored in
+the :class:`~solarwindpy.core.plasma.Plasma` object have a corresponding entry
+in :class:`Constants` and can be converted using :class:`Units`.
 """
 
 from dataclasses import dataclass, field

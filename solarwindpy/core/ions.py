@@ -14,41 +14,21 @@ from . import tensor
 
 
 class Ion(base.Base):
-    """
-    Represents an ion species with various properties and methods.
+    """Container for a single ion species.
+
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame`
+        Data for the ion in the form ``("M", "C")`` where ``M`` is the
+        measurement type (``n``, ``v``, ``w``) and ``C`` is the component.
+    species : str
+        Species identifier, e.g. ``"p"`` for protons or ``"a"`` for alpha
+        particles.
 
     Attributes
-        ----------
-    species : str
-        The species of the ion.
-
-    Properties
     ----------
-    velocity : Vector
-        Ion's velocity.
-    thermal_speed : Tensor
-        Ion's thermal speed.
-    number_density : pd.Series
-        Number density of the ion.
-    mass_density : pd.Series
-        Mass density of the ion.
-    anisotropy : pd.Series
-        Temperature anisotropy.
-    temperature : pd.DataFrame
-        Temperature of the ion.
-    pth : pd.DataFrame
-        Thermal pressure.
-    cs : pd.Series
-        Sound speed of the ion species.
-    specific_entropy : pd.Series
-        Specific entropy of the ion.
-
-    Methods
-    -------
-    set_species(species: str)
-        Set the species of the ion.
-    set_data(data: pd.DataFrame)
-        Set the data for the ion.
+    species : str
+        The ion's species name.
     """
 
     def __init__(self, data: pd.DataFrame, species: str):

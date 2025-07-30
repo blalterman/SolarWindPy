@@ -13,41 +13,51 @@ from . import base
 
 
 class Vector(base.Base):
-    """A class representing a 3D vector.
+    """Three-dimensional vector container.
 
-    This class provides methods for vector operations and coordinate transformations.
-
-    Attributes:
-        data (pd.DataFrame): The vector data with 'x', 'y', and 'z' components.
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame`
+        Data with ``x``, ``y`` and ``z`` components.
     """
 
     def __init__(self, data: pd.DataFrame):
-        """Initialize a Vector object.
+        """Initialize a :class:`Vector` instance.
 
-        Args:
-            data (pd.DataFrame): The vector data with 'x', 'y', and 'z' components.
+        Parameters
+        ----------
+        data : :class:`pandas.DataFrame`
+            The vector data with ``x``, ``y`` and ``z`` components.
         """
         super().__init__(data)
 
     def __call__(self, component: str) -> pd.Series:
-        """Return the specified component of the vector.
+        """Return a vector component.
 
-        Args:
-            component (str): The component to return ('x', 'y', or 'z').
+        Parameters
+        ----------
+        component : str
+            Component to return (``'x'``, ``'y'`` or ``'z'``).
 
-        Returns:
-            pd.Series: The specified component of the vector.
+        Returns
+        -------
+        pd.Series
+            The requested component.
         """
         return self.__getattr__(component)
 
     def set_data(self, new: pd.DataFrame):
-        """Set new data for the vector.
+        """Set new vector data.
 
-        Args:
-            new (pd.DataFrame): The new vector data.
+        Parameters
+        ----------
+        new : :class:`pandas.DataFrame`
+            New vector data.
 
-        Raises:
-            ValueError: If the new data doesn't have the required columns.
+        Raises
+        ------
+        ValueError
+            If ``new`` does not contain the required columns.
         """
         super().set_data(new)
         required_columns = pd.Index(["x", "y", "z"])
@@ -64,8 +74,10 @@ class Vector(base.Base):
     def mag(self) -> pd.Series:
         """Calculate the magnitude of the vector.
 
-        Returns:
-            pd.Series: The magnitude of the vector.
+        Returns
+        -------
+        pd.Series
+            Vector magnitude.
         """
         mag = self.data.loc[:, ["x", "y", "z"]]
         mag = mag.pow(2).sum(axis=1, skipna=False).pow(0.5)
@@ -74,19 +86,23 @@ class Vector(base.Base):
 
     @property
     def magnitude(self) -> pd.Series:
-        """Alias for `mag`.
+        """Alias for :pyattr:`mag`.
 
-        Returns:
-            pd.Series: The magnitude of the vector.
+        Returns
+        -------
+        pd.Series
+            Vector magnitude.
         """
         return self.mag
 
     @property
     def rho(self) -> pd.Series:
-        """Calculate the magnitude of the vector in the xy-plane.
+        """Magnitude of the vector in the xy-plane.
 
-        Returns:
-            pd.Series: The magnitude of the vector in the xy-plane.
+        Returns
+        -------
+        pd.Series
+            XY-plane magnitude.
         """
         rho = self.data.loc[:, ["x", "y"]]
         rho = rho.pow(2).sum(axis=1, skipna=False).pow(0.5)
@@ -95,10 +111,12 @@ class Vector(base.Base):
 
     @property
     def colat(self) -> pd.Series:
-        """Calculate the colatitude of the vector.
+        """Colatitude of the vector.
 
-        Returns:
-            pd.Series: The colatitude of the vector in degrees.
+        Returns
+        -------
+        pd.Series
+            Colatitude in degrees.
         """
         colat = np.rad2deg(np.arctan2(self.data.z, self.rho))
         colat.name = "colat"
@@ -106,10 +124,12 @@ class Vector(base.Base):
 
     @property
     def longitude(self) -> pd.Series:
-        """Calculate the longitude of the vector.
+        """Longitude of the vector.
 
-        Returns:
-            pd.Series: The longitude of the vector in degrees.
+        Returns
+        -------
+        pd.Series
+            Longitude in degrees.
         """
         lon = np.rad2deg(np.arctan2(self.data.y, self.data.x))
         lon.name = "longitude"
@@ -117,21 +137,23 @@ class Vector(base.Base):
 
     @property
     def lon(self) -> pd.Series:
-        """Shortcut for `longitude`.
+        """Shortcut for :pyattr:`longitude`.
 
-        Returns:
-            pd.Series: The longitude of the vector in degrees.
+        Returns
+        -------
+        pd.Series
+            Longitude in degrees.
         """
         return self.longitude
 
     @property
     def r(self) -> pd.Series:
-        """Shortcut to `mag` property.
+        """Shortcut to :pyattr:`mag` when using spherical coordinates.
 
-        Useful when thinking in spherical coordinates, not magnitudes.
-
-        Returns:
-            pd.Series: The magnitude of the vector.
+        Returns
+        -------
+        pd.Series
+            Vector magnitude.
         """
         r = self.mag
         r.name = "r"
@@ -139,19 +161,23 @@ class Vector(base.Base):
 
     @property
     def cartesian(self) -> pd.DataFrame:
-        """Return the Cartesian coordinates of the vector.
+        """Cartesian coordinates of the vector.
 
-        Returns:
-            pd.DataFrame: The Cartesian coordinates (x, y, z) of the vector.
+        Returns
+        -------
+        pd.DataFrame
+            Columns ``x``, ``y`` and ``z``.
         """
         return self.data.loc[:, ["x", "y", "z"]]
 
     @property
     def unit_vector(self) -> "Vector":
-        """Calculate the Cartesian unit vector.
+        """Cartesian unit vector.
 
-        Returns:
-            Vector: The unit vector.
+        Returns
+        -------
+        Vector
+            Normalised vector.
         """
         uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
@@ -159,24 +185,32 @@ class Vector(base.Base):
 
     @property
     def uv(self) -> "Vector":
-        """Shortcut to `unit_vector` property.
+        """Shortcut for :pyattr:`unit_vector`.
 
-        Returns:
-            Vector: The unit vector.
+        Returns
+        -------
+        Vector
+            Normalised vector.
         """
         return self.unit_vector
 
     def project(self, other: Union["Vector", pd.DataFrame]) -> pd.DataFrame:
-        """Project self onto `other`.
+        """Project self onto ``other``.
 
-        Args:
-            other (Union[Vector, pd.DataFrame]): The vector to project onto.
+        Parameters
+        ----------
+        other : :class:`Vector` or :class:`pandas.DataFrame`
+            Vector to project onto.
 
-        Returns:
-            pd.DataFrame: The parallel and perpendicular components of the projection.
+        Returns
+        -------
+        pd.DataFrame
+            Parallel and perpendicular components of the projection.
 
-        Raises:
-            NotImplementedError: If `other` is not a Vector or DataFrame.
+        Raises
+        ------
+        NotImplementedError
+            If ``other`` is not a ``Vector`` or ``DataFrame``.
         """
         if isinstance(other, Vector):
             other = other.uv.data
@@ -196,16 +230,22 @@ class Vector(base.Base):
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
     def cos_theta(self, other: Union["Vector", pd.DataFrame]) -> pd.Series:
-        """Calculate the cosine of the angle between self and `other`.
+        """Cosine of the angle between this vector and ``other``.
 
-        Args:
-            other (Union[Vector, pd.DataFrame]): The vector to calculate the angle with.
+        Parameters
+        ----------
+        other : :class:`Vector` or :class:`pandas.DataFrame`
+            Vector to calculate the angle with.
 
-        Returns:
-            pd.Series: The cosine of the angle between the vectors.
+        Returns
+        -------
+        pd.Series
+            Cosine of the angle.
 
-        Raises:
-            NotImplementedError: If `other` is not a Vector or DataFrame.
+        Raises
+        ------
+        NotImplementedError
+            If ``other`` is not a ``Vector`` or ``DataFrame``.
         """
         if isinstance(other, Vector):
             other = other.uv.data
@@ -227,13 +267,14 @@ class BField(Vector):
         Returns
         -------
         pd.Series
-            The magnetic pressure.
+            Magnetic pressure.
+
         Notes
         -----
-        The magnetic pressure is calculated using the equation:
+        The magnetic pressure is calculated using
 
         .. math::
-            p_B = \frac{1}{2\mu_0} B^2
+           p_B = \frac{1}{2\mu_0} B^2
         """
         bsq = self.mag.pow(2.0)
         const = self.units.b**2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
@@ -243,9 +284,11 @@ class BField(Vector):
 
     @property
     def pb(self) -> pd.Series:
-        """Shortcut to `pressure` property.
+        """Shortcut for :pyattr:`pressure`.
 
-        Returns:
-            pd.Series: The magnetic pressure.
+        Returns
+        -------
+        pd.Series
+            Magnetic pressure.
         """
         return self.pressure

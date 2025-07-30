@@ -4,6 +4,9 @@
 Notes
 -----
 The implementation follows the formalism outlined in Bruno & Carbone [1].
+Lloyd Woodham <https://orcid.org/0000-0003-2845-4250> helped me define these
+calculations at the 2018 AGU Fall Meeting and understand [1]. Please cite [3]
+if using this module.
 
 References
 ----------
@@ -31,46 +34,22 @@ AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
 
 
 class AlfvenicTurbulence(base.Core):
-    r"""Handle and calculate Alfvenic turbulence quantities using the Elsasser
-    variables following Section B.3.1 in [1].
-
-    Lloyd Woodham <https://orcid.org/0000-0003-2845-4250> helped me define these
-    calculations at the 2018 AGU Fall Meeting and understand [1]. Please cite [3] if
-    using this module.
+    r"""Alfv\'enic turbulence diagnostics using Elsasser variables.
 
     Parameters
     ----------
-    velocity : pd.DataFrame, pd.Series (?)
-        The velocity vector in the same basis as `bfield`.
-        Can be a single species, a CoM species, or a differential flow. The
-        differential flow case is an area of curiosity for me and I do not
-        suggest passing it as an input.
-        Expect [v] = km/s (i.e. default stored in `units_constants.Units`).
-    bfield : pd.DataFrame, pd.Series (?)
-        Magnetic field vector in the same basis as `velocity`.
-        Expect [b] = nT (i.e. default stored in `units_contants.Units`).
-    rho : pd.Series
-        The total mass density of the plasma used to define velocity.
-        Expect [rho] = m_p / cm^3 (i.e. default stored in
-        `units_constants.Units`).
-    species: str
-        The species string. Can contain `+`. Can contain at most one `,`.
-
-    Properties
-    ----------
-    data, velocity, v, bfield, b, species, z_plus, zp, z_minus, zm, e_plus, ep,
-    e_minus, em, kinetic_energy, ev, magnetic_energy, eb, total_energy, etot,
-    residual_energy, eres, normalized_residual_energy, eres_norm, sigma_r,
-    cross_helicity, normalized_cross_helicity, sigma_c, alfven_ratio, rA,
-    elsasser_ratio, rE
-
-    Methods
-    -------
-    set_data
+    velocity : :class:`pandas.DataFrame`
+        Plasma velocity in the same basis as ``bfield``.
+    bfield : :class:`pandas.DataFrame`
+        Magnetic field in the same basis as ``velocity``.
+    rho : :class:`pandas.Series`
+        Mass density used for normalising ``bfield``.
+    species : str
+        Species string used when converting to Alfv\'en units.
 
     Notes
     -----
-
+    Implementation follows the formalism of Bruno & Carbone (2013).
     """
 
     def __init__(self, velocity, bfield, rho, species, **kwargs):
