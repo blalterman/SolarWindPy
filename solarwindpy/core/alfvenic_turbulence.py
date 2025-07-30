@@ -25,10 +25,7 @@ from collections import namedtuple
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
 
-try:
-    from . import base
-except ImportError:
-    import base
+from . import base
 
 AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
 

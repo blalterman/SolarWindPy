@@ -14,10 +14,7 @@ import numpy as np
 import pandas as pd
 from pandas import MultiIndex as MI
 
-try:
-    from . import units_constants as uc
-except ImportError:
-    import units_constants as uc
+from . import units_constants as uc
 
 
 class Core(ABC):

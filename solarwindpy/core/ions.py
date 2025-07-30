@@ -8,15 +8,9 @@ contains Vector and Tensor objects.
 from __future__ import annotations
 import pandas as pd
 
-
-try:
-    from . import base
-    from . import vector
-    from . import tensor
-except ImportError:
-    import base
-    import vector
-    import tensor
+from . import base
+from . import vector
+from . import tensor
 
 
 class Ion(base.Base):
