@@ -29,7 +29,7 @@ class Ion(base.Base):
 
     @property
     def units(self):
-        return "\#"  # noqa: W605
+        return r"\#"  # noqa: W605
 
     @property
     def path(self):
@@ -84,7 +84,7 @@ class ChargeState(base.Base):
         uA = self.ionA.units
         uB = self.ionB.units
 
-        units = "\#"  # noqa: W605
+        units = r"\#"  # noqa: W605
         if uA != uB:
             units = f"{uA}/{uB}"
 

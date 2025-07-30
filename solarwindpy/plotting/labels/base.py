@@ -148,7 +148,7 @@ _trans_units = {
     # Plasma measurements.
     "b": _inU["b"],
     "n": _inU["cm-3"],
-    "rho": "m_p \; " + _inU["cm-3"],  # noqa: W605
+    "rho": r"m_p \; " + _inU["cm-3"],  # noqa: W605
     "v": _inU["kms"],
     "w": _inU["kms"],
     "dv": _inU["kms"],
@@ -169,11 +169,11 @@ _trans_units = {
     "edv": _inU["dimless"],
     "S": r"\mathrm{eV \, cm^2 \, m_p^{-5/3}}",  # Specific Entropy
     # Flux
-    "flux": "10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
+    "flux": r"10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),  # noqa: W605
     # Collisional things
     "lnlambda": _inU["dimless"],
     # TODO: verify that these units are Hertz.
-    "nuc": "10^{-7} \mathrm{Hz}",  # noqa: W605
+    "nuc": r"10^{-7} \mathrm{Hz}",  # noqa: W605
     "nc": _inU["dimless"],
     "chisq": _inU["dimless"],
     "chisqnu": _inU["dimless"],
@@ -532,8 +532,8 @@ class TeXlabel(Base):
 
         # clean up empty parentheses
         tex = (
-            tex.replace("\; ()", "")  # noqa: W605
-            .replace("\; {}", "")  # noqa: W605
+            tex.replace(r"\; ()", "")  # noqa: W605
+            .replace(r"\; {}", "")  # noqa: W605
             .replace("()", "")
             .replace("_{}", "")
             .replace("{{}}", "")
@@ -597,7 +597,7 @@ template   : %s
 
         with_units = r"${tex} {sep} \left[{units}\right]$".format(
             tex=tex,
-            sep="$\n$" if self.new_line_for_units else "\;",  # noqa: W605
+            sep=r"$\n$" if self.new_line_for_units else r"\;",  # noqa: W605
             units=units,
         )
 

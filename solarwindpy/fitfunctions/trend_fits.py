@@ -190,7 +190,7 @@ class TrendFit(object):
 
         in_trend = y_ok & w_ok
 
-        legend_title = "${}={} \; {}$\n{}"  # noqa: W605
+        legend_title = r"${}={} \; {}$\n{}"  # noqa: W605
 
         #         xlbl = self.labels.x
         #         try:
@@ -234,7 +234,7 @@ class TrendFit(object):
 
         x = pd.IntervalIndex(popt.index).mid
         if self.trend_logx:
-            x = 10.0 ** x
+            x = 10.0**x
 
         if "weights" in kwargs:
             raise ValueError("Weights are handled by `wkey1d`")
@@ -266,7 +266,7 @@ class TrendFit(object):
 
         x = pd.IntervalIndex(popt.index).mid
         if self.trend_logx:
-            x = 10.0 ** x
+            x = 10.0**x
 
         color = kwargs.pop("color", "cyan")
         linestyle = kwargs.pop("ls", "--")
