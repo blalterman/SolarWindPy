@@ -980,7 +980,6 @@ class PlasmaTestBase(ABC):
                 left.name = "+".join(combo)
                 pdt.assert_series_equal(left, self.object_testing.afsq("+".join(combo)))
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_caani(self):
         # print_inline_debug_info = False
 
@@ -2335,7 +2334,6 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
 
-    @pytest.mark.skip(reason="Not implemented")
     def test_specific_entropy(self):
         # print_inline_debug_info = False
         ot = self.object_testing
