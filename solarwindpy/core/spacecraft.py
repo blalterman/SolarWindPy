@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-r"""Contais :py:class:`~solarwindpy.core.spacecraft.Spacecraft` class.
+"""Spacecraft class handling vector data.
 
-Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` objects.
+This class inherits from :class:`solarwindpy.core.base.Base` and
+contains :class:`solarwindpy.core.vector.Vector` objects.
 """
 
 import pandas as pd

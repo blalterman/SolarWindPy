@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-"""Tensor class for storing quantities like thermal speed, pressure, and temperature."""
+"""Tensor utilities for thermal speed, pressure, and temperature.
+
+The :class:`Tensor` class provides convenient methods for handling
+tensor quantities used throughout the package.
+"""
 
 import pandas as pd
 from typing import Union

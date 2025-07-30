@@ -1,32 +1,21 @@
 #!/usr/bin/env python
-"""The Plasma class that contains all Ions, magnetic field, and spacecraft information.
+"""Plasma container for ions, magnetic field, and spacecraft data.
 
-Propoded Updates
-^^^^^^^^^^^^^^^^
--It would be cute if one could call `plasma % a`, i.e. plasma mod
- an ion and return a new plasma without that ion in it. Well, either
- mod or subtract. Subtract and add probably make more sense. (20180129)
+Notes
+-----
+The following updates have been proposed:
 
--See (https://drive.google.com/drive/folders/0ByIrJAE4KMTtaGhRcXkxNHhmY2M)
- for the various methods that might be worth considering including __getattr__
- vs __getattribute__, __hash__, __deepcopy__, __copy__, etc. (20180129)
-
--Convert `Plasma.__call__` to `Plasma.__getitem__` and `Plasma.__iter__` to
- to allow iterating over ions. (20180316)
- N.B. This could have complicated results as to how we actually access the
- underlying data and objects stored in the DataFrame.
-
--Define `__format__` methods for use with `str.format`. (20180316)
-
--Define `Plasma.__len__` to return the number of ions in the plasma. (20180316)
-
--Split each class into its own file. Suggested by EM. (BLA 20180217)
-
--Add `Plasma.dropna(*args, **kwargs)` that passes everything to `plasma.data.dropna`
- and then calls `self.__Plasma__set_ions()` to update the ions after drop. (20180404)
-
--Moved `_conform_species` to base.Base so that it is accessable for
- alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
+- Support ``plasma % a`` to remove an ion. (2018-01-29)
+- Review ``__getattr__`` vs ``__getattribute__`` and related methods. (2018-01-29)
+- Convert ``Plasma.__call__`` to ``Plasma.__getitem__`` and ``Plasma.__iter__``
+  to allow iterating over ions. This may complicate data access. (2018-03-16)
+- Define ``__format__`` for use with ``str.format``. (2018-03-16)
+- Define ``Plasma.__len__`` to return the number of ions. (2018-03-16)
+- Split each class into its own file (suggested by EM). (2018-02-17)
+- Add ``Plasma.dropna(*args, **kwargs)`` that calls ``plasma.data.dropna`` and
+  ``self.__Plasma__set_ions()`` afterwards. (2018-04-04)
+- Move ``_conform_species`` to ``base.Base`` so it is accessible for
+  ``alfvenic_turbulence.py``; tests remain in ``test_plasma.py``. (2018-11-21)
 """
 import numpy as np
 import pandas as pd
