@@ -2217,25 +2217,48 @@ class PlasmaTestBase(ABC):
             msg = "Unexpected number of species in test case\nslist: %s"
             raise NotImplementedError(msg % (slist))
 
-    @pytest.mark.skip(reason="Not yet implemented")
     def test_drop_species(self):
         print_inline_debug_info = True  # noqa: F841
 
+        ot = self.object_testing
         slist = list(self.stuple)
         if len(slist) == 1:
             msg = "Must have >1 species. Can't have empty plasma."
             with self.assertRaisesRegex(ValueError, msg):
-                self.object_testing.drop_species(*slist)
-            return None  # Exit test.
+                ot.drop_species(*slist)
+            return None
 
         combos = []
         for i in np.arange(1, len(slist) + 1):
             combos += list(itertools.combinations(slist, i))
         combos.sort(key=len)
 
-        data = self.data  # noqa: F841
         for c in combos:
-            raise NotImplementedError
+            if len(c) == len(slist):
+                msg = "Must have >1 species. Can't have empty plasma."
+                with self.assertRaisesRegex(ValueError, msg):
+                    ot.drop_species(*c)
+                continue
+
+            dropped = set(c)
+            remaining = tuple(sorted(set(slist) - dropped))
+
+            result = ot.drop_species(*c)
+
+            self.assertIsInstance(result, plasma.Plasma)
+            self.assertEqual(result.species, remaining)
+
+            keep_mask = (
+                ot.data.columns.get_level_values("S") == ""
+            ) | ot.data.columns.get_level_values("S").isin(remaining)
+            expected_data = ot.data.loc[:, keep_mask]
+
+            pdt.assert_frame_equal(result.data, expected_data)
+
+            pdt.assert_index_equal(result.ions.index, pd.Index(remaining))
+
+            # Original object should remain unchanged
+            self.assertEqual(ot.species, tuple(slist))
 
     def test_VDFratio(self):
         #        print_inline_debug_info = True
