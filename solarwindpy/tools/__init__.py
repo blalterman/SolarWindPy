@@ -1,28 +1,10 @@
 #!/usr/bin/env python
-r"""Miscelaneous tools for working with plasma data.
+"""Miscellaneous helper utilities.
 
-These aren't usually tested and this module will be refactored into submodules when it becomes sufficiently large.
-
-Author : Benjamin L. Alterman
-e-mail : balterma@umich.edu
-
-Revision History
-----------------
--Started module. (2018-03-12)
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+This module collects convenience functions used throughout SolarWindPy.
+The API is experimental and may change in future versions.
 """
+
 
 import pdb  # noqa: F401
 import logging
@@ -105,9 +87,9 @@ def normal_parameters(m, s):
 
     Applies for both :math:`ln` and :math:`log_{10}`. (<https://stats.stackexchange.com/a/22610/203218>)
     """
-    mu = np.exp(m + ((s ** 2.0) / 2.0))
-    sigma = np.exp(s ** 2.0 + 2.0 * m)
-    sigma *= np.exp(s ** 2.0) - 1.0
+    mu = np.exp(m + ((s**2.0) / 2.0))
+    sigma = np.exp(s**2.0 + 2.0 * m)
+    sigma *= np.exp(s**2.0) - 1.0
     sigma = np.sqrt(sigma)
 
     out = pd.concat({"mu": mu, "sigma": sigma}, axis=1)

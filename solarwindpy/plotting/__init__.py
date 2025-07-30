@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r"""Plotting utilities for :py:mod:`solarwindpy`.
+"""Plotting utilities for :mod:`solarwindpy`.
+
+The subpackage provides histogram and scatter plot helpers as well as
+orbit and spiral plotting functions.
 """
 
 __all__ = [

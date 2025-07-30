@@ -1,4 +1,9 @@
-"""Core classes and utilities for :mod:`solarwindpy`."""
+"""Core classes and utilities for :mod:`solarwindpy`.
+
+This subpackage defines vector and tensor objects, ion and plasma
+representations, spacecraft metadata and common constants.  Turbulence
+calculations are also provided via :mod:`.alfvenic_turbulence`.
+"""
 
 from .base import Base, Core
 from .vector import Vector
