@@ -1,3 +1,5 @@
+"""Base classes for solar activity indicators."""
+
 import pdb  # noqa: F401
 import logging
 import re
@@ -19,8 +21,11 @@ pd.set_option("mode.chained_assignment", "raise")
 
 
 class Base(ABC):
+    """Abstract base class providing a logger interface."""
+
     @property
     def logger(self):
+        """``logging.Logger`` attached to the instance."""
         return self._logger
 
     def _init_logger(self):
@@ -34,7 +39,16 @@ class Base(ABC):
 
 
 class ID(Base):
-    def __init__(self, key):
+    """Container for identifying a particular data product."""
+
+    def __init__(self, key: str) -> None:
+        """Instantiate the identifier and set the corresponding URL.
+
+        Parameters
+        ----------
+        key : str
+            Key that maps to a URL fragment in :pyattr:`_trans_url`.
+        """
         self._init_logger()
         self.set_key(key)
 
@@ -56,6 +70,8 @@ class ID(Base):
         return self._url
 
     def set_key(self, key):
+        """Set the identifier key and construct the download URL."""
+
         try:
             url_end = self._trans_url[key]
         except KeyError:
@@ -73,10 +89,15 @@ class ID(Base):
 
 class DataLoader(Base):
     def __init__(self, key, url):
-        r"""
-        key: str
-            Unique data identifier, typically from something like `SIDCID`.
-        url: str
+        r"""Initialize a data loader.
+
+        Parameters
+        ----------
+        key : str
+            Unique data identifier, typically from something like
+            :class:`SIDC_ID`.
+        url : str
+            Full download URL for the data source.
         """
         self._init_logger()
         self.set_key(key)
@@ -147,8 +168,13 @@ class DataLoader(Base):
         self._url = new
 
     def get_data_ctime(self):
-        r"""Examine the path at which the local data was saved to determine the time at
-        which it was created. Date format is (YYYYMMDD).
+        r"""Determine when the current data set was created.
+
+        Returns
+        -------
+        pandas.Timestamp
+            Creation time inferred from the file name, or ``1970-01-01`` if no
+            prior data are found.
         """
         path = self.data_path
         files = [str(x) for x in path.rglob("*.csv")]
@@ -185,7 +211,7 @@ class DataLoader(Base):
         self._data_age = dt
 
     def maybe_update_stale_data(self):
-        r"""Only the most recent data is retained to save space."""
+        r"""Download new data if the existing cache is stale."""
         self.logger.info("Updating stale data")
 
         old_ctime = self.ctime
@@ -235,6 +261,20 @@ class ActivityIndicator(Base):
     # Need to store `interpolated` in subclass. Allows normalized ssn to be interpolated.
     @abstractmethod
     def interpolate_data(self, source_data, target_index):
+        """Interpolate ``source_data`` onto ``target_index``.
+
+        Parameters
+        ----------
+        source_data : pandas.Series or pandas.DataFrame
+            Data with a :class:`~pandas.DatetimeIndex` to interpolate.
+        target_index : pandas.DatetimeIndex
+            Target time axis for the interpolation.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Data interpolated onto ``target_index``.
+        """
         assert isinstance(target_index, pd.DatetimeIndex)
         assert isinstance(source_data.index, pd.DatetimeIndex)
 
@@ -244,8 +284,8 @@ class ActivityIndicator(Base):
         nans = source_data.isna().any().any()
         if nans:
             raise NotImplementedError(
-                """You must drop NaNs in the subclass's caller
-            before calling parent method."""
+                "You must drop NaNs in the subclass's caller before "
+                "calling parent method."
             )
 
         x_target = target_index.asi8
@@ -290,14 +330,17 @@ class ActivityIndicator(Base):
 
     @abstractmethod
     def run_normalization(self):
-        r"""Normalize quantity within each cycle.
-
-        If data has been interpolated, run normalization on interpolated quantity too.
+        r"""Normalize the indicator within each solar cycle.
 
         Parameters
         ----------
-        norm_by: str
-            max, zscore, feature-scale
+        norm_by : {{"max", "zscore", "feature-scale"}}
+            Normalization algorithm to apply.
+
+        Returns
+        -------
+        pandas.Series
+            Normalized values indexed by time.
         """
         pass
 
@@ -317,6 +360,8 @@ class ActivityIndicator(Base):
 
 
 class IndicatorExtrema(Base):
+    """Base class for objects describing indicator extrema."""
+
     def __init__(self, *args, **kwargs):
         self._init_logger()
         self.load_or_set_data(*args, **kwargs)
@@ -328,15 +373,18 @@ class IndicatorExtrema(Base):
 
     @property
     def cycle_intervals(self):
-        r"""`pd.Interval`s corresponding to each Rising and Fall edge along with each
-        full indicator cycle.
-        """
+        r"""`pd.Interval`s corresponding to each rising and falling edge and
+        the full cycle."""
         return self._cycle_intervals
 
     @property
     def extrema_bands(self):
-        r"""Bands of time ($\Delta t$) about indicator extrema, where dt is specified when
-        calling :py:meth:`calculate_intervals`.
+        r"""Bands of time (``\Delta t``) about indicator extrema.
+
+        Parameters
+        ----------
+        dt : str or pandas.Timedelta
+            Window half-width used in :meth:`calculate_extrema_bands`.
         """
         try:
             return self._extrema_bands
@@ -357,8 +405,13 @@ class IndicatorExtrema(Base):
     # Tools for grouping data by Cycle and Cycle Edge (Rising or Falling) #
     #######################################################################
     def calculate_intervals(self):
-        r"""The rising edge comes before the falling edge in time, i.e. it's Min N, Max N.
-        Also calculate intervals for a full SSN cycle.
+        r"""Compute rising, falling, and full-cycle time intervals.
+
+        Notes
+        -----
+        The rising edge comes before the falling edge in time, i.e. it's
+        Min ``N`` followed by Max ``N``. Also calculate intervals for a full
+        SSN cycle.
         """
         extrema = self.data
         intervals = pd.DataFrame(
@@ -403,32 +456,35 @@ class IndicatorExtrema(Base):
         return intervals
 
     def cut_spec_by_interval(self, epoch, kind=None, tk_cycles=None):
-        r"""`pd.cut` the Datetime variable `epoch` into rising and falling edges and
-        cycle numbers.
+        r"""Assign epochs to solar-cycle intervals.
 
         Parameters
         ----------
-        epoch: pd.Series or pd.DatetimeIndex
+        epoch : pandas.Series or pandas.DatetimeIndex
             Data to cut.
-        kind: str, None
-            If `kind` is not None, it should be some subset of
+        kind : str, optional
+            If provided, restricts the cut to a subset of interval types.
 
-                ========= ===============================
-                   Key              Description
-                ========= ===============================
-                 None      Cut by all available options.
-                 "Cycle"   Cut by solar cycle
-                 "Rise"    Cut by rising edge
-                 "Fall"    Cut by falling edge
-                 "Edges"   Cut by `["Fall", "Rise"]`.
-                           Exclusive option.
-                ========= ===============================
+            ========= ===============================
+               Key              Description
+            ========= ===============================
+             None      Cut by all available options.
+             "Cycle"   Cut by solar cycle
+             "Rise"    Cut by rising edge
+             "Fall"    Cut by falling edge
+             "Edges"   Cut by `["Fall", "Rise"]`.
+                       Exclusive option.
+            ========= ===============================
 
-            Note that "Edges" is exclusive and will specify
-            `["Fall", "Rise"]` alone.
-        tk_cycles: None, list, slice
-            If not None, an object that can be used for index
-            slicing to select the target solar cycles.
+            Note that ``"Edges"`` is exclusive and will specify
+            ``["Fall", "Rise"]`` alone.
+        tk_cycles : list or slice, optional
+            If not ``None``, a selector used to choose target solar cycles.
+
+        Returns
+        -------
+        pandas.Series
+            Series of :class:`pandas.Interval` objects labeling each epoch.
         """
         if isinstance(epoch, pd.DatetimeIndex):
             epoch = epoch.to_series()
@@ -468,7 +524,18 @@ class IndicatorExtrema(Base):
     # Tools for selecting data within some dt of cycle extrema #
     ############################################################
     def calculate_extrema_bands(self, dt="365d"):
-        r"""Calculate `pd.IntervalIndex` that is at extrema +/- dt."""
+        r"""Return time windows around indicator extrema.
+
+            Parameters
+            ----------
+            dt : str or pandas.Timedelta, optional
+                Half-width of the window around each extremum. Defaults to ``"365d"``.
+
+            Returns
+            -------
+        pandas.DataFrame
+            ``Min`` and ``Max`` intervals for each cycle.
+        """
         dt = pd.to_timedelta(dt)
         extrema = self.data.stack()
 
@@ -493,17 +560,23 @@ class IndicatorExtrema(Base):
         return bands
 
     def cut_about_extrema_bands(self, epoch, tk_cycles=None, kind=None):
-        r"""Assign each `epoch` measurement within $\Delta t$ to a Indicator extrema, where
-        $\Delta t$ is assigned by :py:meth:`calc_extrema_bands`.
+        r"""Bin epochs relative to extrema bands computed with
+        :py:meth:`calculate_extrema_bands`.
 
         Parameters
         ----------
-        epoch: pd.DatetimeIndex
-            Epochs to bin in extrema bands.
-        tk_cycles: None, slice
-            If not None, a slice object to take the cycles you want to use.
-        kind: None, "Min", "Max"
-            If "Min" or "Max", only use that kind of extrema.
+        epoch : pandas.DatetimeIndex
+            Times to classify.
+        tk_cycles : slice, optional
+            Subset of cycles to use when cutting.
+        kind : {{"Min", "Max"}}, optional
+            Restrict the classification to minima or maxima.
+
+        Returns
+        -------
+        tuple[pandas.Series, pandas.Series]
+            A series of intervals and a mapped series of the form ``"N-Min"`` or
+            ``"N-Max"``.
         """
         bands = self.extrema_bands
         if tk_cycles is not None:

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-"""-Tools for interfacing with the LASP Interactive Solar Irradiance Data Center (LISIRD).
-<http://lasp.colorado.edu/lisird/>
-"""
+"""Interfaces for the LASP Interactive Solar Irradiance Data Center (LISIRD).
+
+The submodule provides classes for downloading and working with data hosted at
+`LASP <http://lasp.colorado.edu/lisird/>`_."""
 
 import pdb  # noqa: F401
 import urllib
@@ -41,21 +42,28 @@ pd.set_option("mode.chained_assignment", "raise")
 
 class LISIRD_ID(ID):
     def __init__(self, key):
-        r"""
-         =========== ======================== =============================
-             Key           Description                     URL
-         =========== ======================== =============================
-          Lalpha      Lyman-alpha              composite_lyman_alpha.jsond
-          CaK         Calcium K line           cak.jsond
-          f107-noaa   NOAA F10.7 flux          noaa_radio_flux.jsond
-          f107-pen    Penticton F10.7 flux     penticton_radio_flux.jsond
-          MgII        Composite Magnesium II   composite_mg_index.jsond
-         =========== ======================== =============================
+        r"""Identifier for LISIRD data products.
 
-        URLs replace the wild card in <http://lasp.colorado.edu/lisird/latis/*>.
+        Parameters
+        ----------
+        key : str
+            Short name of the data set. Examples include ``"Lalpha"`` or
+            ``"f107-noaa"``.
+
+            =========== ======================== =============================
+             Key           Description                     URL
+            =========== ======================== =============================
+             Lalpha      Lyman-alpha              composite_lyman_alpha.jsond
+             CaK         Calcium K line           cak.jsond
+             f107-noaa   NOAA F10.7 flux          noaa_radio_flux.jsond
+             f107-pen    Penticton F10.7 flux     penticton_radio_flux.jsond
+             MgII        Composite Magnesium II   composite_mg_index.jsond
+            =========== ======================== =============================
+
+        URLs replace the wild card in ``http://lasp.colorado.edu/lisird/latis/*``.
 
         Note that the CaK line should probably be served directly from
-        <https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/>.
+        ``https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/``.
         The quantities in CaK data are
 
             ======== ====================================================
@@ -204,22 +212,15 @@ class LISIRDLoader(DataLoader):
 
 
 class LISIRD(ActivityIndicator):
-    r"""
-    Solar activity data from the LASP Interactive Solar IRadiance Datacenter
-    (LISIRD), accessed with LaTiS tools.
-
-    Data taken from <http://lasp.colorado.edu/lisird/about/latis>.
-
-    Descriptions are available at by following links at the LaTiS website
-    described in :py:class:`LISIRDID`.
-    """
+    r"""Wrapper around LISIRD data sets."""
 
     def __init__(self, key):
-        r"""
+        r"""Instantiate a LISIRD data object.
+
         Parameters
         ----------
-        key: str
-            See :py:property:`LISIRD.key`.
+        key : str
+            Identifier passed to :class:`LISIRD_ID`.
         """
         self._init_logger()
         self.set_id(LISIRD_ID(key))
@@ -306,13 +307,11 @@ quantity"""
 class LISIRDExtrema(IndicatorExtrema):
     @property
     def extrema_calculator(self):
-        r""":py:class:`ExtremaCalculator` used to calculate the extrema.
-        """
+        r""":py:class:`ExtremaCalculator` used to calculate the extrema."""
         return self._extrema_calculator
 
     def load_or_set_data(self, *args, **kwargs):
-        r"""Get extrema from :py:class:`ExtremaCalculator`.
-        """
+        r"""Get extrema from :py:class:`ExtremaCalculator`."""
         ec = ExtremaCalculator(*args, **kwargs)
         extrema = ec.formatted_extrema
         self._data = extrema

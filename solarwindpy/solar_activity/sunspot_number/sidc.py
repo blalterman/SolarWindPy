@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-r"""Sunspot number from the solar information data center (SIDC).
-
-Data taken from <http://www.sidc.be/silso/datafiles#total>.
-
-Available SSN listed in :py:class:`SIDC_ID`. Descriptions are available at the SIDC
-website. Per the website, standard error is std/sqrt(n_obs) for each SSN value.
-"""
+"""Access sunspot-number data from the SIDC."""
 
 import pdb  # noqa: F401
 import numpy as np
@@ -183,7 +177,7 @@ class SIDC_ID(ID):
                Hemispheric
         ====== =================== ================
 
-        URLs replace the wild card in <http://www.sidc.be/silso/INFO/*>.
+        URLs replace the wild card in ``http://www.sidc.be/silso/INFO/*``.
         """
         super(SIDC_ID, self).__init__(key)
 
@@ -301,14 +295,13 @@ class SIDCLoader(DataLoader):
 
 
 class SIDC(ActivityIndicator):
+    """Solar sunspot number data from the SIDC."""
+
     def __init__(self, key):
-        r"""
-        Parameters
+        r"""Parameters
         ----------
-        key: str
-            See `SIDC_ID`.
-        convert_nan: bool
-            See `SIDC.convert_nan`.
+        key : str
+            Passed to :class:`SIDC_ID` to select the data series.
         """
 
         self._init_logger()
