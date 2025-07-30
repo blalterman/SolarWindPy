@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
+r"""Abstract helpers for aggregated plotting.
+
+These classes calculate bin edges, perform data aggregation, and provide
+common functionality used by :mod:`solarwindpy` histogram plots.
 """
 
 import pdb  # noqa: F401

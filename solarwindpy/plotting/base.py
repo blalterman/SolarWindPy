@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-r"""Contains plotting :py:class:`Base` class.
+r"""Base classes for plotting utilities.
+
+This module defines abstract helpers that manage axis labels, log scaling,
+and file system paths for saving figures.  Concrete plot classes derive from
+these mixins to implement specific visualizations.
 """
 
 import pdb  # noqa: F401

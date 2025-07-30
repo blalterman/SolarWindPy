@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
-"""
+r"""Two-dimensional histogram and heatmap plotting utilities."""
 
 import pdb  # noqa: F401
 
@@ -109,9 +108,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
     def _maybe_convert_to_log_scale(self, x, y):
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         return x, y
 
@@ -240,9 +239,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             )  # dy = pd.Series(y.right - y.left, index=y)
 
             if self.log.x:
-                dx = 10.0 ** dx
+                dx = 10.0**dx
             if self.log.y:
-                dy = 10.0 ** dy
+                dy = 10.0**dy
 
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
@@ -355,9 +354,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         axnorm = self.axnorm
         norm = kwargs.pop(
             "norm",
-            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-            if axnorm in ("c", "r")
-            else None,
+            (
+                mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+                if axnorm in ("c", "r")
+                else None
+            ),
         )
 
         if limit_color_norm:
@@ -393,7 +394,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             # is most opaque.
             alpha = 1 - mpl.colors.Normalize()(alpha_agg)
             self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha ** 0.25
+            alpha = alpha**0.25
 
             # Set masked values to zero. Otherwise, masked
             # values are rendered as black.
@@ -469,9 +470,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         x0, x1 = xlim
         y0, y1 = ylim
@@ -619,9 +620,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop(
             "norm",
-            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-            if self.axnorm in ("c", "r")
-            else None,
+            (
+                mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+                if self.axnorm in ("c", "r")
+                else None
+            ),
         )
         linestyles = kwargs.pop(
             "linestyles",
@@ -768,7 +771,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x = self.data.loc[:, axis]
         if logx:
             # Need to convert back to regular from log-space for data setting.
-            x = 10.0 ** x
+            x = 10.0**x
 
         y = self.data.loc[:, other] if not project_counts else None
         logy = False  # Defined b/c project_counts option.
@@ -778,7 +781,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             yedges = self.edges[other].values
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
             if logy:
-                y = 10.0 ** y
+                y = 10.0**y
 
         if only_plotted:
             tk = self.get_plotted_data_boolean_series()
