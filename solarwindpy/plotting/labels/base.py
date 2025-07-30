@@ -207,6 +207,8 @@ _trans_units = {
     #     "SEP_differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
     "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
     "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
+    "SEP_energy": r"\mathrm{MeV/nuc}",
+    "SEP_spectrum_index": _inU["dimless"],
 }
 
 _trans_component = {
@@ -309,7 +311,9 @@ _templates = {
     "MeV/nuc": r"\mathrm{Energy}",
     #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
     "SEP_differential_flux": r"{{$S}} \: dJ/dE",
-    "SEP_intensity": r"{{$S}}",
+    "SEP_intensity": r"{{$S}} \: \mathrm{Intensity}",
+    "SEP_energy": r"{{$S}} \: \mathrm{Energy}",
+    "SEP_spectrum_index": r"\gamma_{{$S}}",
 }
 
 
@@ -556,6 +560,7 @@ class TeXlabel(Base):
             .replace("\; {}", "")  # noqa: W605
             .replace("()", "")
             .replace("_{}", "")
+            .replace("{{}}", "")
             .replace("{},", "")
             .replace("{};", "")
             .replace("{}", "")
@@ -566,6 +571,13 @@ class TeXlabel(Base):
             .replace("};}", "}}")
             .replace(";}", "}")
             .replace("_{}", "")
+            .rstrip("_")
+            .strip(" ")
+            #             .lstrip("\:")  # noqa: W605
+            #             .rstrip("\:")  # noqa: W605
+            #             .strip("\:")  # noqa: W605
+            #             .strip("\;")  # noqa: W605
+            .strip(" ")
         )
 
         #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])

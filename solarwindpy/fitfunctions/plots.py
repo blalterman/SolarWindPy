@@ -134,9 +134,11 @@ class FFPlot(object):
         if self.log.y:
             ax.set_yscale("log")
 
-        if with_rax:
-            ax.xaxis.get_label().set_visible(False)
-            [t.set_visible(False) for t in ax.xaxis.get_ticklabels()]
+        #         if with_rax:
+        #             ax.xaxis.get_label().set_visible(False)
+        #             [t.set_visible(False) for t in ax.xaxis.get_ticklabels()]
+
+        ax.label_outer()
 
     def _format_rax(self, ax, pct):
         ax.grid(True, which="major", axis="both")
@@ -158,6 +160,8 @@ class FFPlot(object):
             ax.update_datalim([(x[0], 0), (x[-1], 0)], updatey=False)
 
         #         ax.legend(loc=0, framealpha=0, ncol=2)
+
+        ax.label_outer()
 
         return ax
 

@@ -42,10 +42,15 @@ class ManualLabel(ArbitraryLabel):
         self._path = path
 
     def __str__(self):
-        return r"$\mathrm{%s} \; [%s]$" % (  # noqa: W605
-            self.tex.replace(" ", " \, "),  # noqa: W605
-            self.unit,
-        )  # noqa: W605
+        return (
+            r"$\mathrm{%s} \; [%s]$"
+            % (  # noqa: W605
+                self.tex.replace(" ", " \; "),  # noqa: W605
+                self.unit,
+            )
+        ).replace(
+            "\; []", ""  # noqa: W605
+        )
 
     @property
     def tex(self):
@@ -457,85 +462,6 @@ class MathFcn(ArbitraryLabel):
         self._path = self._build_path()
 
 
-# class Timedelta(ArbitraryLabel):
-#     def __init__(self, offset):
-#         r"""
-#         Parameters
-#         ----------
-#         offset: str
-#             pd.Offset or covertable string
-#         """
-#         super().__init__()
-#         self.set_offset(offset)
-
-#     def __str__(self):
-#         return f"${self.tex} \; [{self.units}]$"  # noqa: W605
-
-#     #     @property
-#     #     def dt(self):
-#     #         return self._dt
-
-#     @property
-#     def offset(self):
-#         return self._offset
-
-#     @property
-#     def tex(self):
-#         return r"\Delta t"
-
-#     @property
-#     def path(self):
-#         try:
-#             return Path("dt") / self.offset.freqstr
-#         except AttributeError:
-#             return Path("dt") / "UNK"
-
-#     @property
-#     def units(self):
-#         try:
-#             return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
-#         except AttributeError:
-#             return base._inU["unknown"]
-
-#     def set_offset(self, new):
-#         try:
-#             new = to_offset(new)
-#         except ValueError:
-#             pass
-
-#         self._offset = new
-
-
-# class DateTime(ArbitraryLabel):
-#     def __init__(self, kind):
-#         r"""
-#         Parameters
-#         ----------
-#         dt: str
-#             Classifies the `datetime` category used for labels, e.g. Year, Month, Day, Date, Epoch, etc.
-#         """
-#         super().__init__()
-#         self.set_kind(kind)
-
-#     def __str__(self):
-#         return r"$%s$" % self.tex
-
-#     @property
-#     def kind(self):
-#         return self._kind
-
-#     @property
-#     def tex(self):
-#         return r"\mathrm{%s}" % self.kind
-
-#     @property
-#     def path(self):
-#         return Path(self.kind.lower())
-
-#     def set_kind(self, new):
-#         self._kind = new
-
-
 class Distance2Sun(ArbitraryLabel):
     def __init__(self, units):
         super().__init__()
@@ -576,8 +502,8 @@ class SSN(ArbitraryLabel):
         return r"$%s \; [\#]$" % self.tex
 
     @property
-    def units(self):
-        return base._inU["dimless"]
+    def kind(self):
+        return self._kind
 
     @property
     def path(self):
@@ -590,7 +516,7 @@ class SSN(ArbitraryLabel):
             "M": "Monthly",
             "M13": "13 Month Smoothed",
             "D": "Daily",
-            "Y": "Yearly",
+            "Y": "Annual",
             "NM": "Normalized Monthly",
             "NM13": "Normalized 13 Month Smoothed",
             "ND": "Normalized Daily",
@@ -600,19 +526,19 @@ class SSN(ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s} \; \mathrm{SSN}" % self.pretty_kind.replace(
-            " ", "\;"  # noqa: W605
+        return (r"\mathrm{%s SSN}" % self.pretty_kind).replace(
+            " ", " \; "  # noqa: W605
         )  # noqa: W605
 
     @property
-    def kind(self):
-        return self._kind
+    def units(self):
+        return base._inU["dimless"]
 
     def set_kind(self, new):
         new = new.upper()
         assert new in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
         self._kind = new
-        self._path = Path(f"""{new.lower()!s}-ssn""")
+        self._path = Path(f"""{new.upper()!s}ssn""")
 
 
 class ComparisonLable(ArbitraryLabel):

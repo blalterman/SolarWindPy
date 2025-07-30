@@ -27,12 +27,11 @@ Development
    execute
       >>> python setup.py sdist bdist_wheel
       >>> python setup.py develop
-      
+
 4) Intall ``flake8`` and ``black``
       >>> pre-commit install
    These are tools for checking code style, variable definitions, etc.
 5) Verify the current tests pass.
-
    >>> python -m solarwindpy.tests.run_tests
 
 License

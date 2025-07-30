@@ -52,8 +52,7 @@ class ID(Base):
 
     @property
     def url(self):
-        r"""URL specifying location from which data was downloaded.
-        """
+        r"""URL specifying location from which data was downloaded."""
         return self._url
 
     def set_key(self, key):
@@ -186,8 +185,7 @@ class DataLoader(Base):
         self._data_age = dt
 
     def maybe_update_stale_data(self):
-        r"""Only the most recent data is retained to save space.
-        """
+        r"""Only the most recent data is retained to save space."""
         self.logger.info("Updating stale data")
 
         old_ctime = self.ctime
@@ -212,8 +210,7 @@ class ActivityIndicator(Base):
 
     @property
     def data(self):
-        r"""Shortcut to `self.loader.data`.
-        """
+        r"""Shortcut to `self.loader.data`."""
         return self.loader.data
 
     @property
@@ -360,7 +357,7 @@ class IndicatorExtrema(Base):
     # Tools for grouping data by Cycle and Cycle Edge (Rising or Falling) #
     #######################################################################
     def calculate_intervals(self):
-        r"""The rising edge comes before the falling edge in time, i.e. it's Max N, Min N.
+        r"""The rising edge comes before the falling edge in time, i.e. it's Min N, Max N.
         Also calculate intervals for a full SSN cycle.
         """
         extrema = self.data
@@ -471,8 +468,8 @@ class IndicatorExtrema(Base):
     # Tools for selecting data within some dt of cycle extrema #
     ############################################################
     def calculate_extrema_bands(self, dt="365d"):
-        r"""Calculate `pd.IntervalIndex` that is at extrema +/- dt.
-        """
+        r"""Calculate `pd.IntervalIndex` that is at extrema +/- dt."""
+        dt = pd.to_timedelta(dt)
         extrema = self.data.stack()
 
         dt = pd.to_timedelta(dt)
@@ -512,15 +509,22 @@ class IndicatorExtrema(Base):
         if tk_cycles is not None:
             bands = bands.loc[tk_cycles]
 
-        if kind is not None:
-            # `drop_level=False` so we can maintain `stack` and data shape.
-            bands = bands.xs(kind, axis=1, drop_level=False)
-        else:
-            bands = bands.stack()
+        if kind is None:
+            kind = ["Min", "Max"]
+
+        elif isinstance(kind, str):
+            kind = [kind]
+
+        bands = bands.loc[:, kind]
+        bands = bands.stack()
 
         # TODO: verify bands shape
         intervals = pd.IntervalIndex(bands.values).sort_values()
         cut = pd.cut(epoch, intervals)
         cut = pd.Series(cut, index=epoch, name="spec_by_extrema_band")
 
-        return cut
+        mapper = bands.reset_index(name="Intervals").set_index("Intervals")
+        mapper = mapper.loc[:, "Number"].astype(str) + "-" + mapper.loc[:, "kind"]
+        mapped = cut.map(mapper)
+
+        return cut, mapped

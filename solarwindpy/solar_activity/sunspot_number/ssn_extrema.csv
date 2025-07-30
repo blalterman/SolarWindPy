@@ -1,21 +1,48 @@
-# Solar cycle extrema calculated using 13-Month Smoothed values. Information
-# for Cycles 1 through 24 was extracted from Tables (1) and (2) in The Solar 
-# Cycle Living Review by D. H. Hathaway. The citation is
-# 
-#     Hathaway, D. H. (2015). The solar cycle. Living Reviews in Solar 
-#     Physics, 12(1). https://doi.org/10.1007/lrsp-2015-4
+# Solar cycle extrema calculated using 13-Month Smoothed values from SILSO [1]
 #
-# Author: B.L.Alterman
-# Date:   2018-08-08
-# e-mail: balterma@umich.edu
-#
-# Notes
+# References
 # -----
-# pd.read_csv("extrema.csv", header=0, skiprows=19, index_col=0)
+# [1] <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt>
 #
-# TODO
-# ----
-# Update source to http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt
+# To update extrema, use the following an manually copy
+#
+#         extrema = pd.read_csv(
+#             "http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt",
+#             header=None,
+#             sep="\s+",
+#             skiprows=2,
+#         )
+#         cols = pd.MultiIndex.from_tuples(
+#             (
+#                 ("Number", ""),
+#                 ("Min", "Year"),
+#                 ("Min", "Month"),
+#                 ("Min", "SSN"),
+#                 ("Max", "Year"),
+#                 ("Max", "Month"),
+#                 ("Max", "SSN"),
+#                 ("Duration", "Years"),
+#                 ("Duration", "Months"),
+#             )
+#         )
+#         extrema.index += 1
+#         extrema.index.name = "Number"
+#         extrema.columns = cols
+#         minima = (
+#             extrema.loc[:, ("Min", "Year")].astype(str)
+#             + "-"
+#             + extrema.loc[:, ("Min", "Month")].astype(str)
+#             + "-01"
+#         )
+#         maxima = (
+#             extrema.loc[:, ("Max", "Year")].astype(str)
+#             + "-"
+#             + extrema.loc[:, ("Max", "Month")].astype(str)
+#             + "-01"
+#         )
+#
+#         extrema = pd.concat({"Min": pd.to_datetime(minima), "Max": pd.to_datetime(maxima)}, axis=1)
+#         extrema.to_csv("tmp.csv")
 
 Number,Min,Max
 1,1755-02-01,1761-06-01
@@ -23,7 +50,7 @@ Number,Min,Max
 3,1775-06-01,1778-05-01
 4,1784-09-01,1788-02-01
 5,1798-04-01,1805-02-01
-6,1810-08-01,1816-05-01
+6,1810-07-01,1816-05-01
 7,1823-05-01,1829-11-01
 8,1833-11-01,1837-03-01
 9,1843-07-01,1848-02-01
@@ -39,7 +66,7 @@ Number,Min,Max
 19,1954-04-01,1958-03-01
 20,1964-10-01,1968-11-01
 21,1976-03-01,1979-12-01
-22,1986-09-01,1989-07-01
-23,1996-05-01,2000-04-01
+22,1986-09-01,1989-11-01
+23,1996-08-01,2001-11-01
 24,2008-12-01,2014-04-01
 25,2019-12-01, 2030-12-01

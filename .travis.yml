@@ -6,9 +6,8 @@ sudo: required
 dist: xenial
 
 python:
-#     - "3.5"
-#     - "3.6"
     - "3.7"
+    - "3.8"
 
 notifications:
     email:
@@ -22,10 +21,7 @@ install:
   - pip install .
 
 script: python solarwindpy/tests/run_tests.py
-# TODO: Figure out how to get `pydocstyle` and `pycodestyle` to run
-#     pycodestyle solarwindpy
-#     pydocstyle solarwindpy
-    
+
 branches:
     only:
         - master
