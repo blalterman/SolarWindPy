@@ -15,3 +15,11 @@ repos:
     rev: 3.8.3
     hooks:
     - id: flake8
+-   repo: local
+    hooks:
+    -   id: check-conventional-commits
+        name: Check Conventional Commits
+        entry: "bash -c '[[ $(cat \"$1\") =~ ^(feat|fix|chore|docs|style|refactor|test|perf)(\\(.+\\))?:\\ .+ ]] || { echo \"❌ Commit message must follow Conventional Commits format.\"; exit 1; }'"
+        language: system
+        stages: [commit-msg]
+        types: [commit-msg]
