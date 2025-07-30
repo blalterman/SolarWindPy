@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save spiral plots.
-"""
+r"""Spiral mesh plots and associated binning utilities."""
 
 import pdb  # noqa: F401
 import logging
@@ -295,7 +294,7 @@ class SpiralMesh(object):
         ax.legend(
             h0 + h1,
             l0 + l1,
-            title=fr"$\Delta t = {stats.loc[:, dt_key].sum():.0f} \, {dt_unit}$",
+            title=rf"$\Delta t = {stats.loc[:, dt_key].sum():.0f} \, {dt_unit}$",
         )
 
         ax.set_yscale("log")
@@ -678,9 +677,9 @@ data : {z.size}
         ymesh = self.mesh.mesh[:, [2, 3]]
 
         if self.log.x:
-            xmesh = 10.0 ** xmesh
+            xmesh = 10.0**xmesh
         if self.log.y:
-            ymesh = 10.0 ** ymesh
+            ymesh = 10.0**ymesh
 
         # (x,y) of bin's lower left corner.
         xy = zip(xmesh[:, 0], ymesh[:, 0])
@@ -755,7 +754,7 @@ data : {z.size}
             alpha_agg = mpl.colors.Normalize()(alpha_agg)
             alpha = 1 - alpha_agg
             self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha ** 0.25
+            alpha = alpha**0.25
 
             # Set masked values to zero. Otherwise, masked
             # values are rendered as black.

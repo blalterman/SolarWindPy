@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r"""Plotting utilities for :py:mod:`solarwindpy`.
+r"""High level plotting API for :mod:`solarwindpy`.
+
+This subpackage exposes a collection of plotters and helper functions
+that simplify producing publication quality figures.
 """
 
 __all__ = [

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-r"""Utility plotting helpers used throughout :mod:`solarwindpy`.
+r"""Utility functions for common :mod:`matplotlib` tasks.
 
-This module wraps common :mod:`matplotlib` patterns for creating figures,
-saving output, and generating grids of axes.  The goal is to reduce boilerplate
-when producing publication quality plots.
+These helpers provide shortcuts for creating figures, saving output, and
+building grids of axes with shared colorbars.
 """
 
 import pdb  # noqa: F401
