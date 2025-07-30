@@ -44,10 +44,11 @@ from . import alfvenic_turbulence as alf_turb
 
 
 class Plasma(base.Base):
-    r"""The class through which ions, magnetic field, and spacecraft data interact.
+    r"""Container for ions, magnetic field, and spacecraft information.
 
-    When method lookup fails, fall back to `self.ions.loc[attr]` and then fall back to
-    `super(Plasma, self).__getattr__(attr)`.
+    Attribute access is first attempted on the underlying :pyattr:`ions` table
+    before falling back to ``super().__getattr__``. This allows convenient
+    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`.
     """
 
     def __init__(
@@ -58,27 +59,31 @@ class Plasma(base.Base):
         auxiliary_data=None,
         log_plasma_stats=False,
     ):
-        r"""*NOTE* Thermal speeds assume :math:`mw^2 = 2kT`.
+        r"""Initialize a :class:`Plasma` instance.
 
         Parameters
         ----------
-        data: pd.DataFrame
-            Contains magnetic field vector and core quantities for each species,
-            including vector velocity, bi-maxwellian thermal speed, and number density.
-            Structured as a `pandas.DataFrame` with a 3-level MultiIndex for the columns.
-            MultiIndex levels should be labelled "M", "C", and "S" for measurement,
-            component, and species. Index should contain datetime information. If
-            loading from a CDF file, this would be the Epoch variable. See Examples
-            below for details.
-        species: iterable of strings
-            The species included in the plasma.
-        spacecraft: Spacecraft, None
-            If not None, the :py:class:`~solarwindpy.core.spacecraft.Spacecraft`
-            instance containing, at a minimum, the spacecraft's location. If None, then
-            Coulomb number `nc` method returns a ValueError.
-        auxiliary_data: pd.DataFrame, None
-            If not None, any additional data to carry with plasma, for example, data
-            quality flags. Column labelling scheme should match `data`.
+        data : :class:`pandas.DataFrame`
+            Contains the magnetic field and core ion moments. Columns are a
+            three-level :class:`~pandas.MultiIndex` labelled ``("M", "C", "S")``
+            for measurement, component, and species. The index should contain
+            datetime information, for example ``Epoch`` when loading from a CDF
+            file.
+        *species : str
+            Iterable of species contained in ``data``.
+        spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+            Spacecraft trajectory and velocity information. If ``None``, the
+            Coulomb number :py:meth:`~Plasma.nc` method will raise a
+            :class:`ValueError`.
+        auxiliary_data : :class:`pandas.DataFrame`, optional
+            Additional measurements to carry with the plasma, for example data
+            quality flags. The column labelling scheme must match ``data``.
+        log_plasma_stats : bool, default ``False``
+            Log summary statistics when ``data`` is set.
+
+        Notes
+        -----
+        Thermal speeds assume :math:`mw^2 = 2kT`.
 
         Examples
         --------

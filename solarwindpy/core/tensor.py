@@ -8,19 +8,21 @@ from . import base
 
 
 class Tensor(base.Base):
-    """A class for storing and manipulating tensor data.
+    """Container for tensor-valued quantities.
 
-    Inherits from solarwindpy.core.Base.
-
-    Attributes:
-        _data (pd.DataFrame): The underlying tensor data.
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame`
+        Tensor data with components ``par``, ``per`` and ``scalar``.
     """
 
     def __init__(self, data: pd.DataFrame):
         """Initialize the Tensor object.
 
-        Args:
-            data (pd.DataFrame): The tensor data to be stored.
+        Parameters
+        ----------
+        data : :class:`pandas.DataFrame`
+            Tensor data to be stored.
         """
         super().__init__(data)
         self._validate_data(data)
@@ -29,25 +31,35 @@ class Tensor(base.Base):
     def __call__(self, component: str) -> Union[pd.Series, pd.DataFrame]:
         """Access a specific component of the tensor.
 
-        Args:
-            component (str): The name of the component to access.
+        Parameters
+        ----------
+        component : str
+            The name of the component to access.
 
-        Returns:
-            Union[pd.Series, pd.DataFrame]: The requested component data.
+        Returns
+        -------
+        Union[pd.Series, pandas.DataFrame]
+            The requested component data.
 
-        Raises:
-            AttributeError: If the component does not exist.
+        Raises
+        ------
+        AttributeError
+            If the component does not exist.
         """
         return self.__getattr__(component)
 
     def set_data(self, new: pd.DataFrame):
-        """Set new data for the tensor.
+        """Set new tensor data.
 
-        Args:
-            new (pd.DataFrame): The new tensor data.
+        Parameters
+        ----------
+        new : :class:`pandas.DataFrame`
+            The new tensor data.
 
-        Raises:
-            ValueError: If the new data does not contain the required columns.
+        Raises
+        ------
+        ValueError
+            If ``new`` does not contain the required columns.
         """
         super().set_data(new)
         self._validate_data(new)
@@ -56,11 +68,15 @@ class Tensor(base.Base):
     def _validate_data(data: pd.DataFrame):
         """Validate the tensor data structure.
 
-        Args:
-            data (pd.DataFrame): The tensor data to validate.
+        Parameters
+        ----------
+        data : :class:`pandas.DataFrame`
+            Tensor data to validate.
 
-        Raises:
-            ValueError: If the data does not contain the required columns.
+        Raises
+        ------
+        ValueError
+            If the data does not contain the required columns.
         """
         required_columns = pd.Index(["per", "par", "scalar"])
         if not required_columns.isin(data.columns).all():
