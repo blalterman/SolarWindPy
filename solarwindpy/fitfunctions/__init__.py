@@ -1,4 +1,7 @@
-r""":py:mod:`~solarwidpy.fitfunctions` classes.
+"""Curve-fitting utilities.
+
+This subpackage exposes :class:`FitFunction` along with common
+fit implementations such as :class:`Gaussian` and :class:`Exponential`.
 """
 
 from . import core

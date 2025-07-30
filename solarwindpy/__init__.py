@@ -1,8 +1,21 @@
-r"""Package for solar wind data analysis.
+"""Top-level package for SolarWindPy.
 
-Primary focus is in situ solar wind measurements and the additional tools
-necessary for context (e.g. solar activity indicies) and some simple plotting
-methods.
+SolarWindPy provides utilities for analysing in situ solar wind
+measurements.  The package is organised into several submodules:
+
+``core``
+    Fundamental classes such as :class:`~solarwindpy.core.Plasma` and
+    :class:`~solarwindpy.core.Vector`.
+``plotting``
+    Convenience routines for visualising data.
+``tools``
+    Miscellaneous helper functions for data manipulation.
+``solar_activity``
+    Functions for retrieving solar activity indices.
+``fitfunctions``
+    Generic curve-fitting utilities.
+``instabilities``
+    Tools for evaluating plasma instabilities.
 """
 
 import pdb  # noqa: F401
