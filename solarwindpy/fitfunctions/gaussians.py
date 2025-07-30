@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-r""":py:mod:`Gaussian` and related `FitFunction` sublcasses.
+r"""Gaussian-based fit functions.
+
+The classes here implement standard Gaussian shapes and common
+variations used throughout the package.  Each class inherits from
+:class:`~solarwindpy.fitfunctions.core.FitFunction` and defines the
+target function, initial parameter estimates, and LaTeX output helpers.
 """
 import pdb  # noqa: F401
 import numpy as np
@@ -9,7 +14,9 @@ from .core import FitFunction
 
 class Gaussian(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(Gaussian, self).__init__(xobs, yobs, **kwargs)
+        """Fit a standard Gaussian profile."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -21,13 +28,7 @@ class Gaussian(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Gaussian parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [mu, sigma, A].
-        """
+        r"""Return initial guesses ``[mu, sigma, A]`` for the fit."""
         assert self.sufficient_data
 
         x, y = self.observations.used.x, self.observations.used.y
@@ -67,7 +68,9 @@ class Gaussian(FitFunction):
 
 class GaussianNormalized(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(GaussianNormalized, self).__init__(xobs, yobs, **kwargs)
+        """Fit a normalized Gaussian where the integral equals ``n``."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -80,13 +83,7 @@ class GaussianNormalized(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Gaussian parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [mu, sigma, n].
-        """
+        r"""Return initial guesses ``[mu, sigma, n]`` for the fit."""
         assert self.sufficient_data
 
         x, y = self.observations.used.x, self.observations.used.y
@@ -132,6 +129,8 @@ class GaussianLn(FitFunction):
     """
 
     def __init__(self, xobs, yobs, **kwargs):
+        """Fit a Gaussian in logarithmic space."""
+
         super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
 
@@ -161,14 +160,7 @@ class GaussianLn(FitFunction):
 
     @property
     def p0(self):
-        r"""
-        Calculate the initial guess for the log normal parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [mean, std, peak].
-        """
+        r"""Return initial guesses ``[ln(mu), ln(sigma), ln(A)]``."""
         assert self.sufficient_data
 
         x, y = self.observations.used.x, self.observations.used.y
@@ -215,23 +207,22 @@ class GaussianLn(FitFunction):
     def normal_parameters(self):
         r"""Calculate the normal parameters from log-normal parameters.
 
-            $\mu = \exp[m + (s^2)/2]$
-            $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
+        $\mu = \exp[m + (s^2)/2]$
+        $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
         """
         m = self.popt["m"]
         s = self.popt["s"]
 
-        mu = np.exp(m + ((s ** 2.0) / 2.0))
-        sigma = np.exp(s ** 2.0 + 2.0 * m)
-        sigma *= np.exp(s ** 2.0) - 1.0
+        mu = np.exp(m + ((s**2.0) / 2.0))
+        sigma = np.exp(s**2.0 + 2.0 * m)
+        sigma *= np.exp(s**2.0) - 1.0
         sigma = np.sqrt(sigma)
 
         return dict(mu=mu, sigma=sigma)
 
     @property
     def TeX_report_normal_parameters(self):
-        r"""Report normal parameters, not log-normal parameters in the TeX info.
-        """
+        r"""Report normal parameters, not log-normal parameters in the TeX info."""
         try:
             return self._use_normal_parameters
         except AttributeError:

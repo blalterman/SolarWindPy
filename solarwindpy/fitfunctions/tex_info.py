@@ -1,8 +1,11 @@
 # !/usr/bin/env python
 __all__ = ["TeXinfo"]
 
-r"""Extract information from :py:class:`solarwindpy.fitufunctions.FitFunction`
-and render information in TeX format. Primary target is `matplotlib` annotation.
+r"""Helpers for formatting fit results in LaTeX.
+
+The :class:`TeXinfo` class collects optimized parameters and statistics
+from a :class:`~solarwindpy.fitfunctions.core.FitFunction` and produces
+ready-to-plot annotation strings for Matplotlib.
 """
 
 import pdb  # noqa: F401
@@ -229,6 +232,8 @@ class TeXinfo(object):
         return formatted_info
 
     def _add_additional_info(self, info, additional_info):
+        """Append extra text to an existing info string."""
+
         if additional_info is not None:
             if hasattr(additional_info, "__iter__") and not isinstance(
                 additional_info, str
@@ -255,6 +260,8 @@ class TeXinfo(object):
         npts=False,
         relative_error=False,
     ):
+        """Assemble the formatted lines describing the fit."""
+
         TeX_function = self.TeX_function
         TeX_popt = self.TeX_popt
 
