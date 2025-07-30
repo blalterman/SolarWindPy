@@ -1,32 +1,15 @@
 #!/usr/bin/env python
-r"""
+"""Instability thresholds from Verscharen et al. (2016).
 
-The following parameters come from:
+The empirical fits of :cite:`Verscharen2016a` are implemented to
+evaluate when a plasma becomes unstable in the ``(beta, R)`` plane.
 
-[1] Verscharen, D., Chandran, B. D. G., Klein, K. G. & Quataert, E.
-    Collisionless Isotropization of the Solar-Wind Protons By Compressive
-    Fluctuations and Plasma Instabilities. Astrophys. J. 831, 128 (2016).
-
-for which the Bibtex entry is:
-
-    @article{Verscharen2016a,
-    author = {Verscharen, D. and Chandran, Benjamin D. G. and Klein, K. G.
-    and Quataert, Eliot},
-    doi = {10.3847/0004-637X/831/2/128},
-    issn = {1538-4357},
-    journal = {Astrophys. J.},
-    keywords = {accretion,accretion disks,accretion, accretion
-    disks,animation,instabilities,plasmas,solar wind,supporting
-    material,turbulence,waves},
-    number = {2},
-    pages = {128},
-    publisher = {IOP Publishing},
-    title = {{Collisionless Isotropization of the Solar-Wind Protons By
-    Compressive Fluctuations and Plasma Instabilities}},
-    url = {http://stacks.iop.org/0004-637X/831/i=2/a=128?key=crossref.765015074c72580bac87603b196556a0},
-    volume = {831},
-    year = {2016}
-    }
+References
+----------
+.. [1] Verscharen, D., Chandran, B. D. G., Klein, K. G., & Quataert, E.
+   *Collisionless Isotropization of the Solar-Wind Protons By Compressive
+   Fluctuations and Plasma Instabilities*, Astrophys. J., **831**, 128
+   (2016).
 """
 
 import pdb  # noqa: F401
@@ -123,13 +106,32 @@ _instability_tests = namedtuple("InstabilityTests", "AIC,MM,FMW,OFI")(
 
 
 def beta_ani_inst(beta, a=None, b=None, c=None):
-    r"""Constant growth rate isocontours from Eq. (5) in [1].
+    r"""Return the anisotropy threshold for a given beta.
 
-        $R_p = 1 + \frac{a}{(\beta_{\parallel,p} - c)^b}$
+    Implements Eq. (5) of :cite:`Verscharen2016a`:
+
+    .. math::
+
+       R_p = 1 + \frac{a}{(\beta_{\parallel,p} - c)^b}
 
     where $p$ is defined assuming only a single proton population is fit.
 
-    `a`, `b`, and `c` are kwargs so that **kwarg expansion works.
+    Parameters
+    ----------
+    beta : array-like
+        Parallel proton beta.
+    a, b, c : float
+        Fit parameters from Verscharen et al. (2016).
+
+    Returns
+    -------
+    numpy.ndarray
+        Threshold anisotropy values.
+
+    Examples
+    --------
+    >>> beta = np.logspace(-2, 2, 5)
+    >>> beta_ani_inst(beta, a=0.367, b=-0.408, c=0.011)
     """
     # Effectively, type checking.
     a = float(a)
@@ -139,79 +141,36 @@ def beta_ani_inst(beta, a=None, b=None, c=None):
 
 
 class StabilityCondition(object):
-    r"""
-    Determines the stability condition of a plasma based on it"s location in
-    the (beta, anisotropy) plane.
+    """Evaluate plasma stability using the Verscharen et al. fits.
 
-    Call signature
-    --------------
-
-        StabilityCondition(growth_rate, beta, anisotropy, fill=-9999)
-
-    Methods
-    -------
-    set_instability_parameters:
-        Take the instability parameters corresponding to the passed growth rate.
-    set_beta_ani:
-        Set the be    set_fill :
-        Set the fill value.ta and anistropy values.
-    _calc_instability_thresholds:
-        Calculate the instability thresholds. This is a private method that
-        should not be called. See `calculate_stability_criteria`.
-    _calc_is_unstable:
-        Determine if a measurement is unstable to each instability. This is a
-        private method that should not be called. See
-        `calculate_stability_criteria`.
-    _calc_stability_bin:
-        Identify which instability (if any) each measurement is unstale to.
-        This is a private method that should not be called. See
-        `calculate_stability_criteria`.
-    calculate_stability_criteria:
-        Run `_calc_instability_thresholds`, `_calc_is_unstable`, and
-        `_calc_stability_bin` in that order. Use this method over the others
-        individually.
-
-    Properties
+    Parameters
     ----------
-    instability_parameters:
-        The Pandas DataFrame of instability parameters.
-    beta:
-        The beta values of the object.
-    anisotropy:
-        The anisotropy values of the object.
-    stability_map: dict
-        The map of ints to strings identifying the instabilities.
-    stability_map_inverse: dict
-        The inverse of `stability_map`.
-    instability_tests: dict
-        The tests used for each instability threshold. The keys are "AIC", "MM",
-        "FMW", and "OFI" for Alfven/Ion-Cyclotron, Mirror Mode, Fast
-        Magnetosonic / Whistler, and Oblique Firehose. The values are numpy
-        ufuncs.
-    instability_thresholds: pd.DataFrame
-        The value of the anisotropy for which the plasma goes unstable.
-    is_unstable: pd.DataFrame
-        Boolean DataFrame indicating if a measurement is unstable to a given
-        instability.
-    stability_bin: pd.Series
-        The integer corresponding to the (in)stability condition of the
-        measurement. The string identifying the instability is given by the
-        `stability_map`.
-    norm: mpl.colors.Normalize(min(stability_map), max(stability_map))
-        The normalization instance used for plotting the stability bin.
-    cmap: matplotlib colormap
-        A linearly segmented to have one level for each (in)stability condition.
+    growth_rate : int
+        Index of the growth-rate table to use (``-2``, ``-3`` or ``-4``).
+    beta : pandas.Series
+        Parallel proton beta.
+    anisotropy : pandas.Series
+        Temperature anisotropy.
+
+    Attributes
+    ----------
+    instability_thresholds : pandas.DataFrame
+        Threshold anisotropies for each instability.
+    is_unstable : pandas.DataFrame
+        Boolean mask indicating unstable modes.
+    stability_bin : pandas.Series
+        Integer label describing the dominant instability.
     """
 
     def __init__(self, growth_rate, beta, anisotropy):
-        r"""
-        growth_rate: int
-            Should correspond the the growth rate minor_axis index of the
-            `insta_params` Pandas.Panel in the containing module. Unless something
-            has changed, these where [-2, -3, -4] when the class was written.
-        beta, anisotropy: pd.Series
-            The 1D array-like objects containing the beta and anisotropy
-            measurements.
+        """Initialize the object.
+
+        Parameters
+        ----------
+        growth_rate : int
+            Growth rate index (``-2``, ``-3`` or ``-4``).
+        beta, anisotropy : pandas.Series
+            Arrays of parallel beta and temperature anisotropy.
         """
         self._init_logger()
         self.set_instability_parameters(growth_rate)
@@ -227,8 +186,7 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Used for building data containers and checking that all entries are visited.
-        """
+        r"""Used for building data containers and checking that all entries are visited."""
         return -9999.0
 
     @property
@@ -324,8 +282,7 @@ class StabilityCondition(object):
         self._data = data
 
     def _calc_instability_thresholds(self):
-        r"""Calculate the beta for which a given anisotropy is unstable.
-        """
+        r"""Calculate the beta for which a given anisotropy is unstable."""
         instability_thresholds = {
             k: beta_ani_inst(self.beta, **v)
             for k, v in self.instability_parameters.iterrows()
@@ -335,8 +292,7 @@ class StabilityCondition(object):
         self._instability_thresholds = instability_thresholds
 
     def _calc_is_unstable(self):
-        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`.
-        """
+        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`."""
         is_unstable = {
             k: self.instability_tests[k](self.anisotropy, v)
             for k, v in self.instability_thresholds.iteritems()
@@ -424,42 +380,12 @@ class StabilityCondition(object):
 
 
 class StabilityContours(object):
-    r"""
-    Calculate stability contours in the (beta, Rt) plane with a simple
-    API to add them to a matplotlib plot axis.
+    """Precompute and plot instability contours.
 
     Parameters
     ----------
-    describe inputs
-
-    Methods
-    -------
-    describe methods
-
-    See Also
-    --------
-    what else should I look at?
-
-    Notes
-    -----
-    -last test :
-    -pass?
-        --condition:
-            -version  :
-            -location :
-        --failure:
-    -Development history:
-        -Started class. (20170530 1630)
-    --major challenges:
-
-    Proposed updates
-    ----------------
-    -Add beta limits for the range of parameters from the Verscharen2016a
-     fits. (20170530 1631)
-
-    Do not try
-    ----------
-
+    beta : numpy.ndarray
+        Parallel proton beta values used for the contours.
     """
 
     def __init__(self, beta):
