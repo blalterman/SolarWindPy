@@ -178,9 +178,13 @@ class StabilityCondition(object):
         self.calculate_stability_criteria()
 
     def __str__(self):
+        """Return the class name."""
+
         return self.__class__.__name__
 
     def _init_logger(self):
+        """Initialize a logger namespaced to the class."""
+
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
@@ -272,11 +276,21 @@ class StabilityCondition(object):
         return format_dict
 
     def set_instability_parameters(self, growth_rate):
+        """Set the growth-rate table for instability parameters.
+
+        Parameters
+        ----------
+        growth_rate : int
+            Growth-rate index (``-2``, ``-3`` or ``-4``).
+        """
+
         growth_rate = int(growth_rate)
         temp = insta_params.xs(growth_rate, axis=0, level="Growth Rate")
         self._instability_parameters = temp
 
     def set_beta_ani(self, beta, anisotropy):
+        """Store parallel beta and temperature anisotropy data."""
+
         assert beta.shape == anisotropy.shape
         data = pd.concat({"beta": beta, "anisotropy": anisotropy}, axis=1)
         self._data = data
