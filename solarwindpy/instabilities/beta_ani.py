@@ -1,3 +1,5 @@
+"""Convenience plotting helpers for anisotropy versus beta."""
+
 __all__ = ["BetaRPlot"]
 
 import pdb  # noqa: F401
@@ -6,25 +8,27 @@ import solarwindpy as swp
 
 
 class BetaRPlot(swp.plotting.histograms.Hist2D):
+    """Generate a beta--anisotropy histogram.
+
+    Parameters
+    ----------
+    beta : pandas.Series
+        Proton parallel beta.
+    ani : pandas.Series
+        Temperature anisotropy.
+    species : str
+        Label used to generate axis titles.
+    **kwargs
+        Additional options forwarded to ``Hist2D``. By default the
+        x- and y-axes use logarithmic scaling.
+
+    Examples
+    --------
+    >>> br = BetaRPlot(beta, ani, "p")
+    >>> ax, cbar = br.make_plot()
+    """
+
     def __init__(self, beta, ani, species, **kwargs):
-        r"""Make a :math:`(\beta, R)` anisotropy plot.
-
-        Default to a minimum of 5 counts/bin
-
-        Parameters
-        ----------
-        beta, ani: pd.Series
-
-        species: str
-            Sets the species in the x-axis and y-axis labels.
-
-        kwargs:
-            Passed to :pyclass:`swp.plotting.histograms.Hist2D`.
-            Defaults
-                logx: True
-                logy: True
-                # axnorm: "t"
-        """
         x = beta
         y = ani
 
@@ -43,6 +47,20 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
         self.set_clim(5, None)
 
     def make_plot(self, **kwargs):
+        """Plot the histogram.
+
+        Parameters
+        ----------
+        **kwargs
+            Additional options forwarded to ``Hist2D.make_plot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            Axis containing the plot.
+        matplotlib.colorbar.Colorbar
+            Colorbar associated with the plot.
+        """
         cmap = kwargs.pop("cmap", "Greens_r")
         ax, cbar = super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)
 
