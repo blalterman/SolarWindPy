@@ -6,8 +6,6 @@ import numpy as np
 import pytest
 import pandas as pd
 import pandas.testing as pdt
-
-from unittest import TestCase
 from abc import ABC, abstractproperty
 from scipy import constants
 
@@ -32,7 +30,7 @@ class QuantityTestBase(ABC):
         print_inline_debug = False
         object_testing = self.object_testing
         # ID should be equal.
-        self.assertEqual(object_testing, object_testing)
+        assert object_testing == object_testing
         # Data and type should be equal.
         new_object = object_testing.__class__(object_testing.data)
 
@@ -51,15 +49,13 @@ class QuantityTestBase(ABC):
                 sep="\n",
             )
 
-        self.assertEqual(object_testing, new_object)
+        assert object_testing == new_object
 
     def test_neq(self):
         object_testing = self.object_testing
         # Data isn't equal
 
-        self.assertNotEqual(
-            object_testing, object_testing.__class__(object_testing.data * 4)
-        )
+        assert object_testing != object_testing.__class__(object_testing.data * 4)
         # Type isn't equal
         for other in (
             [],
@@ -68,11 +64,11 @@ class QuantityTestBase(ABC):
             pd.Series(dtype=np.float64),
             pd.DataFrame(dtype=np.float64),
         ):
-            self.assertNotEqual(object_testing, other)
+            assert object_testing != other
 
     def test_empty_data_catch(self):
-        with self.assertRaisesRegex(
-            ValueError, "You can't set an object with empty data."
+        with pytest.raises(
+            ValueError, match="You can't set an object with empty data."
         ):
             self.object_testing.__class__(pd.DataFrame())
 
@@ -164,9 +160,9 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_frame_equal(
             self.object_testing.uv.data, self.object_testing.unit_vector.data
         )
-        self.assertEqual(uv, self.object_testing.unit_vector)
-        self.assertEqual(uv, self.object_testing.uv)
-        self.assertEqual(self.object_testing.unit_vector, self.object_testing.uv)
+        assert uv == self.object_testing.unit_vector
+        assert uv == self.object_testing.uv
+        assert self.object_testing.unit_vector == self.object_testing.uv
 
     def test_project(self):
         b = (
@@ -219,7 +215,7 @@ class VectorTestBase(QuantityTestBase):
         )
 
         msg = "method not implemented"
-        with self.assertRaisesRegex(NotImplementedError, msg):
+        with pytest.raises(NotImplementedError, match=msg):
             self.object_testing.project(b.data)
 
     def test_cos_theta(self):
@@ -267,7 +263,7 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(par, self.object_testing.cos_theta(vuv))
 
         msg = "method not implemented"
-        with self.assertRaisesRegex(NotImplementedError, msg):
+        with pytest.raises(NotImplementedError, match=msg):
             self.object_testing.project(b.data)
 
 
@@ -409,9 +405,9 @@ class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
 
 
 # @unittest.skip
-class TestQuantitySubclassEquality(TestCase):
+class TestQuantitySubclassEquality:
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         r"""
         Override `setUpClass` so that it doesn't call `set_object_testing`.
         """
@@ -449,63 +445,63 @@ class TestQuantitySubclassEquality(TestCase):
         data = self.data.v.xs("a", axis=1, level="S")
         va0 = vector.Vector(data)
         va1 = vector.Vector(data)
-        self.assertEqual(va0, va0)
-        self.assertEqual(va0, va1)
+        assert va0 == va0
+        assert va0 == va1
 
     def test_b(self):
         data = self.data.b.xs("", axis=1, level="S")
         b0 = vector.BField(data)
         b1 = vector.BField(data)
-        self.assertEqual(b0, b0)
-        self.assertEqual(b0, b1)
+        assert b0 == b0
+        assert b0 == b1
 
     def test_b_v(self):
         b = vector.BField(self.data.b.xs("", axis=1, level="S"))
         v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(b, v)
+        assert b != v
 
     def test_b_w(self):
         b = vector.BField(self.data.b.xs("", axis=1, level="S"))
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
-        self.assertNotEqual(b, w)
+        assert b != w
 
     @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse(self):
         data = self.data.gse.xs("", axis=1, level="S")
         gse0 = vector.Vector(data)
         gse1 = vector.Vector(data)
-        self.assertEqual(gse0, gse0)
-        self.assertEqual(gse0, gse1)
+        assert gse0 == gse0
+        assert gse0 == gse1
 
     @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_b_gse(self):
         b = vector.BField(self.data.b.xs("", axis=1, level="S"))
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
-        self.assertNotEqual(b, gse)
+        assert b != gse
 
     @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_v(self):
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
         v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(gse, v)
+        assert gse != v
 
     @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_w(self):
         gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
-        self.assertNotEqual(gse, w)
+        assert gse != w
 
     def test_va_vp1(self):
         va = vector.Vector(self.data.v.xs("a", axis=1, level="S"))
         vp1 = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
-        self.assertNotEqual(va, vp1)
+        assert va != vp1
 
     def test_v_w(self):
         v = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
         w = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
-        self.assertNotEqual(v, w)
+        assert v != w
 
     def test_wp1_wp2(self):
         wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
         wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
-        self.assertNotEqual(wp1, wp2)
+        assert wp1 != wp2
