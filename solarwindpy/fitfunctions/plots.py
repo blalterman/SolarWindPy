@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.fitfunctions` plotter."""
+r"""Plotting utilities for :mod:`solarwindpy.fitfunctions`.
+
+This module contains :class:`FFPlot`, a helper for visualizing fitted
+models, residuals and associated annotations.
+"""
 
 import pdb  # noqa: F401
 import logging  # noqa: F401
@@ -17,6 +21,22 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 class FFPlot(object):
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
+        """Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.
+
+        Parameters
+        ----------
+        observations : :class:`~solarwindpy.fitfunctions.core.Observations`
+            Observed data used in the fit.
+        y_fit : array-like
+            Model evaluated at the observed ``x`` values.
+        TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`
+            Object describing the fit for annotation.
+        fit_result : scipy.optimize.OptimizeResult
+            Result object returned from the fitting routine.
+        fitfunction_name : str, optional
+            Name of the originating fit function.
+        """
+
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
         self.set_fit_result(fit_result)
@@ -83,21 +103,28 @@ class FFPlot(object):
         return self._y_fit
 
     def set_fitfunction_name(self, new):
+        """Set the descriptive name for saved plots."""
+
         self._fitfunction_name = str(new)
 
     def set_fit_result(self, new):
+        """Store the optimization result object."""
+
         self._fit_result = new
 
     def set_observations(self, observations, y_fit):
+        """Set raw and fitted values used for plotting."""
+
         assert y_fit.shape == observations.raw.x.shape
         assert y_fit[observations.tk_observed].shape == observations.used.x.shape
-        #         assert y_fit[observations.tk_observed].shape == robust_residuals.shape
         self._observations = observations
         self._y_fit = y_fit
 
     #         self._robust_residuals = robust_residuals
 
     def _estimate_markevery(self):
+        """Heuristic marker spacing for large datasets."""
+
         try:
             # Estimate marker density for readability
             markevery = int(
@@ -574,4 +601,6 @@ class FFPlot(object):
         self._log = LogAxes(**log)
 
     def set_TeX_info(self, new):
+        """Assign :class:`TeXinfo` used for annotations."""
+
         self._TeX_info = new

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-r""":py:mod:`Line` and similar `FitFunction` sublcasses.
+r"""Simple linear fit functions.
+
+This module defines :class:`~solarwindpy.fitfunctions.core.FitFunction`
+subclasses for straight-line models.  They are primarily used for
+quick trend estimation and serve as basic examples of the
+FitFunction interface.
 """
 import pdb  # noqa: F401
 import numpy as np
@@ -9,7 +14,9 @@ from .core import FitFunction
 
 class Line(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(Line, self).__init__(xobs, yobs, **kwargs)
+        """Create a line fit to ``(xobs, yobs)`` data."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
