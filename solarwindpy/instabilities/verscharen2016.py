@@ -195,22 +195,32 @@ class StabilityCondition(object):
 
     @property
     def instability_parameters(self):
+        """The Pandas DataFrame of instability parameters."""
+
         return self._instability_parameters
 
     @property
     def data(self):
+        """DataFrame with beta and anisotropy measurements."""
+
         return self._data
 
     @property
     def beta(self):
+        """The beta values of the object."""
+
         return self.data.loc[:, "beta"]
 
     @property
     def anisotropy(self):
+        """The anisotropy values of the object."""
+
         return self.data.loc[:, "anisotropy"]
 
     @property
     def stability_map(self):
+        """The map of ints to strings identifying the instabilities."""
+
         return {
             4: "MM",
             3: "Between\nAIC &\nMM",
@@ -221,31 +231,49 @@ class StabilityCondition(object):
 
     @property
     def stability_map_inverse(self):
+        """The inverse of ``stability_map``."""
+
         return {v: k for k, v in self.stability_map.items()}
 
     @property
     def instability_thresholds(self):
+        """The value of the anisotropy for which the plasma goes unstable."""
+
         return self._instability_thresholds
 
     @property
     def instability_tests(self):
+        """The tests used for each instability threshold.
+
+        The keys are ``"AIC"``, ``"MM"``, ``"FMW"``, and ``"OFI"`` for
+        Alfven/Ion-Cyclotron, Mirror Mode, Fast Magnetosonic / Whistler, and
+        Oblique Firehose. The values are NumPy ufuncs.
+        """
+
         return _instability_tests._asdict()
 
     @property
     def is_unstable(self):
+        """Boolean DataFrame indicating instability to a given instability."""
+
         return self._is_unstable
 
     @property
     def stability_bin(self):
+        """The integer corresponding to the (in)stability condition."""
+
         return self._stability_bin
 
     @property
     def cmap(self):
+        """A linearly segmented colormap for the (in)stability condition."""
+
         return plt.cm.get_cmap("Paired", len(self.stability_map))
 
     @property
     # TODO: rename to `color_norm` for consistancy w/ plotting code.
     def norm(self):
+        """The normalization instance used for plotting the stability bin."""
 
         # Change the normalization slightly so that the tick marks are
         # centered in their respective regions.
@@ -260,6 +288,8 @@ class StabilityCondition(object):
 
     @property
     def cbar_kwargs(self):
+        """Keyword arguments for drawing a colorbar."""
+
         cbar_formatter = mpl.pyplot.FuncFormatter(
             lambda val, loc: self.stability_map[val]
         )
@@ -276,7 +306,7 @@ class StabilityCondition(object):
         return format_dict
 
     def set_instability_parameters(self, growth_rate):
-        """Set the growth-rate table for instability parameters.
+        """Take the instability parameters corresponding to ``growth_rate``.
 
         Parameters
         ----------
@@ -289,14 +319,18 @@ class StabilityCondition(object):
         self._instability_parameters = temp
 
     def set_beta_ani(self, beta, anisotropy):
-        """Store parallel beta and temperature anisotropy data."""
+        """Set the beta and anisotropy values."""
 
         assert beta.shape == anisotropy.shape
         data = pd.concat({"beta": beta, "anisotropy": anisotropy}, axis=1)
         self._data = data
 
     def _calc_instability_thresholds(self):
-        r"""Calculate the beta for which a given anisotropy is unstable."""
+        r"""Calculate the instability thresholds.
+
+        This is a private method that should not be called. See
+        :meth:`calculate_stability_criteria`.
+        """
         instability_thresholds = {
             k: beta_ani_inst(self.beta, **v)
             for k, v in self.instability_parameters.iterrows()
@@ -306,7 +340,11 @@ class StabilityCondition(object):
         self._instability_thresholds = instability_thresholds
 
     def _calc_is_unstable(self):
-        r"""Calculate if the plasma is unstable to a given mode for the `growth_rate`."""
+        r"""Determine if a measurement is unstable to each instability.
+
+        This is a private method that should not be called. See
+        :meth:`calculate_stability_criteria`.
+        """
         is_unstable = {
             k: self.instability_tests[k](self.anisotropy, v)
             for k, v in self.instability_thresholds.iteritems()
@@ -340,9 +378,10 @@ class StabilityCondition(object):
         self._is_unstable = is_unstable
 
     def _calc_stability_bin(self):
-        r"""Using the results of `self._calc_instability_threshold` and `self._calc_is_unstable`,
-        determine the category each spectrum belongs in:
-            MM, between_AIC_MM, Stable, between_FMW_OFI, OFI
+        r"""Identify which instability (if any) each measurement is unstable to.
+
+        This is a private method that should not be called. See
+        :meth:`calculate_stability_criteria`.
         """
         unstable = self.is_unstable
         between_AIC_MM = unstable.AIC & unstable.MM.pipe(np.logical_not)
@@ -372,21 +411,11 @@ class StabilityCondition(object):
         self._stability_bin = stability_bin
 
     def calculate_stability_criteria(self):
-        r"""
-        Run the full instability calculation.
+        r"""Run the full instability calculation.
 
-        N.B. This function was written to collect all steps. The steps are broken into:
-
-            1)  `_calc_instability_thresholds` calculates each stability
-                threshold in anisotropy given beta.
-            2)  `_calc_is_unstable` determines if the plasma is unstable to (1).
-            3)  `_calc_stability_bin` categorize the instabilities according to
-                the `stability_map`.
-
-        so that we can refactor or expand functionality later should that be desired.
-
-        Also, while one could call the `.stability_bin` property to automatically calculate the different steps,
-        that function doesn"t force recalculation if we have, for example, changed the growth rate.
+        This method calls :meth:`_calc_instability_thresholds`,
+        :meth:`_calc_is_unstable`, and :meth:`_calc_stability_bin` in that
+        order. Use this method over calling the private methods individually.
         """
         self._calc_instability_thresholds()
         self._calc_is_unstable()
