@@ -43,7 +43,7 @@ class Line(FitFunction):
 
         m = dy / dx
         m = np.median(m)
-        b = (m * x) - y
+        b = y - (m * x)
         b = np.median(b)
 
         p0 = [m, b]
