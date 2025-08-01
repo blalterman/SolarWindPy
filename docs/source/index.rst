@@ -7,6 +7,7 @@ SolarWindPy Docs
    :caption: Contents:
       
    modules
+   solarwindpy.solar_activity.tests
 
 .. include:: ../../LICENSE.rst
 .. include:: ../../CITATION.rst
