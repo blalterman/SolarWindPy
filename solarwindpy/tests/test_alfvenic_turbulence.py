@@ -190,6 +190,12 @@ class AlfvenicTrubulenceTestBase(ABC):
         ot = self.object_testing
         pdt.assert_frame_equal(measurements, ot.measurements)
 
+    def test_averaging_info(self):
+        ot = self.object_testing
+        avg = ot.averaging_info
+        expected = turb.AlvenicTurbAveraging(self.test_window, self.test_periods)
+        self.assertEqual(expected, avg)
+
     #    def test_auto_reindex(self):
     #
     #        v = self.unrolled_data.loc[:, "v"].drop(1, axis=0)
