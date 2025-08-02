@@ -190,19 +190,19 @@ class Ion(base.Base):
         return pth
 
     @property
-    def cs(self) -> pd.Series:
+    def cs(self) -> pd.DataFrame:
         """
         Calculate the species' sound speed.
 
         Returns
         -------
-        pd.Series
+        pd.DataFrame
             Sound speed of the ion species.
         """
         pth = self.pth * self.units.pth
         rho = self.rho * self.units.rho
         gamma = self.constants.polytropic_index["scalar"]
-        cs = pth.divide(rho).multiply(gamma).pow(0.5) / self.units.cs
+        cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
         cs.name = "cs"
         return cs
 
