@@ -6,6 +6,8 @@ Tests for Alfvenic turbulence calculations.
 
 import numpy as np
 import pandas as pd
+import logging
+import pytest
 
 import pandas.testing as pdt
 
@@ -506,3 +508,33 @@ class TestAlfvenicTrubulenceAlphaP1P2(
     base.AlphaP1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):
     pass
+
+
+def test_set_data_requires_datetimeindex():
+    """``set_data`` raises ``TypeError`` for non-``DatetimeIndex`` inputs."""
+
+    idx = pd.RangeIndex(3)
+    v = pd.DataFrame(np.arange(9).reshape(3, 3), index=idx, columns=["x", "y", "z"])
+    b = pd.DataFrame(
+        np.arange(9).reshape(3, 3) / 10.0, index=idx, columns=["x", "y", "z"]
+    )
+    rho = pd.Series(np.arange(3), index=idx)
+
+    with pytest.raises(TypeError):
+        turb.AlfvenicTurbulence(v, b, rho, "p1")
+
+
+def test_set_data_warns_on_mismatched_index(caplog):
+    """Mismatched indices trigger a warning."""
+
+    v_idx = pd.date_range("2020-01-01", periods=3, freq="H")
+    b_idx = pd.date_range("2020-01-02", periods=3, freq="H")
+    v = pd.DataFrame(np.arange(9).reshape(3, 3), index=v_idx, columns=["x", "y", "z"])
+    b = pd.DataFrame(
+        np.arange(9).reshape(3, 3) / 10.0, index=b_idx, columns=["x", "y", "z"]
+    )
+    rho = pd.Series(np.arange(3), index=v_idx)
+
+    with caplog.at_level(logging.WARNING):
+        turb.AlfvenicTurbulence(v, b, rho, "p1")
+    assert "v and b have unequal indices" in caplog.text
