@@ -349,6 +349,10 @@ class AlfvenicTrubulenceTestBase(ABC):
         pdt.assert_series_equal(eres_norm, ot.normalized_residual_energy)
         pdt.assert_series_equal(ot.normalized_residual_energy, ot.eres_norm)
 
+    def test_sigma_r(self):
+        ot = self.object_testing
+        pdt.assert_series_equal(ot.sigma_r, ot.normalized_residual_energy)
+
     def test_cross_helicity(self):
         v = self.data.loc[:, "v"]
         b = self.data.loc[:, "b"]
