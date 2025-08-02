@@ -182,6 +182,17 @@ class IonTestBase(ABC):
         pdt.assert_series_equal(S, ot.S)
         pdt.assert_series_equal(ot.S, ot.specific_entropy)
 
+    def test_cs(self):
+        m = self.mass
+        n = self.data.n * 1e6
+        w = self.data.w * 1e3
+        rho = n * m
+        pth = w.pow(2).multiply(0.5 * rho, axis=0)
+        gamma = 5.0 / 3.0
+        cs = (pth.divide(rho, axis=0) * gamma).pow(0.5) / 1e3
+        cs.name = "cs"
+        pdt.assert_frame_equal(cs, self.object_testing.cs)
+
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
     pass
