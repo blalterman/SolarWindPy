@@ -36,6 +36,13 @@ generate_issues.py -----> | --Creates Issues------------> |
 [nightly schedule] ------>|--> reconcile.py ------------- |  update/notify/log
 ```
 
+## Workflow Overview
+
+1. Execute `generate_issues.py` to create GitHub issues from the master checklist.
+1. Merge pull requests that reference and close those issues.
+1. Webhooks trigger `sync_checklist.py` to update the checklist when issues or pull requests close.
+1. Scheduled runs of `reconcile.py` resolve mismatches and report results.
+
 ## Component Responsibilities and Workflow
 
 ### A. `generate_issues.py`
