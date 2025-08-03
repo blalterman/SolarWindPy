@@ -19,14 +19,14 @@ ______________________________________________________________________
 - `pytest`
 - `unittest.mock` (for HTTP and filesystem mocking)
 - `pytest-monkeypatch` (monkeypatch fixture)
-- `pytest-tmp_path` (temporary directories for caching)
+- `tmp_path` fixture (built into `pytest` for temporary directories)
 
 ### Checklist
 
 - [ ] Ensure `pytest` is available (#PR_NUMBER)
 - [ ] Ensure `unittest.mock` is available for HTTP and filesystem mocking (#PR_NUMBER)
 - [ ] Ensure `pytest-monkeypatch` plugin is available (#PR_NUMBER)
-- [ ] Ensure `pytest-tmp_path` plugin is available (#PR_NUMBER)
+- [ ] Ensure `tmp_path` fixture from core `pytest` is available (#PR_NUMBER)
 
 ______________________________________________________________________
 
