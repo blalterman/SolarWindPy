@@ -3,8 +3,6 @@
 > **Goal:** Verify correctness, robustness, and full coverage (public and non‑public APIs) of the `fitfunctions` submodule.
 > **Framework:** `pytest` with fixtures; follow `AGENTS.md` guidelines (`pytest -q`, no skipping, style with `flake8` and `black`).
 
-______________________________________________________________________
-
 ## 1. Common fixtures
 
 ```python
@@ -25,8 +23,6 @@ from solarwindpy.fitfunctions import core, gaussians, trend_fits, plots, tex_inf
 - [ ] Implement `simple_linear_data` fixture (#PR_NUMBER)
 - [ ] Implement `gauss_data` fixture (#PR_NUMBER)
 - [ ] Implement `small_n` fixture (#PR_NUMBER)
-
-______________________________________________________________________
 
 ## 2. core.py → `FitFunction`
 
@@ -117,8 +113,6 @@ ______________________________________________________________________
 - [ ] Test `sufficient_data` property after dummy fit (#PR_NUMBER)
 - [ ] Test `TeX_info` property after dummy fit (#PR_NUMBER)
 
-______________________________________________________________________
-
 ## 3. gaussians.py → `Gaussian`, `GaussianNormalized`, `GaussianLn`
 
 For each class:
@@ -158,8 +152,6 @@ For each class:
 
 - [ ] Test success path: calls base `make_fit`, sets `TeX_argnames` in `TeX_info` (#PR_NUMBER)
 - [ ] Test forced failure: no exception in `make_fit`, leaves `TeX_argnames` unset (#PR_NUMBER)
-
-______________________________________________________________________
 
 ## 4. trend_fits.py → `TrendFit`
 
@@ -237,8 +229,6 @@ ______________________________________________________________________
 - [ ] Test `set_fitfunctions` logic (#PR_NUMBER)
 - [ ] Test `set_shared_labels` updates label objects (#PR_NUMBER)
 
-______________________________________________________________________
-
 ## 5. plots.py → `FFPlot`
 
 ### 5.1 Initialization & basic attributes
@@ -315,8 +305,6 @@ ______________________________________________________________________
 - [ ] Test `set_log` toggles `log` flags (#PR_NUMBER)
 - [ ] Test `set_TeX_info` stores `TeXinfo` (#PR_NUMBER)
 
-______________________________________________________________________
-
 ## 6. tex_info.py → `TeXinfo`
 
 ### 6.1 Construction & storage
@@ -364,8 +352,6 @@ ______________________________________________________________________
 - [ ] Test `build_info` (same as `info` with explicit kwargs) (#PR_NUMBER)
 - [ ] Test all setters for type/key-consistency errors (#PR_NUMBER)
 - [ ] Test `val_uncert_2_string` with value/uncertainty pairs (e.g., `3.1415± 0.01`) (#PR_NUMBER)
-
-______________________________________________________________________
 
 ## 7. Justification
 
