@@ -12,7 +12,7 @@ effects.
 - [ ] Mock external I/O such as HTTP downloads and file reads (#PR_NUMBER)
 - [ ] Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## Test Framework & Dependencies
 
@@ -28,15 +28,15 @@ ______________________________________________________________________
 - [ ] Ensure `pytest-monkeypatch` plugin is available (#PR_NUMBER)
 - [ ] Ensure `tmp_path` fixture from core `pytest` is available (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## Fixtures
 
-| Fixture           | Purpose                                      |
+| Fixture | Purpose |
 | ----------------- | -------------------------------------------- |
-| `tmp_path`        | Simulate `data_path` directories & files     |
-| `monkeypatch`     | Patch network calls (e.g., `urllib.request`) |
-| custom DataFrames | Provide synthetic time series inputs         |
+| `tmp_path` | Simulate `data_path` directories & files |
+| `monkeypatch` | Patch network calls (e.g., `urllib.request`) |
+| custom DataFrames | Provide synthetic time series inputs |
 
 ### Checklist
 
@@ -44,7 +44,7 @@ ______________________________________________________________________
 - [ ] Use `monkeypatch` to patch network calls such as `urllib.request` (#PR_NUMBER)
 - [ ] Use custom DataFrames for synthetic time series inputs (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 1. Package Entry Point: `__init__.py`
 
@@ -59,7 +59,7 @@ ______________________________________________________________________
 - [ ] Call `get_all_indices()` and assert columns are `["CaK", "Lalpha", "MgII", "ssn"]` (#PR_NUMBER)
 - [ ] Call `get_all_indices()` and assert index type is `pd.DatetimeIndex` (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 2. Core Base Classes (`base.py`)
 
@@ -109,7 +109,7 @@ ______________________________________________________________________
 - [ ] Test `calculate_extrema_bands()` for single & pair durations (#PR_NUMBER)
 - [ ] Test `cut_about_extrema_bands()` verifying intervals and labels (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 3. Plotting Helpers (`plots.py`)
 
@@ -129,7 +129,7 @@ ______________________________________________________________________
 - [ ] Assert `ykey == "ssn"` (#PR_NUMBER)
 - [ ] After plotting, verify `ax.set_ylim(0, 200)` was called (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 4. LISIRD Sub-package
 
@@ -166,7 +166,7 @@ ______________________________________________________________________
 
 - [ ] Monkeypatch `ExtremaCalculator` to return known `formatted_extrema` (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 5. Extrema Calculator
 
@@ -185,7 +185,7 @@ ______________________________________________________________________
 - [ ] `find_extrema` logic (#PR_NUMBER)
 - [ ] `make_plot`: conditional plotting (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## 6. Sunspot Number Sub-package
 
@@ -224,7 +224,7 @@ ______________________________________________________________________
 - [ ] Temporary `ssn_extrema.csv`, assert parsed `data` (#PR_NUMBER)
 - [ ] Passing args/kwargs raises `ValueError` (#PR_NUMBER)
 
-______________________________________________________________________
+---
 
 ## Test File Structure
 
