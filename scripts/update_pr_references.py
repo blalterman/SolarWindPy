@@ -2,14 +2,18 @@
 """Update PR references in combined_architecture_workflow.md.
 
 This script replaces ``#PR_NUMBER`` placeholders with a specific pull request
-number when a PR is opened and annotates that number as closed when the pull
-request closes.
+number when a PR is opened or reopened and annotates that number as closed when
+the pull request closes.
 
 Examples
 --------
 Update references when a pull request is opened::
 
     python scripts/update_pr_references.py --pr 123 --action opened
+
+Update references when a pull request is reopened::
+
+    python scripts/update_pr_references.py --pr 123 --action reopened
 
 Mark references as closed when a pull request closes::
 
@@ -83,19 +87,19 @@ def main() -> None:
     parser.add_argument("--pr", type=int, required=True, help="Pull request number.")
     parser.add_argument(
         "--action",
-        choices=["opened", "closed"],
+        choices=["opened", "reopened", "closed"],
         required=True,
         help="Pull request action triggering the update.",
     )
     args = parser.parse_args()
 
-    if args.action == "opened":
+    if args.action in {"opened", "reopened"}:
         success = replace_placeholder(args.pr)
+        if args.action == "opened" and not success:
+            sys.exit(1)
     else:
-        success = mark_closed(args.pr)
-
-    if not success:
-        sys.exit(1)
+        if not mark_closed(args.pr):
+            sys.exit(1)
 
 
 if __name__ == "__main__":
