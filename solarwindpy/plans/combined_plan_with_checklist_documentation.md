@@ -34,7 +34,7 @@ SolarWindPy/
 │   └── Makefile
 ├── solarwindpy/
 │   └── ... (code packages)
-└── documentation plans and checklist
+└── plans/combined_plan_with_checklist_documentation.md
 ```
 
 ## Configuration and Standards
