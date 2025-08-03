@@ -43,6 +43,7 @@ SolarWindPy/
   - Add Napoleon extension and enable `autosummary_generate = True`.
   - Confirm `html_theme = "sphinx_rtd_theme"`.
   - Ensure `flake8-docstrings` rules D205/D406 are enabled.
+  - Retrieve `version` from package metadata instead of hardcoding it.
 - Standardize docstrings to NumPy style across the codebase.
   - Include `Parameters`, `Returns`, `Raises`, and `Examples` sections.
   - Audit modules (`core/`, `fitfunctions/`, `instabilities/`, `plotting/`, etc.) for missing or incomplete docstrings.
@@ -78,6 +79,7 @@ SolarWindPy/
 | --- | --- | --- | --- |
 | Evaluate existing docs infrastructure under `docs/` (e.g., Sphinx config, extensions) | not started | | |
 | Verify that `docs/source/conf.py` loads `autodoc`, `todo`, `mathjax`, `viewcode`, and `githubpages` | not started | | |
+| Retrieve package `version` dynamically in `docs/source/conf.py` | not started | | |
 | Confirm that the theme `sphinx_rtd_theme` is set appropriately | not started | | |
 | Check that the source file suffix is `.rst` and master doc is `index.rst` | not started | | |
 | Decide to continue with Sphinx versus evaluate alternatives | not started | | |
