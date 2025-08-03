@@ -1,4 +1,4 @@
-# Test Plan for `solarwindpy.fitfunctions` (update-2025 branch)
+# Combined Test Plan and Checklist for `solarwindpy.fitfunctions` (update-2025 branch)
 
 > **Goal:** Verify correctness, robustness, and full coverage (public and non‑public APIs) of the `fitfunctions` submodule.
 > **Framework:** `pytest` with fixtures; follow `AGENTS.md` guidelines (`pytest -q`, no skipping, style with `flake8` and `black`).
