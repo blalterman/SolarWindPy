@@ -102,5 +102,6 @@ SolarWindPy/
 | Create `.github/workflows/deploy-docs.yml` to build and push to `gh-pages` | not started | | |
 | Add a documentation badge to `README.rst` | not started | | |
 | Document docstring conventions and update workflow in `CONTRIBUTING.md` | not started | | |
-| Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`) in CI | not started | | |
+| Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI | not started | | |
+| Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` | not started | | |
 | Schedule periodic review of documentation coverage | not started | | |

@@ -54,5 +54,6 @@
 ## 8. Documentation maintenance
 
 - [ ] Document docstring conventions and update workflow in `CONTRIBUTING.md` (#PR_NUMBER)
-- [ ] Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`) in CI (#PR_NUMBER)
+- [ ] Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI (#PR_NUMBER)
+- [ ] Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` (#PR_NUMBER)
 - [ ] Schedule periodic review of documentation coverage (#PR_NUMBER)
