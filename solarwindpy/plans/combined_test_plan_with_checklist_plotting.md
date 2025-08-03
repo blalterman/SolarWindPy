@@ -434,6 +434,14 @@ ______________________________________________________________________
 - `tmp_path` for file I/O.
 - Parameterized tests across modes and combinations.
 
+### Checklist
+
+- [ ] Create dummy `Series` fixture for tests (#PR_NUMBER)
+- [ ] Create dummy `DataFrame` fixture for tests (#PR_NUMBER)
+- [ ] Create dummy `IntervalIndex` fixture for tests (#PR_NUMBER)
+- [ ] Use `tmp_path` fixture for file I/O tests (#PR_NUMBER)
+- [ ] Parameterize tests across modes and combinations (#PR_NUMBER)
+
 ## Justification
 
 - Ensures correct functionality, edge-case handling, API stability, and protects
