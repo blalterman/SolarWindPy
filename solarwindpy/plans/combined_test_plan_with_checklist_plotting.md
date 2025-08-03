@@ -242,8 +242,11 @@ ______________________________________________________________________
   (#PR_NUMBER)
 - [ ] Verify `.bin_id` property returns bin IDs (#PR_NUMBER)
 - [ ] Verify `.cat` property returns category labels (#PR_NUMBER)
-- [ ] Verify `.data`, `.initial_edges`, `.mesh`, `.min_per_bin`,
-  `.cell_filter_thresholds` props (#PR_NUMBER)
+- [ ] Verify `.data` property returns stored input data (#PR_NUMBER)
+- [ ] Verify `.initial_edges` property returns initial bin edges (#PR_NUMBER)
+- [ ] Verify `.mesh` property returns computed mesh (#PR_NUMBER)
+- [ ] Verify `.min_per_bin` property returns minimum per bin (#PR_NUMBER)
+- [ ] Verify `.cell_filter_thresholds` property returns filter thresholds (#PR_NUMBER)
 - [ ] Test `set_cell_filter_thresholds(density=0.1,size=0.9)` updates thresholds
   (#PR_NUMBER)
 - [ ] Verify `set_cell_filter_thresholds(bad=…)` raises `KeyError`
