@@ -1,5 +1,10 @@
 # Automated Test Plan Management: Architecture and Workflow
 
+This document outlines a unified approach to automated test plan management by
+linking system architecture with the operational workflow. It defines the scope
+and responsibilities of each component and explains how architectural elements
+and workflow steps cooperate to keep checklists and issues synchronized.
+
 ## Directory Structure
 
 ```
