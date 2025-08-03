@@ -3,8 +3,7 @@
 ## Overview
 
 This document describes a comprehensive test suite for the **solar_activity** submodule of
-SolarWindPy. The goals are to verify behavior, mock external interactions, and isolate side
-effects.
+SolarWindPy. The goals are to verify behavior, mock external interactions, and isolate side effects.
 
 ### Checklist
 
@@ -55,8 +54,10 @@ effects.
 #### Checklist
 
 - [ ] Create dummy classes `DummyLISIRD`, `DummySIDC` with `.data` attributes (#PR_NUMBER)
-- [ ] Monkeypatch `lisird.lisird.LISIRD` and `sunspot_number.sidc.SIDC` to return dummies (#PR_NUMBER)
-- [ ] Call `get_all_indices()` and assert columns are `["CaK", "Lalpha", "MgII", "ssn"]` (#PR_NUMBER)
+- [ ] Monkeypatch `lisird.lisird.LISIRD` and `sunspot_number.sidc.SIDC` to return dummies
+  (#PR_NUMBER)
+- [ ] Call `get_all_indices()` and assert columns are `["CaK", "Lalpha", "MgII", "ssn"]`
+  (#PR_NUMBER)
 - [ ] Call `get_all_indices()` and assert index type is `pd.DatetimeIndex` (#PR_NUMBER)
 
 ---
@@ -76,7 +77,8 @@ effects.
 #### Checklist
 
 - [ ] Create a dummy subclass defining `_url_base` and `_trans_url` (#PR_NUMBER)
-- [ ] Call `set_key(valid_key)`, assert `instance.key` and `instance.url` match expected (#PR_NUMBER)
+- [ ] Call `set_key(valid_key)`, assert `instance.key` and `instance.url` match expected
+  (#PR_NUMBER)
 - [ ] Call `set_key(invalid_key)`, assert `NotImplementedError` is raised (#PR_NUMBER)
 
 ### 2.3 `class DataLoader`
@@ -85,8 +87,10 @@ effects.
 
 - [ ] Use `tmp_path` to create fake date-named CSV directories for `get_data_ctime` (#PR_NUMBER)
 - [ ] Assert `ctime` is parsed correctly or defaults to epoch when none exist (#PR_NUMBER)
-- [ ] After setting `_ctime`, call and assert `age` = `(today – ctime)` for `get_data_age` (#PR_NUMBER)
-- [ ] Patch `download_data` and monkeypatch “today” to simulate stale data for `maybe_update_stale_data` (#PR_NUMBER)
+- [ ] After setting `_ctime`, call and assert `age` = `(today – ctime)` for `get_data_age`
+  (#PR_NUMBER)
+- [ ] Patch `download_data` and monkeypatch “today” to simulate stale data for
+  `maybe_update_stale_data` (#PR_NUMBER)
 - [ ] Assert `download_data` called with correct paths in `maybe_update_stale_data` (#PR_NUMBER)
 - [ ] Create a fake CSV in `data_path/today.csv`, write sample CSV for `load_data` (#PR_NUMBER)
 - [ ] Call `load_data()` and assert `instance.data` matches DataFrame (#PR_NUMBER)
@@ -95,7 +99,8 @@ effects.
 
 #### Checklist
 
-- [ ] Use a dummy subclass implementing abstract methods to test setting and retrieving `id` and `loader` (#PR_NUMBER)
+- [ ] Use a dummy subclass implementing abstract methods to test setting and retrieving `id` and
+  `loader` (#PR_NUMBER)
 - [ ] Access `data`, raising on `norm_by` if not set (#PR_NUMBER)
 - [ ] Test basic interpolation on simple time series (e.g., linear) (#PR_NUMBER)
 
@@ -118,8 +123,10 @@ effects.
 #### Checklist
 
 - [ ] Create a dummy `ActivityIndicator` with known `data` (#PR_NUMBER)
-- [ ] Instantiate `IndicatorPlot(dummy, "col", plasma_index)`, assert `.plot_data` slicing (#PR_NUMBER)
-- [ ] Patch a matplotlib `Axes` object; call `make_plot(ax)` and assert `ax.plot` called with numeric X and correct Y (#PR_NUMBER)
+- [ ] Instantiate `IndicatorPlot(dummy, "col", plasma_index)`, assert `.plot_data` slicing
+  (#PR_NUMBER)
+- [ ] Patch a matplotlib `Axes` object; call `make_plot(ax)` and assert `ax.plot` called with
+  numeric X and correct Y (#PR_NUMBER)
 - [ ] Patch a matplotlib `Axes` object; assert `_format_axis` settings are applied (#PR_NUMBER)
 
 ### 3.2 `class SSNPlot`
@@ -144,12 +151,15 @@ effects.
 
 #### Checklist
 
-- [ ] For `"Lalpha"`, unequal missing values in `convert_nans` raise `NotImplementedError` (#PR_NUMBER)
+- [ ] For `"Lalpha"`, unequal missing values in `convert_nans` raise `NotImplementedError`
+  (#PR_NUMBER)
 - [ ] For other keys, `convert_nans` is a no-op (#PR_NUMBER)
 - [ ] DataFrame with duplicated `milliseconds` dropped in `verify_monotonic_epoch` (#PR_NUMBER)
 - [ ] Manual timestamps dropped for `"f107-penticton"` in `verify_monotonic_epoch` (#PR_NUMBER)
-- [ ] Mock `urllib.request.urlopen` to return JSON; assert CSV & JSON outputs in `download_data` (#PR_NUMBER)
-- [ ] Fake CSV & JSON in `data_path/today.*`, assert `loader.data` & `loader.meta` in `load_data` (#PR_NUMBER)
+- [ ] Mock `urllib.request.urlopen` to return JSON; assert CSV & JSON outputs in `download_data`
+  (#PR_NUMBER)
+- [ ] Fake CSV & JSON in `data_path/today.*`, assert `loader.data` & `loader.meta` in `load_data`
+  (#PR_NUMBER)
 
 ### 4.3 `class LISIRD`
 
@@ -249,4 +259,5 @@ tests/
 ### Checklist
 
 - [ ] Mirror the test file structure as described above (#PR_NUMBER)
-- [ ] Add this plan as `solar_activity_TEST_PLAN.md` at the root of the `solar_activity` module (#PR_NUMBER)
+- [ ] Add this plan as `solar_activity_TEST_PLAN.md` at the root of the `solar_activity` module
+  (#PR_NUMBER)
