@@ -325,7 +325,7 @@ class TestBField(VectorTestBase, base.SWEData):
                 "<dir(ot)>",
                 *dir(self.object_testing),
                 sep="\n",
-                end="\n\n"
+                end="\n\n",
             )
 
         pdt.assert_series_equal(pb, self.object_testing.pressure)
@@ -509,3 +509,24 @@ class TestQuantitySubclassEquality(TestCase):
         wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
         wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
         self.assertNotEqual(wp1, wp2)
+
+
+def test_tensor_call_and_magnitude():
+    index = pd.date_range("2020-01-01", periods=3)
+    data = pd.DataFrame(
+        {
+            "par": [1.0, 2.0, 3.0],
+            "per": [4.0, 5.0, 6.0],
+            "scalar": [7.0, 8.0, 9.0],
+        },
+        index=index,
+    )
+    t = tensor.Tensor(data)
+
+    pdt.assert_series_equal(t("par"), t.par)
+    pdt.assert_series_equal(t("per"), t.per)
+    pdt.assert_series_equal(t("scalar"), t.scalar)
+
+    expected = (data.par + 2 * data.per) / 3
+    expected.name = "magnitude"
+    pdt.assert_series_equal(expected, t.magnitude)
