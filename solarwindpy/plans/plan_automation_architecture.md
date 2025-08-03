@@ -151,4 +151,3 @@ generate_issues.py -----> | --Creates Issues------------> |
 ---
 
 **This structure delivers robust, observable, low-maintenance automation for your test plan and checklist workflow.**
-Would you like a detailed starter code template or example for any specific component?
