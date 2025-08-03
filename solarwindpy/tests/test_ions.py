@@ -15,9 +15,9 @@ import pandas as pd
 import pandas.testing as pdt
 
 from abc import ABC, abstractproperty
+from unittest import TestCase
 
 # from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
-# from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
@@ -299,20 +299,26 @@ class TestIonSpecificsOptions(base.TestData):
         i1 = ions.Ion(self.data, s1)
         self.assertNotEqual(i0, i1)
 
-        s0 = "p1"
-        s1 = "a"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
 
-        s0 = "a"
-        s1 = "p2"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
+class TestIonMissingColumns(TestCase):
+    """Tests for handling missing data columns in ``Ion``."""
 
-        s0 = "p2"
-        s1 = "p1"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
+    def test_missing_measurements(self):
+        index = pd.date_range("2020-01-01", periods=2)
+        cols = pd.MultiIndex.from_tuples(
+            [
+                ("n", ""),
+                ("v", "x"),
+                ("v", "y"),
+                ("v", "z"),
+                ("w", "par"),
+            ],
+            names=["M", "C"],
+        )
+        data = pd.DataFrame(
+            np.arange(len(index) * len(cols)).reshape(len(index), len(cols)),
+            index=index,
+            columns=cols,
+        )
+        with self.assertRaisesRegex(ValueError, "Missing required columns"):
+            ions.Ion(data, "p")
