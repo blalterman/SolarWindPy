@@ -10,6 +10,8 @@ This repository includes Python utilities for analyzing solar wind data. When ma
 ## Testing and linting
 
 - Run the full test suite with `pytest -q`. All tests should pass before committing.
+- If a test fails, do not skip or disable it.
+- Prefer `pytest` over `unittest`. 
 - Check code style using `flake8`.
 - Format any Python code with `black` (default settings).
 
