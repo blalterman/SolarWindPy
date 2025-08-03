@@ -70,6 +70,7 @@ SolarWindPy/
 
 - Integrate `doc8` or similar tools for RST linting.
 - Add docstring conventions and workflow guidelines to `CONTRIBUTING.md`.
+- Create a pull request template that reminds contributors to update docstrings.
 - Include a documentation badge in `README.rst`.
 - Schedule periodic reviews of documentation coverage.
 
@@ -107,3 +108,4 @@ SolarWindPy/
 | Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI | not started | | |
 | Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` | not started | | |
 | Schedule periodic review of documentation coverage | not started | | |
+| Create `.github/PULL_REQUEST_TEMPLATE.md` to prompt docstring updates | not started | | |
