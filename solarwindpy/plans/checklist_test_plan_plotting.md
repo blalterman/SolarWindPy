@@ -1,5 +1,13 @@
 ## 📦 `solarwindpy.plotting` Test Plan (branch `update-2025`)
 
+### 📝 Overview
+
+- [ ] Confirm `solarwindpy.plotting` provides high-level plotting utilities built on pandas and Matplotlib (#PR_NUMBER)
+- [ ] Ensure coverage includes every class, method, property (including non-public) and helper in:
+  `base.py`, `agg_plot.py`, `histograms.py` (`hist1d.py`, `hist2d.py`), `scatter.py`, `spiral.py`,
+  `orbits.py`, `tools.py`, `select_data_from_figure.py`, `labels/base.py`, and `labels/special.py` (#PR_NUMBER)
+- [ ] Group tests by module and document scenarios plus rationale (#PR_NUMBER)
+
 ### 🧩 `base.py`
 
 #### Class `Base` (abstract)
@@ -213,3 +221,11 @@ ______________________________________________________________________
 - [ ] Test `Count(norm=None)` builds default count label (#PR_NUMBER)
 - [ ] Verify `Power` and `Probability(other_label,comparison)` produce correct `tex`,`units`,`path` (#PR_NUMBER)
 - [ ] Verify invalid `other_label` or `comparison` in `Probability` raises `AssertionError` (#PR_NUMBER)
+
+______________________________________________________________________
+
+### 🧰 Fixtures & Utilities
+
+- [ ] Provide fixtures for dummy `Series`, `DataFrame`, `IntervalIndex`, and Matplotlib `Axes` (#PR_NUMBER)
+- [ ] Use `tmp_path` for file I/O operations (#PR_NUMBER)
+- [ ] Parameterize tests across modes and combinations where applicable (#PR_NUMBER)
