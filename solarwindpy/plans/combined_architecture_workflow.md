@@ -5,6 +5,12 @@ linking system architecture with the operational workflow. It defines the scope
 and responsibilities of each component and explains how architectural elements
 and workflow steps cooperate to keep checklists and issues synchronized.
 
+The `update-workflow-doc` GitHub Actions workflow replaces `#PR_NUMBER`
+placeholders in this document with the current pull request number when a PR is
+opened and appends " (closed)" after the number once the PR closes. The
+underlying `scripts/update_pr_references.py` script performs these updates based
+on whether the pull request is opened or closed.
+
 ## Directory Structure
 
 ```
@@ -43,9 +49,11 @@ generate_issues.py -----> | --Creates Issues------------> |
 
 ## Workflow Overview
 
-1. Execute `generate_issues.py` to create GitHub issues from the master checklist.
+1. Execute `generate_issues.py` to create GitHub issues from the master
+   checklist.
 1. Merge pull requests that reference and close those issues.
-1. Webhooks trigger `sync_checklist.py` to update the checklist when issues or pull requests close.
+1. Webhooks trigger `sync_checklist.py` to update the checklist when issues or
+   pull requests close.
 1. Scheduled runs of `reconcile.py` resolve mismatches and report results.
 
 ## Component Responsibilities and Workflow
@@ -56,12 +64,15 @@ generate_issues.py -----> | --Creates Issues------------> |
 
 - Parses the Markdown checklist
 - Creates a GitHub issue for each checkbox via API
-- Posts a comment in each issue linking to the master checklist and updates the master with issue URLs
+- Posts a comment in each issue linking to the master checklist and updates the
+  master with issue URLs
 
 **Workflow Actions**
 
-- [ ] Write or update the test plan in Markdown with GitHub checkboxes (#PR_NUMBER)
-- [ ] Run `generate_issues.py` to parse the checklist and create GitHub issues (#PR_NUMBER)
+- [ ] Write or update the test plan in Markdown with GitHub checkboxes
+  (#PR_NUMBER)
+- [ ] Run `generate_issues.py` to parse the checklist and create GitHub issues
+  (#PR_NUMBER)
 - [ ] Include a unique ID or summary in each issue title (#PR_NUMBER)
 - [ ] Prevent duplicate issues by checking existing titles (#PR_NUMBER)
 
@@ -71,14 +82,17 @@ generate_issues.py -----> | --Creates Issues------------> |
 
 - Triggered by webhook events
 - Fetches the master checklist and maps to linked issues
-- Updates the checklist: toggles `[ ]` to `[x]` for closed issues and adds merged PR numbers
+- Updates the checklist: toggles `[ ]` to `[x]` for closed issues and adds
+  merged PR numbers
 - Logs all actions for auditability
 
 **Workflow Actions**
 
 - [ ] Configure PRs to reference issues with "Closes #ISSUE_NUMBER" (#PR_NUMBER)
-- [ ] Set up webhooks for `issues.closed` and `pull_request.closed` to trigger `sync_checklist.py` (#PR_NUMBER)
-- [ ] Update the master checklist with `[x]` and append the PR number when an issue closes (#PR_NUMBER)
+- [ ] Set up webhooks for `issues.closed` and `pull_request.closed` to trigger
+  `sync_checklist.py` (#PR_NUMBER)
+- [ ] Update the master checklist with `[x]` and append the PR number when an
+  issue closes (#PR_NUMBER)
 - [ ] Log checklist updates for auditability (#PR_NUMBER)
 
 ### C. `webhook_server.py`
@@ -146,7 +160,8 @@ generate_issues.py -----> | --Creates Issues------------> |
 
 **Responsibilities**
 
-- Collects statistics: number of open/closed issues, time-to-close, reconciliation runs, sync failures
+- Collects statistics: number of open/closed issues, time-to-close,
+  reconciliation runs, sync failures
 - Outputs logs and optionally posts metrics to a dashboard or Slack
 
 **Workflow Actions**
@@ -190,33 +205,45 @@ The admin interface is required to meet project goals for manual oversight.
 
 ## Key Functions and Classes
 
-- [ ] Implement `create_issues_from_checklist()` in `generate_issues.py` (#PR_NUMBER)
-- [ ] Implement `update_mapping()` and `gather_metrics()` in metrics and checklist utilities (#PR_NUMBER)
-- [ ] Implement `sync_checklist_with_closed_issues()` in `sync_checklist.py` (#PR_NUMBER)
-- [ ] Implement `reconcile_checklist_and_issues()` in `reconcile.py` (#PR_NUMBER)
+- [ ] Implement `create_issues_from_checklist()` in `generate_issues.py`
+  (#PR_NUMBER)
+- [ ] Implement `update_mapping()` and `gather_metrics()` in metrics and
+  checklist utilities (#PR_NUMBER)
+- [ ] Implement `sync_checklist_with_closed_issues()` in `sync_checklist.py`
+  (#PR_NUMBER)
+- [ ] Implement `reconcile_checklist_and_issues()` in `reconcile.py`
+  (#PR_NUMBER)
 - [ ] Implement `send_notification()` in `notify.py` (#PR_NUMBER)
-- [ ] Implement `/logs`, `/metrics`, `/sync`, and `/reconcile` routes in `web_ui.py` (#PR_NUMBER)
-- [ ] Implement `load_config()` and `get_token()` for `config.yaml` and environment variables (#PR_NUMBER)
+- [ ] Implement `/logs`, `/metrics`, `/sync`, and `/reconcile` routes in
+  `web_ui.py` (#PR_NUMBER)
+- [ ] Implement `load_config()` and `get_token()` for `config.yaml` and
+  environment variables (#PR_NUMBER)
 
 ## Deployment and Execution
 
 - [ ] Manually run `generate_issues.py` when the checklist changes (#PR_NUMBER)
-- [ ] Run `webhook_server.py` continuously via cloud, container, or serverless platform (#PR_NUMBER)
-- [ ] Schedule `reconcile.py` nightly via cron, GitHub Actions, or another scheduler (#PR_NUMBER)
-- [ ] Invoke `metrics.py`, `notify.py`, and `web_ui.py` from sync and reconciliation flows as needed (#PR_NUMBER)
+- [ ] Run `webhook_server.py` continuously via cloud, container, or serverless
+  platform (#PR_NUMBER)
+- [ ] Schedule `reconcile.py` nightly via cron, GitHub Actions, or another
+  scheduler (#PR_NUMBER)
+- [ ] Invoke `metrics.py`, `notify.py`, and `web_ui.py` from sync and
+  reconciliation flows as needed (#PR_NUMBER)
 
 ## Conventions and Best Practices
 
-- [ ] Format checklist items as `- [ ] Description of test (closes #123)` (#PR_NUMBER)
+- [ ] Format checklist items as `- [ ] Description of test (closes #123)`
+  (#PR_NUMBER)
 - [ ] Ensure issue titles map unambiguously to checklist items (#PR_NUMBER)
 - [ ] Reference issues in PR bodies using "Closes #123" (#PR_NUMBER)
-- [ ] Log script operations and handle API errors with retries or clear messages (#PR_NUMBER)
+- [ ] Log script operations and handle API errors with retries or clear messages
+  (#PR_NUMBER)
 
 ## Error Recovery
 
 - [ ] Check for duplicate issues before creation (#PR_NUMBER)
 - [ ] Rerun sync scripts to fix checklist desynchronization (#PR_NUMBER)
-- [ ] Allow manual overrides with recalculation based on current states (#PR_NUMBER)
+- [ ] Allow manual overrides with recalculation based on current states
+  (#PR_NUMBER)
 
 ## Tools and Libraries
 
@@ -225,20 +252,22 @@ The admin interface is required to meet project goals for manual oversight.
 
 ## Security and Maintenance
 
-- [ ] Store tokens and credentials in secrets or environment variables (#PR_NUMBER)
+- [ ] Store tokens and credentials in secrets or environment variables
+  (#PR_NUMBER)
 - [ ] Validate webhook authenticity (#PR_NUMBER)
 - [ ] Log and handle errors in all modules (#PR_NUMBER)
 - [ ] Provide a required admin web UI for manual intervention (#PR_NUMBER)
 
 ## Workflow Summary
 
-| Step | Who/What Runs It | Outcome |
-| --- | --- | --- |
-| Checklist → Issues | Python script/manual | Each test item has a tracked GitHub issue |
-| PR → closes Issue | Developer/PR reviewer | PR merges auto-close related test issues |
-| Issue/PR → checklist | Script via webhook | Master checklist is updated to match reality |
-| Reconciliation/Notify | Scheduled job or error | Manual/auto fix for any desync or error |
-| Retry/metrics/mapping | All scripts | Reliable, observable, flexible automation |
-| Web UI | Maintainers | Low-friction oversight, manual triggers |
+| Step | Who/What Runs It | Outcome | | --- | --- | --- | | Checklist → Issues |
+Python script/manual | Each test item has a tracked GitHub issue | | PR → closes
+Issue | Developer/PR reviewer | PR merges auto-close related test issues | |
+Issue/PR → checklist | Script via webhook | Master checklist is updated to match
+reality | | Reconciliation/Notify | Scheduled job or error | Manual/auto fix for
+any desync or error | | Retry/metrics/mapping | All scripts | Reliable,
+observable, flexible automation | | Web UI | Maintainers | Low-friction
+oversight, manual triggers |
 
-This combined reference links architectural components with their operational workflow and actionable steps.
+This combined reference links architectural components with their operational
+workflow and actionable steps.
