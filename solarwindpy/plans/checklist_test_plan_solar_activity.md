@@ -4,16 +4,16 @@ ______________________________________________________________________
 
 ## Overview
 
-- [ ] Use `pytest` and `unittest.mock` to verify classes, methods, and properties (#PR)
-- [ ] Mock external I/O (HTTP downloads, file reads) (#PR)
-- [ ] Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects (#PR)
+- Use `pytest` and `unittest.mock` to verify classes, methods, and properties
+- Mock external I/O (HTTP downloads, file reads)
+- Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects
 
 ## Test Framework & Dependencies
 
-- [ ] `pytest` (#PR)
-- [ ] `unittest.mock` for HTTP and filesystem mocking (#PR)
-- [ ] `pytest-monkeypatch` for the `monkeypatch` fixture (#PR)
-- [ ] `pytest-tmp_path` for temporary directories (#PR)
+- `pytest`
+- `unittest.mock` for HTTP and filesystem mocking
+- `pytest-monkeypatch` for the `monkeypatch` fixture
+- `pytest-tmp_path` for temporary directories
 
 ## Fixtures
 
