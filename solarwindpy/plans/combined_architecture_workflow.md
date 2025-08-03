@@ -17,7 +17,7 @@ automation/
 ├── reconcile.py                 # Scheduled reconciliation of checklist/issues
 ├── notify.py                    # Email notification logic
 ├── metrics.py                   # Collect and report stats/logs
-├── web_ui.py                    # (Optional but recommended) Simple admin web UI
+├── web_ui.py                    # Required admin web UI for manual oversight
 ├── config.yaml                  # Repo info, tokens, checklist file, master issue
 └── requirements.txt             # PyGithub, Flask/FastAPI, pyyaml, etc.
 ```
@@ -157,6 +157,8 @@ generate_issues.py -----> | --Creates Issues------------> |
 
 ### H. `web_ui.py`
 
+The admin interface is required to meet project goals for manual oversight.
+
 **Responsibilities**
 
 - Provides a minimal web interface for maintainers
@@ -226,7 +228,7 @@ generate_issues.py -----> | --Creates Issues------------> |
 - [ ] Store tokens and credentials in secrets or environment variables (#PR_NUMBER)
 - [ ] Validate webhook authenticity (#PR_NUMBER)
 - [ ] Log and handle errors in all modules (#PR_NUMBER)
-- [ ] Provide an admin web UI for manual intervention (#PR_NUMBER)
+- [ ] Provide a required admin web UI for manual intervention (#PR_NUMBER)
 
 ## Workflow Summary
 
