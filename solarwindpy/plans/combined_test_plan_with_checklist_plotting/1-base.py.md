@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Base Plotting'
 about: Unified documentation and checklist for tests covering base plotting utilities.
-labels: [sweep]
+labels: [sweep, plotting]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
