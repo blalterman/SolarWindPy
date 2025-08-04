@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Extrema Calculator'
 about: Test plan and checklist for the solar_activity extrema calculator.
-labels: [sweep, SolarActivity]
+labels: [sweep, SolarActivity, SolarCycleExtrema]
 ---
 
 <!--
