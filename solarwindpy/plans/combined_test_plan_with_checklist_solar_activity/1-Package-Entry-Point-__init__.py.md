@@ -1,5 +1,5 @@
 ---
-name: Combined Plan and Checklist: Package Entry Point
+name: 'Combined Plan and Checklist: Package Entry Point'
 about: Test plan and checklist for the solar_activity package entry point (`__init__.py`).
 labels: [sweep, SolarActivity]
 ---
