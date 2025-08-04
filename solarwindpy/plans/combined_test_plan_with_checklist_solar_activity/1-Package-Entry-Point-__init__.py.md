@@ -1,7 +1,7 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
+name: Combined Plan and Checklist: Package Entry Point
+about: Test plan and checklist for the solar_activity package entry point (`__init__.py`).
+labels: [sweep, SolarActivity]
 ---
 
 # 1-Package-Entry-Point-__init__.py
