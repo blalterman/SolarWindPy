@@ -5,8 +5,8 @@ The script parses markdown files under ``solarwindpy/plans`` that contain
 YAML frontmatter and converts them into GitHub issues. Frontmatter fields
 ``name``, ``about`` and ``labels`` are used for the issue metadata while the
 markdown content beginning with ``## 🧠 Context`` becomes the issue body.
-Optionally a specific subdirectory can be scanned via the ``--directory`` CLI
-argument.
+Optionally a specific subdirectory can be scanned via the ``-d/--directory``
+CLI argument.
 """
 
 from __future__ import annotations
@@ -210,6 +210,7 @@ def main() -> None:
         help="GitHub repository name",
     )
     parser.add_argument(
+        "-d",
         "--directory",
         help="Subdirectory under plans to search for markdown files",
     )
