@@ -23,9 +23,9 @@ narrative plan followed by a deduplicated checklist of actionable items.
 
 ______________________________________________________________________
 
-## `base.py`
+## 1. `base.py`
 
-### Class `Base` (abstract)
+### 1.1 Class `Base` (abstract)
 
 - Instantiation via subclass to ensure `_init_logger`, `_labels`, `_log`, and `path`
   setup.
@@ -56,9 +56,9 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `agg_plot.py`
+## 2. `agg_plot.py`
 
-### Class `AggPlot(Base)`
+### 2.1 Class `AggPlot(Base)`
 
 - Properties `edges`, `categoricals`, `intervals`, `cut`, `clim`,
   `agg_axes`, `joint`, `grouped`, `axnorm`.
@@ -90,9 +90,9 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `histograms.py`
+## 3. `histograms.py`
 
-### Module exports
+### 3.1 Module exports
 
 - Test that `AggPlot`, `Hist1D`, and `Hist2D` are re-exported correctly.
 
@@ -100,7 +100,7 @@ ______________________________________________________________________
 
 - [ ] Verify `__all__` includes `AggPlot`, `Hist1D`, `Hist2D` (#PR_NUMBER)
 
-### `hist1d.py` → Class `Hist1D(AggPlot)`
+### 3.2 `hist1d.py` → Class `Hist1D(AggPlot)`
 
 - `__init__(x, y=None, logx, axnorm, clip_data, nbins, bin_precision)`
   handles default count vs. y-aggregation and `logx=True` transforms data.
@@ -157,7 +157,7 @@ ______________________________________________________________________
 - [ ] Test `make_plot(ax, errorbar=True)` renders error bars correctly
   (#PR_NUMBER)
 
-### `hist2d.py` → Class `Hist2D(AggPlot, PlotWithZdata, CbarMaker)`
+### 3.3 `hist2d.py` → Class `Hist2D(AggPlot, PlotWithZdata, CbarMaker)`
 
 - `__init__(x, y, z=None, logx, logy, clip_data, nbins, bin_precision)`.
 - `_gb_axes` and `_maybe_convert_to_log_scale(x, y)`.
@@ -197,7 +197,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `scatter.py`
+## 3.4 `scatter.py`
 
 ### Class `Scatter(PlotWithZdata, CbarMaker)`
 
@@ -217,7 +217,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `spiral.py`
+## 3.5 `spiral.py`
 
 ### Numba helpers
 
@@ -259,7 +259,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `orbits.py`
+## 4. `orbits.py`
 
 ### Class `OrbitPlot(ABC)`
 
@@ -310,7 +310,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `tools.py`
+## 5. `tools.py`
 
 - `subplots(nrows, ncols, scale_width, scale_height, **kwargs)` scales figure
   size with grid shape.
@@ -336,7 +336,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `select_data_from_figure.py`
+## 6. `select_data_from_figure.py`
 
 ### Class `SelectFromPlot2D`
 
@@ -376,7 +376,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `labels/base.py`
+## 7. `labels/base.py`
 
 - Namedtuples: `LogAxes`, `AxesLabels`, `RangeLimits` with defaults and custom
   values.
@@ -391,7 +391,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## `labels/special.py`
+## 8. `labels/special.py`
 
 ### Abstract `ArbitraryLabel(Base)`
 
@@ -430,7 +430,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Fixtures & Utilities
+## 9. Fixtures & Utilities
 
 - `pytest` fixtures: dummy `Series`, `DataFrame`, `IntervalIndex`, `Axes` from
   `plt.subplots()`.
