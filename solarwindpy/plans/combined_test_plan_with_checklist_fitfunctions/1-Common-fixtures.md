@@ -1,7 +1,7 @@
 ---
 name: 'FitFunction Combined Plan and Checklist: Common Fixtures'
 about: Summarizes shared test fixtures for fitfunction tests with checklist items.
-labels: [sweep]
+labels: [sweep, FitFunctions]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
