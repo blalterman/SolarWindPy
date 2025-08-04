@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: TrendFit'
-about: Covers tests and checklist for the FitFunction subclass TrendFit in trend_fits.py.
-labels: [sweep]
+about: Covers tests and checklist for the TrendFit class in trend_fits.py.
+labels: [sweep, FitFunction]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
