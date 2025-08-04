@@ -1,3 +1,9 @@
+---
+name: Combined Plan and Checklist Documentation
+about: Central plan and checklist for SolarWindPy documentation tasks.
+labels: [sweep]
+---
+
 # Combined Documentation Plan and Task List for SolarWindPy (update-2025 branch)
 
 ## 1. Overview and Goals
