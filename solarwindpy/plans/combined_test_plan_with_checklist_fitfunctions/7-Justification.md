@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Justification'
+about: Explains the rationale for comprehensive fitfunction test coverage.
 labels: [sweep]
 ---
 

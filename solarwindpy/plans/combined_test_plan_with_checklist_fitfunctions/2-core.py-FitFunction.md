@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: FitFunction Core'
+about: Details tests and checklist for the FitFunction base class in core.py.
 labels: [sweep]
 ---
 
@@ -77,7 +77,7 @@ None.
 - [ ] Test `_build_outside_mask` with `outside=None` (all `True`).
 - [ ] Test `_build_outside_mask` with valid tuple (only outside points `True`).
 - [ ] Test `set_fit_obs` for combined masks (`x`, `y`, `wmin`, `wmax`, `logy`).
-- [ ] Test `_set_argnames` on subclass with known signature (`argnames` matches function arguments`).
+- [ ] Test `_set_argnames` on subclass with known signature (`argnames` matches function arguments\`).
 - [ ] Test `_run_least_squares` with monkey-patched optimizer (dummy `OptimizeResult`).
 - [ ] Test `_run_least_squares` for default kwargs (`loss`, `method`, etc.).
 - [ ] Test `_run_least_squares` for invalid `args` kwarg (`ValueError`).

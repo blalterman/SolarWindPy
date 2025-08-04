@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Common Fixtures'
+about: Summarizes shared test fixtures for fitfunction tests with checklist items.
 labels: [sweep]
 ---
 

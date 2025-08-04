@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Gaussian Classes'
+about: Lists tests and checklist for Gaussian variants in gaussians.py.
 labels: [sweep]
 ---
 

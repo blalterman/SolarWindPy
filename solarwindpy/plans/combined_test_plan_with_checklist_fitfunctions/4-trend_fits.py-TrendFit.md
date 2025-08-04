@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: TrendFit'
+about: Covers tests and checklist for the TrendFit class in trend_fits.py.
 labels: [sweep]
 ---
 
