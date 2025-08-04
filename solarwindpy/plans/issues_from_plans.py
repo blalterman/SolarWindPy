@@ -5,6 +5,8 @@ The script parses markdown files under ``solarwindpy/plans`` that contain
 YAML frontmatter and converts them into GitHub issues. Frontmatter fields
 ``name``, ``about`` and ``labels`` are used for the issue metadata while the
 markdown content beginning with ``## 🧠 Context`` becomes the issue body.
+Optionally a specific subdirectory can be scanned via the ``--directory`` CLI
+argument.
 """
 
 from __future__ import annotations
@@ -149,11 +151,27 @@ def infer_owner_repo() -> Tuple[Optional[str], Optional[str]]:
     return parts[0], parts[1]
 
 
-def find_plan_files() -> List[Path]:
-    """Recursively locate plan markdown files."""
+def find_plan_files(subdir: Optional[str] = None) -> List[Path]:
+    """Recursively locate plan markdown files.
+
+    Parameters
+    ----------
+    subdir : str, optional
+        Specific directory under the plans folder to search.
+
+    Returns
+    -------
+    list of Path
+        Markdown files excluding ``pre_combination_files``.
+    """
 
     root = Path(__file__).resolve().parent
-    return [p for p in root.rglob("*.md") if "pre_combination_files" not in p.parts]
+    search_root = root / subdir if subdir else root
+    if not search_root.exists():
+        raise FileNotFoundError(f"Directory {search_root} does not exist")
+    return [
+        p for p in search_root.rglob("*.md") if "pre_combination_files" not in p.parts
+    ]
 
 
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
@@ -191,6 +209,10 @@ def main() -> None:
         "--repo",
         help="GitHub repository name",
     )
+    parser.add_argument(
+        "--directory",
+        help="Subdirectory under plans to search for markdown files",
+    )
     args = parser.parse_args()
 
     token = os.getenv("GITHUB_TOKEN")
@@ -218,7 +240,11 @@ def main() -> None:
 
     summary_rows: List[Tuple[str, str]] = []
 
-    plan_files = find_plan_files()
+    try:
+        plan_files = find_plan_files(args.directory)
+    except FileNotFoundError as err:
+        logging.error(err)
+        raise SystemExit(1)
     if not plan_files:
         msg = "No markdown files found in plans directory"
         logging.warning(msg)
