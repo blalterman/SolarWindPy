@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: FitFunction Core'
 about: Details tests and checklist for the FitFunction base class in core.py.
-labels: [sweep]
+labels: [sweep, FitFunction]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
