@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Orbit Plotting'
 about: Unified documentation and checklist for orbit plotting features.
-labels: [sweep]
+labels: [sweep, plotting, OrbitPlot]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
