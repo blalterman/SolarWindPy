@@ -1,5 +1,5 @@
 ---
-name: 'Combined Plan and Checklist: Common Fixtures'
+name: 'FitFunction Combined Plan and Checklist: Common Fixtures'
 about: Summarizes shared test fixtures for fitfunction tests with checklist items.
 labels: [sweep]
 ---
