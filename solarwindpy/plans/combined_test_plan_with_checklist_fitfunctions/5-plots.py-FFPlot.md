@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: FFPlot'
 about: Describes plotting tests and checklist for the FFPlot class in plots.py.
-labels: [sweep] [FitFunctions]
+labels: [sweep, FitFunctions, plotting]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
