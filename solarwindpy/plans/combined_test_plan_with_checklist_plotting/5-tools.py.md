@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Plotting Tools'
 about: Unified documentation and checklist for helper tools used in plotting.
-labels: [sweep]
+labels: [sweep, plotting, utils]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
