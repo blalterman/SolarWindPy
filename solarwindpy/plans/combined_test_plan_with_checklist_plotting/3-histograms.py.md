@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Histogram Plotting'
 about: Unified documentation and checklist for validating histogram plotting modules.
-labels: [sweep]
+labels: [sweep, plotting, Hist1D, Hist2D]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
