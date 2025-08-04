@@ -1,6 +1,6 @@
 ---
-name: 'Combined Plan and Checklist: FitFunction Gaussian Classes'
-about: Lists tests and checklist for FitFunction  Gaussian variants in gaussians.py.
+name: 'Combined Plan and Checklist: Gaussian Classes'
+about: Lists tests and checklist for FitFunction subclass Gaussian in gaussians.py.
 labels: [sweep]
 ---
 
