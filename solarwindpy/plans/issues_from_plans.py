@@ -10,9 +10,9 @@ markdown content beginning with ``## 🧠 Context`` becomes the issue body.
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -115,8 +115,8 @@ def create_issue(
     return resp.json()
 
 
-def load_repo_config() -> Tuple[Optional[str], Optional[str]]:
-    """Load default repository information from package config.
+def infer_owner_repo() -> Tuple[Optional[str], Optional[str]]:
+    """Infer repository information from the local Git remote.
 
     Returns
     -------
@@ -124,14 +124,28 @@ def load_repo_config() -> Tuple[Optional[str], Optional[str]]:
         Repository owner and name if available.
     """
 
-    config_path = Path(__file__).resolve().parent.parent / "github_config.json"
-    if not config_path.exists():
+    try:
+        url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"],
+            text=True,
+        ).strip()
+    except Exception:  # pragma: no cover - best effort
         return None, None
 
-    with config_path.open("r", encoding="utf-8") as cfg:
-        data = json.load(cfg)
+    if url.startswith("git@"):
+        _, path = url.split(":", 1)
+    elif "github.com/" in url:
+        path = url.split("github.com/", 1)[1]
+    else:
+        return None, None
 
-    return data.get("owner"), data.get("repo")
+    if path.endswith(".git"):
+        path = path[:-4]
+
+    parts = path.strip("/").split("/")
+    if len(parts) != 2:
+        return None, None
+    return parts[0], parts[1]
 
 
 def find_plan_files() -> List[Path]:
@@ -173,9 +187,9 @@ def main() -> None:
     owner = args.owner
     repo = args.repo
     if not owner or not repo:
-        cfg_owner, cfg_repo = load_repo_config()
-        owner = owner or cfg_owner
-        repo = repo or cfg_repo
+        git_owner, git_repo = infer_owner_repo()
+        owner = owner or git_owner
+        repo = repo or git_repo
     if not owner or not repo:
         logging.error("Repository owner and name must be provided")
         raise SystemExit(1)
