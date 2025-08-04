@@ -1,6 +1,6 @@
 # Combined Documentation Plan and Task List for SolarWindPy (update-2025 branch)
 
-## Overview and Goals
+## 1. Overview and Goals
 
 - **Aim**: Provide clear, searchable, and versioned API documentation and tutorials.
 - **Scope**:
@@ -8,7 +8,7 @@
   - User guide with installation, basic usage, and advanced examples.
   - Hosted primarily on Read the Docs and mirrored on GitHub Pages.
 
-## Toolchain and Hosting
+## 2. Toolchain and Hosting
 
 - **Documentation generator**: Sphinx
   - Extensions: `sphinx.ext.autodoc`, `sphinx.ext.napoleon`, `sphinx.ext.mathjax`, `sphinx.ext.viewcode`, `sphinx.ext.githubpages`.
@@ -28,7 +28,7 @@
 - [ ] Create `docs/requirements.txt` listing Sphinx and related extensions (#PR_NUMBER)
 - [ ] Update `docs/Makefile` and `docs/make.bat` to include `html`, `clean`, and `spellcheck` targets (#PR_NUMBER)
 
-## Repository Structure
+## 3. Repository Structure
 
 ```
 SolarWindPy/
@@ -45,7 +45,7 @@ SolarWindPy/
 └── plans/combined_plan_with_checklist_documentation.md
 ```
 
-## Configuration and Standards
+## 4. Configuration and Standards
 
 - Update `docs/source/conf.py`:
   - Add Napoleon extension and enable `autosummary_generate = True`.
@@ -69,7 +69,7 @@ SolarWindPy/
 - [ ] Remove or address any `TODO` placeholders related to documentation (#PR_NUMBER)
 - [ ] Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` (#PR_NUMBER)
 
-## Documentation Content
+## 5. Documentation Content
 
 - Create `docs/source/modules.rst` with a toctree covering core modules.
 - Update `docs/source/index.rst` to reference:
@@ -89,7 +89,7 @@ SolarWindPy/
 - [ ] Generate API reference via `sphinx-apidoc` and include in `api_reference.rst` (#PR_NUMBER)
 - [ ] Run `sphinx-apidoc` to regenerate module stub files (#PR_NUMBER)
 
-## CI/CD and Validation
+## 6. CI/CD and Validation
 
 - Add CI workflow `.github/workflows/doc-build.yml` to build documentation and fail on warnings.
 - Use GitHub Actions to deploy to `gh-pages`.
@@ -104,7 +104,7 @@ SolarWindPy/
 - [ ] Configure Read the Docs with `.readthedocs.yaml` (#PR_NUMBER)
 - [ ] Create `.github/workflows/deploy-docs.yml` to build and push to `gh-pages` (#PR_NUMBER)
 
-## Maintenance
+## 7. Maintenance
 
 - Integrate `doc8` or similar tools for RST linting.
 - Add docstring conventions and workflow guidelines to `CONTRIBUTING.md`.
