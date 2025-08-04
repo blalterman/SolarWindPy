@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: Combined Plan and Checklist Documentation – CI/CD and Validation
+about: Details the continuous integration and validation steps for documentation.
 labels: [sweep]
 ---
 
@@ -12,11 +12,12 @@ Details the continuous integration and validation steps for documentation.
 
 ## 🎯 Overview of the Task
 
-- Add CI workflow `.github/workflows/doc-build.yml` to build documentation and fail on warnings.
+- Add CI workflow `.github/workflows/doc-build.yml` to build documentation and
+  fail on warnings.
 - Use GitHub Actions to deploy to `gh-pages`.
 - Configure Read the Docs with `.readthedocs.yaml`.
-- Validate locally by running `sphinx-apidoc` and `make html` without errors or warnings and testing
-  links and snippets.
+- Validate locally by running `sphinx-apidoc` and `make html` without errors or
+  warnings and testing links and snippets.
 
 ## 🔧 Framework & Dependencies
 
@@ -36,12 +37,13 @@ N/A
 
 ## ✅ Acceptance Criteria
 
-- [ ] Add CI workflow `.github/workflows/doc-build.yml` to install docs requirements and run
-  `make html`.
+- [ ] Add CI workflow `.github/workflows/doc-build.yml` to install docs
+  requirements and run `make html`.
 - [ ] Execute `make html` in `docs/` and confirm no errors or warnings.
 - [ ] Test links, code snippets, and formatting in the generated site.
 - [ ] Configure Read the Docs with `.readthedocs.yaml`.
-- [ ] Create `.github/workflows/deploy-docs.yml` to build and push to `gh-pages`.
+- [ ] Create `.github/workflows/deploy-docs.yml` to build and push to
+  `gh-pages`.
 
 ## 🧩 Decomposition Instructions (Optional)
 

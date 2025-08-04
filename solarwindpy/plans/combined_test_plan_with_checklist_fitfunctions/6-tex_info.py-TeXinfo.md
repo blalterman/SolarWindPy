@@ -1,7 +1,7 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
+name: 'Combined Plan and Checklist: TeXinfo'
+about: Presents test plan and checklist for TeXinfo formatting utilities.
+labels: [sweep, FitFunction, plotting, LaTeX]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md

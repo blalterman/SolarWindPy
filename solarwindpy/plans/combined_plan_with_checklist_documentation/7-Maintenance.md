@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: Combined Plan and Checklist Documentation – Maintenance
+about: Covers long-term maintenance practices for documentation.
 labels: [sweep]
 ---
 
@@ -37,7 +37,8 @@ N/A
 
 - [ ] Add a documentation badge to `README.rst`.
 - [ ] Document docstring conventions and update workflow in `CONTRIBUTING.md`.
-- [ ] Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI.
+- [ ] Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`,
+  `doc8`) in CI.
 - [ ] Schedule periodic review of documentation coverage.
 - [ ] Create `.github/PULL_REQUEST_TEMPLATE.md` to prompt docstring updates.
 
