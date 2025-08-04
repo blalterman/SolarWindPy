@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Tuple
 
 import requests
 import yaml
+from tabulate import tabulate
 
 GITHUB_API = "https://api.github.com"
 
@@ -156,7 +157,7 @@ def find_plan_files() -> List[Path]:
 
 
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
-    """Build an ASCII table summarizing issue creation outcomes.
+    """Build a tabulated summary of issue creation outcomes.
 
     Parameters
     ----------
@@ -166,24 +167,14 @@ def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     Returns
     -------
     str
-        Formatted table as a string. Returns a message when ``rows`` is empty.
+        Formatted table using :mod:`tabulate`. Returns a message when ``rows`` is
+        empty.
     """
 
     if not rows:
         return "No actions performed."
 
-    status_width = max(len("Status"), max(len(s) for s, _ in rows))
-    detail_width = max(len("Detail"), max(len(d) for _, d in rows))
-    sep = f"+{'-' * (status_width + 2)}+{'-' * (detail_width + 2)}+"
-    lines = [
-        sep,
-        f"| {'Status'.ljust(status_width)} | {'Detail'.ljust(detail_width)} |",
-        sep,
-    ]
-    for status, detail in rows:
-        lines.append(f"| {status.ljust(status_width)} | {detail.ljust(detail_width)} |")
-    lines.append(sep)
-    return "\n".join(lines)
+    return tabulate(rows, headers=["Status", "Detail"], tablefmt="github")
 
 
 def main() -> None:
