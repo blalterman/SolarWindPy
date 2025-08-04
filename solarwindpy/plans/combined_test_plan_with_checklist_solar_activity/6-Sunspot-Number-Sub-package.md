@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist: Sunspot Number Sub-package
 about: Test plan and checklist for the solar_activity sunspot number sub-package.
-labels: [sweep]
+labels: [sweep, SolarActivity]
 ---
 
 # 6-Sunspot-Number-Sub-package
