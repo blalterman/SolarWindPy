@@ -74,38 +74,36 @@ SolarWindPy/
 - Include a documentation badge in `README.rst`.
 - Schedule periodic reviews of documentation coverage.
 
-## Task Checklist
+## Checklist
 
-| Task | Status | Owner | Due Date |
-| --- | --- | --- | --- |
-| Evaluate existing docs infrastructure under `docs/` (e.g., Sphinx config, extensions) | not started | | |
-| Verify that `docs/source/conf.py` loads `autodoc`, `todo`, `mathjax`, `viewcode`, and `githubpages` | not started | | |
-| Retrieve package `version` dynamically in `docs/source/conf.py` | not started | | |
-| Confirm that the theme `sphinx_rtd_theme` is set appropriately | not started | | |
-| Check that the source file suffix is `.rst` and master doc is `index.rst` | not started | | |
-| Decide to continue with Sphinx versus evaluate alternatives | not started | | |
-| Add `sphinx.ext.napoleon` extension to parse NumPy/Google-style docstrings | not started | | |
-| Review benefits of plugins such as `sphinx.ext.viewcode` and `sphinx.ext.githubpages` | not started | | |
-| Create `docs/requirements.txt` listing Sphinx and related extensions | not started | | |
-| Update `docs/Makefile` and `docs/make.bat` to include `html`, `clean`, and `spellcheck` targets | not started | | |
-| Add CI workflow `.github/workflows/doc-build.yml` to install docs requirements and run `make html` | not started | | |
-| Audit all public modules and classes for missing docstrings | not started | | |
-| Standardize all existing docstrings to NumPy style | not started | | |
-| Add missing sections such as `Examples`, `Notes`, and `Attributes` where relevant | not started | | |
-| Remove or address any `TODO` placeholders related to documentation | not started | | |
-| Update `docs/source/index.rst` to include `installation.rst`, `usage.rst`, `tutorial.rst`, and `api_reference.rst` | not started | | |
-| Create `installation.rst` with installation instructions (pip, conda) | not started | | |
-| Create `usage.rst` with basic usage examples | not started | | |
-| Create `tutorial.rst` with a step-by-step tutorial | not started | | |
-| Generate API reference via `sphinx-apidoc` and include in `api_reference.rst` | not started | | |
-| Run `sphinx-apidoc` to regenerate module stub files | not started | | |
-| Execute `make html` in `docs/` and confirm no errors or warnings | not started | | |
-| Test links, code snippets, and formatting in the generated site | not started | | |
-| Configure Read the Docs with `.readthedocs.yaml` | not started | | |
-| Create `.github/workflows/deploy-docs.yml` to build and push to `gh-pages` | not started | | |
-| Add a documentation badge to `README.rst` | not started | | |
-| Document docstring conventions and update workflow in `CONTRIBUTING.md` | not started | | |
-| Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI | not started | | |
-| Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` | not started | | |
-| Schedule periodic review of documentation coverage | not started | | |
-| Create `.github/PULL_REQUEST_TEMPLATE.md` to prompt docstring updates | not started | | |
+- [ ] Evaluate existing docs infrastructure under `docs/` (e.g., Sphinx config, extensions) (#PR_NUMBER)
+- [ ] Verify that `docs/source/conf.py` loads `autodoc`, `todo`, `mathjax`, `viewcode`, and `githubpages` (#PR_NUMBER)
+- [ ] Retrieve package `version` dynamically in `docs/source/conf.py` (#PR_NUMBER)
+- [ ] Confirm that the theme `sphinx_rtd_theme` is set appropriately (#PR_NUMBER)
+- [ ] Check that the source file suffix is `.rst` and master doc is `index.rst` (#PR_NUMBER)
+- [ ] Decide to continue with Sphinx versus evaluate alternatives (#PR_NUMBER)
+- [ ] Add `sphinx.ext.napoleon` extension to parse NumPy/Google-style docstrings (#PR_NUMBER)
+- [ ] Review benefits of plugins such as `sphinx.ext.viewcode` and `sphinx.ext.githubpages` (#PR_NUMBER)
+- [ ] Create `docs/requirements.txt` listing Sphinx and related extensions (#PR_NUMBER)
+- [ ] Update `docs/Makefile` and `docs/make.bat` to include `html`, `clean`, and `spellcheck` targets (#PR_NUMBER)
+- [ ] Add CI workflow `.github/workflows/doc-build.yml` to install docs requirements and run `make html` (#PR_NUMBER)
+- [ ] Audit all public modules and classes for missing docstrings (#PR_NUMBER)
+- [ ] Standardize all existing docstrings to NumPy style (#PR_NUMBER)
+- [ ] Add missing sections such as `Examples`, `Notes`, and `Attributes` where relevant (#PR_NUMBER)
+- [ ] Remove or address any `TODO` placeholders related to documentation (#PR_NUMBER)
+- [ ] Update `docs/source/index.rst` to include `installation.rst`, `usage.rst`, `tutorial.rst`, and `api_reference.rst` (#PR_NUMBER)
+- [ ] Create `installation.rst` with installation instructions (pip, conda) (#PR_NUMBER)
+- [ ] Create `usage.rst` with basic usage examples (#PR_NUMBER)
+- [ ] Create `tutorial.rst` with a step-by-step tutorial (#PR_NUMBER)
+- [ ] Generate API reference via `sphinx-apidoc` and include in `api_reference.rst` (#PR_NUMBER)
+- [ ] Run `sphinx-apidoc` to regenerate module stub files (#PR_NUMBER)
+- [ ] Execute `make html` in `docs/` and confirm no errors or warnings (#PR_NUMBER)
+- [ ] Test links, code snippets, and formatting in the generated site (#PR_NUMBER)
+- [ ] Configure Read the Docs with `.readthedocs.yaml` (#PR_NUMBER)
+- [ ] Create `.github/workflows/deploy-docs.yml` to build and push to `gh-pages` (#PR_NUMBER)
+- [ ] Add a documentation badge to `README.rst` (#PR_NUMBER)
+- [ ] Document docstring conventions and update workflow in `CONTRIBUTING.md` (#PR_NUMBER)
+- [ ] Set up linting for documentation (e.g., `flake8-docstrings`, `rst-lint`, `doc8`) in CI (#PR_NUMBER)
+- [ ] Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg` (#PR_NUMBER)
+- [ ] Schedule periodic review of documentation coverage (#PR_NUMBER)
+- [ ] Create `.github/PULL_REQUEST_TEMPLATE.md` to prompt docstring updates (#PR_NUMBER)
