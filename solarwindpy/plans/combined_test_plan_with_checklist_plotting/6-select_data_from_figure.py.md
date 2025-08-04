@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Select Data From Figure'
 about: Unified documentation and checklist for selecting data from interactive figures.
-labels: [sweep]
+labels: [sweep, plotting]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
