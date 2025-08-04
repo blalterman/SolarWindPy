@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: Combined Plan and Checklist: Plotting Helpers
+about: Test plan and checklist for plotting helper functions in the solar_activity module.
 labels: [sweep]
 ---
 
