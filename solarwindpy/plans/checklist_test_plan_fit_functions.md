@@ -228,8 +228,3 @@ _For each class:_
 - [ ] API contracts: string formats (`TeX`), plotting behaviors, and property outputs must be stable (#PR)
 - [ ] Edge cases: zero-size data, insufficient observations, bad weights, solver failures—ensures graceful degradation (#PR)
 
----
-
-_Aligns with AGENTS.md: run with `pytest -q`, enforce no skipped tests, maintain code style with `flake8` & `black`._
-
----
