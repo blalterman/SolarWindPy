@@ -155,6 +155,37 @@ def find_plan_files() -> List[Path]:
     return [p for p in root.rglob("*.md") if "pre_combination_files" not in p.parts]
 
 
+def format_summary_table(rows: List[Tuple[str, str]]) -> str:
+    """Build an ASCII table summarizing issue creation outcomes.
+
+    Parameters
+    ----------
+    rows : list of tuple of str
+        Each tuple is a ``(status, detail)`` pair.
+
+    Returns
+    -------
+    str
+        Formatted table as a string. Returns a message when ``rows`` is empty.
+    """
+
+    if not rows:
+        return "No actions performed."
+
+    status_width = max(len("Status"), max(len(s) for s, _ in rows))
+    detail_width = max(len("Detail"), max(len(d) for _, d in rows))
+    sep = f"+{'-' * (status_width + 2)}+{'-' * (detail_width + 2)}+"
+    lines = [
+        sep,
+        f"| {'Status'.ljust(status_width)} | {'Detail'.ljust(detail_width)} |",
+        sep,
+    ]
+    for status, detail in rows:
+        lines.append(f"| {status.ljust(status_width)} | {detail.ljust(detail_width)} |")
+    lines.append(sep)
+    return "\n".join(lines)
+
+
 def main() -> None:
     """CLI entry point for converting plans into GitHub issues."""
 
@@ -194,31 +225,41 @@ def main() -> None:
         logging.error("Repository owner and name must be provided")
         raise SystemExit(1)
 
+    summary_rows: List[Tuple[str, str]] = []
+
     plan_files = find_plan_files()
     if not plan_files:
-        logging.warning("No markdown files found in plans directory")
-        return
+        msg = "No markdown files found in plans directory"
+        logging.warning(msg)
+        summary_rows.append(("Warning", msg))
+    else:
+        logging.info("Found %d plan files", len(plan_files))
+        existing_titles = set(fetch_existing_issue_titles(owner, repo, token))
+        for path in plan_files:
+            try:
+                plan = load_markdown_plan(path)
+                title = plan["name"]
+                body = plan["body"]
+                labels = plan["labels"]
 
-    logging.info("Found %d plan files", len(plan_files))
+                if title in existing_titles:
+                    logging.info("Skipping '%s': issue already exists", title)
+                    summary_rows.append(("Exists", title))
+                    continue
 
-    existing_titles = set(fetch_existing_issue_titles(owner, repo, token))
+                issue = create_issue(owner, repo, token, title, body, labels)
+                logging.info("Created issue #%d '%s'", issue["number"], title)
+                summary_rows.append(("Created", f"{title} (#{issue['number']})"))
 
-    for path in plan_files:
-        try:
-            plan = load_markdown_plan(path)
-            title = plan["name"]
-            body = plan["body"]
-            labels = plan["labels"]
+            except Exception as err:  # noqa: BLE001 - logging the error
+                logging.error("Failed on %s: %s", path, err)
+                summary_rows.append(("Error", f"{path.name}: {err}"))
 
-            if title in existing_titles:
-                logging.info("Skipping '%s': issue already exists", title)
-                continue
-
-            issue = create_issue(owner, repo, token, title, body, labels)
-            logging.info("Created issue #%d '%s'", issue["number"], title)
-
-        except Exception as err:  # noqa: BLE001 - logging the error
-            logging.error("Failed on %s: %s", path, err)
+    table = format_summary_table(summary_rows)
+    print(table)
+    logging.info("\n%s", table)
+    with log_file.open("a", encoding="utf-8") as fh:
+        fh.write(table + "\n")
 
 
 if __name__ == "__main__":
