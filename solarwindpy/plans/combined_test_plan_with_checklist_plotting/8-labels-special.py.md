@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Special Labels'
+about: Unified documentation and checklist for special label utilities in plotting.
 labels: [sweep]
 ---
 

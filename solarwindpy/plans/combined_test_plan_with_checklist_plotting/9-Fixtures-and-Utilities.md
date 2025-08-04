@@ -1,6 +1,10 @@
-______________________________________________________________________
+---
+name: 'Combined Plan and Checklist: Fixtures and Utilities'
+about: Unified documentation and checklist for fixtures and utility functions supporting plotting tests.
+labels: [sweep]
+---
 
-## name: SweepAI Task Template about: Use this template to request a code update, refactor, or documentation change via SweepAI. labels: [sweep]
+______________________________________________________________________
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
 

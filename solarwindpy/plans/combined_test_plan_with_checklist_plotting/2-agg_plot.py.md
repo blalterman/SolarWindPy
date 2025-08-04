@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Aggregate Plotting'
+about: Unified documentation and checklist for testing aggregate plotting functions.
 labels: [sweep]
 ---
 

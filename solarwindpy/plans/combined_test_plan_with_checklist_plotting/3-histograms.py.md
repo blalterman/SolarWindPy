@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: 'Combined Plan and Checklist: Histogram Plotting'
+about: Unified documentation and checklist for validating histogram plotting modules.
 labels: [sweep]
 ---
 
