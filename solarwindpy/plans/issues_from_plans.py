@@ -1,122 +1,284 @@
 #!/usr/bin/env python3
-"""
-Create GitHub issues from Markdown plans with YAML frontmatter.
+"""Create GitHub issues from plan files.
 
-Usage:
-    python create_issues_from_plans.py \
-        --owner my-org \
-        --repo my-repo \
-        --dir SolarWindPy/solarwindpy/plans/combined_test_plan_with_checklist_solar_activity
+The script parses markdown files under ``solarwindpy/plans`` that contain
+YAML frontmatter and converts them into GitHub issues. Frontmatter fields
+``name``, ``about`` and ``labels`` are used for the issue metadata while the
+markdown content beginning with ``## 🧠 Context`` becomes the issue body.
+Optionally a specific subdirectory can be scanned via the ``-d/--directory``
+CLI argument.
 """
 
-import os
-import glob
+from __future__ import annotations
+
 import argparse
 import logging
-import yaml
+import os
+import subprocess
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 import requests
-from typing import List, Dict
+import yaml
+from tabulate import tabulate
 
 GITHUB_API = "https://api.github.com"
 
-def load_markdown_plan(path: str) -> Dict:
+
+def load_markdown_plan(path: Path) -> Dict[str, object]:
+    """Parse a markdown plan file.
+
+    Parameters
+    ----------
+    path : Path
+        Location of the markdown file.
+
+    Returns
+    -------
+    dict
+        Dictionary with ``name``, ``about``, ``labels`` and ``body`` keys.
     """
-    Read a markdown file, parse YAML frontmatter and return:
-      { "name": str, "about": str, "labels": List[str], "body": str }
-    """
-    text = open(path, 'r', encoding='utf-8').read()
-    if not text.startswith('---'):
+
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
         raise ValueError(f"No YAML frontmatter found in {path}")
-    _, fm, rest = text.split('---', 2)
+
+    _, fm, rest = text.split("---", 2)
     meta = yaml.safe_load(fm)
-    body = rest.lstrip('\n')
+
+    context_index = rest.find("## 🧠 Context")
+    body = rest[context_index:].lstrip() if context_index != -1 else rest.lstrip("\n")
+
     return {
         "name": meta.get("name", "").strip(),
         "about": meta.get("about", "").strip(),
         "labels": meta.get("labels", []),
-        "body": body
+        "body": body,
     }
 
-def fetch_existing_issue_titles(owner: str, repo: str, token: str) -> List[str]:
-    """
-    Retrieve the titles of open issues in the repo (up to 100).
-    """
-    url = f"{GITHUB_API}/repos/{owner}/{repo}/issues"
-    headers = {"Authorization": f"token {token}"}
-    params = {"state": "all", "per_page": 100}
-    resp = requests.get(url, headers=headers, params=params)
-    resp.raise_for_status()
-    return [issue["title"] for issue in resp.json()]
 
-def create_issue(owner: str, repo: str, token: str,
-                 title: str, body: str, labels: List[str]) -> Dict:
+def fetch_existing_issue_titles(owner: str, repo: str, token: str) -> List[str]:
+    """Retrieve titles of all issues in a repository.
+
+    Parameters
+    ----------
+    owner : str
+        GitHub organization or username.
+    repo : str
+        GitHub repository name.
+    token : str
+        Personal access token.
+
+    Returns
+    -------
+    list of str
+        Titles of existing issues (open and closed).
     """
-    Create a GitHub issue and return the response JSON.
+
+    titles: List[str] = []
+    headers = {"Authorization": f"token {token}"}
+    page = 1
+    while True:
+        params = {"state": "all", "per_page": 100, "page": page}
+        url = f"{GITHUB_API}/repos/{owner}/{repo}/issues"
+        resp = requests.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        if not data:
+            break
+        titles.extend(issue["title"] for issue in data)
+        page += 1
+    return titles
+
+
+def create_issue(
+    owner: str, repo: str, token: str, title: str, body: str, labels: List[str]
+) -> Dict[str, object]:
+    """Create a GitHub issue.
+
+    Parameters
+    ----------
+    owner, repo, token, title, body, labels : str or list of str
+        Standard GitHub issue parameters.
+
+    Returns
+    -------
+    dict
+        Response JSON from GitHub API.
     """
+
     url = f"{GITHUB_API}/repos/{owner}/{repo}/issues"
     headers = {
         "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
     payload = {"title": title, "body": body, "labels": labels}
     resp = requests.post(url, json=payload, headers=headers)
     resp.raise_for_status()
     return resp.json()
 
-def main():
+
+def infer_owner_repo() -> Tuple[Optional[str], Optional[str]]:
+    """Infer repository information from the local Git remote.
+
+    Returns
+    -------
+    tuple of (str or None, str or None)
+        Repository owner and name if available.
+    """
+
+    try:
+        url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"],
+            text=True,
+        ).strip()
+    except Exception:  # pragma: no cover - best effort
+        return None, None
+
+    if url.startswith("git@"):
+        _, path = url.split(":", 1)
+    elif "github.com/" in url:
+        path = url.split("github.com/", 1)[1]
+    else:
+        return None, None
+
+    if path.endswith(".git"):
+        path = path[:-4]
+
+    parts = path.strip("/").split("/")
+    if len(parts) != 2:
+        return None, None
+    return parts[0], parts[1]
+
+
+def find_plan_files(subdir: Optional[str] = None) -> List[Path]:
+    """Recursively locate plan markdown files.
+
+    Parameters
+    ----------
+    subdir : str, optional
+        Specific directory under the plans folder to search.
+
+    Returns
+    -------
+    list of Path
+        Markdown files excluding ``pre_combination_files``.
+    """
+
+    root = Path(__file__).resolve().parent
+    search_root = root / subdir if subdir else root
+    if not search_root.exists():
+        raise FileNotFoundError(f"Directory {search_root} does not exist")
+    return [
+        p for p in search_root.rglob("*.md") if "pre_combination_files" not in p.parts
+    ]
+
+
+def format_summary_table(rows: List[Tuple[str, str]]) -> str:
+    """Build a tabulated summary of issue creation outcomes.
+
+    Parameters
+    ----------
+    rows : list of tuple of str
+        Each tuple is a ``(status, detail)`` pair.
+
+    Returns
+    -------
+    str
+        Formatted table using :mod:`tabulate`. Returns a message when ``rows`` is
+        empty.
+    """
+
+    if not rows:
+        return "No actions performed."
+
+    return tabulate(rows, headers=["Status", "Detail"], tablefmt="github")
+
+
+def main() -> None:
+    """CLI entry point for converting plans into GitHub issues."""
+
     parser = argparse.ArgumentParser(
-        description="Create GitHub issues from Markdown plans."
+        description="Create GitHub issues from Markdown plans.",
     )
     parser.add_argument(
-        "--owner", required=True,
-        help="GitHub organization or username"
+        "--owner",
+        help="GitHub organization or username",
     )
     parser.add_argument(
-        "--repo", required=True,
-        help="GitHub repository name"
+        "--repo",
+        help="GitHub repository name",
     )
     parser.add_argument(
-        "--dir", required=True,
-        help="Directory containing plan markdown files"
+        "-d",
+        "--directory",
+        help="Subdirectory under plans to search for markdown files",
     )
     args = parser.parse_args()
 
     token = os.getenv("GITHUB_TOKEN")
     if not token:
-        logging.error("Environment variable GITHUB_TOKEN not set.")
-        exit(1)
+        raise SystemExit("Environment variable GITHUB_TOKEN not set.")
 
+    log_dir = Path(__file__).resolve().parent.parent / "scripts" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "issues_from_plans.log"
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s"
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
     )
 
-    plan_files = glob.glob(os.path.join(args.dir, "*.md"))
+    owner = args.owner
+    repo = args.repo
+    if not owner or not repo:
+        git_owner, git_repo = infer_owner_repo()
+        owner = owner or git_owner
+        repo = repo or git_repo
+    if not owner or not repo:
+        logging.error("Repository owner and name must be provided")
+        raise SystemExit(1)
+
+    summary_rows: List[Tuple[str, str]] = []
+
+    try:
+        plan_files = find_plan_files(args.directory)
+    except FileNotFoundError as err:
+        logging.error(err)
+        raise SystemExit(1)
     if not plan_files:
-        logging.warning("No markdown files found in %s", args.dir)
-        return
+        msg = "No markdown files found in plans directory"
+        logging.warning(msg)
+        summary_rows.append(("Warning", msg))
+    else:
+        logging.info("Found %d plan files", len(plan_files))
+        existing_titles = set(fetch_existing_issue_titles(owner, repo, token))
+        for path in plan_files:
+            try:
+                plan = load_markdown_plan(path)
+                title = plan["name"]
+                body = plan["body"]
+                labels = plan["labels"]
 
-    logging.info("Found %d plan files", len(plan_files))
+                if title in existing_titles:
+                    logging.info("Skipping '%s': issue already exists", title)
+                    summary_rows.append(("Exists", title))
+                    continue
 
-    existing_titles = fetch_existing_issue_titles(args.owner, args.repo, token)
-    existing_set = set(existing_titles)
+                issue = create_issue(owner, repo, token, title, body, labels)
+                logging.info("Created issue #%d '%s'", issue["number"], title)
+                summary_rows.append(("Created", f"{title} (#{issue['number']})"))
 
-    for path in plan_files:
-        try:
-            plan = load_markdown_plan(path)
-            title = plan["name"]
-            body = plan["body"]
-            labels = plan["labels"]
+            except Exception as err:  # noqa: BLE001 - logging the error
+                logging.error("Failed on %s: %s", path, err)
+                summary_rows.append(("Error", f"{path.name}: {err}"))
 
-            if title in existing_set:
-                logging.info("Skipping '%s': issue already exists", title)
-                continue
+    table = format_summary_table(summary_rows)
+    print(table)
+    logging.info("\n%s", table)
+    with log_file.open("a", encoding="utf-8") as fh:
+        fh.write(table + "\n")
 
-            issue = create_issue(args.owner, args.repo, token, title, body, labels)
-            logging.info("Created issue #%d '%s'", issue["number"], title)
-
-        except Exception as e:
-            logging.error("Failed on %s: %s", path, e)
 
 if __name__ == "__main__":
     main()
