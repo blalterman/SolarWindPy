@@ -1,8 +1,16 @@
+---
+name: 'Combined Plan and Checklist: LISIRD Sub-package'
+about: Test plan and checklist for the solar_activity LISIRD sub-package.
+labels: [sweep, SolarActivity]
+---
+
 <!--
 This file was extracted from combined_test_plan_with_checklist_solar_activity.md.
 Source lines: 1-45, 141-179, 239-263
 -->
+
 <!-- markdownlint-disable MD024 -->
+
 # Combined Test Plan and Checklist for `solar_activity` Submodule (update-2025 branch)
 
 ## Overview
@@ -82,7 +90,7 @@ behavior, mock external interactions, and isolate side effects.
 
 - [ ] Monkeypatch `ExtremaCalculator` to return known `formatted_extrema`
 
----
+______________________________________________________________________
 
 ## Test File Structure
 

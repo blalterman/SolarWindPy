@@ -1,8 +1,16 @@
+---
+name: 'Combined Plan and Checklist: Core Base Classes'
+about: Test plan and checklist for base classes in the solar_activity module.
+labels: [sweep, SolarActivity]
+---
+
 <!--
 This file was extracted from combined_test_plan_with_checklist_solar_activity.md.
 Source lines: 1-45, 65-117, 239-263
 -->
+
 <!-- markdownlint-disable MD024 -->
+
 # Combined Test Plan and Checklist for `solar_activity` Submodule (update-2025 branch)
 
 ## Overview
@@ -17,7 +25,7 @@ interactions, and isolate side effects.
 - [ ] Mock external I/O such as HTTP downloads and file reads
 - [ ] Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects
 
----
+______________________________________________________________________
 
 ## Test Framework & Dependencies
 
@@ -33,7 +41,7 @@ interactions, and isolate side effects.
 - [ ] Ensure `pytest-monkeypatch` plugin is available
 - [ ] Ensure `tmp_path` fixture from core `pytest` is available
 
----
+______________________________________________________________________
 
 ## Fixtures
 
@@ -72,13 +80,18 @@ interactions, and isolate side effects.
 #### Checklist
 
 - [ ] Use `tmp_path` to create fake date-named CSV directories for `get_data_ctime`
+
 - [ ] Assert `ctime` is parsed correctly or defaults to epoch when none exist
+
 - [ ] After setting `_ctime`, call and assert `age` = `(today – ctime)` for `get_data_age`
 
 - [ ] Patch `download_data` and monkeypatch “today” to simulate stale data for
   `maybe_update_stale_data`
+
 - [ ] Assert `download_data` called with correct paths in `maybe_update_stale_data`
+
 - [ ] Create a fake CSV in `data_path/today.csv`, write sample CSV for `load_data`
+
 - [ ] Call `load_data()` and assert `instance.data` matches DataFrame
 
 ### 2.4 `class ActivityIndicator`
@@ -100,7 +113,7 @@ interactions, and isolate side effects.
 - [ ] Test `calculate_extrema_bands()` for single & pair durations
 - [ ] Test `cut_about_extrema_bands()` verifying intervals and labels
 
----
+______________________________________________________________________
 
 ## Test File Structure
 
