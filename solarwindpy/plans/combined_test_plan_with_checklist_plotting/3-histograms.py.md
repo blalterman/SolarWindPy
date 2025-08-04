@@ -94,7 +94,7 @@ narrative plan followed by a deduplicated checklist of actionable items.
 
 ## 🎯 Overview of the Task
 
-Implement comprehensive tests for `histograms.py` within the `solarwindpy.plotting` package.
+Implement comprehensive tests for `histograms.py`, `scatter.py`, and `spiral.py` within the `solarwindpy.plotting` package.
 
 ## 🔧 Framework & Dependencies
 
