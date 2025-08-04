@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist Documentation – Repository Structure
 about: Provides the repository layout relevant to documentation.
-labels: [sweep]
+labels: [sweep, Docs]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md

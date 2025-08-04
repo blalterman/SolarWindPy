@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist Documentation – Documentation Content
 about: Outlines the content to include in the documentation set.
-labels: [sweep]
+labels: [sweep, Docs]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md

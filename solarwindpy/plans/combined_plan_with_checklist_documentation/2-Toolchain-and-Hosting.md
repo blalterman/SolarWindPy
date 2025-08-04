@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist Documentation – Toolchain and Hosting
 about: Defines the tools and hosting strategy for building and publishing documentation.
-labels: [sweep]
+labels: [sweep, Docs]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md

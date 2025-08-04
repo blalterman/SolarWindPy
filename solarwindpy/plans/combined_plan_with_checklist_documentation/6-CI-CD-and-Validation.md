@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist Documentation – CI/CD and Validation
 about: Details the continuous integration and validation steps for documentation.
-labels: [sweep]
+labels: [sweep, Docs, CI, CD, Validation]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md

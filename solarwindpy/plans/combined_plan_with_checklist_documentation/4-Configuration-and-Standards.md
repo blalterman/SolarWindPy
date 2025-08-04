@@ -1,7 +1,7 @@
 ---
 name: Combined Plan and Checklist Documentation – Configuration and Standards
 about: Sets configuration choices and documentation standards for the project.
-labels: [sweep]
+labels: [sweep, Docs, config]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md
