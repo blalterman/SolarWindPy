@@ -1,33 +1,46 @@
-### 🧩 Goal
-
-Convert the existing LaTeX-based scientific paper repository into a reusable template.  
-This includes modularization, placeholder substitution, and template metadata creation.
-
+---
+name: SweepAI Task Template
+about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+labels: [sweep]
 ---
 
-### 🔨 Tasks (please create separate PRs if appropriate)
+## 🧠 Context
+<!-- Provide background on the issue. What is the motivation for this change?
+     Include relevant links, previous PRs, or related discussions. -->
 
-- [ ] Identify and replace hardcoded metadata (title, author, date) with placeholders
-- [ ] Move all section files into a `sections/` directory
-- [ ] Create a `copier.yml` file with appropriate user prompts (e.g., paper title, author, affiliation)
-- [ ] Add instructions to the `README.md` for using the template
-- [ ] Ensure the LaTeX compiles with placeholder values
-- [ ] Remove paper-specific content, keeping only structural scaffolding
-- [ ] Insert `\todo{Fill out the <section name>}` where full content was removed
+## 🎯 Overview of the Task
+<!-- Describe clearly what you want SweepAI to do. 
+     Examples: Refactor a function, write new tests, update docs, fix a bug. -->
 
----
+## 🔧 Framework & Dependencies
+<!-- List any frameworks, libraries, or versions relevant to the task.
+     Mention external APIs or packages that should not be changed. -->
 
-### 🧠 Notes for Sweep AI
+## 📂 Affected Files and Paths
+<!-- List the files or directories that will likely be involved.
+     Use relative paths, e.g., src/utils/math.py or tests/test_math.py -->
 
-- Please split these into **separate PRs per task**, unless a combined PR is more efficient.
-- Create your own branches for each PR (e.g., `sweep/add-copier`, `sweep/modularize-sections`, etc.)
-- Ensure each PR has a clear commit message and references this issue.
-- Use placeholders like `{{ author_name }}` or `{{ paper_title }}` where appropriate.
-- Label PRs with `template-conversion` and assign reviewers if applicable.
+## 📊 Figures, Diagrams, or Artifacts (Optional)
+<!-- If the task relates to a specific figure, image, or dataset, reference it here. 
+     Include links or file paths if stored in the repo. -->
 
----
+## ✅ Acceptance Criteria
+<!-- Define the criteria for a successful implementation.
+     Examples:
+     - [ ] Refactored function passes all unit tests
+     - [ ] Code coverage remains ≥ 95%
+     - [ ] Docs are updated -->
 
-### 📚 References
+## 🧩 Decomposition Instructions (Optional)
+<!-- If the task should be split into multiple PRs, specify how.
+     Example: 
+     - PR 1: Create utilities in utils/
+     - PR 2: Refactor main logic to use new utilities
+     - PR 3: Write unit tests for utils -->
 
-- Original repo: [link to repo]
-- Template tool to use: [`copier`](https://copier.readthedocs.io/en/latest/)
+## 🤖 Sweep Agent Instructions (Optional)
+<!-- If you have an AGENTS.md file with agent configurations, you can request a specific agent here.
+     Example: Use the `RefactorBot` agent for this task. -->
+
+## 💬 Additional Notes
+<!-- Any other comments, constraints, or requirements that SweepAI should consider. -->
