@@ -7,8 +7,7 @@ YAML frontmatter and converts them into GitHub issues. Frontmatter fields
 markdown content beginning with ``## 🧠 Context`` becomes the issue body.
 Optionally a specific subdirectory can be scanned via the ``-d/--directory``
 CLI argument. Authentication uses a token supplied via ``--token`` or the
-``GITHUB_TOKEN``, ``GH_TOKEN`` or ``GITHUB_ACCESS_TOKEN`` environment
-variables.
+``GITHUB_TOKEN_SOLARWINDPY`` environment variable.
 """
 
 from __future__ import annotations
@@ -224,14 +223,13 @@ def main() -> None:
 
     token = (
         args.token
-        or os.getenv("GITHUB_TOKEN")
-        or os.getenv("GH_TOKEN")
-        or os.getenv("GITHUB_ACCESS_TOKEN")
+        or os.getenv("GITHUB_TOKEN_SOLARWINDPY")
+#         or os.getenv("GH_TOKEN")
+#         or os.getenv("GITHUB_ACCESS_TOKEN")
     )
     if not token:
         raise SystemExit(
-            "GitHub access token not provided. Use --token or set GITHUB_TOKEN"
-            "/GH_TOKEN/GITHUB_ACCESS_TOKEN."
+            "GitHub access token not provided. Use --token or set GITHUB_TOKEN_SOLARWINDPY"
         )
 
     log_dir = Path(__file__).resolve().parent.parent / "scripts" / "logs"
