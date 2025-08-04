@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Aggregate Plotting'
 about: Unified documentation and checklist for testing aggregate plotting functions.
-labels: [sweep]
+labels: [sweep, plotting, AggPlot]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
