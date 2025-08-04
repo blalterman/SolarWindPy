@@ -1,7 +1,7 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
+name: 'FitFunction Combined Plan and Checklist: Common Fixtures'
+about: Summarizes shared test fixtures for fitfunction tests with checklist items.
+labels: [sweep, FitFunction]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md

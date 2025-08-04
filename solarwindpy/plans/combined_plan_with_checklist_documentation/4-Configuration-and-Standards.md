@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: Combined Plan and Checklist Documentation – Configuration and Standards
+about: Sets configuration choices and documentation standards for the project.
 labels: [sweep]
 ---
 
@@ -19,8 +19,8 @@ Sets configuration choices and documentation standards for the project.
   - Retrieve `version` from package metadata instead of hardcoding it.
 - Standardize docstrings to NumPy style across the codebase.
   - Include `Parameters`, `Returns`, `Raises`, and `Examples` sections.
-  - Audit modules (`core/`, `fitfunctions/`, `instabilities/`, `plotting/`, etc.) for missing or
-    incomplete docstrings.
+  - Audit modules (`core/`, `fitfunctions/`, `instabilities/`, `plotting/`,
+    etc.) for missing or incomplete docstrings.
 
 ## 🔧 Framework & Dependencies
 
@@ -43,15 +43,17 @@ N/A
 
 ## ✅ Acceptance Criteria
 
-- [ ] Verify that `docs/source/conf.py` loads `autodoc`, `todo`, `mathjax`, `viewcode`, and
-  `githubpages`.
+- [ ] Verify that `docs/source/conf.py` loads `autodoc`, `todo`, `mathjax`,
+  `viewcode`, and `githubpages`.
 - [ ] Retrieve package `version` dynamically in `docs/source/conf.py`.
 - [ ] Confirm that the theme `sphinx_rtd_theme` is set appropriately.
 - [ ] Check that the source file suffix is `.rst` and master doc is `index.rst`.
-- [ ] Add `sphinx.ext.napoleon` extension to parse NumPy/Google-style docstrings.
+- [ ] Add `sphinx.ext.napoleon` extension to parse NumPy/Google-style
+  docstrings.
 - [ ] Audit all public modules and classes for missing docstrings.
 - [ ] Standardize all existing docstrings to NumPy style.
-- [ ] Add missing sections such as `Examples`, `Notes`, and `Attributes` where relevant.
+- [ ] Add missing sections such as `Examples`, `Notes`, and `Attributes` where
+  relevant.
 - [ ] Remove or address any `TODO` placeholders related to documentation.
 - [ ] Ensure `flake8-docstrings` rules D205/D406 are enabled in `setup.cfg`.
 

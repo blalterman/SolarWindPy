@@ -1,14 +1,15 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
+name: Combined Plan and Checklist Documentation – Overview and Goals
+about: Summarizes the overarching aims and scope for SolarWindPy's documentation.
+labels: [sweep, Docs]
 ---
 
 > Extracted from solarwindpy/plans/combined_plan_with_checklist_documentation.md
 
 ## 🧠 Context
 
-This section outlines the overarching aims and scope for SolarWindPy's documentation effort.
+This section outlines the overarching aims and scope for SolarWindPy's
+documentation effort.
 
 ## 🎯 Overview of the Task
 

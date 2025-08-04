@@ -1,6 +1,6 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+name: Combined Plan and Checklist Documentation – Repository Structure
+about: Provides the repository layout relevant to documentation.
 labels: [sweep]
 ---
 
@@ -27,7 +27,8 @@ SolarWindPy/
 
 ## 🎯 Overview of the Task
 
-Summarize and maintain the structure shown above to support documentation development.
+Summarize and maintain the structure shown above to support documentation
+development.
 
 ## 🔧 Framework & Dependencies
 
