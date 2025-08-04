@@ -1,6 +1,6 @@
 ---
 name: 'Combined Plan and Checklist: TrendFit'
-about: Covers tests and checklist for the TrendFit class in trend_fits.py.
+about: Covers tests and checklist for the FitFunction subclass TrendFit in trend_fits.py.
 labels: [sweep]
 ---
 
