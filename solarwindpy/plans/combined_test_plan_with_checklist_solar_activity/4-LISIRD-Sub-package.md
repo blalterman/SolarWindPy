@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: LISIRD Sub-package'
 about: Test plan and checklist for the solar_activity LISIRD sub-package.
-labels: [sweep, SolarActivity]
+labels: [sweep, SolarActivity, LISIRD]
 ---
 
 <!--
