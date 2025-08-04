@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Justification'
 about: Explains the rationale for comprehensive fitfunction test coverage.
-labels: [sweep]
+labels: [sweep, FitFunction]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
