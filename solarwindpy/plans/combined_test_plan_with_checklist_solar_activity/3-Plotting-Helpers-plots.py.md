@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Plotting Helpers'
 about: Test plan and checklist for plotting helper functions in the solar_activity module.
-labels: [sweep, SolarActivity]
+labels: [sweep, SolarActivity, plotting]
 ---
 
 # 3-Plotting-Helpers-plots.py
