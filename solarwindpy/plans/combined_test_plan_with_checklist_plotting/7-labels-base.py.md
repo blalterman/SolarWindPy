@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Base Labels'
 about: Unified documentation and checklist for base label utilities in plotting.
-labels: [sweep]
+labels: [sweep, plotting, TeXlabel, LaTeX]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
