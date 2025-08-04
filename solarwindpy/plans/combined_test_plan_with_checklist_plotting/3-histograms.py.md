@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## name: SweepAI Task Template about: Use this template to request a code update, refactor, or documentation change via SweepAI. labels: [sweep]
+---
+name: SweepAI Task Template
+about: Use this template to request a code update, refactor, or documentation change via SweepAI.
+labels: [sweep]
+---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
 
