@@ -1,7 +1,7 @@
 ---
 name: 'Combined Plan and Checklist: Fixtures and Utilities'
 about: Unified documentation and checklist for fixtures and utility functions supporting plotting tests.
-labels: [sweep]
+labels: [sweep, plotting, Fixtures, Utilities]
 ---
 
 ______________________________________________________________________
