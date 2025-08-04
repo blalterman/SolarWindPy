@@ -1,7 +1,7 @@
 ---
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
+name: 'Combined Plan and Checklist: Gaussian Classes'
+about: Lists tests and checklist for FitFunction subclass Gaussian in gaussians.py.
+labels: [sweep, FitFunction]
 ---
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
