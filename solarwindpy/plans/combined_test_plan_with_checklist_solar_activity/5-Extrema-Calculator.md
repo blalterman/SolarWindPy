@@ -1,8 +1,16 @@
+---
+name: 'Combined Plan and Checklist: Extrema Calculator'
+about: Test plan and checklist for the solar_activity extrema calculator.
+labels: [sweep, SolarActivity, SolarCycleExtrema]
+---
+
 <!--
 This file was extracted from combined_test_plan_with_checklist_solar_activity.md.
 Source lines: 1-45, 181-197, 239-263
 -->
+
 <!-- markdownlint-disable MD024 -->
+
 # Combined Test Plan and Checklist for `solar_activity` Submodule (update-2025 branch)
 
 ## Overview
@@ -17,7 +25,7 @@ behavior, mock external interactions, and isolate side effects.
 - [ ] Mock external I/O such as HTTP downloads and file reads
 - [ ] Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects
 
----
+______________________________________________________________________
 
 ## Test Framework & Dependencies
 
@@ -33,7 +41,7 @@ behavior, mock external interactions, and isolate side effects.
 - [ ] Ensure `pytest-monkeypatch` plugin is available
 - [ ] Ensure `tmp_path` fixture from core `pytest` is available
 
----
+______________________________________________________________________
 
 ## Fixtures
 
@@ -66,7 +74,7 @@ behavior, mock external interactions, and isolate side effects.
 - [ ] `find_extrema` logic
 - [ ] `make_plot`: conditional plotting
 
----
+______________________________________________________________________
 
 ## Test File Structure
 

@@ -11,6 +11,7 @@ labels: [sweep, SolarActivity]
 > Extracted from plans/combined_test_plan_with_checklist_solar_activity.md
 
 <!-- markdownlint-disable-next-line MD013 -->
+
 ### Combined Test Plan and Checklist for `solar_activity` Submodule (update-2025 branch)
 
 ## Overview
@@ -25,7 +26,7 @@ behavior, mock external interactions, and isolate side effects.
 - [ ] Mock external I/O such as HTTP downloads and file reads
 - [ ] Use fixtures (`tmp_path`, `monkeypatch`) to isolate side effects
 
----
+______________________________________________________________________
 
 ## 🎯 Overview of the Task
 
@@ -50,7 +51,7 @@ DataFrame.
 - [ ] Ensure `pytest-monkeypatch` plugin is available
 - [ ] Ensure `tmp_path` fixture from core `pytest` is available
 
----
+______________________________________________________________________
 
 ## 📂 Affected Files and Paths
 
