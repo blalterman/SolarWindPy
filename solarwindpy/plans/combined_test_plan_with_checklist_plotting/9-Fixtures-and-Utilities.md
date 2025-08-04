@@ -1,8 +1,6 @@
----
-name: SweepAI Task Template
-about: Use this template to request a code update, refactor, or documentation change via SweepAI.
-labels: [sweep]
----
+______________________________________________________________________
+
+## name: SweepAI Task Template about: Use this template to request a code update, refactor, or documentation change via SweepAI. labels: [sweep]
 
 > Extracted from solarwindpy/plans/combined_test_plan_with_checklist_plotting.md
 
@@ -49,7 +47,7 @@ Implement comprehensive tests for Fixtures & Utilities within the `solarwindpy.p
 
 ## 📂 Affected Files and Paths
 
-- solarwindpy/plotting/Fixtures & Utilities
+- `solarwindpy/tests` (fixtures and utilities for plotting tests)
 
 ## 📊 Figures, Diagrams, or Artifacts (Optional)
 
