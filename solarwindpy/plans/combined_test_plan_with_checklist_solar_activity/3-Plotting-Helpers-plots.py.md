@@ -1,5 +1,5 @@
 ---
-name: Combined Plan and Checklist: Plotting Helpers
+name: 'Combined Plan and Checklist: Plotting Helpers'
 about: Test plan and checklist for plotting helper functions in the solar_activity module.
 labels: [sweep, SolarActivity, plotting]
 ---
