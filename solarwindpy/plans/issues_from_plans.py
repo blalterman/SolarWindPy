@@ -172,9 +172,10 @@ def find_plan_files(subdir: Optional[str] = None) -> List[Path]:
     search_root = root / subdir if subdir else root
     if not search_root.exists():
         raise FileNotFoundError(f"Directory {search_root} does not exist")
-    return [
+    files = [
         p for p in search_root.rglob("*.md") if "pre_combination_files" not in p.parts
     ]
+    return sorted(files, key=lambda p: p.name)
 
 
 def infer_issue_title(path: Path, name: str) -> str:
