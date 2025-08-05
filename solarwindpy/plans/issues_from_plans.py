@@ -8,8 +8,7 @@ markdown content beginning with ``## 🧠 Context`` becomes the issue body. The
 final issue title combines the containing directory name with any numeric
 prefix in the filename to preserve ordering. Optionally a specific
 subdirectory can be scanned via the ``-d/--directory`` CLI argument.
-Authentication uses a token supplied via ``--token`` or the ``GITHUB_TOKEN``,
-``GH_TOKEN`` or ``GITHUB_ACCESS_TOKEN`` environment variables.
+Authentication uses a token supplied via ``--token`` or the ``GITHUB_TOKEN_SOLARWINDPY``.
 """
 
 from __future__ import annotations
@@ -212,7 +211,6 @@ def infer_issue_title(path: Path, name: str) -> str:
 
     return f"{dir_title} – {title_part}"
 
-
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     """Build a tabulated summary of issue creation outcomes.
 
@@ -261,13 +259,11 @@ def main() -> None:
 
     token = (
         args.token
-        or os.getenv("GITHUB_TOKEN")
-        or os.getenv("GH_TOKEN")
-        or os.getenv("GITHUB_ACCESS_TOKEN")
+        or os.getenv("GITHUB_TOKEN_SOLARWINDPY")
     )
     if not token:
         raise SystemExit(
-            "GitHub access token not provided. Use --token or set GITHUB_TOKEN"
+            "GitHub access token not provided. Use --token or set GITHUB_TOKEN_SOLARWINDPY"
             "/GH_TOKEN/GITHUB_ACCESS_TOKEN."
         )
 
@@ -290,7 +286,7 @@ def main() -> None:
         logging.error("Repository owner and name must be provided")
         raise SystemExit(1)
 
-    summary_rows: List[Tuple[str, str]] = []
+        summary_rows: List[Tuple[str, str]] = []
 
     try:
         plan_files = find_plan_files(args.directory)
