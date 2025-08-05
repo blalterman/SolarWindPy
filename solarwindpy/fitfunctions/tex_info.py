@@ -396,7 +396,7 @@ class TeXinfo(object):
         Parameters
         ----------
         TeX_popt: dict
-            :py:method:`FitFunction.TeX_popt` dictionary, which contains
+            :py:meth:`FitFunction.TeX_popt` dictionary, which contains
             keys identifying the parameter and values their value.
         TeX_function: str
             :py:meth:`FitFunction.TeX_function` contents giving the functional
@@ -422,7 +422,7 @@ class TeXinfo(object):
             notation.
             This option overrides `convert_pow_10`.
         add_initial_guess: bool
-            If True and :pymeth:`initial_guess_info` is not None, add
+            If True and :py:meth:`initial_guess_info` is not None, add
             `(p0, fit_bounds)` table to info.
         additional_info: str or iterable of strings
             Additional info added to the fit info annotation box.

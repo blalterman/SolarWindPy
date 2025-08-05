@@ -46,7 +46,7 @@ from . import alfvenic_turbulence as alf_turb
 class Plasma(base.Base):
     r"""Container for ions, magnetic field, and spacecraft information.
 
-    Attribute access is first attempted on the underlying :pyattr:`ions` table
+    Attribute access is first attempted on the underlying :py:attr:`ions` table
     before falling back to ``super().__getattr__``. This allows convenient
     shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`.
     """

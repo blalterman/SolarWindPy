@@ -47,7 +47,7 @@ class ID(Base):
         Parameters
         ----------
         key : str
-            Key that maps to a URL fragment in :pyattr:`_trans_url`.
+            Key that maps to a URL fragment in :py:attr:`_trans_url`.
         """
         self._init_logger()
         self.set_key(key)
