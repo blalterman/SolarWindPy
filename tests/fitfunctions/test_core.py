@@ -44,6 +44,8 @@ def test_build_one_obs_mask():
     assert np.array_equal(mask, np.array([False, True, False, False]))
     mask = lf._build_one_obs_mask("xobs", x, None, 1.5)
     assert np.array_equal(mask, np.array([True, True, False, False]))
+    mask = lf._build_one_obs_mask("xobs", x, 0.5, None)
+    assert np.array_equal(mask, np.array([False, True, True, False]))
 
 
 def test_build_outside_mask():
