@@ -2,7 +2,7 @@
 SolarWindPy
 ###########
 
-|Build Status| |License| |Black Code|
+|Build Status| |Docs Status| |License| |Black Code|
 
 Python data analysis tools for solar wind measurements.
 
@@ -29,7 +29,7 @@ Development
       conda env create -f solarwindpy-20250403.yml
       conda activate solarwindpy-20250403
       pip install -e .
-      
+
    Alternatively generate the environment from ``requirements-dev.txt``:
 
    .. code-block:: bash
@@ -83,6 +83,8 @@ See :doc:`CITATION.rst` for instructions on citing SolarWindPy.
 
 .. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml/badge.svg?branch=master
    :target: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml
+.. |Docs Status| image:: https://readthedocs.org/projects/solarwindpy/badge/?version=latest
+   :target: https://solarwindpy.readthedocs.io/en/latest/?badge=latest
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE.rst
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg

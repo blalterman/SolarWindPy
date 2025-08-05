@@ -12,3 +12,5 @@ tabulate
 pytest
 black
 flake8
+doc8
+flake8-docstrings

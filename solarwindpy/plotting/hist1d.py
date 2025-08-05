@@ -214,7 +214,7 @@ class Hist1D(AggPlot):
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
     def make_plot(self, ax=None, fcn=None, transpose_axes=False, **kwargs):
-        f"""Make a plot.
+        """Make a plot.
 
         Parameters
         ----------
