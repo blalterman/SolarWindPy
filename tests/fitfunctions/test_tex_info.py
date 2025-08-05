@@ -99,6 +99,12 @@ def test_build_fit_parameter_info(texinfo):
     assert "N_\\mathrm{pts}" in info and "sigma(X)/X" in info
 
 
+def test_build_fit_parameter_info_errors(texinfo):
+    """_build_fit_parameter_info should reject unknown kwargs."""
+    with pytest.raises(ValueError):
+        texinfo._build_fit_parameter_info(bogus=True)
+
+
 def test_annotate_info(texinfo):
     import matplotlib.pyplot as plt
 

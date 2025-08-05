@@ -259,8 +259,23 @@ class TeXinfo(object):
         simplify_info_for_paper=False,
         npts=False,
         relative_error=False,
+        **kwargs,
     ):
-        """Assemble the formatted lines describing the fit."""
+        r"""Assemble the formatted lines describing the fit.
+
+        Parameters
+        ----------
+        **kwargs
+            Unused keyword arguments.
+
+        Raises
+        ------
+        ValueError
+            If ``kwargs`` contains any entries.
+        """
+
+        if kwargs:
+            raise ValueError(f"Unused kwargs {kwargs.keys()}")
 
         TeX_function = self.TeX_function
         TeX_popt = self.TeX_popt
