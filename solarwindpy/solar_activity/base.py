@@ -379,7 +379,7 @@ class IndicatorExtrema(Base):
 
     @property
     def extrema_bands(self):
-        r"""Bands of time (``\Delta t``) about indicator extrema.
+        r"""Bands of time (:math:`\Delta t`) about indicator extrema.
 
         Parameters
         ----------
