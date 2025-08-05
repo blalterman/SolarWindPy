@@ -577,7 +577,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         gaussian_filter_kwargs=None,
         **kwargs,
     ):
-        f"""Make a contour plot on `ax` using `ax.contour`.
+        """Make a contour plot on `ax` using `ax.contour`.
 
         Paremeters
         ----------
@@ -735,7 +735,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return ax, lbls, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
-        f"""Make a `Hist1D` from the data stored in this `His2D`.
+        """Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
         ----------

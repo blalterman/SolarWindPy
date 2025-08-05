@@ -11,6 +11,7 @@ SolarWindPy Docs
    tutorial
    api_reference
    modules
+   documentation_review
 
 .. include:: ../../LICENSE.rst
 .. include:: ../../CITATION.rst

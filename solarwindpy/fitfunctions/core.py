@@ -684,7 +684,7 @@ xobs: {xobs.shape}"""
         return popt, pcov, psigma, all_chisq
 
     def make_fit(self, return_exception=False, **kwargs):
-        f"""Fit the function with the independent values `xobs` and dependent
+        """Fit the function with the independent values `xobs` and dependent
         values `yobs` using `least_squares` and returning the `OptimizeResult`
         object, but treating weights as in `curve_fit`.
 
