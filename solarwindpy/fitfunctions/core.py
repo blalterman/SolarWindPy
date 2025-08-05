@@ -35,9 +35,7 @@ from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
 from .tex_info import TeXinfo
-from .plots import FFPlot, AxesLabels as _AxesLabels
-
-AxesLabels = _AxesLabels
+from .plots import FFPlot, AxesLabels
 
 Observations = namedtuple("Observations", "x,y,w")
 UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
