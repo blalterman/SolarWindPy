@@ -178,11 +178,9 @@ class TeXinfo(object):
 
     @staticmethod
     def _check_and_add_math_escapes(x):
-        r"""
-        Add "$" math escapes to a string.
+        r"""Add dollar-sign math escapes to a string.
 
-        This function can probably be turned into a
-        static method.
+        This function can probably be turned into a static method.
         """
         assert isinstance(x, str)
         if not x.count("$"):

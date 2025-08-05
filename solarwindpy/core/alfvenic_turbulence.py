@@ -34,7 +34,7 @@ AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
 
 
 class AlfvenicTurbulence(base.Core):
-    r"""Alfv\'enic turbulence diagnostics using Elsasser variables.
+    """Alfvénic turbulence diagnostics using Elsasser variables.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ class AlfvenicTurbulence(base.Core):
     rho : :class:`pandas.Series`
         Mass density used for normalising ``bfield``.
     species : str
-        Species string used when converting to Alfv\'en units.
+        Species string used when converting to Alfvén units.
 
     Notes
     -----
