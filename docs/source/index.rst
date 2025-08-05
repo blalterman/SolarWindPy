@@ -7,6 +7,7 @@ SolarWindPy Docs
    :caption: Contents:
       
    modules
+   tutorial/quickstart
    solarwindpy.solar_activity.tests
 
 .. include:: ../../LICENSE.rst
