@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 from scipy.optimize import OptimizeWarning
 
-from solarwindpy.fitfunctions import gaussians, trend_fits, lines
+from solarwindpy.fitfunctions import core, gaussians, trend_fits, lines
 
 
 @pytest.fixture
@@ -117,3 +117,9 @@ def test_set_agged_set_fitfunctions_set_shared_labels(trend_fit, agged):
     first_ff = trend_fit.ffuncs.iloc[0]
     assert first_ff.plotter.labels.x == "density"
     assert first_ff.plotter.labels.y == "counts"
+
+
+def test_labels_instance_and_update(trend_fit):
+    assert isinstance(trend_fit.labels, core.AxesLabels)
+    trend_fit.set_shared_labels(x="time", y="density", z="counts")
+    assert trend_fit.labels == core.AxesLabels("time", "density", "counts")
