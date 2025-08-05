@@ -19,3 +19,13 @@ def agged():
 def test_popt1d_keys_property(agged):
     trend_fit = trend_fits.TrendFit(agged, lines.Line)
     assert trend_fit.popt1d_keys == trend_fits.Popt1DKeys("mu", "sigma")
+
+
+def test_trend_logx_true_make_trend_func(agged):
+    """Ensure ``trend_logx`` propagates to the trend function."""
+    trend_fit = trend_fits.TrendFit(agged, lines.Line, trend_logx=True)
+    assert trend_fit.trend_logx is True
+    trend_fit.make_ffunc1ds()
+    trend_fit.make_1dfits()
+    trend_fit.make_trend_func()
+    assert isinstance(trend_fit.trend_func, lines.Line)
