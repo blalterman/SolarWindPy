@@ -513,6 +513,10 @@ class TeXinfo(object):
         self._npts = new
 
     def set_popt_psigma(self, popt, psigma):
+        if not isinstance(popt, dict):
+            raise TypeError(f"'popt' must be a dict, not {type(popt)}")
+        if not isinstance(psigma, dict):
+            raise TypeError(f"'psigma' must be a dict, not {type(psigma)}")
         for k in popt:
             if k not in psigma:
                 raise ValueError(f"key ({k}) must be in both 'popt' and 'psigma' ")
@@ -538,12 +542,22 @@ class TeXinfo(object):
         self._TeX_argnames = kwargs.items()
 
     def set_TeX_function(self, TeX_function):
+        if not isinstance(TeX_function, str):
+            raise TypeError(f"'TeX_function' must be a str, not {type(TeX_function)}")
         self._TeX_function = TeX_function
 
     def set_chisq_dof(self, new):
+        if new is not None and not (
+            isinstance(new, Number)
+            or hasattr(new, "__dict__")
+            or isinstance(new, tuple)
+        ):
+            raise TypeError(f"Unexpected chisq_dof type ({type(new)})")
         self._chisq_dof = new
 
     def set_rsq(self, new):
+        if new is not None and not isinstance(new, Number):
+            raise TypeError(f"Unexpected rsq type ({type(new)})")
         self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):
