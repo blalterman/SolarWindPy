@@ -620,8 +620,8 @@ data : {z.size}
         mesh.build_cat()
 
     def set_clim(self, lower=None, upper=None):
-        f"""Set the minimum (lower) and maximum (upper) alowed number of
-        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        """Set the minimum (lower) and maximum (upper) allowed counts per bin
+        returned after calling :py:meth:`add`.
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None

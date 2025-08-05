@@ -22,5 +22,9 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
           pip install .
+      - name: Lint code
+        run: flake8
+      - name: Lint docs
+        run: doc8 README.rst docs CITATION.rst --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
       - name: Run tests
         run: pytest -q

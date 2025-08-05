@@ -285,7 +285,7 @@ class DataLimFormatter(ABC):
 
 class CbarMaker(ABC):
     def _make_cbar(self, mappable, **kwargs):
-        f"""Make a colorbar on `ax` using `mappable`.
+        """Make a colorbar on `ax` using `mappable`.
 
         Parameters
         ----------
