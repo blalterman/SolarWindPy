@@ -142,7 +142,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def e_plus(self):
-        """Energy contained in :math:`z^+`."""
+        r"""Energy contained in :math:`z^+`."""
         ep = 0.5 * self.zp.pow(2).sum(axis=1)
         return ep
 
