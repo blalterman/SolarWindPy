@@ -59,6 +59,13 @@ Development
 
    This will run ``black`` and ``flake8`` automatically when committing.
 
+6. Build the documentation and fail on warnings:
+
+   .. code-block:: bash
+
+      cd docs
+      make html SPHINXOPTS=-W
+
 
 License
 =======
