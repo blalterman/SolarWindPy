@@ -119,6 +119,11 @@ def test_set_agged_set_fitfunctions_set_shared_labels(trend_fit, agged):
     assert first_ff.plotter.labels.y == "counts"
 
 
+def test_set_agged_rejects_non_dataframe(trend_fit):
+    with pytest.raises(AssertionError):
+        trend_fit.set_agged(42)
+
+
 def test_labels_instance_and_update(trend_fit):
     assert isinstance(trend_fit.labels, core.AxesLabels)
     trend_fit.set_shared_labels(x="time", y="density", z="counts")
