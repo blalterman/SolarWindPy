@@ -11,6 +11,9 @@ set SOURCEDIR=source
 set BUILDDIR=build
 
 if "%1" == "" goto help
+if "%1" == "html" goto html
+if "%1" == "clean" goto clean
+if "%1" == "spellcheck" goto spellcheck
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
@@ -25,6 +28,21 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
+goto make
+
+:html
+%SPHINXBUILD% -M html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
+
+:clean
+%SPHINXBUILD% -M clean %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
+
+:spellcheck
+%SPHINXBUILD% -b spelling %SOURCEDIR% %BUILDDIR%\spelling %SPHINXOPTS%
+goto end
+
+:make
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
 goto end
 
