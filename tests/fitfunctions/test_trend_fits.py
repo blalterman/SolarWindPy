@@ -130,6 +130,42 @@ def test_plotting_methods_return_axes(monkeypatch, trend_fit):
     assert isinstance(ax, DummyAx)
 
 
+def test_plot_all_popt_1d_returns_errorbar_artists(agged):
+    class StubAx:
+        def __init__(self):
+            self.calls = {}
+            line = SimpleNamespace(set_linestyle=lambda *_: None)
+            self.ret = ("pl", "cl", [line])
+
+        def errorbar(self, *args, **kwargs):
+            self.calls["errorbar"] = {"args": args, "kwargs": kwargs}
+            return self.ret
+
+        def set_xscale(self, *args, **kwargs):  # pragma: no cover - not used here
+            self.calls["set_xscale"] = {"args": args, "kwargs": kwargs}
+
+    tf = trend_fits.TrendFit(agged, lines.Line)
+    tf.make_ffunc1ds()
+    tf.make_1dfits()
+    tf.make_trend_func()
+
+    ax = StubAx()
+    pl, cl, bl = tf.plot_all_popt_1d(ax, color="magenta", ls=":", label="1D Fits")
+
+    assert (pl, cl, bl) == ax.ret
+
+    kwargs = ax.calls["errorbar"]["kwargs"]
+    expected_x = pd.IntervalIndex(tf.popt_1d.index).mid
+    np.testing.assert_allclose(kwargs["x"], expected_x)
+    ykey, wkey = tf.popt1d_keys
+    assert kwargs["y"] == ykey
+    assert kwargs["yerr"] == wkey
+    assert kwargs["color"] == "magenta"
+    assert kwargs["linestyle"] == ":"
+    assert kwargs["label"] == "1D Fits"
+    pd.testing.assert_frame_equal(kwargs["data"], tf.popt_1d)
+
+
 def test_set_agged_set_fitfunctions_set_shared_labels(trend_fit, agged):
     new_agged = agged * 2
     trend_fit.set_agged(new_agged)
