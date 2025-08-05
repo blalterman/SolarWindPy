@@ -38,6 +38,33 @@ def trend_fit(agged):
     return tf
 
 
+@pytest.fixture
+def trend_fit_all_ffuncs(monkeypatch, agged):
+    tf = trend_fits.TrendFit(agged, lines.Line)
+    tf.make_ffunc1ds()
+    tf.make_1dfits()
+    tf.make_trend_func()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=OptimizeWarning)
+        tf.trend_func.make_fit()
+    monkeypatch.setattr(
+        tf.trend_func.plotter,
+        "_labels",
+        SimpleNamespace(x=SimpleNamespace(tex="", units="")),
+    )
+    calls = {}
+    hax = SimpleNamespace(legend_=SimpleNamespace(set_title=lambda *_: None))
+    rax = SimpleNamespace()
+    for k, ff in tf.ffuncs.items():
+
+        def stub(*_, _key=k, **__):
+            calls[_key] = calls.get(_key, 0) + 1
+            return hax, rax
+
+        monkeypatch.setattr(ff.plotter, "plot_raw_used_fit_resid", stub)
+    return tf, calls, hax, rax
+
+
 def test_type_enforcement_and_properties(agged):
     tf = trend_fits.TrendFit(agged, lines.Line)
     assert tf.agged.equals(agged)
@@ -129,7 +156,6 @@ def test_plotting_methods_return_axes(monkeypatch, trend_fit):
     ax = trend_fit.plot_1d_popt_and_trend()
     assert isinstance(ax, DummyAx)
 
-
 def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     class StubAx:
         def __init__(self):
@@ -164,6 +190,15 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     assert kwargs["linestyle"] == ":"
     assert kwargs["label"] == "1D Fits"
     pd.testing.assert_frame_equal(kwargs["data"], tf.popt_1d)
+
+def test_plot_all_ffuncs(trend_fit_all_ffuncs):
+    tf, calls, hax, rax = trend_fit_all_ffuncs
+    axes = tf.plot_all_ffuncs()
+    assert isinstance(axes, pd.DataFrame)
+    for key in tf.ffuncs.index:
+        assert axes.loc[key, "hax"] is hax
+        assert axes.loc[key, "rax"] is rax
+        assert calls[key] == 1
 
 
 def test_set_agged_set_fitfunctions_set_shared_labels(trend_fit, agged):
