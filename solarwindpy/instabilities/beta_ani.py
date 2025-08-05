@@ -29,6 +29,20 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
     """
 
     def __init__(self, beta, ani, species, **kwargs):
+        """Instantiate the histogram plot.
+
+        Parameters
+        ----------
+        beta : pandas.Series
+            Proton parallel beta.
+        ani : pandas.Series
+            Temperature anisotropy.
+        species : str
+            Label used to generate axis titles.
+        **kwargs
+            Additional options forwarded to :class:`Hist2D`.
+        """
+
         x = beta
         y = ani
 

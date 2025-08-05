@@ -16,6 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
+import solarwindpy  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -24,10 +25,10 @@ project = "SolarWindPy"
 copyright = "2019, B. L. Alterman"
 author = "B. L. Alterman"
 
-# The short X.Y version
-version = ""
+# Dynamically fetch the package version
+version = solarwindpy.__version__
 # The full version, including alpha/beta/rc tags
-release = "0.0.1-alpha"
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,11 +42,14 @@ needs_sphinx = "1.8"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
 ]
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
