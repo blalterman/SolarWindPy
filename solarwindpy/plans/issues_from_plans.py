@@ -205,11 +205,20 @@ def infer_issue_title(path: Path, name: str) -> str:
     number = stem_parts[0] if stem_parts and stem_parts[0].isdigit() else ""
 
     if name:
-        title_part = f"{number} {name}".strip()
+        n = name.strip()
+        # Remove any leading directory/plan name and keep only the final part after the last dash or en dash
+        if "–" in n:
+            n = n.split("–")[-1].strip()
+        elif "-" in n:
+            n = n.split("-")[-1].strip()
+        # Remove any repeated directory/plan name at the start of n
+        if n.lower().startswith(dir_title.lower()):
+            n = n[len(dir_title):].lstrip(" -–")
+        title_part = f"{number} {n}".strip() if number else n
     else:
         title_part = " ".join(stem_parts)
 
-    return f"{dir_title} – {title_part}"
+    return f"{dir_title} – {title_part}".strip()
 
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     """Build a tabulated summary of issue creation outcomes.
@@ -286,7 +295,7 @@ def main() -> None:
         logging.error("Repository owner and name must be provided")
         raise SystemExit(1)
 
-        summary_rows: List[Tuple[str, str]] = []
+    summary_rows: List[Tuple[str, str]] = []
 
     try:
         plan_files = find_plan_files(args.directory)
