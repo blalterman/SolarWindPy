@@ -55,6 +55,30 @@ def test_constructor_and_setters_errors():
         tex.set_TeX_argnames(c="\\gamma")
 
 
+def test_set_popt_psigma_errors(texinfo):
+    with pytest.raises(TypeError):
+        texinfo.set_popt_psigma("bad", {"a": 1})
+    with pytest.raises(TypeError):
+        texinfo.set_popt_psigma({"a": 1}, "bad")
+    with pytest.raises(ValueError):
+        texinfo.set_popt_psigma({"a": 1}, {"b": 1})
+
+
+def test_set_chisq_dof_type_error(texinfo):
+    with pytest.raises(TypeError):
+        texinfo.set_chisq_dof("bad")
+
+
+def test_set_rsq_type_error(texinfo):
+    with pytest.raises(TypeError):
+        texinfo.set_rsq("bad")
+
+
+def test_set_TeX_function_type_error(texinfo):
+    with pytest.raises(TypeError):
+        texinfo.set_TeX_function(5)
+
+
 def test_check_and_add_math_escapes():
     f = TeXinfo._check_and_add_math_escapes
     assert f("x") == "$x$"
