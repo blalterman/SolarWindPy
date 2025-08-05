@@ -62,6 +62,31 @@ def test_make_ffunc1ds_make_1dfits(agged):
     assert not tf.psigma_1d.empty
 
 
+def test_make_1dfits_moves_bad_fit(monkeypatch):
+    xbins = pd.interval_range(0, 5, periods=5)
+    ybins = pd.interval_range(0, 2, periods=2)
+    data = {
+        ybins[0]: np.array([1, 2, 3, 4, 5]),
+        ybins[1]: np.array([np.nan, np.nan, np.nan, 5, 6]),
+    }
+    agged = pd.DataFrame(data, index=xbins)
+    tf = trend_fits.TrendFit(agged, lines.Line)
+    tf.make_ffunc1ds()
+
+    orig_make_fit = gaussians.Gaussian.make_fit
+
+    def fail_on_small_n(self, *args, **kwargs):
+        if self.nobs < len(self.argnames):
+            return ValueError("insufficient data")
+        return orig_make_fit(self, *args, **kwargs)
+
+    monkeypatch.setattr(gaussians.Gaussian, "make_fit", fail_on_small_n)
+    tf.make_1dfits()
+    bad_bin = ybins[1]
+    assert bad_bin in tf.bad_fits.index
+    assert bad_bin not in tf.ffuncs.index
+
+
 def test_make_trend_func_success_and_failure(trend_fit, agged_empty):
     assert isinstance(trend_fit.trend_func, lines.Line)
     tf = trend_fits.TrendFit(agged_empty, lines.Line)
