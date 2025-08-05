@@ -331,7 +331,7 @@ def main() -> None:
                 summary_rows.append(("Error", f"{path.name}: {err}"))
 
     table = format_summary_table(summary_rows)
-    print(table)
+
     logging.info("\n%s", table)
     with log_file.open("a", encoding="utf-8") as fh:
         fh.write(table + "\n")
