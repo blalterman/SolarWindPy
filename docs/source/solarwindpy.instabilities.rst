@@ -8,23 +8,22 @@ solarwindpy.instabilities.beta\_ani module
 ------------------------------------------
 
 .. automodule:: solarwindpy.instabilities.beta_ani
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :show-inheritance:
+   :undoc-members:
 
 solarwindpy.instabilities.verscharen2016 module
 -----------------------------------------------
 
 .. automodule:: solarwindpy.instabilities.verscharen2016
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   :members:
+   :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: solarwindpy.instabilities
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :show-inheritance:
+   :undoc-members:
