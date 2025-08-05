@@ -3,11 +3,12 @@ SolarWindPy Docs
 ################
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
-      
-   modules
-   solarwindpy.solar_activity.tests
+
+   api/index
+   user_guide/index
+   tutorials/index
 
 .. include:: ../../LICENSE.rst
 .. include:: ../../CITATION.rst

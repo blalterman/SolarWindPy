@@ -214,12 +214,13 @@ def infer_issue_title(path: Path, name: str) -> str:
             n = n.split("-")[-1].strip()
         # Remove any repeated directory/plan name at the start of n
         if n.lower().startswith(dir_title.lower()):
-            n = n[len(dir_title):].lstrip(" -–")
+            n = n[len(dir_title) :].lstrip(" -–")  # noqa: E203
         title_part = f"{number} {n}".strip() if number else n
     else:
         title_part = " ".join(stem_parts)
 
     return f"{dir_title} – {title_part}".strip()
+
 
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     """Build a tabulated summary of issue creation outcomes.
@@ -267,10 +268,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    token = (
-        args.token
-        or os.getenv("GITHUB_TOKEN_SOLARWINDPY")
-    )
+    token = args.token or os.getenv("GITHUB_TOKEN_SOLARWINDPY")
     if not token:
         raise SystemExit(
             "GitHub access token not provided. Use --token or set GITHUB_TOKEN_SOLARWINDPY"
