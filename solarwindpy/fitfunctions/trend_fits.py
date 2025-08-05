@@ -62,8 +62,7 @@ class TrendFit(object):
         self.set_fitfunctions(ffunc1d, trendfunc)
         self._trend_logx = bool(trend_logx)
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
-
-    #         self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
+        self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
 
     def __str__(self):
         return self.__class__.__name__
@@ -411,7 +410,8 @@ class TrendFit(object):
         tf = self.trend_func
         tf.plotter.set_labels(**kwargs)
 
-        y = tf.plotter.labels.y
-        z = tf.plotter.labels.z
-        for k, ff in self.ffuncs.items():
-            ff.plotter.set_labels(x=y, y=z)
+        lbls = tf.plotter.labels
+        self._labels = core.AxesLabels(lbls.x, lbls.y, lbls.z)
+
+        for ff in self.ffuncs.values:
+            ff.plotter.set_labels(x=lbls.y, y=lbls.z)
