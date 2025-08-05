@@ -4,10 +4,11 @@
 The script parses markdown files under ``solarwindpy/plans`` that contain
 YAML frontmatter and converts them into GitHub issues. Frontmatter fields
 ``name``, ``about`` and ``labels`` are used for the issue metadata while the
-markdown content beginning with ``## 🧠 Context`` becomes the issue body.
-Optionally a specific subdirectory can be scanned via the ``-d/--directory``
-CLI argument. Authentication uses a token supplied via ``--token`` or the
-``GITHUB_TOKEN_SOLARWINDPY`` environment variable.
+markdown content beginning with ``## 🧠 Context`` becomes the issue body. The
+final issue title combines the containing directory name with any numeric
+prefix in the filename to preserve ordering. Optionally a specific
+subdirectory can be scanned via the ``-d/--directory`` CLI argument.
+Authentication uses a token supplied via ``--token`` or the ``GITHUB_TOKEN_SOLARWINDPY``.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import re
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -175,6 +177,40 @@ def find_plan_files(subdir: Optional[str] = None) -> List[Path]:
     ]
 
 
+def infer_issue_title(path: Path, name: str) -> str:
+    """Construct an issue title from directory and file names.
+
+    Parameters
+    ----------
+    path : Path
+        Location of the markdown file.
+    name : str
+        Title from the YAML frontmatter. When provided, it is combined with
+        the numeric prefix from ``path``.
+
+    Returns
+    -------
+    str
+        Issue title in the form ``"<Directory> – <number> <name>"``. If
+        ``name`` is empty the filename (with hyphens/underscores replaced by
+        spaces) is used.
+    """
+
+    dir_name = path.parent.name
+    dir_title = " ".join(
+        part.capitalize() for part in re.split(r"[-_]", dir_name) if part
+    )
+
+    stem_parts = re.split(r"[-_]", path.stem)
+    number = stem_parts[0] if stem_parts and stem_parts[0].isdigit() else ""
+
+    if name:
+        title_part = f"{number} {name}".strip()
+    else:
+        title_part = " ".join(stem_parts)
+
+    return f"{dir_title} – {title_part}"
+
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     """Build a tabulated summary of issue creation outcomes.
 
@@ -224,12 +260,11 @@ def main() -> None:
     token = (
         args.token
         or os.getenv("GITHUB_TOKEN_SOLARWINDPY")
-#         or os.getenv("GH_TOKEN")
-#         or os.getenv("GITHUB_ACCESS_TOKEN")
     )
     if not token:
         raise SystemExit(
             "GitHub access token not provided. Use --token or set GITHUB_TOKEN_SOLARWINDPY"
+            "/GH_TOKEN/GITHUB_ACCESS_TOKEN."
         )
 
     log_dir = Path(__file__).resolve().parent.parent / "scripts" / "logs"
@@ -251,7 +286,7 @@ def main() -> None:
         logging.error("Repository owner and name must be provided")
         raise SystemExit(1)
 
-    summary_rows: List[Tuple[str, str]] = []
+        summary_rows: List[Tuple[str, str]] = []
 
     try:
         plan_files = find_plan_files(args.directory)
@@ -268,7 +303,7 @@ def main() -> None:
         for path in plan_files:
             try:
                 plan = load_markdown_plan(path)
-                title = plan["name"]
+                title = infer_issue_title(path, plan["name"])
                 body = plan["body"]
                 labels = plan["labels"]
 
