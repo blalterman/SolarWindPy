@@ -33,6 +33,7 @@ def test_properties_and_str(texinfo):
     assert texinfo.rsq == 0.99
     assert texinfo.npts == 10
     assert texinfo.TeX_function == "f(x)=a x + b"
+    assert texinfo.TeX_argnames == {"a": "\\alpha", "b": "\\beta"}
     assert "\\alpha" in texinfo.initial_guess_info
     assert texinfo.TeX_popt["\\alpha"].startswith("1.23")
     assert "\\sigma(X)/X" in texinfo.TeX_relative_error
