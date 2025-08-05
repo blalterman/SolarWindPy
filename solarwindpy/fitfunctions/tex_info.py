@@ -131,10 +131,11 @@ class TeXinfo(object):
 
     @property
     def TeX_popt(self):
-        r"""Create a dictionary with (k, v) pairs corresponding to
-        (self.argnames, popt \pm psigma) with the appropriate uncertainty.
+        r"""Create a dictionary with ``(k, v)`` pairs corresponding to
+        ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
+        appropriate uncertainty.
 
-        See `set_TeX_trans_argnames` to translate the argnames for TeX.
+        See ``set_TeX_trans_argnames`` to translate the argnames for TeX.
         """
         psigma = self.psigma
         popt = self.popt.items()
@@ -532,14 +533,15 @@ class TeXinfo(object):
         self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):
-        r"""
-        Convert a value, uncertainty pair to a string in which the
-        value is reported to the first non-zero digit of the uncertainty.
+        r"""Convert a value, uncertainty pair to a string where the value is
+        reported to the first non-zero digit of the uncertainty.
 
-        Require that value > uncertainty.
+        Require that ``value > uncertainty``.
 
-        Example
-        -------
+        Examples
+        --------
+        The generated string uses :math:`\pm` to denote the uncertainty.
+
         >>> a = 3.1415
         >>> b = 0.01
         >>> val_uncert_2_string(a, b)

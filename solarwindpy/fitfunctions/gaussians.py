@@ -236,11 +236,11 @@ class GaussianLn(FitFunction):
 
     @property
     def TeX_popt(self):
-        r"""
-        Create a dictionary with (k, v) pairs corresponding to
-        (self.argnames, popt \pm psigma) with the appropriate uncertainty.
+        r"""Create a dictionary with ``(k, v)`` pairs corresponding to
+        ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
+        appropriate uncertainty.
 
-        See self.set_TeX_trans_argnames to translate the argnames for TeX.
+        See ``set_TeX_trans_argnames`` to translate the argnames for TeX.
         """
         TeX_popt = super(GaussianLn, self).TeX_popt
 
