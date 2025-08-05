@@ -1,27 +1,39 @@
-# AGENTS Instructions for SolarWindPy
+# AGENTS for SolarWindPy
 
-This repository includes Python utilities for analyzing solar wind data. When making changes within this project, please keep the following guidelines in mind:
-
-## Development environment
-
-1. Install required dependencies using `pip install -r requirements-dev.txt`.
-2. Activate a Python 3.11 (or newer) environment.
-
-## Testing and linting
-
-- Run the full test suite with `pytest -q`. All tests should pass before committing.
-- If a test fails, do not skip or disable it.
-- Prefer `pytest` over `unittest`. 
-- Check code style using `flake8`.
-- Format any Python code with `black` (default settings).
-
-## Documentation
-
+# General
+Applies to: *
+Instructions:
+- Use Python 3.11+; install dev deps via `pip install -r requirements-dev.txt`.
+- Run tests with `pytest -q`; all must pass—don’t skip or disable failures.
+- Format code with `black`; lint with `flake8`.
 - Write docstrings in NumPy style.
-- Update relevant documentation files when modifying or adding features.
+- Commit messages: concise, descriptive, reference issues.
 
-## Commit guidelines
+# RefactorBot
+Applies to: src/**/*.py
+Instructions:
+- Refactor large functions into smaller, reusable components.
+- Remove unused variables and dead code.
+- Preserve public APIs; ensure all changes pass existing tests.
 
-- Keep commit messages concise but descriptive.
-- Include references to relevant issues when applicable.
+# TestWriter
+Applies to: tests/**/*.py
+Instructions:
+- Add tests for uncovered public functions using `pytest`.
+- Maintain ≥ 95% coverage; isolate tests (avoid unnecessary mocks).
 
+# DocAgent
+Applies to: docs/**/*.md, README.md, src/**/*.py
+Instructions:
+- Improve clarity and consistency; preserve code examples.
+- For docstrings, strictly follow NumPy style.
+
+# LinterBot
+Applies to: src/**/*.py, tests/**/*.py
+Instructions:
+- Enforce PEP 8 via `flake8`; use inline disables only when unavoidable.
+
+# DependencyGuardian
+Applies to: requirements*.txt, pyproject.toml
+Instructions:
+- Do not un-pin dependencies; minimize version upgrades.
