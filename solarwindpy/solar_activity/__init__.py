@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-r"""Solar activity indicator tools.
+"""Helper functions and shortcuts for solar activity data.
 
-Inclues utilities for downloading and analyzing indices from various sources.
+This package consolidates the different solar activity indicators available in
+:mod:`solarwindpy` and exposes convenience utilities for working with them.
 """
 
 __all__ = ["sunspot_number", "ssn", "lisird", "plots"]
@@ -17,7 +18,14 @@ ssn = sunspot_number
 
 
 def get_all_indices():
-    r"""Convenience function to collect Lyman-alpha, CA-K, F10.7, and M13 SSN data.
+    """Return a table of common solar activity indicators.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing Lyman-alpha, Calcium K line, monthly smoothed
+        sunspot number, the Bremen MgII index, and other indices where
+        available. The index is daily and missing data are preserved.
     """
     Lalpha = lisird.lisird.LISIRD("Lalpha")
     CaK = lisird.lisird.LISIRD("CaK")

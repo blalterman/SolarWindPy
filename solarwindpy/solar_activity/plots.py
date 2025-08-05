@@ -1,3 +1,5 @@
+"""Plotting helpers for solar activity indicators."""
+
 import pdb  # noqa: F401
 from matplotlib import dates as mdates
 
@@ -13,7 +15,18 @@ from solarwindpy import plotting as pp
 
 
 class IndicatorPlot(pp.base.Base):
+    """Base class for plotting a solar activity indicator."""
+
     def __init__(self, indicator, ykey, plasma_index=None):
+        """Parameters
+        ----------
+        indicator : ActivityIndicator
+            Object providing the time series to plot.
+        ykey : str
+            Column in ``indicator.data`` to display.
+        plasma_index : pandas.DatetimeIndex, optional
+            Restrict plotted data to this index.
+        """
         self.set_data(indicator, ykey, plasma_index)
         self.set_log(x=False, y=False)
         self._labels = pp.base.AxesLabels(x=pp.labels.special.DateTime("Year"), y="y")
@@ -87,6 +100,8 @@ class IndicatorPlot(pp.base.Base):
 
 
 class SSNPlot(IndicatorPlot):
+    """Plotter specialised for sunspot number."""
+
     def __init__(self, indicator, **kwargs):
         super(SSNPlot, self).__init__(indicator, "ssn", **kwargs)
         self.set_labels(y=pp.labels.special.SSN(indicator.id.key))

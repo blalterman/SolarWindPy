@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
+r"""Convenience accessors for histogram style plotters.
+
+This module re-exports :class:`AggPlot`, :class:`Hist1D`, and
+:class:`Hist2D` so they can be imported directly from
+:mod:`solarwindpy.plotting.histograms`.
 """
 
 from . import agg_plot

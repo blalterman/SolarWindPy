@@ -1,3 +1,5 @@
+"""Tools for calculating extrema in LISIRD activity indices."""
+
 __all__ = ["ExtremaCalculator"]
 
 import pdb  # noqa: F401
@@ -10,29 +12,24 @@ import solarwindpy as swp
 
 
 class ExtremaCalculator(object):
-    r"""Calculate the minima and maxima for a activity index, defining an
-    Indicator Cycle starting at Minima N and ending at Minimum N+1.
+    r"""Determine extrema in an activity index time series.
 
-    Properties
+    The calculator smooths the input series with a rolling mean and finds
+    local minima and maxima based on a threshold value.
+
+    Attributes
     ----------
-    data: pd.Series
-        Activity index, possibly smoothed by `window`.
-    raw: pd.Series
-        Activity index as passed, not smoothed.
-    name: str
-        Key identifying index type.
-    window: scalar, None
-        If not None, the number of days for applying the rolling window.
-    threshold: pd.Series
-        The threshold for determining Maxima and Minima in a `pd.Series` for each
-        point in the `data`.
-    extrema_finders: namedtuple
-        Contains times when `data` crosses `threshold` (changes) and DateTime information
-        binned by the ranges for identifying extrema (`cut`).
-    extrema: pd.Series
-        Extrema times identifies by extrema type.
-    formatted_extrema: pd.DataFrame
-        Extrema formatted as the SSN extrema:
+    data : pandas.Series
+        Smoothed version of the activity index.
+    raw : pandas.Series
+        Unsmoothed input data.
+    threshold : pandas.Series
+        Threshold used to classify maxima and minima.
+    extrema : pandas.Series
+        Series with ``"Max"`` or ``"Min"`` labels at the extrema times.
+    formatted_extrema : pandas.DataFrame
+        Data frame formatted as a solar cycle table with ``Min`` and ``Max``
+        columns::
 
             ========== ============ ============
              Interval      Min          Max
@@ -43,26 +40,24 @@ class ExtremaCalculator(object):
               ...
               N         <DateTime>   <DateTime>
             ========== ============ ============
-
-    Methods
-    -------
-    set_name, set_data, set_threshold, find_extrema, make_plot
     """
 
     def __init__(self, name, activity_index, threshold=None, window=600):
-        r"""Parameters
+        r"""Create the calculator.
+
+        Parameters
         ----------
-        name: str
-            key used to select activity indicator.
-        activity_index: pd.Series
-            Data as measured for the index.
-        threshold: scalar, FunctionType, None
-            If scalar, the threshold for selecting data for finding Maxima/Minima.
-            If FunctionType, called on `activity_index` (`self.data`) to calculate the threshold.
-            If None, pull scalar from an internal dictionary. If not present in dictionary,
-            calculate with `np.nanmedian`.
-        window: scalar
-            The number of days to apply for a rolling window mean.
+        name : str
+            Identifier for the activity index.
+        activity_index : pandas.Series
+            Raw activity measurements.
+        threshold : float or callable, optional
+            If a scalar, it is used directly to classify maxima and minima.
+            If a callable, it is invoked with ``activity_index`` to compute the
+            threshold. When ``None``, the value is looked up from an internal
+            table or computed with :func:`numpy.nanmedian`.
+        window : int, optional
+            Window length in days for the rolling mean.
         """
         self.set_name(name)
         self.set_data(activity_index, window)
@@ -80,8 +75,7 @@ class ExtremaCalculator(object):
 
     @property
     def name(self):
-        r"""Activity index name.
-        """
+        r"""Activity index name."""
         return self._name
 
     @property
@@ -110,6 +104,24 @@ class ExtremaCalculator(object):
 
     @property
     def formatted_extrema(self):
+        """Extrema formatted as a solar-cycle table.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Data frame with ``Min`` and ``Max`` columns indexed by cycle::
+
+                ========== ============ ============
+                 Interval      Min          Max
+                ========== ============ ============
+                 -1         <DateTime>   <DateTime>
+                  0         <DateTime>   <DateTime>
+                  1         <DateTime>   <DateTime>
+                  ...
+                  N         <DateTime>   <DateTime>
+                ========== ============ ============
+        """
+
         return self._formatted_extrema
 
     def set_name(self, new):

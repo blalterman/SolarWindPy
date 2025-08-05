@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D plots for orbits.
-"""
+r"""Plotting helpers specialized for solar wind orbits."""
 
 import pdb  # noqa: F401
 
@@ -50,21 +49,18 @@ class OrbitPlot(ABC):
 
     @property
     def grouped(self):
-        r"""`joint.groupby` with appropriate axes passes.
-        """
+        r"""`joint.groupby` with appropriate axes passes."""
         gb = self.joint.groupby(list(self._gb_axes) + [self._orbit_key])
         return gb
 
     def set_path(self, *args, orbit=None, **kwargs):
-        r"""Set path information, accounting for orbit info.
-        """
+        r"""Set path information, accounting for orbit info."""
         super(OrbitPlot, self).set_path(*args, **kwargs)
         if orbit is not None:
             self._path = self.path / orbit.path
 
     def set_orbit(self, new):
-        r"""`IntervalIndex` corresponding to the times we want to subset the orbit.
-        """
+        r"""`IntervalIndex` corresponding to the times we want to subset the orbit."""
         if not isinstance(new, pd.IntervalIndex):
             raise TypeError
         self._orbit = new.sort_values()
@@ -144,7 +140,7 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
 
         x = pd.IntervalIndex(agg.index).mid
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
         for k, v in agg.items():
@@ -289,7 +285,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         x = self.data.loc[:, axis]
         if logx:
             # Need to convert back to regular from log-space for data setting.
-            x = 10.0 ** x
+            x = 10.0**x
 
         y = self.data.loc[:, other] if not project_counts else None
         if y is not None:
@@ -298,7 +294,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             yedges = self.edges[other].values
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
             if logy:
-                y = 10.0 ** y
+                y = 10.0**y
 
         h1 = OrbitHist1D(
             self.orbit,
@@ -307,7 +303,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
             nbins=self.edges[axis].values,
-            **kwargs
+            **kwargs,
         )
         h1.set_labels(x=self.labels._asdict()[axis], y=self.labels._asdict()[other])
         h1.set_path("auto")
@@ -325,9 +321,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         y = self.edges["y"]
 
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         XX, YY = np.meshgrid(x, y)
 
@@ -374,7 +370,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         cbar=True,
         limit_color_norm=False,
         cbar_kwargs=None,
-        **kwargs
+        **kwargs,
     ):
         r"""Make one of "Inbound", "Outbound", or "Both" plots on `ax`.
 

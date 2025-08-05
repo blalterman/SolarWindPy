@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-r""":py:mod:`Exponential` and similar `FitFunction` subclasses.
+r"""Utilities for fitting power-law models.
+
+This module provides :class:`~solarwindpy.fitfunctions.core.FitFunction`
+subclasses to fit power-law relations of the form ``f(x) = A x^b`` with
+optional offsets or centering.  These classes supply sensible initial
+guesses and convenience properties for plotting and LaTeX reporting.
 """
 import pdb  # noqa: F401
 
@@ -8,24 +13,29 @@ from .core import FitFunction
 
 class PowerLaw(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
+        """Initialize a simple power-law fit.
+
+        Parameters
+        ----------
+        xobs, yobs : array-like
+            Observed ``x`` and ``y`` values to fit.
+        **kwargs : dict
+            Additional arguments passed to
+            :class:`~solarwindpy.fitfunctions.core.FitFunction`.
+        """
+
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
         def power_law(x, A, b):
-            return A * (x ** b)
+            return A * (x**b)
 
         return power_law
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c, A].
-        """
+        r"""Return initial guesses ``[A, b]`` for the fit."""
         assert self.sufficient_data
 
         #         y = self.yobs
@@ -56,24 +66,28 @@ class PowerLaw(FitFunction):
 
 class PowerLawPlusC(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
+        """Initialize a power law with constant offset.
+
+        Parameters
+        ----------
+        xobs, yobs : array-like
+            Observed values to fit.
+        **kwargs : dict
+            Forwarded to :class:`~solarwindpy.fitfunctions.core.FitFunction`.
+        """
+
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
         def power_law(x, A, b, c):
-            return (A * (x ** b)) + c
+            return (A * (x**b)) + c
 
         return power_law
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c, A].
-        """
+        r"""Return initial guesses ``[A, b, c]`` for the fit."""
         assert self.sufficient_data
 
         #         y = self.yobs
@@ -104,7 +118,7 @@ class PowerLawPlusC(FitFunction):
 
 class PowerLawOffCenter(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        r""":py:class:`Fitfunction` for a power law centered at (x - x_0) with no constant offset."""
+        r"""Initialize a power law centered at ``x - x_0`` without offset."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -116,13 +130,7 @@ class PowerLawOffCenter(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c, A].
-        """
+        r"""Return initial guesses ``[A, b, x0]`` for the fit."""
         assert self.sufficient_data
 
         #         y = self.yobs

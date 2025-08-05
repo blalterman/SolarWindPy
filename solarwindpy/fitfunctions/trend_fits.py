@@ -247,7 +247,7 @@ class TrendFit(object):
             x = popt.index
 
         if self.trend_logx:
-            x = 10.0 ** x
+            x = 10.0**x
 
         if "weights" in kwargs:
             raise ValueError("Weights are handled by `wkey1d`")
@@ -291,7 +291,7 @@ class TrendFit(object):
             x = x[tk]
 
         if self.trend_logx:
-            x = 10.0 ** x
+            x = 10.0**x
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 

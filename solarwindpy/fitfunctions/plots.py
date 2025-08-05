@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.fitfunctions` plotter.
+r"""Plotting utilities for :mod:`solarwindpy.fitfunctions`.
+
+This module contains :class:`FFPlot`, a helper for visualizing fitted
+models, residuals and associated annotations.
 """
 
 import pdb  # noqa: F401
@@ -18,6 +21,22 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 class FFPlot(object):
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
+        """Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.
+
+        Parameters
+        ----------
+        observations : :class:`~solarwindpy.fitfunctions.core.Observations`
+            Observed data used in the fit.
+        y_fit : array-like
+            Model evaluated at the observed ``x`` values.
+        TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`
+            Object describing the fit for annotation.
+        fit_result : scipy.optimize.OptimizeResult
+            Result object returned from the fitting routine.
+        fitfunction_name : str, optional
+            Name of the originating fit function.
+        """
+
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
         self.set_fit_result(fit_result)
@@ -84,21 +103,28 @@ class FFPlot(object):
         return self._y_fit
 
     def set_fitfunction_name(self, new):
+        """Set the descriptive name for saved plots."""
+
         self._fitfunction_name = str(new)
 
     def set_fit_result(self, new):
+        """Store the optimization result object."""
+
         self._fit_result = new
 
     def set_observations(self, observations, y_fit):
+        """Set raw and fitted values used for plotting."""
+
         assert y_fit.shape == observations.raw.x.shape
         assert y_fit[observations.tk_observed].shape == observations.used.x.shape
-        #         assert y_fit[observations.tk_observed].shape == robust_residuals.shape
         self._observations = observations
         self._y_fit = y_fit
 
     #         self._robust_residuals = robust_residuals
 
     def _estimate_markevery(self):
+        """Heuristic marker spacing for large datasets."""
+
         try:
             # Estimate marker density for readability
             markevery = int(
@@ -461,34 +487,28 @@ class FFPlot(object):
     def plot_residuals(
         self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
     ):
-        r"""Make a plot of the fit function that includes the data and fit,
-                but are limited to data included in the fit.
+        r"""Plot residuals for the data used in the fit.
 
-                Residuals are plotted as a percentage, both positive and negative, on
-                a symlog scale with `linthresh=10`.
-        <<<<<<< HEAD
-        =======
+        Residuals are shown on a symlog scale with ``linthresh=10``. By default
+        they are expressed as percentages of the fitted model.
 
-                Parameters
-                ----------
-                ax: None, mpl.axis.Axis
-                    If not None, mpl.axis.Axis.
-                pct: bool
-                    If True, plot in units of percent.
-                subplots_kwargs: dict, None
-                    If not None, passed to `plt.subplots`. Disabled if `ax` is not
-                    None.
-                kind: str
-                    Specify type of residuals to plot.
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, optional
+            Axis to draw on. If ``None`` a new figure and axis are created.
+        pct : bool, default True
+            If ``True``, show residuals as percentages.
+        subplots_kwargs : dict, optional
+            Passed to ``plt.subplots`` when ``ax`` is ``None``.
+        kind : {'simple', 'robust', 'both'}, default "both"
+            Which residuals to plot.
+        **kwargs
+            Additional keyword arguments passed to ``ax.plot``.
 
-                        ======== ======================
-                         Value        Description
-                        ======== ======================
-                         simple   Use simple residuals
-                         robust   Use robust residuals
-                         both     Use both
-                        ======== ======================
-        >>>>>>> c8b5d9bfe4c7ce53d00e5d0773d27dcc8b8f258c
+        Returns
+        -------
+        ax : mpl.axes.Axes
+            Axis with residuals plotted.
         """
 
         if subplots_kwargs is None:
@@ -699,4 +719,6 @@ class FFPlot(object):
         self._log = LogAxes(**log)
 
     def set_TeX_info(self, new):
+        """Assign :class:`TeXinfo` used for annotations."""
+
         self._TeX_info = new

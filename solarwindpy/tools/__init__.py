@@ -1,27 +1,23 @@
 #!/usr/bin/env python
-r"""Miscelaneous tools for working with plasma data.
+"""Utility functions for manipulating solar wind data.
 
-These aren't usually tested and this module will be refactored into submodules when it becomes sufficiently large.
+This module contains helper functions that are not yet organized into
+their own submodules. The functions are primarily used for handling
+proton data and for converting log-normal parameters to their normal
+form.
 
-Author : Benjamin L. Alterman
-e-mail : balterma@umich.edu
+Functions
+---------
+swap_protons
+    Swap beam and core proton labels when the beam density exceeds the
+    core density.
+normal_parameters
+    Convert log-normal distribution parameters to normal parameters.
 
-Revision History
-----------------
--Started module. (2018-03-12)
-
-Propodes Updates
-----------------
--
-
-Do Not Try
-----------
--
-
-Notes
------
--
-
+Examples
+--------
+>>> df = pd.DataFrame(...)
+>>> new_df, mask = swap_protons(df)
 """
 
 import pdb  # noqa: F401
@@ -31,23 +27,28 @@ import pandas as pd
 
 
 def swap_protons(data, logger=None):
-    r"""
-    Swap the beam and core labels when the proton beam has a larger number density than the proton core.
+    """Swap beam and core proton labels when the beam density dominates.
 
     Parameters
     ----------
-    data: pd.DataFrame
-        The data to check for swapping.
-    logger: None, logging.Logger
-        If not None, a logger to log the index of swapped protons and
-        the number of protons swapped.
+    data : pandas.DataFrame
+        Data containing proton information. Proton species are stored in the
+        ``S`` level of the column index.
+    logger : logging.Logger, optional
+        Logger used to report indices of swapped protons. If ``None`` a simple
+        logger is created.
 
     Returns
     -------
-    new_data: pd.DataFrame
-        `data` with p1<->p2 labels swapped.
-    swap: pd.Series
-        Boolean series indicating True where labels swapped.
+    new_data : pandas.DataFrame
+        Copy of ``data`` with ``p1`` and ``p2`` columns swapped where the beam
+        density exceeds the core density.
+    swap : pandas.Series
+        Boolean mask indicating where swaps occurred.
+
+    Examples
+    --------
+    >>> new_df, mask = swap_protons(df)
     """
     p1 = data.xs("p1", axis=1, level="S")
     p2 = data.xs("p2", axis=1, level="S")
@@ -98,16 +99,39 @@ def swap_protons(data, logger=None):
 
 
 def normal_parameters(m, s):
-    r"""Calculate the normal parameters from log-normal parameters.
+    r"""Convert log-normal parameters to normal distribution parameters.
 
-        $\mu = \exp[m + (s^2)/2]$
-        $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
+    Parameters
+    ----------
+    m : pandas.Series or numpy.ndarray
+        Mean of the log-normal distribution.
+    s : pandas.Series or numpy.ndarray
+        Standard deviation of the log-normal distribution.
 
-    Applies for both :math:`ln` and :math:`log_{10}`. (<https://stats.stackexchange.com/a/22610/203218>)
+    Returns
+    -------
+    pandas.DataFrame
+        Data frame with columns ``mu`` and ``sigma``.
+
+    Notes
+    -----
+    The conversion uses
+
+    .. math::
+       \mu = \exp[m + s^2/2]
+
+    .. math::
+       \sigma = \sqrt{\exp[s^2 + 2m]\,(\exp[s^2] - 1)}
+
+    These expressions apply to both natural logarithms and base-10 logarithms.
+
+    Examples
+    --------
+    >>> normal_parameters(m, s)
     """
-    mu = np.exp(m + ((s ** 2.0) / 2.0))
-    sigma = np.exp(s ** 2.0 + 2.0 * m)
-    sigma *= np.exp(s ** 2.0) - 1.0
+    mu = np.exp(m + ((s**2.0) / 2.0))
+    sigma = np.exp(s**2.0 + 2.0 * m)
+    sigma *= np.exp(s**2.0) - 1.0
     sigma = np.sqrt(sigma)
 
     out = {"mu": mu, "sigma": sigma}

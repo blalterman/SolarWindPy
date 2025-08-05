@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-r""":py:mod:`Exponential` and similar `FitFunction` subclasses.
+r"""Fit functions for exponential models.
+
+Classes in this module implement exponential decay and related forms
+using the :class:`~solarwindpy.fitfunctions.core.FitFunction` API.
+They provide reasonable starting parameters and formatted LaTeX output
+for visualization.
 """
 import pdb  # noqa: F401
 import numpy as np
@@ -11,7 +16,9 @@ from .core import FitFunction
 
 class Exponential(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(Exponential, self).__init__(xobs, yobs, **kwargs)
+        """Fit ``A * exp(-c x)`` to the data."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -22,13 +29,7 @@ class Exponential(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c, A].
-        """
+        r"""Return initial guesses ``[c, A]`` for the fit."""
         assert self.sufficient_data
 
         y = self.observations.used.y
@@ -59,7 +60,9 @@ class Exponential(FitFunction):
 
 class ExponentialPlusC(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(ExponentialPlusC, self).__init__(xobs, yobs, **kwargs)
+        """Fit ``A * exp(-c x) + d`` to the data."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -70,13 +73,7 @@ class ExponentialPlusC(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential + Constant parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c, A, d].
-        """
+        r"""Return initial guesses ``[c, A, d]`` for the fit."""
         assert self.sufficient_data
 
         y = self.observations.used.y
@@ -108,7 +105,9 @@ class ExponentialPlusC(FitFunction):
 
 class ExponentialCDF(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        super(ExponentialCDF, self).__init__(xobs, yobs, **kwargs)
+        """Fit an exponential cumulative distribution function."""
+
+        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -119,8 +118,7 @@ class ExponentialCDF(FitFunction):
 
     @property
     def y0(self):
-        r"""Amplitude of the CDF.
-        """
+        r"""Amplitude of the CDF."""
         return self._y0
 
     def set_y0(self, new):
@@ -129,13 +127,7 @@ class ExponentialCDF(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the Exponential parameters.
-
-        Return
-        ------
-        p0 : list
-            The initial guesses as [c].
-        """
+        r"""Return initial guess ``[c]`` for the fit."""
         assert self.sufficient_data
 
         y = self.observations.used.y
@@ -151,6 +143,8 @@ class ExponentialCDF(FitFunction):
         return TeX
 
     def set_TeX_info(self, **kwargs):
+        """Include ``A`` value in the TeX annotation."""
+
         # HACK: assumes integer A
         #       If not integer, will need to format float or exp.
         additional_info = kwargs.pop("additional_info", [])

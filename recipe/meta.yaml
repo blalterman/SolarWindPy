@@ -1,0 +1,48 @@
+{% set name = "solarwindpy" %}
+{% set version = "0.1.dev607+gc0bc6b5" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: fccb60370b682a48d3eda8b0fb0e948641e57c193c58657bbef3da8cafe3a7a7
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - numpy
+    - scipy
+    - pandas
+    - numexpr
+    - bottleneck
+    - h5py
+    - pyyaml
+    - matplotlib
+    - importlib_metadata; python_version < '3.8'
+    - astropy
+    - numba
+    - tabulate
+
+test:
+  imports:
+    - solarwindpy
+
+about:
+  home: https://github.com/blalterman/SolarWindPy
+  license: BSD-3-Clause
+  license_file: LICENSE.rst
+  summary: "Python package for solar wind data analysis."
+
+extra:
+  recipe-maintainers:
+    - blalterman

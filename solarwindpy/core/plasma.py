@@ -28,7 +28,6 @@ Propoded Updates
 -Moved `_conform_species` to base.Base so that it is accessable for
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
 """
-import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 import itertools
@@ -36,27 +35,20 @@ import itertools
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
-try:
-    from . import base
-    from . import vector
-    from . import ions
-    from . import spacecraft
-    from . import alfvenic_turbulence as alf_turb
-except ImportError:
-    import base
-    import vector
-    import ions
-    import spacecraft
-    import alfvenic_turbulence as alf_turb
+from . import base
+from . import vector
+from . import ions
+from . import spacecraft
+from . import alfvenic_turbulence as alf_turb
 
 
 class Plasma(base.Base):
-    r"""The class through which ions, magnetic field, and spacecraft data interact.
+    r"""Container for ions, magnetic field, and spacecraft information.
 
-    When method lookup fails, fall back to `self.ions.loc[attr]` and then fall back to
-    `super(Plasma, self).__getattr__(attr)`.
+    Attribute access is first attempted on the underlying :pyattr:`ions` table
+    before falling back to ``super().__getattr__``. This allows convenient
+    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`.
     """
 
     def __init__(
@@ -67,27 +59,31 @@ class Plasma(base.Base):
         auxiliary_data=None,
         log_plasma_stats=False,
     ):
-        r"""*NOTE* Thermal speeds assume :math:`mw^2 = 2kT`.
+        r"""Initialize a :class:`Plasma` instance.
 
         Parameters
         ----------
-        data: pd.DataFrame
-            Contains magnetic field vector and core quantities for each species,
-            including vector velocity, bi-maxwellian thermal speed, and number density.
-            Structured as a `pandas.DataFrame` with a 3-level MultiIndex for the columns.
-            MultiIndex levels should be labelled "M", "C", and "S" for measurement,
-            component, and species. Index should contain datetime information. If
-            loading from a CDF file, this would be the Epoch variable. See Examples
-            below for details.
-        species: iterable of strings
-            The species included in the plasma.
-        spacecraft: Spacecraft, None
-            If not None, the :py:class:`~solarwindpy.core.spacecraft.Spacecraft`
-            instance containing, at a minimum, the spacecraft's location. If None, then
-            Coulomb number `nc` method returns a ValueError.
-        auxiliary_data: pd.DataFrame, None
-            If not None, any additional data to carry with plasma, for example, data
-            quality flags. Column labelling scheme should match `data`.
+        data : :class:`pandas.DataFrame`
+            Contains the magnetic field and core ion moments. Columns are a
+            three-level :class:`~pandas.MultiIndex` labelled ``("M", "C", "S")``
+            for measurement, component, and species. The index should contain
+            datetime information, for example ``Epoch`` when loading from a CDF
+            file.
+        *species : str
+            Iterable of species contained in ``data``.
+        spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+            Spacecraft trajectory and velocity information. If ``None``, the
+            Coulomb number :py:meth:`~Plasma.nc` method will raise a
+            :class:`ValueError`.
+        auxiliary_data : :class:`pandas.DataFrame`, optional
+            Additional measurements to carry with the plasma, for example data
+            quality flags. The column labelling scheme must match ``data``.
+        log_plasma_stats : bool, default ``False``
+            Log summary statistics when ``data`` is set.
+
+        Notes
+        -----
+        Thermal speeds assume :math:`mw^2 = 2kT`.
 
         Examples
         --------
@@ -154,14 +150,12 @@ class Plasma(base.Base):
 
     @property
     def spacecraft(self):
-        r"""`Spacecraft` object stored in `plasma`.
-        """
+        r"""`Spacecraft` object stored in `plasma`."""
         return self._spacecraft
 
     @property
     def sc(self):
-        r"""Shortcut to `spacecraft`.
-        """
+        r"""Shortcut to `spacecraft`."""
         return self.spacecraft
 
     @property
@@ -182,8 +176,7 @@ class Plasma(base.Base):
 
     @property
     def aux(self):
-        r"""Shortcut to :py:meth:`auxiliary_data`.
-        """
+        r"""Shortcut to :py:meth:`auxiliary_data`."""
         return self.auxiliary_data
 
     @property
@@ -377,7 +370,7 @@ class Plasma(base.Base):
 
             plasma.set_spacecraft(sc)
             plasma.logger.warning(
-                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.shape
+                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.data.shape
             )
 
         if akey:
@@ -438,14 +431,12 @@ class Plasma(base.Base):
 
     @property
     def species(self):
-        r"""Tuple of species contained in plasma.
-        """
+        r"""Tuple of species contained in plasma."""
         return self._species
 
     @property
     def ions(self):
-        r"""`pd.Series` containing the ions.
-        """
+        r"""`pd.Series` containing the ions."""
         return self._ions
 
     def _set_ions(self):
@@ -460,6 +451,51 @@ class Plasma(base.Base):
         ions_ = pd.Series({s: ions.Ion(self.data, s) for s in species})
         self._ions = ions_
         self._species = species
+
+    def drop_species(self, *species: str) -> "Plasma":
+        """Return a new :class:`Plasma` without the specified species.
+
+        Parameters
+        ----------
+        *species : str
+            Species to remove from the plasma.
+
+        Returns
+        -------
+        Plasma
+            A new plasma containing only the remaining species.
+
+        Raises
+        ------
+        ValueError
+            If all species are removed.
+        """
+
+        species_to_drop = self._chk_species(*species)
+        remaining = [s for s in self.species if s not in species_to_drop]
+        if not remaining:
+            raise ValueError("Must have >1 species. Can't have empty plasma.")
+
+        mask_keep = (
+            self.data.columns.get_level_values("S") == ""
+        ) | self.data.columns.get_level_values("S").isin(remaining)
+        data = self.data.loc[:, mask_keep]
+
+        aux = None
+        if self.auxiliary_data is not None:
+            aux_mask = (
+                self.auxiliary_data.columns.get_level_values("S") == ""
+            ) | self.auxiliary_data.columns.get_level_values("S").isin(remaining)
+            aux = self.auxiliary_data.loc[:, aux_mask]
+
+        new = Plasma(
+            data,
+            *remaining,
+            spacecraft=self.spacecraft,
+            auxiliary_data=aux,
+            log_plasma_stats=self.log_plasma_at_init,
+        )
+        return new
 
     def set_spacecraft(self, new):
         assert isinstance(new, spacecraft.Spacecraft) or new is None
@@ -535,8 +571,7 @@ class Plasma(base.Base):
             )
 
     def set_data(self, new):
-        r"""Set the data and log statistics about it.
-        """
+        r"""Set the data and log statistics about it."""
         #         assert isinstance(new, pd.DataFrame)
         super(Plasma, self).set_data(new)
 
@@ -580,17 +615,13 @@ class Plasma(base.Base):
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".
-        #         try:
-        #             w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
-        #         except ValueError as e:
-        #             print(e)
-        #             pdb.set_trace()
 
         # Workaround for `skipna=False` bug. (20200814)
-        w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
+        # Changed to new groupby method (20250611)
+        w = w.T.groupby("S").sum().T.pow(0.5)
         #         w_is_finite = w.notna().all(axis=1, level="S")
         #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
-        #         pdb.set_trace()
         #         w = w.where(w_is_finite, axis=1, level="S")
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
@@ -626,8 +657,7 @@ class Plasma(base.Base):
 
     @property
     def bfield(self):
-        r"""Magnetic field data.
-        """
+        r"""Magnetic field data."""
         return self._bfield
 
     @property
@@ -703,8 +733,7 @@ class Plasma(base.Base):
         return rho
 
     def rho(self, *species):
-        r"""Shortcut to :py:meth:`mass_density`.
-        """
+        r"""Shortcut to :py:meth:`mass_density`."""
         return self.mass_density(*species)
 
     def thermal_speed(self, *species):
@@ -732,13 +761,13 @@ class Plasma(base.Base):
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            w = w.sum(axis=1, level="C")
+            # w = w.sum(axis=1, level="C")
+            w = w.T.groupby(level="C").sum().T
 
         return w
 
     def w(self, *species):
-        r"""Shortcut to :py:meth:`thermal_speed`.
-        """
+        r"""Shortcut to :py:meth:`thermal_speed`."""
         return self.thermal_speed(*species)
 
     def pth(self, *species):
@@ -768,7 +797,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.sum(axis=1, level="C")
+            pth = pth.T.groupby("C").sum().T
             # pth["S"] = species[0]
             # pth = pth.set_index("S", append=True).unstack()
             # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -797,7 +826,7 @@ class Plasma(base.Base):
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            temp = temp.sum(axis=1, level="C")
+            temp = temp.T.groupby("C").sum().T
             # temp["S"] = species[0]
             # temp = temp.set_index("S", append=True).unstack()
             # temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -851,7 +880,7 @@ class Plasma(base.Base):
         bsq = self.bfield.mag.pow(2)
         beta = pth.divide(bsq, axis=0)
 
-        units = self.units.pth / (self.units.b ** 2.0)
+        units = self.units.pth / (self.units.b**2.0)
         coeff = 2.0 * self.constants.misc.mu0 * units
         beta *= coeff
         return beta
@@ -886,7 +915,8 @@ class Plasma(base.Base):
 
         if len(species) > 1:
             # if "S" in pth.columns.names:
-            ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
+            #             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
+            ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
         else:
             ani = pth.pow(exp, axis=1).product(axis=1)
             ani.name = species[0]
@@ -924,7 +954,7 @@ class Plasma(base.Base):
                 m2q = np.sqrt(
                     self.constants.m_in_mp[s] / self.constants.charge_states[s]
                 )
-                v = v.multiply(m2q)
+                v = v.data.multiply(m2q)
                 v = vector.Vector(v)
 
         elif project_m2q:
@@ -947,7 +977,9 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                rv = v.multiply(rhos, axis=1, level="S").sum(axis=1, level="C")
+                rv = (
+                    v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T
+                )  # sum(axis=1, level="C")
                 v = rv.divide(rhos.sum(axis=1), axis=0)
                 v = vector.Vector(v)
 
@@ -1023,7 +1055,7 @@ species: {}
             msg = "Must have >1 species to calculate dynamic pressure.\nRequested: {}"
             raise ValueError(msg.format(species))
 
-        const = 0.5 * self.units.rho * (self.units.dv ** 2.0) / self.units.pth
+        const = 0.5 * self.units.rho * (self.units.dv**2.0) / self.units.pth
 
         if not project_m2q:
             # Calculate as m*v
@@ -1035,7 +1067,7 @@ species: {}
                 names="S",
                 sort=True,
             )
-            dvsq_i = dv_i.pow(2.0).sum(axis=1, level="S")
+            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum().T
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
             pdv = dvsq_rho_i.sum(axis=1)
 
@@ -1081,8 +1113,7 @@ species: {}
         return pdv
 
     def pdv(self, *species, project_m2q=False):
-        r"""Shortcut to :py:meth:`pdynamic`.
-        """
+        r"""Shortcut to :py:meth:`pdynamic`."""
         return self.pdynamic(*species, project_m2q=project_m2q)
 
     def sound_speed(self, *species):
@@ -1118,8 +1149,7 @@ species: {}
         return cs
 
     def cs(self, *species):
-        r""" Shortcut to :py:meth:`sound_speed`.
-        """
+        r"""Shortcut to :py:meth:`sound_speed`."""
         return self.sound_speed(*species)
 
     def ca(self, *species):
@@ -1197,7 +1227,9 @@ species: {}
 
         bsq = self.bfield.cartesian.pow(2.0).sum(axis=1)
 
-        pth = self.pth(*species).drop("scalar", axis=1)
+        pth = self.pth(*species)
+        pth = pth.drop("scalar", axis=1)
+
         sum_coeff = pd.Series({"per": 1, "par": -1})
         dp = pth.multiply(sum_coeff, axis=1, level="C" if multi_species else None)
 
@@ -1206,10 +1238,14 @@ species: {}
         # My guess is that following this line, we'd insert the subtraction
         # of the dynamic pressure with the appropriate alignment of the
         # species as necessary.
-        dp = dp.sum(axis=1, level="S" if multi_species else None)
+        #         dp = dp.sum(axis=1, level="S" if multi_species else None)
+        if multi_species:
+            dp = dp.T.groupby(level="S").sum().T
+        else:
+            dp = dp.sum(axis=1)
 
         mu0 = self.constants.misc.mu0
-        coeff = mu0 * self.units.pth / (self.units.b ** 2.0)
+        coeff = mu0 * self.units.pth / (self.units.b**2.0)
 
         afsq = 1.0 + (dp.divide(bsq, axis=0) * coeff)
 
@@ -1326,8 +1362,8 @@ species: {}
         T0 = self.ions.loc[s0].temperature.scalar * units.temperature * constants.kb.eV
         T1 = self.ions.loc[s1].temperature.scalar * units.temperature * constants.kb.eV
 
-        r0 = n0.multiply(z0 ** 2.0).divide(T0, axis=0)
-        r1 = n1.multiply(z1 ** 2.0).divide(T1, axis=0)
+        r0 = n0.multiply(z0**2.0).divide(T0, axis=0)
+        r1 = n1.multiply(z1**2.0).divide(T1, axis=0)
         right = r0.add(r1).pipe(np.sqrt)
 
         left = z0 * z1 * (a0 + a1) / (a0 * T1).add(a1 * T0, axis=0)
@@ -1411,12 +1447,14 @@ species: {}
         ma = constants.m.loc[sa]
         masses = constants.m.loc[[sa, sb]]
         mu = masses.product() / masses.sum()
-        coeff = qabsq / (4.0 * np.pi * constants.misc.e0 ** 2.0 * ma * mu)
+        coeff = qabsq / (4.0 * np.pi * constants.misc.e0**2.0 * ma * mu)
 
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat({s: self.ions.loc[s].w.par for s in [sa, sb]}, axis=1, sort=True)
+        w = pd.concat(
+            {s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True
+        )
         wab = w.pow(2.0).sum(axis=1).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).magnitude * units.dv
@@ -1607,8 +1645,8 @@ species: {}
         beam = beam[0]
         core = core[0]
 
-        n1 = self.xs(("n", "", core), axis=1)
-        n2 = self.xs(("n", "", beam), axis=1)
+        n1 = self.data.xs(("n", "", core), axis=1)
+        n2 = self.data.xs(("n", "", beam), axis=1)
 
         w = self.w(beam, core).drop("scalar", axis=1, level="C")
         w1_par = w.par.loc[:, core]
@@ -1704,7 +1742,10 @@ species: {}
             )
             niqi = ni.multiply(qi, axis=1, level="S")
             ne = niqi.sum(axis=1)
-            niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
+            # niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
+            niqivi = (
+                vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T
+            )  # sum(axis=1, level="C")
 
         ve = niqivi.divide(ne, axis=0)
 
@@ -1810,7 +1851,7 @@ species: {}
         #        print("<qpar>", type(qs), qs,
         #              sep="\n")
 
-        coeff = self.units.rho * (self.units.v ** 3.0) / self.units.qpar
+        coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
         q = coeff * qs
         return q
 
@@ -1869,8 +1910,7 @@ species: {}
         return turb
 
     def S(self, *species):
-        r"""Shortcut to :py:meth:`specific_entropy`.
-        """
+        r"""Shortcut to :py:meth:`specific_entropy`."""
         return self.specific_entropy(*species)
 
     def specific_entropy(self, *species):
