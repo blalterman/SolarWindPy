@@ -5,19 +5,22 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    solarwindpy.core
-    solarwindpy.fitfunctions
-    solarwindpy.instabilities
-    solarwindpy.plotting
-    solarwindpy.solar_activity
-    solarwindpy.tests
-    solarwindpy.tools
+   solarwindpy.core
+   solarwindpy.fitfunctions
+   solarwindpy.instabilities
+   solarwindpy.plans
+   solarwindpy.plotting
+   solarwindpy.scripts
+   solarwindpy.solar_activity
+   solarwindpy.tests
+   solarwindpy.tools
 
 Module contents
 ---------------
 
 .. automodule:: solarwindpy
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :show-inheritance:
+   :undoc-members:
