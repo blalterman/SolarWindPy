@@ -1,0 +1,25 @@
+name: Docs Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
+          pip install .
+      - name: Build documentation
+        env:
+          SPHINXOPTS: -W
+        working-directory: docs
+        run: make html
