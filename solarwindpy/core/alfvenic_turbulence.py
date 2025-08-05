@@ -53,18 +53,20 @@ class AlfvenicTurbulence(base.Core):
     """
 
     def __init__(self, velocity, bfield, rho, species, **kwargs):
-        r"""Initialize an :py:class:`AlfvenicTurbulence` object.
+        """Initialize the turbulence diagnostics.
 
         Parameters
         ----------
-        velocity: pd.DataFrame
-            Vector velocity measurments.
-        bfield: pd.DataFrame
-            Vector mangetic field measurements.
-        rho: pd.Series
-            Mass density measurments, used to put `bfield` into Alfven units.
-        kwargs:
-            Passed to `rolling` method when mean-subtracing in `set_data`.
+        velocity : pandas.DataFrame
+            Plasma velocity in the same basis as ``bfield``.
+        bfield : pandas.DataFrame
+            Magnetic field in the same basis as ``velocity``.
+        rho : pandas.Series
+            Mass density used to normalise ``bfield``.
+        species : str
+            Species string used for the Alfvén-unit conversion.
+        **kwargs
+            Additional options forwarded to :meth:`set_data`.
         """
 
         super(AlfvenicTurbulence, self).__init__()
