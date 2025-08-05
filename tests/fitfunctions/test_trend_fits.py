@@ -43,6 +43,7 @@ def test_type_enforcement_and_properties(agged):
     assert tf.agged.equals(agged)
     assert tf.ffunc1d_class is gaussians.Gaussian
     assert tf.trendfunc_class is lines.Line
+    assert str(tf) == "TrendFit"
     with pytest.raises(TypeError):
         trend_fits.TrendFit(agged, int)
     with pytest.raises(TypeError):
