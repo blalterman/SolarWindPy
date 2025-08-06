@@ -254,5 +254,5 @@ def test_plot_residuals_missing_fun_no_exception():
     assert len(lines) == 1
     ax.legend()
     labels = {t.get_text() for t in ax.get_legend().get_texts()}
-    assert any("Simple" in lbl for lbl in labels)
+    assert labels == {r"$\mathrm{Simple}$"}
     assert ax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"

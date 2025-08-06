@@ -443,12 +443,13 @@ class FFPlot(object):
 
         elif kind == "both":
 
+            simple_label = (r"%s \; Simple" % label).lstrip(r" \; ")
+            label = r"$\mathrm{%s}$" % simple_label
+
             ax.plot(
                 self.observations.used.x,
                 self.residuals(pct=pct, robust=False),
-                label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(  # noqa: W605
-                    " \; "  # noqa: W605
-                ),
+                label=label,
                 drawstyle=drawstyle,
                 color="forestgreen",
                 marker="P",
