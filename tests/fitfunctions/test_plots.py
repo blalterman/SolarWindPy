@@ -54,8 +54,10 @@ def make_ffplot(n=5):
 
 
 def test_str_returns_class_name():
+    """Ensure ``FFPlot.__str__`` yields the class name."""
+
     plot, *_ = make_ffplot()
-    assert str(plot) == "FFPlot"
+    assert str(plot) == plot.__class__.__name__ == "FFPlot"
 
 
 def test_initial_properties_and_path():
