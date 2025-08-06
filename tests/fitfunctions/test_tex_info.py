@@ -101,6 +101,12 @@ def test_simplify_for_paper():
     ]
 
 
+def test_add_additional_info_with_str(texinfo):
+    base = "base"
+    result = texinfo._add_additional_info(base, "extra")
+    assert "$extra$" in result
+
+
 def test_add_additional_info(texinfo):
     base = "base"
     result = texinfo._add_additional_info(base, ["x", "y"])

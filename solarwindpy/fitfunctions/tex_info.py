@@ -240,12 +240,11 @@ class TeXinfo(object):
             ):
                 for i, this_info in enumerate(additional_info):
                     additional_info[i] = self._check_and_add_math_escapes(this_info)
-
                 additional_info = "\n".join(additional_info)
-                additional_info = self._check_and_add_math_escapes(additional_info)
-
-            if not isinstance(additional_info, str):
+            elif not isinstance(additional_info, str):
                 raise TypeError("Additional info must be a string")
+
+            additional_info = self._check_and_add_math_escapes(additional_info)
 
             combined_info = info + "\n" + additional_info
             return combined_info
