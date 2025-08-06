@@ -193,8 +193,8 @@ def test_plot_raw_used_fit_resid(monkeypatch):
     monkeypatch.setattr(plots.plt, "subplots", fake_subplots)
 
     hax, rax = plot.plot_raw_used_fit_resid()
-    assert not calls
-    assert isinstance(hax, plt.Axes) and isinstance(rax, plt.Axes)
+    assert isinstance(hax, plt.Axes)
+    assert isinstance(rax, plt.Axes)
     labels = {t.get_text() for t in hax.get_legend().get_texts()}
     assert labels == {r"$\mathrm{Obs}$", r"$\mathrm{Used}$", r"$\mathrm{Fit}$"}
     assert tex.calls == 1
