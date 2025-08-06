@@ -53,6 +53,11 @@ def make_ffplot(n=5):
     return plot, tex, obs, y_fit
 
 
+def test_str_returns_class_name():
+    plot, *_ = make_ffplot()
+    assert str(plot) == "FFPlot"
+
+
 def test_initial_properties_and_path():
     plot, tex, obs, y_fit = make_ffplot()
     assert plot.observations is obs
