@@ -167,3 +167,43 @@ def test_label_log_texinfo():
     tex2 = DummyTeX()
     plot.set_TeX_info(tex2)
     assert plot.TeX_info is tex2
+
+
+def test_plot_residuals_simple_pct_false():
+    plot, *_ = make_ffplot()
+    ax = plot.plot_residuals(kind="simple", pct=False)
+    assert isinstance(ax, plt.Axes)
+    line = ax.get_lines()[0]
+    expected = plot.y_fit[plot.observations.tk_observed] - plot.observations.used.y
+    assert np.allclose(line.get_ydata(), expected)
+    assert ax.get_ylabel() == r"$\mathrm{Residual} \; [\#]$"
+    ax.legend()
+    labels = {t.get_text() for t in ax.get_legend().get_texts()}
+    assert labels == {r"$\mathrm{Simple}$"}
+
+
+def test_plot_residuals_robust():
+    plot, *_ = make_ffplot()
+    ax = plot.plot_residuals(kind="robust")
+    assert isinstance(ax, plt.Axes)
+    line = ax.get_lines()[0]
+    y_fit_used = plot.y_fit[plot.observations.tk_observed]
+    expected = 100.0 * (plot.fit_result.fun / y_fit_used)
+    assert np.allclose(line.get_ydata(), expected)
+    ax.legend()
+    labels = {t.get_text() for t in ax.get_legend().get_texts()}
+    assert labels == {r"$\mathrm{Robust}$"}
+    assert ax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
+
+
+def test_plot_residuals_missing_fun_no_exception():
+    plot, *_ = make_ffplot()
+    plot.set_fit_result(OptimizeResult())
+    ax = plot.plot_residuals(kind="both")
+    assert isinstance(ax, plt.Axes)
+    lines = ax.get_lines()
+    assert len(lines) == 1
+    ax.legend()
+    labels = {t.get_text() for t in ax.get_legend().get_texts()}
+    assert any("Simple" in lbl for lbl in labels)
+    assert ax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
