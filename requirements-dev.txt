@@ -12,3 +12,4 @@ tabulate
 pytest
 black
 flake8
+pytables
