@@ -1,0 +1,20 @@
+name: solarwindpy-dev
+channels:
+- conda-forge
+- defaults
+dependencies:
+- numpy
+- scipy
+- pandas
+- numexpr
+- bottleneck
+- h5py
+- pyyaml
+- matplotlib
+- astropy
+- numba
+- tabulate
+- pytest
+- black
+- flake8
+- pytables
