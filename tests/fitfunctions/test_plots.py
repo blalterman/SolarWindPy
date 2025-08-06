@@ -167,6 +167,31 @@ def test_plot_methods_and_annotations(monkeypatch):
     assert calls
 
 
+def test_plot_raw_used_fit_resid(monkeypatch):
+    import solarwindpy.fitfunctions.plots as plots
+
+    plot, tex, *_ = make_ffplot()
+
+    calls = []
+    original = plots.plt.subplots
+
+    def fake_subplots(*args, **kwargs):  # pragma: no cover - small wrapper
+        calls.append((args, kwargs))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(plots.plt, "subplots", fake_subplots)
+
+    hax, rax = plot.plot_raw_used_fit_resid()
+    assert not calls
+    assert isinstance(hax, plt.Axes) and isinstance(rax, plt.Axes)
+    labels = {t.get_text() for t in hax.get_legend().get_texts()}
+    assert labels == {r"$\mathrm{Obs}$", r"$\mathrm{Used}$", r"$\mathrm{Fit}$"}
+    assert tex.calls == 1
+
+    plot.plot_raw_used_fit_resid(annotate=False)
+    assert tex.calls == 1
+
+
 def test_label_log_texinfo():
     plot, tex, *_ = make_ffplot()
     plot.set_labels(y="Y")
