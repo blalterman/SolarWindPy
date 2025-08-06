@@ -4,18 +4,27 @@ about: Explains the rationale for comprehensive fitfunction test coverage.
 labels: [sweep, FitFunction]
 ---
 
-> Extracted from solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
+> Extracted from
+> solarwindpy/plans/combined_test_plan_with_checklist_fitfunctions.md
 
 ## 🧠 Context
 
-Verify correctness, robustness, and coverage of the `solarwindpy.fitfunctions` submodule.
+Verify correctness, robustness, and coverage of the `solarwindpy.fitfunctions`
+submodule.
 
 ## 🎯 Overview of the Task
 
-1. **Safety and regression**: non‑public helpers guard data integrity.
-1. **Numerical correctness**: fitting and parameter extraction must remain accurate.
-1. **API contracts**: string formats (`TeX`), plotting behaviors, and property outputs must be stable.
-1. **Edge cases**: zero‑size data, insufficient observations, bad weights, solver failures—ensures graceful degradation.
+Provide justification for comprehensive tests of `solarwindpy.fitfunctions`.
+
+## 🔎 Summary
+
+- **Safety**: non-public helpers guard data integrity and prevent regressions.
+- **Numerical correctness**: fitting routines and parameter extraction must
+  remain accurate.
+- **API stability**: TeX strings, plotting behaviors, and property outputs
+  should not change unexpectedly.
+- **Edge-case handling**: zero-size data, insufficient observations, invalid
+  weights, and solver failures should degrade gracefully.
 
 ## 🔧 Framework & Dependencies
 
@@ -46,4 +55,5 @@ None.
 
 ## 💬 Additional Notes
 
-Aligns with `AGENTS.md`: run with `pytest -q`, enforce no skipped tests, maintain code style with `flake8` and `black`.
+Aligns with `AGENTS.md`: run with `pytest -q`, enforce no skipped tests,
+maintain code style with `flake8` and `black`.
