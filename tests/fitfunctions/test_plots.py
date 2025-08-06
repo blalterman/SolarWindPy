@@ -98,6 +98,15 @@ def test_set_observations_mismatched_length():
         plot.set_observations(obs, bad_y_fit)
 
 
+def test_set_observations_short_y_fit():
+    """Ensure shorter ``y_fit`` arrays trigger an assertion."""
+    plot, *_ = make_ffplot()
+    obs = plot.observations
+    bad_y_fit = np.ones(obs.raw.x.size - 1)
+    with pytest.raises(AssertionError):
+        plot.set_observations(obs, bad_y_fit)
+
+
 def test_estimate_markevery():
     plot, *_ = make_ffplot(n=5)
     assert plot._estimate_markevery() is None
