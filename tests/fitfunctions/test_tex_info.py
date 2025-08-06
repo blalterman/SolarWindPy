@@ -145,3 +145,24 @@ def test_build_info_and_val_uncert(texinfo):
         texinfo.build_info(bogus=True)
     s = texinfo.val_uncert_2_string(1.234, 0.01)
     assert "\\pm" in s and s.startswith("1.23")
+
+
+def test_build_info_with_initial_guess(texinfo):
+    info = texinfo.build_info(add_initial_guess=True)
+    assert "\\alpha" in info and "5.000e-01" in info
+    assert str(texinfo) == info
+
+
+def test_build_info_relative_error_e_format(texinfo):
+    info = texinfo.build_info(relative_error=True, convert_pow_10=False)
+    assert "sigma(X)/X" in info and "e+00" in info
+    assert "10^" not in info
+    assert str(texinfo) == info
+
+
+def test_build_info_strip_uncert_simplify(texinfo):
+    info = texinfo.build_info(strip_uncertainties=True, simplify_info_for_paper=True)
+    assert "\\pm" not in info
+    assert "\\alpha = 1.23" in info
+    assert "e+" not in info
+    assert str(texinfo) == info
