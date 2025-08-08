@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D plots.
-"""
+r"""Scatter plot utilities with optional color mapping."""
 
 import pdb  # noqa: F401
 

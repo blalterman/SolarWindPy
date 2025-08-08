@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-"""Units and constants for transforming into and out of SI units.
+"""Definitions of common units and physical constants.
 
-All data is sourced from :py:mod:`scipy.constants` and :py:attr:`scipy.constants.physical_constants`. Every quantity stored in :py:class:`~solarwindpy.core.plasma.Plasma` and contained objects should have a entry in :py:class:`Constants`.
+The values are derived from :mod:`scipy.constants`. All quantities stored in
+the :class:`~solarwindpy.core.plasma.Plasma` object have a corresponding entry
+in :class:`Constants` and can be converted using :class:`Units`.
 """
 
-import pdb  # noqa: F401
+from dataclasses import dataclass, field
+
 import pandas as pd
 
 from scipy import constants
@@ -13,7 +16,6 @@ from scipy.constants import physical_constants
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
 _misc_constants = {
     "e0": constants.epsilon_0,
@@ -100,155 +102,98 @@ _m_amu = {
 }
 
 
-class Constants(object):
-    def __init__(self):
-        pass
+@dataclass
+class Constants:
+    """Physical constants useful for solar wind calculations."""
 
-    @property
-    def misc(self):
-        return pd.Series(_misc_constants)
+    misc: pd.Series = field(default_factory=lambda: pd.Series(_misc_constants))
+    kb: pd.Series = field(default_factory=lambda: pd.Series(_kBoltzmann))
+    m_in_mp: pd.Series = field(default_factory=lambda: pd.Series(_m_in_mp))
+    m: pd.Series = field(default_factory=lambda: pd.Series(_masses))
+    m_amu: pd.Series = field(
+        default_factory=lambda: pd.Series(_m_amu),
+        metadata={"doc": "Masses in amu."},
+    )
+    charges: pd.Series = field(default_factory=lambda: pd.Series(_charges))
+    charge_states: pd.Series = field(default_factory=lambda: pd.Series(_charge_states))
+    polytropic_index: pd.Series = field(
+        default_factory=lambda: pd.Series(_polytropic_index),
+        metadata={"doc": "Polytropic index for various cases."},
+    )
 
-    @property
-    def kb(self):
-        return pd.Series(_kBoltzmann)
-
-    @property
-    def m_in_mp(self):
-        return pd.Series(_m_in_mp)
-
-    @property
-    def m(self):
-        return pd.Series(_masses)
-
-    @property
-    def m_amu(self):
-        r"""Masses in amu.
-        """
-        return pd.Series(_m_amu)
-
-    @property
-    def charges(self):
-        return pd.Series(_charges)
-
-    @property
-    def charge_states(self):
-        return pd.Series(_charge_states)
-
-    @property
-    def polytropic_index(self):
-        r"""The polytropic index. Some example cases are [1, pg 27].
-
-            ======= =========================== ==========
-             gamma              use               alias
-            ======= =========================== ==========
-             3       Motion parallel to B        "par"
-             2       Motion perpendicular to B   "per"
-             5/3     Isotropic plasma            "scalar"
-            ======= =========================== ==========
-
-        References
-        ----------
-        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
-            11–100). https://doi.org/10.1007/978-94-009-7194-3_2
-        """
-        return pd.Series(_polytropic_index)
+    def __post_init__(self) -> None:
+        """Validate the shapes of series."""
+        for s in (
+            self.misc,
+            self.kb,
+            self.m_in_mp,
+            self.m,
+            self.m_amu,
+            self.charges,
+            self.charge_states,
+            self.polytropic_index,
+        ):
+            if not isinstance(s, pd.Series):
+                raise TypeError("Constant values must be pandas Series")
 
 
-class Units(object):
-    def __init__(self):
-        pass
+@dataclass
+class Units:
+    r"""Common unit conversion factors.
 
-    @property
-    def bfield(self):
-        r""":math:`[\mathrm{nT}]`"""
-        return 1e-9
+    Attributes
+    ----------
+    bfield : float
+        Magnetic field units :math:`[\mathrm{nT}]`.
+    v : float
+        Velocity units :math:`[\mathrm{km\,s^{-1}}]`.
+    pth : float
+        Thermal pressure units :math:`[\mathrm{pPa}]`.
+    temperature : float
+        Temperature units :math:`[10^{5}\,\mathrm{K}]`.
+    n : float
+        Number density units :math:`[\mathrm{cm^{-3}}]`.
+    beta : float
+        Dimensionless beta units.
+    lnlambda : float
+        Dimensionless Coulomb log units.
+    nuc : float
+        Collision frequency units :math:`[10^{-7}\,\mathrm{Hz}]`.
+    nc : float
+        Dimensionless count units.
+    qpar : float
+        Parallel heat flux units :math:`[\mathrm{mW\,cm^{-2}}]`.
+    distance2sun : float
+        Distance to sun units ``[m]``.
+    """
 
-    @property
-    def b(self):
-        r""":math:`[\mathrm{nT}]`"""
-        return self.bfield
+    bfield: float = 1e-9
+    b: float = field(init=False)
+    v: float = 1e3
+    w: float = field(init=False)
+    dv: float = field(init=False)
+    ca: float = field(init=False)
+    cs: float = field(init=False)
+    cfms: float = field(init=False)
+    pth: float = 1e-12
+    temperature: float = 1e5
+    n: float = 1e6
+    rho: float = field(init=False)
+    beta: float = 1.0
+    lnlambda: float = 1.0
+    nuc: float = 1e-7
+    nc: float = 1.0
+    qpar: float = 1e-7
+    distance2sun: float = 1.0
+    specific_entropy: float = field(init=False)
 
-    @property
-    def v(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return 1e3
-
-    @property
-    def w(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return self.v
-
-    @property
-    def dv(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return self.v
-
-    @property
-    def ca(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return self.v
-
-    @property
-    def cs(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return self.v
-
-    @property
-    def cfms(self):
-        r""":math:`[\mathrm{km \, s^{-1}}]`"""
-        return self.v
-
-    @property
-    def pth(self):
-        r""":math:`[\mathrm{pPa}]`"""
-        return 1e-12
-
-    @property
-    def temperature(self):
-        r""":math:`[10^{5} \mathrm{K}]`"""
-        return 1e5
-
-    @property
-    def n(self):
-        r""":math:`[\mathrm{cm^{-3}}]`"""
-        return 1e6
-
-    @property
-    def rho(self):
-        r""":math:`[\mathrm{cm^{-3} \, m_p}]`"""
-        return self.n * constants.m_p
-
-    @property
-    def beta(self):
-        r""":math:`[\#]`"""
-        return 1.0
-
-    @property
-    def lnlambda(self):
-        r""":math:`[\#]`"""
-        return 1.0
-
-    @property
-    def nuc(self):
-        r""":math:`[10^{-7} \mathrm{Hz}]`"""
-        return 1e-7
-
-    @property
-    def nc(self):
-        r""":math:`[\#]`"""
-        return 1.0
-
-    @property
-    def qpar(self):
-        r""":math:`[\mathrm{mW \, cm^{-2}}]`"""
-        return 1e-7
-
-    @property
-    def distance2sun(self):
-        r""":math:`[m]`"""
-        return 1.0
-
-    @property
-    def specific_entropy(self):
-        r""":math:`[\mathrm{eV \, cm^2 \, m_p^{-5/3}}]`"""
-        return 1e4 / constants.e
+    def __post_init__(self) -> None:
+        """Compute derived unit conversions."""
+        self.b = self.bfield
+        self.w = self.v
+        self.dv = self.v
+        self.ca = self.v
+        self.cs = self.v
+        self.cfms = self.v
+        self.rho = self.n * constants.m_p
+        self.specific_entropy = 1e4 / constants.e

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
-"""
+r"""Two-dimensional histogram and heatmap plotting utilities."""
 
 import pdb  # noqa: F401
 
@@ -15,8 +14,15 @@ from scipy.signal import savgol_filter
 
 from . import base
 from . import labels as labels_module
-from .agg_plot import AggPlot
-from .hist1d import Hist1D
+
+# from .agg_plot import AggPlot
+# from .hist1d import Hist1D
+
+from . import agg_plot
+from . import hist1d
+
+AggPlot = agg_plot.AggPlot
+Hist1D = hist1d.Hist1D
 
 # import os
 # import psutil
@@ -102,6 +108,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
+        self.set_alim(None, None)
 
     @property
     def _gb_axes(self):
@@ -109,9 +116,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
     def _maybe_convert_to_log_scale(self, x, y):
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         return x, y
 
@@ -199,10 +206,19 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
          d     Density normalize
          r     Row normalize
          t     Total normalize
+         cd    PDFs in each column
+         rd    PDFs in each row
         ===== ============================================================="""
         if new is not None:
-            new = new.lower()[0]
-            assert new in ("c", "r", "t", "d")
+            new = new.lower()
+            assert new in (
+                "c",
+                "r",
+                "t",
+                "d",
+                "cd",
+                "rd",
+            ), f"Unrecgonized axnorm `{new}`"
 
         zlbl = self.labels.z
         if isinstance(zlbl, labels_module.Count):
@@ -240,11 +256,31 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             )  # dy = pd.Series(y.right - y.left, index=y)
 
             if self.log.x:
-                dx = 10.0 ** dx
+                dx = 10.0**dx
             if self.log.y:
-                dy = 10.0 ** dy
+                dy = 10.0**dy
 
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
+
+        elif axnorm == "cd":
+            #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
+            N = agg.sum(level="x")
+            dy = pd.IntervalIndex(
+                agg.index.get_level_values("y").unique()
+            ).sort_values()
+            dy = pd.Series(dy.length, index=dy).sort_index()
+            # Divide by total in each column and each row's width
+            agg = agg.divide(N, level="x").divide(dy, level="y")
+
+        elif axnorm == "rd":
+            #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
+            N = agg.sum(level="y")
+            dx = pd.IntervalIndex(
+                agg.index.get_level_values("x").unique()
+            ).sort_values()
+            dx = pd.Series(dx.length, index=dx).sort_index()
+            # Divide by total in each column and each row's width
+            agg = agg.divide(N, level="y").divide(dx, level="x")
 
         elif hasattr(axnorm, "__iter__"):
             kind, fcn = axnorm
@@ -263,6 +299,20 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         agg = super().agg(**kwargs)
         agg = self._axis_normalizer(agg)
         agg = self._agg_reindexer(agg)
+
+        a0, a1 = self.alim
+        if a0 is not None or a1 is not None:
+            tk = pd.Series(True, index=agg.index)
+            #             tk  = pd.DataFrame(True,
+            #                                index=agg.index,
+            #                                columns=agg.columns
+            #                               )
+            if a0 is not None:
+                tk = tk & (agg >= a0)
+            if a1 is not None:
+                tk = tk & (agg <= a1)
+
+            agg = agg.where(tk)
 
         return agg
 
@@ -353,11 +403,16 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x, y = self._maybe_convert_to_log_scale(x, y)
 
         axnorm = self.axnorm
+        default_norm = None
+        if axnorm in ("c", "r"):
+            default_norm = mpl.colors.BoundaryNorm(
+                np.linspace(0, 1, 11), 256, clip=True
+            )
+        elif axnorm in ("d", "cd", "rd"):
+            default_norm = mpl.colors.LogNorm(clip=True)
         norm = kwargs.pop(
             "norm",
-            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-            if axnorm in ("c", "r")
-            else None,
+            default_norm
         )
 
         if limit_color_norm:
@@ -393,7 +448,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             # is most opaque.
             alpha = 1 - mpl.colors.Normalize()(alpha_agg)
             self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha ** 0.25
+            alpha = alpha**0.25
 
             # Set masked values to zero. Otherwise, masked
             # values are rendered as black.
@@ -469,9 +524,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         x0, x1 = xlim
         y0, y1 = ylim
@@ -537,6 +592,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         elif (levels is None) and (self.axnorm in ["r", "c"]):
             levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+        elif (levels is None) and (self.axnorm in ["cd", "rd"]):
+            levels = None
 
         else:
             raise ValueError(
@@ -619,9 +677,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop(
             "norm",
-            mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-            if self.axnorm in ("c", "r")
-            else None,
+            (
+                mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+                if self.axnorm in ("c", "r")
+                else None
+            ),
         )
         linestyles = kwargs.pop(
             "linestyles",
@@ -694,6 +754,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         levels = self._get_contour_levels(levels)
 
+        if (norm is None) and (levels is not None):
+            norm = mpl.colors.BoundaryNorm(levels, 256, clip=True)
+
         contour_fcn = ax.contour
         if use_contourf:
             contour_fcn = ax.contourf
@@ -715,7 +778,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         if label_levels:
             qset.levels = [nf(level) for level in qset.levels]
             lbls = ax.clabel(
-                *args, inline=inline, inline_spacing=inline_spacing, fmt=fmt
+                *args,
+                inline=inline,
+                inline_spacing=inline_spacing,
+                fmt=fmt,
+                **clabel_kwargs,
             )
 
         if plot_edges:
@@ -768,17 +835,17 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x = self.data.loc[:, axis]
         if logx:
             # Need to convert back to regular from log-space for data setting.
-            x = 10.0 ** x
+            x = 10.0**x
 
         y = self.data.loc[:, other] if not project_counts else None
         logy = False  # Defined b/c project_counts option.
-        if y is not None:
+        if y is not None and (other == "y"):
             # Only select y-values plotted.
             logy = self.log._asdict()[other]
             yedges = self.edges[other].values
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
             if logy:
-                y = 10.0 ** y
+                y = 10.0**y
 
         if only_plotted:
             tk = self.get_plotted_data_boolean_series()
@@ -802,13 +869,19 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         return h1
 
-    def make_joint_h2_h1_plot(self, **kwargs):
+    def make_joint_h2_h1_plot(
+        self, project_counts=True, kwargs_1d=None, fig_axes=None, **kwargs
+    ):
         figsize = kwargs.pop("figsize", (5, 6))
         height_ratios = kwargs.pop("height_ratios", [0.25, 1, 0.2, 0.1])
         width_ratios = kwargs.pop("width_ratios", [1, 0.25])
         hspace = kwargs.pop("hspace", 0)
         wspace = kwargs.pop("wspace", 0)
 
+        #         if fig_axes is not None:
+        #             fig, axes = fig_axes
+        #             hax, xax, yax, cax = axes
+        #         else:
         fig = plt.figure(figsize=figsize)
         gs = mpl.gridspec.GridSpec(
             4,
@@ -827,14 +900,21 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cbar_kwargs = kwargs.pop("cbar_kwargs", dict())
         cax = cbar_kwargs.pop("cax", cax)
         orientation = cbar_kwargs.pop("orientation", "horizontal")
-        self.make_plot(
+        _, cbar = self.make_plot(
             ax=hax,
             cbar_kwargs=dict(cax=cax, orientation=orientation, **cbar_kwargs),
             **kwargs,
         )
 
-        self.project_1d("x", project_counts=True).make_plot(ax=xax)
-        self.project_1d("y", project_counts=True).make_plot(ax=yax, transpose_axes=True)
+        if kwargs_1d is None:
+            kwargs_1d = dict()
+
+        self.project_1d("x", project_counts=project_counts).make_plot(
+            ax=xax, **kwargs_1d
+        )
+        self.project_1d("y", project_counts=project_counts).make_plot(
+            ax=yax, **kwargs_1d, transpose_axes=True
+        )
 
         xax.label_outer()
         # Mimic `ax.label_outer` for `yax`.
@@ -843,15 +923,113 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         yax.get_yaxis().get_offset_text().set_visible(False)
         yax.set_ylabel("")
 
-        hax.xaxis.set_major_locator(
-            mpl.ticker.MaxNLocator(
-                nbins=hax.xaxis.get_ticklocs().size - 1, prune="upper"
+        log = self.log
+        if not log.x:
+            hax.xaxis.set_major_locator(
+                mpl.ticker.MaxNLocator(
+                    nbins=hax.xaxis.get_ticklocs().size - 1, prune="upper"
+                )
             )
-        )
-        hax.yaxis.set_major_locator(
-            mpl.ticker.MaxNLocator(
-                nbins=hax.yaxis.get_ticklocs().size - 1, prune="upper"
+        if not log.y:
+            hax.yaxis.set_major_locator(
+                mpl.ticker.MaxNLocator(
+                    nbins=hax.yaxis.get_ticklocs().size - 1, prune="upper"
+                )
             )
+
+        return hax, xax, yax, cbar
+
+    def id_data_above_contour(self, level):
+        r"""Gets data above the `level`.
+
+        Parameters
+        ----------
+        level: scalar
+             The z-value above which to select data. Data is aggregated according
+             to `ax_norm`.
+
+        Returns
+        -------
+        above_contour: pd.Series
+            For data in a bin above `level`, indicates the x-`pd.Interval` within
+            which the observation falls. `NaN` are observations that are below
+            `level`. This object is purposely the same length as the data stored by
+            Hist2D and can be used in groupby operations.
+        """
+        x = self.data.x
+        y = self.data.y
+        above_contour = pd.Series(np.nan, self.data.index)
+        for k, v in self.agg().unstack("x").items():
+            tk = v >= level
+            left, right = k.left, k.right
+            bottom, top = v[tk].index.min().left, v[tk].index.max().right
+            above_contour_at_x = (left < x) & (x <= right) & (bottom < y) & (y <= top)
+            above_contour[above_contour_at_x] = k
+
+        above_contour = pd.Series(
+            pd.Categorical(above_contour), index=above_contour.index
         )
 
-        return hax, xax, yax, cax
+        return above_contour
+
+    def take_data_in_yrange_across_x(
+        self, ranges_by_x, get_x_bounds, get_y_bounds,
+    ):
+        r"""
+
+        Parameters
+        ----------
+        ranges_by_x: iterable
+            An iterable with keys used to get the left and right bounds for the data
+            and values used to get the top and bottom bounds for the data.
+
+        get_x_bounds: function
+            First argument is one key of `ranges_by_x` and returns `left, right`.
+            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
+            to whether or not the keys are :math:`log(x)` or :math:`x` in a manner
+            that matches data stored in Hist2D.
+
+        get_y_bounds: functions
+            Takes on value of `ranges_by_x` and returns `top, bottom`. Second argument
+            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
+            to whether or not the keys are :math:`log(y)` or :math:`y` in a manner
+            that matches data stored in Hist2D.
+
+        Returns
+        -------
+        taken: np.ndarray 1D
+            Array of indices for selecting data in interval.
+        """
+
+        available_x = self.agg().unstack("x").columns
+        if ranges_by_x.index.symmetric_difference(available_x).size:
+            drop = ranges_by_x.index.symmetric_difference(available_x)
+            if not drop.isin(available_x).all():
+                raise ValueError(
+                    "Need a way to drop values in selector that aren't available."
+                )
+            else:
+                self.logger.warning(
+                    f"Dropping {drop.size} intervals from available for selecting."
+                )
+
+        data = self.data
+        logx = self.log.x
+        logy = self.log.y
+
+        taken = []
+        for x, at_x in ranges_by_x.iterrows():
+            l, r = get_x_bounds(x, expected_logx=logx)
+            b, t = get_y_bounds(at_x, expected_logy=logy)
+
+            assert l < r
+            assert b < t
+
+            tkx = (l < data.x) & (data.x <= r)
+            tky = (b < data.y) & (data.y <= t)
+            tk = tkx & tky
+            tk = tk.loc[tk].index
+            taken.append(tk)
+
+        taken = np.sort(np.concatenate(taken))
+        return taken

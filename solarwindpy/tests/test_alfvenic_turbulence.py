@@ -1,43 +1,13 @@
 #!/usr/bin/env python
 """
-Name                :   test_alfvenic_turbulence.py
-Common Alias        :
-Version             :   0.1.00
-Updated             :   20181121
-Author              :   B. L. Alterman
-e-mail              :   balterma@umich.edu
-
-Description
------------
--Tests `alfvenic_turbulence.py` modeule.
-
-Bibliography
-------------
-[1]
-
-Dependencies beyond standard distribution
------------------------------------------
--
-
-Revision History
-----------------
--Started module. (20181121)
-
-Propodes Updates
-----------------
--
-
-Notes
------
--
-
+Tests for Alfvenic turbulence calculations.
 """
 
-import pdb
 
 import numpy as np
 import pandas as pd
-import unittest
+import logging
+import pytest
 
 import pandas.testing as pdt
 
@@ -90,7 +60,12 @@ class AlfvenicTrubulenceTestBase(ABC):
         rtot = r.sum(axis=1)
 
         vcom = (
-            v.multiply(r, axis=1, level="S").sum(axis=1, level="C").divide(rtot, axis=0)
+            v.multiply(r, axis=1, level="S")
+            .T.groupby(level="C")
+            .sum()
+            .T
+            # sum(axis=1, level="C")
+            .divide(rtot, axis=0)
         )
 
         coef = 1e-9 / (np.sqrt(constants.mu_0 * constants.m_p * 1e6) * 1e3)
@@ -214,6 +189,12 @@ class AlfvenicTrubulenceTestBase(ABC):
         measurements = self.unrolled_data.drop("r", axis=1, level="M")
         ot = self.object_testing
         pdt.assert_frame_equal(measurements, ot.measurements)
+
+    def test_averaging_info(self):
+        ot = self.object_testing
+        avg = ot.averaging_info
+        expected = turb.AlvenicTurbAveraging(self.test_window, self.test_periods)
+        self.assertEqual(expected, avg)
 
     #    def test_auto_reindex(self):
     #
@@ -376,6 +357,10 @@ class AlfvenicTrubulenceTestBase(ABC):
         pdt.assert_series_equal(eres_norm, ot.normalized_residual_energy)
         pdt.assert_series_equal(ot.normalized_residual_energy, ot.eres_norm)
 
+    def test_sigma_r(self):
+        ot = self.object_testing
+        pdt.assert_series_equal(ot.sigma_r, ot.normalized_residual_energy)
+
     def test_cross_helicity(self):
         v = self.data.loc[:, "v"]
         b = self.data.loc[:, "b"]
@@ -484,6 +469,7 @@ class AlfvenicTrubulenceTestBase(ABC):
 #         for other in ([], tuple(), np.array([]), pd.Series(), pd.DataFrame()):
 #             self.assertNotEqual(object_testing, other)
 
+
 #####
 # Tests
 #####
@@ -530,30 +516,31 @@ class TestAlfvenicTrubulenceAlphaP1P2(
     pass
 
 
-if __name__ == "__main__":
-    import sys
+def test_set_data_requires_datetimeindex():
+    """``set_data`` raises ``TypeError`` for non-``DatetimeIndex`` inputs."""
 
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    #     sys.setrecursionlimit(sys.getrecursionlimit() // 10)
-    sys.setrecursionlimit(100)
+    idx = pd.RangeIndex(3)
+    v = pd.DataFrame(np.arange(9).reshape(3, 3), index=idx, columns=["x", "y", "z"])
+    b = pd.DataFrame(
+        np.arange(9).reshape(3, 3) / 10.0, index=idx, columns=["x", "y", "z"]
+    )
+    rho = pd.Series(np.arange(3), index=idx)
 
-    try:
-        run_this_test = "TestAlfvenicTrubulenceP1"
-        run_this_test = None
-        unittest.main(verbosity=2, defaultTest=run_this_test)
+    with pytest.raises(TypeError):
+        turb.AlfvenicTurbulence(v, b, rho, "p1")
 
-    except (  # noqa: F841
-        AssertionError,
-        AttributeError,
-        ValueError,
-        TypeError,
-        IndexError,
-    ) as e:
-        import sys
-        import traceback as tb
 
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])
+def test_set_data_warns_on_mismatched_index(caplog):
+    """Mismatched indices trigger a warning."""
+
+    v_idx = pd.date_range("2020-01-01", periods=3, freq="H")
+    b_idx = pd.date_range("2020-01-02", periods=3, freq="H")
+    v = pd.DataFrame(np.arange(9).reshape(3, 3), index=v_idx, columns=["x", "y", "z"])
+    b = pd.DataFrame(
+        np.arange(9).reshape(3, 3) / 10.0, index=b_idx, columns=["x", "y", "z"]
+    )
+    rho = pd.Series(np.arange(3), index=v_idx)
+
+    with caplog.at_level(logging.WARNING):
+        turb.AlfvenicTurbulence(v, b, rho, "p1")
+    assert "v and b have unequal indices" in caplog.text

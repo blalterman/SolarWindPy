@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save spiral plots.
-"""
+r"""Spiral mesh plots and associated binning utilities."""
 
 import pdb  # noqa: F401
 import logging
@@ -295,7 +294,7 @@ class SpiralMesh(object):
         ax.legend(
             h0 + h1,
             l0 + l1,
-            title=fr"$\Delta t = {stats.loc[:, dt_key].sum():.0f} \, {dt_unit}$",
+            title=rf"$\Delta t = {stats.loc[:, dt_key].sum():.0f} \, {dt_unit}$",
         )
 
         ax.set_yscale("log")
@@ -678,9 +677,9 @@ data : {z.size}
         ymesh = self.mesh.mesh[:, [2, 3]]
 
         if self.log.x:
-            xmesh = 10.0 ** xmesh
+            xmesh = 10.0**xmesh
         if self.log.y:
-            ymesh = 10.0 ** ymesh
+            ymesh = 10.0**ymesh
 
         # (x,y) of bin's lower left corner.
         xy = zip(xmesh[:, 0], ymesh[:, 0])
@@ -755,7 +754,7 @@ data : {z.size}
             alpha_agg = mpl.colors.Normalize()(alpha_agg)
             alpha = 1 - alpha_agg
             self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha ** 0.25
+            alpha = alpha**0.25
 
             # Set masked values to zero. Otherwise, masked
             # values are rendered as black.
@@ -772,3 +771,203 @@ data : {z.size}
         #         self.logger.warning(f"Elapsed {stop - start}")
 
         return ax, cbar_or_mappable
+
+    def _verify_contour_passthrough_kwargs(
+        self, ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+    ):
+        if clabel_kwargs is None:
+            clabel_kwargs = dict()
+        if edges_kwargs is None:
+            edges_kwargs = dict()
+        if cbar_kwargs is None:
+            cbar_kwargs = dict()
+        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
+            cbar_kwargs["ax"] = ax
+
+        return clabel_kwargs, edges_kwargs, cbar_kwargs
+
+    def plot_contours(
+        self,
+        ax=None,
+        label_levels=True,
+        cbar=True,
+        limit_color_norm=False,
+        cbar_kwargs=None,
+        fcn=None,
+        plot_edges=False,
+        edges_kwargs=None,
+        clabel_kwargs=None,
+        skip_max_clbl=True,
+        use_contourf=False,
+        #         gaussian_filter_std=0,
+        #         gaussian_filter_kwargs=None,
+        **kwargs,
+    ):
+        """Make a contour plot on `ax` using `ax.contour`.
+
+        Paremeters
+        ----------
+        ax: mpl.axes.Axes, None
+            If None, create an `Axes` instance from `plt.subplots`.
+        label_levels: bool
+            If True, add labels to contours with `ax.clabel`.
+        cbar: bool
+            If True, create color bar with `labels.z`.
+        limit_color_norm: bool
+            If True, limit the color range to 0.001 and 0.999 percentile range
+            of the z-value, count or otherwise.
+        cbar_kwargs: dict, None
+            If not None, kwargs passed to `self._make_cbar`.
+        fcn: FunctionType, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
+        plot_edges: bool
+            If True, plot the smoothed, extreme edges of the 2D histogram.
+        clabel_kwargs: None, dict
+            If not None, dictionary of kwargs passed to `ax.clabel`.
+        skip_max_clbl: bool
+            If True, don't label the maximum contour. Primarily used when the maximum
+            contour is, effectively, a point.
+        maximum_color:
+            The color for the maximum of the PDF.
+        use_contourf: bool
+            If True, use `ax.contourf`. Else use `ax.contour`.
+        gaussian_filter_std: int
+            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
+            standard deviation specified by `gaussian_filter_std`.
+        gaussian_filter_kwargs: None, dict
+            If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
+        kwargs:
+            Passed to :py:meth:`ax.pcolormesh`.
+            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`."""
+        levels = kwargs.pop("levels", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop(
+            "norm",
+            None,
+            #             mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+            #             if self.axnorm in ("c", "r")
+            #             else None,
+        )
+        linestyles = kwargs.pop(
+            "linestyles",
+            [
+                "-",
+                ":",
+                "--",
+                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+                "--",
+                ":",
+                "-",
+                (0, (7, 3, 1, 3, 1, 3)),
+            ],
+        )
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        (
+            clabel_kwargs,
+            edges_kwargs,
+            cbar_kwargs,
+        ) = self._verify_contour_passthrough_kwargs(
+            ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+        )
+
+        inline = clabel_kwargs.pop("inline", True)
+        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
+        fmt = clabel_kwargs.pop("fmt", "%s")
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        C = self.agg(fcn=fcn).values
+        assert isinstance(C, np.ndarray)
+        assert C.ndim == 1
+        if C.shape[0] != self.mesh.mesh.shape[0]:
+            raise ValueError(
+                f"""{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned."""
+            )
+
+        x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
+        y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
+
+        if self.log.x:
+            x = 10.0 ** x
+        if self.log.y:
+            y = 10.0 ** y
+
+        tk_finite = np.isfinite(C)
+        x = x[tk_finite]
+        y = y[tk_finite]
+        C = C[tk_finite]
+
+        contour_fcn = ax.tricontour
+        if use_contourf:
+            contour_fcn = ax.tricontourf
+
+        if levels is None:
+            args = [x, y, C]
+        else:
+            args = [x, y, C, levels]
+
+        qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
+
+        try:
+            args = (qset, levels[:-1] if skip_max_clbl else levels)
+        except TypeError:
+            # None can't be subscripted.
+            args = (qset,)
+
+        class nf(float):
+            # Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html
+            # Define a class that forces representation of float to look a certain way
+            # This remove trailing zero so '1.0' becomes '1'
+            def __repr__(self):
+                return str(self).rstrip("0")
+
+        lbls = None
+        if label_levels:
+            qset.levels = [nf(level) for level in qset.levels]
+            lbls = ax.clabel(
+                *args,
+                inline=inline,
+                inline_spacing=inline_spacing,
+                fmt=fmt,
+                **clabel_kwargs,
+            )
+
+        cbar_or_mappable = qset
+        if cbar:
+            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
+            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
+
+        self._format_axis(ax)
+
+        return ax, lbls, cbar_or_mappable, qset
+
+#    def plot_surface(self):
+#
+#        from scipy.interpolate import griddata
+#
+#        z = self.agg()
+#        x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
+#        y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
+#
+#        is_finite = np.isfinite(z)
+#        z = z[is_finite]
+#        x = x[is_finite]
+#        y = y[is_finite]
+#
+#        xi = np.linspace(x.min(), x.max(), 100)
+#        yi = np.linspace(y.min(), y.max(), 100)
+#        # VERY IMPORTANT, to tell matplotlib how is your data organized
+#        zi = griddata((x, y), y, (xi[None, :], yi[:, None]), method="cubic")
+#
+#        if ax is None:
+#            fig = plt.figure(figsize=(8, 8))
+#            ax = fig.add_subplot(projection="3d")
+#
+#        xig, yig = np.meshgrid(xi, yi)
+#
+#        ax.plot_surface(xx, yy, zz, cmap="Spectral_r", norm=chavp.norms.vsw)

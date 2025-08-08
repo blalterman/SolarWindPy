@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Special labels not handled by :py:class:`TeXlabel`.
-"""
+r"""Special labels not handled by :py:class:`TeXlabel`."""
 import pdb  # noqa: F401
 from pathlib import Path
 from string import Template as StringTemplate
@@ -10,6 +9,8 @@ from . import base
 
 
 class ArbitraryLabel(base.Base):
+    """Abstract base class for custom labels."""
+
     def __init__(self):
         super().__init__()
 
@@ -28,12 +29,7 @@ class ArbitraryLabel(base.Base):
 
 
 class ManualLabel(ArbitraryLabel):
-    r"""Build a manual label out of `tex` and `unit`.
-
-    `unit` can be a key for :py:class:`base._inU`.
-
-    :py:class:`ManualLabel` assumes `tex` is a string of words.
-    """
+    r"""Label defined by raw LaTeX text and unit."""
 
     def __init__(self, tex, unit, path=None):
         super().__init__()
@@ -77,6 +73,8 @@ class ManualLabel(ArbitraryLabel):
 
 
 class Vsw(base.Base):
+    """Solar wind speed."""
+
     def __init__(self):
         super().__init__()
 
@@ -97,8 +95,10 @@ class Vsw(base.Base):
 
 
 class CarringtonRotation(ArbitraryLabel):
+    """Carrington rotation count."""
+
     def __init__(self, short_label=True):
-        r"""If `short_label`, use "CR". Otherwise, use "Carrington Rotation"."""
+        """Instantiate the label."""
         super().__init__()
         self._short_label = bool(short_label)
 
@@ -122,6 +122,8 @@ class CarringtonRotation(ArbitraryLabel):
 
 
 class Count(ArbitraryLabel):
+    """Count histogram label."""
+
     def __init__(self, norm=None):
         super().__init__()
         self.set_axnorm(norm)
@@ -156,10 +158,16 @@ class Count(ArbitraryLabel):
     def _build_tex(self):
         axnorm = self.axnorm
         if axnorm:
-            if self.axnorm in ("r", "c", "t"):
+            if axnorm in ("r", "c", "t"):
                 tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm.get(axnorm)
-            else:
+            elif axnorm == "cd":
+                tex = r"\mathrm{1D Probability Density}"
+            elif axnorm == "rd":
+                tex = r"\mathrm{1D Probability Density}"
+            elif axnorm == "d":
                 tex = r"\mathrm{Probability Density}"
+            else:
+                raise ValueError(f"Unrecognized axis normalization `{axnorm}`")
         else:
             tex = r"\mathrm{Count}"
 
@@ -180,6 +188,8 @@ class Count(ArbitraryLabel):
 
 
 class Power(ArbitraryLabel):
+    """Power spectrum label."""
+
     def __init__(self):
         super().__init__()
 
@@ -200,11 +210,10 @@ class Power(ArbitraryLabel):
 
 
 class Probability(ArbitraryLabel):
-    def __init__(self, other_label, comparison=None):
-        r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+    """Probability that a quantity meets a comparison criterion."""
 
-        The `comparison`, if passed, is something like "> 0".
-        """
+    def __init__(self, other_label, comparison=None):
+        """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
@@ -278,11 +287,10 @@ class Probability(ArbitraryLabel):
 
 
 class CountOther(ArbitraryLabel):
-    def __init__(self, other_label, comparison=None, new_line_for_units=False):
-        r"""`other_label` is a `TeXlabel` or str identifying the quantity for which we're calculating the probability.
+    """Count of samples of another label fulfilling a comparison."""
 
-        The `comparison`, if passed, is something like "> 0".
-        """
+    def __init__(self, other_label, comparison=None, new_line_for_units=False):
+        """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
@@ -368,8 +376,10 @@ class CountOther(ArbitraryLabel):
 
 
 class MathFcn(ArbitraryLabel):
+    """Math function applied to another label."""
+
     def __init__(self, fcn, other_label, dimensionless=True, new_line_for_units=False):
-        r"""`other_label` is a `TeXlabel` or str identifying the quantity to which we're applying a math function."""
+        """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_function(fcn)
@@ -457,6 +467,8 @@ class MathFcn(ArbitraryLabel):
 
 
 class Distance2Sun(ArbitraryLabel):
+    """Distance to the Sun."""
+
     def __init__(self, units):
         super().__init__()
         self.set_units(units)
@@ -488,6 +500,8 @@ class Distance2Sun(ArbitraryLabel):
 
 
 class SSN(ArbitraryLabel):
+    """Sunspot number label."""
+
     def __init__(self, key):
         super().__init__()
         self.set_kind(key)
@@ -536,14 +550,10 @@ class SSN(ArbitraryLabel):
 
 
 class ComparisonLable(ArbitraryLabel):
+    """Label comparing two other labels via a function."""
+
     def __init__(self, labelA, labelB, fcn_name, fcn=None):
-        r"""Function label comparing labelA and labelB.
-
-        Label is built as
-
-            >>> fcn.format(labelA=labelA, labelB=labelB)
-
-        """
+        """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
@@ -680,8 +690,10 @@ keys : {",".join(keys)}
 
 
 class Xcorr(ArbitraryLabel):
+    """Cross-correlation coefficient between two labels."""
+
     def __init__(self, labelA, labelB, method, short_tex=False):
-        r"""Cross correlation coefficeint between labelA and labelB."""
+        """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)

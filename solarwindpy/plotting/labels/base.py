@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r"""Tools for creating physical quantity plot labels.
-"""
+r"""Tools for creating physical quantity plot labels."""
 import pdb  # noqa: F401
 import logging
 import re
@@ -64,7 +63,7 @@ for i, s in (
 ):
     _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
 
-_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density"}
+_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density", "rd": "1D Probability Density", "cd": "1D Probability Density"}
 
 _all_species_re = sorted(_trans_species.keys())[
     ::-1
@@ -74,12 +73,24 @@ _default_template_string = "{$M}_{{$C};{$S}}"
 
 
 def _run_species_substitution(pattern):
-    r"""Basic substitution of any species within a species string so long
-    as the species has a substitution in the ion_species dictionary.
-    Note: this equation might only work because a->\alpha is the only
-    actual translation made and, based on lexsort order, would be the
-    first group. This function may need to be updated for more complex
-    patterns, e.g. if we translate something like He2+->\text{He}^{2+}."""
+    """Replace species codes in a string with their LaTeX equivalents.
+
+    Parameters
+    ----------
+    pattern : str
+        String potentially containing species codes.
+
+    Returns
+    -------
+    tuple
+        ``(new_string, count)`` from :func:`re.subn`.
+
+    Notes
+    -----
+    Only substitutions defined in ``_trans_species`` are performed. The
+    implementation relies on the simple mapping used in this module and may
+    need to be revisited for more complex patterns.
+    """
 
     def repl(x):
         return _trans_species[x.group()]
@@ -141,6 +152,7 @@ _trans_units = {
     "v": _inU["kms"],
     "w": _inU["kms"],
     "dv": _inU["kms"],
+    "dn": _inU["cm-3"],
     "cs": _inU["kms"],
     "ca": _inU["kms"],
     "afsq": _inU["dimless"],
@@ -286,6 +298,7 @@ _templates = {
     "sigma_xy": r"\sigma_{\parallel}",
     "ra": r"r_{A;{$S}}",
     "re": r"r_{E;{$S}}",
+    "dn": r"\delta n_{{$S}}",
     # Instability things
     "Wn": r"\mathrm{W_n}",
     "gamma": r"\gamma",
@@ -316,7 +329,10 @@ _templates = {
 
 
 class Base(ABC):
+    """Base class for all label objects."""
+
     def __init__(self):
+        """Initialize the logger."""
         self._init_logger()
 
     def __str__(self):
@@ -349,9 +365,7 @@ class Base(ABC):
         return self._logger
 
     def _init_logger(self, handlers=None):
-        r"""
-        Init a logger with a StreamHandler at INFO level.
-        """
+        """Create a logger at the INFO level."""
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
 
@@ -373,67 +387,33 @@ class Base(ABC):
 
 
 class TeXlabel(Base):
-    r"""Create a LaTeX label from (Measurement, Component, Species)
-    information that includes units and a str useable for creating a path at
-    which a figure can be saved.
+    r"""Create a LaTeX label from measurement, component and species information.
 
-    `__str__` returns the formatted label with units, so an instantiated
-    object can be passed directly to a plotting method. For example, the
-    following prints "$V_{x;p} \; [\mathrm{km \, s^{-1}}]$" as the axis'
-    xlabel.
-
-        >>> lbl = TeXlabel("v", "x", "p")
-        >>> fig, ax = plt.subplots()
-        >>> ax.set_xlabel(lbl)
-
-    Properties
-    ----------
-    logger: logger
-        Logging instance used to record process.
-    mcs0: 3-tuple
-        (<Measurement>, <Component>, <Species>) tuple.
-    mcs1: 3-tuple or None
-        (<Measurement>, <Component>, <Species>) tuple that specifies the denomenator
-        for the label.
-    tex: str
-        The laTeX formatted string, excluding units and $s used for math
-        escapes.
-    with_units: str
-        `tex` with units and $s used for math escapes.
-    path: pathlib.Path
-        A Path object in `m_c_s` format.
-
-    Methods
-    -------
-    build_label:
-        Build the label.
+    The object can be used directly in plotting routines. String
+    representation returns the formatted label with units.
 
     Notes
     -----
-    Comparison operators and hash are defined based on `str(self)`. So `TeXlabels` identifying
-    identical quantities hash identically.
+    Comparison operators and hashing use :func:`str` of the object so two
+    labels representing the same quantity compare equal.
     """
 
     def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
-        r"""Parameters
+        """Instantiate the label.
+
+        Parameters
         ----------
-        mcs0: tuple of strings
-            Form is `("M", "C", "S")` where m = measurement, c=component, and
-            s=species. Both c and s can be empty strings when that metadata
-            does not apply. (For example, a magnetic field has no species.)
-            If an m, c, or s value raises a `KeyError` in its dictionary, then
-            it is passed through without change.
-        mcs1: tuple or None
-            If not None, `("M", "C", "S")` info. Treated such that `mcs0` is
-            the numerator and `mcs1` is the denomenator in a fraction label.
-            When `mcs1` is specified, units are checked and, if they are
-            identical, dimensionless units are speciefied.
-        axnorm: str or None
-            If not None, axis normalization on plot. Primarily used for
-            creating colorbar labels.
-        new_line_for_units: bool
-            If True, :py:meth:`tex` and :py:meth:`units` are separated by a
-            new line. Otherwise, they are separated by "\;".
+        mcs0 : tuple of str
+            ``("M", "C", "S")`` where ``m`` is the measurement, ``c`` the
+            component and ``s`` the species. Empty strings are allowed for
+            components or species.
+        mcs1 : tuple of str or None, optional
+            Denominator for fraction style labels. Units are compared and set
+            to dimensionless when equal.
+        axnorm : {"c", "r", "t", "d"}, optional
+            Axis normalization used when building colorbar labels.
+        new_line_for_units : bool, default ``False``
+            If ``True`` a newline separates label and units.
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
@@ -609,6 +589,7 @@ template   : %s
         return tex, units, path
 
     def _combine_tex_path_units_axnorm(self, tex, path, units):
+        """Finalize label pieces with axis normalization."""
         axnorm = self.axnorm
         tex_norm = _trans_axnorm[axnorm]
         if tex_norm:
@@ -625,6 +606,7 @@ template   : %s
         return tex, path, units, with_units
 
     def build_label(self):
+        """Construct the complete label."""
         mcs0 = self.mcs0
         mcs1 = self.mcs1
 

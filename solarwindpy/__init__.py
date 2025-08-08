@@ -7,7 +7,10 @@ methods.
 
 import pdb  # noqa: F401
 
-from pkg_resources import get_distribution, DistributionNotFound
+try:
+    from importlib.metadata import PackageNotFoundError, version
+except ImportError:  # pragma: no cover - Python <3.8
+    from importlib_metadata import PackageNotFoundError, version
 
 import pandas as pd
 
@@ -24,8 +27,14 @@ from .core import (
 from . import core, plotting, solar_activity, tools, fitfunctions
 from . import instabilities  # noqa: F401
 
-pd.set_option("mode.chained_assignment", "raise")
-pd.set_option("mode.use_inf_as_na", True)
+
+def _configure_pandas() -> None:
+    """Configure global pandas options used throughout SolarWindPy."""
+
+    pd.set_option("mode.chained_assignment", "raise")
+
+
+_configure_pandas()
 
 Plasma = core.plasma.Plasma
 at = alfvenic_turbulence
@@ -62,8 +71,8 @@ __author__ = "B. L. Alterman <balterma@umich.edu>"
 __name__ = "solarwindpy"
 
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
     __version__ = "unknown"
 

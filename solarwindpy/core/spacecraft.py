@@ -4,33 +4,29 @@ r"""Contais :py:class:`~solarwindpy.core.spacecraft.Spacecraft` class.
 Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` objects.
 """
 
-import pdb  # noqa: F401
 import pandas as pd
 import numpy as np
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
 # accidentally cause a problem.
-pd.set_option("mode.chained_assignment", "raise")
 
-try:
-    from . import base
-    from . import vector
-except ImportError:
-    import base
-    import vector
+from . import base
+from . import vector
 
 
 class Spacecraft(base.Base):
-    r"""Spacecraft class.
+    r"""Representation of a spacecraft trajectory.
 
-    Properties
+    Parameters
     ----------
-    name, frame, data, position, velocity, carrington
-
-    Methods
-    -------
-    set_<>
+    data : :class:`pandas.DataFrame`
+        Vector position (and optionally velocity) with MultiIndex columns
+        ``("M", "C")``.
+    name : str
+        Identifier of the spacecraft.
+    frame : str
+        Reference frame of the vectors, e.g. ``"HCI"`` or ``"GSE"``.
     """
 
     def __init__(self, data, name, frame):
@@ -85,14 +81,12 @@ class Spacecraft(base.Base):
 
     @property
     def frame(self):
-        r"""Spacecraft's frame of reference (e.g. GSE, HCI, etc.).
-        """
+        r"""Spacecraft's frame of reference (e.g. GSE, HCI, etc.)."""
         return self._frame
 
     @property
     def name(self):
-        r"""Spacecraft name (e.g. WIND, PSP)
-        """
+        r"""Spacecraft name (e.g. WIND, PSP)"""
         return self._name
 
     @property
@@ -107,8 +101,7 @@ class Spacecraft(base.Base):
 
     @property
     def r(self):
-        r"""Shortcut to :py:meth:`position`.
-        """
+        r"""Shortcut to :py:meth:`position`."""
         return self.position
 
     @property
@@ -126,8 +119,7 @@ class Spacecraft(base.Base):
 
     @property
     def carrington(self):
-        r"""Carrington latitude and longitude.
-        """
+        r"""Carrington latitude and longitude."""
         try:
             return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
         except KeyError as e:  # noqa: F841
@@ -135,9 +127,8 @@ class Spacecraft(base.Base):
 
     @property
     def distance2sun(self):
-        r"""Radial distance to Sun in meters.
-        """
-        pos = self.position
+        r"""Radial distance to Sun in meters."""
+        pos = self.position.data
         frame = self.frame
 
         if frame == "GSE":

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.fitfunctions` base class.
+r"""Base classes used to implement specific fit functions.
 
-A `FitFunction` takes a function, generates a fit with `scipy.curve_fit`, and provides
-tools for plotting that fit. It also provies tools for annotating the plot with
-well-formatted LaTeX that describes the fit.
+The :class:`FitFunction` abstract base class handles selecting the
+observations to include in a fit, running SciPy optimizers and
+providing convenient plotting helpers.  Subclasses need only define
+the functional form and an initial parameter guess.
 """
 
 import pdb  # noqa: F401
@@ -17,7 +18,19 @@ from inspect import getfullargspec
 
 # from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
-from scipy.optimize.minpack import _wrap_func, _wrap_jac, _initialize_feasible
+
+try:
+    from scipy.optimize._minpack_py import (
+        _wrap_func,
+        _wrap_jac,
+        _initialize_feasible,
+    )
+except ImportError:  # pragma: no cover - fall back for older SciPy versions
+    from scipy.optimize.minpack import (
+        _wrap_func,
+        _wrap_jac,
+        _initialize_feasible,
+    )
 from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
@@ -74,6 +87,28 @@ class FitFunction(ABC):
         logx=False,
         logy=False,
     ):
+        """Initialize a ``FitFunction`` with observed data.
+
+        Parameters
+        ----------
+        xobs, yobs : array-like
+            Observed ``x`` and ``y`` values.
+        xmin, xmax : float, optional
+            Range limits for ``x`` used in fitting.
+        xoutside : tuple(float, float), optional
+            Include data outside this range in the fit.
+        ymin, ymax : float, optional
+            Range limits for ``y`` used in fitting.
+        youtside : tuple(float, float), optional
+            Include data outside this range.
+        weights : array-like, optional
+            Uncertainties associated with ``y``.
+        wmin, wmax : float, optional
+            Weight limits.
+        logx, logy : bool, default False
+            Whether to interpret ``x`` or ``y`` on a log10 scale.
+        """
+
         self._init_logger()
         self._set_argnames()
 
@@ -101,6 +136,7 @@ class FitFunction(ABC):
         return f"{self.__class__.__name__} ({self.TeX_function})"
 
     def __call__(self, x):
+        """Evaluate the fitted model at ``x``."""
 
         # TODO
         # Do you want to have this function accept optional kwarg parameters?
@@ -130,7 +166,8 @@ class FitFunction(ABC):
         return self._logger
 
     def _init_logger(self):
-        # return None
+        """Create a module-level logger for the instance."""
+
         logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._logger = logger
 
@@ -496,6 +533,8 @@ xobs: {xobs.shape}"""
         self._observations = usedrawobs
 
     def _run_least_squares(self, **kwargs):
+        """Execute :func:`scipy.optimize.least_squares` with defaults."""
+
         p0 = kwargs.pop("p0", self.p0)
         bounds = kwargs.pop("bounds", (-np.inf, np.inf))
         method = kwargs.pop("method", "trf")
@@ -591,6 +630,8 @@ xobs: {xobs.shape}"""
         return res, p0
 
     def _calc_popt_pcov_psigma_chisq(self, res, p0):
+        """Compute optimized parameters and statistics from the result."""
+
         xdata = self.observations.used.x
         ydata = self.observations.used.y
         sigma = self.observations.used.w
@@ -608,14 +649,14 @@ xobs: {xobs.shape}"""
             r = self.function(xdata, *popt) - ydata
             if sigma is not None:
                 r /= sigma
-            chisq_dof = (r ** 2).sum() / dof
+            chisq_dof = (r**2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.
         _, s, VT = svd(res.jac, full_matrices=False)
         threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
         s = s[s > threshold]
         VT = VT[: s.size]
-        pcov = np.dot(VT.T / (s ** 2), VT)
+        pcov = np.dot(VT.T / (s**2), VT)
 
         warn_cov = False
         if ysize > p0.size:

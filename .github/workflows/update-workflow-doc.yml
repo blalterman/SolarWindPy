@@ -1,0 +1,24 @@
+name: update-workflow-doc
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+jobs:
+  update-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Update PR references
+        run: python scripts/update_pr_references.py --pr ${{ github.event.pull_request.number }} --action ${{ github.event.action }}
+      - name: Commit changes
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "github-actions"
+          if git diff --quiet; then
+            echo "No changes"
+          else
+            git commit -am "chore: update workflow PR references"
+            git push
+          fi

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-r"""Test spacecraft class.
 """
-import pdb
+Tests for spacecraft handling.
+"""
 import numpy as np
 import pandas as pd
-import unittest
 import pandas.testing as pdt
 from scipy import constants
 from unittest import TestCase
@@ -72,7 +71,7 @@ class TestBase(ABC):
     def test_position(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.position.columns)
+        pdt.assert_index_equal(cols, ot.position.data.columns)
         self.assertIsInstance(ot.position, vector.Vector)
         self.assertEqual(ot.position, ot.r)
         self.assertEqual(ot.position, ot.pos)
@@ -81,7 +80,7 @@ class TestBase(ABC):
     def test_velocity(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.velocity.columns)
+        pdt.assert_index_equal(cols, ot.velocity.data.columns)
         self.assertIsInstance(ot.velocity, vector.Vector)
         self.assertEqual(ot.velocity, ot.v)
         return ot
@@ -211,22 +210,3 @@ class TestPSP(TestBase, TestCase):
         self.assertIsInstance(ot.carrington, pd.DataFrame)
         pdt.assert_index_equal(cols, ot.carrington.columns)
         pdt.assert_frame_equal(carr, ot.carrington)
-
-
-if __name__ == "__main__":
-
-    # Just make recursion stacks smaller in Terminal.
-    # Comment this line if it causes problems with other
-    # tests or decrease the denominator.
-    # sys.setrecursionlimit(sys.getrecursionlimit() // 10)
-
-    try:
-        unittest.main(verbosity=2)
-
-    except (AssertionError, AttributeError, ValueError, TypeError) as e:  # noqa: 841
-        import sys
-        import traceback as tb
-
-        exc_info = sys.exc_info()
-        tb.print_exception(*exc_info)
-        pdb.post_mortem(exc_info[-1])

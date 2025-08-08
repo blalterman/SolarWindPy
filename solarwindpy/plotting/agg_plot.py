@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r"""Aggregate, create, and save 1D and 2D histograms and binned plots.
+r"""Abstract helpers for aggregated plotting.
+
+These classes calculate bin edges, perform data aggregation, and provide
+common functionality used by :mod:`solarwindpy` histogram plots.
 """
 
 import pdb  # noqa: F401
@@ -72,6 +75,10 @@ class AggPlot(base.Base):
     @property
     def clim(self):
         return self._clim
+
+    @property
+    def alim(self):
+        return self._alim
 
     @property
     def agg_axes(self):
@@ -185,11 +192,20 @@ class AggPlot(base.Base):
 
     def set_clim(self, lower=None, upper=None):
         f"""Set the minimum (lower) and maximum (upper) alowed number of
-        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.add()`.
+        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.agg()`.
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
+
+    def set_alim(self, lower=None, upper=None):
+        r"""Set the minimum (lower) and maximum (upper) allowed value when
+        aggregating. This is different from `clim` because it uses the
+        `agg_fcn`. So behavior will change based on `axnorm`, etc.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._alim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""
@@ -356,9 +372,10 @@ class AggPlot(base.Base):
         cut = self.cut
         tko = self.agg_axes
 
+        lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
         self.logger.info(
             f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
-            "\n".join([f"{k!s}: {v!s}" for k, v in self.labels._asdict().items()]),
+            "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
         )
 
         gb = self.grouped
@@ -400,6 +417,26 @@ class AggPlot(base.Base):
         )
 
         return tk
+
+    def get_subset_above_threshold(self, threshold, fcn="count"):
+        r"""Get the subset of data above a given threshold using `fcn` to
+        aggregate. If `axnorm` set, this is used.
+        """
+        agg = self.agg(fcn=fcn)
+        tk = agg >= threshold
+        tk = tk.loc[tk]
+
+        tk_h2 = pd.Series(True, index=self.data.index)
+        for k, v in self.cut.items():
+            tk_ax = pd.IntervalIndex(v).isin(tk.index.get_level_values(k).unique())
+            tk_h2 = tk_h2 & tk_ax
+
+        subset = self.data.loc[tk_h2].copy(deep=True)
+        for k, log in self.log._asdict().items():
+            if log:
+                subset.loc[:, k] = 10 ** subset.loc[:, k]
+
+        return subset, tk_h2
 
     #     Old version that cuts at percentiles.
     #     @staticmethod

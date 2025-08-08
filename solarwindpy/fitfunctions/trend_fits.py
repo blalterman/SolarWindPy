@@ -9,7 +9,9 @@ import pdb  # noqa: F401
 
 # import warnings
 import logging  # noqa: F401
+import numpy as np
 import pandas as pd
+import matplotlib as mpl
 from collections import namedtuple
 
 import solarwindpy as swp
@@ -133,7 +135,11 @@ class TrendFit(object):
     def make_ffunc1ds(self, **kwargs):
         r"""kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""
         agg = self.agged
-        x = pd.IntervalIndex(agg.index).mid.values
+        x = agg.index
+        try:
+            x = pd.IntervalIndex(agg.index).mid.values
+        except TypeError:
+            x = x.values
 
         #         ylbl = self.labels.y
         #         zlbl = self.labels.z
@@ -152,7 +158,10 @@ class TrendFit(object):
     def make_1dfits(self, **kwargs):
         r"""Removes bad fits from `ffuncs` and saves them in `bad_fits`."""
         # Successful fits return None, which pandas treats as NaN.
-        fit_success = self.ffuncs.apply(lambda x: x.make_fit(**kwargs))
+        return_exception = kwargs.pop("return_exception", True)
+        fit_success = self.ffuncs.apply(
+            lambda x: x.make_fit(return_exception=return_exception, **kwargs)
+        )
         bad_idx = fit_success.dropna().index
         bad_fits = self.ffuncs.loc[bad_idx]
         self._bad_fits = bad_fits
@@ -232,9 +241,13 @@ class TrendFit(object):
         if not popt.shape[0]:
             raise ValueError("Insufficient 1D fits to build trend function")
 
-        x = pd.IntervalIndex(popt.index).mid
+        try:
+            x = pd.IntervalIndex(popt.index).mid
+        except TypeError:
+            x = popt.index
+
         if self.trend_logx:
-            x = 10.0 ** x
+            x = 10.0**x
 
         if "weights" in kwargs:
             raise ValueError("Weights are handled by `wkey1d`")
@@ -252,7 +265,9 @@ class TrendFit(object):
 
         self._trend_func = trend
 
-    def plot_all_popt_1d(self, ax=None, **kwargs):
+    def plot_all_popt_1d(
+        self, ax=None, only_plot_data_in_trend_fit=False, plot_window=True, **kwargs
+    ):
         r"""Plot all the 1D popt appropriate for identifying the trend on
         `ax`.
 
@@ -265,29 +280,73 @@ class TrendFit(object):
         ykey, wkey = self.popt1d_keys
 
         x = pd.IntervalIndex(popt.index).mid
-        if self.trend_logx:
-            x = 10.0 ** x
 
+        if only_plot_data_in_trend_fit:
+            tk = (
+                np.isin(x, self.trend_func.observations.used.x)
+                & np.isin(popt.loc[:, ykey].values, self.trend_func.observations.used.y)
+                & np.isin(popt.loc[:, wkey].values, self.trend_func.observations.used.w)
+            )
+            popt = popt.loc[tk]
+            x = x[tk]
+
+        if self.trend_logx:
+            x = 10.0**x
+
+        window_kwargs = kwargs.pop("window_kwargs", dict())
+
+        wkey = kwargs.pop("wkey", wkey)  # For disabling errobars
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "cyan")
         linestyle = kwargs.pop("ls", "--")
         label = kwargs.pop("label", "1D Fits")
-        pl, cl, bl = ax.errorbar(
-            x=x,
-            y=ykey,
-            yerr=wkey,
-            color=color,
-            linestyle=linestyle,
-            label=label,
-            data=popt,
-            **kwargs,
-        )
 
-        bl[0].set_linestyle(linestyle)
+        if plot_window:
+            if wkey is None:
+                raise NotImplementedError(
+                    "`wkey` must be able to index if `plot_window` is True"
+                )
+
+            window_kwargs = mpl.cbook.normalize_kwargs(
+                window_kwargs, mpl.collections.Collection._alias_map
+            )
+            window_color = window_kwargs.pop("color", color)
+            window_alpha = window_kwargs.pop("alpha", 0.15)
+
+            y = popt.loc[:, ykey]
+            w = popt.loc[:, wkey]
+
+            line = ax.plot(x, y, label=label, color=color, **kwargs)
+
+            y1 = y - w
+            y2 = y + w
+            window = ax.fill_between(
+                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+            )
+
+            plotted = (line, window)
+
+        else:
+            plotted = ax.errorbar(
+                x=x,
+                y=ykey,
+                yerr=wkey,
+                color=color,
+                linestyle=linestyle,
+                label=label,
+                data=popt,
+                **kwargs,
+            )
+
+            pl, cl, bl = plotted
+
+            if wkey is not None:
+                bl[0].set_linestyle(linestyle)
 
         #         ax.set_xlabel(self.labels.x)
         #         ax.set_ylabel(self.labels.y)
 
-        return pl, cl, bl
+        return plotted
 
     def plot_trend_fit_resid(self, **kwargs):
         annotate_kwargs = kwargs.pop(

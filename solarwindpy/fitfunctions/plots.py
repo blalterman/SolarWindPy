@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-r""":py:mod:`~solarwindpy.fitfunctions` plotter.
+r"""Plotting utilities for :mod:`solarwindpy.fitfunctions`.
+
+This module contains :class:`FFPlot`, a helper for visualizing fitted
+models, residuals and associated annotations.
 """
 
 import pdb  # noqa: F401
@@ -18,6 +21,22 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 class FFPlot(object):
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
+        """Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.
+
+        Parameters
+        ----------
+        observations : :class:`~solarwindpy.fitfunctions.core.Observations`
+            Observed data used in the fit.
+        y_fit : array-like
+            Model evaluated at the observed ``x`` values.
+        TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`
+            Object describing the fit for annotation.
+        fit_result : scipy.optimize.OptimizeResult
+            Result object returned from the fitting routine.
+        fitfunction_name : str, optional
+            Name of the originating fit function.
+        """
+
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
         self.set_fit_result(fit_result)
@@ -84,21 +103,28 @@ class FFPlot(object):
         return self._y_fit
 
     def set_fitfunction_name(self, new):
+        """Set the descriptive name for saved plots."""
+
         self._fitfunction_name = str(new)
 
     def set_fit_result(self, new):
+        """Store the optimization result object."""
+
         self._fit_result = new
 
     def set_observations(self, observations, y_fit):
+        """Set raw and fitted values used for plotting."""
+
         assert y_fit.shape == observations.raw.x.shape
         assert y_fit[observations.tk_observed].shape == observations.used.x.shape
-        #         assert y_fit[observations.tk_observed].shape == robust_residuals.shape
         self._observations = observations
         self._y_fit = y_fit
 
     #         self._robust_residuals = robust_residuals
 
     def _estimate_markevery(self):
+        """Heuristic marker spacing for large datasets."""
+
         try:
             # Estimate marker density for readability
             markevery = int(
@@ -130,9 +156,9 @@ class FFPlot(object):
         ax.set_xlabel(self.labels.x)
         ax.set_ylabel(self.labels.y)
         if self.log.x:
-            ax.set_xscale("log", nonpositive="clip")
+            ax.set_xscale("log")
         if self.log.y:
-            ax.set_yscale("log", nonpositive="clip")
+            ax.set_yscale("log")
 
         #         if with_rax:
         #             ax.xaxis.get_label().set_visible(False)
@@ -165,12 +191,19 @@ class FFPlot(object):
 
         return ax
 
-    def plot_raw(self, ax=None, **kwargs):
+    def plot_raw(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,
         :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.
+
+        Parameters
+        ----------
+        edge_kwargs: None, dict
+            If not None, plot edges on the window using these kwargs.
         """
         if ax is None:
             fig, ax = plt.subplots()
+
+        window_kwargs = kwargs.pop("window_kwargs", dict())
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "k")
@@ -183,21 +216,68 @@ class FFPlot(object):
         #             w = w / (y * np.log(10.0))
         #             w = np.log10(np.exp(1)) * w / y
 
-        # Plot the raw data histograms.
-        plotline, caplines, barlines = ax.errorbar(
-            x, y, yerr=w, label=label, color=color, **kwargs
-        )
+        #         # Plot the raw data histograms.
+        #         plotline, caplines, barlines = ax.errorbar(
+        #             x, y, yerr=w, label=label, color=color, **kwargs
+        #         )
+
+        def _plot_window_edges(ax, **kwargs):
+            kwargs = mpl.cbook.normalize_kwargs(
+                kwargs, mpl.collections.Collection._alias_map
+            )
+
+            edge1 = ax.plot(x, y1, **kwargs)
+            edge2 = ax.plot(x, y2, **kwargs)
+
+            return edge1, edge2
+
+        if plot_window:
+            if w is None:
+                logging.getLogger().warning(
+                    "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
+                )
+                w = 0
+
+            window_kwargs = mpl.cbook.normalize_kwargs(
+                window_kwargs, mpl.collections.Collection._alias_map
+            )
+            window_color = window_kwargs.pop("color", color)
+            window_alpha = window_kwargs.pop("alpha", 0.15)
+
+            line = ax.plot(x, y, label=label, color=color, **kwargs)
+
+            y1 = y - w
+            y2 = y + w
+            window = ax.fill_between(
+                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+            )
+
+            edges = None
+            if edge_kwargs is not None:
+                edge_kwargs = mpl.cbook.normalize_kwargs(
+                    edge_kwargs, mpl.collections.Collection._alias_map
+                )
+                edge_color = edge_kwargs.pop("color", window_color)
+                edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
+
+            plotted = (line, window, edges)
+
+        else:
+            # Plot the raw data histograms.
+            plotted = ax.errorbar(x, y, yerr=w, label=label, color=color, **kwargs,)
 
         self._format_hax(ax)
 
-        return ax, plotline, caplines, barlines
+        return ax, plotted
 
-    def plot_used(self, ax=None, **kwargs):
+    def plot_used(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
         r"""Plot the observations used in the fit from :py:meth:`self.observations.used.x`,
         :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
         """
         if ax is None:
             fig, ax = plt.subplots()
+
+        window_kwargs = kwargs.pop("window_kwargs", dict())
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
         color = kwargs.pop("color", "forestgreen")
@@ -217,23 +297,86 @@ class FFPlot(object):
         if markevery is None:
             markevery = self._estimate_markevery()
 
-        # Plot the raw data histograms.
-        plotline, caplines, barlines = ax.errorbar(
-            x,
-            y,
-            yerr=w,
-            label=label,
-            color=color,
-            marker=marker,
-            markerfacecolor=markerfacecolor,
-            markersize=markersize,
-            markevery=markevery,
-            **kwargs,
-        )
+        if plot_window:
+            if w is None:
+                logging.getLogger().warning(
+                    "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
+                )
+                w = 0
+
+            window_kwargs = mpl.cbook.normalize_kwargs(
+                window_kwargs, mpl.collections.Collection._alias_map
+            )
+            window_color = window_kwargs.pop("color", color)
+            window_alpha = window_kwargs.pop("alpha", 0.15)
+
+            line = ax.plot(
+                x,
+                y,
+                label=label,
+                color=color,
+                marker=marker,
+                markerfacecolor=markerfacecolor,
+                markersize=markersize,
+                markevery=markevery,
+                **kwargs,
+            )
+
+            y1 = y - w
+            y2 = y + w
+            window = ax.fill_between(
+                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+            )
+
+            edges = None
+            if edge_kwargs is not None:
+
+                def _plot_window_edges(ax, **kwargs):
+                    kwargs = mpl.cbook.normalize_kwargs(
+                        kwargs, mpl.collections.Collection._alias_map
+                    )
+
+                    edge1 = ax.plot(x, y1, **kwargs)
+                    edge2 = ax.plot(x, y2, **kwargs)
+
+                    return edge1, edge2
+
+                edge_kwargs = mpl.cbook.normalize_kwargs(
+                    edge_kwargs, mpl.collections.Collection._alias_map
+                )
+                edge_color = edge_kwargs.pop("color", window_color)
+                edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
+            #                 edge_kwargs = mpl.cbook.normalize_kwargs(edge_kwargs, mpl.collections.Collection._alias_map)
+
+            #                 edge1 = ax.plot(x, y1,
+            #                                 color=window_color,
+            #                                 **edge_kwargs)
+            #                 edge2 = ax.plot(x, y2,
+            #                                 color=window_color,
+            #                                 **edge_kwargs)
+
+            #                 edges = (edge1, edge2)
+
+            plotted = (line, window, edges)
+
+        else:
+            # Plot the raw data histograms.
+            plotted = ax.errorbar(
+                x,
+                y,
+                yerr=w,
+                label=label,
+                color=color,
+                marker=marker,
+                markerfacecolor=markerfacecolor,
+                markersize=markersize,
+                markevery=markevery,
+                **kwargs,
+            )
 
         self._format_hax(ax)
 
-        return ax, plotline, caplines, barlines
+        return ax, plotted
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
         r"""Plot the fit."""
@@ -318,7 +461,8 @@ class FFPlot(object):
             used_kwargs = dict()  # dict(color="k")
 
         if fit_kwargs is None:
-            fit_kwargs = dict()  # dict(color="darkorange")
+            #             fit_kwargs = dict()  # dict(color="darkorange")
+            fit_kwargs = dict(zorder=2.2)
 
         if drawstyle is None:
             drawstyle = "steps-mid"
@@ -343,34 +487,28 @@ class FFPlot(object):
     def plot_residuals(
         self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
     ):
-        r"""Make a plot of the fit function that includes the data and fit,
-                but are limited to data included in the fit.
+        r"""Plot residuals for the data used in the fit.
 
-                Residuals are plotted as a percentage, both positive and negative, on
-                a symlog scale with `linthresh=10`.
-        <<<<<<< HEAD
-        =======
+        Residuals are shown on a symlog scale with ``linthresh=10``. By default
+        they are expressed as percentages of the fitted model.
 
-                Parameters
-                ----------
-                ax: None, mpl.axis.Axis
-                    If not None, mpl.axis.Axis.
-                pct: bool
-                    If True, plot in units of percent.
-                subplots_kwargs: dict, None
-                    If not None, passed to `plt.subplots`. Disabled if `ax` is not
-                    None.
-                kind: str
-                    Specify type of residuals to plot.
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, optional
+            Axis to draw on. If ``None`` a new figure and axis are created.
+        pct : bool, default True
+            If ``True``, show residuals as percentages.
+        subplots_kwargs : dict, optional
+            Passed to ``plt.subplots`` when ``ax`` is ``None``.
+        kind : {'simple', 'robust', 'both'}, default "both"
+            Which residuals to plot.
+        **kwargs
+            Additional keyword arguments passed to ``ax.plot``.
 
-                        ======== ======================
-                         Value        Description
-                        ======== ======================
-                         simple   Use simple residuals
-                         robust   Use robust residuals
-                         both     Use both
-                        ======== ======================
-        >>>>>>> c8b5d9bfe4c7ce53d00e5d0773d27dcc8b8f258c
+        Returns
+        -------
+        ax : mpl.axes.Axes
+            Axis with residuals plotted.
         """
 
         if subplots_kwargs is None:
@@ -581,4 +719,6 @@ class FFPlot(object):
         self._log = LogAxes(**log)
 
     def set_TeX_info(self, new):
+        """Assign :class:`TeXinfo` used for annotations."""
+
         self._TeX_info = new
