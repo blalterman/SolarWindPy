@@ -1053,6 +1053,17 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(NotImplementedError, regex_msg):
                 self.object_testing.caani("+".join(combo), pdynamic=True)
 
+    def test_sound_speed_not_implemented(self):
+        class DummyUC:
+            polytropic_index = {"scalar": 5 / 3}
+
+        sp = self.stuple[0]
+        self.object_testing.units_constants = DummyUC()
+        with self.assertRaises(NotImplementedError):
+            self.object_testing.sound_speed(sp)
+        with self.assertRaises(NotImplementedError):
+            self.object_testing.cs(sp)
+
     def test_lnlambda(self):
         #        print_inline_debug_info = True
 
