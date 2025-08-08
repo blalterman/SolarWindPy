@@ -325,7 +325,7 @@ class TestBField(VectorTestBase, base.SWEData):
                 "<dir(ot)>",
                 *dir(self.object_testing),
                 sep="\n",
-                end="\n\n"
+                end="\n\n",
             )
 
         pdt.assert_series_equal(pb, self.object_testing.pressure)
@@ -509,3 +509,16 @@ class TestQuantitySubclassEquality(TestCase):
         wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
         wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
         self.assertNotEqual(wp1, wp2)
+
+
+def test_set_data_missing_component_raises_value_error():
+    """``Tensor.set_data`` should validate its input."""
+
+    index = pd.date_range("2020-01-01", periods=1)
+    valid = pd.DataFrame({"par": [1.0], "per": [2.0], "scalar": [3.0]}, index=index)
+    t = tensor.Tensor(valid)
+
+    missing_scalar = valid.drop(columns=["scalar"])
+
+    with pytest.raises(ValueError, match="Missing required columns"):
+        t.set_data(missing_scalar)
