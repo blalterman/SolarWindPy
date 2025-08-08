@@ -48,28 +48,28 @@ class Hist1D(AggPlot):
         nbins=101,
         bin_precision=None,
     ):
-        r"""
+        """Create a one-dimensional histogram.
+
         Parameters
         ----------
-        x: pd.Series
+        x : pandas.Series
             Data from which to create bins.
-        y: pd.Series, None
-            If not None, the values to aggregate in bins of `x`. If None,
-            aggregate counts of `x`.
-        logx: bool
-            If True, compute bins in log-space.
-        axnorm: None, str
-        Normalize the histogram.
-            key  normalization
-            ---  -------------
-            t    total
-            d    density
-        clip_data: bool
-            If True, remove the extreme values at 0.001 and 0.999 percentiles
-            before calculating bins or aggregating.
-        nbins: int, str, array-like
-            Dispatched to `np.histogram_bin_edges` or `pd.cut` depending on
-            input type and value.
+        y : pandas.Series or None, optional
+            Values to aggregate in bins of ``x``. If ``None``, counts of
+            ``x`` are used.
+        logx : bool, optional
+            If ``True``, compute bins in logarithmic space.
+        axnorm : {"t", "d", None}, optional
+            Normalisation applied to the histogram. ``"t"`` uses total
+            counts and ``"d"`` yields a density.
+        clip_data : bool, optional
+            Remove extreme values at the 0.001 and 0.999 percentiles before
+            binning or aggregation.
+        nbins : int or array-like, optional
+            Binning strategy passed to :func:`numpy.histogram_bin_edges` or
+            :func:`pandas.cut` depending on the input type.
+        bin_precision : int, optional
+            Precision for decimal bin edges.
         """
         super(Hist1D, self).__init__()
         self.set_log(x=logx)
@@ -226,7 +226,7 @@ class Hist1D(AggPlot):
         gaussian_filter_kwargs=None,
         **kwargs,
     ):
-        f"""Make a plot.
+        """Make a plot.
 
         Parameters
         ----------

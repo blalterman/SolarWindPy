@@ -474,12 +474,17 @@ class TeXlabel(Base):
         self._axnorm = new
 
     def make_species(self, pattern):
-        r"""Basic substitution of any species within a species string so long
-        as the species has a substitution in the ion_species dictionary.
-        Note: this equation might only work because a->\alpha is the only
-        actual translation made and, based on lexsort order, would be the
-        first group. This function may need to be updated for more complex
-        patterns, e.g. if we translate something like He2+->\text{He}^{2+}."""
+        r"""Basic substitution of any species within a species string if the
+        species has a substitution in the ion_species dictionary.
+
+        Notes
+        -----
+        This equation might only work because :math:`a\rightarrow\alpha` is
+        the only actual translation made and, based on lexsort order, would be
+        the first group. This function may need to be updated for more complex
+        patterns, e.g., if we translate something like
+        :math:`\mathrm{He}^{2+}\rightarrow\text{He}^{2+}`.
+        """
 
         #         def repl(x):
         #             return _trans_species[x.group()]

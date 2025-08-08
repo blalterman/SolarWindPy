@@ -123,7 +123,7 @@ class GaussianNormalized(FitFunction):
 
 
 class GaussianLn(FitFunction):
-    r"""Gaussian where taking `$ln(x)$`.
+    r"""Gaussian where taking :math:`\ln(x)`.
 
     [1] https://mathworld.wolfram.com/LogNormalDistribution.html
     """
@@ -207,8 +207,10 @@ class GaussianLn(FitFunction):
     def normal_parameters(self):
         r"""Calculate the normal parameters from log-normal parameters.
 
-        $\mu = \exp[m + (s^2)/2]$
-        $\sigma = \sqrt{ \exp[s^2 + 2m] (\exp[s^2] - 1)}$
+        .. math::
+
+            \mu = \exp[m + (s^2)/2]
+            \sigma = \sqrt{\exp[s^2 + 2m] (\exp[s^2] - 1)}
         """
         m = self.popt["m"]
         s = self.popt["s"]
@@ -234,11 +236,11 @@ class GaussianLn(FitFunction):
 
     @property
     def TeX_popt(self):
-        r"""
-        Create a dictionary with (k, v) pairs corresponding to
-        (self.argnames, popt \pm psigma) with the appropriate uncertainty.
+        r"""Create a dictionary with ``(k, v)`` pairs corresponding to
+        ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
+        appropriate uncertainty.
 
-        See self.set_TeX_trans_argnames to translate the argnames for TeX.
+        See ``set_TeX_trans_argnames`` to translate the argnames for TeX.
         """
         TeX_popt = super(GaussianLn, self).TeX_popt
 

@@ -28,11 +28,31 @@ When working in this repository, Claude Code will automatically load the configu
 
 ## Development Workflow
 
+### Branch-First Development (NEW!)
+
+**CRITICAL:** Claude now uses a branch-first development workflow:
+
+1. **Before any development**, Claude lists unmerged branches: `git branch -r --no-merged master`
+2. **Asks user** to specify branch, search for appropriate branch, or create new branch
+3. **Never works directly on master** - all development happens on feature branches
+4. **Creates descriptive branches** using pattern: `claude/YYYY-MM-DD-HH-MM-SS-module-feature-description`
+
+### Quality Requirements
+
 The configuration enforces these requirements:
 1. All tests must pass (`pytest -q`)
-2. Code must be formatted (`black .`)
+2. Code must be formatted (`black solarwindpy/`)
 3. No linting errors (`flake8`)
 4. NumPy-style docstrings required
 5. Target ≥95% code coverage
+6. **NEW:** Include "Generated with Claude Code" in commit messages
 
-See the main project `CLAUDE.md` file for complete development guidelines.
+### File Overview
+
+- **`settings.json`**: Updated with branch-first workflow systemPrompt
+- **`agents.md`**: Enhanced with git workflow requirements for all agents
+- **`CLAUDE.md`**: Comprehensive branching workflow documentation
+- **`WORKFLOW_TEMPLATE.md`**: Step-by-step template for feature development
+- **`README.md`**: This overview file
+
+See `CLAUDE.md` for complete branching workflow and `WORKFLOW_TEMPLATE.md` for detailed development process.

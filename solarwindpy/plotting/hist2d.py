@@ -548,7 +548,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return ax.plot(x, y, **kwargs)
 
     def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
-        r"""Overplot the edges.
+        """Overplot the edges.
 
         Parameters
         ----------
@@ -560,8 +560,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         sg_kwargs: dict, None
             If not None, dict of kwargs passed to Savitzky-Golay filter. Also allows
             for setting of `window_length` and `polyorder` as kwargs. They default to
-            10\% of the number of observations (`window_length`) and 3 (`polyorder`).
-            Note that because `window_length` must be odd, if the 10\% value is even, we
+            10% of the number of observations (`window_length`) and 3 (`polyorder`).
+            Note that because `window_length` must be odd, if the 10% value is even, we
             take 1-window_length.
         kwargs:
             Passed to `ax.plot`
@@ -634,7 +634,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         gaussian_filter_kwargs=None,
         **kwargs,
     ):
-        f"""Make a contour plot on `ax` using `ax.contour`.
+        """Make a contour plot on `ax` using `ax.contour`.
 
         Paremeters
         ----------
@@ -799,7 +799,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return ax, lbls, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
-        f"""Make a `Hist1D` from the data stored in this `His2D`.
+        """Make a `Hist1D` from the data stored in this `His2D`.
 
         Parameters
         ----------

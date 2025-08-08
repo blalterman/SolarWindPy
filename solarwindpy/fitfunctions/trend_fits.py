@@ -453,18 +453,18 @@ class TrendFit(object):
         self._trendfunc_class = trendfunc
 
     def set_shared_labels(self, **kwargs):
-        r"""Axis labels are shared between the :pymeth:`trend_func` and entries in :pymeth:`ffuncs`.
-        Here, we update them according to placement in :pymeth:`trend_func`, but properly locating
-        them for :pymeth:`ffuncs`.
+        r"""Axis labels are shared between the :py:meth:`trend_func` and entries in :py:meth:`ffuncs`.
+        Here, we update them according to placement in :py:meth:`trend_func`, but properly locating
+        them for :py:meth:`ffuncs`.
 
         Parameters
         ----------
         x:
-            :pymeth:`trend_func` x-label. Maps to :pymeth:`ffuncs` legend label.
+            :py:meth:`trend_func` x-label. Maps to :py:meth:`ffuncs` legend label.
         y:
-            :pymeth:`trend_func` y-label. Maps to :pymeth:`ffuncs` x-label.
+            :py:meth:`trend_func` y-label. Maps to :py:meth:`ffuncs` x-label.
         z:
-            :pymeth:`trend_func` z-label. Maps to :pymeth:`ffuncs` y-label.
+            :py:meth:`trend_func` z-label. Maps to :py:meth:`ffuncs` y-label.
         """
 
         tf = self.trend_func

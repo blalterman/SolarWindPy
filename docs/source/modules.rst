@@ -1,7 +1,12 @@
-solarwindpy
-===========
+SolarWindPy Modules
+===================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
-   solarwindpy
+   solarwindpy.core
+   solarwindpy.tools
+   solarwindpy.fitfunctions
+   solarwindpy.instabilities
+   solarwindpy.plotting
+   solarwindpy.solar_activity

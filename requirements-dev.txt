@@ -13,3 +13,5 @@ pytest
 black
 flake8
 pytables
+doc8
+flake8-docstrings

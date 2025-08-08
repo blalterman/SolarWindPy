@@ -1,0 +1,10 @@
+solarwindpy.scripts package
+===========================
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.scripts
+   :members:
+   :show-inheritance:
+   :undoc-members:

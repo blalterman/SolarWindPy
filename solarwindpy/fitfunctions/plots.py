@@ -609,7 +609,7 @@ class FFPlot(object):
         resid_kwargs=None,
         **kwargs,
     ):
-        f"""Make a stacked fit, residual plot.
+        """Make a stacked fit, residual plot.
 
         Parameters
         ----------

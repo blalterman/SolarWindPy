@@ -191,8 +191,8 @@ class AggPlot(base.Base):
     #         return data
 
     def set_clim(self, lower=None, upper=None):
-        f"""Set the minimum (lower) and maximum (upper) alowed number of
-        counts/bin to return aftter calling :py:meth:`{self.__class__.__name__}.agg()`.
+        """Set the minimum (lower) and maximum (upper) allowed number of
+        counts per bin to return after calling :py:meth:`agg`.
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
@@ -385,13 +385,10 @@ class AggPlot(base.Base):
         return agg
 
     def get_plotted_data_boolean_series(self):
-        f"""A boolean `pd.Series` identifing each measurement that is plotted.
+        """Return a boolean ``pd.Series`` identifying each plotted measurement.
 
-        Note: The Series is indexed identically to the data stored in the :py:class:`{self.__class__.__name__}`.
-              To align with another index, you may want to use:
-
-                  tk = {self.__class__.__name__}.get_plotted_data_boolean_series()
-                  idx = tk.replace(False, np.nan).dropna().index
+        The series shares the same index as the stored data. To align with a
+        different index you may need to adjust the returned series.
         """
         agg = self.agg().dropna()
         cut = self.cut

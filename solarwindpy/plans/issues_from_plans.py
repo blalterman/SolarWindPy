@@ -221,6 +221,7 @@ def infer_issue_title(path: Path, name: str) -> str:
 
     return f"{dir_title} – {title_part}".strip()
 
+
 def format_summary_table(rows: List[Tuple[str, str]]) -> str:
     """Build a tabulated summary of issue creation outcomes.
 

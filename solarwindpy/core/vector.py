@@ -86,7 +86,7 @@ class Vector(base.Base):
 
     @property
     def magnitude(self) -> pd.Series:
-        """Alias for :pyattr:`mag`.
+        """Alias for :py:attr:`mag`.
 
         Returns
         -------
@@ -149,7 +149,7 @@ class Vector(base.Base):
         return lon
 
     def lon(self) -> pd.Series:
-        """Shortcut for :pyattr:`longitude`.
+        """Shortcut for :py:attr:`longitude`.
 
         Returns
         -------
@@ -160,7 +160,7 @@ class Vector(base.Base):
 
     @property
     def r(self) -> pd.Series:
-        """Shortcut to :pyattr:`mag` when using spherical coordinates.
+        """Shortcut to :py:attr:`mag` when using spherical coordinates.
 
         Returns
         -------
@@ -197,7 +197,7 @@ class Vector(base.Base):
 
     @property
     def uv(self) -> "Vector":
-        """Shortcut for :pyattr:`unit_vector`.
+        """Shortcut for :py:attr:`unit_vector`.
 
         Returns
         -------
@@ -296,7 +296,7 @@ class BField(Vector):
 
     @property
     def pb(self) -> pd.Series:
-        """Shortcut for :pyattr:`pressure`.
+        """Shortcut for :py:attr:`pressure`.
 
         Returns
         -------
