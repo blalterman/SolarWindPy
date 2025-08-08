@@ -210,3 +210,21 @@ class TestPSP(TestBase, TestCase):
         self.assertIsInstance(ot.carrington, pd.DataFrame)
         pdt.assert_index_equal(cols, ot.carrington.columns)
         pdt.assert_frame_equal(carr, ot.carrington)
+
+
+class TestSpacecraftErrors(TestCase):
+    def setUp(self):
+        data = base.TestData().spacecraft_data
+        p = data.xs("pos_HCI", axis=1, level="M")
+        df = pd.concat({"pos": p}, axis=1, names=["M"], sort=True).sort_index(axis=1)
+        self.sc = spacecraft.Spacecraft(df, "psp", "hci")
+
+    def test_invalid_frame_raises(self):
+        msg = "Unrecognized frame"
+        with self.assertRaisesRegex(NotImplementedError, msg):
+            self.sc.set_frame_name("bad", "psp")
+
+    def test_invalid_name_raises(self):
+        msg = "Unrecognized name"
+        with self.assertRaisesRegex(NotImplementedError, msg):
+            self.sc.set_frame_name("hci", "unknown")
