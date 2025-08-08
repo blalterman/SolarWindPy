@@ -28,6 +28,28 @@ class Tensor(base.Base):
         self._validate_data(data)
         self._data = data
 
+    def __getattr__(self, attr: str) -> Union[pd.Series, pd.DataFrame]:
+        """Return a component column if present.
+
+        Parameters
+        ----------
+        attr : str
+            Component name to return.
+
+        Returns
+        -------
+        Union[pd.Series, pandas.DataFrame]
+            Column data corresponding to ``attr``.
+
+        Raises
+        ------
+        AttributeError
+            If ``attr`` is not a valid component.
+        """
+        if attr in self.data.columns:
+            return self.data[attr]
+        return super().__getattr__(attr)
+
     def __call__(self, component: str) -> Union[pd.Series, pd.DataFrame]:
         """Access a specific component of the tensor.
 
@@ -85,7 +107,15 @@ class Tensor(base.Base):
 
     @property
     def magnitude(self) -> Union[pd.Series, pd.DataFrame]:
-        """Calculate and return the magnitude of the tensor."""
-        return self.data.multiply({"par": 1 / 3, "per": 2 / 3}, axis=1, level="C").sum(
-            axis=1
-        )
+        """Calculate and return the magnitude of the tensor.
+
+        The magnitude is defined as :math:`(p_\\parallel + 2 p_\\perp) / 3`.
+        It is computed using only the ``par`` and ``per`` components so that
+        it works regardless of the column index name.
+        """
+
+        coeff = pd.Series({"par": 1 / 3, "per": 2 / 3})
+        cols = coeff.index.intersection(self.data.columns)
+        mag = self.data[cols].multiply(coeff[cols], axis=1).sum(axis=1)
+        mag.name = "magnitude"
+        return mag
