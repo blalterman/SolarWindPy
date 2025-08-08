@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pytest*)",
+      "Bash(black*)",
+      "Bash(flake8*)",
+      "Bash(conda*)",
+      "Bash(pip*)",
+      "Bash(python scripts/update_conda_recipe.py)",
+      "Bash(python scripts/requirements_to_conda_env.py*)",
+      "Bash(git*)",
+      "Bash(pre-commit*)",
+      "Bash(tox*)"
+    ],
+    "deny": [
+      "Read(./.env*)",
+      "Read(./secrets/**)",
+      "Read(./.token*)",
+      "Edit(./.env*)",
+      "Edit(./secrets/**)",
+      "Edit(./.token*)"
+    ]
+  },
+  "systemPrompt": "You are working on SolarWindPy, a scientific Python package for solar wind plasma physics analysis. Always follow the development guidelines in CLAUDE.md. Run tests with `pytest -q`, format code with `black .`, and lint with `flake8`. All tests must pass before committing. Use NumPy-style docstrings and follow Conventional Commits format.",
+  "tools": {
+    "enabled": ["Bash", "Edit", "Read", "Write", "Glob", "Grep", "TodoWrite"],
+    "disabled": []
+  },
+  "ai": {
+    "preferredModel": "claude-sonnet-4-20250514"
+  }
+}
