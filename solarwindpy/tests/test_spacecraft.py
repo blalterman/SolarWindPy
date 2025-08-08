@@ -210,3 +210,24 @@ class TestPSP(TestBase, TestCase):
         self.assertIsInstance(ot.carrington, pd.DataFrame)
         pdt.assert_index_equal(cols, ot.carrington.columns)
         pdt.assert_frame_equal(carr, ot.carrington)
+
+
+class TestSpacecraftSetDataErrors(TestCase):
+    def _make_dataframe(self, columns):
+        idx = pd.date_range("2020-01-01", periods=1)
+        data = pd.DataFrame([[1] * len(columns)], index=idx, columns=columns)
+        data.columns = pd.MultiIndex.from_tuples(data.columns, names=["M", "C", "S"])
+        return data.xs("", axis=1, level="S")
+
+    def test_missing_pos_subcolumns(self):
+        cols = [("pos", "x", ""), ("pos", "y", "")]
+        data = self._make_dataframe(cols)
+        with self.assertRaises(KeyError):
+            spacecraft.Spacecraft(data, "wind", "gse")
+
+    def test_non_datetime_index(self):
+        cols = [("pos", "x", ""), ("pos", "y", ""), ("pos", "z", "")]
+        data = pd.DataFrame([[1, 2, 3]], columns=cols)
+        data.columns = pd.MultiIndex.from_tuples(data.columns, names=["M", "C", "S"])
+        with self.assertRaises(AssertionError):
+            spacecraft.Spacecraft(data.xs("", axis=1, level="S"), "wind", "gse")
