@@ -1,5 +1,8 @@
+# Documentation requirements generated from requirements-dev.txt
+# DO NOT EDIT MANUALLY - regenerate with scripts/generate_docs_requirements.py
+
+doc8
 sphinx
 sphinx_rtd_theme
 sphinxcontrib-spelling
 sphinxcontrib-bibtex
-doc8
