@@ -166,6 +166,37 @@ After Implementation Session:
   - Required Validation: PerformanceOptimizer
 ```
 
+## Context Compaction & Session Continuity
+
+### Token Management & Compaction
+- **Token Monitoring**: Track context usage and trigger compaction at 80% threshold
+- **Phase Boundary Compaction**: Automatic compaction between implementation phases
+- **CompactionAgent Integration**: Seamless context compression for extended development sessions
+- **Compression Efficiency**: Medium-complexity processing (50-70% token reduction)
+
+### Compaction Workflow
+```
+Compaction Trigger:
+1. Monitor token usage during implementation sessions
+2. Prepare context at phase boundaries or 80% token threshold
+3. Format implementation state for CompactionAgent processing
+4. Receive compacted state and resumption instructions
+5. Continue implementation with reduced context overhead
+
+Context Preparation Format:
+- Agent Type: Plan Implementer (Research-Optimized)
+- Current Phase: Implementation progress and status
+- Active Tasks: Current and next priority tasks
+- Dependencies: Critical coordination requirements
+- Branch State: Feature/plan branch synchronization status
+```
+
+### Session Resumption
+- **Compacted State Recovery**: Restore implementation context from `plans/<plan-name>/compacted_state.md`
+- **Priority Task Identification**: Resume with clear next steps and immediate actions
+- **Branch Synchronization**: Maintain feature/plan branch coordination across sessions
+- **Progress Continuity**: Seamless workflow continuation without implementation disruption
+
 ## Claude Pro Usage Optimization
 
 ### Session Management for Implementation

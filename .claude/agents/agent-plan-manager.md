@@ -42,6 +42,38 @@ Claude's strategic planning agent that manages multi-phase development plans usi
 - **Progress Updates**: Maintain real-time progress tracking and notes
 - **Plan Archival**: Handle completed plan cleanup and documentation
 
+### 6. Context Compaction & Session Continuity
+- **Compaction Triggers**: Monitor token usage (80% threshold) and phase boundaries for automatic compaction
+- **Context Preparation**: Format current planning state for CompactionAgent processing
+- **Compaction Integration**: Seamlessly invoke CompactionAgent for high-complexity context compression (40-60% reduction)
+- **Session Resumption**: Restore compressed context and continue planning workflow without interruption
+- **Multi-Session Planning**: Enable complex plan development spanning multiple sessions within token limits
+
+#### Compaction Workflow for Enterprise Planning
+```
+Compaction Trigger:
+1. Monitor token usage during comprehensive multi-plan coordination sessions
+2. Prepare enterprise planning context including cross-plan dependencies and time estimation intelligence
+3. Format comprehensive planning state for CompactionAgent processing with full metadata
+4. Receive enterprise-optimized compacted state with all critical planning coordination preserved
+5. Continue planning with reduced context but full enterprise planning capabilities intact
+6. Resume with seamless integration to implementation agents and specialist coordination
+
+Context Preparation Format:
+- Agent Type: Plan Manager Full (Enterprise)
+- Planning Complexity: Multi-plan coordination status and cross-dependencies
+- Active Plans: Current plan portfolio with interdependencies and resource conflicts
+- Time Intelligence: Historical analysis data and estimation calibration metrics
+- Enterprise Coordination: Cross-team planning requirements and approval gates
+```
+
+#### Session Resumption for Enterprise Planning
+- **Enterprise Planning Recovery**: Restore full enterprise planning workflow from compressed state
+- **Multi-Plan Coordination**: Resume cross-plan dependency tracking and resource allocation
+- **Time Intelligence Continuity**: Maintain estimation calibration and historical analysis across sessions
+- **Compacted State Recovery**: Restore planning context from `plans/<plan-name>/compacted_state.md`
+- **Cross-Agent Integration**: Seamless coordination with implementation agents and domain specialists
+
 ## Behavioral Guidelines
 
 ### Proactive Behaviors

@@ -32,6 +32,14 @@ Task: "Add user authentication"
 - **Invalid Checksums**: Regenerate from git log
 - **Failed Commits**: Retry with conflict resolution
 
+## Context Compaction Integration
+
+### Lightweight Compaction Support
+- **Minimal Overhead**: Ultra-efficient compaction preserving 200-300 token ceiling
+- **Essential Context Only**: Compress completed task status into summaries
+- **Quick Resumption**: Immediate continuation with minimal context recovery
+- **CompactionAgent Integration**: Seamless lightweight processing for sustained sessions
+
 ## Claude Pro Usage Optimization
 
 ### Maximum Efficiency Implementation

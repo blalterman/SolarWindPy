@@ -53,6 +53,34 @@ Response:
 - **Basic Git**: Simple branch operations
 - **Plan Files**: Read/write plan markdown files
 - **Progress Calculation**: Task completion percentages
+- **Lightweight Compaction**: Minimal CompactionAgent integration preserving ultra-efficiency (maintain 200-300 token ceiling)
+
+## Context Compaction Integration
+
+### Ultra-Lightweight Compaction
+- **Minimal Triggers**: Token usage monitoring with automatic compaction at capacity
+- **Essential Context Only**: Compress completed plan status into summaries
+- **Quick Resumption**: Immediate continuation with minimal context recovery  
+- **CompactionAgent Integration**: Seamless ultra-efficient processing for sustained sessions
+
+### Minimal Compaction Workflow
+```
+Compaction Trigger:
+1. Monitor basic token usage during planning sessions
+2. Prepare essential planning context (active tasks and progress only)
+3. Format minimal state for CompactionAgent lightweight processing
+4. Continue with ultra-efficient resumed context
+
+Context Format:
+- Agent Type: Plan Manager Minimal  
+- Essential Status: Current active tasks and completion percentages
+- Next Priorities: Immediate planning actions only
+```
+
+### Session Resumption
+- **Quick Context Recovery**: Restore minimal planning state from `plans/<plan-name>/compacted_state.md`
+- **Immediate Continuation**: Resume planning with essential context only
+- **Ultra-Efficient Processing**: Maintain 200-300 token ceiling throughout
 
 ## Error Handling
 - **Missing Plans**: Create from template if needed

@@ -23,6 +23,7 @@ This index provides a centralized reference for all specialized agents working o
 - **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
 - **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
 - **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic plan execution for simple tasks
+- **[CompactionAgent](./agent-compaction.md)** - Context compression and session continuity service
 
 ### 🔬 Core Physics & Data
 - **[PhysicsValidator](./agent-physics-validator.md)** - Ensures physical correctness and unit consistency
@@ -49,6 +50,7 @@ This index provides a centralized reference for all specialized agents working o
 | PlanManager-Streamlined | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
 | PlanManager-Minimal | Medium | Basic planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
 | PlanImplementer | High | Plan execution | All implementation files |
+| CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
 | DataFrameArchitect | High | Data structures | `core/*.py` |
 | TestEngineer | High | Testing | `tests/**/*.py` |
@@ -92,6 +94,17 @@ graph LR
     E --> F[TestEngineer]
 ```
 
+### Long-Duration Development Session
+```mermaid
+graph LR
+    A[Planning Agent] --> B[Implementation Work]
+    B --> C{Token Threshold?}
+    C -->|Yes| D[CompactionAgent]
+    D --> E[Compacted State + Git Commit]
+    E --> F[Session Resume]
+    C -->|No| G[Continue Work]
+```
+
 ## Agent Communication Protocol
 
 ### Priority Levels
@@ -108,6 +121,11 @@ graph LR
 3. **Low Priority**: Periodic maintenance
    - DocumentationMaintainer (documentation updates)
    - DependencyManager (dependency updates)
+
+### CompactionAgent Usage Rules
+- **Automatic Triggers**: Token thresholds (80% of agent limit), phase boundaries
+- **Service Model**: Called by planning/implementation agents, not directly invoked
+- **Cross-Session Bridge**: Enables session continuity across token limit boundaries
 
 ### Collaboration Rules
 
@@ -144,6 +162,12 @@ Agents must work in sequence for:
 3. **TestEngineer**: Test plot generation
 4. **DocumentationMaintainer**: Add examples to gallery
 
+### Managing Long Development Sessions
+1. **PlanningAgent/ImplementationAgent**: Detect compaction triggers
+2. **CompactionAgent**: Compress context and preserve essential state
+3. **Git Integration**: Commit compacted state with metadata
+4. **Session Resumption**: Restore compressed context for continuation
+
 ## Emergency Protocols
 
 ### Critical Bug
@@ -177,6 +201,9 @@ Agents must work in sequence for:
 | API design | DataFrameArchitect | DocumentationMaintainer |
 | Algorithm selection | PerformanceOptimizer | NumericalStabilityGuard |
 | Dependency updates | DependencyManager | TestEngineer |
+| Context compression | CompactionAgent | Planning/Implementation Agents |
+| Session continuity | CompactionAgent | All agents |
+| Long-term state management | CompactionAgent | PlanManager variants |
 
 ## Best Practices
 
@@ -187,6 +214,7 @@ Agents must work in sequence for:
 - [ ] TestEngineer: Tests comprehensive?
 - [ ] PerformanceOptimizer: Performance acceptable?
 - [ ] DocumentationMaintainer: Documentation complete?
+- [ ] CompactionAgent: Session continuity preserved?
 
 ### Pre-Merge Requirements
 1. All tests passing (TestEngineer)
@@ -210,6 +238,9 @@ Agents must work in sequence for:
 - Comprehensive examples (DocumentationMaintainer)
 
 ## Future Enhancements
+
+### Recently Added Agents
+- **CompactionAgent**: Context compression and session continuity (2025-08-09)
 
 ### Planned Agents
 - **SolarActivityTracker**: Specialized solar indices management

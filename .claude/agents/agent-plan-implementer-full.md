@@ -209,6 +209,37 @@ After Each Implementation Session:
 - **Rollback Coordination**: Manage large-scale rollbacks across multiple teams and systems
 - **Disaster Recovery**: Implement business continuity procedures for development workflows
 
+## Context Compaction & Session Continuity
+
+### Enterprise-Scale Context Management
+- **Complex Context Compaction**: High-complexity compression algorithms (40-60% token reduction)
+- **Multi-Team Coordination Preservation**: Maintain team synchronization data across sessions
+- **Enterprise Workflow Continuity**: Preserve approval gates, compliance tracking, and risk management
+- **Cross-Session Integration**: Seamless coordination with multiple specialist agents and stakeholders
+
+### Compaction Workflow for Enterprise
+```
+Compaction Trigger:
+1. Monitor token usage during complex multi-team implementations  
+2. Prepare enterprise context including team coordination and compliance data
+3. Format comprehensive implementation state for CompactionAgent processing
+4. Receive enterprise-optimized compacted state with all critical coordination preserved
+5. Continue implementation with reduced context but full enterprise capabilities intact
+
+Context Preparation Format:
+- Agent Type: Plan Implementer Full (Enterprise)
+- Implementation Complexity: Multi-team coordination status
+- Active Approvals: Pending management gates and compliance checkpoints
+- Team Dependencies: Cross-team coordination requirements
+- Risk Management: Current risk mitigation status and escalation points
+```
+
+### Session Resumption for Enterprise
+- **Enterprise Context Recovery**: Restore full enterprise workflow from compressed state
+- **Multi-Team Coordination**: Resume team synchronization and resource allocation
+- **Compliance Continuity**: Maintain regulatory compliance tracking across sessions
+- **Stakeholder Communication**: Seamless continuation of management reporting
+
 ## Claude Pro Usage Optimization
 
 ### Enterprise Implementation Considerations
