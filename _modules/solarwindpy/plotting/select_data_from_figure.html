@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.plotting.select_data_from_figure &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.plotting.select_data_from_figure</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.plotting.select_data_from_figure</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Interactive selection utilities for plotted data.&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SelectFromPlot2D&quot;</span><span class="p">]</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="n">DateAxes</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;DateAxes&quot;</span><span class="p">,</span> <span class="s2">&quot;x,y&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SelectFromPlot2D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plotter</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">has_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xdate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ydate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_kwargs</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plotter</span> <span class="o">=</span> <span class="n">plotter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">has_colorbar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_corners</span><span class="p">()</span>
+        <span class="c1">#         self._init_centers()</span>
+
+        <span class="k">if</span> <span class="n">text_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">text_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_selector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_date_axes</span><span class="p">(</span><span class="n">xdate</span><span class="p">,</span> <span class="n">ydate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_text</span><span class="p">(</span><span class="o">**</span><span class="n">text_kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">date_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_date_axes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_multipanel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_multipanel</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sampled_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampled_indices</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">failed_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_failed_samples</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sampled_per_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampled_per_patch</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_initial_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_initial_patches</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_selection_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_initial_patches</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;analysis.</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SelectFromPlot2D._init_corners">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D._init_corners">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D._add_corners">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D._add_corners">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">corners</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corners</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span> <span class="o">+</span> <span class="p">(</span><span class="n">corners</span><span class="p">,)</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D._finalize_text">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D._finalize_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tx</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_selection_patches</span><span class="si">}</span><span class="s2"> Patches</span>
+<span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sampled_per_patch</span><span class="si">}</span><span class="s2"> Spectra / Patch</span>
+<span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sampled_indices</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> Spectra Selected</span>
+<span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failed_samples</span><span class="p">)</span><span class="si">}</span><span class="s2"> Empty Patches&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_multipanel</span><span class="p">:</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;  -  &quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D._update_text">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D._update_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">extents</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_axes</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+            <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">num2date</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">])</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x0</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x1</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_axes</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
+            <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">num2date</span><span class="p">([</span><span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">])</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="n">y0</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">y1</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y0</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">y1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y1</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">tx</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Patch </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_selection_patches</span><span class="si">}</span>
+<span class="s2">Lower Left  </span><span class="si">{</span><span class="n">x0</span><span class="p">,</span><span class="w"> </span><span class="n">y0</span><span class="si">}</span>
+<span class="s2">Upper Right </span><span class="si">{</span><span class="n">x1</span><span class="p">,</span><span class="w"> </span><span class="n">y1</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.disconnect">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.disconnect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_SelectFromPlot2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scatter_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">scatter_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scatter_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">other_SelectFromPlot2D</span><span class="o">=</span><span class="n">other_SelectFromPlot2D</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_sample</span><span class="p">(</span><span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_failed_samples</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_text</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">disconnect_events</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.onselect">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.onselect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onselect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">press</span><span class="p">,</span> <span class="n">release</span><span class="p">):</span>
+        <span class="o">*</span><span class="n">xy</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">_rect_bbox</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+            <span class="n">xy</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_corners</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">extents</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.set_ax">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.set_ax">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_ax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">has_colorbar</span><span class="p">):</span>
+        <span class="n">is_multipanel</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span> <span class="o">-</span> <span class="nb">bool</span><span class="p">(</span><span class="n">has_colorbar</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_multipanel</span> <span class="o">=</span> <span class="n">is_multipanel</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.start_text">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.start_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span>
+        <span class="n">is_multipanel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_multipanel</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">Text</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+
+        <span class="n">xloc</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mf">0.015</span> <span class="k">if</span> <span class="n">is_multipanel</span> <span class="k">else</span> <span class="mf">0.00</span><span class="p">)</span>
+        <span class="n">yloc</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mf">0.975</span> <span class="k">if</span> <span class="n">is_multipanel</span> <span class="k">else</span> <span class="mf">1.05</span><span class="p">)</span>
+        <span class="n">va</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;va&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span> <span class="k">if</span> <span class="n">is_multipanel</span> <span class="k">else</span> <span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+        <span class="n">ha</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ha&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+        <span class="n">fontdict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fontdict&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;small&quot;</span><span class="p">))</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;wheat&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="n">text</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">xloc</span><span class="p">,</span>
+            <span class="n">yloc</span><span class="p">,</span>
+            <span class="s2">&quot;Selection Info Will Appear Here&quot;</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">fontdict</span><span class="o">=</span><span class="n">fontdict</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.start_selector">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.start_selector">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">RectangleSelector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">onselect</span><span class="p">,</span> <span class="n">rectprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;lime&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_initial_patches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.sample_data">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.sample_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_SelectFromPlot2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;random_state&quot;</span><span class="p">,</span> <span class="mi">20200629</span><span class="p">)</span>
+        <span class="n">frac</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;frac&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Please use the `n` kwarg&quot;</span><span class="p">)</span>
+
+        <span class="n">plotter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotter</span>
+        <span class="n">logx</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span>
+
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">other_SelectFromPlot2D</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other_SelectFromPlot2D</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+                <span class="n">other_SelectFromPlot2D</span> <span class="o">=</span> <span class="p">[</span><span class="n">other_SelectFromPlot2D</span><span class="p">]</span>
+
+            <span class="n">already_selected</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">other_SelectFromPlot2D</span><span class="p">:</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">already_selected</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sampled_indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">already_selected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">already_selected</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">xdata</span> <span class="o">=</span> <span class="n">xdata</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">already_selected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">ydata</span> <span class="o">=</span> <span class="n">ydata</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">already_selected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;None of `already_selected` found in xdata or ydata</span>
+<span class="s2">x : (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="si">}</span><span class="s2">)</span>
+<span class="s2">y : (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="si">}</span><span class="s2">).</span>
+<span class="s2">&quot;&quot;&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">failed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">corner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
+            <span class="c1"># Expand here so keep original `corner` for `failed.append`.</span>
+            <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">corner</span>
+            <span class="k">if</span> <span class="n">logx</span><span class="p">:</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+                <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">([</span><span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">])</span>
+
+            <span class="n">tk_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span> <span class="o">&lt;</span> <span class="n">xdata</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xdata</span> <span class="o">&lt;=</span> <span class="n">x1</span><span class="p">)</span>
+            <span class="n">tk_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y0</span> <span class="o">&lt;</span> <span class="n">ydata</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ydata</span> <span class="o">&lt;=</span> <span class="n">y1</span><span class="p">)</span>
+            <span class="n">tk</span> <span class="o">=</span> <span class="n">tk_x</span> <span class="o">&amp;</span> <span class="n">tk_y</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tk</span><span class="o">.</span><span class="n">sum</span><span class="p">():</span>
+                <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corner</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sample</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="o">==</span> <span class="s2">&quot;Cannot take a larger sample than population when &#39;replace=False&#39;&quot;</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Sample failed without replacement. Attempting with replacement and then dropping duplicates.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">sample</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                        <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                    <span class="p">)</span>
+                    <span class="n">sample</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+
+            <span class="n">indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampled_indices</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_failed_samples</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">failed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampled_per_patch</span> <span class="o">=</span> <span class="n">n</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.scatter_sample">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.scatter_sample">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scatter_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">plotter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotter</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sampled_indices</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">y</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+            <span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PatchCollection</span><span class="o">.</span><span class="n">_alias_map</span>
+        <span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;Sample&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;fuchsia&quot;</span><span class="p">)</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+            <span class="c1">#             edgecolors=&quot;k&quot;,</span>
+            <span class="c1">#             linewidths=1,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="c1">#             alpha=0.75,</span>
+            <span class="c1">#             data=data,</span>
+        <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">*</span><span class="n">ylim</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.plot_failed_samples">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.plot_failed_samples">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_failed_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span>
+        <span class="k">for</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_samples</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span>
+            <span class="n">rect</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">),</span>
+                <span class="n">w</span><span class="p">,</span>
+                <span class="n">h</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">,</span>
+                <span class="c1">#                                          alpha=0.75,</span>
+                <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;///&quot;</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                <span class="c1">#                                          linewidth=1,</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw_idle</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SelectFromPlot2D.set_date_axes">
+<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.set_date_axes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_date_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xdate</span><span class="p">,</span> <span class="n">ydate</span><span class="p">):</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">DateAxes</span><span class="p">(</span><span class="n">xdate</span><span class="p">,</span> <span class="n">ydate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_date_axes</span> <span class="o">=</span> <span class="n">dates</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

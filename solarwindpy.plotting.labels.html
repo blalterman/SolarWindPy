@@ -1,0 +1,1761 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.plotting.labels package &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="solarwindpy.scripts package" href="solarwindpy.scripts.html" />
+    <link rel="prev" title="solarwindpy.plotting package" href="solarwindpy.plotting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.html">solarwindpy.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html">solarwindpy.fitfunctions package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.instabilities.html">solarwindpy.instabilities package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plans.html">solarwindpy.plans package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.plotting.html">solarwindpy.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.scripts.html">solarwindpy.scripts package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.tools.html">solarwindpy.tools package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_reference.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.html">solarwindpy package</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.plotting.html">solarwindpy.plotting package</a></li>
+      <li class="breadcrumb-item active">solarwindpy.plotting.labels package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/solarwindpy.plotting.labels.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-plotting-labels-package">
+<h1>solarwindpy.plotting.labels package<a class="headerlink" href="#solarwindpy-plotting-labels-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-solarwindpy.plotting.labels.base">
+<span id="solarwindpy-plotting-labels-base-module"></span><h2>solarwindpy.plotting.labels.base module<a class="headerlink" href="#module-solarwindpy.plotting.labels.base" title="Link to this heading"></a></h2>
+<p>Tools for creating physical quantity plot labels.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for all label objects.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.Base.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.Base.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.base.</span></span><span class="sig-name descname"><span class="pre">MCS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Create new instance of MCS(m, c, s)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS._make">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS._make" title="Link to this definition"></a></dt>
+<dd><p>Make a new MCS object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS._asdict">
+<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS._asdict" title="Link to this definition"></a></dt>
+<dd><p>Return a new dict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS._replace">
+<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS._replace" title="Link to this definition"></a></dt>
+<dd><p>Return a new MCS object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9223372036854775807</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS._field_defaults">
+<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS._field_defaults" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS._fields">
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('m',</span> <span class="pre">'c',</span> <span class="pre">'s')</span></em><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS._fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS.c">
+<span class="sig-name descname"><span class="pre">c</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS.c" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS.m" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.MCS.s">
+<span class="sig-name descname"><span class="pre">s</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.MCS.s" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.base.</span></span><span class="sig-name descname"><span class="pre">TeXlabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Create a LaTeX label from measurement, component and species information.</p>
+<p>The object can be used directly in plotting routines. String
+representation returns the formatted label with units.</p>
+<p class="rubric">Notes</p>
+<p>Comparison operators and hashing use <code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> of the object so two
+labels representing the same quantity compare equal.</p>
+<p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mcs0</strong> (<em>tuple</em><em> of </em><em>str</em>) – <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">m</span></code> is the measurement, <code class="docutils literal notranslate"><span class="pre">c</span></code> the
+component and <code class="docutils literal notranslate"><span class="pre">s</span></code> the species. Empty strings are allowed for
+components or species.</p></li>
+<li><p><strong>mcs1</strong> (<em>tuple</em><em> of </em><em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Denominator for fraction style labels. Units are compared and set
+to dimensionless when equal.</p></li>
+<li><p><strong>axnorm</strong> (<em>{&quot;c&quot;</em><em>, </em><em>&quot;r&quot;</em><em>, </em><em>&quot;t&quot;</em><em>, </em><em>&quot;d&quot;}</em><em>, </em><em>optional</em>) – Axis normalization used when building colorbar labels.</p></li>
+<li><p><strong>new_line_for_units</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> a newline separates label and units.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel._build_one_label">
+<span class="sig-name descname"><span class="pre">_build_one_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel._build_one_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel._build_one_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel._combine_tex_path_units_axnorm">
+<span class="sig-name descname"><span class="pre">_combine_tex_path_units_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel._combine_tex_path_units_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel._combine_tex_path_units_axnorm" title="Link to this definition"></a></dt>
+<dd><p>Finalize label pieces with axis normalization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.build_label" title="Link to this definition"></a></dt>
+<dd><p>Construct the complete label.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.make_species">
+<span class="sig-name descname"><span class="pre">make_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.make_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.make_species" title="Link to this definition"></a></dt>
+<dd><p>Basic substitution of any species within a species string if the
+species has a substitution in the ion_species dictionary.</p>
+<p class="rubric">Notes</p>
+<p>This equation might only work because <span class="math notranslate nohighlight">\(a\rightarrow\alpha\)</span> is
+the only actual translation made and, based on lexsort order, would be
+the first group. This function may need to be updated for more complex
+patterns, e.g., if we translate something like
+<span class="math notranslate nohighlight">\(\mathrm{He}^{2+}\rightarrow\text{He}^{2+}\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.set_axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.set_mcs">
+<span class="sig-name descname"><span class="pre">set_mcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_mcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.set_mcs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.set_new_line_for_units">
+<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.set_new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.mcs0">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs0</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.mcs0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.mcs1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs1</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.mcs1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.new_line_for_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base.TeXlabel.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.base.TeXlabel.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.base._run_species_substitution">
+<span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.base.</span></span><span class="sig-name descname"><span class="pre">_run_species_substitution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#_run_species_substitution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.base._run_species_substitution" title="Link to this definition"></a></dt>
+<dd><p>Replace species codes in a string with their LaTeX equivalents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>str</em>) – String potentially containing species codes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(new_string,</span> <span class="pre">count)</span></code> from <code class="xref py py-func docutils literal notranslate"><span class="pre">re.subn()</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Only substitutions defined in <code class="docutils literal notranslate"><span class="pre">_trans_species</span></code> are performed. The
+implementation relies on the simple mapping used in this module and may
+need to be revisited for more complex patterns.</p>
+</dd></dl>
+
+</section>
+<section id="module-solarwindpy.plotting.labels.chemistry">
+<span id="solarwindpy-plotting-labels-chemistry-module"></span><h2>solarwindpy.plotting.labels.chemistry module<a class="headerlink" href="#module-solarwindpy.plotting.labels.chemistry" title="Link to this heading"></a></h2>
+<p>Common chemistry labels.</p>
+</section>
+<section id="module-solarwindpy.plotting.labels.composition">
+<span id="solarwindpy-plotting-labels-composition-module"></span><h2>solarwindpy.plotting.labels.composition module<a class="headerlink" href="#module-solarwindpy.plotting.labels.composition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.composition.</span></span><span class="sig-name descname"><span class="pre">ChargeState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ionA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/composition.html#ChargeState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Ratio of two ion abundances.</p>
+<p>Instantiate the charge-state ratio.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.set_ions">
+<span class="sig-name descname"><span class="pre">set_ions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ionA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/composition.html#ChargeState.set_ions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.set_ions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.ionA">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ionA</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.ionA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.ionB">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ionB</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.ionB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.ChargeState.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.ChargeState.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.composition.</span></span><span class="sig-name descname"><span class="pre">Ion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/composition.html#Ion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Represent a single ion.</p>
+<p>Instantiate the ion.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.set_species_charge">
+<span class="sig-name descname"><span class="pre">set_species_charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/composition.html#Ion.set_species_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.set_species_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.charge">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">charge</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.species">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.species" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.composition.Ion.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.composition.Ion.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-solarwindpy.plotting.labels.datetime">
+<span id="solarwindpy-plotting-labels-datetime-module"></span><h2>solarwindpy.plotting.labels.datetime module<a class="headerlink" href="#module-solarwindpy.plotting.labels.datetime" title="Link to this heading"></a></h2>
+<p>Special labels not handled by <code class="xref py py-class docutils literal notranslate"><span class="pre">TeXlabel</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.datetime.</span></span><span class="sig-name descname"><span class="pre">DateTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#DateTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Generic datetime label.</p>
+<p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kind</strong> (<em>str</em>) – Text used to build the label, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Year&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Month&quot;</span></code>.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.set_kind">
+<span class="sig-name descname"><span class="pre">set_kind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#DateTime.set_kind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.set_kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.kind">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.DateTime.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.DateTime.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.datetime.</span></span><span class="sig-name descname"><span class="pre">Epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">of_thing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\\,'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Create epoch analysis labels, e.g. <code class="docutils literal notranslate"><span class="pre">Hour</span> <span class="pre">of</span> <span class="pre">Day</span></code>.</p>
+<p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kind</strong> (<em>str</em>) – The smaller time unit, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Hour&quot;</span></code>.</p></li>
+<li><p><strong>of_thing</strong> (<em>str</em>) – The larger time unit, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Day&quot;</span></code>.</p></li>
+<li><p><strong>space</strong> (str, default <code class="docutils literal notranslate"><span class="pre">&quot;,&quot;</span></code>) – TeX spacing command placed between words.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.set_larger">
+<span class="sig-name descname"><span class="pre">set_larger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Epoch.set_larger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.set_larger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.set_smaller">
+<span class="sig-name descname"><span class="pre">set_smaller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Epoch.set_smaller"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.set_smaller" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.set_space">
+<span class="sig-name descname"><span class="pre">set_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Epoch.set_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.set_space" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.larger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">larger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.larger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.smaller">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smaller</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.smaller" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">space</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.space" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Epoch.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Epoch.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.datetime.</span></span><span class="sig-name descname"><span class="pre">Frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Frequency of another quantity.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Frequency._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Frequency.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.set_other">
+<span class="sig-name descname"><span class="pre">set_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Frequency.set_other"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.set_other" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.other">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.other" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Frequency.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Frequency.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.datetime.</span></span><span class="sig-name descname"><span class="pre">January1st</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#January1st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Label for the first day of the year.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.January1st.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.January1st.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.datetime.</span></span><span class="sig-name descname"><span class="pre">Timedelta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Timedelta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Label for a time interval.</p>
+<p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>offset</strong> (<em>str</em><em> or </em><em>pandas offset</em>) – Value convertible via <code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.tseries.frequencies.to_offset()</span></code>.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.set_offset">
+<span class="sig-name descname"><span class="pre">set_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/datetime.html#Timedelta.set_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.set_offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.offset">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.datetime.Timedelta.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.datetime.Timedelta.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-solarwindpy.plotting.labels.elemental_abundance">
+<span id="solarwindpy-plotting-labels-elemental-abundance-module"></span><h2>solarwindpy.plotting.labels.elemental_abundance module<a class="headerlink" href="#module-solarwindpy.plotting.labels.elemental_abundance" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.elemental_abundance.</span></span><span class="sig-name descname"><span class="pre">ElementalAbundance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">photospheric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/elemental_abundance.html#ElementalAbundance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Ratio of elemental abundances.</p>
+<p>Instantiate the abundance label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.set_species">
+<span class="sig-name descname"><span class="pre">set_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/elemental_abundance.html#ElementalAbundance.set_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.set_species" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.pct_unit">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pct_unit</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.pct_unit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.photospheric">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">photospheric</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.photospheric" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.reference_species">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reference_species</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.reference_species" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.species">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.species" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-solarwindpy.plotting.labels.special">
+<span id="solarwindpy-plotting-labels-special-module"></span><h2>solarwindpy.plotting.labels.special module<a class="headerlink" href="#module-solarwindpy.plotting.labels.special" title="Link to this heading"></a></h2>
+<p>Special labels not handled by <code class="xref py py-class docutils literal notranslate"><span class="pre">TeXlabel</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">ArbitraryLabel</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ArbitraryLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Abstract base class for custom labels.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ArbitraryLabel.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ArbitraryLabel.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">CarringtonRotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">short_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CarringtonRotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Carrington rotation count.</p>
+<p>Instantiate the label.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.short_label">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">short_label</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.short_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CarringtonRotation.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CarringtonRotation.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">ComparisonLable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Label comparing two other labels via a function.</p>
+<p>Instantiate the label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.set_constituents">
+<span class="sig-name descname"><span class="pre">set_constituents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.set_constituents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.set_constituents" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.set_function">
+<span class="sig-name descname"><span class="pre">set_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.set_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.set_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.function">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.function_name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_name</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.function_name" title="Link to this definition"></a></dt>
+<dd><p>Basically for use with building <a class="reference internal" href="#solarwindpy.plotting.labels.special.ComparisonLable.path" title="solarwindpy.plotting.labels.special.ComparisonLable.path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">path()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.labelA">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labelA</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.labelA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.labelB">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labelB</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.labelB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Count histogram label.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.set_axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Count.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Count.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">CountOther</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Count of samples of another label fulfilling a comparison.</p>
+<p>Instantiate the label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.set_comparison">
+<span class="sig-name descname"><span class="pre">set_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther.set_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.set_comparison" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.set_new_line_for_units">
+<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.set_new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.set_other_label">
+<span class="sig-name descname"><span class="pre">set_other_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#CountOther.set_other_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.set_other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.comparison">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">comparison</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.comparison" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.new_line_for_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.other_label">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_label</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.CountOther.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.CountOther.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Distance2Sun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Distance2Sun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Distance to the Sun.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.set_units">
+<span class="sig-name descname"><span class="pre">set_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Distance2Sun.set_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.set_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Distance2Sun.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Distance2Sun.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">ManualLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ManualLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Label defined by raw LaTeX text and unit.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.set_tex">
+<span class="sig-name descname"><span class="pre">set_tex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ManualLabel.set_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.set_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.set_unit">
+<span class="sig-name descname"><span class="pre">set_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#ManualLabel.set_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.set_unit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.unit">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unit</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.unit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ManualLabel.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ManualLabel.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">MathFcn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensionless</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Math function applied to another label.</p>
+<p>Instantiate the label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.set_dimensionless">
+<span class="sig-name descname"><span class="pre">set_dimensionless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn.set_dimensionless"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.set_dimensionless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.set_function">
+<span class="sig-name descname"><span class="pre">set_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn.set_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.set_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.set_new_line_for_units">
+<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.set_new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.set_other_label">
+<span class="sig-name descname"><span class="pre">set_other_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#MathFcn.set_other_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.set_other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.dimensionless">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimensionless</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.dimensionless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.function">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.new_line_for_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.other_label">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_label</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.MathFcn.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.MathFcn.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Power</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Power spectrum label.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Power.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Power.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Probability that a quantity meets a comparison criterion.</p>
+<p>Instantiate the label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.set_comparison">
+<span class="sig-name descname"><span class="pre">set_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability.set_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.set_comparison" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.set_other_label">
+<span class="sig-name descname"><span class="pre">set_other_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Probability.set_other_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.set_other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.comparison">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">comparison</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.comparison" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.other_label">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">other_label</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.other_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Probability.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Probability.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">SSN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#SSN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Sunspot number label.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.set_kind">
+<span class="sig-name descname"><span class="pre">set_kind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#SSN.set_kind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.set_kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.kind">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.pretty_kind">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_kind</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.pretty_kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.SSN.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.SSN.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Vsw</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Vsw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Solar wind speed.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Vsw.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Vsw.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.special.</span></span><span class="sig-name descname"><span class="pre">Xcorr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_tex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Cross-correlation coefficient between two labels.</p>
+<p>Instantiate the label.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.set_constituents">
+<span class="sig-name descname"><span class="pre">set_constituents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr.set_constituents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.set_constituents" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.set_method">
+<span class="sig-name descname"><span class="pre">set_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr.set_method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.set_method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.set_short_tex">
+<span class="sig-name descname"><span class="pre">set_short_tex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Xcorr.set_short_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.set_short_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.labelA">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labelA</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.labelA" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.labelB">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labelB</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.labelB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.method">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.short_tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">short_tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.short_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.Xcorr.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.Xcorr.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-solarwindpy.plotting.labels">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-solarwindpy.plotting.labels" title="Link to this heading"></a></h2>
+<p>Tools for creating physical quantity plot labels.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.</span></span><span class="sig-name descname"><span class="pre">Count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
+<p>Count histogram label.</p>
+<p>Initialize the logger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count._build_path">
+<span class="sig-name descname"><span class="pre">_build_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count._build_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count._build_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count._build_tex">
+<span class="sig-name descname"><span class="pre">_build_tex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count._build_tex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count._build_tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Count.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count.set_axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.</span></span><span class="sig-name descname"><span class="pre">TeXlabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Create a LaTeX label from measurement, component and species information.</p>
+<p>The object can be used directly in plotting routines. String
+representation returns the formatted label with units.</p>
+<p class="rubric">Notes</p>
+<p>Comparison operators and hashing use <code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> of the object so two
+labels representing the same quantity compare equal.</p>
+<p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mcs0</strong> (<em>tuple</em><em> of </em><em>str</em>) – <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">m</span></code> is the measurement, <code class="docutils literal notranslate"><span class="pre">c</span></code> the
+component and <code class="docutils literal notranslate"><span class="pre">s</span></code> the species. Empty strings are allowed for
+components or species.</p></li>
+<li><p><strong>mcs1</strong> (<em>tuple</em><em> of </em><em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Denominator for fraction style labels. Units are compared and set
+to dimensionless when equal.</p></li>
+<li><p><strong>axnorm</strong> (<em>{&quot;c&quot;</em><em>, </em><em>&quot;r&quot;</em><em>, </em><em>&quot;t&quot;</em><em>, </em><em>&quot;d&quot;}</em><em>, </em><em>optional</em>) – Axis normalization used when building colorbar labels.</p></li>
+<li><p><strong>new_line_for_units</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> a newline separates label and units.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel._build_one_label">
+<span class="sig-name descname"><span class="pre">_build_one_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel._build_one_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel._build_one_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel._combine_tex_path_units_axnorm">
+<span class="sig-name descname"><span class="pre">_combine_tex_path_units_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel._combine_tex_path_units_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel._combine_tex_path_units_axnorm" title="Link to this definition"></a></dt>
+<dd><p>Finalize label pieces with axis normalization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.build_label" title="Link to this definition"></a></dt>
+<dd><p>Construct the complete label.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.make_species">
+<span class="sig-name descname"><span class="pre">make_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.make_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.make_species" title="Link to this definition"></a></dt>
+<dd><p>Basic substitution of any species within a species string if the
+species has a substitution in the ion_species dictionary.</p>
+<p class="rubric">Notes</p>
+<p>This equation might only work because <span class="math notranslate nohighlight">\(a\rightarrow\alpha\)</span> is
+the only actual translation made and, based on lexsort order, would be
+the first group. This function may need to be updated for more complex
+patterns, e.g., if we translate something like
+<span class="math notranslate nohighlight">\(\mathrm{He}^{2+}\rightarrow\text{He}^{2+}\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.set_axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.set_mcs">
+<span class="sig-name descname"><span class="pre">set_mcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_mcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.set_mcs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.set_new_line_for_units">
+<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.set_new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.mcs0">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs0</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.mcs0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.mcs1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs1</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.mcs1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.new_line_for_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.</span></span><span class="sig-name descname"><span class="pre">Vsw</span></span><a class="reference internal" href="_modules/solarwindpy/plotting/labels/special.html#Vsw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#solarwindpy.plotting.labels.base.Base" title="solarwindpy.plotting.labels.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Solar wind speed.</p>
+<p>Initialize the logger.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.species_translation">
+<span class="sig-prename descclassname"><span class="pre">solarwindpy.plotting.labels.</span></span><span class="sig-name descname"><span class="pre">species_translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.species_translation" title="Link to this definition"></a></dt>
+<dd><p>Replace species codes in a string with their LaTeX equivalents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pattern</strong> (<em>str</em>) – String potentially containing species codes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(new_string,</span> <span class="pre">count)</span></code> from <code class="xref py py-func docutils literal notranslate"><span class="pre">re.subn()</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Only substitutions defined in <code class="docutils literal notranslate"><span class="pre">_trans_species</span></code> are performed. The
+implementation relies on the simple mapping used in this module and may
+need to be revisited for more complex patterns.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.plotting.html" class="btn btn-neutral float-left" title="solarwindpy.plotting package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.scripts.html" class="btn btn-neutral float-right" title="solarwindpy.scripts package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

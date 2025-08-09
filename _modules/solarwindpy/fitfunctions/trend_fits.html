@@ -1,0 +1,618 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.fitfunctions.trend_fits</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.fitfunctions.trend_fits</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:mod:`~solarwindpy.fitfunctions.trend_fits`.</span>
+
+<span class="sd">Apply a fit along one dimention of a 2D aggregated data and then fit the</span>
+<span class="sd">results of those 1D fits along the 2nd dimension of the aggregated data.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+
+<span class="c1"># import warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">subplots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussians</span>
+
+<span class="n">Popt1DKeys</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Popt1Dkeys&quot;</span><span class="p">,</span> <span class="s2">&quot;y,w&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="TrendFit">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrendFit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">agged</span><span class="p">,</span>
+        <span class="n">trendfunc</span><span class="p">,</span>
+        <span class="n">trend_logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">ykey1d</span><span class="o">=</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span>
+        <span class="n">wkey1d</span><span class="o">=</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span>
+        <span class="n">ffunc1d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Note that `TrendFit.make_1dfits` must be called by the user so that any</span>
+<span class="sd">        kwargs may be passed to the 1D `make_fit` method, which are passed to</span>
+<span class="sd">        `curve_fit`, allowing the user to specify fit methods, bounds, etc.</span>
+
+<span class="sd">        Similarly, `TrendFit.trend_fit.make_fit` must be called by the user so</span>
+<span class="sd">        that kwargs can be appropriately passed to `curve_fit`.</span>
+
+<span class="sd">        call signagure after instantiation is:</span>
+
+<span class="sd">            0) Set x and y labels: TrendFunc.set_labels(x=&lt;x label&gt;, y=&lt;y label&gt;)</span>
+<span class="sd">            1) Make the 1D fit functions: TrendFunc.make_ffunc1ds()</span>
+<span class="sd">            2) TrendFunc.make_1dfits(): Run 1D fits</span>
+<span class="sd">            3) TrendFunc.make_trend_func(): init trend function</span>
+<span class="sd">            4) TrendFunc.trend_func.make_fit(): run trend fits</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        agged: pd.DataFrame</span>
+<span class="sd">            x-values along the columns and y-values along the index.</span>
+<span class="sd">        trendfunc: fitfunctoins.FitFunction</span>
+<span class="sd">            The function to fit the trend of the ffunc1d popts.</span>
+<span class="sd">        trend_logx: bool</span>
+<span class="sd">            If True, take :math:`10.0^x` for x-values passed to `trendfunc_class`.</span>
+<span class="sd">        ykey1d, wkey1d: str</span>
+<span class="sd">            The keys to select y-values and weights from the 1D `FitFunction`s for</span>
+<span class="sd">            passing to the `FitFunction` for fitting the trend.</span>
+<span class="sd">        ffunc1d: fitfunctoins.FitFunction or None</span>
+<span class="sd">            Applied in each x-bin. If None, `fitfunctions.Gaussian`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_agged</span><span class="p">(</span><span class="n">agged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_fitfunctions</span><span class="p">(</span><span class="n">ffunc1d</span><span class="p">,</span> <span class="n">trendfunc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trend_logx</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">trend_logx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_popt1d_keys</span> <span class="o">=</span> <span class="n">Popt1DKeys</span><span class="p">(</span><span class="n">ykey1d</span><span class="p">,</span> <span class="n">wkey1d</span><span class="p">)</span>
+
+    <span class="c1">#         self._labels = core.AxesLabels(x=&quot;x&quot;, y=&quot;y&quot;, z=swp.pp.labels.Count())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">agged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agged</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ffunc1d_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ffunc1d_class</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trendfunc_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt` of</span>
+<span class="sd">        the `ffunc1d` along the x-axis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trendfunc_class</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ffuncs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ffuncs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">popt_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Optimized parameters from 1D fits.&quot;&quot;&quot;</span>
+        <span class="c1">#         return self._popt_1d</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">popt</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">psigma_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fit uncertainties from 1D fits.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">psigma</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trend_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;`trendfunc_class` applied along the x-axis.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trend_func</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bad_fits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Bad 1D fits identifyied when running `make_1dfits`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bad_fits</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">popt1d_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_popt1d_keys</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trend_logx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;If True, trend&#39;s x-axis is log-scaled.</span>
+
+<span class="sd">        Should probably change this to pull from `trend_func` somehow, but unsure how to do so.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trend_logx</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span>
+
+<div class="viewcode-block" id="TrendFit.make_ffunc1ds">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_ffunc1ds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_ffunc1ds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;kwargs passed to `self.ffunc1d(x, y, **kwargs)`.&quot;&quot;&quot;</span>
+        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agged</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="c1">#         ylbl = self.labels.y</span>
+        <span class="c1">#         zlbl = self.labels.z</span>
+
+        <span class="n">ffuncs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">agg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ff1d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffunc1d_class</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># These are slices along y traversing the x-axis, so we</span>
+            <span class="c1"># rotate labels accordingly.</span>
+            <span class="c1">#             ff1d.set_labels(x=ylbl, y=zlbl)</span>
+            <span class="n">ffuncs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ff1d</span>
+
+        <span class="n">ffuncs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ffuncs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ffuncs</span> <span class="o">=</span> <span class="n">ffuncs</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.make_1dfits">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_1dfits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Removes bad fits from `ffuncs` and saves them in `bad_fits`.&quot;&quot;&quot;</span>
+        <span class="c1"># Successful fits return None, which pandas treats as NaN.</span>
+        <span class="n">return_exception</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;return_exception&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">fit_success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">bad_idx</span> <span class="o">=</span> <span class="n">fit_success</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">bad_fits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bad_idx</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_fits</span> <span class="o">=</span> <span class="n">bad_fits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">bad_idx</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="c1">#         self.make_popt_frame()</span>
+
+<div class="viewcode-block" id="TrendFit.plot_all_ffuncs">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_ffuncs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_all_ffuncs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legend_title_fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.0f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        legend_title_fmt: str</span>
+<span class="sd">            A string template for formatting the legend titles. Use % formatting so we</span>
+<span class="sd">            can easily instert TeX into `legend_title_fmt` should we desire.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed to :py:meth:`ffunc.plot_raw_used_fit`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt_1d</span>
+        <span class="n">yk</span><span class="p">,</span> <span class="n">wk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt1d_keys</span>
+        <span class="n">yv</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">yk</span><span class="p">]</span>
+        <span class="n">wv</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">wk</span><span class="p">]</span>
+
+        <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">y_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">y0</span> <span class="o">&lt;=</span> <span class="n">yv</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">yv</span> <span class="o">&lt;=</span> <span class="n">y1</span><span class="p">)</span>
+
+        <span class="n">w0</span><span class="p">,</span> <span class="n">w1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">w_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">w0</span> <span class="o">&lt;=</span> <span class="n">wv</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wv</span> <span class="o">&lt;=</span> <span class="n">w1</span><span class="p">)</span>
+
+        <span class="n">in_trend</span> <span class="o">=</span> <span class="n">y_ok</span> <span class="o">&amp;</span> <span class="n">w_ok</span>
+
+        <span class="n">legend_title</span> <span class="o">=</span> <span class="s2">&quot;$</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2"> \; </span><span class="si">{}</span><span class="s2">$</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span>  <span class="c1"># noqa: W605</span>
+
+        <span class="c1">#         xlbl = self.labels.x</span>
+        <span class="c1">#         try:</span>
+        <span class="c1">#             xlbl = xlbl.tex</span>
+        <span class="c1">#         except AttributeError:</span>
+        <span class="c1">#             pass</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">ff</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_raw_used_fit_resid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">hax</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+                <span class="n">legend_title</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">legend_title_fmt</span> <span class="o">%</span> <span class="n">k</span><span class="o">.</span><span class="n">mid</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                    <span class="s2">&quot;In Fit&quot;</span> <span class="k">if</span> <span class="n">in_trend</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;Not In Fit&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hax&quot;</span><span class="p">:</span> <span class="n">hax</span><span class="p">,</span> <span class="s2">&quot;rax&quot;</span><span class="p">:</span> <span class="n">rax</span><span class="p">}</span>
+
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">axes</span></div>
+
+
+    <span class="c1">#     def make_popt_frame(self):</span>
+    <span class="c1">#         popt = {}</span>
+    <span class="c1">#         for k, v in self.ffuncs.items():</span>
+    <span class="c1">#             popt[k] = v.popt</span>
+
+    <span class="c1">#         popt = pd.DataFrame.from_dict(popt, orient=&quot;index&quot;)</span>
+    <span class="c1">#         self._popt_1d = popt</span>
+
+<div class="viewcode-block" id="TrendFit.make_trend_func">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_trend_func">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_trend_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            passed to `trendfunc_class(x, y, **kwargs)`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt_1d</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">popt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Insufficient 1D fits to build trend function&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">popt</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">index</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_logx</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
+
+        <span class="k">if</span> <span class="s2">&quot;weights&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Weights are handled by `wkey1d`&quot;</span><span class="p">)</span>
+
+        <span class="n">ykey</span><span class="p">,</span> <span class="n">wkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt1d_keys</span>
+        <span class="n">fcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trendfunc_class</span>
+        <span class="n">trend</span> <span class="o">=</span> <span class="n">fcn</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ykey</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">weights</span><span class="o">=</span><span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">wkey</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">logx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trend_logx</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1">#         trend.set_labels(**self.labels._asdict())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trend_func</span> <span class="o">=</span> <span class="n">trend</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.plot_all_popt_1d">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_popt_1d">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_all_popt_1d</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_plot_data_in_trend_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot all the 1D popt appropriate for identifying the trend on</span>
+<span class="sd">        `ax`.</span>
+
+<span class="sd">        kwargs passed to `ax.errorbar`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt_1d</span>
+        <span class="n">ykey</span><span class="p">,</span> <span class="n">wkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt1d_keys</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">popt</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
+
+        <span class="k">if</span> <span class="n">only_plot_data_in_trend_fit</span><span class="p">:</span>
+            <span class="n">tk</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ykey</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+                <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">wkey</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">popt</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_logx</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
+
+        <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+
+        <span class="n">wkey</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;wkey&quot;</span><span class="p">,</span> <span class="n">wkey</span><span class="p">)</span>  <span class="c1"># For disabling errobars</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;cyan&quot;</span><span class="p">)</span>
+        <span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ls&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;1D Fits&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot_window</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">wkey</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;`wkey` must be able to index if `plot_window` is True&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                <span class="n">window_kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+            <span class="p">)</span>
+            <span class="n">window_color</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+            <span class="n">window_alpha</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span>
+
+            <span class="n">y</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ykey</span><span class="p">]</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">popt</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">wkey</span><span class="p">]</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">w</span>
+            <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">w</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">plotted</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plotted</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">ykey</span><span class="p">,</span>
+                <span class="n">yerr</span><span class="o">=</span><span class="n">wkey</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">popt</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">pl</span><span class="p">,</span> <span class="n">cl</span><span class="p">,</span> <span class="n">bl</span> <span class="o">=</span> <span class="n">plotted</span>
+
+            <span class="k">if</span> <span class="n">wkey</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">bl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_linestyle</span><span class="p">(</span><span class="n">linestyle</span><span class="p">)</span>
+
+        <span class="c1">#         ax.set_xlabel(self.labels.x)</span>
+        <span class="c1">#         ax.set_ylabel(self.labels.y)</span>
+
+        <span class="k">return</span> <span class="n">plotted</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.plot_trend_fit_resid">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_trend_fit_resid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_trend_fit_resid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">annotate_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
+            <span class="s2">&quot;annotate_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xloc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">yloc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">used_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;used_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">))</span>
+        <span class="n">drawstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;drawstyle&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span>
+        <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_raw_used_fit_resid</span><span class="p">(</span>
+            <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
+            <span class="n">annotate_kwargs</span><span class="o">=</span><span class="n">annotate_kwargs</span><span class="p">,</span>
+            <span class="n">used_kwargs</span><span class="o">=</span><span class="n">used_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_logx</span><span class="p">:</span>
+            <span class="n">rax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.plot_trend_and_resid_on_ffuncs">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_trend_and_resid_on_ffuncs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_trend_and_resid_on_ffuncs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit1d_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the trend fit on the 1D popt and the trend fit residuals.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">trend_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">trend_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">fit1d_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fit1d_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_trend_fit_resid</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">trend_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_all_popt_1d</span><span class="p">(</span><span class="n">hax</span><span class="p">,</span> <span class="o">**</span><span class="n">fit1d_kwargs</span><span class="p">)</span>
+
+        <span class="n">hax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_logx</span><span class="p">:</span>
+            <span class="n">rax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.plot_1d_popt_and_trend">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_1d_popt_and_trend">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_1d_popt_and_trend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the trend and 1D popt, without trend residuals, on `ax`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">kwargs_popt_1d</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;kwargs_popt_1d&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_all_popt_1d</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_popt_1d</span><span class="p">)</span>
+
+        <span class="n">annotate_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;annotate_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">fit_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fit_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;limegreen&quot;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_raw_used_fit</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">annotate_kwargs</span><span class="o">=</span><span class="n">annotate_kwargs</span><span class="p">,</span>
+            <span class="c1">#             color=color,</span>
+            <span class="n">fit_kwargs</span><span class="o">=</span><span class="n">fit_kwargs</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.set_agged">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.set_agged">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_agged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agged</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+    <span class="c1">#     def set_labels(self, **kwargs):</span>
+    <span class="c1">#         r&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
+    <span class="c1">#         is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
+    <span class="c1">#         &quot;&quot;&quot;</span>
+
+    <span class="c1">#         x = kwargs.pop(&quot;x&quot;, self.labels.x)</span>
+    <span class="c1">#         y = kwargs.pop(&quot;y&quot;, self.labels.y)</span>
+    <span class="c1">#         z = kwargs.pop(&quot;z&quot;, self.labels.z)</span>
+
+    <span class="c1">#         if len(kwargs.keys()):</span>
+    <span class="c1">#             extra = &quot;\n&quot;.join([&quot;{}: {}&quot;.format(k, v) for k, v in kwargs.items()])</span>
+    <span class="c1">#             raise KeyError(&quot;Unexpected kwarg\n{}&quot;.format(extra))</span>
+
+    <span class="c1">#         self._labels = core.AxesLabels(x, y, z)</span>
+
+    <span class="c1">#         # log = logging.getLogger()</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             # Update ffunc1d labels</span>
+    <span class="c1">#             self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))</span>
+    <span class="c1">#         #             log.warning(&quot;Set ffunc1d labels {}&quot;.format(self.ffuncs.iloc[0].labels))</span>
+    <span class="c1">#         except AttributeError:</span>
+    <span class="c1">#             #             log.warning(&quot;Skipping setting ffunc 1d labels&quot;)</span>
+    <span class="c1">#             pass</span>
+
+    <span class="c1">#         try:</span>
+    <span class="c1">#             # Update trendfunc labels</span>
+    <span class="c1">#             self.trend_func.set_labels(x=x, y=y, z=z)</span>
+    <span class="c1">#         #             log.warning(&quot;Set trend_func labels {}&quot;.format(self.trend_func.labels))</span>
+
+    <span class="c1">#         except AttributeError:</span>
+    <span class="c1">#             #             log.warning(&quot;Skipping setting trend_func labels&quot;)</span>
+    <span class="c1">#             pass</span>
+
+<div class="viewcode-block" id="TrendFit.set_fitfunctions">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.set_fitfunctions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_fitfunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ffunc1d</span><span class="p">,</span> <span class="n">trendfunc</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ffunc1d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ffunc1d</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">Gaussian</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">ffunc1d</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunction</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">trendfunc</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunction</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ffunc1d_class</span> <span class="o">=</span> <span class="n">ffunc1d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trendfunc_class</span> <span class="o">=</span> <span class="n">trendfunc</span></div>
+
+
+<div class="viewcode-block" id="TrendFit.set_shared_labels">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.trend_fits.TrendFit.set_shared_labels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_shared_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Axis labels are shared between the :py:meth:`trend_func` and entries in :py:meth:`ffuncs`.</span>
+<span class="sd">        Here, we update them according to placement in :py:meth:`trend_func`, but properly locating</span>
+<span class="sd">        them for :py:meth:`ffuncs`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x:</span>
+<span class="sd">            :py:meth:`trend_func` x-label. Maps to :py:meth:`ffuncs` legend label.</span>
+<span class="sd">        y:</span>
+<span class="sd">            :py:meth:`trend_func` y-label. Maps to :py:meth:`ffuncs` x-label.</span>
+<span class="sd">        z:</span>
+<span class="sd">            :py:meth:`trend_func` z-label. Maps to :py:meth:`ffuncs` y-label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend_func</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">ff</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

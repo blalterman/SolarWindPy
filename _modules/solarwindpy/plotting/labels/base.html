@@ -1,0 +1,813 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.plotting.labels.base &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.plotting.labels.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.plotting.labels.base</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Tools for creating physical quantity plot labels.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span> <span class="k">as</span> <span class="n">StringTemplate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="n">MCS</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;MCS&quot;</span><span class="p">,</span> <span class="s2">&quot;m,c,s&quot;</span><span class="p">)</span>
+
+
+<span class="n">__isotope_species</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^{</span><span class="si">%s</span><span class="s2">}\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span>
+<span class="n">_trans_species</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^-&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\alpha&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;a1&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\alpha_1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;a2&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\alpha_2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;p&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;p_bimax&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;p&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;p1&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;p_1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;p2&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;p_2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;he&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{He}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\Delta v&quot;</span><span class="p">,</span>  <span class="c1"># Because we want pdv in species</span>
+    <span class="c1">#     &quot;H&quot;: r&quot;\mathrm{H}&quot;,</span>
+    <span class="c1">#     &quot;C&quot;: r&quot;\mathrm{Fe}&quot;,</span>
+    <span class="c1">#     &quot;Fe&quot;: ,</span>
+    <span class="c1">#     &quot;He&quot;: ,</span>
+    <span class="c1">#     &quot;Mg&quot;: ,</span>
+    <span class="c1">#     &quot;Ne&quot;: ,</span>
+    <span class="c1">#     &quot;N&quot;: ,</span>
+    <span class="c1">#     &quot;O&quot;: ,</span>
+    <span class="c1">#     &quot;Si&quot;: ,</span>
+    <span class="c1">#     &quot;S&quot;: ,</span>
+    <span class="c1">#     &quot;3He&quot;: __isotope_species % (3, &quot;He&quot;),</span>
+    <span class="c1">#     &quot;4He&quot;: __isotope_species % (4, &quot;He&quot;),</span>
+    <span class="c1">#     &quot;12C&quot;: __isotope_species % (12, &quot;C&quot;),</span>
+    <span class="c1">#     &quot;14N&quot;: __isotope_species % (14, &quot;N&quot;),</span>
+    <span class="c1">#     &quot;16O&quot;: __isotope_species % (16, &quot;O&quot;),</span>
+    <span class="c1">#     &quot;20Ne&quot;: __isotope_species % (20, &quot;Ne&quot;),</span>
+    <span class="c1">#     &quot;24Mg&quot;: __isotope_species % (24, &quot;Mg&quot;),</span>
+    <span class="c1">#     &quot;28Si&quot;: __isotope_species % (28, &quot;Si&quot;),</span>
+    <span class="c1">#     &quot;32S&quot;: __isotope_species % (32, &quot;S&quot;),</span>
+    <span class="c1">#     &quot;40Ca&quot;: __isotope_species % (40, &quot;Ca&quot;),</span>
+    <span class="c1">#     &quot;Fe&quot;: r&quot;\mathrm{Fe}&quot;,</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;Ne&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">):</span>
+    <span class="n">_trans_species</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="n">s</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;Ne&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="s2">&quot;Ca&quot;</span><span class="p">),</span>
+<span class="p">):</span>
+    <span class="n">_trans_species</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__isotope_species</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="n">_trans_axnorm</span> <span class="o">=</span> <span class="p">{</span><span class="kc">None</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;Col.&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="s2">&quot;Row&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="s2">&quot;Total&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="s2">&quot;Density&quot;</span><span class="p">,</span> <span class="s2">&quot;rd&quot;</span><span class="p">:</span> <span class="s2">&quot;1D Probability Density&quot;</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">:</span> <span class="s2">&quot;1D Probability Density&quot;</span><span class="p">}</span>
+
+<span class="n">_all_species_re</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_trans_species</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+    <span class="p">::</span><span class="o">-</span><span class="mi">1</span>
+<span class="p">]</span>  <span class="c1"># Order so we check for p1 and p2 before p.</span>
+<span class="n">_all_species_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_all_species_re</span><span class="p">)))</span>
+<span class="n">_default_template_string</span> <span class="o">=</span> <span class="s2">&quot;{$M}_{{$C};{$S}}&quot;</span>
+
+
+<div class="viewcode-block" id="_run_species_substitution">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base._run_species_substitution">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_species_substitution</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace species codes in a string with their LaTeX equivalents.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pattern : str</span>
+<span class="sd">        String potentially containing species codes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        ``(new_string, count)`` from :func:`re.subn`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Only substitutions defined in ``_trans_species`` are performed. The</span>
+<span class="sd">    implementation relies on the simple mapping used in this module and may</span>
+<span class="sd">    need to be revisited for more complex patterns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">repl</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_trans_species</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">()]</span>
+
+    <span class="n">substitution</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="n">_all_species_re</span><span class="p">,</span> <span class="n">repl</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">substitution</span></div>
+
+
+
+<span class="n">_trans_measurement</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;pth&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;P&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;beta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\beta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dbeta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\Delta \beta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\Delta v&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;qhat&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\widehat</span><span class="si">{q}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Qhat&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\widehat</span><span class="si">{q}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ab&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\theta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cos_theta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\cos\theta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;carr&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Carrington}</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_inU</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{nT}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Re&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{R}</span><span class="s2">_\oplus&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Rs&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{R}</span><span class="s2">_\odot&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;kms&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{km \; s^{-1}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pPa&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{pPa}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cm-3&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{cm}</span><span class="s2">^{-3}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dimless&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{\#}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;unknown&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;???&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;km&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{km}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;deg&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{deg.}&quot;</span><span class="p">,</span>
+    <span class="c1">#     &quot;deg&quot;: r&quot;\degree&quot;,</span>
+    <span class="s2">&quot;Hz&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Hz}</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_trans_units</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Vector components.</span>
+    <span class="s2">&quot;gse&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Re&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;hci&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Rs&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;colat&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;carr&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="c1"># Trig things.</span>
+    <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;deg&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;deg&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;cos&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;cos_theta&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="c1"># Timestamps.</span>
+    <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Year}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;fdoy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{fdoy}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="c1"># Plasma measurements.</span>
+    <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;cm-3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;rho&quot;</span><span class="p">:</span> <span class="s2">&quot;m_p \; &quot;</span> <span class="o">+</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;cm-3&quot;</span><span class="p">],</span>  <span class="c1"># noqa: W605</span>
+    <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;w&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;dv&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;dn&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;cm-3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;cs&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ca&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;afsq&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;caani&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="c1"># Temperatures, pressures, and anisotropies.</span>
+    <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;pPa&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;pth&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;pPa&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;10^5 \, \mathrm</span><span class="si">{K}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{mW \, cm^{-2}}&quot;</span><span class="p">,</span>  <span class="c1"># heat flux,</span>
+    <span class="s2">&quot;qhat&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>  <span class="c1"># normalized heat flux</span>
+    <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{mW \, cm^{-2}}&quot;</span><span class="p">,</span>  <span class="c1"># heating rate</span>
+    <span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\perp/\parallel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;beta&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;pdv&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;pPa&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;edv&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{eV \, cm^2 \, m_p^{-5/3}}&quot;</span><span class="p">,</span>  <span class="c1"># Specific Entropy</span>
+    <span class="c1"># Flux</span>
+    <span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="s2">&quot;10^{-9} \, </span><span class="si">%s</span><span class="s2"> \, s^{-1}&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;cm-3&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-3&quot;</span><span class="p">,</span> <span class="s2">&quot;-2&quot;</span><span class="p">),</span>  <span class="c1"># noqa: W605</span>
+    <span class="c1"># Collisional things</span>
+    <span class="s2">&quot;lnlambda&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="c1"># TODO: verify that these units are Hertz.</span>
+    <span class="s2">&quot;nuc&quot;</span><span class="p">:</span> <span class="s2">&quot;10^{-7} \mathrm</span><span class="si">{Hz}</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="c1"># noqa: W605</span>
+    <span class="s2">&quot;nc&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;chisq&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;chisqnu&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;VDFratio&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ab&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\%&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="c1"># Alfvenic Turbulence</span>
+    <span class="s2">&quot;zp&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;zm&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ep&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;em&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ev&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;etot&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;eres&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;xhel&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)^2&quot;</span> <span class="o">%</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;kms&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;sigma_m&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;sigma_c&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;sigma_r&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;sigma_xy&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ra&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;re&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="c1"># Nyquist things</span>
+    <span class="s2">&quot;Wn&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;omegaR&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;gamma_max&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;gyro_freq&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;kvec&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;insta_power&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">],</span>
+    <span class="c1"># Solar Activity</span>
+    <span class="s2">&quot;Lalpha&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{W/m^2}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;f10.7&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Solar \, Flux \, Unit \, (SFU)}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CaK&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Unknown \, Need \, to \, Read \, MetaData&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MgII&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="c1"># MISC</span>
+    <span class="s2">&quot;entropy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{ln}</span><span class="s2">(K \, \mathrm</span><span class="si">{cm}</span><span class="s2">^{-3/2})&quot;</span><span class="p">,</span>
+    <span class="c1"># Spectral things</span>
+    <span class="s2">&quot;spectral_exponent&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;MeV/nuc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{MeV/nuc}&quot;</span><span class="p">,</span>
+    <span class="c1">#     &quot;SEP_differential_flux&quot;: r&quot;\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}&quot;,</span>
+    <span class="s2">&quot;SEP_differential_flux&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_intensity&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{cm^2 \, sr \, s \, MeV/nuc}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_energy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{MeV/nuc}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_spectrum_index&quot;</span><span class="p">:</span> <span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">_trans_component</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Coordinates</span>
+    <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;R&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rho&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\rho&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;colat&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\lambda&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\theta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\phi&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{R}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scalar&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{scalar}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\theta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\phi&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;per&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\perp&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;par&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\parallel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;T&quot;</span><span class="p">,</span>  <span class="c1"># For use with temperature anisotropy.</span>
+    <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;p&quot;</span><span class="p">,</span>  <span class="c1"># For use with pressure anisotropy.</span>
+    <span class="s2">&quot;const&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{const}</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="c1"># constant for (&quot;w&quot;, &quot;const&quot;, &quot;&quot;) label.</span>
+    <span class="c1"># These will be replaced by dot products and regex.</span>
+    <span class="s2">&quot;bv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{\mathbf</span><span class="si">{B}</span><span class="s2"> \cdot \mathbf</span><span class="si">{v}</span><span class="s2">}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\Delta v&quot;</span><span class="p">,</span>  <span class="c1"># For &quot;e&quot; terms</span>
+<span class="p">}</span>
+
+<span class="n">_templates</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Timestamps</span>
+    <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Year}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;fdoy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Fractional \; Day \; of \; Year}&quot;</span><span class="p">,</span>
+    <span class="c1"># Coordinates, e.g. for location plots.</span>
+    <span class="s2">&quot;gse&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{$C}_{\mathrm</span><span class="si">{GSE}</span><span class="s2">}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hci&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{$C}_{\mathrm</span><span class="si">{HCI}</span><span class="s2">}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;colat&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\theta_{$C}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;carr&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{$C}_\mathrm</span><span class="si">{Carrington}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="s2">&quot;B_{$C}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;n_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rho&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\rho_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;q_{{$C};{$S}}&quot;</span><span class="p">,</span>  <span class="c1"># heat flux</span>
+    <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Q_{{$C};{$S}}&quot;</span><span class="p">,</span>  <span class="c1"># heating rate</span>
+    <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;S_{$S}&quot;</span><span class="p">,</span>  <span class="c1"># Specific entropy logarithm</span>
+    <span class="s2">&quot;ratio&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Ratio}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cos&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\cos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cos_theta&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\cos \theta_{{$C}_{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cos_phi&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\cos \phi_{{$C}_{$S}}&quot;</span><span class="p">,</span>
+    <span class="c1"># Characteristic Velocities</span>
+    <span class="s2">&quot;cs&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;C_{s;$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ca&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;C_{A;$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;afsq&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Anisotropy \, Factor}^2_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;caani&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;C^{(\mathrm</span><span class="si">{Ani}</span><span class="s2">)}_{A;$S} \; ($C)&quot;</span><span class="p">,</span>
+    <span class="c1"># Collision things.</span>
+    <span class="s2">&quot;lnlambda&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\ln\Lambda_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nuc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\nu_{$C,$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;N_{C;$S}&quot;</span><span class="p">,</span>
+    <span class="c1"># Misc</span>
+    <span class="s2">&quot;VDFratio&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{ln}</span><span class="s2">(\frac</span><span class="si">{f_i}{f_j}</span><span class="s2"> \left(v_i\right)_{$S})&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chisq&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\chi^2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chisqnu&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\chi^2_\nu&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;edv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;P_{\Delta v}/P_\mathrm</span><span class="si">{th}</span><span class="s2">|_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pdv&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;P_{\Delta v_{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ab&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;A_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e\left({$C}_{$S}\right)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;entropy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{S}</span><span class="s2">_{$S}&quot;</span><span class="p">,</span>
+    <span class="c1"># Alfvenic Turbulence</span>
+    <span class="s2">&quot;zp&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Z^+_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;zm&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Z^-_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ep&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^+_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;em&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^-_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ev&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^v_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;etot&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;E_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eres&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^r_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;xhel&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;e^c_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sigma_c&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\sigma_{c;{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sigma_r&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\sigma_{r;{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sigma_m&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\sigma_</span><span class="si">{m}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sigma_xy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\sigma_{\parallel}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ra&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;r_{A;{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;re&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;r_{E;{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dn&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\delta n_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="c1"># Instability things</span>
+    <span class="s2">&quot;Wn&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{W_n}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\gamma&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gamma_max&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\gamma_\mathrm</span><span class="si">{max}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;omegaR&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\omega_R&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gyro_freq&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\Omega_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eth&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\eth&quot;</span><span class="p">,</span>  <span class="c1"># &quot;_{{$C;$S}}&quot;</span>
+    <span class="s2">&quot;kvec&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathbf</span><span class="si">{k}</span><span class="s2">_{$C}\rho_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;k_{$C}\rho_{$S}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;insta_power&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathcal</span><span class="si">{P}</span><span class="s2">_{{$S}}&quot;</span><span class="p">,</span>
+    <span class="c1"># Solar Activity</span>
+    <span class="c1">#     &quot;ssn&quot;: r&quot;{{$C}} \; \mathrm{SSN}&quot;,</span>
+    <span class="s2">&quot;Lalpha&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{L}</span><span class="s2">\alpha&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;f10.7&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{F}</span><span class="s2">10.7&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CaK&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{CaK}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MgII&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{MgII}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="c1"># Flux</span>
+    <span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Flux}</span><span class="s2">_{$C}({$S})&quot;</span><span class="p">,</span>
+    <span class="c1"># Spectral Exponents</span>
+    <span class="s2">&quot;spectral_exponent&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Spectral \, Exponent}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MeV/nuc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Energy}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="c1">#     &quot;differential_flux&quot;: r&quot;\mathrm{\frac{dJ}{dE}}&quot;,</span>
+    <span class="s2">&quot;SEP_differential_flux&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{{$S}} \: dJ/dE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_intensity&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{{$S}} \: \mathrm</span><span class="si">{Intensity}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_energy&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;{{$S}} \: \mathrm</span><span class="si">{Energy}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SEP_spectrum_index&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\gamma_{{$S}}&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="Base">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.Base">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all label objects.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the logger.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_units</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Makes debugging easier.</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__geq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__leq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a logger at the INFO level.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; \left[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">\right]$&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span></div>
+
+
+
+<div class="viewcode-block" id="TeXlabel">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TeXlabel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a LaTeX label from measurement, component and species information.</span>
+
+<span class="sd">    The object can be used directly in plotting routines. String</span>
+<span class="sd">    representation returns the formatted label with units.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Comparison operators and hashing use :func:`str` of the object so two</span>
+<span class="sd">    labels representing the same quantity compare equal.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcs0</span><span class="p">,</span> <span class="n">mcs1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axnorm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_line_for_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mcs0 : tuple of str</span>
+<span class="sd">            ``(&quot;M&quot;, &quot;C&quot;, &quot;S&quot;)`` where ``m`` is the measurement, ``c`` the</span>
+<span class="sd">            component and ``s`` the species. Empty strings are allowed for</span>
+<span class="sd">            components or species.</span>
+<span class="sd">        mcs1 : tuple of str or None, optional</span>
+<span class="sd">            Denominator for fraction style labels. Units are compared and set</span>
+<span class="sd">            to dimensionless when equal.</span>
+<span class="sd">        axnorm : {&quot;c&quot;, &quot;r&quot;, &quot;t&quot;, &quot;d&quot;}, optional</span>
+<span class="sd">            Axis normalization used when building colorbar labels.</span>
+<span class="sd">        new_line_for_units : bool, default ``False``</span>
+<span class="sd">            If ``True`` a newline separates label and units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TeXlabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="n">axnorm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mcs</span><span class="p">(</span><span class="n">mcs0</span><span class="p">,</span> <span class="n">mcs1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_new_line_for_units</span><span class="p">(</span><span class="n">new_line_for_units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mcs0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcs0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mcs1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcs1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">new_line_for_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span>
+
+<div class="viewcode-block" id="TeXlabel.set_mcs">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel.set_mcs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_mcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcs0</span><span class="p">,</span> <span class="n">mcs1</span><span class="p">):</span>
+        <span class="n">mcs0_</span> <span class="o">=</span> <span class="n">MCS</span><span class="p">(</span><span class="o">*</span><span class="n">mcs0</span><span class="p">)</span>
+
+        <span class="n">mcs1_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mcs1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mcs1_</span> <span class="o">=</span> <span class="n">MCS</span><span class="p">(</span><span class="o">*</span><span class="n">mcs1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mcs0</span> <span class="o">=</span> <span class="n">mcs0_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mcs1</span> <span class="o">=</span> <span class="n">mcs1_</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel.set_new_line_for_units">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel.set_new_line_for_units">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_new_line_for_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel.set_axnorm">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel.set_axnorm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel.make_species">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel.make_species">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Basic substitution of any species within a species string if the</span>
+<span class="sd">        species has a substitution in the ion_species dictionary.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This equation might only work because :math:`a\rightarrow\alpha` is</span>
+<span class="sd">        the only actual translation made and, based on lexsort order, would be</span>
+<span class="sd">        the first group. This function may need to be updated for more complex</span>
+<span class="sd">        patterns, e.g., if we translate something like</span>
+<span class="sd">        :math:`\mathrm{He}^{2+}\rightarrow\text{He}^{2+}`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#         def repl(x):</span>
+        <span class="c1">#             return _trans_species[x.group()]</span>
+
+        <span class="n">substitution</span> <span class="o">=</span> <span class="n">_run_species_substitution</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">substitution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel._build_one_label">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel._build_one_label">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_one_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcs</span><span class="p">):</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">c</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">s</span>
+
+        <span class="c1">#         mcs = MCS(m, c, s)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;-OV-&quot;</span><span class="p">),</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;-OV-&quot;</span><span class="p">),</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;-OV-&quot;</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,{&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{,&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="c1"># The following two work jointly to remove cases</span>
+            <span class="c1"># where the species leads the label and it is empty.</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">err</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;_err&quot;</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_err&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">_trans_measurement</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">_trans_component</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_species</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;M&quot;</span><span class="p">:</span> <span class="n">m1</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">c1</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="n">s1</span><span class="p">}</span>
+
+        <span class="n">template_string</span> <span class="o">=</span> <span class="n">_templates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">_default_template_string</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">StringTemplate</span><span class="p">(</span><span class="n">template_string</span><span class="p">)</span>
+
+        <span class="n">tex</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\sigma(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">tex</span>
+
+        <span class="c1"># clean up empty parentheses</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;\; ()&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;\; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;()&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{{}}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,}&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{,&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;;}&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;};</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;};}&quot;</span><span class="p">,</span> <span class="s2">&quot;}}&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;;}&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="c1">#             .lstrip(&quot;\:&quot;)  # noqa: W605</span>
+            <span class="c1">#             .rstrip(&quot;\:&quot;)  # noqa: W605</span>
+            <span class="c1">#             .strip(&quot;\:&quot;)  # noqa: W605</span>
+            <span class="c1">#             .strip(&quot;\;&quot;)  # noqa: W605</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1">#         with_units = r&quot;$%s \; [%s]$&quot; % (tex, _trans_units[m])</span>
+        <span class="n">ukey</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;colat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">):</span>
+            <span class="n">ukey</span> <span class="o">=</span> <span class="n">c</span>
+
+        <span class="n">units</span> <span class="o">=</span> <span class="n">_trans_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ukey</span><span class="p">,</span> <span class="s2">&quot;???&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Built TeX label</span>
+<span class="sd">TeX        : %s</span>
+<span class="sd">units      : %s</span>
+<span class="sd">save path  : %s</span>
+<span class="sd">template   : %s</span>
+<span class="sd">         M : %s -&gt; %s</span>
+<span class="sd">         C : %s -&gt; %s</span>
+<span class="sd">         S : %s -&gt; %s&quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">tex</span><span class="p">,</span>
+            <span class="n">units</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">,</span>
+            <span class="n">template_string</span><span class="p">,</span>
+            <span class="n">m</span><span class="p">,</span>
+            <span class="n">m1</span><span class="p">,</span>
+            <span class="n">c</span> <span class="k">if</span> <span class="n">c</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">c1</span> <span class="k">if</span> <span class="n">c1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">s</span> <span class="k">if</span> <span class="n">s</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">s1</span> <span class="k">if</span> <span class="n">s1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tex</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel._combine_tex_path_units_axnorm">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel._combine_tex_path_units_axnorm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_combine_tex_path_units_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finalize label pieces with axis normalization.&quot;&quot;&quot;</span>
+        <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
+        <span class="n">tex_norm</span> <span class="o">=</span> <span class="n">_trans_axnorm</span><span class="p">[</span><span class="n">axnorm</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tex_norm</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\#&quot;</span>
+            <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2"> \; Norm} \; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tex_norm</span><span class="p">,</span> <span class="n">tex</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="n">axnorm</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;norm&quot;</span><span class="p">)</span>
+
+        <span class="n">with_units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{tex}</span><span class="s2"> </span><span class="si">{sep}</span><span class="s2"> \left[</span><span class="si">{units}</span><span class="s2">\right]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">tex</span><span class="o">=</span><span class="n">tex</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\n</span><span class="s2">$&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_line_for_units</span> <span class="k">else</span> <span class="s2">&quot;\;&quot;</span><span class="p">,</span>  <span class="c1"># noqa: W605</span>
+            <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tex</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">with_units</span></div>
+
+
+<div class="viewcode-block" id="TeXlabel.build_label">
+<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.base.TeXlabel.build_label">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct the complete label.&quot;&quot;&quot;</span>
+        <span class="n">mcs0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcs0</span>
+        <span class="n">mcs1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcs1</span>
+
+        <span class="n">tex0</span><span class="p">,</span> <span class="n">units0</span><span class="p">,</span> <span class="n">path0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_one_label</span><span class="p">(</span><span class="n">mcs0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mcs1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tex1</span><span class="p">,</span> <span class="n">units1</span><span class="p">,</span> <span class="n">path1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_one_label</span><span class="p">(</span><span class="n">mcs1</span><span class="p">)</span>
+
+            <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span> <span class="o">=</span> <span class="n">mcs0</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">mcs1</span><span class="o">.</span><span class="n">m</span>
+            <span class="n">u0</span><span class="p">,</span> <span class="n">u1</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_trans_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m0</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_err&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;???&quot;</span><span class="p">),</span>
+                <span class="n">_trans_units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_err&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;???&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">u0</span> <span class="o">==</span> <span class="n">u1</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\#&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u0</span><span class="p">,</span> <span class="n">u1</span><span class="p">)</span>
+
+            <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tex0</span><span class="p">,</span> <span class="n">tex1</span><span class="p">)</span>
+            <span class="c1">#             with_units = r&quot;$%s \; [%s]$&quot; % (tex, units)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-OV-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">path0</span><span class="p">,</span> <span class="n">path1</span><span class="p">]))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tex</span> <span class="o">=</span> <span class="n">tex0</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="n">units0</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path0</span><span class="p">)</span>
+
+            <span class="n">tex1</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">units1</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">path1</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">tex</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">with_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_tex_path_units_axnorm</span><span class="p">(</span>
+            <span class="n">tex</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Joined ratio label</span>
+<span class="sd">TeX        : %s</span>
+<span class="sd">units      : %s</span>
+<span class="sd">with units : %s</span>
+<span class="sd">save path  : %s</span>
+<span class="sd">        T0 : %s</span>
+<span class="sd">        U0 : %s</span>
+<span class="sd">        P0 : %s</span>
+<span class="sd">        T1 : %s</span>
+<span class="sd">        U1 : %s</span>
+<span class="sd">        P1 : %s&quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">tex</span><span class="p">,</span>
+            <span class="n">units</span><span class="p">,</span>
+            <span class="n">with_units</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">,</span>
+            <span class="n">tex0</span><span class="p">,</span>
+            <span class="n">units0</span><span class="p">,</span>
+            <span class="n">path0</span><span class="p">,</span>
+            <span class="n">tex1</span><span class="p">,</span>
+            <span class="n">units1</span><span class="p">,</span>
+            <span class="n">path1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_with_units</span> <span class="o">=</span> <span class="n">with_units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

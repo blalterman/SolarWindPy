@@ -1,0 +1,174 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.solar_activity test plan &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">solarwindpy.solar_activity test plan</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/solarwindpy.solar_activity.tests.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-solar-activity-test-plan">
+<h1>solarwindpy.solar_activity test plan<a class="headerlink" href="#solarwindpy-solar-activity-test-plan" title="Link to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All tests described below should reside in <code class="docutils literal notranslate"><span class="pre">solarwindpy/tests/solar_activity</span></code>.</p>
+</div>
+<section id="init-py">
+<h2>__init__.py<a class="headerlink" href="#init-py" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">get_all_indices</span></code> returns a <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> with columns <code class="docutils literal notranslate"><span class="pre">Lalpha</span></code>, <code class="docutils literal notranslate"><span class="pre">ssn</span></code>, <code class="docutils literal notranslate"><span class="pre">MgII</span></code> and <code class="docutils literal notranslate"><span class="pre">CaK</span></code>.</p></li>
+<li><p>Validate that the returned index is a <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code>.</p></li>
+<li><p>Confirm that the module-level alias <code class="docutils literal notranslate"><span class="pre">ssn</span></code> refers to <a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html#module-solarwindpy.solar_activity.sunspot_number" title="solarwindpy.solar_activity.sunspot_number"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.sunspot_number</span></code></a>.</p></li>
+</ul>
+</section>
+<section id="base-py">
+<h2>base.py<a class="headerlink" href="#base-py" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ID.set_key</span></code> accepts known keys and raises <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> for unknown keys.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataLoader.get_data_ctime</span></code> handles an empty cache and derives creation time from file names.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataLoader.get_data_age</span></code> returns the time difference between today and the cached date.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataLoader.maybe_update_stale_data</span></code> calls <code class="docutils literal notranslate"><span class="pre">download_data</span></code> when cached data are out of date.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ActivityIndicator.interpolate_data</span></code> interpolates without extrapolating past the source range.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.calculate_intervals</span></code> produces rise, fall and full-cycle intervals.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.calculate_extrema_bands</span></code> builds intervals around minima and maxima.</p></li>
+</ul>
+</section>
+<section id="lisird-lisird-module">
+<h2>lisird.lisird module<a class="headerlink" href="#lisird-lisird-module" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRD_ID</span></code> builds correct URLs for supported keys and rejects invalid keys.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRDLoader.convert_nans</span></code> replaces LISIRD specific missing values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRDLoader.verify_monotonic_epoch</span></code> removes duplicate timestamps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRDLoader.download_data</span></code> writes CSV and JSON files and deletes previous versions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRD.load_data</span></code> populates the loader and metadata attributes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRD.interpolate_data</span></code> maps the selected column onto a target index.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LISIRDExtrema.load_or_set_data</span></code> obtains extrema from <code class="xref py py-class docutils literal notranslate"><span class="pre">ExtremaCalculator</span></code>.</p></li>
+</ul>
+</section>
+<section id="lisird-extrema-calculator-module">
+<h2>lisird.extrema_calculator module<a class="headerlink" href="#lisird-extrema-calculator-module" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ExtremaCalculator.set_threshold</span></code> accepts scalars, callables and defaults correctly.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cut_data_into_extrema_finding_intervals</span></code> segments the rolled series using threshold crossings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_find_extrema</span></code> and <code class="docutils literal notranslate"><span class="pre">find_extrema</span></code> detect minima and maxima in example data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format_extrema</span></code> returns a table indexed by cycle number.</p></li>
+</ul>
+</section>
+<section id="plots-py">
+<h2>plots.py<a class="headerlink" href="#plots-py" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.make_plot</span></code> renders a basic line plot with formatted axes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSNPlot</span></code> sets the y-axis label and limits appropriate for sunspot number.</p></li>
+</ul>
+</section>
+<section id="sunspot-number-sidc-module">
+<h2>sunspot_number.sidc module<a class="headerlink" href="#sunspot-number-sidc-module" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDC_ID</span></code> maps keys to URLs and raises on invalid keys.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDCLoader.convert_nans</span></code> converts <code class="docutils literal notranslate"><span class="pre">-1</span></code> values to <code class="docutils literal notranslate"><span class="pre">NaN</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDCLoader.download_data</span></code> loads SIDC CSV data and saves cleaned files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDC.load_data</span></code> attaches the loader and adds cycle labels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDC.interpolate_data</span></code> interpolates the <code class="docutils literal notranslate"><span class="pre">ssn</span></code> column onto a new index.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDC.calculate_extrema_kind</span></code> and <code class="docutils literal notranslate"><span class="pre">calculate_edge</span></code> classify rising and falling periods.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIDC.run_normalization</span></code> computes a <code class="docutils literal notranslate"><span class="pre">nssn</span></code> column for each cycle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SSNExtrema.load_or_set_data</span></code> reads <code class="docutils literal notranslate"><span class="pre">ssn_extrema.csv</span></code> into a <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

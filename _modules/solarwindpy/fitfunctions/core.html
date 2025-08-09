@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.fitfunctions.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.fitfunctions.core</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Base classes used to implement specific fit functions.</span>
+
+<span class="sd">The :class:`FitFunction` abstract base class handles selecting the</span>
+<span class="sd">observations to include in a fit, running SciPy optimizers and</span>
+<span class="sd">providing convenient plotting helpers.  Subclasses need only define</span>
+<span class="sd">the functional form and an initial parameter guess.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractproperty</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getfullargspec</span>
+
+<span class="c1"># from scipy.optimize import curve_fit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">least_squares</span><span class="p">,</span> <span class="n">OptimizeWarning</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize._minpack_py</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">_wrap_func</span><span class="p">,</span>
+        <span class="n">_wrap_jac</span><span class="p">,</span>
+        <span class="n">_initialize_feasible</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - fall back for older SciPy versions</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize.minpack</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">_wrap_func</span><span class="p">,</span>
+        <span class="n">_wrap_jac</span><span class="p">,</span>
+        <span class="n">_initialize_feasible</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize._lsq.least_squares</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_bounds</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">svd</span><span class="p">,</span> <span class="n">cholesky</span><span class="p">,</span> <span class="n">LinAlgError</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tex_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">TeXinfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">FFPlot</span>
+
+<span class="n">Observations</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Observations&quot;</span><span class="p">,</span> <span class="s2">&quot;x,y,w&quot;</span><span class="p">)</span>
+<span class="n">UsedRawObs</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;UsedRawObs&quot;</span><span class="p">,</span> <span class="s2">&quot;used,raw,tk_observed&quot;</span><span class="p">)</span>
+<span class="n">InitialGuessInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;InitialGuessInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;p0,bounds&quot;</span><span class="p">)</span>
+<span class="n">ChisqPerDegreeOfFreedom</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ChisqPerDegreeOfFreedom&quot;</span><span class="p">,</span> <span class="s2">&quot;linear,robust&quot;</span><span class="p">)</span>
+<span class="n">FitBounds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;FitBounds&quot;</span><span class="p">,</span> <span class="s2">&quot;lower,upper&quot;</span><span class="p">)</span>
+
+<span class="c1"># def __huber(z):</span>
+<span class="c1">#     cost = np.array(z)</span>
+<span class="c1">#     mask = z &lt;= 1</span>
+<span class="c1">#     cost[~mask] = 2 * z[~mask]**0.5 - 1</span>
+<span class="c1">#     return cost</span>
+<span class="c1">#</span>
+<span class="c1"># def __soft_l1(z):</span>
+<span class="c1">#     t = 1 + z</span>
+<span class="c1">#     cost = 2 * (t**0.5 - 1)</span>
+<span class="c1">#     return cost</span>
+<span class="c1">#</span>
+<span class="c1"># _loss_fcns = {&quot;huber&quot;: __huber,</span>
+<span class="c1"># &quot;soft_l1&quot;: __soft_l1,</span>
+<span class="c1"># &quot;cauchy&quot;: np.log1p,</span>
+<span class="c1"># &quot;arctan&quot;: np.arctan}</span>
+
+
+<div class="viewcode-block" id="FitFunction">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FitFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Assuming that you don&#39;t want any special formatting, the typical call</span>
+<span class="sd">    order is:</span>
+
+<span class="sd">        fit_function = FitFunction(function, TeX_string)</span>
+<span class="sd">        fit_function.make_fit()</span>
+
+<span class="sd">    Instances are callable. If the fit fails, calling the instance will return</span>
+<span class="sd">    an array of NaNs the same shape as the x-values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xobs</span><span class="p">,</span>
+        <span class="n">yobs</span><span class="p">,</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">xoutside</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">youtside</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a ``FitFunction`` with observed data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xobs, yobs : array-like</span>
+<span class="sd">            Observed ``x`` and ``y`` values.</span>
+<span class="sd">        xmin, xmax : float, optional</span>
+<span class="sd">            Range limits for ``x`` used in fitting.</span>
+<span class="sd">        xoutside : tuple(float, float), optional</span>
+<span class="sd">            Include data outside this range in the fit.</span>
+<span class="sd">        ymin, ymax : float, optional</span>
+<span class="sd">            Range limits for ``y`` used in fitting.</span>
+<span class="sd">        youtside : tuple(float, float), optional</span>
+<span class="sd">            Include data outside this range.</span>
+<span class="sd">        weights : array-like, optional</span>
+<span class="sd">            Uncertainties associated with ``y``.</span>
+<span class="sd">        wmin, wmax : float, optional</span>
+<span class="sd">            Weight limits.</span>
+<span class="sd">        logx, logy : bool, default False</span>
+<span class="sd">            Whether to interpret ``x`` or ``y`` on a log10 scale.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_argnames</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">wmin</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="n">wmax</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_fit_obs</span><span class="p">(</span>
+            <span class="n">xobs</span><span class="p">,</span>
+            <span class="n">yobs</span><span class="p">,</span>
+            <span class="n">weights</span><span class="p">,</span>
+            <span class="n">xmin</span><span class="o">=</span><span class="n">xmin</span><span class="p">,</span>
+            <span class="n">xmax</span><span class="o">=</span><span class="n">xmax</span><span class="p">,</span>
+            <span class="n">xoutside</span><span class="o">=</span><span class="n">xoutside</span><span class="p">,</span>
+            <span class="n">ymin</span><span class="o">=</span><span class="n">ymin</span><span class="p">,</span>
+            <span class="n">ymax</span><span class="o">=</span><span class="n">ymax</span><span class="p">,</span>
+            <span class="n">youtside</span><span class="o">=</span><span class="n">youtside</span><span class="p">,</span>
+            <span class="n">wmin</span><span class="o">=</span><span class="n">wmin</span><span class="p">,</span>
+            <span class="n">wmax</span><span class="o">=</span><span class="n">wmax</span><span class="p">,</span>
+            <span class="n">logx</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span>
+            <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TeX_function</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the fitted model at ``x``.&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO</span>
+        <span class="c1"># Do you want to have this function accept optional kwarg parameters?</span>
+        <span class="c1"># It adds a layer of complexity, but could be helfpul.</span>
+
+        <span class="c1"># Sort the parameter keywords into the proper order to pass to the</span>
+        <span class="c1"># numerical function.</span>
+
+        <span class="c1">#         try:</span>
+        <span class="n">popt_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
+        <span class="n">popt_</span> <span class="o">=</span> <span class="p">[</span><span class="n">popt_</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">]</span>
+
+        <span class="c1"># NOTE</span>
+        <span class="c1"># An instance of FitFunction is for a given function. To change the</span>
+        <span class="c1"># function itself, a new instance of FitFunction should be required.</span>
+        <span class="c1"># Therefore, we access the function directly.</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">popt_</span><span class="p">)</span>
+
+        <span class="c1">#         except AttributeError as e:</span>
+        <span class="c1">#             if &quot;&#39;PowerLaw&#39; object has no attribute &#39;_popt&#39;&quot; in str(e):</span>
+        <span class="c1">#                 y = np.full_like(x, np.nan, dtype=np.float64)</span>
+
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a module-level logger for the instance.&quot;&quot;&quot;</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the function that`curve_fit` fits.</span>
+
+<span class="sd">        The function is set at instantiation. It doesn&#39;t make sense to change</span>
+<span class="sd">        it unless you redefine the entire FitFunction, so there is no `new`</span>
+<span class="sd">        kwarg.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The initial guess for the FitFunction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Function written in LaTeX.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The names of the actual function arguments pulled by getfullargspec.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_argnames</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Bounds used when running the fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_bounds</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chisq_dof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Chisq per degree of freedom :math:`\chi^2_\nu`.</span>
+
+<span class="sd">        If None, not calculated by `make_fit_old`. If `np.nan`, fit failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#         r = self.residuals(pct=False)</span>
+        <span class="c1">#         sigma = self.observations.used.w</span>
+        <span class="c1">#         if sigma is not None:</span>
+        <span class="c1">#             r = r / sigma</span>
+        <span class="c1">#</span>
+        <span class="c1">#         chisq = (r ** 2).sum()</span>
+        <span class="c1">#         dof = r.size - len(self.p0)</span>
+        <span class="c1">#         chisq_dof = chisq / dof</span>
+        <span class="c1">#         return chisq_dof</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chisq_dof</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Degrees of freedom in the fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initial_guess_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># If failed to make an initial guess, then don&#39;t build the info.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_bounds</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">InitialGuessInfo</span><span class="p">(</span><span class="n">guess</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">guess</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">p0</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="c1">#         info = [&quot;\n&quot;.join(param) for param in info]</span>
+        <span class="c1">#         info = &quot;\n\n&quot;.join(info)</span>
+
+        <span class="k">return</span> <span class="n">info</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The total number of observations used in the fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">tk_observed</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#         try:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotter</span>
+
+    <span class="c1">#         except AttributeError:</span>
+    <span class="c1">#             return self.build_plotter()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">popt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Optimized fit parameters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_popt</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">psigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_psigma</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">psigma_relative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">psigma</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">combined_popt_psigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convenience to extract all versions of the optimized parameters.&quot;&quot;&quot;</span>
+        <span class="c1">#         try:</span>
+        <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
+        <span class="n">psigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psigma</span>
+        <span class="n">prel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psigma_relative</span>
+        <span class="c1">#         except AttributeError:</span>
+        <span class="c1">#             popt = {k: np.nan for k in self.argnames}</span>
+        <span class="c1">#             psigma = {k: np.nan for k in self.argnames}</span>
+        <span class="c1">#             prel = {k: np.nan for k in self.argnames}</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;popt&quot;</span><span class="p">:</span> <span class="n">popt</span><span class="p">,</span> <span class="s2">&quot;psigma&quot;</span><span class="p">:</span> <span class="n">psigma</span><span class="p">,</span> <span class="s2">&quot;psigma_relative&quot;</span><span class="p">:</span> <span class="n">prel</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pcov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A copy of the covariance matrix.</span>
+
+<span class="sd">        Returns a copy so that the matrix isn&#39;t accidentally edited.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcov</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rsq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Coefficient of determination.</span>
+
+<span class="sd">        Source: &lt;en.wikipedia.org/wiki/Coefficient_of_determination#Definitions&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">ybar</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">yfit</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">sum_squares_total</span> <span class="o">=</span> <span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">ybar</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">sum_squares_residual</span> <span class="o">=</span> <span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">yfit</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">rsq</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">sum_squares_residual</span> <span class="o">/</span> <span class="n">sum_squares_total</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rsq</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sufficient_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A check to ensure that we can fit the data before doing any</span>
+<span class="sd">        computations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nobs</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chk</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There is insufficient data to fit the model.&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#         try:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_TeX_info</span>
+
+    <span class="c1">#         except AttributeError:</span>
+    <span class="c1">#             return self.build_TeX_info()</span>
+
+<div class="viewcode-block" id="FitFunction._clean_raw_obs">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._clean_raw_obs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_raw_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the raw x- and y-values along with weights for the fit.</span>
+
+<span class="sd">        Doesn&#39;t account for extrema, finite data, etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xobs</span><span class="p">)</span>
+        <span class="n">yobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">yobs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xobs</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">yobs</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;xobs and yobs must have the same shape.,</span>
+<span class="s2">xobs: </span><span class="si">{</span><span class="n">xobs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">yobs: </span><span class="si">{</span><span class="n">yobs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">weights</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">xobs</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;weights and xobs must have the same shape.,</span>
+<span class="s2">weighs: </span><span class="si">{</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;,</span>
+<span class="s2">xobs: </span><span class="si">{</span><span class="n">xobs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span></div>
+
+
+<div class="viewcode-block" id="FitFunction._build_one_obs_mask">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._build_one_obs_mask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_one_obs_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">):</span>
+        <span class="c1">#         mask = np.full_like(x, True, dtype=bool)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xmin_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">xmin</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">xmin_mask</span>
+
+        <span class="k">if</span> <span class="n">xmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xmax_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xmax</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">xmax_mask</span>
+
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="FitFunction._build_outside_mask">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._build_outside_mask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_outside_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">outside</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Take data outside of the range `outside[0]:outside[1]`.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">outside</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">outside</span>
+        <span class="k">assert</span> <span class="n">lower</span> <span class="o">&lt;</span> <span class="n">upper</span>
+        <span class="n">l_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">lower</span>
+        <span class="n">u_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">upper</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">l_mask</span> <span class="o">|</span> <span class="n">u_mask</span>
+
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="FitFunction._set_argnames">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._set_argnames">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the arguments of the function, assuming that the first</span>
+<span class="sd">        is dependent variable.</span>
+
+<span class="sd">        Should be called after function is set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">getfullargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_argnames</span> <span class="o">=</span> <span class="n">args</span></div>
+
+
+<div class="viewcode-block" id="FitFunction.build_plotter">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction.build_plotter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">yfit</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">yfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="c1">#         robust_residuals = self.fit_result.fun</span>
+        <span class="n">tex_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TeX_info</span>
+        <span class="n">fit_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_result</span>
+
+        <span class="c1">#         try:</span>
+        <span class="c1">#             fit_result = self.fit_result</span>
+        <span class="c1">#         except AttributeError:</span>
+        <span class="c1">#             fit_result = None</span>
+
+        <span class="n">plotter</span> <span class="o">=</span> <span class="n">FFPlot</span><span class="p">(</span>
+            <span class="n">obs</span><span class="p">,</span>
+            <span class="n">yfit</span><span class="p">,</span>
+            <span class="c1">#             robust_residuals,</span>
+            <span class="n">tex_info</span><span class="p">,</span>
+            <span class="n">fit_result</span><span class="p">,</span>
+            <span class="n">fitfunction_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plotter</span> <span class="o">=</span> <span class="n">plotter</span>
+        <span class="k">return</span> <span class="n">plotter</span></div>
+
+
+<div class="viewcode-block" id="FitFunction.build_TeX_info">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction.build_TeX_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Allows annotating of TeX_info when fit fails in a manner</span>
+        <span class="c1"># that is easily identifiable.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">popt</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">psigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psigma</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">psigma</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">}</span>
+
+        <span class="n">tex_info</span> <span class="o">=</span> <span class="n">TeXinfo</span><span class="p">(</span>
+            <span class="n">popt</span><span class="p">,</span>
+            <span class="n">psigma</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TeX_function</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chisq_dof</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rsq</span><span class="p">,</span>
+            <span class="n">initial_guess_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_guess_info</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_TeX_info</span> <span class="o">=</span> <span class="n">tex_info</span>
+        <span class="k">return</span> <span class="n">tex_info</span></div>
+
+
+<div class="viewcode-block" id="FitFunction.residuals">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction.residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
+<span class="sd">        If pct, normalize by fit yvalues.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: calculate with all values</span>
+        <span class="c1"># Make it an option to calculate with either</span>
+        <span class="c1"># the values used in the fit or all the values,</span>
+        <span class="c1"># including those excluded by `set_extrema`.</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1">#         r = self.fit_result.fun</span>
+
+        <span class="k">if</span> <span class="n">pct</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="FitFunction.set_fit_obs">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction.set_fit_obs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_fit_obs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xobs_raw</span><span class="p">,</span>
+        <span class="n">yobs_raw</span><span class="p">,</span>
+        <span class="n">weights_raw</span><span class="p">,</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">xoutside</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">youtside</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the observed values we&#39;ll actually use in the fit by applying</span>
+<span class="sd">        limits to xobs_raw and yobs_raw and checking for finite values.</span>
+
+<span class="sd">        All boundaries are inclusive &lt;= or &gt;=.</span>
+
+<span class="sd">        If logy, then make selection of `wmin` and `wmax` based on :math:`w/(y \ln(10))`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xobs_raw</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">weights_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_raw_obs</span><span class="p">(</span>
+            <span class="n">xobs_raw</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">weights_raw</span>
+        <span class="p">)</span>
+
+        <span class="n">xmask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_one_obs_mask</span><span class="p">(</span><span class="s2">&quot;xobs&quot;</span><span class="p">,</span> <span class="n">xobs_raw</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+        <span class="n">ymask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_one_obs_mask</span><span class="p">(</span><span class="s2">&quot;yobs&quot;</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+        <span class="n">xout_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_outside_mask</span><span class="p">(</span><span class="s2">&quot;xobs&quot;</span><span class="p">,</span> <span class="n">xobs_raw</span><span class="p">,</span> <span class="n">xoutside</span><span class="p">)</span>
+        <span class="n">yout_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_outside_mask</span><span class="p">(</span><span class="s2">&quot;yobs&quot;</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">youtside</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">xmask</span> <span class="o">&amp;</span> <span class="n">ymask</span> <span class="o">&amp;</span> <span class="n">xout_mask</span> <span class="o">&amp;</span> <span class="n">yout_mask</span>
+        <span class="k">if</span> <span class="n">weights_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights_for_mask</span> <span class="o">=</span> <span class="n">weights_raw</span>
+
+            <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+                <span class="c1"># Enables picking weights based on normalized scale for log stuff</span>
+                <span class="n">weights_for_mask</span> <span class="o">=</span> <span class="n">weights_for_mask</span> <span class="o">/</span> <span class="p">(</span><span class="n">yobs_raw</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+            <span class="n">wmask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_one_obs_mask</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span> <span class="n">weights_for_mask</span><span class="p">,</span> <span class="n">wmin</span><span class="p">,</span> <span class="n">wmax</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">wmask</span>
+
+        <span class="n">xobs</span> <span class="o">=</span> <span class="n">xobs_raw</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">yobs</span> <span class="o">=</span> <span class="n">yobs_raw</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">weights_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights_raw</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="n">used</span> <span class="o">=</span> <span class="n">Observations</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">Observations</span><span class="p">(</span><span class="n">xobs_raw</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">weights_raw</span><span class="p">)</span>
+        <span class="n">usedrawobs</span> <span class="o">=</span> <span class="n">UsedRawObs</span><span class="p">(</span><span class="n">used</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="n">usedrawobs</span></div>
+
+
+<div class="viewcode-block" id="FitFunction._run_least_squares">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._run_least_squares">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_least_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute :func:`scipy.optimize.least_squares` with defaults.&quot;&quot;&quot;</span>
+
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;p0&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bounds&quot;</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;trf&quot;</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;huber&quot;</span><span class="p">)</span>
+        <span class="n">max_nfev</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;max_nfev&quot;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+        <span class="n">f_scale</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;f_scale&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">jac</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;jac&quot;</span><span class="p">,</span> <span class="s2">&quot;2-point&quot;</span><span class="p">)</span>
+
+        <span class="c1">#         loss_fcn = _loss_fcns.pop(loss, loss)</span>
+
+        <span class="c1"># Copied from `curve_fit` line 704 (20200527)</span>
+        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># determine number of parameters by inspecting the function</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scipy._lib._util</span><span class="w"> </span><span class="kn">import</span> <span class="n">getargspec_no_self</span> <span class="k">as</span> <span class="n">_getargspec</span>
+
+            <span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">varkw</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">_getargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to determine number of fit parameters.&quot;</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># Monkey patch to work with bounds being stored as</span>
+            <span class="c1"># dict for TeX_info. (20201202)</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">]</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Copied from `curve_fit` line 715 (20200527)</span>
+        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prepare_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="n">_initialize_feasible</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;args&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Adopted `curve_fit` convention for which&#39;args&#39; is not a supported keyword argument.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">xdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span>
+
+        <span class="c1"># Copied from `curve_fit` line 749 (20200527)</span>
+        <span class="c1"># Determine type of sigma</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="c1"># sigma = sigma / np.nansum(sigma)</span>
+
+            <span class="c1"># if 1-d, sigma are errors, define transform = 1/sigma</span>
+            <span class="k">if</span> <span class="n">sigma</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">size</span><span class="p">,):</span>
+                <span class="n">transform</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sigma</span>
+            <span class="c1"># if 2-d, sigma is the covariance matrix,</span>
+            <span class="c1"># define transform = L such that L L^T = C</span>
+            <span class="k">elif</span> <span class="n">sigma</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">ydata</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># scipy.linalg.cholesky requires lower=True to return L L^T = A</span>
+                    <span class="n">transform</span> <span class="o">=</span> <span class="n">cholesky</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`sigma` must be positive definite.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`sigma` has incorrect shape.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Copied from `curve_fit` line 769 (20200527)</span>
+        <span class="n">loss_func</span> <span class="o">=</span> <span class="n">_wrap_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">xdata</span><span class="p">,</span> <span class="n">ydata</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+        <span class="c1"># Already define default `jac` with `kwargs`. Don&#39;t need ELSE clause.</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">jac</span><span class="p">):</span>
+            <span class="n">jac</span> <span class="o">=</span> <span class="n">_wrap_jac</span><span class="p">(</span><span class="n">jac</span><span class="p">,</span> <span class="n">xdata</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span>
+            <span class="n">loss_func</span><span class="p">,</span>
+            <span class="n">p0</span><span class="p">,</span>
+            <span class="n">jac</span><span class="o">=</span><span class="n">jac</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+            <span class="n">max_nfev</span><span class="o">=</span><span class="n">max_nfev</span><span class="p">,</span>
+            <span class="n">f_scale</span><span class="o">=</span><span class="n">f_scale</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Optimal parameters not found: &quot;</span> <span class="o">+</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="n">fit_bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">fit_bounds</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">FitBounds</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">fit_bounds</span><span class="p">)}</span>
+        <span class="n">fit_bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fit_bounds</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_bounds</span> <span class="o">=</span> <span class="n">fit_bounds</span>
+
+        <span class="c1">#         self._loss_fcn = loss_fcn</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">p0</span></div>
+
+
+<div class="viewcode-block" id="FitFunction._calc_popt_pcov_psigma_chisq">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction._calc_popt_pcov_psigma_chisq">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_popt_pcov_psigma_chisq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">p0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute optimized parameters and statistics from the result.&quot;&quot;&quot;</span>
+
+        <span class="n">xdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span>
+
+        <span class="c1"># The following is from `curve_fit` line 801 and following. (20200625)</span>
+        <span class="c1"># `cost` is the robust loss, i.e. residuals passed through loss funciton.</span>
+        <span class="n">ysize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">res</span><span class="o">.</span><span class="n">cost</span>  <span class="c1"># res.cost is half sum of squares!</span>
+        <span class="n">popt</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+
+        <span class="c1"># Linear chisq_dof value.</span>
+        <span class="n">dof</span> <span class="o">=</span> <span class="n">ydata</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+        <span class="n">chisq_dof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># Divide by zero =&gt; infinity</span>
+        <span class="k">if</span> <span class="n">dof</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span> <span class="o">-</span> <span class="n">ydata</span>
+            <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">/=</span> <span class="n">sigma</span>
+            <span class="n">chisq_dof</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">dof</span>
+
+        <span class="c1"># Do Moore-Penrose inverse discarding zero singular values.</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">VT</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">s</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span>
+        <span class="n">VT</span> <span class="o">=</span> <span class="n">VT</span><span class="p">[:</span> <span class="n">s</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+        <span class="n">pcov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">VT</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="p">(</span><span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">VT</span><span class="p">)</span>
+
+        <span class="n">warn_cov</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ysize</span> <span class="o">&gt;</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="c1"># Cost is robust residuals, so this is robust chisq per dof.</span>
+            <span class="n">s_sq</span> <span class="o">=</span> <span class="n">cost</span> <span class="o">/</span> <span class="p">(</span><span class="n">ysize</span> <span class="o">-</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">pcov</span> <span class="o">=</span> <span class="n">pcov</span> <span class="o">*</span> <span class="n">s_sq</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">pcov</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+            <span class="n">warn_cov</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">warn_cov</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Covariance of the parameters could not be estimated&quot;</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="n">OptimizeWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">psigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pcov</span><span class="p">))</span>
+
+        <span class="c1"># Based on `curve_fit`&#39;s `absolute_sigma` documentation and reading</span>
+        <span class="c1"># `least_square`, `s_sq` should be chisq_nu based on robust residuals</span>
+        <span class="c1"># that account for `f_scale`(20200527).</span>
+        <span class="n">all_chisq</span> <span class="o">=</span> <span class="n">ChisqPerDegreeOfFreedom</span><span class="p">(</span><span class="n">chisq_dof</span><span class="p">,</span> <span class="n">s_sq</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span><span class="p">,</span> <span class="n">psigma</span><span class="p">,</span> <span class="n">all_chisq</span></div>
+
+
+<div class="viewcode-block" id="FitFunction.make_fit">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.core.FitFunction.make_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_exception</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the function with the independent values `xobs` and dependent</span>
+<span class="sd">        values `yobs` using `least_squares` and returning the `OptimizeResult`</span>
+<span class="sd">        object, but treating weights as in `curve_fit`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        return_exception: bool</span>
+<span class="sd">            If True, return exceptions from fitting routine, instead of raising.</span>
+<span class="sd">            This is useful when looping through many fits and wanting to</span>
+<span class="sd">            identify failed fits after the fact.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Unless specified here, defaults are as defined by `curve_fit`.</span>
+
+<span class="sd">                ============= ======================================</span>
+<span class="sd">                    kwarg                    default</span>
+<span class="sd">                ============= ======================================</span>
+<span class="sd">                 p0            Setup by `{self.__class__.__name__}`</span>
+<span class="sd">                 return_full   False</span>
+<span class="sd">                 method        &quot;trf&quot;</span>
+<span class="sd">                 loss          &quot;huber&quot;</span>
+<span class="sd">                 max_nfev      10000</span>
+<span class="sd">                 f_scale       0.1</span>
+<span class="sd">                ============= ======================================</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>  <span class="c1"># Check we have enough data to fit.</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1">#             raise</span>
+            <span class="k">return</span> <span class="n">e</span>
+
+        <span class="n">absolute_sigma</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;absolute_sigma&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">absolute_sigma</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;We want to rescale fit errors by chisq_dof&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">,</span> <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_least_squares</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1">#             print(&quot;fitting failed&quot;, flush=True)</span>
+            <span class="c1">#             raise</span>
+            <span class="k">if</span> <span class="n">return_exception</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span><span class="p">,</span> <span class="n">psigma</span><span class="p">,</span> <span class="n">all_chisq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_popt_pcov_psigma_chisq</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">p0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_popt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">popt</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_psigma</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">psigma</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pcov</span> <span class="o">=</span> <span class="n">pcov</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chisq_dof</span> <span class="o">=</span> <span class="n">all_chisq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_result</span> <span class="o">=</span> <span class="n">res</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_TeX_info</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_plotter</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

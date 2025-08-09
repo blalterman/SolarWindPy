@@ -1,0 +1,881 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.fitfunctions.plots</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.fitfunctions.plots</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plotting utilities for :mod:`solarwindpy.fitfunctions`.</span>
+
+<span class="sd">This module contains :class:`FFPlot`, a helper for visualizing fitted</span>
+<span class="sd">models, residuals and associated annotations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">AxesLabels</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;AxesLabels&quot;</span><span class="p">,</span> <span class="s2">&quot;x,y,z&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,))</span>
+<span class="n">LogAxes</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;LogAxes&quot;</span><span class="p">,</span> <span class="s2">&quot;x,y&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">(</span><span class="kc">False</span><span class="p">,))</span>
+
+
+<div class="viewcode-block" id="FFPlot">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FFPlot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">TeX_info</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">fitfunction_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        observations : :class:`~solarwindpy.fitfunctions.core.Observations`</span>
+<span class="sd">            Observed data used in the fit.</span>
+<span class="sd">        y_fit : array-like</span>
+<span class="sd">            Model evaluated at the observed ``x`` values.</span>
+<span class="sd">        TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`</span>
+<span class="sd">            Object describing the fit for annotation.</span>
+<span class="sd">        fit_result : scipy.optimize.OptimizeResult</span>
+<span class="sd">            Result object returned from the fitting routine.</span>
+<span class="sd">        fitfunction_name : str, optional</span>
+<span class="sd">            Name of the originating fit function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_observations</span><span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_TeX_info</span><span class="p">(</span><span class="n">TeX_info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_fit_result</span><span class="p">(</span><span class="n">fit_result</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_fitfunction_name</span><span class="p">(</span><span class="n">fitfunction_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">LogAxes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">AxesLabels</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">observations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fitfunction_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunction_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction_name</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">/=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">/=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">path</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="n">x_scale</span> <span class="o">=</span> <span class="s2">&quot;logX&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span> <span class="k">else</span> <span class="s2">&quot;linX&quot;</span>
+        <span class="n">y_scale</span> <span class="o">=</span> <span class="s2">&quot;logY&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span> <span class="k">else</span> <span class="s2">&quot;logY&quot;</span>
+        <span class="n">scale_info</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x_scale</span><span class="p">,</span> <span class="n">y_scale</span><span class="p">])</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">base</span> <span class="o">/</span> <span class="n">scale_info</span>
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_TeX_info</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">y_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_fit</span>
+
+<div class="viewcode-block" id="FFPlot.set_fitfunction_name">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_fitfunction_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_fitfunction_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptive name for saved plots.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitfunction_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.set_fit_result">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_fit_result">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_fit_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the optimization result object.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_result</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.set_observations">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_observations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set raw and fitted values used for plotting.&quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="n">y_fit</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">assert</span> <span class="n">y_fit</span><span class="p">[</span><span class="n">observations</span><span class="o">.</span><span class="n">tk_observed</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="n">observations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_fit</span> <span class="o">=</span> <span class="n">y_fit</span></div>
+
+
+    <span class="c1">#         self._robust_residuals = robust_residuals</span>
+
+<div class="viewcode-block" id="FFPlot._estimate_markevery">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._estimate_markevery">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate_markevery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Heuristic marker spacing for large datasets.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Estimate marker density for readability</span>
+            <span class="n">markevery</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="c1"># Or we have a huge number of data points, so lets only</span>
+            <span class="c1"># mark a few of them.</span>
+            <span class="n">markevery</span> <span class="o">=</span> <span class="mi">1000</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">markevery</span><span class="p">:</span>
+            <span class="n">markevery</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">markevery</span></div>
+
+
+<div class="viewcode-block" id="FFPlot._format_hax">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._format_hax">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format_hax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_rax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and</span>
+<span class="sd">        :py:meth:`plot_fit` results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+
+        <span class="c1">#         ax.legend(loc=1, framealpha=0)  # loc chosen so annotation text defaults work.</span>
+
+        <span class="c1"># Copied from plt.hist. (20161107_0112)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">update_datalim</span><span class="p">([(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">updatey</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+        <span class="c1">#         if with_rax:</span>
+        <span class="c1">#             ax.xaxis.get_label().set_visible(False)</span>
+        <span class="c1">#             [t.set_visible(False) for t in ax.xaxis.get_ticklabels()]</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FFPlot._format_rax">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._format_rax">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format_rax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">pct</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pct</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Residual}</span><span class="s2"> \; [\%]$&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;symlog&quot;</span><span class="p">,</span> <span class="n">linthresh</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Residual}</span><span class="s2"> \; [\#]$&quot;</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">update_datalim</span><span class="p">([(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)],</span> <span class="n">updatey</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#         ax.legend(loc=0, framealpha=0, ncol=2)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_raw">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,</span>
+<span class="sd">        :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        edge_kwargs: None, dict</span>
+<span class="sd">            If not None, plot edges on the window using these kwargs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Obs}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">w</span>
+        <span class="c1">#         if self.log.y and w is not None:</span>
+        <span class="c1">#             w = w / (y * np.log(10.0))</span>
+        <span class="c1">#             w = np.log10(np.exp(1)) * w / y</span>
+
+        <span class="c1">#         # Plot the raw data histograms.</span>
+        <span class="c1">#         plotline, caplines, barlines = ax.errorbar(</span>
+        <span class="c1">#             x, y, yerr=w, label=label, color=color, **kwargs</span>
+        <span class="c1">#         )</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_plot_window_edges</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+            <span class="p">)</span>
+
+            <span class="n">edge1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">edge2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">edge1</span><span class="p">,</span> <span class="n">edge2</span>
+
+        <span class="k">if</span> <span class="n">plot_window</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;No weights. Need weights to plot a window for FitFunction. Setting w to 0.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                <span class="n">window_kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+            <span class="p">)</span>
+            <span class="n">window_color</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+            <span class="n">window_alpha</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">w</span>
+            <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">w</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">edges</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">edge_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">edge_kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                    <span class="n">edge_kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+                <span class="p">)</span>
+                <span class="n">edge_color</span> <span class="o">=</span> <span class="n">edge_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">window_color</span><span class="p">)</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="n">_plot_window_edges</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">edge_color</span><span class="p">,</span> <span class="o">**</span><span class="n">edge_kwargs</span><span class="p">)</span>
+
+            <span class="n">plotted</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Plot the raw data histograms.</span>
+            <span class="n">plotted</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format_hax</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">plotted</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_used">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_used">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_used</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.used.x`,</span>
+<span class="sd">        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;forestgreen&quot;</span><span class="p">)</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span>
+        <span class="n">markerfacecolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+        <span class="n">markersize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markersize&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">markevery</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markevery&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Used}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">w</span>
+        <span class="c1">#         if self.log.y and w is not None:</span>
+        <span class="c1">#             w = w / (y * np.log(10.0))</span>
+        <span class="c1">#             w = np.log10(np.exp(1)) * w / y</span>
+
+        <span class="k">if</span> <span class="n">markevery</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">markevery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_markevery</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">plot_window</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;No weights. Need weights to plot a window for FitFunction. Setting w to 0.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                <span class="n">window_kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+            <span class="p">)</span>
+            <span class="n">window_color</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+            <span class="n">window_alpha</span> <span class="o">=</span> <span class="n">window_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">markerfacecolor</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                <span class="n">markevery</span><span class="o">=</span><span class="n">markevery</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">w</span>
+            <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">w</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">edges</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">edge_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="k">def</span><span class="w"> </span><span class="nf">_plot_window_edges</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                        <span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+                    <span class="p">)</span>
+
+                    <span class="n">edge1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">edge2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">edge1</span><span class="p">,</span> <span class="n">edge2</span>
+
+                <span class="n">edge_kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span>
+                    <span class="n">edge_kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="o">.</span><span class="n">_alias_map</span>
+                <span class="p">)</span>
+                <span class="n">edge_color</span> <span class="o">=</span> <span class="n">edge_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">window_color</span><span class="p">)</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="n">_plot_window_edges</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">edge_color</span><span class="p">,</span> <span class="o">**</span><span class="n">edge_kwargs</span><span class="p">)</span>
+            <span class="c1">#                 edge_kwargs = mpl.cbook.normalize_kwargs(edge_kwargs, mpl.collections.Collection._alias_map)</span>
+
+            <span class="c1">#                 edge1 = ax.plot(x, y1,</span>
+            <span class="c1">#                                 color=window_color,</span>
+            <span class="c1">#                                 **edge_kwargs)</span>
+            <span class="c1">#                 edge2 = ax.plot(x, y2,</span>
+            <span class="c1">#                                 color=window_color,</span>
+            <span class="c1">#                                 **edge_kwargs)</span>
+
+            <span class="c1">#                 edges = (edge1, edge2)</span>
+
+            <span class="n">plotted</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Plot the raw data histograms.</span>
+            <span class="n">plotted</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y</span><span class="p">,</span>
+                <span class="n">yerr</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">markerfacecolor</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                <span class="n">markevery</span><span class="o">=</span><span class="n">markevery</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format_hax</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">plotted</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_fit">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">annotate_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the fit.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">annotate_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotate_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;darkorange&quot;</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Fit}</span><span class="s2">$&quot;</span><span class="p">)</span>
+        <span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;linestyle&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+        <span class="c1">#         zorder = kwargs.pop(&quot;zorder&quot;, 2.005) # Ensure it&#39;s the top line</span>
+
+        <span class="c1"># Overplot the fit.</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_fit</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span>
+            <span class="c1">#             zorder=zorder,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">annotate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TeX_info</span><span class="o">.</span><span class="n">annotate_info</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">annotate_kwargs</span><span class="p">)</span>
+        <span class="c1">#             self.annotate_TeX_info(ax, **annotate_kwargs)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format_hax</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_raw_used_fit">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw_used_fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">drawstyle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">raw_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">used_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">annotate_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make a plot of the raw observations, observations in fit, and the fit.</span>
+
+<span class="sd">        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_used`,</span>
+<span class="sd">        and :py:meth:`self.plot_fit`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax: None, mpl.Axes.axis_subplot</span>
+
+<span class="sd">        drawstyle: str, None</span>
+<span class="sd">            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_used`.</span>
+<span class="sd">            If None, defaults to &quot;steps-mid&quot;.</span>
+<span class="sd">        annotate: True</span>
+<span class="sd">            If True, add fit info to the annotation using ax.text.</span>
+<span class="sd">        raw_kwargs: dict</span>
+<span class="sd">            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw`.</span>
+<span class="sd">        used_kwargs: dict</span>
+<span class="sd">            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.</span>
+<span class="sd">        fit_kwargs: dict</span>
+<span class="sd">            Passed to `ax.plot(**fit_kwargs)` for plotting fit.</span>
+<span class="sd">        annotate_kwargs:</span>
+<span class="sd">            Passed to `ax.text`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax: mpl.Axes.axis_subplot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">raw_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">raw_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">dict</span><span class="p">()</span>
+            <span class="p">)</span>  <span class="c1"># dict(color=&quot;darkgreen&quot;, markerfacecolor=&quot;none&quot;, marker=&quot;P&quot;)</span>
+
+        <span class="k">if</span> <span class="n">used_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">used_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># dict(color=&quot;k&quot;)</span>
+
+        <span class="k">if</span> <span class="n">fit_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#             fit_kwargs = dict()  # dict(color=&quot;darkorange&quot;)</span>
+            <span class="n">fit_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">drawstyle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">drawstyle</span> <span class="o">=</span> <span class="s2">&quot;steps-mid&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_raw</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span> <span class="o">**</span><span class="n">raw_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_used</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span> <span class="o">**</span><span class="n">used_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_fit</span><span class="p">(</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="n">annotate</span><span class="p">,</span> <span class="n">annotate_kwargs</span><span class="o">=</span><span class="n">annotate_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span>
+        <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># loc chosen so annotation text defaults work.</span>
+
+        <span class="c1">#         # Copied from plt.hist. (20161107_0112)</span>
+        <span class="c1">#         ax.update_datalim(</span>
+        <span class="c1">#             [(self.observations.raw.x[0], 0), (self.observations.raw.x[-1], 0)], updatey=False</span>
+        <span class="c1">#         )</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format_hax</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_residuals">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_residuals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">subplots_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot residuals for the data used in the fit.</span>
+
+<span class="sd">        Residuals are shown on a symlog scale with ``linthresh=10``. By default</span>
+<span class="sd">        they are expressed as percentages of the fitted model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : mpl.axes.Axes, optional</span>
+<span class="sd">            Axis to draw on. If ``None`` a new figure and axis are created.</span>
+<span class="sd">        pct : bool, default True</span>
+<span class="sd">            If ``True``, show residuals as percentages.</span>
+<span class="sd">        subplots_kwargs : dict, optional</span>
+<span class="sd">            Passed to ``plt.subplots`` when ``ax`` is ``None``.</span>
+<span class="sd">        kind : {&#39;simple&#39;, &#39;robust&#39;, &#39;both&#39;}, default &quot;both&quot;</span>
+<span class="sd">            Which residuals to plot.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments passed to ``ax.plot``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax : mpl.axes.Axes</span>
+<span class="sd">            Axis with residuals plotted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">subplots_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subplots_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="o">**</span><span class="n">subplots_kwargs</span><span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
+        <span class="n">drawstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;drawstyle&quot;</span><span class="p">,</span> <span class="s2">&quot;steps-mid&quot;</span><span class="p">)</span>
+        <span class="c1">#         color = kwargs.pop(&quot;color&quot;, &quot;darkgreen&quot;)</span>
+        <span class="c1">#         marker = kwargs.pop(&quot;marker&quot;, &quot;P&quot;)</span>
+        <span class="n">markerfacecolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markerfacecolor&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+        <span class="n">markersize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markersize&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">markevery</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;markevery&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">)</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">markevery</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">markevery</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate_markevery</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;robust&quot;</span><span class="p">):</span>
+            <span class="n">residuals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span>
+                <span class="n">pct</span><span class="o">=</span><span class="n">pct</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;robust&quot;</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="p">)</span>
+
+            <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;forestgreen&quot;</span><span class="p">)</span>
+            <span class="n">marker</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span>
+            <span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;linestyle&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; \; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">title</span><span class="p">()])</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
+                <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2">}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
+            <span class="c1">#             label = (r&quot;$\mathrm{%s \; %s}$&quot; % (label, kind.title()).replace(&quot; \; &quot;, &quot;&quot;)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">residuals</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span>
+                <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">markerfacecolor</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                <span class="n">markevery</span><span class="o">=</span><span class="n">markevery</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="n">pct</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
+                    <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+                <span class="p">),</span>
+                <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;forestgreen&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">markerfacecolor</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                <span class="n">markevery</span><span class="o">=</span><span class="n">markevery</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="n">pct</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                    <span class="n">r</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
+                        <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+                    <span class="p">),</span>
+                    <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkorange&quot;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                    <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">markerfacecolor</span><span class="p">,</span>
+                    <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">,</span>
+                    <span class="n">markevery</span><span class="o">=</span><span class="n">markevery</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;NoneType&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                    <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format_rax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">pct</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.plot_raw_used_fit_resid">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit_resid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw_used_fit_resid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fit_resid_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">resid_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a stacked fit, residual plot.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        annotate: bool</span>
+<span class="sd">            If True, add fit annotation to axis.</span>
+<span class="sd">        fit_resid_axes: None, 2-tuple of mpl.axis.Axis</span>
+<span class="sd">            If not None, (fit, resid) axis pair to plot the (raw, used, fit)</span>
+<span class="sd">            and residual on, respectively. Otherwise, use `GridSpec` to build</span>
+<span class="sd">            a pair of axes where the `raw_used_fit` axis is 3 times the `resid_axis`.</span>
+<span class="sd">            Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share</span>
+<span class="sd">            an x-axis and `hax`&#39;s x-ticks and label will be set invisible.</span>
+<span class="sd">        figsize:</span>
+<span class="sd">            Any valid argument for :py:meth:`plt.figure(figsize=figsize)`. This code</span>
+<span class="sd">            was developed with default size 6x4 and this size helps accomodate annotation.</span>
+<span class="sd">            So we persist it here.</span>
+<span class="sd">        resid_kwargs: dict, None</span>
+<span class="sd">            Passed to :py:meth:`{self.__class__.__name__}.plot_residuals`.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_used_fit`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        hax: mpl.axis.Axis</span>
+<span class="sd">            Axis with raw observations, used observations, and fit plotted on it.</span>
+<span class="sd">        rax: mpl.axis.Axis</span>
+<span class="sd">            Axis with residuals plotted on it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">fit_resid_axes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span> <span class="o">=</span> <span class="n">fit_resid_axes</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="c1"># sharex in this code requires that I pass the axis object with which the x-axis is being shared.</span>
+            <span class="c1"># Source for sharex option: http://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">hax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="n">rax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">resid_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resid_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">resid_pct</span> <span class="o">=</span> <span class="n">resid_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;resid_pct&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_raw_used_fit</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">hax</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="n">annotate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_residuals</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">rax</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="n">resid_pct</span><span class="p">,</span> <span class="o">**</span><span class="n">resid_kwargs</span><span class="p">)</span>
+
+        <span class="c1">#         if fit_resid_axes is None:</span>
+        <span class="n">hax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">hax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_ticklabels</span><span class="p">()]</span>
+
+        <span class="k">return</span> <span class="n">hax</span><span class="p">,</span> <span class="n">rax</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.residuals">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
+<span class="sd">        If pct, normalize by fit yvalues.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">y_fit_used</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_fit</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">tk_observed</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">robust</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_result</span><span class="o">.</span><span class="n">fun</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">y_fit_used</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
+
+        <span class="k">if</span> <span class="n">pct</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">y_fit_used</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+    <span class="c1">#     def robust_residuals(self, pct=False):</span>
+    <span class="c1">#         r&quot;&quot;&quot;Return the fit residuals.</span>
+    <span class="c1">#         If pct, normalize by fit yvalues.</span>
+    <span class="c1">#         &quot;&quot;&quot;</span>
+    <span class="c1">#         r = self._robust_residuals</span>
+    <span class="c1">#</span>
+    <span class="c1">#         if pct:</span>
+    <span class="c1">#             y_fit_used = self.y_fit[self.observations.tk_observed]</span>
+    <span class="c1">#             r = 100.0 * (r / y_fit_used)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         return r</span>
+
+<div class="viewcode-block" id="FFPlot.set_labels">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_labels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
+<span class="sd">        is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected kwarg</span><span class="se">\n</span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">AxesLabels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.set_log">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_log">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set :py:class:`LogAxes`.</span>
+
+<span class="sd">        Only used for determining if weights should be :math:`w/(y \ln(10))`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">log</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">LogAxes</span><span class="p">(</span><span class="o">**</span><span class="n">log</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FFPlot.set_TeX_info">
+<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_TeX_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign :class:`TeXinfo` used for annotations.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_TeX_info</span> <span class="o">=</span> <span class="n">new</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

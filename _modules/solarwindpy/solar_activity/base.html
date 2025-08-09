@@ -1,0 +1,781 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.solar_activity.base &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.solar_activity.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.solar_activity.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Base classes for solar activity indicators.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span><span class="p">,</span> <span class="n">abstractstaticmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">InterpolatedUnivariateSpline</span>
+
+<span class="n">_Loader_Dtypes_Columns</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;LoaderNamedTuple&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dtypes&quot;</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">])</span>
+<span class="n">_data_date_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d</span><span class="si">{4}</span><span class="s2">\d</span><span class="si">{2}</span><span class="s2">\d</span><span class="si">{2}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;mode.chained_assignment&quot;</span><span class="p">,</span> <span class="s2">&quot;raise&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Base">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.Base">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class providing a logger interface.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;``logging.Logger`` attached to the instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span></div>
+
+
+
+<div class="viewcode-block" id="ID">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ID">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ID</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for identifying a particular data product.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the identifier and set the corresponding URL.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Key that maps to a URL fragment in :py:attr:`_trans_url`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_url_base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trans_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;URL specifying location from which data was downloaded.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span>
+
+<div class="viewcode-block" id="ID.set_key">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ID.set_key">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the identifier key and construct the download URL.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trans_url</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> key unavailable&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_url_base</span><span class="p">,</span> <span class="n">url_end</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting key</span><span class="se">\n</span><span class="s2">key : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">url : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="n">url</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DataLoader">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataLoader</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a data loader.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Unique data identifier, typically from something like</span>
+<span class="sd">            :class:`SIDC_ID`.</span>
+<span class="sd">        url : str</span>
+<span class="sd">            Full download URL for the data source.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_data_ctime</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_data_age</span><span class="p">()</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#        return Path(__file__).parent / &quot;data&quot;</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;solarwindpy&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span>
+
+<div class="viewcode-block" id="DataLoader.convert_nans">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.convert_nans">[docs]</a>
+    <span class="nd">@abstractstaticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_nans</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.download_data">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.download_data">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.load_data">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.load_data">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;Loading </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="si">!s}</span><span class="s2"> data&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maybe_update_stale_data</span><span class="p">()</span>
+
+        <span class="n">today</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;today&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">fpath</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="n">today</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ctime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctime</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">age</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_age</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+<div class="viewcode-block" id="DataLoader.set_key">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.set_key">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.set_url">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.set_url">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.get_data_ctime">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.get_data_ctime">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_data_ctime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine when the current data set was created.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.Timestamp</span>
+<span class="sd">            Creation time inferred from the file name, or ``1970-01-01`` if no</span>
+<span class="sd">            prior data are found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_path</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">)]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">_data_date_pattern</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">):</span>
+            <span class="c1"># This will automatically return a date in 1970, so we</span>
+            <span class="c1"># will clear and download new data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ctime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+
+        <span class="c1"># BUG: This fails if there are more than two dated data directories.</span>
+        <span class="c1">#         if dates.size &gt; 1:</span>
+        <span class="c1">#             raise ValueError(&quot;Too many dates: %s&quot; % &quot;, &quot;.join(dates.astype(str)))</span>
+        <span class="c1">#         elif not dates.size:</span>
+        <span class="c1">#             ctime = pd.to_datetime(0)</span>
+        <span class="c1">#         else:</span>
+        <span class="c1">#             ctime = pd.to_datetime(dates[0])</span>
+
+        <span class="k">assert</span> <span class="n">dates</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">ctime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Local data ctime </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ctime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctime</span> <span class="o">=</span> <span class="n">ctime</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.get_data_age">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.get_data_age">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_data_age</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ctime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctime</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;today&quot;</span><span class="p">)</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">today</span> <span class="o">-</span> <span class="n">ctime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_age</span> <span class="o">=</span> <span class="n">dt</span></div>
+
+
+<div class="viewcode-block" id="DataLoader.maybe_update_stale_data">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.DataLoader.maybe_update_stale_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maybe_update_stale_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Download new data if the existing cache is stale.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating stale data&quot;</span><span class="p">)</span>
+
+        <span class="n">old_ctime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctime</span>
+        <span class="n">new_ctime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;today&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">new_ctime</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">old_ctime</span><span class="o">.</span><span class="n">date</span><span class="p">():</span>
+            <span class="n">old_data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="n">old_ctime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">new_data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="n">new_ctime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">new_data_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="n">new_data_path</span><span class="p">,</span> <span class="n">old_data_path</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ActivityIndicator">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ActivityIndicator</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to `self.loader.data`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrema</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_by</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm_by</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Please calculate normalized quantity&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpolated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolated</span>
+
+<div class="viewcode-block" id="ActivityIndicator.set_id">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator.set_id">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">ID</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">new</span></div>
+
+
+    <span class="c1"># Need to store `interpolated` in subclass. Allows normalized ssn to be interpolated.</span>
+<div class="viewcode-block" id="ActivityIndicator.interpolate_data">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator.interpolate_data">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_data</span><span class="p">,</span> <span class="n">target_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate ``source_data`` onto ``target_index``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_data : pandas.Series or pandas.DataFrame</span>
+<span class="sd">            Data with a :class:`~pandas.DatetimeIndex` to interpolate.</span>
+<span class="sd">        target_index : pandas.DatetimeIndex</span>
+<span class="sd">            Target time axis for the interpolation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.DataFrame</span>
+<span class="sd">            Data interpolated onto ``target_index``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">source_data</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+
+        <span class="n">nans</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">nans</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;You must drop NaNs in the subclass&#39;s caller before &quot;</span>
+                <span class="s2">&quot;calling parent method.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">x_target</span> <span class="o">=</span> <span class="n">target_index</span><span class="o">.</span><span class="n">asi8</span>
+        <span class="n">x_source</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">asi8</span>
+
+        <span class="n">interpolated</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">y_source</span> <span class="ow">in</span> <span class="n">source_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">interpolator</span> <span class="o">=</span> <span class="n">InterpolatedUnivariateSpline</span><span class="p">(</span>
+                <span class="n">x_source</span><span class="p">,</span> <span class="n">y_source</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">interped</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">x_target</span><span class="p">)</span>
+            <span class="n">interpolated</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">interped</span>
+
+        <span class="n">interpolated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">interpolated</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">target_index</span><span class="p">)</span>
+
+        <span class="c1"># Remove extrapolated data</span>
+        <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">target_index</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">target_index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">s1</span> <span class="o">&lt;</span> <span class="n">t1</span><span class="p">:</span>
+            <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">target_index</span> <span class="o">&lt;=</span> <span class="n">s1</span><span class="p">)</span>
+
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">target_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s0</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">t0</span> <span class="o">&lt;</span> <span class="n">s0</span><span class="p">:</span>
+            <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s0</span> <span class="o">&lt;=</span> <span class="n">target_index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tk</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">interpolated</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tk</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpolated</span> <span class="o">=</span> <span class="n">interpolated</span>
+        <span class="k">return</span> <span class="n">interpolated</span></div>
+
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="ActivityIndicator.set_extrema">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator.set_extrema">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ActivityIndicator.run_normalization">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator.run_normalization">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalize the indicator within each solar cycle.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        norm_by : {{&quot;max&quot;, &quot;zscore&quot;, &quot;feature-scale&quot;}}</span>
+<span class="sd">            Normalization algorithm to apply.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.Series</span>
+<span class="sd">            Normalized values indexed by time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ActivityIndicator._run_normalization">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.ActivityIndicator._run_normalization">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">norm_fcn</span><span class="p">):</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">cut_spec_by_interval</span><span class="p">(</span><span class="n">indicator</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;Cycle&quot;</span><span class="p">)</span>
+        <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">indicator</span><span class="p">,</span> <span class="n">cut</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;indicator&quot;</span><span class="p">,</span> <span class="s2">&quot;cycle&quot;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cycle&quot;</span><span class="p">)</span>
+
+        <span class="n">normed</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">]</span>
+            <span class="n">normed</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_fcn</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">normed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normed</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">normed</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IndicatorExtrema">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IndicatorExtrema</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for objects describing indicator extrema.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_or_set_data</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_intervals</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cycle_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;`pd.Interval`s corresponding to each rising and falling edge and</span>
+<span class="sd">        the full cycle.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_intervals</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extrema_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Bands of time (:math:`\Delta t`) about indicator extrema.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dt : str or pandas.Timedelta</span>
+<span class="sd">            Window half-width used in :meth:`calculate_extrema_bands`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrema_bands</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Have you called `extrema.calculate_extrema_bands`?&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IndicatorExtrema.load_or_set_data">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema.load_or_set_data">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_or_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="c1">#         path = Path(__file__).parent / &quot;ssn_extrema.csv&quot;</span>
+    <span class="c1">#         data = pd.read_csv(path, header=0, skiprows=15, index_col=0)</span>
+    <span class="c1">#         data = pd.to_datetime(data.stack(), format=&quot;%Y-%m-%d&quot;).unstack(level=1)</span>
+    <span class="c1">#         data.columns.names = [&quot;kind&quot;]</span>
+    <span class="c1">#         self._data = data</span>
+
+    <span class="c1">#######################################################################</span>
+    <span class="c1"># Tools for grouping data by Cycle and Cycle Edge (Rising or Falling) #</span>
+    <span class="c1">#######################################################################</span>
+<div class="viewcode-block" id="IndicatorExtrema.calculate_intervals">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_intervals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute rising, falling, and full-cycle time intervals.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The rising edge comes before the falling edge in time, i.e. it&#39;s</span>
+<span class="sd">        Min ``N`` followed by Max ``N``. Also calculate intervals for a full</span>
+<span class="sd">        SSN cycle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extrema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="s2">&quot;Rise&quot;</span><span class="p">,</span> <span class="s2">&quot;Fall&quot;</span><span class="p">,</span> <span class="s2">&quot;Cycle&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;kind&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make `today` only keep the date.</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;today&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">extrema</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Min&quot;</span><span class="p">]</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Max&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">t1</span><span class="p">):</span>
+                <span class="c1"># No maximum yet, then use Today for maximum</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">today</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Get next cycle&#39;s Minimum to calculate Falling edge</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Min&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="n">today</span><span class="p">:</span>
+                    <span class="c1"># We haven&#39;t reached next Min yet, but have current cycle Max</span>
+                    <span class="c1"># so use today.</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="n">today</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># This cycle does not have a falling edge.</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+
+            <span class="n">rise_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+            <span class="n">fall_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+            <span class="n">all_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">t1</span> <span class="o">==</span> <span class="n">t2</span><span class="p">:</span>
+                <span class="c1"># Then no falling edge</span>
+                <span class="n">fall_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NaT</span>
+
+            <span class="n">intervals</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;Rise&quot;</span><span class="p">:</span> <span class="n">rise_</span><span class="p">,</span> <span class="s2">&quot;Fall&quot;</span><span class="p">:</span> <span class="n">fall_</span><span class="p">,</span> <span class="s2">&quot;Cycle&quot;</span><span class="p">:</span> <span class="n">all_</span><span class="p">})</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cycle_intervals</span> <span class="o">=</span> <span class="n">intervals</span>
+        <span class="k">return</span> <span class="n">intervals</span></div>
+
+
+<div class="viewcode-block" id="IndicatorExtrema.cut_spec_by_interval">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema.cut_spec_by_interval">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cut_spec_by_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tk_cycles</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Assign epochs to solar-cycle intervals.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        epoch : pandas.Series or pandas.DatetimeIndex</span>
+<span class="sd">            Data to cut.</span>
+<span class="sd">        kind : str, optional</span>
+<span class="sd">            If provided, restricts the cut to a subset of interval types.</span>
+
+<span class="sd">            ========= ===============================</span>
+<span class="sd">               Key              Description</span>
+<span class="sd">            ========= ===============================</span>
+<span class="sd">             None      Cut by all available options.</span>
+<span class="sd">             &quot;Cycle&quot;   Cut by solar cycle</span>
+<span class="sd">             &quot;Rise&quot;    Cut by rising edge</span>
+<span class="sd">             &quot;Fall&quot;    Cut by falling edge</span>
+<span class="sd">             &quot;Edges&quot;   Cut by `[&quot;Fall&quot;, &quot;Rise&quot;]`.</span>
+<span class="sd">                       Exclusive option.</span>
+<span class="sd">            ========= ===============================</span>
+
+<span class="sd">            Note that ``&quot;Edges&quot;`` is exclusive and will specify</span>
+<span class="sd">            ``[&quot;Fall&quot;, &quot;Rise&quot;]`` alone.</span>
+<span class="sd">        tk_cycles : list or slice, optional</span>
+<span class="sd">            If not ``None``, a selector used to choose target solar cycles.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.Series</span>
+<span class="sd">            Series of :class:`pandas.Interval` objects labeling each epoch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_intervals</span>
+
+        <span class="n">available_kind</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;kind&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">available_kind</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;Edges&quot;</span><span class="p">:</span>
+                <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;Fall&quot;</span><span class="p">,</span> <span class="s2">&quot;Rise&quot;</span><span class="p">]]</span>
+            <span class="c1">#                 kind = [&quot;Rise&quot;, &quot;Fall&quot;]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="n">kind</span><span class="p">]]</span>
+        <span class="c1">#                 kind = [kind]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">k</span> <span class="ow">in</span> <span class="n">available_kind</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kind</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;Interval `</span><span class="si">{</span><span class="n">kind</span><span class="si">!s}</span><span class="s2">` is unavailable&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">kind</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;Interval `</span><span class="si">{</span><span class="n">kind</span><span class="si">!s}</span><span class="s2">` is unavailable&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tk_cycles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">intervals</span> <span class="o">=</span> <span class="n">intervals</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk_cycles</span><span class="p">]</span>
+
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">intervals</span><span class="o">.</span><span class="n">stack</span><span class="p">())</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ii</span><span class="o">.</span><span class="n">is_unique</span> <span class="ow">and</span> <span class="n">ii</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span>
+        <span class="n">cut</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Cycle_Interval&quot;</span>
+
+        <span class="k">return</span> <span class="n">cut</span></div>
+
+
+    <span class="c1">############################################################</span>
+    <span class="c1"># Tools for selecting data within some dt of cycle extrema #</span>
+    <span class="c1">############################################################</span>
+<div class="viewcode-block" id="IndicatorExtrema.calculate_extrema_bands">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_extrema_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="s2">&quot;365d&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return time windows around indicator extrema.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            dt : str or pandas.Timedelta, optional</span>
+<span class="sd">                Half-width of the window around each extremum. Defaults to ``&quot;365d&quot;``.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">        pandas.DataFrame</span>
+<span class="sd">            ``Min`` and ``Max`` intervals for each cycle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">extrema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dl</span><span class="p">,</span> <span class="n">dr</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="k">elif</span> <span class="n">dt</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dl</span> <span class="o">=</span> <span class="n">dr</span> <span class="o">=</span> <span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only know how to handle 1 or 2 dt options.&quot;</span><span class="p">)</span>
+
+        <span class="n">left</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">dl</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="n">left</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="n">right</span><span class="p">})</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_interval</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">])</span>
+
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">make_interval</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;kind&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extrema_bands</span> <span class="o">=</span> <span class="n">bands</span>
+        <span class="k">return</span> <span class="n">bands</span></div>
+
+
+<div class="viewcode-block" id="IndicatorExtrema.cut_about_extrema_bands">
+<a class="viewcode-back" href="../../../solarwindpy.solar_activity.html#solarwindpy.solar_activity.base.IndicatorExtrema.cut_about_extrema_bands">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cut_about_extrema_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">tk_cycles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Bin epochs relative to extrema bands computed with</span>
+<span class="sd">        :py:meth:`calculate_extrema_bands`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        epoch : pandas.DatetimeIndex</span>
+<span class="sd">            Times to classify.</span>
+<span class="sd">        tk_cycles : slice, optional</span>
+<span class="sd">            Subset of cycles to use when cutting.</span>
+<span class="sd">        kind : {{&quot;Min&quot;, &quot;Max&quot;}}, optional</span>
+<span class="sd">            Restrict the classification to minima or maxima.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple[pandas.Series, pandas.Series]</span>
+<span class="sd">            A series of intervals and a mapped series of the form ``&quot;N-Min&quot;`` or</span>
+<span class="sd">            ``&quot;N-Max&quot;``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrema_bands</span>
+        <span class="k">if</span> <span class="n">tk_cycles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk_cycles</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span> <span class="s2">&quot;Max&quot;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="p">[</span><span class="n">kind</span><span class="p">]</span>
+
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">kind</span><span class="p">]</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+
+        <span class="c1"># TODO: verify bands shape</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">bands</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">intervals</span><span class="p">)</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;spec_by_extrema_band&quot;</span><span class="p">)</span>
+
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Intervals&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Intervals&quot;</span><span class="p">)</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;Number&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">mapper</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;kind&quot;</span><span class="p">]</span>
+        <span class="n">mapped</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">mapper</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cut</span><span class="p">,</span> <span class="n">mapped</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

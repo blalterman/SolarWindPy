@@ -1,0 +1,463 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.solar_activity.lisird.lisird &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.solar_activity.lisird.lisird</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.solar_activity.lisird.lisird</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Interfaces for the LASP Interactive Solar Irradiance Data Center (LISIRD).</span>
+
+<span class="sd">The submodule provides classes for downloading and working with data hosted at</span>
+<span class="sd">`LASP &lt;http://lasp.colorado.edu/lisird/&gt;`_.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># from scipy.interpolate import InterpolatedUnivariateSpline</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ID</span><span class="p">,</span>
+    <span class="n">DataLoader</span><span class="p">,</span>
+    <span class="n">ActivityIndicator</span><span class="p">,</span>
+    <span class="n">IndicatorExtrema</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># , _Loader_Dtypes_Columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.extrema_calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtremaCalculator</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;mode.chained_assignment&quot;</span><span class="p">,</span> <span class="s2">&quot;raise&quot;</span><span class="p">)</span>
+
+<span class="c1"># _m13_dtypes_columns = _Loader_Dtypes_Columns(</span>
+<span class="c1"># {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},</span>
+<span class="c1"># (&quot;year&quot;, &quot;month&quot;, &quot;year_fraction&quot;, &quot;ssn&quot;, &quot;std&quot;, &quot;n_obs&quot;, &quot;definitive&quot;)</span>
+<span class="c1"># )</span>
+<span class="c1">#</span>
+<span class="c1"># _m_dtypes_columns = _Loader_Dtypes_Columns(</span>
+<span class="c1"># {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},</span>
+<span class="c1"># [&quot;year&quot;, &quot;month&quot;, &quot;year_fraction&quot;, &quot;ssn&quot;, &quot;std&quot;, &quot;n_obs&quot;, &quot;definitive&quot;]</span>
+<span class="c1"># )</span>
+<span class="c1">#</span>
+<span class="c1"># _d_dtypes_columns = _Loader_Dtypes_Columns(</span>
+<span class="c1"># {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},</span>
+<span class="c1"># [&quot;year&quot;, &quot;month&quot;, &quot;day&quot;, &quot;year_fraction&quot;, &quot;ssn&quot;, &quot;std&quot;, &quot;n_obs&quot;, &quot;definitive&quot;</span>
+<span class="c1"># )</span>
+
+
+<div class="viewcode-block" id="LISIRD_ID">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD_ID">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LISIRD_ID</span><span class="p">(</span><span class="n">ID</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Identifier for LISIRD data products.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Short name of the data set. Examples include ``&quot;Lalpha&quot;`` or</span>
+<span class="sd">            ``&quot;f107-noaa&quot;``.</span>
+
+<span class="sd">            =========== ======================== =============================</span>
+<span class="sd">             Key           Description                     URL</span>
+<span class="sd">            =========== ======================== =============================</span>
+<span class="sd">             Lalpha      Lyman-alpha              composite_lyman_alpha.jsond</span>
+<span class="sd">             CaK         Calcium K line           cak.jsond</span>
+<span class="sd">             f107-noaa   NOAA F10.7 flux          noaa_radio_flux.jsond</span>
+<span class="sd">             f107-pen    Penticton F10.7 flux     penticton_radio_flux.jsond</span>
+<span class="sd">             MgII        Composite Magnesium II   composite_mg_index.jsond</span>
+<span class="sd">            =========== ======================== =============================</span>
+
+<span class="sd">        URLs replace the wild card in ``http://lasp.colorado.edu/lisird/latis/*``.</span>
+
+<span class="sd">        Note that the CaK line should probably be served directly from</span>
+<span class="sd">        ``https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/``.</span>
+<span class="sd">        The quantities in CaK data are</span>
+
+<span class="sd">            ======== ====================================================</span>
+<span class="sd">             k3       Core Intensity</span>
+<span class="sd">             k2vk3    Relative blue K2 peak w/rt K3 instensity</span>
+<span class="sd">             delk1    Separation of the blue and red K1 minima (K1V-K1R)</span>
+<span class="sd">             delk2    Separation of the two emission maxima (K2V-K2R)</span>
+<span class="sd">             delwb    Wilson-Bappu parameter, width between the outer</span>
+<span class="sd">                      edges of the K2 emission peaks</span>
+<span class="sd">             emdx     Emission index equivalent width in 1 angstrom</span>
+<span class="sd">                      band centered on K3</span>
+<span class="sd">             viored   ???</span>
+<span class="sd">            ======== ====================================================</span>
+
+<span class="sd">        (&lt;https://www.nso.edu/wp-content/uploads/2018/09/cak_paper.pdf&gt;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LISIRD_ID</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_url_base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;http://lasp.colorado.edu/lisird/latis/dap/&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trans_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">trans_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;Lalpha&quot;</span><span class="p">,</span> <span class="s2">&quot;composite_lyman_alpha.jsond&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;CaK&quot;</span><span class="p">,</span> <span class="s2">&quot;cak.jsond&quot;</span><span class="p">),</span>
+            <span class="c1">#             (&quot;f107&quot;, &quot;noaa_radio_flux.jsond&quot;),</span>
+            <span class="p">(</span><span class="s2">&quot;f107-penticton&quot;</span><span class="p">,</span> <span class="s2">&quot;penticton_radio_flux.jsond&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;f107-noaa&quot;</span><span class="p">,</span> <span class="s2">&quot;noaa_radio_flux.jsond&quot;</span><span class="p">),</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;MgII&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;composite_mg_index.jsond&quot;</span><span class="p">,</span>
+            <span class="p">),</span>  <span class="c1"># CHECK: Change to &quot;bremen_composite_mgii.jsond&quot; ?</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">trans_url</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LISIRDLoader">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LISIRDLoader</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">LISIRDLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="s2">&quot;lisird&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span>
+
+<div class="viewcode-block" id="LISIRDLoader.convert_nans">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader.convert_nans">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_nans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;CaK&quot;</span><span class="p">,</span> <span class="s2">&quot;MgII&quot;</span><span class="p">,</span> <span class="s2">&quot;f107-noaa&quot;</span><span class="p">,</span> <span class="s2">&quot;f107-penticton&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Prior inspection shows no missing data in `</span><span class="si">%s</span><span class="s2">`.&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;Lalpha&quot;</span><span class="p">:</span>
+            <span class="n">mv0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;irradiance&quot;</span><span class="p">][</span><span class="s2">&quot;missing_value&quot;</span><span class="p">])</span>
+            <span class="n">mv1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;uncertainty&quot;</span><span class="p">][</span><span class="s2">&quot;missing_value&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mv0</span> <span class="o">==</span> <span class="n">mv1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsure how to handle mv0 (</span><span class="si">{</span><span class="n">mv0</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">) != mv1 (</span><span class="si">{</span><span class="n">mv1</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+            <span class="n">mv</span> <span class="o">=</span> <span class="n">mv0</span>
+        <span class="c1">#         elif key == &quot;f107&quot;:</span>
+        <span class="c1">#             mv = np.float64(meta[&quot;f107&quot;][&quot;missing_value&quot;])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Haven&#39;t inspected other data to convert.&quot;</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_replace</span><span class="o">=</span><span class="n">mv</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LISIRDLoader.verify_monotonic_epoch">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader.verify_monotonic_epoch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verify_monotonic_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span>
+
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;milliseconds&quot;</span><span class="p">]</span>
+        <span class="n">drop</span> <span class="o">=</span> <span class="n">ms</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;f107-penticton&quot;</span><span class="p">:</span>
+            <span class="n">manually_identified_bad_timestamps</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="mi">1_061_657_971_200</span><span class="p">,</span>
+                <span class="mi">1_277_073_820_800</span><span class="p">,</span>
+                <span class="mi">1_568_685_597_120</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="n">manual_bad</span> <span class="o">=</span> <span class="n">ms</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">manually_identified_bad_timestamps</span><span class="p">)</span>
+            <span class="n">drop</span> <span class="o">=</span> <span class="n">drop</span> <span class="o">|</span> <span class="n">manual_bad</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">drop</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="LISIRDLoader.download_data">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader.download_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_path</span><span class="p">,</span> <span class="n">old_data_path</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Downloading solar activity data: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">url: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">url_</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">url_</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">())[</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="p">]</span>
+
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">])</span>
+
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;1970-01-01 00:00:00&quot;</span><span class="p">)</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>  <span class="c1"># Time in milliseconds since 1970-01-01.</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;milliseconds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ms</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert_nans</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_monotonic_epoch</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="n">new_data_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">new_data_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)</span>
+
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">d_old</span> <span class="o">=</span> <span class="n">old_data_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+        <span class="n">m_old</span> <span class="o">=</span> <span class="n">old_data_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d_old</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">m_old</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LISIRDLoader.load_data">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader.load_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LISIRDLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+        <span class="c1">#        self.logger.info(&quot;Loading %s LISIRD data&quot;, self.key)</span>
+        <span class="c1">#</span>
+        <span class="c1">#        self.maybe_update_stale_data()</span>
+        <span class="c1">#</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;today&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="n">today</span>
+
+        <span class="c1">#        data = pd.read_csv(data_path.with_suffix(&quot;.csv&quot;))</span>
+        <span class="c1">#        self._data = data</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Load complete&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LISIRD">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LISIRD</span><span class="p">(</span><span class="n">ActivityIndicator</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wrapper around LISIRD data sets.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Instantiate a LISIRD data object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Identifier passed to :class:`LISIRD_ID`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">LISIRD_ID</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_extrema</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LISIRD.set_extrema">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD.set_extrema">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">meta</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="LISIRD.run_normalization">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD.run_normalization">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm_by</span><span class="o">=</span><span class="s2">&quot;feature-scale&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Need to fix normalization handling for each LISIRD</span>
+<span class="sd">quantity&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Note: &quot;max&quot; and &quot;feature-scale&quot; are the same if the min(SSN) = 0.</span>
+        <span class="k">assert</span> <span class="n">norm_by</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span> <span class="s2">&quot;feature-scale&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Normalizing SSN by </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">norm_by</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_norm_by</span> <span class="o">=</span> <span class="n">norm_by</span>
+
+        <span class="k">if</span> <span class="n">norm_by</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">norm_fcn</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="k">elif</span> <span class="n">norm_by</span> <span class="o">==</span> <span class="s2">&quot;zscore&quot;</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">norm_fcn</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+
+        <span class="k">elif</span> <span class="n">norm_by</span> <span class="o">==</span> <span class="s2">&quot;feature-scale&quot;</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">norm_fcn</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">g</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+        <span class="n">normalized</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_normalization</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">norm_fcn</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normalized</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">normed_interpolated</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">interpolated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolated</span>
+            <span class="n">normed_interpolated</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_normalization</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">norm_fcn</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">interpolated</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">normed_interpolated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normed_interpolated</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">normalized</span><span class="p">,</span> <span class="n">normed_interpolated</span></div>
+
+
+    <span class="n">run_normalization</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">ActivityIndicator</span><span class="o">.</span><span class="n">run_normalization</span>
+
+<div class="viewcode-block" id="LISIRD.load_data">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD.load_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">LISIRDLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loader</span> <span class="o">=</span> <span class="n">loader</span></div>
+
+
+<div class="viewcode-block" id="LISIRD.interpolate_data">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRD.interpolate_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_index</span><span class="p">):</span>
+        <span class="n">trans</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Lalpha&quot;</span><span class="p">:</span> <span class="s2">&quot;irradiance&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;MgII&quot;</span><span class="p">:</span> <span class="s2">&quot;mg_index&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;CaK&quot;</span><span class="p">:</span> <span class="s2">&quot;emdx&quot;</span><span class="p">,</span>  <span class="c1"># Other CaK data is available, but unsure how to use.</span>
+            <span class="c1"># Per &lt;https://www.spaceweather.gc.ca/solarflux/sx-3-en.php&gt;, adjusted value is scaled for variation in Earth-Sun distance</span>
+            <span class="s2">&quot;f107-noaa&quot;</span><span class="p">:</span> <span class="s2">&quot;adjusted_flux&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f107-penticton&quot;</span><span class="p">:</span> <span class="s2">&quot;adjusted_flux&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">trans</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">key</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">interpolated</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">LISIRD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpolated</span> <span class="o">=</span> <span class="n">interpolated</span>
+        <span class="k">return</span> <span class="n">interpolated</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LISIRDExtrema">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDExtrema">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LISIRDExtrema</span><span class="p">(</span><span class="n">IndicatorExtrema</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extrema_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`ExtremaCalculator` used to calculate the extrema.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrema_calculator</span>
+
+<div class="viewcode-block" id="LISIRDExtrema.load_or_set_data">
+<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.lisird.LISIRDExtrema.load_or_set_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_or_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get extrema from :py:class:`ExtremaCalculator`.&quot;&quot;&quot;</span>
+        <span class="n">ec</span> <span class="o">=</span> <span class="n">ExtremaCalculator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">extrema</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">formatted_extrema</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">extrema</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extrema_calculator</span> <span class="o">=</span> <span class="n">ec</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

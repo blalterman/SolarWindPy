@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.core.alfvenic_turbulence &mdash; SolarWindPy 0.1.dev1+g5298190 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c75a0f12"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">solarwindpy.core.alfvenic_turbulence</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.core.alfvenic_turbulence</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Alfvenic turbulence diagnostics using Elsasser variables.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">The implementation follows the formalism outlined in Bruno &amp; Carbone [1].</span>
+<span class="sd">Lloyd Woodham &lt;https://orcid.org/0000-0003-2845-4250&gt; helped me define these</span>
+<span class="sd">calculations at the 2018 AGU Fall Meeting and understand [1]. Please cite [3]</span>
+<span class="sd">if using this module.</span>
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+<span class="sd">[1] Bruno, R., &amp; Carbone, V. (2013). *Living Reviews in Solar Physics*,</span>
+<span class="sd">    10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2</span>
+<span class="sd">[2] Telloni, D., &amp; Bruno, R. (2016). *Monthly Notices of the Royal Astronomical</span>
+<span class="sd">    Society: Letters*, 463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135</span>
+<span class="sd">[3] Woodham, L. D., Wicks, R. T., Verscharen, D., &amp; Owen, C. J. (2018).</span>
+<span class="sd">    *Astrophys. J.*, 856, 49.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="c1"># We rely on views via DataFrame.xs to reduce memory size and do not</span>
+<span class="c1"># `.copy(deep=True)`, so we want to make sure that this doesn&#39;t</span>
+<span class="c1"># accidentally cause a problem.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
+
+<span class="n">AlvenicTurbAveraging</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;AlvenicTurbAveraging&quot;</span><span class="p">,</span> <span class="s2">&quot;window,min_periods&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AlfvenicTurbulence">
+<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlfvenicTurbulence</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Core</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alfv\&#39;enic turbulence diagnostics using Elsasser variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    velocity : :class:`pandas.DataFrame`</span>
+<span class="sd">        Plasma velocity in the same basis as ``bfield``.</span>
+<span class="sd">    bfield : :class:`pandas.DataFrame`</span>
+<span class="sd">        Magnetic field in the same basis as ``velocity``.</span>
+<span class="sd">    rho : :class:`pandas.Series`</span>
+<span class="sd">        Mass density used for normalising ``bfield``.</span>
+<span class="sd">    species : str</span>
+<span class="sd">        Species string used when converting to Alfv\&#39;en units.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Implementation follows the formalism of Bruno &amp; Carbone (2013).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">velocity</span><span class="p">,</span>
+        <span class="n">bfield</span><span class="p">,</span>
+        <span class="n">rho</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">,</span>
+        <span class="n">raffaella_version</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">sc_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize an :py:class:`AlfvenicTurbulence` object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        velocity: pd.DataFrame</span>
+<span class="sd">            Vector velocity measurments.</span>
+<span class="sd">        bfield: pd.DataFrame</span>
+<span class="sd">            Vector mangetic field measurements.</span>
+<span class="sd">        rho: pd.Series</span>
+<span class="sd">            Mass density measurments, used to put `bfield` into Alfven units.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed to `rolling` method when mean-subtracing in `set_data`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">AlfvenicTurbulence</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+            <span class="n">velocity</span><span class="p">,</span>
+            <span class="n">bfield</span><span class="p">,</span>
+            <span class="n">rho</span><span class="p">,</span>
+            <span class="n">species</span><span class="p">,</span>
+            <span class="n">raffaella_version</span><span class="o">=</span><span class="n">raffaella_version</span><span class="p">,</span>
+            <span class="n">sc_vector</span><span class="o">=</span><span class="n">sc_vector</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean-subtracted quantities used to calculated Elsasser variables.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">averaging_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Averaging window and minimum number of measurements / average used</span>
+<span class="sd">        in calculating background component in :math:`\delta B` and :math:`\delta v`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_info</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Measurements used to calcualte mean-subtracted `data`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Velocity in Plasma&#39;s v-units.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;v&quot;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.velocity`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bfield</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field in Alfven units, where velocity is stored in Plasma&#39;s</span>
+<span class="sd">        v-units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#         return self.data.loc[:, &quot;b&quot;]</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;b&quot;</span><span class="p">]</span>
+        <span class="n">polarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polarity</span>
+        <span class="k">if</span> <span class="n">polarity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Rectifying B&quot;</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#             b = b.copy(deep=True)</span>
+        <span class="c1">#             b.loc[:, [&quot;x&quot;, &quot;y&quot;]] = b.loc[:, [&quot;x&quot;, &quot;y&quot;]].multiply(polarity, axis=0)</span>
+        <span class="k">return</span> <span class="n">b</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.bfield`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bfield</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">polarity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field polarity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polarity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Species used to create `AlfvenicTurbulence`. Defines mass density in Alfven</span>
+<span class="sd">        units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_plus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Z+ Elsasser variable.&quot;&quot;&quot;</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">zp</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_plus`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_plus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_minus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Z- Elsasser variable.&quot;&quot;&quot;</span>
+        <span class="n">zm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">zm</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_minus`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_minus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">e_plus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy contained in :math:`z^+`.&quot;&quot;&quot;</span>
+        <span class="n">ep</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">zp</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ep</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_plus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">e_minus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">zm</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">em</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">em</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_minus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ev</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ev</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kinetic_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">magnetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eb</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">eb</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnetic_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">etot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residual_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eres</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized_residual_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eres</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">etot</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eres_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_residual_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_residual_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cross_helicity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized_cross_helicity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">em</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">em</span><span class="p">)</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">em</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">den</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_cross_helicity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alfven_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alfven_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">elsasser_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">em</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elsasser_ratio</span>
+
+<div class="viewcode-block" id="AlfvenicTurbulence.set_data">
+<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.set_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">v_in</span><span class="p">,</span>
+        <span class="n">b_in</span><span class="p">,</span>
+        <span class="n">rho</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">,</span>
+        <span class="n">raffaella_version</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">sc_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The `auto_reindex` kwarg can be set to False so that, if running a</span>
+<span class="sd">        large batch of analysis on the same data, one can reindex once outside</span>
+<span class="sd">        of this class and avoid many unnecessary reindexing cases within it.</span>
+
+<span class="sd">        Be sure to carefully check your reindexing so as to not introduce lots</span>
+<span class="sd">        of NaNs. I ran into that bug when first writing this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_species_for_setting</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b_in</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">b_in</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;v and b have unequal indices. Results may be unexpected.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;v and rho have unequal indices. Results may be</span>
+<span class="sd">unexpected.&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># Convert b -&gt; Alfven units before averaging as in Bruno and Carbone</span>
+        <span class="c1"># [2013], Section B.3.1.</span>
+        <span class="c1"># Based on my read of Bruno and Carbone&#39;s definition in B.3.1 (p.166),</span>
+        <span class="c1"># we first define the magnetic field in Alfven units. Then we calculate</span>
+        <span class="c1"># averages. Note that I took the other option in my test cases in</span>
+        <span class="c1"># `TS-analysis` project. (20181120)</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">b</span> <span class="o">/</span> <span class="p">(</span>  <span class="c1"># Convert b -&gt; Alfven units.</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">mu0</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">v</span>
+        <span class="p">)</span>
+        <span class="n">b_ca_units</span> <span class="o">=</span> <span class="n">b_in</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">v_in</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b_ca_units</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1">#        if auto_reindex:</span>
+        <span class="c1">#            idx = v_in.index.union(b_in.index)</span>
+        <span class="c1">#            i0 = idx.min()</span>
+        <span class="c1">#            i1 = idx.max() + 1  # `stop` excludes `i1`, so use `i1 + 1`.</span>
+        <span class="c1">#            idx = pd.RangeIndex(start=i0, stop=i1, step=1)</span>
+        <span class="c1">#</span>
+        <span class="c1">#            v = v_in.reindex(idx, axis=0)</span>
+        <span class="c1">#            b = b_ca_units.reindex(idx, axis=0)</span>
+        <span class="c1">#</span>
+        <span class="c1">#        else:</span>
+        <span class="c1">#            v = v_in</span>
+        <span class="c1">#            b = b_ca_units</span>
+
+        <span class="c1">#         print(&quot;&lt;set_data&gt;&quot;,</span>
+        <span class="c1">#               &quot;&lt;species&gt;: %s&quot; % species,</span>
+        <span class="c1">#               &quot;&lt;v_in&gt;&quot;, type(v_in), v_in,</span>
+        <span class="c1">#               &quot;&lt;v&gt;&quot;, type(v), v,</span>
+        <span class="c1">#               &quot;&lt;rho&gt;&quot;, type(rho), rho,</span>
+        <span class="c1">#               &quot;&lt;b_in&gt;&quot;, type(b_in), b_in,</span>
+        <span class="c1">#               &quot;&lt;coef&gt;: %s&quot; % coef,</span>
+        <span class="c1">#               &quot;&lt;b&gt;&quot;, type(b), b,</span>
+        <span class="c1">#               sep=&quot;\n&quot;,</span>
+        <span class="c1">#               end=&quot;\n\n&quot;)</span>
+
+        <span class="n">polarity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">raffaella_version</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Running Raffaella&#39;s version&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sc_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;SC-Sun distance required to peform Raffaella&#39;s version.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1">#             # Drop normal component</span>
+            <span class="c1">#             data = data.drop(&quot;z&quot;, axis=1, level=&quot;C&quot;).copy(deep=True)</span>
+
+            <span class="c1"># Convert GSE -&gt; RTN</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Project along nominal Parker Spiral</span>
+            <span class="n">omega</span> <span class="o">=</span> <span class="mf">2.865e-6</span>  <span class="c1"># rad/s</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">r_rtn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pos</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span>
+                <span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">rho_rtn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pos</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cos_colat</span> <span class="o">=</span> <span class="n">rho_rtn</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">r_rtn</span><span class="p">)</span>
+            <span class="c1">#             cos_colat = 1</span>
+
+            <span class="n">r</span> <span class="o">=</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">distance2sun</span> <span class="o">*</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">distance2sun</span> <span class="o">*</span> <span class="mf">1e-3</span>  <span class="c1"># [km]</span>
+
+            <span class="n">correction</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">cos_colat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                <span class="n">omega</span>
+            <span class="p">)</span>  <span class="c1"># [arc length speed] = [km/s]</span>
+            <span class="n">vt</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">correction</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vt</span>
+            <span class="c1">#             vy = data.loc[:, (&quot;v&quot;, &quot;y&quot;)].add(correction)</span>
+            <span class="c1">#             data.loc[:, (&quot;v&quot;, &quot;y&quot;)] = vy</span>
+
+            <span class="n">polarity</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;v&quot;</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">window</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window&quot;</span><span class="p">,</span> <span class="s2">&quot;15min&quot;</span><span class="p">)</span>
+        <span class="n">min_periods</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;min_periods&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="n">rolled</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">agged</span> <span class="o">=</span> <span class="n">rolled</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+        <span class="n">deltas</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">agged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;measurements&quot;</span>
+        <span class="n">deltas</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;deltas&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">deltas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_polarity</span> <span class="o">=</span> <span class="n">polarity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_info</span> <span class="o">=</span> <span class="n">AlvenicTurbAveraging</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">min_periods</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_species_for_setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.species must be a single species w/ an optional `+` or `,`&quot;</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">species</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.species can contain at most one `,`</span><span class="se">\n</span><span class="s2">species: </span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">species</span><span class="p">))</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">))))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">species</span></div>
+
+
+
+<div class="viewcode-block" id="AlfvenicTurbulenceDAmicis">
+<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulenceDAmicis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlfvenicTurbulenceDAmicis</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Core</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Handle and calculate Alfvenic turbulence quantities using the Elsasser</span>
+<span class="sd">    variables following R D&#39;Amicis&#39; email (20240214).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    velocity : pd.DataFrame, pd.Series (?)</span>
+<span class="sd">        The velocity vector in the same basis as `bfield`.</span>
+<span class="sd">        Can be a single species, a CoM species, or a differential flow. The</span>
+<span class="sd">        differential flow case is an area of curiosity for me and I do not</span>
+<span class="sd">        suggest passing it as an input.</span>
+<span class="sd">        Expect [v] = km/s (i.e. default stored in `units_constants.Units`).</span>
+<span class="sd">    bfield : pd.DataFrame, pd.Series (?)</span>
+<span class="sd">        Magnetic field vector in the same basis as `velocity`.</span>
+<span class="sd">        Expect [b] = nT (i.e. default stored in `units_contants.Units`).</span>
+<span class="sd">    rho : pd.Series</span>
+<span class="sd">        The total mass density of the plasma used to define velocity.</span>
+<span class="sd">        Expect [rho] = m_p / cm^3 (i.e. default stored in</span>
+<span class="sd">        `units_constants.Units`).</span>
+<span class="sd">    species: str</span>
+<span class="sd">        The species string. Can contain `+`. Can contain at most one `,`.</span>
+
+<span class="sd">    Properties</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data, species, z_plus, zp, z_minus, zm, e_plus, ep,</span>
+<span class="sd">    e_minus, em, total_energy, etot,</span>
+<span class="sd">    residual_energy, eres, normalized_residual_energy, eres_norm, sigma_r,</span>
+<span class="sd">    cross_helicity, normalized_cross_helicity, sigma_c, alfven_ratio, rA,</span>
+<span class="sd">    elsasser_ratio, rE</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    set_data</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">bfield</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">sc_vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize an :py:class:`AlfvenicTurbulence` object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        velocity: pd.DataFrame</span>
+<span class="sd">            Vector velocity measurments.</span>
+<span class="sd">        bfield: pd.DataFrame</span>
+<span class="sd">            Vector mangetic field measurements.</span>
+<span class="sd">        rho: pd.Series</span>
+<span class="sd">            Mass density measurments, used to put `bfield` into Alfven units.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed to `rolling` method when mean-subtracing in `set_data`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#         print(&quot;&lt;Module&gt;&quot;,</span>
+        <span class="c1">#               &quot;__init__&quot;,</span>
+        <span class="c1">#               sep=&quot;\n&quot;,</span>
+        <span class="c1">#               end=&quot;\n&quot;)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">AlfvenicTurbulenceDAmicis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span> <span class="n">bfield</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">sc_vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean-subtracted quantities used to calculated Elsasser variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">averaging_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Averaging window and minimum number of measurements / average used</span>
+<span class="sd">        in calculating background component in :math:`\delta B` and :math:`\delta v`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_info</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Measurements used to calcualte mean-subtracted `data`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">polarity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field polarity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polarity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Species used to create `AlfvenicTurbulence`. Defines mass density in Alfven</span>
+<span class="sd">        units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_plus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Z+ Elsasser variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;zp&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">zp</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_plus`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_plus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_minus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Z- Elsasser variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;zm&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">zm</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_minus`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_minus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">e_plus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># I took the averages before I created the +/-z quantities in my</span>
+        <span class="c1"># previous test cases. Based on a more detailed read of Bruno and</span>
+        <span class="c1"># Carbone, I calculate +/-z before I take averages. Note that because</span>
+        <span class="c1"># I am adding v and b, the differene shouldn&#39;t matter.</span>
+        <span class="n">ep</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">zp</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ep</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_plus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">e_minus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">zm</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">em</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">em</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_minus</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def kinetic_energy(self):</span>
+    <span class="c1">#         ev = 0.5 * self.v.pow(2).sum(axis=1)</span>
+    <span class="c1">#         return ev</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def ev(self):</span>
+    <span class="c1">#         return self.kinetic_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def magnetic_energy(self):</span>
+    <span class="c1">#         eb = 0.5 * self.b.pow(2).sum(axis=1)</span>
+    <span class="c1">#         return eb</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def eb(self):</span>
+    <span class="c1">#         return self.magnetic_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def total_energy(self):</span>
+    <span class="c1">#         return self.ev.add(self.eb, axis=0)</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def etot(self):</span>
+    <span class="c1">#         return self.total_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def residual_energy(self):</span>
+    <span class="c1">#         return self.ev.subtract(self.eb, axis=0)</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def eres(self):</span>
+    <span class="c1">#         return self.residual_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def normalized_residual_energy(self):</span>
+    <span class="c1">#         return self.eres.divide(self.etot, axis=0)</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def eres_norm(self):</span>
+    <span class="c1">#         return self.normalized_residual_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def sigma_r(self):</span>
+    <span class="c1">#         return self.normalized_residual_energy</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def cross_helicity(self):</span>
+    <span class="c1">#         v = self.v</span>
+    <span class="c1">#         b = self.b</span>
+    <span class="c1">#         c = 0.5 * v.multiply(b).sum(axis=1)</span>
+    <span class="c1">#         return c</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalized_cross_helicity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">em</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">em</span><span class="p">)</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">em</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">den</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_cross_helicity</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def alfven_ratio(self):</span>
+    <span class="c1">#         return self.ev.divide(self.eb, axis=0)</span>
+
+    <span class="c1">#     @property</span>
+    <span class="c1">#     def rA(self):</span>
+    <span class="c1">#         return self.alfven_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">elsasser_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">em</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elsasser_ratio</span>
+
+<div class="viewcode-block" id="AlfvenicTurbulenceDAmicis.set_data">
+<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulenceDAmicis.set_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_in</span><span class="p">,</span> <span class="n">b_in</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">sc_vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The `auto_reindex` kwarg can be set to False so that, if running a</span>
+<span class="sd">        large batch of analysis on the same data, one can reindex once outside</span>
+<span class="sd">        of this class and avoid many unnecessary reindexing cases within it.</span>
+
+<span class="sd">        Be sure to carefully check your reindexing so as to not introduce lots</span>
+<span class="sd">        of NaNs. I ran into that bug when first writing this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_species_for_setting</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b_in</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">b_in</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;v and b have unequal indices. Results may be unexpected.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v_in</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">rho</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;v and rho have unequal indices. Results may be</span>
+<span class="sd">unexpected.&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># auto_reindex = bool(auto_reindex)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">v_in</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b_in</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1">#         print(&quot;1&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="c1"># Convert GSE -&gt; RTN</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+
+        <span class="c1">#         print(&quot;2&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="c1"># Project along nominal Parker Spiral</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="mf">2.865e-6</span>  <span class="c1"># rad/s</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">r_rtn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">rho_rtn</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+        <span class="n">cos_colat</span> <span class="o">=</span> <span class="n">rho_rtn</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">r_rtn</span><span class="p">)</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">distance2sun</span> <span class="o">*</span> <span class="n">sc_vector</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">distance2sun</span> <span class="o">*</span> <span class="mf">1e-3</span>  <span class="c1"># [km]</span>
+
+        <span class="n">correction</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">cos_colat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+            <span class="n">omega</span>
+        <span class="p">)</span>  <span class="c1"># [arc length speed] = [km/s]</span>
+        <span class="n">vt</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">correction</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vt</span>
+
+        <span class="c1"># #         print(&quot;3&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="n">polarity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;v&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1">#                     .drop([&quot;x&quot;, &quot;y&quot;], axis=1)</span>
+            <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">coef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">b</span> <span class="o">/</span> <span class="p">(</span>  <span class="c1"># Convert b -&gt; Alfven units.</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">mu0</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">v</span>
+        <span class="p">)</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
+        <span class="n">polarity_coef</span> <span class="o">=</span> <span class="n">polarity</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
+
+        <span class="c1">#         print(&quot;Coef&quot;, polarity_coef.head(), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="n">b_calc</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;b&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">polarity_coef</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#         b_calc = data.loc[:, &quot;b&quot;].multiply(coef, axis=0)</span>
+        <span class="n">v_calc</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;v&quot;</span><span class="p">]</span>
+
+        <span class="c1">#         print(&quot;4&quot;, v_calc.head().round(3), b_calc.head().round(3),sep=&quot;\n&quot;,  end=&quot;\n\n&quot;)</span>
+
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">v_calc</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">b_calc</span><span class="p">)</span>
+        <span class="n">zm</span> <span class="o">=</span> <span class="n">v_calc</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">b_calc</span><span class="p">)</span>
+        <span class="n">z_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;zp&quot;</span><span class="p">:</span> <span class="n">zp</span><span class="p">,</span> <span class="s2">&quot;zm&quot;</span><span class="p">:</span> <span class="n">zm</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1">#         print(&quot;5&quot;, z_raw.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="n">window</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window&quot;</span><span class="p">,</span> <span class="s2">&quot;15min&quot;</span><span class="p">)</span>
+        <span class="n">min_periods</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;min_periods&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="n">rolled</span> <span class="o">=</span> <span class="n">z_raw</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">agged</span> <span class="o">=</span> <span class="n">rolled</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+        <span class="n">deltas</span> <span class="o">=</span> <span class="n">z_raw</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">agged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1">#         print(&quot;6&quot;, agged.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+        <span class="c1">#         print(&quot;y&quot;, deltas.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;measurements&quot;</span>
+        <span class="n">deltas</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;deltas&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measurements</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">deltas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_polarity</span> <span class="o">=</span> <span class="n">polarity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_info</span> <span class="o">=</span> <span class="n">AlvenicTurbAveraging</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">min_periods</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_species_for_setting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.species must be a single species w/ an optional `+` or `,`&quot;</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">species</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.species can contain at most one `,`</span><span class="se">\n</span><span class="s2">species: </span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">species</span><span class="p">))</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">))))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">species</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
