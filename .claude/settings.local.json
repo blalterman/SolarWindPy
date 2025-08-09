@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(conda info:*)",
+      "Bash(echo $CONDA_DEFAULT_ENV)",
+      "Bash(doc8:*)"
+    ],
+    "deny": []
+  }
+}

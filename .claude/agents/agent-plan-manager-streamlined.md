@@ -73,4 +73,40 @@ feature/feature-name         # Implementation work
 - **Time Estimation**: Provide ranges for uncertainty, handle missing data, adjust for scope changes  
 - **Cross-Agent Sync**: Manage conflicts between plan and implementation branches
 
-This agent serves as the strategic brain for development planning, ensuring all plans are properly tracked, estimated, and coordinated for optimal development efficiency.
+## Claude Pro Usage Optimization
+
+### Session Management Strategies
+- **Optimal Session Length**: Plan for 2-3 hour focused sessions to stay within Claude Pro 5-hour cycles
+- **Checkpointing**: Save plan progress at natural phase boundaries to resume efficiently
+- **Context Pruning**: Keep plan conversations focused on current phase to maximize token efficiency
+- **Priority Ordering**: Address high-impact planning tasks first in case of usage limits
+
+### Token Efficiency Guidelines
+- **Streamlined Token Count**: ~1,000 tokens - efficient for regular Pro usage patterns
+- **Context Management**: Focus on current plan branch to avoid context window saturation
+- **Batch Planning**: Group related planning activities to maximize session productivity
+- **Strategic Breaks**: Natural stopping points between plan creation and implementation phases
+
+### Usage Pattern Recommendations
+- **Daily Usage**: Ideal for regular development planning within Pro limits
+- **Weekly Planning**: Effective for 40-80 hour weekly Sonnet 4 allocation
+- **Multi-Session Plans**: Break complex plans across multiple sessions using branch checkpoints
+- **Emergency Planning**: Lightweight enough for urgent planning needs
+
+### Session Checkpointing Protocol
+```
+Checkpoint Creation:
+1. Complete current phase planning
+2. Update plan status and time estimates
+3. Commit plan to plan/<name> branch
+4. Document next session priorities in plan notes
+5. Close session at natural phase boundary
+
+Session Resume:
+1. Switch to plan/<name> branch
+2. Review previous session progress
+3. Identify next priority tasks
+4. Continue with focused planning session
+```
+
+This agent serves as the strategic brain for development planning, ensuring all plans are properly tracked, estimated, and coordinated for optimal development efficiency while respecting Claude Pro usage limits.

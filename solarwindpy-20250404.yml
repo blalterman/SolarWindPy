@@ -1,0 +1,31 @@
+name: solarwindpy-20250404
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - astropy
+  - black
+  - blackcellmagic
+  - bottleneck
+  - cdflib
+  - flake8
+  - h5py
+  - jupyterlab
+  - matplotlib
+  - multiprocess
+  - nbdime
+  - numba
+  - numexpr
+  - numpy
+  - pandas
+  - pre_commit
+  - pytables
+  - scipy
+  - setuptools
+  - sunpy
+  - tabulate
+  - tqdm
+  - twine
+  - wheel
+  - zlib
+prefix: /opt/anaconda3/envs/solarwindpy-20250403

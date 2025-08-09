@@ -19,6 +19,7 @@ This index provides a centralized reference for all specialized agents working o
 ### 🎯 Planning & Implementation
 - **[PlanManager](./agent-plan-manager.md)** - Strategic planning with comprehensive features and detailed guidance
 - **[PlanManager-Streamlined](./agent-plan-manager-streamlined.md)** - Strategic planning optimized for token efficiency
+- **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for simple projects and prototypes
 - **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
 - **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
 - **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic plan execution for simple tasks
@@ -46,6 +47,7 @@ This index provides a centralized reference for all specialized agents working o
 |-------|----------|--------------|-----------|
 | PlanManager | High | Strategic planning (comprehensive) | `solarwindpy/plans/*.md`, plan branches |
 | PlanManager-Streamlined | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
+| PlanManager-Minimal | Medium | Basic planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
 | PlanImplementer | High | Plan execution | All implementation files |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
 | DataFrameArchitect | High | Data structures | `core/*.py` |

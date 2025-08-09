@@ -18,6 +18,8 @@ jobs:
           pip install -r requirements.txt
           pip install -r docs/requirements.txt
           pip install .
+      - name: Lint documentation with doc8
+        run: doc8 README.rst docs
       - name: Build documentation
         env:
           SPHINXOPTS: -W
