@@ -16,6 +16,13 @@ This index provides a centralized reference for all specialized agents working o
 
 ## Agent Categories
 
+### 🎯 Planning & Implementation
+- **[PlanManager](./agent-plan-manager.md)** - Strategic planning with comprehensive features and detailed guidance
+- **[PlanManager-Streamlined](./agent-plan-manager-streamlined.md)** - Strategic planning optimized for token efficiency
+- **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
+- **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
+- **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic plan execution for simple tasks
+
 ### 🔬 Core Physics & Data
 - **[PhysicsValidator](./agent-physics-validator.md)** - Ensures physical correctness and unit consistency
 - **[DataFrameArchitect](./agent-dataframe-architect.md)** - Manages pandas MultiIndex data structures
@@ -37,6 +44,9 @@ This index provides a centralized reference for all specialized agents working o
 
 | Agent | Priority | Primary Focus | Key Files |
 |-------|----------|--------------|-----------|
+| PlanManager | High | Strategic planning (comprehensive) | `solarwindpy/plans/*.md`, plan branches |
+| PlanManager-Streamlined | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
+| PlanImplementer | High | Plan execution | All implementation files |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
 | DataFrameArchitect | High | Data structures | `core/*.py` |
 | TestEngineer | High | Testing | `tests/**/*.py` |
