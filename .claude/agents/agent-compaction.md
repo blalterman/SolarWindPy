@@ -45,11 +45,14 @@ Universal context compression and session continuity service for all SolarWindPy
 - **Directory Creation**: Ensure plan subdirectories exist before compaction
 - **Atomic Operations**: Group directory creation, file writes, and commits together
 
-### 5. Session Resumption Optimization
+### 5. Session Resumption Optimization & State Validation
 - **Context Recovery**: Generate resumption-optimized summaries (50-150 tokens)
 - **Priority Identification**: Highlight next session priorities and quick wins
 - **State Reconstruction**: Enable seamless workflow continuation
 - **Cross-Agent Coordination**: Preserve integration points for specialist agents
+- **Session State Preservation**: Maintain git-first validation capability in compacted context
+- **Git Evidence Integration**: Include commit references validating completion claims
+- **Resumption Accuracy**: Ensure compacted states reflect verified progress status
 
 ## Behavioral Guidelines
 
@@ -129,6 +132,8 @@ solarwindpy/plans/
 - **Token Efficiency**: [original] → [compressed] tokens ([percentage]% reduction)
 - **Source Agent**: [agent-type] ([Full/Streamlined/Minimal])
 - **Compaction Tier**: [High/Medium/Low-Complexity]
+- **Git Sync Status**: ✅ Validated | ⚠️ Pending | ❌ Conflicted
+- **Evidence Commits**: [commit-hash-list] validating progress claims
 
 ## Current State Summary
 - **Active Objectives**: [2-3 primary current objectives]
@@ -137,12 +142,13 @@ solarwindpy/plans/
 - **Branch Status**: [current branch state and synchronization status]
 - **Integration Points**: [specialist agent connections and coordination requirements]
 
-## Progress Snapshot  
-- **Completed Phases**: [phase-1] ✓, [phase-2] ✓, [phase-3] (in-progress)
-- **Current Progress**: [X]/[total] tasks completed ([percentage]%)
-- **Key Achievements**: [significant milestones and completed deliverables]
-- **Velocity Metrics**: [estimated vs actual time, completion rate]
+## Progress Snapshot (Git-Validated)
+- **Completed Phases**: [phase-1] ✓ (commits: [hash-list]), [phase-2] ✓ (commits: [hash-list])
+- **Current Progress**: [X]/[total] tasks completed ([percentage]%) - verified by git evidence
+- **Key Achievements**: [significant milestones] with commit references: [commit-hash-list]
+- **Velocity Metrics**: [estimated vs actual time] validated against git commit timing
 - **Time Investment**: [hours invested] of [estimated total] hours
+- **Git Evidence**: [N] commits validate progress claims, session state accuracy: ✅
 
 ## Compacted Context Archive
 ### Phase 1: [phase-name]

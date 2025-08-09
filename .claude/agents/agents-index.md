@@ -16,14 +16,14 @@ This index provides a centralized reference for all specialized agents working o
 
 ## Agent Categories
 
-### 🎯 Planning & Implementation
-- **[PlanManager](./agent-plan-manager.md)** - Strategic planning with comprehensive features and detailed guidance
+### 🎯 Planning & Implementation (Enhanced with Git-First Validation)
+- **[PlanManager](./agent-plan-manager.md)** - Enhanced strategic planning with git-first validation and context-aware agent pairing
 - **[PlanManager-Streamlined](./agent-plan-manager-streamlined.md)** - Strategic planning optimized for token efficiency
 - **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for simple projects and prototypes
 - **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
 - **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
 - **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic plan execution for simple tasks
-- **[CompactionAgent](./agent-compaction.md)** - Context compression and session continuity service
+- **[CompactionAgent](./agent-compaction.md)** - Enhanced universal context compression with session state validation
 
 ### 🔬 Core Physics & Data
 - **[PhysicsValidator](./agent-physics-validator.md)** - Ensures physical correctness and unit consistency
@@ -94,16 +94,25 @@ graph LR
     E --> F[TestEngineer]
 ```
 
-### Long-Duration Development Session
+### Unified Development Workflow (Enhanced)
 ```mermaid
 graph LR
-    A[Planning Agent] --> B[Implementation Work]
-    B --> C{Token Threshold?}
-    C -->|Yes| D[CompactionAgent]
-    D --> E[Compacted State + Git Commit]
-    E --> F[Session Resume]
-    C -->|No| G[Continue Work]
+    A[Enhanced Plan Manager] --> B{Git-First Validation}
+    B --> C[Context-Aware Agent Selection]
+    C --> D[Implementation Work]
+    D --> E{Token Threshold?}
+    E -->|Yes| F[Enhanced CompactionAgent]
+    F --> G[Git-Validated Compacted State]
+    G --> H[Session Resume with Accuracy]
+    E -->|No| I[Continue Work]
+    I --> J[Automatic Progress Validation]
 ```
+
+### Session Continuity Architecture
+- **Single Point of Entry**: Enhanced Plan Manager handles all planning functions
+- **Git-First Validation**: Automatic session state accuracy checking
+- **Context Switching Prevention**: Infrastructure priority framework built-in
+- **Unified Progress Tracking**: Git-validated status without competing systems
 
 ## Agent Communication Protocol
 
