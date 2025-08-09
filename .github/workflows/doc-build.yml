@@ -19,7 +19,7 @@ jobs:
           pip install -r docs/requirements.txt
           pip install .
       - name: Lint documentation with doc8
-        run: doc8 README.rst docs
+        run: doc8 README.rst docs CITATION.rst --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
       - name: Build documentation
         env:
           SPHINXOPTS: -W
