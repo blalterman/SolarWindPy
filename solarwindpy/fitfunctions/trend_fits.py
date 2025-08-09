@@ -14,7 +14,7 @@ import pandas as pd
 import matplotlib as mpl
 from collections import namedtuple
 
-import solarwindpy as swp
+from ..plotting import subplots
 from . import core
 from . import gaussians
 
@@ -274,7 +274,7 @@ class TrendFit(object):
         kwargs passed to `ax.errorbar`
         """
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = subplots()
 
         popt = self.popt_1d
         ykey, wkey = self.popt1d_keys
@@ -385,7 +385,7 @@ class TrendFit(object):
     def plot_1d_popt_and_trend(self, ax=None, **kwargs):
         r"""Plot the trend and 1D popt, without trend residuals, on `ax`"""
         if ax is None:
-            fig, ax = swp.pp.subplots()
+            fig, ax = subplots()
 
         kwargs_popt_1d = kwargs.pop("kwargs_popt_1d", dict())
         self.plot_all_popt_1d(ax, **kwargs_popt_1d)

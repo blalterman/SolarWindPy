@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib as mpl
 import numpy as np
 
-import solarwindpy as swp
+from ...plotting import subplots
 
 
 class ExtremaCalculator(object):
@@ -375,7 +375,7 @@ class ExtremaCalculator(object):
         self._formatted_extrema = formatted
 
     def make_plot(self, crossings=False, extrema=False, ranges=False):
-        fig, ax = swp.pp.subplots(scale_width=2.5)
+        fig, ax = subplots(scale_width=2.5)
 
         self._plot_data(ax)
         self._plot_threshold(ax)

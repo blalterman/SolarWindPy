@@ -4,10 +4,11 @@ __all__ = ["BetaRPlot"]
 
 import pdb  # noqa: F401
 
-import solarwindpy as swp
+from ..plotting.histograms import Hist2D
+from ..plotting import labels
 
 
-class BetaRPlot(swp.plotting.histograms.Hist2D):
+class BetaRPlot(Hist2D):
     """Generate a beta--anisotropy histogram.
 
     Parameters
@@ -51,8 +52,8 @@ class BetaRPlot(swp.plotting.histograms.Hist2D):
 
         super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, **kwargs)
         self.set_labels(
-            x=swp.pp.labels.TeXlabel(("beta", "par", species.replace("_bimax", ""))),
-            y=swp.pp.labels.TeXlabel(
+            x=labels.TeXlabel(("beta", "par", species.replace("_bimax", ""))),
+            y=labels.TeXlabel(
                 ("R", "P" if "+" in species else "T", species.replace("_bimax", ""))
             ),
         )
