@@ -140,7 +140,7 @@ python scripts/test_dynamic_imports.py
 
 1. **Fix Syntax Warnings**: Address LaTeX string literal warnings in plotting labels
 2. **Standardize Import Style**: Choose consistent relative vs. absolute import patterns
-3. **Documentation**: Document import patterns in CLAUDE.md
+3. **Documentation**: Document import patterns in .claude/CLAUDE.md
 4. **Automated Prevention**: Add import validation to pre-commit hooks
 
 ### 🚨 Warning Signs to Watch For
