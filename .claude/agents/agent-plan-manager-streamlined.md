@@ -113,7 +113,7 @@ Context Preparation Format:
 solarwindpy/plans/
 ├── plan_template.md          # Template for new plans
 ├── [plan-name].md           # Individual plan files (on plan branches)
-└── status_tracker.py        # Status tracking system
+└── <plan-name>/             # Plan-specific subdirectories for compacted states
 
 Branches:
 plan/feature-name            # Planning and design

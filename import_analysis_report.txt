@@ -1,0 +1,168 @@
+SolarWindPy Import Dependency Analysis Report
+==================================================
+
+Total modules analyzed: 55
+Total import relationships: 45
+
+Analyzed modules:
+  solarwindpy
+  solarwindpy.core
+  solarwindpy.core.alfvenic_turbulence
+  solarwindpy.core.base
+  solarwindpy.core.ions
+  solarwindpy.core.plasma
+  solarwindpy.core.spacecraft
+  solarwindpy.core.tensor
+  solarwindpy.core.units_constants
+  solarwindpy.core.vector
+  solarwindpy.fitfunctions
+  solarwindpy.fitfunctions.core
+  solarwindpy.fitfunctions.exponentials
+  solarwindpy.fitfunctions.gaussians
+  solarwindpy.fitfunctions.lines
+  solarwindpy.fitfunctions.moyal
+  solarwindpy.fitfunctions.plots
+  solarwindpy.fitfunctions.power_laws
+  solarwindpy.fitfunctions.tex_info
+  solarwindpy.fitfunctions.trend_fits
+  solarwindpy.instabilities
+  solarwindpy.instabilities.beta_ani
+  solarwindpy.instabilities.verscharen2016
+  solarwindpy.plans
+  solarwindpy.plans.issues_from_plans
+  solarwindpy.plans.plan_status_cli
+  solarwindpy.plans.status_tracker
+  solarwindpy.plotting
+  solarwindpy.plotting.agg_plot
+  solarwindpy.plotting.base
+  solarwindpy.plotting.hist1d
+  solarwindpy.plotting.hist2d
+  solarwindpy.plotting.histograms
+  solarwindpy.plotting.labels
+  solarwindpy.plotting.labels.base
+  solarwindpy.plotting.labels.chemistry
+  solarwindpy.plotting.labels.composition
+  solarwindpy.plotting.labels.datetime
+  solarwindpy.plotting.labels.elemental_abundance
+  solarwindpy.plotting.labels.special
+  solarwindpy.plotting.orbits
+  solarwindpy.plotting.scatter
+  solarwindpy.plotting.select_data_from_figure
+  solarwindpy.plotting.spiral
+  solarwindpy.plotting.tools
+  solarwindpy.scripts
+  solarwindpy.solar_activity
+  solarwindpy.solar_activity.base
+  solarwindpy.solar_activity.lisird
+  solarwindpy.solar_activity.lisird.extrema_calculator
+  solarwindpy.solar_activity.lisird.lisird
+  solarwindpy.solar_activity.plots
+  solarwindpy.solar_activity.sunspot_number
+  solarwindpy.solar_activity.sunspot_number.sidc
+  solarwindpy.tools
+
+✅ No circular dependencies detected!
+
+Top 10 modules with most dependencies (outgoing):
+  solarwindpy.fitfunctions.core: 2 dependencies
+    → solarwindpy.fitfunctions.plots
+    → solarwindpy.fitfunctions.tex_info
+  solarwindpy.fitfunctions.trend_fits: 2 dependencies
+    → solarwindpy.fitfunctions
+    → solarwindpy.plotting
+  solarwindpy.instabilities.beta_ani: 2 dependencies
+    → solarwindpy.plotting
+    → solarwindpy.plotting.histograms
+  solarwindpy.plotting.hist1d: 2 dependencies
+    → solarwindpy.plotting
+    → solarwindpy.plotting.agg_plot
+  solarwindpy.solar_activity.lisird.lisird: 2 dependencies
+    → solarwindpy.solar_activity.base
+    → solarwindpy.solar_activity.lisird.extrema_calculator
+  solarwindpy.solar_activity.lisird: 2 dependencies
+    → solarwindpy.solar_activity
+    → solarwindpy.solar_activity.lisird
+  solarwindpy.fitfunctions.moyal: 1 dependencies
+    → solarwindpy.fitfunctions.core
+  solarwindpy.fitfunctions.exponentials: 1 dependencies
+    → solarwindpy.fitfunctions.core
+  solarwindpy.fitfunctions: 1 dependencies
+    → solarwindpy
+  solarwindpy.fitfunctions.lines: 1 dependencies
+    → solarwindpy.fitfunctions.core
+
+Top 10 most depended-upon modules (incoming):
+  solarwindpy.plotting: 12 dependents
+    ← solarwindpy.fitfunctions.trend_fits
+    ← solarwindpy.instabilities.beta_ani
+    ← solarwindpy.plotting.agg_plot
+    ... and 9 more
+  solarwindpy.core: 7 dependents
+    ← solarwindpy.core.alfvenic_turbulence
+    ← solarwindpy.core.base
+    ← solarwindpy.core.ions
+    ... and 4 more
+  solarwindpy.fitfunctions.core: 5 dependents
+    ← solarwindpy.fitfunctions.exponentials
+    ← solarwindpy.fitfunctions.gaussians
+    ← solarwindpy.fitfunctions.lines
+    ... and 2 more
+  solarwindpy: 4 dependents
+    ← solarwindpy.fitfunctions
+    ← solarwindpy.instabilities
+    ← solarwindpy.plotting
+    ... and 1 more
+  solarwindpy.plotting.labels: 4 dependents
+    ← solarwindpy.plotting.labels.composition
+    ← solarwindpy.plotting.labels.datetime
+    ← solarwindpy.plotting.labels.elemental_abundance
+    ... and 1 more
+  solarwindpy.solar_activity: 3 dependents
+    ← solarwindpy.solar_activity.lisird
+    ← solarwindpy.solar_activity.sunspot_number
+    ← solarwindpy.solar_activity.sunspot_number.sidc
+  solarwindpy.fitfunctions.tex_info: 1 dependents
+    ← solarwindpy.fitfunctions.core
+  solarwindpy.fitfunctions.plots: 1 dependents
+    ← solarwindpy.fitfunctions.core
+  solarwindpy.fitfunctions: 1 dependents
+    ← solarwindpy.fitfunctions.trend_fits
+  solarwindpy.plans.status_tracker: 1 dependents
+    ← solarwindpy.plans.plan_status_cli
+
+
+
+Key Module Dependencies:
+------------------------------
+
+solarwindpy.core.alfvenic_turbulence:
+  Line 31: from . import base
+
+solarwindpy.core.base:
+  Line 17: from . import units_constants as uc
+
+solarwindpy.core.ions:
+  Line 11: from . import base
+  Line 12: from . import vector
+  Line 13: from . import tensor
+
+solarwindpy.core.plasma:
+  Line 39: from . import base
+  Line 40: from . import vector
+  Line 41: from . import ions
+  Line 42: from . import spacecraft
+  Line 43: from . import alfvenic_turbulence as alf_turb
+
+solarwindpy.core.spacecraft:
+  Line 14: from . import base
+  Line 15: from . import vector
+
+solarwindpy.core.tensor:
+  Line 7: from . import base
+
+solarwindpy.core.vector:
+  Line 12: from . import base
+
+solarwindpy.fitfunctions.core:
+  Line 38: from .plots import FFPlot
+  Line 37: from .tex_info import TeXinfo

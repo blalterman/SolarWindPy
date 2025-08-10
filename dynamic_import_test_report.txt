@@ -1,0 +1,74 @@
+SolarWindPy Dynamic Import Test Report
+==================================================
+
+Total modules tested: 55
+Individual imports successful: 55
+Individual imports failed: 0
+Circular imports detected: 0
+
+✅ No circular imports detected in dynamic testing!
+
+Individual Import Test Results:
+------------------------------
+solarwindpy: ✅ SUCCESS (3.6781s)
+solarwindpy.core: ✅ SUCCESS (0.0101s)
+solarwindpy.core.alfvenic_turbulence: ✅ SUCCESS (0.0092s)
+solarwindpy.core.base: ✅ SUCCESS (0.0101s)
+solarwindpy.core.ions: ✅ SUCCESS (0.0098s)
+solarwindpy.core.plasma: ✅ SUCCESS (0.0099s)
+solarwindpy.core.spacecraft: ✅ SUCCESS (0.0100s)
+solarwindpy.core.tensor: ✅ SUCCESS (0.0098s)
+solarwindpy.core.units_constants: ✅ SUCCESS (0.0094s)
+solarwindpy.core.vector: ✅ SUCCESS (0.0096s)
+solarwindpy.fitfunctions: ✅ SUCCESS (0.0101s)
+solarwindpy.fitfunctions.core: ✅ SUCCESS (0.0091s)
+solarwindpy.fitfunctions.exponentials: ✅ SUCCESS (0.0095s)
+solarwindpy.fitfunctions.gaussians: ✅ SUCCESS (0.0096s)
+solarwindpy.fitfunctions.lines: ✅ SUCCESS (0.0099s)
+solarwindpy.fitfunctions.moyal: ✅ SUCCESS (0.0098s)
+solarwindpy.fitfunctions.plots: ✅ SUCCESS (0.0097s)
+solarwindpy.fitfunctions.power_laws: ✅ SUCCESS (0.0098s)
+solarwindpy.fitfunctions.tex_info: ✅ SUCCESS (0.0098s)
+solarwindpy.fitfunctions.trend_fits: ✅ SUCCESS (0.0098s)
+solarwindpy.instabilities: ✅ SUCCESS (0.0098s)
+solarwindpy.instabilities.beta_ani: ✅ SUCCESS (0.0098s)
+solarwindpy.instabilities.verscharen2016: ✅ SUCCESS (0.0098s)
+solarwindpy.plans: ✅ SUCCESS (0.0109s)
+solarwindpy.plans.issues_from_plans: ✅ SUCCESS (0.0858s)
+solarwindpy.plans.plan_status_cli: ✅ SUCCESS (0.0145s)
+solarwindpy.plans.status_tracker: ✅ SUCCESS (0.0108s)
+solarwindpy.plotting: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.agg_plot: ✅ SUCCESS (0.0098s)
+solarwindpy.plotting.base: ✅ SUCCESS (0.0100s)
+solarwindpy.plotting.hist1d: ✅ SUCCESS (0.0098s)
+solarwindpy.plotting.hist2d: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.histograms: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.labels: ✅ SUCCESS (0.0098s)
+solarwindpy.plotting.labels.base: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.labels.chemistry: ✅ SUCCESS (0.0098s)
+solarwindpy.plotting.labels.composition: ✅ SUCCESS (0.0098s)
+solarwindpy.plotting.labels.datetime: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.labels.elemental_abundance: ✅ SUCCESS (0.0097s)
+solarwindpy.plotting.labels.special: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.orbits: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.scatter: ✅ SUCCESS (0.0115s)
+solarwindpy.plotting.select_data_from_figure: ✅ SUCCESS (0.0099s)
+solarwindpy.plotting.spiral: ✅ SUCCESS (0.0101s)
+solarwindpy.plotting.tools: ✅ SUCCESS (0.0099s)
+solarwindpy.scripts: ✅ SUCCESS (0.0109s)
+solarwindpy.solar_activity: ✅ SUCCESS (0.0099s)
+solarwindpy.solar_activity.base: ✅ SUCCESS (0.0099s)
+solarwindpy.solar_activity.lisird: ✅ SUCCESS (0.0099s)
+solarwindpy.solar_activity.lisird.extrema_calculator: ✅ SUCCESS (0.0096s)
+solarwindpy.solar_activity.lisird.lisird: ✅ SUCCESS (0.0096s)
+solarwindpy.solar_activity.plots: ✅ SUCCESS (0.0098s)
+solarwindpy.solar_activity.sunspot_number: ✅ SUCCESS (0.0098s)
+solarwindpy.solar_activity.sunspot_number.sidc: ✅ SUCCESS (0.0098s)
+solarwindpy.tools: ✅ SUCCESS (0.0098s)
+
+Cross-Import Test Results:
+------------------------------
+Total cross-import tests: 15
+Successful: 15
+Failed: 0
+Circular import errors: 0
