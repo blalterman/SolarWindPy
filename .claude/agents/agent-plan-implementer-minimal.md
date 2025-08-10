@@ -1,3 +1,19 @@
+---
+name: PlanImplementer-Minimal
+description: Basic plan execution for simple tasks and straightforward implementations
+priority: medium
+tags:
+  - implementation
+  - execution
+  - minimal
+  - basic
+  - lightweight
+applies_to:
+  - feature/* branches
+  - plan/* branches
+  - solarwindpy/**/*.py
+---
+
 # Plan Implementer Agent (Minimal Version)
 
 ## Role

@@ -5,7 +5,9 @@
       "Bash(conda info:*)",
       "Bash(echo $CONDA_DEFAULT_ENV)",
       "Bash(doc8:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   }

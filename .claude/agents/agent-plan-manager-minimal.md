@@ -1,3 +1,17 @@
+---
+name: PlanManager-Minimal
+description: Basic planning for simple projects and prototypes
+priority: medium
+tags:
+  - planning
+  - minimal
+  - lightweight
+  - simple
+applies_to:
+  - solarwindpy/plans/*.md
+  - plan/* branches
+---
+
 # Plan Manager Agent (Minimal Version)
 
 ## Role

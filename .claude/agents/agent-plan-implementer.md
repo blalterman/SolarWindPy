@@ -1,3 +1,18 @@
+---
+name: PlanImplementer
+description: Plan execution optimized for research workflows with QA integration
+priority: high
+tags:
+  - implementation
+  - execution
+  - research-optimized
+  - qa-integration
+applies_to:
+  - feature/* branches
+  - plan/* branches
+  - solarwindpy/**/*.py
+---
+
 # Plan Implementer Agent
 
 ## Role

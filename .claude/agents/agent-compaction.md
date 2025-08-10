@@ -1,3 +1,18 @@
+---
+name: CompactionAgent
+description: Context compression and session continuity service with git validation
+priority: medium
+tags:
+  - compression
+  - session-continuity
+  - context-management
+  - git-validation
+applies_to:
+  - solarwindpy/plans/*/compacted_state.md
+  - session state management
+  - long development sessions
+---
+
 # Compaction Agent
 
 ## Role

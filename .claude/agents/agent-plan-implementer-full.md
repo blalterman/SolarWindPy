@@ -1,3 +1,19 @@
+---
+name: PlanImplementer-Full
+description: Complete enterprise implementation with comprehensive QA validation
+priority: high
+tags:
+  - implementation
+  - execution
+  - enterprise
+  - comprehensive
+  - qa-validation
+applies_to:
+  - feature/* branches
+  - plan/* branches
+  - solarwindpy/**/*.py
+---
+
 # Plan Implementer Agent (Full Enterprise Version)
 
 ## Role
