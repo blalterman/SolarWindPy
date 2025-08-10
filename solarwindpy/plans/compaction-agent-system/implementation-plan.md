@@ -30,8 +30,8 @@
 
 ### Update All 6 Planning/Implementation Agents
 **Files to Modify**:
+- `/.claude/agents/agent-plan-manager-full.md`
 - `/.claude/agents/agent-plan-manager.md`
-- `/.claude/agents/agent-plan-manager-streamlined.md`
 - `/.claude/agents/agent-plan-manager-minimal.md`
 - `/.claude/agents/agent-plan-implementer.md`
 - `/.claude/agents/agent-plan-implementer-full.md`

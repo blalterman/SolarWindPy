@@ -17,8 +17,8 @@ This index provides a centralized reference for all specialized agents working o
 ## Agent Categories
 
 ### 🎯 Planning & Implementation (Enhanced with Git-First Validation)
-- **[PlanManager](./agent-plan-manager.md)** - Enhanced strategic planning with git-first validation and context-aware agent pairing
-- **[PlanManager-Streamlined](./agent-plan-manager-streamlined.md)** - Strategic planning optimized for token efficiency
+- **[PlanManager](./agent-plan-manager.md)** - Strategic planning optimized for token efficiency
+- **[PlanManager-Full](./agent-plan-manager-full.md)** - Enhanced strategic planning with git-first validation and context-aware agent pairing
 - **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for simple projects and prototypes
 - **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
 - **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
@@ -46,8 +46,8 @@ This index provides a centralized reference for all specialized agents working o
 
 | Agent | Priority | Primary Focus | Key Files |
 |-------|----------|--------------|-----------|
-| PlanManager | High | Strategic planning (comprehensive) | `solarwindpy/plans/*.md`, plan branches |
-| PlanManager-Streamlined | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
+| PlanManager | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
+| PlanManager-Full | High | Strategic planning (comprehensive) | `solarwindpy/plans/*.md`, plan branches |
 | PlanManager-Minimal | Medium | Basic planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
 | PlanImplementer | High | Plan execution | All implementation files |
 | CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |

@@ -71,7 +71,7 @@ All critical infrastructure work (documentation validation, requirements consoli
 
 ### Agent Selection Framework
 **For Complex Projects:** PlanManager-Full + PlanImplementer-Full + High-complexity compaction
-**For Feature Development:** PlanManager-Streamlined + PlanImplementer + Medium-complexity compaction
+**For Feature Development:** PlanManager + PlanImplementer + Medium-complexity compaction
 **For Maintenance:** PlanManager-Minimal + PlanImplementer-Minimal + Low-complexity compaction
 
 ### Environment Status

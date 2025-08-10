@@ -20,8 +20,8 @@
 All 6 agent variants confirmed with compaction integration:
 
 **Plan Manager Variants:**
-1. ✅ `agent-plan-manager.md` (Full) - Lines 45-50 contain compaction integration
-2. ✅ `agent-plan-manager-streamlined.md` - Compaction integration verified
+1. ✅ `agent-plan-manager-full.md` (Full) - Lines 45-50 contain compaction integration
+2. ✅ `agent-plan-manager.md` - Compaction integration verified
 3. ✅ `agent-plan-manager-minimal.md` - Compaction integration verified
 
 **Plan Implementer Variants:**  

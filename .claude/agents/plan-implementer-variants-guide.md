@@ -5,7 +5,7 @@ The Planning Agents system includes multiple variants of both Plan Manager and P
 
 ## Plan Manager Variants
 
-### 📋 agent-plan-manager.md (Comprehensive)
+### 📋 agent-plan-manager-full.md (Comprehensive)
 **Use for:** Complex projects requiring detailed guidance and comprehensive planning features
 
 **Features:**
@@ -21,7 +21,7 @@ The Planning Agents system includes multiple variants of both Plan Manager and P
 - Complex multi-phase projects with many dependencies
 - Situations requiring comprehensive documentation and guidance
 
-### ⚡ agent-plan-manager-streamlined.md (Token Optimized)
+### ⚡ agent-plan-manager.md (Token Optimized)
 **Use for:** Most development scenarios where token efficiency is important
 
 **Features:**
@@ -168,7 +168,7 @@ agent: agent-plan-implementer-minimal
 ### Research Context (SolarWindPy) - RECOMMENDED FOR PRO USERS
 ```bash
 # Planning: Use streamlined for efficient planning
-agent: agent-plan-manager-streamlined
+agent: agent-plan-manager
 
 # Implementation: Use research-optimized version
 agent: agent-plan-implementer
