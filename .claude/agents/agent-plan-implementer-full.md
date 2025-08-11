@@ -23,9 +23,9 @@ Claude's tactical implementation agent that executes development plans using cro
 
 ### 1. Cross-Branch Coordination
 - **Branch Synchronization**: Coordinate between `plan/<name>` and `feature/<name>` branches
-- **Status Mirroring**: Keep plan checklists synchronized with implementation progress  
-- **Commit Tracking**: Update plan checklists with actual commit checksums using `<checksum>` format
-- **Progress Validation**: Verify implementation matches planned tasks
+- **Multi-Phase Status Mirroring**: Keep plan phase files synchronized with implementation progress  
+- **Commit Tracking**: Update phase files with actual commit checksums using `<checksum>` format
+- **Progress Validation**: Verify implementation matches planned tasks across all phases
 
 ### 2. Checklist Management
 - **Checksum Updates**: Replace `<checksum>` placeholders with actual commit hashes

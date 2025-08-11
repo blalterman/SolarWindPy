@@ -184,15 +184,19 @@ Agent:
 ```
 solarwindpy/plans/
 ├── plan_template.md          # Template for new plans
-├── [plan-name].md           # Individual plan files (on plan branches)
-└── overview.md              # Cross-plan status summary
+├── completed/               # Archived completed plans
+└── [plan-name]/             # Multi-phase plan directories
+    ├── 0-Overview.md        # Plan metadata and phase overview
+    ├── 1-Phase-Name.md      # Individual phase files
+    └── N-Final-Phase.md     # Numbered phase structure
 ```
 
 ### Branch Architecture
 ```
 plan/feature-name            # Planning and design
-├── solarwindpy/plans/feature-name.md
-└── status.json
+├── solarwindpy/plans/feature-name/
+│   ├── 0-Overview.md
+│   └── [phase files]
 
 feature/feature-name         # Implementation work
 ├── [implementation files]

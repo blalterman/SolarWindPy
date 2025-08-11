@@ -16,13 +16,14 @@ This index provides a centralized reference for all specialized agents working o
 
 ## Agent Categories
 
-### 🎯 Planning & Implementation (Enhanced with Git-First Validation)
-- **[PlanManager](./agent-plan-manager.md)** - Strategic planning optimized for token efficiency
-- **[PlanManager-Full](./agent-plan-manager-full.md)** - Enhanced strategic planning with git-first validation and context-aware agent pairing
-- **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for simple projects and prototypes
-- **[PlanImplementer](./agent-plan-implementer.md)** - Plan execution with QA integration (Research optimized)
-- **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise implementation agent
-- **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic plan execution for simple tasks
+### 🎯 Planning & Implementation (Enhanced with Format Specialization)
+- **[PlanManager](./agent-plan-manager.md)** - Strategic planning for multi-phase plans (token optimized)
+- **[PlanManager-Full](./agent-plan-manager-full.md)** - Enhanced strategic planning for multi-phase plans with git-first validation
+- **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for single-file plans and prototypes
+- **[PlanImplementer](./agent-plan-implementer.md)** - Multi-phase plan execution with QA integration (Research optimized)
+- **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise multi-phase implementation agent
+- **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic execution for single-file plans and simple tasks
+- **[PlanStatusAggregator](./agent-plan-status-aggregator.md)** - Cross-plan status monitoring and dependency analysis
 - **[CompactionAgent](./agent-compaction.md)** - Enhanced universal context compression with session state validation
 
 ### 🔬 Core Physics & Data
@@ -46,10 +47,13 @@ This index provides a centralized reference for all specialized agents working o
 
 | Agent | Priority | Primary Focus | Key Files |
 |-------|----------|--------------|-----------|
-| PlanManager | High | Strategic planning (token optimized) | `solarwindpy/plans/*.md`, plan branches |
-| PlanManager-Full | High | Strategic planning (comprehensive) | `solarwindpy/plans/*.md`, plan branches |
-| PlanManager-Minimal | Medium | Basic planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
-| PlanImplementer | High | Plan execution | All implementation files |
+| PlanManager | High | Multi-phase strategic planning (token optimized) | `solarwindpy/plans/*/`, plan branches |
+| PlanManager-Full | High | Multi-phase strategic planning (comprehensive) | `solarwindpy/plans/*/`, plan branches |
+| PlanManager-Minimal | Medium | Single-file planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
+| PlanImplementer | High | Multi-phase plan execution | All implementation files |
+| PlanImplementer-Full | High | Multi-phase enterprise execution | All implementation files |
+| PlanImplementer-Minimal | Medium | Single-file plan execution | Basic implementation files |
+| PlanStatusAggregator | Medium | Cross-plan monitoring & dependency analysis | `solarwindpy/plans/**/*.md` |
 | CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
 | DataFrameArchitect | High | Data structures | `core/*.py` |

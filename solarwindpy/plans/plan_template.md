@@ -4,7 +4,12 @@
 - **Plan Name**: [Short descriptive name]
 - **Created**: [Date]
 - **Branch**: plan/[plan-name]
-- **Implementation Branch**: feature/[plan-name] 
+- **Implementation Branch**: feature/[plan-name]
+- **PlanManager**: [PlanManager | PlanManager-Full | PlanManager-Minimal]
+- **PlanImplementer**: [PlanImplementer | PlanImplementer-Full | PlanImplementer-Minimal]
+- **Structure**: [Multi-Phase | Single-File]
+- **Dependencies**: [List of prerequisite plans, if any]
+- **Affects**: [Files/modules that will be modified]
 - **Estimated Duration**: [Total time estimate]
 - **Status**: [Planning | In Progress | Paused | Completed]
 

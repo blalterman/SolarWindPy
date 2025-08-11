@@ -126,8 +126,11 @@ Context Preparation Format:
 ```
 solarwindpy/plans/
 ├── plan_template.md          # Template for new plans
-├── [plan-name].md           # Individual plan files (on plan branches)
-└── <plan-name>/             # Plan-specific subdirectories for compacted states
+├── completed/               # Archived completed plans
+└── [plan-name]/             # Multi-phase plan directories
+    ├── 0-Overview.md        # Plan metadata and phase overview
+    ├── 1-Phase-Name.md      # Individual phase files
+    └── N-Final-Phase.md     # Numbered phase structure
 
 Branches:
 plan/feature-name            # Planning and design

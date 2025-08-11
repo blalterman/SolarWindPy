@@ -29,22 +29,22 @@ Executes development plans using cross-branch coordination between `plan/<name>`
 ## Primary Workflow
 ```
 Implementation Process:
-1. Read current plan status from plan/<name> branch
-2. Parse nested checklist structure and identify dependencies
+1. Read current plan status from plan/<name>/0-Overview.md and phase files
+2. Parse multi-phase structure and identify phase dependencies
 3. Switch to/create feature/<name> branch for implementation
-4. Execute sub-plans in dependency order
+4. Execute phases in dependency order
 5. For each completed task:
    - Run QA validation (pytest -q, flake8, black formatting)
    - Commit changes with descriptive message
-   - Replace <checksum> with actual commit hash
+   - Replace <checksum> with actual commit hash in phase files
    - Update status to "Completed" and record time
    - Execute benchmark tests against reference datasets
-6. Update parent plan status as sub-plans complete
-7. Validate cross-sub-plan integration points
+6. Update overview status as phases complete
+7. Validate cross-phase integration points
 8. Update performance metrics and velocity tracking
 
 Completion Workflow:
-8. When all sub-plans complete, merge feature/<name> → plan/<name>
+8. When all phases complete, merge feature/<name> → plan/<name>
 9. Update final plan status and documentation on plan branch
 10. Merge plan/<name> → master for production deployment
 11. Clean up feature branch and update cross-plan status
