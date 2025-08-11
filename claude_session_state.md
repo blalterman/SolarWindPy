@@ -33,8 +33,18 @@
 
 **Current Status:** Major fitfunctions testing implementation completed successfully. Comprehensive test coverage framework established with industry-standard infrastructure.
 
-## 🎯 **CURRENT PRIORITY: Ready for Next Development Phase**
-**Achievement:** ✅ COMPLETED - Fitfunctions testing implementation achieved production readiness
+## 🎯 **CURRENT PRIORITY: Single Ecosystem Plan Implementation**
+**CRITICAL INITIATIVE:** Unified Plan Management System Implementation
+**Objective:** Implement single ecosystem with format specialization, cross-plan dependency analysis, and optimized file structure
+**Plan Location:** `single-ecosystem-plan-implementation.tmp.md` (ROOT - saved outside plans/ to prevent modification during implementation)
+**Safety Note:** Plan saved outside solarwindpy/plans/ directory to prevent circular modification errors during execution
+**Estimated Duration:** 9 hours across 6 phases
+**Key Benefits:** 1,000+ token savings, cross-plan dependency analysis, unified agent ecosystem
+**Status:** Plan saved and ready for immediate implementation
+
+**Previous Priority:** Test Infrastructure Optimization (deferred until ecosystem implementation complete)
+
+**Previous Achievement:** ✅ COMPLETED - Fitfunctions testing implementation achieved production readiness
 **Result:** 170 total tests with 95.3% success rate (162/170 passing)
 **Major Accomplishments:**
 - **✅ Moyal Coverage Added**: Comprehensive test_moyal.py with 12 specialized tests implemented
@@ -46,24 +56,33 @@
 ## 📋 IMMEDIATE DEVELOPMENT PRIORITIES
 
 ### 🔴 Critical Priority (Next Development Phase)
-1. **✅ Fitfunctions Testing Coverage - COMPLETED:** Comprehensive fitfunctions test suite achieved
+1. **Test Infrastructure Optimization - IN PROGRESS:** Consolidate test directory structure
+   - **Objective**: Move all tests to standardized root `/tests/` directory structure
+   - **Scope**: 33 total test files (11 existing root + 22 package-level)
+   - **Approach**: Root-level consolidation following Python packaging best practices
+   - **Benefits**: Industry standard compliance, better tooling, cleaner architecture
+   - **Plan**: Documented in `solarwindpy/plans/test-directory-consolidation.md`
+   - **Status**: Ready for PlanManager → PlanImplementer execution
+   - **Estimated Effort**: 5.5 hours with systematic validation and rollback capabilities
+
+2. **✅ Fitfunctions Testing Coverage - COMPLETED:** Comprehensive fitfunctions test suite achieved
    - **✅ Moyal module implemented**: Complete test_moyal.py with 12 specialized tests
    - **✅ API consistency fixed**: Resolved all weights/chisq usage inconsistencies
    - **✅ Production readiness achieved**: 95.3% success rate (162/170 tests) exceeds target
    - **Status**: Production ready, available for merge to master and next phase
 
-2. **Fitfunctions Implementation:** ✅ COMPLETED (2025-08-10)
+3. **Fitfunctions Implementation:** ✅ COMPLETED (2025-08-10)
    - **Status**: Major testing breakthrough achieved
    - **Result**: Comprehensive test framework with industry-standard imports
    - **Achievement**: Added 3 missing test modules, expanded from 75 to 158 test cases
    - **Infrastructure**: Eliminated path manipulation, standardized pytest configuration
    - **Ready**: Core testing framework operational, optimization phase available
 
-### 🟡 Secondary Priorities (After Tests Pass)
-3. **Performance Optimization:** Leveraging PerformanceOptimizer agent for computational improvements
-4. **Code Quality Enhancement:** Applying TestEngineer and PhysicsValidator for comprehensive validation
-5. **Documentation Enhancement:** Content improvements using DocumentationMaintainer agent
-6. **Feature Development:** New SolarWindPy capabilities using established infrastructure
+### 🟡 Secondary Priorities (After Test Infrastructure)
+4. **Performance Optimization:** Leveraging PerformanceOptimizer agent for computational improvements
+5. **Code Quality Enhancement:** Applying TestEngineer and PhysicsValidator for comprehensive validation
+6. **Documentation Enhancement:** Content improvements using DocumentationMaintainer agent
+7. **Feature Development:** New SolarWindPy capabilities using established infrastructure
 
 ## ✅ COMPLETED INFRASTRUCTURE
 
@@ -97,4 +116,4 @@
 - **Documentation:** Build validated (`cd docs && make html` succeeds)
 - **Requirements:** Consolidated and automated system operational
 
-**Session State:** ✅ FITFUNCTIONS TESTING COMPLETED - Production ready with 95.3% success rate achieved. **READY FOR:** Merge to master and next development phase selection.
+**Session State:** ✅ FITFUNCTIONS TESTING COMPLETED - Production ready with 95.3% success rate achieved. **CURRENT FOCUS:** Test Infrastructure Optimization - comprehensive plan documented and ready for systematic execution via PlanManager → PlanImplementer workflow.
