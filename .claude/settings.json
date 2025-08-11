@@ -35,5 +35,10 @@
   "ai": {
     "preferredModel": "claude-sonnet-4-20250514"
   },
-  "planningMode": true
+  "planningMode": true,
+  "statusLine": {
+    "type": "command",
+    "command": ".claude/statusline.py",
+    "padding": 0
+  }
 }
