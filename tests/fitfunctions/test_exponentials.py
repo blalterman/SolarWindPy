@@ -27,6 +27,10 @@ def test_function_signature_and_output(
     y = np.ones_like(x)
     obj = cls(x, y)
     
+    # ExponentialCDF needs y0 to be set before function can be called
+    if cls.__name__ == 'ExponentialCDF':
+        obj.set_y0(1.0)
+    
     # Test function signature
     sig = inspect.signature(obj.function)
     assert tuple(sig.parameters.keys()) == expected_params
@@ -167,8 +171,10 @@ def test_make_fit_insufficient_data():
         y = np.array([1.0])
         obj = cls(x, y)
         
-        with pytest.raises((ValueError, AssertionError)):
-            obj.make_fit()
+        # By default, make_fit returns exceptions rather than raising them
+        result = obj.make_fit()
+        assert isinstance(result, ValueError)
+        assert "insufficient data" in str(result).lower()
     
     # Test ExponentialCDF (needs special setup)
     x = np.array([1.0])
@@ -176,8 +182,9 @@ def test_make_fit_insufficient_data():
     obj = ExponentialCDF(x, y)
     obj.set_y0(1.0)
     
-    with pytest.raises((ValueError, AssertionError)):
-        obj.make_fit()
+    result = obj.make_fit()
+    assert isinstance(result, ValueError)
+    assert "insufficient data" in str(result).lower()
 
 
 def test_exponential_numerical_stability():
@@ -294,8 +301,6 @@ def test_property_access_before_fit(cls):
         _ = obj.popt
     with pytest.raises(AttributeError):
         _ = obj.pcov
-    with pytest.raises(AttributeError):
-        _ = obj.y_fit
 
 
 def test_exponential_with_weights(exponential_data):

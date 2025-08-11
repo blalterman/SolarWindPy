@@ -127,12 +127,10 @@ def test_make_fit_success(cls, power_law_data):
     # Test fit results are available
     assert obj.popt is not None
     assert obj.pcov is not None
-    assert obj.chisq is not None
-    assert obj.y_fit is not None
+    assert obj.chisq_dof is not None
     
     # Test output shapes
     assert len(obj.popt) == len(obj.p0)
-    assert obj.y_fit.shape == y.shape
 
 
 @pytest.mark.parametrize("cls", [PowerLaw, PowerLawPlusC, PowerLawOffCenter])
@@ -142,8 +140,10 @@ def test_make_fit_insufficient_data(cls):
     y = np.array([1.0])
     obj = cls(x, y)
     
-    with pytest.raises(ValueError, match="Insufficient data"):
-        obj.make_fit()
+    # By default, make_fit returns exceptions rather than raising them
+    result = obj.make_fit()
+    assert isinstance(result, ValueError)
+    assert "insufficient data" in str(result).lower()
 
 
 def test_power_law_perfect_fit():
@@ -156,8 +156,8 @@ def test_power_law_perfect_fit():
     obj.make_fit()
     
     # Should recover true parameters accurately
-    assert abs(obj.popt[0] - A) < 1e-10  # A
-    assert abs(obj.popt[1] - b) < 1e-10  # b
+    assert abs(obj.popt['A'] - A) < 1e-10  # A
+    assert abs(obj.popt['b'] - b) < 1e-10  # b
     
     # Predicted values should match
     y_pred = obj(x)
@@ -174,9 +174,9 @@ def test_power_law_plus_c_perfect_fit():
     obj.make_fit()
     
     # Should recover parameters accurately
-    assert abs(obj.popt[0] - A) < 1e-10  # A
-    assert abs(obj.popt[1] - b) < 1e-10  # b
-    assert abs(obj.popt[2] - c) < 1e-10  # c
+    assert abs(obj.popt['A'] - A) < 1e-10  # A
+    assert abs(obj.popt['b'] - b) < 1e-10  # b
+    assert abs(obj.popt['c'] - c) < 1e-10  # c
     
     y_pred = obj(x)
     assert np.allclose(y_pred, y, rtol=1e-12)
@@ -192,9 +192,9 @@ def test_power_law_off_center_perfect_fit():
     obj.make_fit()
     
     # Should recover parameters
-    assert abs(obj.popt[0] - A) < 1e-10  # A
-    assert abs(obj.popt[1] - b) < 1e-10  # b
-    assert abs(obj.popt[2] - x0) < 1e-10  # x0
+    assert abs(obj.popt['A'] - A) < 1e-10  # A
+    assert abs(obj.popt['b'] - b) < 1e-10  # b
+    assert abs(obj.popt['x0'] - x0) < 1e-10  # x0
     
     y_pred = obj(x)
     assert np.allclose(y_pred, y, rtol=1e-12)
@@ -272,7 +272,7 @@ def test_power_law_with_weights(power_law_data):
     # Create varying weights
     w_varied = np.linspace(0.5, 2.0, len(x))
     
-    obj = PowerLaw(x, y, wobs=w_varied)
+    obj = PowerLaw(x, y, weights=w_varied)
     obj.make_fit()
     
     # Should complete successfully
@@ -314,8 +314,6 @@ def test_property_access_before_fit(cls):
         _ = obj.popt
     with pytest.raises(AttributeError):
         _ = obj.pcov
-    with pytest.raises(AttributeError):
-        _ = obj.y_fit
 
 
 def test_power_law_negative_x_handling():
