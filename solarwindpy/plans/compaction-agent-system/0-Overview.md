@@ -32,20 +32,15 @@
 Develop a centralized CompactionAgent to eliminate 8,000+ tokens of duplicated context management logic across 6 planning agents, creating a single source of truth for session continuity while reducing token usage by 2,400-4,200 tokens across the ecosystem with plan-specific compaction state management.
 
 ## 🧠 Context
-The repository's 6 planning agents (PlanManager variants and PlanImplementer variants) contain substantial duplicated context management and session continuity logic, totaling ~8,000 tokens of repeated code. This creates maintenance burden and token inefficiency. A centralized CompactionAgent can provide tiered compression services while maintaining agent specialization.
+The repository's planning agents contain context management and session continuity logic that can be centralized. A CompactionAgent provides tiered compression services while maintaining agent specialization.
 
 ### Current Token Distribution Analysis
 ```
-PlanManager (1,000 tokens total): ~400 tokens context logic (40%)
-PlanManager-Full (3,000 tokens): ~900 tokens context logic (30%)
-PlanManager-Minimal (800 tokens): ~250 tokens context logic (31%)
-PlanImplementer (2,000 tokens): ~600 tokens context logic (30%)
-PlanImplementer-Full (4,000 tokens): ~1,200 tokens context logic (30%)
-PlanImplementer-Minimal (1,200 tokens): ~350 tokens context logic (29%)
+PlanManager (~1,200 tokens): Core planning with velocity tracking
+PlanImplementer (~1,200 tokens): Core implementation with git integration
 
-Total Context Logic: ~3,700 tokens
-Shared Infrastructure: ~4,300 tokens
-TOTAL DUPLICATION: ~8,000 tokens
+CompactionAgent provides centralized compression services for both agents
+while maintaining their specialized functionality.
 ```
 
 ## 🔧 Technical Requirements
