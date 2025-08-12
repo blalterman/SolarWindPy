@@ -8,7 +8,7 @@ tags:
   - coverage
   - quality
 applies_to:
-  - solarwindpy/tests/**/*.py
+  - tests/**/*.py
 ---
 
 # TestEngineer Agent
@@ -32,10 +32,11 @@ solarwindpy/
 ├── core/
 │   ├── plasma.py
 │   └── ions.py
-└── tests/
-    └── core/
-        ├── test_plasma.py
-        └── test_ions.py
+
+tests/                  # Root-level tests directory
+└── core/
+    ├── test_plasma.py
+    └── test_ions.py
 ```
 
 ### Fixture Management
@@ -235,7 +236,7 @@ def test_data_export(tmp_path):
 
 1. Run specific test in verbose mode:
    ```bash
-   pytest -vvs tests/path/to/test.py::test_function
+   pytest -vvs tests/core/test_plasma.py::test_function
    ```
 
 2. Use pytest debugger:
