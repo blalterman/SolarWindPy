@@ -499,6 +499,8 @@ class IndicatorExtrema(Base):
                 intervals = intervals.loc[:, ["Fall", "Rise"]]
             #                 kind = ["Rise", "Fall"]
             else:
+                if kind not in available_kind:
+                    raise ValueError(f"""Interval `{kind!s}` is unavailable""")
                 intervals = intervals.loc[:, [kind]]
         #                 kind = [kind]
         elif hasattr(kind, "__iter__"):

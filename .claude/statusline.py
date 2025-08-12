@@ -6,6 +6,50 @@ import subprocess
 from pathlib import Path
 import time
 
+# ANSI color codes for terminal output
+class Colors:
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    GREEN = '\033[92m'
+    RESET = '\033[0m'
+    
+    @staticmethod
+    def colorize(text, color):
+        """Apply color to text if terminal supports it."""
+        if os.getenv('NO_COLOR') or not sys.stdout.isatty():
+            return text
+        return f"{color}{text}{Colors.RESET}"
+    
+    @staticmethod
+    def red(text):
+        return Colors.colorize(text, Colors.RED)
+    
+    @staticmethod 
+    def yellow(text):
+        return Colors.colorize(text, Colors.YELLOW)
+    
+    @staticmethod
+    def green(text):
+        return Colors.colorize(text, Colors.GREEN)
+
+# Thresholds for Max plan limits (based on Claude Sonnet 4 limits)
+class Thresholds:
+    # Token limits (200k context window)
+    TOKEN_YELLOW = 150_000  # 75% of 200k limit
+    TOKEN_RED = 180_000     # 90% of 200k limit
+    
+    # Time limits (Max $100 plan: 140-280 hours/week, Max $200: 240-480 hours/week)  
+    TIME_YELLOW_HOURS = 200  # Weekly high usage threshold
+    TIME_RED_HOURS = 400     # Weekly critical usage threshold
+    
+    # Session duration limits (in hours)
+    SESSION_YELLOW_HOURS = 6   # Heavy usage
+    SESSION_RED_HOURS = 12     # Very heavy usage
+    
+    # Compaction thresholds (file size based)
+    COMPACTION_YELLOW_RATIO = 0.6  # 60% toward compaction
+    COMPACTION_RED_RATIO = 0.8     # 80% toward compaction
+
 def get_model_name(data):
     """Extract model display name from JSON data."""
     return data.get('model', {}).get('display_name', 'Claude')
@@ -34,7 +78,7 @@ def get_conda_env():
     return ''
 
 def estimate_token_usage(data):
-    """Estimate token usage from transcript file."""
+    """Estimate token usage from transcript file with color coding."""
     try:
         transcript_path = data.get('transcript_path', '')
         if not transcript_path or not os.path.exists(transcript_path):
@@ -44,17 +88,26 @@ def estimate_token_usage(data):
         file_size = os.path.getsize(transcript_path)
         estimated_tokens = file_size // 4
         
+        # Format token count
         if estimated_tokens > 1000000:
-            return f"{estimated_tokens//1000000:.1f}M"
+            token_str = f"{estimated_tokens//1000000:.1f}M"
         elif estimated_tokens > 1000:
-            return f"{estimated_tokens//1000:.0f}k"
+            token_str = f"{estimated_tokens//1000:.0f}k"
         else:
-            return str(estimated_tokens)
+            token_str = str(estimated_tokens)
+        
+        # Apply color coding based on thresholds
+        if estimated_tokens >= Thresholds.TOKEN_RED:
+            return Colors.red(token_str)
+        elif estimated_tokens >= Thresholds.TOKEN_YELLOW:
+            return Colors.yellow(token_str)
+        else:
+            return Colors.green(token_str)
     except:
         return '0'
 
 def get_compaction_indicator(data):
-    """Estimate time until context compaction based on file size."""
+    """Estimate time until context compaction based on file size with color coding."""
     try:
         transcript_path = data.get('transcript_path', '')
         if not transcript_path or not os.path.exists(transcript_path):
@@ -63,18 +116,25 @@ def get_compaction_indicator(data):
         file_size = os.path.getsize(transcript_path)
         # Rough estimate: compaction around 200k tokens (~800KB)
         compaction_threshold = 800 * 1024
+        ratio = file_size / compaction_threshold
         
-        if file_size < compaction_threshold * 0.5:
-            return '●●●'  # Far from compaction
-        elif file_size < compaction_threshold * 0.8:
-            return '●●○'  # Getting closer
+        if ratio < 0.5:
+            indicator = '●●●'  # Far from compaction
+            return Colors.green(indicator)
+        elif ratio < Thresholds.COMPACTION_YELLOW_RATIO:
+            indicator = '●●○'  # Getting closer
+            return Colors.green(indicator)
+        elif ratio < Thresholds.COMPACTION_RED_RATIO:
+            indicator = '●○○'  # Close to compaction
+            return Colors.yellow(indicator)
         else:
-            return '●○○'  # Near compaction
+            indicator = '○○○'  # Near compaction
+            return Colors.red(indicator)
     except:
         return '?'
 
 def get_usage_indicator():
-    """Approximate usage indicator based on session duration."""
+    """Approximate usage indicator based on session duration with color coding."""
     try:
         # Check if there's a session start time file
         session_file = Path.home() / '.claude' / 'session_start'
@@ -83,20 +143,26 @@ def get_usage_indicator():
             elapsed_hours = (time.time() - start_time) / 3600
             
             if elapsed_hours < 1:
-                return '█████'  # Fresh session
+                indicator = '█████'  # Fresh session
+                return Colors.green(indicator)
             elif elapsed_hours < 3:
-                return '████○'  # Light usage
-            elif elapsed_hours < 6:
-                return '███○○'  # Medium usage
-            elif elapsed_hours < 12:
-                return '██○○○'  # Heavy usage
+                indicator = '████○'  # Light usage
+                return Colors.green(indicator)
+            elif elapsed_hours < Thresholds.SESSION_YELLOW_HOURS:
+                indicator = '███○○'  # Medium usage
+                return Colors.yellow(indicator)
+            elif elapsed_hours < Thresholds.SESSION_RED_HOURS:
+                indicator = '██○○○'  # Heavy usage
+                return Colors.red(indicator)
             else:
-                return '█○○○○'  # Very heavy usage
+                indicator = '█○○○○'  # Very heavy usage
+                return Colors.red(indicator)
         else:
             # Create session start file
             session_file.parent.mkdir(exist_ok=True)
             session_file.write_text(str(time.time()))
-            return '█████'
+            indicator = '█████'
+            return Colors.green(indicator)
     except:
         return '?????'
 
