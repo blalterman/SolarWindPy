@@ -56,19 +56,25 @@ None
 
 ## ✅ Acceptance Criteria
 
-- [ ] Verify `.edges` property constructs correct bin-edge arrays
-- [ ] Verify `.categoricals` property returns categorical bins mapping
-- [ ] Verify `.intervals` property returns correct `IntervalIndex` objects
-- [ ] Verify `.cut` property returns the internal `_cut` DataFrame
-- [ ] Verify `.clim` property returns the internal `_clim` tuple
-- [ ] Verify `.agg_axes` returns the correct aggregation column
-- [ ] Verify `.joint` returns a `Series` with a `MultiIndex`
-- [ ] Verify `.grouped` returns a `GroupBy` on the correct axes
-- [ ] Verify `.axnorm` returns the internal `_axnorm` value
-- [ ] Test `clip_data(pd.Series, 'l')`, `'u'`, numeric → correct clipping
-- [ ] Test `clip_data(pd.DataFrame, …)` with lower/upper modes
-- [ ] Verify `clip_data()` raises `TypeError` on unsupported input
-- [ ] Test `set_clim(2, 10)` sets `_clim` to `(2, 10)`
+- [x] Verify `.edges` property constructs correct bin-edge arrays
+- [x] Verify `.categoricals` property returns categorical bins mapping
+- [x] Verify `.intervals` property returns correct `IntervalIndex` objects
+- [x] Verify `.cut` property returns the internal `_cut` DataFrame
+- [x] Verify `.clim` property returns the internal `_clim` tuple
+- [x] Verify `.agg_axes` returns the correct aggregation column
+- [x] Verify `.joint` returns a `Series` with a `MultiIndex`
+- [x] Verify `.grouped` returns a `GroupBy` on the correct axes
+- [x] Verify `.axnorm` returns the internal `_axnorm` value
+- [x] Test `clip_data(pd.Series, 'l')`, `'u'`, numeric → correct clipping
+- [x] Test `clip_data(pd.DataFrame, …)` with lower/upper modes
+- [x] Verify `clip_data()` raises `TypeError` on unsupported input
+- [x] Test `set_clim(2, 10)` sets `_clim` to `(2, 10)`
+
+**Commit**: `991a842`  
+**Status**: Completed  
+**Tests**: 42 passed  
+**Time**: 1.5 hours  
+**Notes**: Comprehensive test suite with pandas deprecation handling
 
 ## 🧩 Decomposition Instructions (Optional)
 
