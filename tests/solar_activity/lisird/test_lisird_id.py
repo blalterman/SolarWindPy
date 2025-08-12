@@ -65,12 +65,9 @@ class TestLISIRD_ID:
         # Test behavior with key not in _trans_url mapping
         invalid_key = "invalid_key_not_in_mapping"
         
-        # LISIRD_ID might raise KeyError when accessing url property
-        lisird_id = LISIRD_ID(invalid_key)
-        
-        # The error should occur when accessing url property, not during init
-        with pytest.raises(KeyError):
-            _ = lisird_id.url
+        # LISIRD_ID raises NotImplementedError during initialization for invalid keys
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID(invalid_key)
     
     def test_inheritance_from_id_base_class(self):
         """Test that LISIRD_ID inherits from ID base class."""
@@ -90,12 +87,11 @@ class TestLISIRD_ID:
         assert valid_id.key == "Lalpha"
         
         # Case variations should be treated as different keys
-        # They may not have URL mappings and should raise KeyError
+        # They may not have URL mappings and should raise NotImplementedError during init
         case_variant_key = "lalpha"  # lowercase
-        case_variant_id = LISIRD_ID(case_variant_key)
         
-        with pytest.raises(KeyError):
-            _ = case_variant_id.url
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID(case_variant_key)
     
     def test_url_property_consistency(self):
         """Test that url property is consistent and repeatable."""
@@ -131,53 +127,39 @@ class TestLISIRD_IDEdgeCases:
     
     def test_empty_key_handling(self):
         """Test behavior with empty or None keys."""
-        # Empty string key
-        empty_key_id = LISIRD_ID("")
-        assert empty_key_id.key == ""
+        # Empty string key should raise NotImplementedError during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID("")
         
-        # Should raise KeyError when trying to access URL
-        with pytest.raises(KeyError):
-            _ = empty_key_id.url
-        
-        # None key - this might raise TypeError in __init__ or later
-        with pytest.raises(TypeError):
+        # None key also raises NotImplementedError during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
             LISIRD_ID(None)
     
     def test_whitespace_key_handling(self):
         """Test behavior with whitespace in keys."""
         whitespace_key = " Lalpha "
-        whitespace_id = LISIRD_ID(whitespace_key)
         
-        # Key should be preserved as-is (including whitespace)
-        assert whitespace_id.key == " Lalpha "
-        
-        # Should not match the valid mapping due to whitespace
-        with pytest.raises(KeyError):
-            _ = whitespace_id.url
+        # Should not match the valid mapping due to whitespace, raises during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID(whitespace_key)
     
     def test_numeric_key_handling(self):
         """Test behavior with numeric keys."""
-        # String numeric key
-        numeric_key_id = LISIRD_ID("123")
-        assert numeric_key_id.key == "123"
+        # String numeric key should raise NotImplementedError during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID("123")
         
-        with pytest.raises(KeyError):
-            _ = numeric_key_id.url
-        
-        # Integer key (should be converted to string by base class or raise TypeError)
-        with pytest.raises((TypeError, AttributeError)):
-            # This might fail in __init__ or when accessing properties
+        # Integer key also raises NotImplementedError during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
             LISIRD_ID(123)
     
     def test_special_characters_in_key(self):
         """Test behavior with special characters in keys."""
         special_key = "f107-special!@#$%"
-        special_id = LISIRD_ID(special_key)
-        assert special_id.key == special_key
         
-        # Should not match any valid mapping
-        with pytest.raises(KeyError):
-            _ = special_id.url
+        # Should not match any valid mapping, raises during init
+        with pytest.raises(NotImplementedError, match="key unavailable"):
+            LISIRD_ID(special_key)
     
     def test_url_construction_consistency(self):
         """Test that URL construction is deterministic and correct."""
