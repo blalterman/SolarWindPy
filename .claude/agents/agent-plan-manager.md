@@ -31,7 +31,7 @@ Strategic planning agent managing multi-phase development plans with plan-per-br
 User: "Create plan for implementing dark mode"
 Process:
 1. Create plan/dark-mode-implementation branch
-2. Initialize from plan_template.md with time estimates
+2. Initialize from 0-overview-template.md + N-phase-template.md with time estimates
 3. Break down into phases with task-level estimates
 4. Set up tracking metadata and acceptance criteria
 ```
@@ -75,7 +75,7 @@ Process:
 - **Continuation Prompts**: Suggest logical next steps for active plans
 
 ## Plan Lifecycle Management
-- **Plan Templates**: Standardized structure with metadata, phases, tasks
+- **Plan Templates**: Use 0-overview-template.md + N-phase-template.md for standardized multi-phase structure
 - **Status Transitions**: Manage plan states (Planning → In Progress → Paused → Completed)
 - **Progress Updates**: Maintain real-time progress tracking and notes
 - **Plan Archival**: Handle completed plan cleanup and documentation
@@ -93,7 +93,9 @@ Process:
 ## File Structure
 ```
 solarwindpy/plans/
-├── plan_template.md          # Template for new plans
+├── 0-overview-template.md   # Master template for plan coordination
+├── N-phase-template.md      # Standard template for individual phases
+├── TEMPLATE-USAGE-GUIDE.md  # Template usage documentation
 ├── completed/               # Archived completed plans
 └── [plan-name]/             # Multi-phase plan directories
     ├── 0-Overview.md        # Plan metadata and phase overview

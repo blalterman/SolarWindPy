@@ -2,7 +2,7 @@
 
 ## Template Architecture Overview
 
-The SolarWindPy planning system uses a **unified multi-phase architecture** designed for optimal Claude Code agent efficiency, session continuity, and collaborative development.
+The SolarWindPy planning system uses a **unified multi-phase architecture** for structured development planning with git branch coordination.
 
 ### Template Hierarchy
 
@@ -58,14 +58,14 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 1. **Plan Name**: Clear, descriptive name
 2. **Created**: Use YYYY-MM-DD format  
 3. **Branch Names**: Follow plan/[name] and feature/[name] convention
-4. **Agent Selection**: Choose appropriate PlanManager/PlanImplementer variants
+4. **Agent Selection**: Use PlanManager and PlanImplementer
 5. **Total Phases**: Must match number of phase files created
 6. **Dependencies**: List prerequisite plans or "None"
 7. **Affects**: List all files/directories that will be modified
 8. **Phase Overview**: One-line description per phase
 9. **Phase Files**: Update links to match actual filenames
 
-**Critical Fields for Agent Efficiency:**
+**Critical Fields:**
 - **Dependencies**: Enables cross-plan coordination
 - **Affects**: Prevents resource conflicts
 - **Total Phases**: Enables progress tracking
@@ -83,23 +83,10 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 
 ## 🏗️ Architecture Benefits
 
-### Agent Optimization
-- **Token Efficiency**: Overview files optimized for Claude Pro limits
-- **Context Switching**: Natural break points between phases
-- **Session Continuity**: Each phase designed for focused implementation
-- **Progress Visibility**: Clear completion tracking across sessions
-
-### Development Workflow
 - **Resource Conflict Detection**: "Affects" field prevents concurrent modifications
 - **Dependency Management**: Clear prerequisite tracking
-- **Collaborative Safety**: Phase isolation reduces merge conflicts
 - **Quality Assurance**: Phase-level acceptance criteria ensure thoroughness
-
-### Template Consistency
-- **Standardized Metadata**: All plans follow identical structure
-- **Predictable Navigation**: Consistent file naming and linking
-- **Cross-Plan Coordination**: Dependencies enable ecosystem planning
-- **Maintenance Efficiency**: Template updates propagate systematically
+- **Template Consistency**: All plans follow identical structure
 
 ## 📊 Template Field Specifications
 
@@ -111,8 +98,8 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 | **Created** | YYYY-MM-DD | Plan creation date | "2025-08-12" |
 | **Branch** | plan/[name] | Planning branch name | "plan/test-consolidation" |
 | **Implementation Branch** | feature/[name] | Development branch name | "feature/test-consolidation" |
-| **PlanManager** | Enum | Agent for planning coordination | "PlanManager" |
-| **PlanImplementer** | Enum | Agent for implementation | "PlanImplementer" |
+| **PlanManager** | Fixed | Agent for planning coordination | "PlanManager" |
+| **PlanImplementer** | Fixed | Agent for implementation | "PlanImplementer" |
 | **Structure** | "Multi-Phase" | Fixed value for consistency | "Multi-Phase" |
 | **Total Phases** | Integer | Number of implementation phases | "6" |
 | **Dependencies** | List or "None" | Prerequisite plan names | "Requirements Management Consolidation" |
@@ -160,48 +147,24 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 - [ ] Phase files follow N-phase-template.md structure
 - [ ] "Affects" field comprehensively lists modified files
 - [ ] Dependencies accurately reflect plan relationships
-- [ ] Agent assignments appropriate for plan complexity
+- [ ] Agent assignments use PlanManager + PlanImplementer
 
-## 🚀 Advanced Usage
 
-### Cross-Plan Dependency Management
-- Use **Dependencies** field to create plan execution order
-- Reference plans by exact name from their Plan Name field
-- Update dependencies when prerequisite plans complete
+### Agent Usage
 
-### Resource Conflict Prevention
-- **Affects** field enables detection of concurrent modifications
-- List all files, directories, and configuration that will change
-- Include indirect effects (e.g., test file changes from source changes)
-
-### Agent Selection Guidelines
-
-| Plan Complexity | Duration | Agent Recommendation |
-|------------------|----------|---------------------|
-| Simple | <4 hours, <3 phases | PlanManager + PlanImplementer |
-| Medium | 4-12 hours, 3-6 phases | PlanManager + PlanImplementer |
-| Complex | >12 hours, >6 phases | PlanManager-Full + PlanImplementer-Full |
-| Infrastructure | Any, affects multiple systems | PlanManager-Full + PlanImplementer-Full |
+**All Plans**: Use PlanManager + PlanImplementer
+- Planning coordination with velocity tracking
+- Implementation execution with git integration
+- Automatic time estimation learning
 
 ## 💡 Best Practices
-
-### Template Maintenance
-1. **Version Templates**: Update templates when patterns emerge from completed plans
-2. **Propagate Improvements**: Apply template enhancements to active plans when beneficial  
-3. **Document Decisions**: Track why template changes were made
-4. **Validate Ecosystem**: Ensure all plans remain compliant after template updates
 
 ### Plan Development
 1. **Start with Overview**: Complete all metadata before creating phase files
 2. **Realistic Estimates**: Base time estimates on similar completed plans
 3. **Atomic Phases**: Each phase should have clear start/end points
 4. **Progressive Refinement**: Update estimates and tasks as implementation progresses
-
-### Collaboration
-1. **Branch Strategy**: Always follow plan/[name] → feature/[name] pattern
-2. **Phase Ownership**: Assign phases to team members to avoid conflicts
-3. **Status Updates**: Keep phase status current for team visibility
-4. **Cross-References**: Maintain links between overview and phase files
+5. **Branch Strategy**: Always follow plan/[name] → feature/[name] pattern
 
 ---
 
