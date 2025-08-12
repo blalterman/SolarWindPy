@@ -3,8 +3,8 @@
 ## Plan Metadata
 - **Plan Name**: Combined Test Plan with Checklist: Solar Activity
 - **Created**: 2025-08-03
-- **Branch**: plan/combined-test-solar-activity
-- **Implementation Branch**: feature/combined-test-solar-activity
+- **Branch**: plan/solar-activity-testing
+- **Implementation Branch**: feature/solar-activity-testing
 - **PlanManager**: PlanManager
 - **PlanImplementer**: PlanImplementer
 - **Structure**: Multi-Phase
