@@ -140,14 +140,14 @@ solarwindpy/plans/
 # Compacted Context State - [Plan Name]
 
 ## Compaction Metadata
-- **Plan Name**: [plan-name] 
-- **Current Phase**: [phase-name] ([N]/[total])
+- **Plan Name**: [plan-name]
+- **Source Agent**: PlanManager | PlanImplementer | PlanStatusAggregator
+- **Agent Context**: [planning/implementation/monitoring] workflow state
 - **Compaction Timestamp**: [ISO-8601 timestamp]
 - **Token Efficiency**: [original] → [compressed] tokens ([percentage]% reduction)
-- **Source Agent**: [PlanManager/PlanImplementer/PlanStatusAggregator]
-- **Processing Method**: [Agent-Specific Optimization]
-- **Git Sync Status**: ✅ Validated | ⚠️ Pending | ❌ Conflicted
-- **Evidence Commits**: [commit-hash-list] validating progress claims
+- **Session Extension**: [effective capacity increase] ([multiplier]x session length)
+- **Git Validation**: ✅ Commits verified | ⚠️ Sync pending | ❌ Conflicts detected
+- **Resumption Quality**: [High/Medium/Low] based on context preservation
 
 ## Current State Summary
 - **Active Objectives**: [2-3 primary current objectives]
@@ -157,46 +157,50 @@ solarwindpy/plans/
 - **Integration Points**: [specialist agent connections and coordination requirements]
 
 ## Progress Snapshot (Git-Validated)
-- **Completed Phases**: [phase-1] ✓ (commits: [hash-list]), [phase-2] ✓ (commits: [hash-list])
-- **Current Progress**: [X]/[total] tasks completed ([percentage]%) - verified by git evidence
-- **Key Achievements**: [significant milestones] with commit references: [commit-hash-list]
-- **Velocity Metrics**: [estimated vs actual time] validated against git commit timing
-- **Time Investment**: [hours invested] of [estimated total] hours
-- **Git Evidence**: [N] commits validate progress claims, session state accuracy: ✅
+- **Branch State**: [plan/name ↔ feature/name] sync status with commit alignment
+- **Verified Completion**: [X]/[total] tasks ✓ with commit evidence: [recent-commits]
+- **Velocity Intelligence**: [estimated vs actual] hours with learning calibration
+- **Progress Quality**: [implementation/testing/integration] status with QA validation
+- **Session Continuity**: [next session priorities] with git-validated foundation
+- **Evidence Integrity**: [N] commits confirm accuracy, [M] specialist validations preserved
 
-## Compacted Context Archive
-### Phase 1: [phase-name]
-- **Summary**: [key outcomes and lessons learned]
-- **Key Commits**: [commit-hash]: [description]
-- **Deliverables**: [completed outputs]
+## Agent-Specific Compacted Context
 
-### Phase 2: [phase-name]  
-- **Summary**: [key outcomes and lessons learned]
-- **Key Commits**: [commit-hash]: [description]
-- **Deliverables**: [completed outputs]
+### [For PlanManager] Plan Management State
+- **Active Plans**: [plan-inventory] with progress, priorities, and dependencies
+- **Current Focus**: [plan-name] Phase [N]: [current tasks and estimates]
+- **Velocity Intelligence**: [learning data] from [completed phases] for time calibration
+- **Archived Planning**: [Phase-1: outcomes, Phase-2: outcomes] with commit refs
 
-### Current Phase: [phase-name]
-- **In Progress**: [current tasks and status]
-- **Recent Work**: [latest commits and progress]
-- **Next Milestones**: [upcoming deliverables]
+### [For PlanImplementer] Implementation State
+- **Active Implementation**: [current phase] on [feature/name] branch
+- **Branch Coordination**: [plan ↔ feature] sync with [commit alignment]
+- **QA Status**: [test results, validation status] and [performance benchmarks]
+- **Archived Implementation**: [Phase-1: commits, Phase-2: commits] with QA validation
+
+### [For StatusAggregator] Monitoring State
+- **Active Monitoring**: [plan dependencies and bottlenecks]
+- **Cross-Plan Coordination**: [coordination requirements and conflicts]
+- **Priority Alerts**: [critical dependencies] requiring [immediate attention]
+- **Archived Analysis**: [resolved issues] compressed to [trend data]
 
 ## Resumption Instructions
-### Next Session Priorities
-1. **Immediate Action**: [first task to tackle]
-2. **Quick Wins**: [2-3 achievable tasks for momentum]
-3. **Critical Path**: [essential tasks for plan progression]
 
-### Context Recovery
-- **Branch Operations**: [git commands to resume work environment]
-- **Specialist Coordination**: [agents to re-engage and coordination points]
-- **Integration Requirements**: [cross-component dependencies to validate]
+### Immediate Session Startup ([estimated time])
+1. **Git Recovery**: `git checkout [branch]` and validate [sync status]
+2. **Context Restoration**: Resume [agent-type] workflow at [specific task]
+3. **Priority Validation**: Confirm [next 1-3 tasks] align with [time available]
 
-### Session Startup Checklist
-- [ ] Switch to appropriate branch: `git checkout [branch-name]`  
-- [ ] Review recent commits and current state
-- [ ] Re-engage specialist agents: [list specific agents]
-- [ ] Validate integration points and dependencies
-- [ ] Begin with [specific next task]
+### Agent-Specific Resumption
+- **PlanManager**: Restore [plan inventory], review [velocity data], prioritize [next planning]
+- **PlanImplementer**: Sync [feature branch], validate [QA status], continue [implementation phase]
+- **StatusAggregator**: Update [monitoring scope], resolve [dependencies], report [bottlenecks]
+
+### Quality Continuity Checklist
+- [ ] Agent context fully restored with [specific validation]
+- [ ] Git state validated: [branch status] and [sync requirements]
+- [ ] Session priorities confirmed: [immediate tasks] within [token budget]
+- [ ] Specialist integration ready: [domain experts] available as needed
 ```
 
 ## Agent Coordination
