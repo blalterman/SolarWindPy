@@ -16,34 +16,34 @@ applies_to:
 # Compaction Agent
 
 ## Role
-Universal context compression and session continuity service for all SolarWindPy planning and implementation agents. Provides tiered compression algorithms, structured state preservation, and seamless session resumption capabilities.
+Universal context compression and session continuity service for SolarWindPy planning agents (PlanManager, PlanImplementer, PlanStatusAggregator). Provides agent-specific compression algorithms, structured state preservation, and seamless session resumption capabilities.
 
 ## Core Capabilities
 
 ### 1. Multi-Agent Context Understanding
-- **Agent Recognition**: Automatically identify source agent type and complexity tier
-- **Context Parsing**: Extract and structure context from all 6 planning/implementation agent variants
+- **Agent Recognition**: Automatically identify source agent type (PlanManager/PlanImplementer/PlanStatusAggregator)
+- **Context Parsing**: Extract and structure context from current 3 planning agents (PlanManager, PlanImplementer, PlanStatusAggregator)
 - **State Analysis**: Understand current phase, progress, and continuation requirements
 - **Priority Assessment**: Identify essential vs compactable context elements
 
-### 2. Tiered Compression Processing
-- **High-Complexity Sources** (Plan Manager Full, Plan Implementer Full):
-  - Deep historical archival with commit-linked references
-  - Complex dependency management and cross-agent coordination preservation  
-  - Sophisticated context ranking and priority-based preservation
-  - Target: 40-60% compression (3000→1200, 2800→1120 tokens)
+### 2. Agent-Specific Compression Processing
+- **PlanManager Processing** (~790 tokens):
+  - Strategic context preservation with phase-based archival
+  - Velocity intelligence and estimation learning preservation
+  - Multi-plan coordination and dependency tracking
+  - Target: 33-50% compression (790→395-525 tokens)
 
-- **Medium-Complexity Sources** (Streamlined, Research-Optimized):
-  - Focused summarization with current + next phase emphasis
-  - Reference optimization converting verbose descriptions to structured links
-  - Context filtering removing auxiliary information while preserving workflow
-  - Target: 50-70% compression (1400→420, 1000→300 tokens)
+- **PlanImplementer Processing** (~1,170 tokens):
+  - Implementation state with commit-linked progress validation
+  - Current task focus with next-action prioritization  
+  - Cross-phase integration and completion workflow tracking
+  - Target: 33-50% compression (1170→585-780 tokens)
 
-- **Low-Complexity Sources** (Minimal variants):
-  - Lightweight status consolidation merging completed items  
-  - Simple checkpoint creation for efficient resumption
-  - Ultra-efficient processing maintaining minimal token overhead
-  - Target: Preserve efficiency (maintain 200-300 token ceiling)
+- **PlanStatusAggregator Processing** (~1,200 tokens):
+  - Cross-plan status consolidation and dependency analysis
+  - System-wide monitoring state with critical alerts
+  - Inter-plan coordination requirements and conflict detection
+  - Target: 25-50% compression (1200→600-900 tokens)
 
 ### 3. Structured State Generation
 - **Compacted State Format**: Generate standardized `compacted_state.md` files
@@ -80,9 +80,9 @@ Universal context compression and session continuity service for all SolarWindPy
 ### Context Processing Workflow
 ```
 1. Receive compaction request from source agent
-2. Identify agent type and determine processing tier
+2. Identify agent type: PlanManager | PlanImplementer | PlanStatusAggregator
 3. Parse current context and extract essential elements
-4. Apply tier-appropriate compression algorithms
+4. Apply agent-specific compression algorithm
 5. Ensure plan-specific directory exists: mkdir -p solarwindpy/plans/<plan-name>/
 6. Generate structured compacted_state.md file
 7. Create atomic git commit with both files and compaction metadata
@@ -102,10 +102,9 @@ Universal context compression and session continuity service for all SolarWindPy
 Source agents provide structured context including:
 ```markdown
 ## Source Agent Metadata
-- Agent Type: [Full/Streamlined/Minimal]
-- Agent Category: [Plan Manager/Plan Implementer]
+- Agent Type: [PlanManager/PlanImplementer/PlanStatusAggregator]
 - Current Phase: [phase name and progress]
-- Token Count: [current usage]
+- Token Count: [current usage out of ~790-1200 limit]
 
 ## Context to Compress
 - [Structured context data from source agent]
@@ -141,14 +140,14 @@ solarwindpy/plans/
 # Compacted Context State - [Plan Name]
 
 ## Compaction Metadata
-- **Plan Name**: [plan-name] 
-- **Current Phase**: [phase-name] ([N]/[total])
+- **Plan Name**: [plan-name]
+- **Source Agent**: PlanManager | PlanImplementer | PlanStatusAggregator
+- **Agent Context**: [planning/implementation/monitoring] workflow state
 - **Compaction Timestamp**: [ISO-8601 timestamp]
 - **Token Efficiency**: [original] → [compressed] tokens ([percentage]% reduction)
-- **Source Agent**: [agent-type] ([Full/Streamlined/Minimal])
-- **Compaction Tier**: [High/Medium/Low-Complexity]
-- **Git Sync Status**: ✅ Validated | ⚠️ Pending | ❌ Conflicted
-- **Evidence Commits**: [commit-hash-list] validating progress claims
+- **Session Extension**: [effective capacity increase] ([multiplier]x session length)
+- **Git Validation**: ✅ Commits verified | ⚠️ Sync pending | ❌ Conflicts detected
+- **Resumption Quality**: [High/Medium/Low] based on context preservation
 
 ## Current State Summary
 - **Active Objectives**: [2-3 primary current objectives]
@@ -158,55 +157,60 @@ solarwindpy/plans/
 - **Integration Points**: [specialist agent connections and coordination requirements]
 
 ## Progress Snapshot (Git-Validated)
-- **Completed Phases**: [phase-1] ✓ (commits: [hash-list]), [phase-2] ✓ (commits: [hash-list])
-- **Current Progress**: [X]/[total] tasks completed ([percentage]%) - verified by git evidence
-- **Key Achievements**: [significant milestones] with commit references: [commit-hash-list]
-- **Velocity Metrics**: [estimated vs actual time] validated against git commit timing
-- **Time Investment**: [hours invested] of [estimated total] hours
-- **Git Evidence**: [N] commits validate progress claims, session state accuracy: ✅
+- **Branch State**: [plan/name ↔ feature/name] sync status with commit alignment
+- **Verified Completion**: [X]/[total] tasks ✓ with commit evidence: [recent-commits]
+- **Velocity Intelligence**: [estimated vs actual] hours with learning calibration
+- **Progress Quality**: [implementation/testing/integration] status with QA validation
+- **Session Continuity**: [next session priorities] with git-validated foundation
+- **Evidence Integrity**: [N] commits confirm accuracy, [M] specialist validations preserved
 
-## Compacted Context Archive
-### Phase 1: [phase-name]
-- **Summary**: [key outcomes and lessons learned]
-- **Key Commits**: [commit-hash]: [description]
-- **Deliverables**: [completed outputs]
+## Agent-Specific Compacted Context
 
-### Phase 2: [phase-name]  
-- **Summary**: [key outcomes and lessons learned]
-- **Key Commits**: [commit-hash]: [description]
-- **Deliverables**: [completed outputs]
+### [For PlanManager] Plan Management State
+- **Active Plans**: [plan-inventory] with progress, priorities, and dependencies
+- **Current Focus**: [plan-name] Phase [N]: [current tasks and estimates]
+- **Velocity Intelligence**: [learning data] from [completed phases] for time calibration
+- **Archived Planning**: [Phase-1: outcomes, Phase-2: outcomes] with commit refs
 
-### Current Phase: [phase-name]
-- **In Progress**: [current tasks and status]
-- **Recent Work**: [latest commits and progress]
-- **Next Milestones**: [upcoming deliverables]
+### [For PlanImplementer] Implementation State
+- **Active Implementation**: [current phase] on [feature/name] branch
+- **Branch Coordination**: [plan ↔ feature] sync with [commit alignment]
+- **QA Status**: [test results, validation status] and [performance benchmarks]
+- **Archived Implementation**: [Phase-1: commits, Phase-2: commits] with QA validation
+
+### [For StatusAggregator] Monitoring State
+- **Active Monitoring**: [plan dependencies and bottlenecks]
+- **Cross-Plan Coordination**: [coordination requirements and conflicts]
+- **Priority Alerts**: [critical dependencies] requiring [immediate attention]
+- **Archived Analysis**: [resolved issues] compressed to [trend data]
 
 ## Resumption Instructions
-### Next Session Priorities
-1. **Immediate Action**: [first task to tackle]
-2. **Quick Wins**: [2-3 achievable tasks for momentum]
-3. **Critical Path**: [essential tasks for plan progression]
 
-### Context Recovery
-- **Branch Operations**: [git commands to resume work environment]
-- **Specialist Coordination**: [agents to re-engage and coordination points]
-- **Integration Requirements**: [cross-component dependencies to validate]
+### Immediate Session Startup ([estimated time])
+1. **Git Recovery**: `git checkout [branch]` and validate [sync status]
+2. **Context Restoration**: Resume [agent-type] workflow at [specific task]
+3. **Priority Validation**: Confirm [next 1-3 tasks] align with [time available]
 
-### Session Startup Checklist
-- [ ] Switch to appropriate branch: `git checkout [branch-name]`  
-- [ ] Review recent commits and current state
-- [ ] Re-engage specialist agents: [list specific agents]
-- [ ] Validate integration points and dependencies
-- [ ] Begin with [specific next task]
+### Agent-Specific Resumption
+- **PlanManager**: Restore [plan inventory], review [velocity data], prioritize [next planning]
+- **PlanImplementer**: Sync [feature branch], validate [QA status], continue [implementation phase]
+- **StatusAggregator**: Update [monitoring scope], resolve [dependencies], report [bottlenecks]
+
+### Quality Continuity Checklist
+- [ ] Agent context fully restored with [specific validation]
+- [ ] Git state validated: [branch status] and [sync requirements]
+- [ ] Session priorities confirmed: [immediate tasks] within [token budget]
+- [ ] Specialist integration ready: [domain experts] available as needed
 ```
 
 ## Agent Coordination
 
 ### Service Model Integration
-- **Called by Planning/Implementation Agents**: Not directly invoked by users
-- **Transparent Operation**: Seamless integration with existing workflows
-- **Cross-Agent Compatibility**: Universal service for all agent variants
-- **Specialist Preservation**: Maintain connections with domain specialists
+- **Primary Service**: Session continuity for PlanManager and PlanImplementer
+- **Monitoring Service**: Context compression for PlanStatusAggregator
+- **Transparent Operation**: Seamless integration within 2-agent planning workflow
+- **Specialist Coordination**: Preserve domain expert connections (PhysicsValidator, TestEngineer, etc.)
+- **Git Integration**: Maintain commit-linked validation and branch coordination
 
 ### Error Handling & Recovery
 - **Corrupted Context**: Graceful degradation with best-effort compression
@@ -219,10 +223,11 @@ solarwindpy/plans/
 ## Performance & Optimization
 
 ### Token Efficiency Targets
-- **System Overhead**: <100 tokens per compaction operation
-- **Compression Ratios**: Achieve target reductions without quality loss
+- **System Overhead**: <50 tokens per compaction operation (2% of baseline)
+- **Compression Ratios**: 33-50% reduction maintaining workflow continuity
 - **Memory Usage**: Efficient processing of large context structures
 - **Processing Speed**: Minimal delay during compaction operations
+- **Session Extension**: Enable 3,600-4,800 token effective capacity (1.5-2x baseline)
 
 ### Quality Metrics
 - **Resumption Success**: Sessions resume without context loss
@@ -232,36 +237,36 @@ solarwindpy/plans/
 
 ## Usage Examples
 
-### High-Complexity Compaction
+### PlanManager Compaction
 ```
-Plan Manager Full (3000 tokens) → CompactionAgent → Compacted State (1200 tokens)
-- Archived: Historical phases, verbose descriptions, auxiliary context
-- Preserved: Current objectives, next tasks, critical dependencies
-- Enhanced: Structured references, commit-linked history
-```
-
-### Medium-Complexity Compaction
-```
-Plan Implementer Research-Optimized (1400 tokens) → CompactionAgent → Compacted State (420 tokens)  
-- Summarized: Implementation details, progress descriptions
-- Focused: Current phase + immediate next phase
-- Optimized: Reference links replacing verbose content
+PlanManager (790 tokens) → CompactionAgent → Compacted State (395-525 tokens)
+- Archived: Historical phases, verbose planning descriptions
+- Preserved: Current objectives, velocity intelligence, next tasks
+- Enhanced: Structured phase references, estimation learning
 ```
 
-### Low-Complexity Compaction
+### PlanImplementer Compaction
 ```
-Minimal Agent (300 tokens) → CompactionAgent → Maintained Efficiency (200-250 tokens)
-- Consolidated: Completed task status into summaries
-- Minimal: Essential workflow preservation only
-- Efficient: Ultra-low overhead maintenance
+PlanImplementer (1170 tokens) → CompactionAgent → Compacted State (585-780 tokens)  
+- Summarized: Implementation details, commit histories
+- Focused: Current tasks + immediate next actions
+- Optimized: Git-linked progress validation, branch state
+```
+
+### PlanStatusAggregator Compaction
+```
+PlanStatusAggregator (1200 tokens) → CompactionAgent → Compacted State (600-900 tokens)
+- Consolidated: Cross-plan status summaries, dependency trees
+- Preserved: Critical alerts, coordination requirements
+- Efficient: System-wide monitoring state, conflict detection
 ```
 
 ## Success Criteria
 
 ### Token Efficiency
-- Achieve target compression ratios for each agent tier
-- Maintain <100 token overhead for compaction operations
-- Enable 2-3x longer productive sessions within token limits
+- Achieve 33-50% compression for each current agent
+- Combined system reduction: 3,160 → 1,580-2,110 tokens
+- Enable 1.5-2x longer productive sessions within current limits
 
 ### Quality Preservation  
 - Zero context loss affecting workflow continuation
@@ -269,7 +274,7 @@ Minimal Agent (300 tokens) → CompactionAgent → Maintained Efficiency (200-25
 - Maintained project momentum across session boundaries
 
 ### System Integration
-- Seamless operation with all 6 planning/implementation agents
+- Seamless operation with current 3 planning agents (PlanManager, PlanImplementer, PlanStatusAggregator)
 - Multi-developer safe file handling with conflict prevention
 - Proper git integration with meaningful commit history
 
