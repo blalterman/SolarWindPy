@@ -218,11 +218,11 @@ solarwindpy/plans/
 ## Performance & Optimization
 
 ### Token Efficiency Targets
-- **System Overhead**: <50 tokens per compaction operation (2% of baseline)
+- **System Overhead**: <65 tokens per compaction operation (2% of baseline)
 - **Compression Ratios**: 33-50% reduction maintaining workflow continuity
 - **Memory Usage**: Efficient processing of large context structures
 - **Processing Speed**: Minimal delay during compaction operations
-- **Session Extension**: Enable 4,700-9,400 token effective capacity (1.5-3x baseline)
+- **Session Extension**: Enable 4,740-6,320 token effective capacity (1.5-2x baseline)
 
 ### Quality Metrics
 - **Resumption Success**: Sessions resume without context loss
@@ -261,7 +261,7 @@ PlanStatusAggregator (1200 tokens) → CompactionAgent → Compacted State (600-
 ### Token Efficiency
 - Achieve 33-50% compression for each current agent
 - Combined system reduction: 3,160 → 1,580-2,110 tokens
-- Enable 2-3x longer productive sessions within current limits
+- Enable 1.5-2x longer productive sessions within current limits
 
 ### Quality Preservation  
 - Zero context loss affecting workflow continuation
