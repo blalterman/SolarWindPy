@@ -427,7 +427,7 @@ class TestDateTimeIntegration:
         
         # Test frequency units
         freq = datetime_labels.Frequency("1h")
-        assert "^{-1}" in freq.units
+        assert "^-1" in freq.units
         
         # Test epoch relationships
         epoch = datetime_labels.Epoch("Hour", "Day")
