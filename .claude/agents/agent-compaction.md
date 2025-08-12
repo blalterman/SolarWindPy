@@ -21,29 +21,29 @@ Universal context compression and session continuity service for all SolarWindPy
 ## Core Capabilities
 
 ### 1. Multi-Agent Context Understanding
-- **Agent Recognition**: Automatically identify source agent type and complexity tier
+- **Agent Recognition**: Automatically identify source agent type (PlanManager/PlanImplementer/PlanStatusAggregator)
 - **Context Parsing**: Extract and structure context from current 3 planning agents (PlanManager, PlanImplementer, PlanStatusAggregator)
 - **State Analysis**: Understand current phase, progress, and continuation requirements
 - **Priority Assessment**: Identify essential vs compactable context elements
 
 ### 2. Agent-Specific Compression Processing
-- **PlanManager Processing** (~600 tokens):
+- **PlanManager Processing** (~790 tokens):
   - Strategic context preservation with phase-based archival
   - Velocity intelligence and estimation learning preservation
   - Multi-plan coordination and dependency tracking
-  - Target: 33-50% compression (600→400-500 tokens)
+  - Target: 33-50% compression (790→395-525 tokens)
 
-- **PlanImplementer Processing** (~900 tokens):
+- **PlanImplementer Processing** (~1,170 tokens):
   - Implementation state with commit-linked progress validation
   - Current task focus with next-action prioritization  
   - Cross-phase integration and completion workflow tracking
-  - Target: 33-50% compression (900→450-600 tokens)
+  - Target: 33-50% compression (1170→585-780 tokens)
 
-- **PlanStatusAggregator Processing** (~900 tokens):
+- **PlanStatusAggregator Processing** (~1,200 tokens):
   - Cross-plan status consolidation and dependency analysis
   - System-wide monitoring state with critical alerts
   - Inter-plan coordination requirements and conflict detection
-  - Target: 25-50% compression (900→450-675 tokens)
+  - Target: 25-50% compression (1200→600-900 tokens)
 
 ### 3. Structured State Generation
 - **Compacted State Format**: Generate standardized `compacted_state.md` files
@@ -104,7 +104,7 @@ Source agents provide structured context including:
 ## Source Agent Metadata
 - Agent Type: [PlanManager/PlanImplementer/PlanStatusAggregator]
 - Current Phase: [phase name and progress]
-- Token Count: [current usage out of ~600-900 limit]
+- Token Count: [current usage out of ~790-1200 limit]
 
 ## Context to Compress
 - [Structured context data from source agent]
@@ -218,10 +218,11 @@ solarwindpy/plans/
 ## Performance & Optimization
 
 ### Token Efficiency Targets
-- **System Overhead**: <100 tokens per compaction operation
-- **Compression Ratios**: Achieve target reductions without quality loss
+- **System Overhead**: <50 tokens per compaction operation (2% of baseline)
+- **Compression Ratios**: 33-50% reduction maintaining workflow continuity
 - **Memory Usage**: Efficient processing of large context structures
 - **Processing Speed**: Minimal delay during compaction operations
+- **Session Extension**: Enable 4,700-9,400 token effective capacity (1.5-3x baseline)
 
 ### Quality Metrics
 - **Resumption Success**: Sessions resume without context loss
@@ -233,7 +234,7 @@ solarwindpy/plans/
 
 ### PlanManager Compaction
 ```
-PlanManager (600 tokens) → CompactionAgent → Compacted State (400-500 tokens)
+PlanManager (790 tokens) → CompactionAgent → Compacted State (395-525 tokens)
 - Archived: Historical phases, verbose planning descriptions
 - Preserved: Current objectives, velocity intelligence, next tasks
 - Enhanced: Structured phase references, estimation learning
@@ -241,7 +242,7 @@ PlanManager (600 tokens) → CompactionAgent → Compacted State (400-500 tokens
 
 ### PlanImplementer Compaction
 ```
-PlanImplementer (900 tokens) → CompactionAgent → Compacted State (450-600 tokens)  
+PlanImplementer (1170 tokens) → CompactionAgent → Compacted State (585-780 tokens)  
 - Summarized: Implementation details, commit histories
 - Focused: Current tasks + immediate next actions
 - Optimized: Git-linked progress validation, branch state
@@ -249,7 +250,7 @@ PlanImplementer (900 tokens) → CompactionAgent → Compacted State (450-600 to
 
 ### PlanStatusAggregator Compaction
 ```
-PlanStatusAggregator (900 tokens) → CompactionAgent → Compacted State (450-675 tokens)
+PlanStatusAggregator (1200 tokens) → CompactionAgent → Compacted State (600-900 tokens)
 - Consolidated: Cross-plan status summaries, dependency trees
 - Preserved: Critical alerts, coordination requirements
 - Efficient: System-wide monitoring state, conflict detection
@@ -259,7 +260,7 @@ PlanStatusAggregator (900 tokens) → CompactionAgent → Compacted State (450-6
 
 ### Token Efficiency
 - Achieve 33-50% compression for each current agent
-- Combined system reduction: 2,400 → 1,200-1,600 tokens
+- Combined system reduction: 3,160 → 1,580-2,110 tokens
 - Enable 2-3x longer productive sessions within current limits
 
 ### Quality Preservation  
