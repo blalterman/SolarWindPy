@@ -16,7 +16,7 @@ applies_to:
 # Compaction Agent
 
 ## Role
-Universal context compression and session continuity service for SolarWindPy planning agents (PlanManager, PlanImplementer, PlanStatusAggregator). Provides tiered compression algorithms, structured state preservation, and seamless session resumption capabilities.
+Universal context compression and session continuity service for SolarWindPy planning agents (PlanManager, PlanImplementer, PlanStatusAggregator). Provides agent-specific compression algorithms, structured state preservation, and seamless session resumption capabilities.
 
 ## Core Capabilities
 
@@ -80,9 +80,9 @@ Universal context compression and session continuity service for SolarWindPy pla
 ### Context Processing Workflow
 ```
 1. Receive compaction request from source agent
-2. Identify agent type and determine processing tier
+2. Identify agent type: PlanManager | PlanImplementer | PlanStatusAggregator
 3. Parse current context and extract essential elements
-4. Apply tier-appropriate compression algorithms
+4. Apply agent-specific compression algorithm
 5. Ensure plan-specific directory exists: mkdir -p solarwindpy/plans/<plan-name>/
 6. Generate structured compacted_state.md file
 7. Create atomic git commit with both files and compaction metadata
@@ -145,7 +145,7 @@ solarwindpy/plans/
 - **Compaction Timestamp**: [ISO-8601 timestamp]
 - **Token Efficiency**: [original] → [compressed] tokens ([percentage]% reduction)
 - **Source Agent**: [PlanManager/PlanImplementer/PlanStatusAggregator]
-- **Processing Tier**: [Agent-Specific Optimization]
+- **Processing Method**: [Agent-Specific Optimization]
 - **Git Sync Status**: ✅ Validated | ⚠️ Pending | ❌ Conflicted
 - **Evidence Commits**: [commit-hash-list] validating progress claims
 
