@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.vector &mdash; SolarWindPy 0.1.dev1+ge92b50a94 documentation</title>
+  <title>solarwindpy.core.vector &mdash; SolarWindPy 0.1.dev1+g72c30d289 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5c001219"></script>
+      <script src="../../../_static/documentation_options.js?v=cbb62e85"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -194,8 +194,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">colat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">colatitude</span>
 
-<div class="viewcode-block" id="Vector.colatitude">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.vector.Vector.colatitude">[docs]</a>
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">colatitude</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Colatitude of the vector.</span>
 
@@ -206,8 +205,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">colat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">))</span>
         <span class="n">colat</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;colatitude&quot;</span>
-        <span class="k">return</span> <span class="n">colat</span></div>
-
+        <span class="k">return</span> <span class="n">colat</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">lat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -232,8 +230,7 @@
         <span class="n">lon</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;longitude&quot;</span>
         <span class="k">return</span> <span class="n">lon</span>
 
-<div class="viewcode-block" id="Vector.lon">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.vector.Vector.lon">[docs]</a>
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">lon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shortcut for :py:attr:`longitude`.</span>
 
@@ -242,8 +239,7 @@
 <span class="sd">        pd.Series</span>
 <span class="sd">            Longitude in degrees.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
