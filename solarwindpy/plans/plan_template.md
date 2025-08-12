@@ -1,4 +1,20 @@
-# Plan Template for Claude Code Development
+# ⚠️ DEPRECATED: Plan Template for Claude Code Development
+
+**⚠️ LEGACY TEMPLATE - NO LONGER RECOMMENDED**
+
+This template is deprecated as of 2025-08-12. Use the following templates instead:
+
+- **For new plans**: Use [0-overview-template.md](./0-overview-template.md) for plan overview
+- **For phase files**: Use [N-phase-template.md](./N-phase-template.md) for individual phase implementation
+
+**Migration Path**: Convert existing single-file plans to multi-phase structure using:
+1. Create plan directory with 0-Overview.md (using 0-overview-template.md)
+2. Split implementation sections into numbered phase files (using N-phase-template.md)
+3. Update phase files with proper cross-linking
+
+---
+
+# Original Template Content (DEPRECATED)
 
 ## Plan Metadata
 - **Plan Name**: [Short descriptive name]

@@ -2,16 +2,16 @@
 
 ## Plan Metadata
 - **Plan Name**: [Short descriptive name]
-- **Created**: [Date]
+- **Created**: [Date - YYYY-MM-DD format]
 - **Branch**: plan/[plan-name]
 - **Implementation Branch**: feature/[plan-name]
 - **PlanManager**: [PlanManager | PlanManager-Full | PlanManager-Minimal]
 - **PlanImplementer**: [PlanImplementer | PlanImplementer-Full | PlanImplementer-Minimal]
 - **Structure**: Multi-Phase
 - **Total Phases**: [N]
-- **Dependencies**: [List of prerequisite plans, if any]
-- **Affects**: [Files/modules that will be modified]
-- **Estimated Duration**: [Total time estimate]
+- **Dependencies**: [List prerequisite plans by name, or "None"]
+- **Affects**: [Files/modules/directories that will be modified - used for resource conflict detection]
+- **Estimated Duration**: [Total time estimate - e.g., "8-12 hours"]
 - **Status**: [Planning | In Progress | Paused | Completed]
 
 ## Phase Overview
