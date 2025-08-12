@@ -202,10 +202,11 @@ solarwindpy/plans/
 ## Agent Coordination
 
 ### Service Model Integration
-- **Called by Planning/Implementation Agents**: Not directly invoked by users
-- **Transparent Operation**: Seamless integration with existing workflows
-- **Cross-Agent Compatibility**: Universal service for current planning agents
-- **Specialist Preservation**: Maintain connections with domain specialists
+- **Primary Service**: Session continuity for PlanManager and PlanImplementer
+- **Monitoring Service**: Context compression for PlanStatusAggregator
+- **Transparent Operation**: Seamless integration within 2-agent planning workflow
+- **Specialist Coordination**: Preserve domain expert connections (PhysicsValidator, TestEngineer, etc.)
+- **Git Integration**: Maintain commit-linked validation and branch coordination
 
 ### Error Handling & Recovery
 - **Corrupted Context**: Graceful degradation with best-effort compression
@@ -218,11 +219,11 @@ solarwindpy/plans/
 ## Performance & Optimization
 
 ### Token Efficiency Targets
-- **System Overhead**: <65 tokens per compaction operation (2% of baseline)
+- **System Overhead**: <50 tokens per compaction operation (2% of baseline)
 - **Compression Ratios**: 33-50% reduction maintaining workflow continuity
 - **Memory Usage**: Efficient processing of large context structures
 - **Processing Speed**: Minimal delay during compaction operations
-- **Session Extension**: Enable 4,740-6,320 token effective capacity (1.5-2x baseline)
+- **Session Extension**: Enable 3,600-4,800 token effective capacity (1.5-2x baseline)
 
 ### Quality Metrics
 - **Resumption Success**: Sessions resume without context loss
