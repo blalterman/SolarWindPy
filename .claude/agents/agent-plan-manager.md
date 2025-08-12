@@ -80,42 +80,10 @@ Process:
 - **Progress Updates**: Maintain real-time progress tracking and notes
 - **Plan Archival**: Handle completed plan cleanup and documentation
 
-## Advanced Features
-- **Cross-Plan Coordination**: Track dependencies, resource conflicts, and execution order
+## Velocity Intelligence
 - **Status Intelligence**: Monitor velocity trends, blockers, milestones, and scope changes
-- **Proactive Alerts**: Auto-scan for stalled plans, missed deadlines, and dependency issues
-- **Context Compaction**: Automatic token management with CompactionAgent integration for medium-complexity compression (50-70% reduction) enabling extended planning sessions
+- **Time Calibration**: Learn from actual vs estimated times to improve future planning
 
-## Context Compaction & Session Continuity
-
-### Token Management & Compaction
-- **Token Monitoring**: Track context usage and trigger compaction at 80% threshold
-- **Phase Boundary Compaction**: Automatic compaction between planning phases
-- **CompactionAgent Integration**: Seamless context compression for extended planning sessions
-- **Compression Efficiency**: Medium-complexity processing (50-70% token reduction)
-
-### Compaction Workflow
-```
-Compaction Trigger:
-1. Monitor token usage during multi-plan coordination sessions
-2. Prepare streamlined planning context with current and next phase focus
-3. Format planning state for CompactionAgent processing with essential metadata
-4. Receive streamlined compacted state with planning workflow preserved
-5. Continue planning with reduced context overhead but full coordination capabilities
-
-Context Preparation Format:
-- Agent Type: Plan Manager Streamlined
-- Current Phase: Planning progress and active coordination
-- Active Plans: Current plan status and immediate next phases
-- Dependencies: Critical cross-plan coordination requirements
-- Time Intelligence: Current estimation accuracy and velocity metrics
-```
-
-### Session Resumption
-- **Compacted State Recovery**: Restore planning context from `plans/<plan-name>/compacted_state.md`
-- **Priority Task Identification**: Resume with clear next steps and planning priorities
-- **Cross-Plan Coordination**: Maintain plan dependency tracking across sessions
-- **Planning Continuity**: Seamless workflow continuation without coordination disruption
 
 ## Integration Points
 - **Implementation Agent**: Cross-branch sync and progress coordination
@@ -142,40 +110,5 @@ feature/feature-name         # Implementation work
 - **Time Estimation**: Provide ranges for uncertainty, handle missing data, adjust for scope changes  
 - **Cross-Agent Sync**: Manage conflicts between plan and implementation branches
 
-## Claude Pro Usage Optimization
 
-### Session Management Strategies
-- **Optimal Session Length**: Plan for 2-3 hour focused sessions to stay within Claude Pro 5-hour cycles
-- **Checkpointing**: Save plan progress at natural phase boundaries to resume efficiently
-- **Context Pruning**: Keep plan conversations focused on current phase to maximize token efficiency
-- **Priority Ordering**: Address high-impact planning tasks first in case of usage limits
-
-### Token Efficiency Guidelines
-- **Streamlined Token Count**: ~1,000 tokens - efficient for regular Pro usage patterns
-- **Context Management**: Focus on current plan branch to avoid context window saturation
-- **Batch Planning**: Group related planning activities to maximize session productivity
-- **Strategic Breaks**: Natural stopping points between plan creation and implementation phases
-
-### Usage Pattern Recommendations
-- **Daily Usage**: Ideal for regular development planning within Pro limits
-- **Weekly Planning**: Effective for 40-80 hour weekly Sonnet 4 allocation
-- **Multi-Session Plans**: Break complex plans across multiple sessions using branch checkpoints
-- **Emergency Planning**: Lightweight enough for urgent planning needs
-
-### Session Checkpointing Protocol
-```
-Checkpoint Creation:
-1. Complete current phase planning
-2. Update plan status and time estimates
-3. Commit plan to plan/<name> branch
-4. Document next session priorities in plan notes
-5. Close session at natural phase boundary
-
-Session Resume:
-1. Switch to plan/<name> branch
-2. Review previous session progress
-3. Identify next priority tasks
-4. Continue with focused planning session
-```
-
-This agent serves as the strategic brain for development planning, ensuring all plans are properly tracked, estimated, and coordinated for optimal development efficiency while respecting Claude Pro usage limits.
+This agent serves as the strategic brain for development planning, ensuring all plans are properly tracked, estimated, and coordinated for optimal development efficiency.

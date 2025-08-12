@@ -76,12 +76,6 @@ After Implementation Session:
 5. Return to feature branch for next task
 ```
 
-## Sub-Plan Coordination
-- **Nested Checklists**: Handle plans with multiple sub-components and hierarchical task structures
-- **Dependency Tracking**: Ensure prerequisite tasks complete before dependent tasks execute
-- **Component Integration**: Manage integration of completed sub-components into cohesive feature
-- **Parallel Sub-Plans**: Coordinate multiple sub-plans within same feature when dependencies allow
-- **Status Rollup**: Aggregate sub-plan completion into overall plan progress tracking
 
 ## Git Integration
 - **Branch Management**: Create, switch between, and clean up plan and feature branches
@@ -95,21 +89,7 @@ After Implementation Session:
 - **Domain Specialists**: Work with TestEngineer, PhysicsValidator, etc. for quality gates
 - **Git Operations**: Handle branch management, merging, conflict resolution, and cleanup
 
-## Domain Specialist Coordination
-- **PhysicsValidator**: Verify thermal speed calculations (kT/m), unit consistency, and energy conservation
-- **NumericalStabilityGuard**: Check matrix operations for overflow, underflow, and convergence issues
-- **TestEngineer**: Validate implementations against benchmark datasets and scientific edge cases
-- **PerformanceOptimizer**: Optimize algorithms for large solar wind datasets and computational efficiency
-- **DocumentationMaintainer**: Update mathematical derivations, scientific methodology, and API documentation
-- **DataFrameArchitect**: Ensure MultiIndex structures maintain scientific data relationships and memory efficiency
 
-## Quality Assurance Integration
-- **Pre-Commit Validation**: Run pytest, flake8, and black formatting checks before marking tasks complete
-- **Test Integration**: Execute relevant test suites with coverage reporting for implemented features
-- **Code Review Preparation**: Ensure code meets scientific computing standards and peer review requirements
-- **Documentation Sync**: Update docstrings, mathematical derivations, and API docs with implementation
-- **Coverage Validation**: Verify test coverage meets ≥95% standard for scientific reliability
-- **Benchmark Testing**: Run performance benchmarks against reference datasets to prevent regression
 
 ## Performance Monitoring
 - **Velocity Tracking**: Monitor implementation speed vs estimates to improve future planning accuracy
@@ -181,77 +161,6 @@ After Implementation Session:
   - Required Validation: PerformanceOptimizer
 ```
 
-## Context Compaction & Session Continuity
 
-### Token Management & Compaction
-- **Token Monitoring**: Track context usage and trigger compaction at 80% threshold
-- **Phase Boundary Compaction**: Automatic compaction between implementation phases
-- **CompactionAgent Integration**: Seamless context compression for extended development sessions
-- **Compression Efficiency**: Medium-complexity processing (50-70% token reduction)
 
-### Compaction Workflow
-```
-Compaction Trigger:
-1. Monitor token usage during implementation sessions
-2. Prepare context at phase boundaries or 80% token threshold
-3. Format implementation state for CompactionAgent processing
-4. Receive compacted state and resumption instructions
-5. Continue implementation with reduced context overhead
-
-Context Preparation Format:
-- Agent Type: Plan Implementer (Research-Optimized)
-- Current Phase: Implementation progress and status
-- Active Tasks: Current and next priority tasks
-- Dependencies: Critical coordination requirements
-- Branch State: Feature/plan branch synchronization status
-```
-
-### Session Resumption
-- **Compacted State Recovery**: Restore implementation context from `plans/<plan-name>/compacted_state.md`
-- **Priority Task Identification**: Resume with clear next steps and immediate actions
-- **Branch Synchronization**: Maintain feature/plan branch coordination across sessions
-- **Progress Continuity**: Seamless workflow continuation without implementation disruption
-
-## Claude Pro Usage Optimization
-
-### Session Management for Implementation
-- **Implementation Sessions**: Plan for 2-4 hour focused implementation sessions within Claude Pro cycles
-- **Task Batching**: Group related implementation tasks to maximize productivity per session
-- **Checkpoint Commits**: Create commit checkpoints at natural break points for session resumption
-- **Context Efficiency**: Focus on specific implementation areas to optimize token usage
-
-### Token Efficiency Strategies
-- **Research Optimized Token Count**: ~1,400-1,800 tokens - good balance for Pro usage
-- **Domain Specialist Coordination**: Efficient integration without token overhead
-- **QA Integration**: Streamlined testing validation to minimize context bloat
-- **Branch Context**: Focus on feature/<name> branch to avoid context saturation
-
-### Usage Pattern Optimization
-- **Multi-Session Implementation**: Break large implementations across multiple Pro sessions
-- **Priority Task Ordering**: Complete high-risk/high-value tasks first in each session
-- **Testing Integration**: Batch test runs to maximize validation efficiency
-- **Performance Monitoring**: Lightweight metrics collection to stay within limits
-
-### Implementation Checkpointing Protocol
-```
-Session Checkpoint:
-1. Complete current implementation task
-2. Run QA validation (pytest -q, flake8, black)  
-3. Commit with descriptive message and checksum update
-4. Update plan status on plan/<name> branch
-5. Document next session priorities in commit notes
-
-Session Resume:
-1. Switch to feature/<name> branch
-2. Review last checkpoint and plan status
-3. Identify next priority implementation tasks
-4. Continue focused implementation session
-```
-
-### Scientific Workflow Considerations
-- **Physics Validation**: Efficient coordination with PhysicsValidator agent
-- **Data Structure**: Streamlined DataFrameArchitect integration
-- **Performance Testing**: Batch performance validation to optimize session usage
-- **Documentation**: Concurrent docstring updates to avoid separate documentation sessions
-
-This agent ensures systematic plan execution with dependency management, robust error recovery, and structured completion through the merge workflow while respecting Claude Pro usage limits.
+This agent ensures systematic plan execution with dependency management, robust error recovery, and structured completion through the merge workflow.

@@ -16,13 +16,9 @@ This index provides a centralized reference for all specialized agents working o
 
 ## Agent Categories
 
-### 🎯 Planning & Implementation (Enhanced with Format Specialization)
-- **[PlanManager](./agent-plan-manager.md)** - Strategic planning for multi-phase plans (token optimized)
-- **[PlanManager-Full](./agent-plan-manager-full.md)** - Enhanced strategic planning for multi-phase plans with git-first validation
-- **[PlanManager-Minimal](./agent-plan-manager-minimal.md)** - Basic planning for single-file plans and prototypes
-- **[PlanImplementer](./agent-plan-implementer.md)** - Multi-phase plan execution with QA integration (Research optimized)
-- **[PlanImplementer-Full](./agent-plan-implementer-full.md)** - Complete enterprise multi-phase implementation agent
-- **[PlanImplementer-Minimal](./agent-plan-implementer-minimal.md)** - Basic execution for single-file plans and simple tasks
+### 🎯 Planning & Implementation
+- **[PlanManager](./agent-plan-manager.md)** - Strategic planning for multi-phase plans with velocity tracking
+- **[PlanImplementer](./agent-plan-implementer.md)** - Multi-phase plan execution with velocity intelligence
 - **[PlanStatusAggregator](./agent-plan-status-aggregator.md)** - Cross-plan status monitoring and dependency analysis
 - **[CompactionAgent](./agent-compaction.md)** - Enhanced universal context compression with session state validation
 
@@ -47,12 +43,8 @@ This index provides a centralized reference for all specialized agents working o
 
 | Agent | Priority | Primary Focus | Key Files |
 |-------|----------|--------------|-----------|
-| PlanManager | High | Multi-phase strategic planning (token optimized) | `solarwindpy/plans/*/`, plan branches |
-| PlanManager-Full | High | Multi-phase strategic planning (comprehensive) | `solarwindpy/plans/*/`, plan branches |
-| PlanManager-Minimal | Medium | Single-file planning (lightweight) | `solarwindpy/plans/*.md`, plan branches |
-| PlanImplementer | High | Multi-phase plan execution | All implementation files |
-| PlanImplementer-Full | High | Multi-phase enterprise execution | All implementation files |
-| PlanImplementer-Minimal | Medium | Single-file plan execution | Basic implementation files |
+| PlanManager | High | Multi-phase strategic planning with velocity tracking | `solarwindpy/plans/*/`, plan branches |
+| PlanImplementer | High | Multi-phase plan execution with velocity intelligence | All implementation files |
 | PlanStatusAggregator | Medium | Cross-plan monitoring & dependency analysis | `solarwindpy/plans/**/*.md` |
 | CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
@@ -112,11 +104,11 @@ graph LR
     I --> J[Automatic Progress Validation]
 ```
 
-### Session Continuity Architecture
-- **Single Point of Entry**: Enhanced Plan Manager handles all planning functions
-- **Git-First Validation**: Automatic session state accuracy checking
-- **Context Switching Prevention**: Infrastructure priority framework built-in
-- **Unified Progress Tracking**: Git-validated status without competing systems
+### Planning Architecture
+- **Two Core Agents**: Plan Manager for strategic planning, Plan Implementer for execution
+- **Velocity Intelligence**: Built-in learning from actual vs estimated times
+- **Simple Workflows**: Clean plan → implement → commit workflow
+- **Git Integration**: Automatic branch management and progress tracking
 
 ## Agent Communication Protocol
 
@@ -175,11 +167,11 @@ Agents must work in sequence for:
 3. **TestEngineer**: Test plot generation
 4. **DocumentationMaintainer**: Add examples to gallery
 
-### Managing Long Development Sessions
-1. **PlanningAgent/ImplementationAgent**: Detect compaction triggers
-2. **CompactionAgent**: Compress context and preserve essential state
-3. **Git Integration**: Commit compacted state with metadata
-4. **Session Resumption**: Restore compressed context for continuation
+### Planning & Implementation Workflow
+1. **PlanManager**: Create structured plan with time estimates
+2. **PlanImplementer**: Execute plan with velocity tracking
+3. **Git Integration**: Automatic branch management and checksum tracking
+4. **Progress Updates**: Real-time status tracking with learning algorithms
 
 ## Emergency Protocols
 
@@ -216,7 +208,7 @@ Agents must work in sequence for:
 | Dependency updates | DependencyManager | TestEngineer |
 | Context compression | CompactionAgent | Planning/Implementation Agents |
 | Session continuity | CompactionAgent | All agents |
-| Long-term state management | CompactionAgent | PlanManager variants |
+| Velocity tracking | PlanManager/PlanImplementer | All planning activities |
 
 ## Best Practices
 
