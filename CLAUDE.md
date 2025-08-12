@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. **Domain Work**: Use specialized agents (PhysicsValidator, PlottingEngineer, etc.)
 
 ### Agent Selection
-- **Check**: [.claude/agents/agents-index.md](./claude/agents/agents-index.md) for complete agent catalog
+- **Check**: @.claude/agents/agents-index.md for complete agent catalog
 - **Coordinate**: Agents handle their domains; avoid manual operations  
 - **Escalate**: Use CompactionAgent for session continuity
 
@@ -73,7 +73,7 @@ The package uses a hierarchical data structure centered around `pandas.DataFrame
 
 ### Testing Strategy  
 **Use TestEngineer agent** - maintains `/tests/` structure, ≥95% coverage, fixtures
-See [TestEngineer](./claude/agents/agent-test-engineer.md) for testing protocols
+See @.claude/agents/agent-test-engineer.md for testing protocols
 
 ### Documentation
 **Use DocumentationMaintainer agent** - NumPy docstrings, Sphinx docs, examples
@@ -120,5 +120,5 @@ Follow Conventional Commits format:
 ## Current Status and Context
 
 For current development priorities and agent coordination:
-- [claude_session_state.md](./claude_session_state.md) - Dynamic status
-- [.claude/agents/agents-index.md](./claude/agents/agents-index.md) - Agent ecosystem
+@claude_session_state.md
+@.claude/agents/agents-index.md
