@@ -2,82 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Git Branching Workflow
+## Agent-Driven Development Protocol
 
-### CRITICAL: Branch-First Development
+### Primary Workflow
+**ALL development work should use agents:**
 
-**Before ANY development work, Claude must:**
+1. **Complex Tasks**: Use `Task` tool with PlanManager → creates plan → PlanImplementer executes
+2. **Git Operations**: GitIntegration agent handles all branch/commit operations  
+3. **Testing**: TestEngineer agent ensures comprehensive coverage
+4. **Domain Work**: Use specialized agents (PhysicsValidator, PlottingEngineer, etc.)
 
-1. **List unmerged branches:**
-   ```bash
-   git branch -r --no-merged master
-   ```
-
-2. **Ask user for branch selection:**
-   "Which branch should I use? Please specify branch name, or say 'search' if you want me to help find an appropriate branch, or say 'new' to create a new branch"
-
-3. **Wait for explicit user instruction** - NEVER auto-select a branch
-
-4. **If user says "search":** Help identify relevant branches by examining branch names and purposes
-
-5. **If user says "new":** Create new branch using pattern:
-   ```bash
-   git checkout -b claude/YYYY-MM-DD-HH-MM-SS-module-feature-description
-   git push -u origin claude/YYYY-MM-DD-HH-MM-SS-module-feature-description
-   ```
-
-### Branch Naming Convention
-
-**Format:** `claude/YYYY-MM-DD-HH-MM-SS-module-feature-description`
-
-**Examples:**
-- `claude/2025-08-08-14-30-00-fitfunctions-add-robust-fitting`
-- `claude/2025-08-08-15-15-00-plotting-improve-histogram-performance`
-- `claude/2025-08-08-16-00-00-core-plasma-fix-thermal-speed-calc`
-
-### Branch Management Rules
-
-- **NEVER** work directly on master branch
-- **ALWAYS** push feature branches for tracking: `git push -u origin <branch-name>`
-- **ALWAYS** include "Generated with Claude Code" in commit messages
-- **VERIFY** all tests pass before commits: `pytest -q`
-- **FORMAT** code before commits: `black solarwindpy/` and `flake8`
-
-### Merge Procedures
-
-**When feature is complete:**
-
-1. **Final validation:**
-   ```bash
-   pytest -q          # All tests must pass
-   black solarwindpy/ # Format code
-   flake8             # Check linting
-   ```
-
-2. **Create merge-ready commit:**
-   ```bash
-   git add .
-   git commit -m "feat(module): descriptive commit message
-   
-   Generated with Claude Code
-   
-   Co-Authored-By: Claude <noreply@anthropic.com>"
-   ```
-
-3. **Push and create PR:**
-   ```bash
-   git push origin <branch-name>
-   # User creates PR through GitHub interface
-   ```
-
-### Benefits of This Workflow
-
-- ✅ **Prevents master conflicts:** All work happens on feature branches
-- ✅ **Avoids CI triggers:** GitHub Actions won't run on incomplete work
-- ✅ **Enables parallel development:** Multiple features can be developed simultaneously
-- ✅ **Provides audit trail:** Clear history of Claude contributions
-- ✅ **Maintains clean history:** Each feature has dedicated branch and PR
-- ✅ **Supports review process:** All changes go through PR review before merge
+### Agent Selection
+- **Check**: [.claude/agents/agents-index.md](./claude/agents/agents-index.md) for complete agent catalog
+- **Coordinate**: Agents handle their domains; avoid manual operations  
+- **Escalate**: Use CompactionAgent for session continuity
 
 ## Development Commands
 
@@ -95,28 +33,12 @@ conda activate solarwindpy-dev
 pip install -e .
 ```
 
-### Testing
+### Quality Commands (Agent-Coordinated)
 ```bash
-# Run all tests (must pass, no skipping)
-pytest -q
-
-# Run specific test file
-pytest solarwindpy/tests/test_plasma.py
-
-# Run with verbose output
-pytest -v
-```
-
-### Code Quality
-```bash
-# Format code with black
-black solarwindpy/
-
-# Lint with flake8 (configured in setup.cfg)
-flake8 solarwindpy/
-
-# Install pre-commit hooks (optional)
-pre-commit install
+# These should normally be handled by agents:
+pytest -q              # TestEngineer validates
+black solarwindpy/     # PerformanceOptimizer formats  
+flake8                 # TestEngineer checks
 ```
 
 ### Conda Recipe Management
@@ -149,37 +71,15 @@ The package uses a hierarchical data structure centered around `pandas.DataFrame
 
 ## Key Development Patterns
 
-### Testing Strategy
-- Tests in `solarwindpy/tests/` mirror source structure
-- Use `conftest.py` for shared fixtures
-- Test data stored in CSV format under `tests/data/`
-- Coverage target: ≥95%
+### Testing Strategy  
+**Use TestEngineer agent** - maintains `/tests/` structure, ≥95% coverage, fixtures
+See [TestEngineer](./claude/agents/agent-test-engineer.md) for testing protocols
 
 ### Documentation
-- NumPy-style docstrings required for all public functions
-- Sphinx documentation in `docs/source/`
-- Examples should be included in docstrings
+**Use DocumentationMaintainer agent** - NumPy docstrings, Sphinx docs, examples
 
-### Dependency Management
-- Dependencies specified in `pyproject.toml` and `requirements*.txt`
-- Do not unpin dependencies without justification
-- Run `python scripts/update_conda_recipe.py` after dependency changes
-
-## Specialized Development Agents
-
-When working with this codebase, consider these specialized validation and development focuses:
-
-### Core Development Priorities
-- **PhysicsValidator**: Verify physical units consistency, thermal speed calculations (mw² = 2kT), ion mass/charge ratios
-- **DataFrameArchitect**: Maintain MultiIndex structure ("M", "C", "S"), use DataFrame.xs() for memory efficiency
-- **TestEngineer**: Write comprehensive tests, maintain ≥95% coverage, test edge cases
-- **NumericalStabilityGuard**: Check for overflow/underflow, validate matrix operations, ensure iterative convergence
-
-### Domain-Specific Guidelines
-- **FitFunctionSpecialist**: Inherit from FitFunction base, implement proper parameter guessing, handle failures gracefully
-- **PlottingEngineer**: Maintain matplotlib conventions, support TeXlabel system, handle log-scale plotting
-- **SolarActivityTracker**: Maintain LISIRD interface compatibility, handle missing time series data
-- **PerformanceOptimizer**: Profile numba functions, optimize vectorized operations, monitor DataFrame memory usage
+### Git Operations
+**Use GitIntegration agent** - `plan/` and `feature/` branch management, commit tracking
 
 ### Physics and Data Processing Rules
 - Preserve SI units internally, convert only for display
@@ -219,13 +119,6 @@ Follow Conventional Commits format:
 
 ## Current Status and Context
 
-For current development priorities, session status, and recent achievements, see:
-- [claude_session_state.md](./claude_session_state.md) - Dynamic status and priorities
-- [.claude/agents/](./claude/agents/) - Specialized agent definitions
-
-## Planning Agents Ecosystem
-
-**Status**: ✅ Fully implemented and operational
-- **Plan Manager Agents**: Token-optimized variants (1,000-3,000 tokens) for different project scales
-- **Plan Implementer Agents**: Research-optimized and enterprise variants with QA integration
-- **Plan-Per-Branch Architecture**: Complete workflow with git integration and status tracking
+For current development priorities and agent coordination:
+- [claude_session_state.md](./claude_session_state.md) - Dynamic status
+- [.claude/agents/agents-index.md](./claude/agents/agents-index.md) - Agent ecosystem
