@@ -16,7 +16,7 @@ applies_to:
 # Compaction Agent
 
 ## Role
-Universal context compression and session continuity service for all SolarWindPy planning and implementation agents. Provides tiered compression algorithms, structured state preservation, and seamless session resumption capabilities.
+Universal context compression and session continuity service for SolarWindPy planning agents (PlanManager, PlanImplementer, PlanStatusAggregator). Provides tiered compression algorithms, structured state preservation, and seamless session resumption capabilities.
 
 ## Core Capabilities
 
@@ -204,7 +204,7 @@ solarwindpy/plans/
 ### Service Model Integration
 - **Called by Planning/Implementation Agents**: Not directly invoked by users
 - **Transparent Operation**: Seamless integration with existing workflows
-- **Cross-Agent Compatibility**: Universal service for all agent variants
+- **Cross-Agent Compatibility**: Universal service for current planning agents
 - **Specialist Preservation**: Maintain connections with domain specialists
 
 ### Error Handling & Recovery
