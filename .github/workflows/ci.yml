@@ -27,3 +27,5 @@ jobs:
         run: doc8 README.rst docs CITATION.rst --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
       - name: Run tests
         run: pytest -q
+      - name: Check for circular imports
+        run: pytest tests/test_circular_imports.py -v

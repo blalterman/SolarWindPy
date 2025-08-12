@@ -103,7 +103,7 @@ class DateTime(special.ArbitraryLabel):
 class Epoch(special.ArbitraryLabel):
     r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
-    def __init__(self, kind, of_thing, space="\,"):  # noqa: W605
+    def __init__(self, kind, of_thing, space=r"\,"):
         """Instantiate the label.
 
         Parameters
@@ -159,7 +159,7 @@ class Epoch(special.ArbitraryLabel):
         self._smaller = new.title()
 
     def set_space(self, new):
-        if new not in (" ", "\,", "\;", "\:"):  # noqa: W605
+        if new not in (" ", r"\,", r"\;", r"\:"):
             raise ValueError(f"Unrecognized Space {new}")
 
         self._space = new

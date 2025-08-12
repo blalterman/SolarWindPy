@@ -41,11 +41,11 @@ class ManualLabel(ArbitraryLabel):
         return (
             r"$\mathrm{%s} \; [%s]$"
             % (  # noqa: W605
-                self.tex.replace(" ", " \; "),  # noqa: W605
+                self.tex.replace(" ", r" \; "),
                 self.unit,
             )
         ).replace(
-            "\; []", ""  # noqa: W605
+            r"\; []", ""
         )
 
     @property
@@ -194,7 +194,7 @@ class Power(ArbitraryLabel):
         super().__init__()
 
     def __str__(self):
-        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+        return rf"${self.tex} \; [{self.units}]$"
 
     @property
     def tex(self):
@@ -301,7 +301,7 @@ class CountOther(ArbitraryLabel):
     def __str__(self):
         return r"${tex} {sep} [{units}]$".format(
             tex=self.tex,
-            sep="$\n$" if self.new_line_for_units else "\;",  # noqa: W605
+            sep="$\n$" if self.new_line_for_units else r"\;",
             units=self.units,
         )
 
@@ -388,7 +388,7 @@ class MathFcn(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        sep = "$\n$" if self.new_line_for_units else "\;"  # noqa: W605
+        sep = "$\n$" if self.new_line_for_units else r"\;"
         return rf"""${self.tex} {sep} \left[{self.units}\right]$"""
 
     @property
@@ -535,7 +535,7 @@ class SSN(ArbitraryLabel):
     @property
     def tex(self):
         return (r"\mathrm{%s SSN}" % self.pretty_kind).replace(
-            " ", " \; "  # noqa: W605
+            " ", r" \; "
         )  # noqa: W605
 
     @property

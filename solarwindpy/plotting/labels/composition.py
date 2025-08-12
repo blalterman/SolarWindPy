@@ -84,7 +84,7 @@ class ChargeState(base.Base):
         uA = self.ionA.units
         uB = self.ionB.units
 
-        units = "\#"  # noqa: W605
+        units = r"\#"
         if uA != uB:
             units = f"{uA}/{uB}"
 
