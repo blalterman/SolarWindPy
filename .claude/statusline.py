@@ -150,10 +150,10 @@ def get_usage_indicator():
                 return Colors.green(indicator)
             elif elapsed_hours < Thresholds.SESSION_YELLOW_HOURS:
                 indicator = '███○○'  # Medium usage
-                return Colors.green(indicator)
+                return Colors.yellow(indicator)
             elif elapsed_hours < Thresholds.SESSION_RED_HOURS:
                 indicator = '██○○○'  # Heavy usage
-                return Colors.yellow(indicator)
+                return Colors.red(indicator)
             else:
                 indicator = '█○○○○'  # Very heavy usage
                 return Colors.red(indicator)
