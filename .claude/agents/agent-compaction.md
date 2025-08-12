@@ -22,28 +22,28 @@ Universal context compression and session continuity service for all SolarWindPy
 
 ### 1. Multi-Agent Context Understanding
 - **Agent Recognition**: Automatically identify source agent type and complexity tier
-- **Context Parsing**: Extract and structure context from all 6 planning/implementation agent variants
+- **Context Parsing**: Extract and structure context from current 3 planning agents (PlanManager, PlanImplementer, PlanStatusAggregator)
 - **State Analysis**: Understand current phase, progress, and continuation requirements
 - **Priority Assessment**: Identify essential vs compactable context elements
 
-### 2. Tiered Compression Processing
-- **High-Complexity Sources** (Plan Manager Full, Plan Implementer Full):
-  - Deep historical archival with commit-linked references
-  - Complex dependency management and cross-agent coordination preservation  
-  - Sophisticated context ranking and priority-based preservation
-  - Target: 40-60% compression (3000→1200, 2800→1120 tokens)
+### 2. Agent-Specific Compression Processing
+- **PlanManager Processing** (~600 tokens):
+  - Strategic context preservation with phase-based archival
+  - Velocity intelligence and estimation learning preservation
+  - Multi-plan coordination and dependency tracking
+  - Target: 33-50% compression (600→400-500 tokens)
 
-- **Medium-Complexity Sources** (Streamlined, Research-Optimized):
-  - Focused summarization with current + next phase emphasis
-  - Reference optimization converting verbose descriptions to structured links
-  - Context filtering removing auxiliary information while preserving workflow
-  - Target: 50-70% compression (1400→420, 1000→300 tokens)
+- **PlanImplementer Processing** (~900 tokens):
+  - Implementation state with commit-linked progress validation
+  - Current task focus with next-action prioritization  
+  - Cross-phase integration and completion workflow tracking
+  - Target: 33-50% compression (900→450-600 tokens)
 
-- **Low-Complexity Sources** (Minimal variants):
-  - Lightweight status consolidation merging completed items  
-  - Simple checkpoint creation for efficient resumption
-  - Ultra-efficient processing maintaining minimal token overhead
-  - Target: Preserve efficiency (maintain 200-300 token ceiling)
+- **PlanStatusAggregator Processing** (~900 tokens):
+  - Cross-plan status consolidation and dependency analysis
+  - System-wide monitoring state with critical alerts
+  - Inter-plan coordination requirements and conflict detection
+  - Target: 25-50% compression (900→450-675 tokens)
 
 ### 3. Structured State Generation
 - **Compacted State Format**: Generate standardized `compacted_state.md` files
@@ -102,10 +102,9 @@ Universal context compression and session continuity service for all SolarWindPy
 Source agents provide structured context including:
 ```markdown
 ## Source Agent Metadata
-- Agent Type: [Full/Streamlined/Minimal]
-- Agent Category: [Plan Manager/Plan Implementer]
+- Agent Type: [PlanManager/PlanImplementer/PlanStatusAggregator]
 - Current Phase: [phase name and progress]
-- Token Count: [current usage]
+- Token Count: [current usage out of ~600-900 limit]
 
 ## Context to Compress
 - [Structured context data from source agent]
@@ -145,8 +144,8 @@ solarwindpy/plans/
 - **Current Phase**: [phase-name] ([N]/[total])
 - **Compaction Timestamp**: [ISO-8601 timestamp]
 - **Token Efficiency**: [original] → [compressed] tokens ([percentage]% reduction)
-- **Source Agent**: [agent-type] ([Full/Streamlined/Minimal])
-- **Compaction Tier**: [High/Medium/Low-Complexity]
+- **Source Agent**: [PlanManager/PlanImplementer/PlanStatusAggregator]
+- **Processing Tier**: [Agent-Specific Optimization]
 - **Git Sync Status**: ✅ Validated | ⚠️ Pending | ❌ Conflicted
 - **Evidence Commits**: [commit-hash-list] validating progress claims
 
@@ -232,36 +231,36 @@ solarwindpy/plans/
 
 ## Usage Examples
 
-### High-Complexity Compaction
+### PlanManager Compaction
 ```
-Plan Manager Full (3000 tokens) → CompactionAgent → Compacted State (1200 tokens)
-- Archived: Historical phases, verbose descriptions, auxiliary context
-- Preserved: Current objectives, next tasks, critical dependencies
-- Enhanced: Structured references, commit-linked history
-```
-
-### Medium-Complexity Compaction
-```
-Plan Implementer Research-Optimized (1400 tokens) → CompactionAgent → Compacted State (420 tokens)  
-- Summarized: Implementation details, progress descriptions
-- Focused: Current phase + immediate next phase
-- Optimized: Reference links replacing verbose content
+PlanManager (600 tokens) → CompactionAgent → Compacted State (400-500 tokens)
+- Archived: Historical phases, verbose planning descriptions
+- Preserved: Current objectives, velocity intelligence, next tasks
+- Enhanced: Structured phase references, estimation learning
 ```
 
-### Low-Complexity Compaction
+### PlanImplementer Compaction
 ```
-Minimal Agent (300 tokens) → CompactionAgent → Maintained Efficiency (200-250 tokens)
-- Consolidated: Completed task status into summaries
-- Minimal: Essential workflow preservation only
-- Efficient: Ultra-low overhead maintenance
+PlanImplementer (900 tokens) → CompactionAgent → Compacted State (450-600 tokens)  
+- Summarized: Implementation details, commit histories
+- Focused: Current tasks + immediate next actions
+- Optimized: Git-linked progress validation, branch state
+```
+
+### PlanStatusAggregator Compaction
+```
+PlanStatusAggregator (900 tokens) → CompactionAgent → Compacted State (450-675 tokens)
+- Consolidated: Cross-plan status summaries, dependency trees
+- Preserved: Critical alerts, coordination requirements
+- Efficient: System-wide monitoring state, conflict detection
 ```
 
 ## Success Criteria
 
 ### Token Efficiency
-- Achieve target compression ratios for each agent tier
-- Maintain <100 token overhead for compaction operations
-- Enable 2-3x longer productive sessions within token limits
+- Achieve 33-50% compression for each current agent
+- Combined system reduction: 2,400 → 1,200-1,600 tokens
+- Enable 2-3x longer productive sessions within current limits
 
 ### Quality Preservation  
 - Zero context loss affecting workflow continuation
@@ -269,7 +268,7 @@ Minimal Agent (300 tokens) → CompactionAgent → Maintained Efficiency (200-25
 - Maintained project momentum across session boundaries
 
 ### System Integration
-- Seamless operation with all 6 planning/implementation agents
+- Seamless operation with current 3 planning agents (PlanManager, PlanImplementer, PlanStatusAggregator)
 - Multi-developer safe file handling with conflict prevention
 - Proper git integration with meaningful commit history
 
