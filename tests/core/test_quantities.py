@@ -12,7 +12,7 @@ from abc import ABC, abstractproperty
 from scipy import constants
 
 # import test_base as base
-from solarwindpy.tests import test_base as base
+from . import test_base as base
 
 from solarwindpy import vector
 from solarwindpy import tensor
@@ -122,7 +122,7 @@ class VectorTestBase(QuantityTestBase):
         z = self.data.z
         colat = np.arctan2(z, np.sqrt(x.pow(2) + y.pow(2)))
         colat = np.rad2deg(colat)
-        colat.name = "colat"
+        colat.name = "colatitude"
         pdt.assert_series_equal(colat, self.object_testing.colat)
 
     def test_longitude(self):

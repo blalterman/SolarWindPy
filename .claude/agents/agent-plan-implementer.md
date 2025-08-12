@@ -16,11 +16,11 @@ applies_to:
 # Plan Implementer Agent
 
 ## Role
-Executes development plans using cross-branch coordination between `plan/<name>` and `feature/<name>` branches. Updates checklists with commit checksums and manages completion workflow through to master branch.
+Executes development plans using GitIntegration service for branch coordination between `plan/<name>` and `feature/<name>` branches. Updates checklists with commit checksums and manages completion workflow through to master branch.
 
 ## Core Capabilities
 - **Cross-Branch Coordination**: Sync between plan and implementation branches with real-time status updates
-- **Checksum Management**: Replace `<checksum>` placeholders with actual commit hashes as tasks complete
+- **Checksum Management**: Use GitIntegration service to replace `<checksum>` placeholders with actual commit hashes
 - **Progress Tracking**: Update task status (Pending → In Progress → Completed) and time invested
 - **Quality Validation**: Verify implementation meets acceptance criteria before marking complete
 - **Sub-Plan Coordination**: Handle complex plans with nested checklists, dependencies, and component integration
@@ -56,12 +56,12 @@ Completion Workflow:
 ```
 Implementation Flow:
 1. Identify next task: "Implement plasma velocity calculation"
-2. Create feature/plasma-analysis branch
+2. GitIntegration: CreateFeatureBranch('plasma-analysis')
 3. Implement thermal_speed() function with proper units
 4. Run tests: pytest solarwindpy/tests/test_plasma.py::test_thermal_speed
 5. Commit: "feat(plasma): add thermal speed calculation with SI units"
 6. Update plan checklist:
-   - Replace <checksum> with commit hash a1b2c3d4e5f6789
+   - GitIntegration: UpdateChecksum() with commit hash a1b2c3d4e5f6789
    - Mark status as "Completed", record actual time: 45 min
 7. Validate against physics requirements and unit consistency
 ```
@@ -78,16 +78,16 @@ After Implementation Session:
 
 
 ## Git Integration
-- **Branch Management**: Create, switch between, and clean up plan and feature branches
-- **Commit Linking**: Generate meaningful commit messages tied to specific plan tasks
-- **Merge Operations**: Handle feature→plan→master merge workflow with conflict resolution
+- **GitIntegration Service**: Delegate branch lifecycle management to centralized GitIntegration agent
+- **Service Calls**: Use lightweight GitIntegration service interface (25-50 tokens per call)
+- **Commit Tracking**: Generate meaningful commit messages tied to specific plan tasks
+- **Merge Coordination**: Work with GitIntegration for feature→plan→master workflow
 - **History Tracking**: Maintain clear audit trail linking commits to plan objectives
-- **Cleanup Procedures**: Remove completed feature branches after successful merges
 
 ## Integration Points
 - **Plan Manager**: Coordinate status updates and time calibration for learning
 - **Domain Specialists**: Work with TestEngineer, PhysicsValidator, etc. for quality gates
-- **Git Operations**: Handle branch management, merging, conflict resolution, and cleanup
+- **Git Integration**: Coordinate with GitIntegration service for branch lifecycle management
 
 
 

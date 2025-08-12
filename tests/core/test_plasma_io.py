@@ -1,5 +1,5 @@
 from solarwindpy import plasma
-from solarwindpy.tests import test_base
+from . import test_base
 
 
 def test_save_and_load(tmp_path):

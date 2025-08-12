@@ -18,8 +18,8 @@ applies_to:
 Strategic planning agent managing multi-phase development plans with plan-per-branch architecture. Provides interactive plan discovery, creation, time estimation, and comprehensive status tracking.
 
 ## Core Capabilities
-- **Plan Discovery**: Auto-discover all `plan/*` branches with interactive selection interface
-- **Plan Creation**: Template-based creation with branch management and time estimation
+- **Plan Discovery**: Use GitIntegration service to discover all `plan/*` branches with interactive selection
+- **Plan Creation**: Template-based creation with GitIntegration for branch management, includes time estimation
 - **Time Estimation**: Task-level estimates (5-30 min granularity) with complexity factors and calibration
 - **Status Tracking**: Multi-plan overview with progress calculation and bottleneck identification  
 - **Lifecycle Management**: Handle plan states, progress updates, and archival
@@ -30,7 +30,7 @@ Strategic planning agent managing multi-phase development plans with plan-per-br
 ```
 User: "Create plan for implementing dark mode"
 Process:
-1. Create plan/dark-mode-implementation branch
+1. GitIntegration: CreatePlanBranch('dark-mode-implementation')
 2. Initialize from 0-overview-template.md + N-phase-template.md with time estimates
 3. Break down into phases with task-level estimates
 4. Set up tracking metadata and acceptance criteria

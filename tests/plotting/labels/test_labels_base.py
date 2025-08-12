@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture(scope="module")
 def labels_base():
     """Load :mod:`solarwindpy.plotting.labels.base` without side effects."""
-    path = Path(__file__).resolve().parents[3] / "plotting" / "labels" / "base.py"
+    path = Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels" / "base.py"
     spec = importlib.util.spec_from_file_location("swp_labels_base", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

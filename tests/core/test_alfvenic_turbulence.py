@@ -17,7 +17,7 @@ from scipy import constants
 from scipy.constants import physical_constants
 
 # import test_base as base
-from solarwindpy.tests import test_base as base
+from . import test_base as base
 
 from solarwindpy import alfvenic_turbulence as turb
 

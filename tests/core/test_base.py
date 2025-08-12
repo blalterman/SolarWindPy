@@ -9,7 +9,7 @@ from unittest import TestCase
 
 pd.set_option("mode.chained_assignment", "raise")
 
-DATA_PATH = Path(__file__).with_suffix("").parent / "data"
+DATA_PATH = Path(__file__).parent.parent / "data"
 
 
 class TestData(object):

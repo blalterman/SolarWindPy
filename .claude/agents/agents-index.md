@@ -20,6 +20,7 @@ This index provides a centralized reference for all specialized agents working o
 - **[PlanManager](./agent-plan-manager.md)** - Strategic planning for multi-phase plans with velocity tracking
 - **[PlanImplementer](./agent-plan-implementer.md)** - Multi-phase plan execution with velocity intelligence
 - **[PlanStatusAggregator](./agent-plan-status-aggregator.md)** - Cross-plan status monitoring and dependency analysis
+- **[GitIntegration](./agent-git-integration.md)** - Centralized git operations service for all planning agents
 - **[CompactionAgent](./agent-compaction.md)** - Enhanced universal context compression with session state validation
 
 ### 🔬 Core Physics & Data
@@ -45,6 +46,7 @@ This index provides a centralized reference for all specialized agents working o
 |-------|----------|--------------|-----------|
 | PlanManager | High | Multi-phase strategic planning with velocity tracking | `solarwindpy/plans/*/`, plan branches |
 | PlanImplementer | High | Multi-phase plan execution with velocity intelligence | All implementation files |
+| GitIntegration | High | Centralized git operations and branch management | `plan/*`, `feature/*` branches |
 | PlanStatusAggregator | Medium | Cross-plan monitoring & dependency analysis | `solarwindpy/plans/**/*.md` |
 | CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |

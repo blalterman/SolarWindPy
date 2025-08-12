@@ -15,7 +15,7 @@ def datetime_mod():
     module
         The loaded ``datetime`` module.
     """
-    root = Path(__file__).resolve().parents[3] / "plotting" / "labels"
+    root = Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels"
 
     pkg = types.ModuleType("solarwindpy")
     plotting = types.ModuleType("solarwindpy.plotting")

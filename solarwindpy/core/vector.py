@@ -113,6 +113,7 @@ class Vector(base.Base):
     def colat(self):
         return self.colatitude
 
+    @property
     def colatitude(self) -> pd.Series:
         """Colatitude of the vector.
 
@@ -148,6 +149,7 @@ class Vector(base.Base):
         lon.name = "longitude"
         return lon
 
+    @property
     def lon(self) -> pd.Series:
         """Shortcut for :py:attr:`longitude`.
 
