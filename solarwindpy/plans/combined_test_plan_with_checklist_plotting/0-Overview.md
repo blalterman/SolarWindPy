@@ -45,14 +45,14 @@
 8. [8-select_data_from_figure.py.md](./8-select_data_from_figure.py.md)
 9. [9-labels-base.py.md](./9-labels-base.py.md)
 10. [10-labels-special.py.md](./10-labels-special.py.md)
-11. [12-labels-chemistry.py.md](./12-labels-chemistry.py.md)
-12. [13-labels-composition.py.md](./13-labels-composition.py.md)
-13. [14-labels-datetime.py.md](./14-labels-datetime.py.md)
-14. [15-labels-elemental_abundance.py.md](./15-labels-elemental_abundance.py.md)
-15. [16-visual-validation.md](./16-visual-validation.md)
-16. [17-integration-testing.md](./17-integration-testing.md)
-17. [18-performance-benchmarks.md](./18-performance-benchmarks.md)
-18. [19-Fixtures-and-Utilities.md](./19-Fixtures-and-Utilities.md)
+11. [11-labels-chemistry.py.md](./11-labels-chemistry.py.md)
+12. [12-labels-composition.py.md](./12-labels-composition.py.md)
+13. [13-labels-datetime.py.md](./13-labels-datetime.py.md)
+14. [14-labels-elemental_abundance.py.md](./14-labels-elemental_abundance.py.md)
+15. [15-visual-validation.md](./15-visual-validation.md)
+16. [16-integration-testing.md](./16-integration-testing.md)
+17. [17-performance-benchmarks.md](./17-performance-benchmarks.md)
+18. [18-Fixtures-and-Utilities.md](./18-Fixtures-and-Utilities.md)
 
 ## 🎯 Objective
 Implement comprehensive test coverage for the `solarwindpy.plotting` subpackage to ensure correctness, robustness, and maintain ≥95% code coverage for all plotting utilities built on pandas and Matplotlib.
