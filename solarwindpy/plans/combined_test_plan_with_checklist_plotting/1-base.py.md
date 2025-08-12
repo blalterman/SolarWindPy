@@ -58,18 +58,23 @@ None
 
 ## ✅ Acceptance Criteria
 
-- [ ] Instantiate a minimal subclass of `Base` to verify `_init_logger`,
+- [x] Instantiate a minimal subclass of `Base` to verify `_init_logger`,
   `_labels`, `_log` and `path` are initialized
-- [ ] Verify that `__str__` returns the class name
-- [ ] Verify that `.data` property returns the internal `_data`
-- [ ] Verify that `.clip` property returns the internal `_clip`
-- [ ] Verify that `.log` property returns the internal `_log`
-- [ ] Verify that `.labels` property returns the internal `_labels`
-- [ ] Verify that `.path` property returns the internal `_path`
-- [ ] Test `set_log()` with defaults toggles `log.x` and `log.y` appropriately
-- [ ] Test `set_log(x=True, y=False)` correctly updates `log` axes
-- [ ] Test `set_labels()` updates labels and regenerates `path`
-- [ ] Verify that `set_labels(unexpected=…)` raises `KeyError`
+- [x] Verify that `__str__` returns the class name
+- [x] Verify that `.data` property returns the internal `_data`
+- [x] Verify that `.clip` property returns the internal `_clip`
+- [x] Verify that `.log` property returns the internal `_log`
+- [x] Verify that `.labels` property returns the internal `_labels`
+- [x] Verify that `.path` property returns the internal `_path`
+- [x] Test `set_log()` with defaults toggles `log.x` and `log.y` appropriately
+- [x] Test `set_log(x=True, y=False)` correctly updates `log` axes
+- [x] Test `set_labels()` updates labels and regenerates `path`
+- [x] Verify that `set_labels(unexpected=…)` raises `KeyError`
+
+**Commit**: `2f434e8`  
+**Status**: Completed  
+**Tests**: 51 passed  
+**Time**: 0.5 hours
 
 ## 🧩 Decomposition Instructions (Optional)
 
