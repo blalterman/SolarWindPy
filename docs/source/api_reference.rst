@@ -1,9 +1,9 @@
 API Reference
 =============
 
-The complete API documentation is generated from the source code.
+Complete API documentation for all modules, classes, and functions.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   solarwindpy
+   api/modules

@@ -1,16 +1,26 @@
-################
-SolarWindPy Docs
-################
+SolarWindPy Documentation
+=========================
+
+SolarWindPy is a comprehensive toolkit for analyzing solar wind plasma and magnetic field data.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
 
    installation
    usage
    tutorial
+
+.. toctree::
+   :maxdepth: 3
+   :caption: API Reference
+   
    api_reference
-   modules
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Development
+   
    documentation_review
 
 .. include:: ../../LICENSE.rst

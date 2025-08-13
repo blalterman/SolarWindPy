@@ -122,3 +122,7 @@ Follow Conventional Commits format:
 For current development priorities and agent coordination:
 @claude_session_state.md
 @.claude/agents/agents-index.md
+
+- CLAUDE.md
+- .claude/agents/agents-index.md
+- @claude_session_state.md

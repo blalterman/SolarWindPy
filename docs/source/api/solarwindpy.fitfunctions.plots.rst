@@ -1,0 +1,7 @@
+solarwindpy.fitfunctions.plots module
+=====================================
+
+.. automodule:: solarwindpy.fitfunctions.plots
+   :members:
+   :show-inheritance:
+   :undoc-members:

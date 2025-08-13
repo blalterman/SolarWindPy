@@ -1,0 +1,7 @@
+solarwindpy.fitfunctions.gaussians module
+=========================================
+
+.. automodule:: solarwindpy.fitfunctions.gaussians
+   :members:
+   :show-inheritance:
+   :undoc-members:

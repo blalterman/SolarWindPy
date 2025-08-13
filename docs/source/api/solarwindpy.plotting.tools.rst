@@ -1,0 +1,7 @@
+solarwindpy.plotting.tools module
+=================================
+
+.. automodule:: solarwindpy.plotting.tools
+   :members:
+   :show-inheritance:
+   :undoc-members:

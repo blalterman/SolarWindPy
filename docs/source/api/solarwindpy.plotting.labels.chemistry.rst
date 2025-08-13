@@ -1,0 +1,7 @@
+solarwindpy.plotting.labels.chemistry module
+============================================
+
+.. automodule:: solarwindpy.plotting.labels.chemistry
+   :members:
+   :show-inheritance:
+   :undoc-members:

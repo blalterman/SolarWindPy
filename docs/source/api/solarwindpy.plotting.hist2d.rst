@@ -1,0 +1,7 @@
+solarwindpy.plotting.hist2d module
+==================================
+
+.. automodule:: solarwindpy.plotting.hist2d
+   :members:
+   :show-inheritance:
+   :undoc-members:

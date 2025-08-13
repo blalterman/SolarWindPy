@@ -1,0 +1,7 @@
+solarwindpy.fitfunctions.power\_laws module
+===========================================
+
+.. automodule:: solarwindpy.fitfunctions.power_laws
+   :members:
+   :show-inheritance:
+   :undoc-members:

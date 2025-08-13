@@ -1,0 +1,7 @@
+solarwindpy.plotting.labels.special module
+==========================================
+
+.. automodule:: solarwindpy.plotting.labels.special
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,7 @@
+solarwindpy.plotting.scatter module
+===================================
+
+.. automodule:: solarwindpy.plotting.scatter
+   :members:
+   :show-inheritance:
+   :undoc-members:

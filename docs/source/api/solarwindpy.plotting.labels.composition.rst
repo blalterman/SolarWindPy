@@ -1,0 +1,7 @@
+solarwindpy.plotting.labels.composition module
+==============================================
+
+.. automodule:: solarwindpy.plotting.labels.composition
+   :members:
+   :show-inheritance:
+   :undoc-members:
