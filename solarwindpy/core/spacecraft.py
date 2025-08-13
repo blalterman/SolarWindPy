@@ -86,16 +86,30 @@ class Spacecraft(base.Base):
 
     @property
     def name(self):
-        r"""Spacecraft name (e.g. WIND, PSP)"""
+        r"""Spacecraft name (e.g. WIND, PSP)."""
         return self._name
 
     @property
     def position(self):
+        """Position vector of the spacecraft.
+        
+        Returns
+        -------
+        vector.Vector
+            Position vector with x, y, z components.
+        """
         pos = self.data.xs("pos", axis=1, level="M").loc[:, ("x", "y", "z")]
         return vector.Vector(pos)
 
     @property
     def pos(self):
+        """Shortcut to position property.
+        
+        Returns
+        -------
+        vector.Vector
+            Position vector with x, y, z components.
+        """
         # Ensures that `sc.pos` returns vector.
         return self.position
 
@@ -106,6 +120,18 @@ class Spacecraft(base.Base):
 
     @property
     def velocity(self):
+        """Velocity vector of the spacecraft.
+        
+        Returns
+        -------
+        vector.Vector
+            Velocity vector with x, y, z components.
+        
+        Raises
+        ------
+        KeyError
+            If spacecraft velocity data is not available.
+        """
         try:
             v = self.data.xs("v", axis=1, level="M").loc[:, ("x", "y", "z")]
             return vector.Vector(v)
@@ -163,6 +189,20 @@ class Spacecraft(base.Base):
         )
 
     def set_frame_name(self, frame, name):
+        """Set the coordinate frame and spacecraft name.
+        
+        Parameters
+        ----------
+        frame : str
+            Coordinate frame ('GSE' or 'HCI').
+        name : str
+            Spacecraft name.
+            
+        Raises
+        ------
+        NotImplementedError
+            If frame is not 'GSE' or 'HCI'.
+        """
         frame = frame.upper()
         name = name.upper()
 
@@ -175,6 +215,13 @@ class Spacecraft(base.Base):
         self._name = name
 
     def set_data(self, data):
+        """Set the spacecraft data.
+        
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Spacecraft position/velocity data.
+        """
         super(Spacecraft, self).set_data(data)
 
         p = data.xs("pos", axis=1, level="M")

@@ -30,7 +30,6 @@ from . import instabilities  # noqa: F401
 
 def _configure_pandas() -> None:
     """Configure global pandas options used throughout SolarWindPy."""
-
     pd.set_option("mode.chained_assignment", "raise")
 
 

@@ -111,6 +111,13 @@ class Vector(base.Base):
 
     @property
     def colat(self):
+        """Shortcut to colatitude property.
+        
+        Returns
+        -------
+        pd.Series
+            Colatitude in degrees.
+        """
         return self.colatitude
 
     @property
@@ -128,10 +135,24 @@ class Vector(base.Base):
 
     @property
     def lat(self):
+        """Shortcut to latitude property.
+        
+        Returns
+        -------
+        pd.Series
+            Latitude in degrees.
+        """
         return self.latitude
 
     @property
     def latitude(self):
+        """Latitude of the vector.
+        
+        Returns
+        -------
+        pd.Series
+            Latitude in degrees.
+        """
         lat = np.rad2deg(np.arctan2(self.rho, self.data.z))
         lat.name = "latitude"
         return lat

@@ -41,9 +41,28 @@ class Core(ABC):
         self._init_constants()
 
     def __str__(self) -> str:
+        """Return string representation of the object.
+        
+        Returns
+        -------
+        str
+            Class name.
+        """
         return self.__class__.__name__
 
     def __eq__(self, other: Any) -> bool:
+        """Check equality between Base objects.
+        
+        Parameters
+        ----------
+        other : Any
+            Object to compare with.
+            
+        Returns
+        -------
+        bool
+            True if objects are equal, False otherwise.
+        """
         if id(self) == id(other):
             return True
         if not isinstance(other, type(self)):
@@ -59,18 +78,46 @@ class Core(ABC):
 
     @property
     def logger(self) -> logging.Logger:
+        """Logger instance for this object.
+        
+        Returns
+        -------
+        logging.Logger
+            Logger instance.
+        """
         return self._logger
 
     @property
     def units(self) -> uc.Units:
+        """Units conversion factors.
+        
+        Returns
+        -------
+        uc.Units
+            Units conversion instance.
+        """
         return self._units
 
     @property
     def constants(self) -> uc.Constants:
+        """Physical constants.
+        
+        Returns
+        -------
+        uc.Constants
+            Physical constants instance.
+        """
         return self._constants
 
     @property
     def data(self) -> pd.DataFrame:
+        """Underlying DataFrame containing the data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            Data with MultiIndex columns.
+        """
         return self._data
 
     def _init_logger(self) -> None:
@@ -203,7 +250,21 @@ class Base(Core):
         return species
 
     def head(self):
+        """Return the first few rows of the data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            First few rows of the data.
+        """
         return self.data.head()
 
     def tail(self):
+        """Return the last few rows of the data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            Last few rows of the data.
+        """
         return self.data.tail()
