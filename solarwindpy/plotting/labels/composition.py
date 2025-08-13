@@ -29,7 +29,7 @@ class Ion(base.Base):
 
     @property
     def units(self):
-        return "\#"  # noqa: W605
+        return r"\#"  # noqa: W605
 
     @property
     def path(self):

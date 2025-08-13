@@ -255,7 +255,7 @@ _templates = {
     "hci": r"{$C}_{\mathrm{HCI}}",
     "colat": r"\theta_{$C}",
     "carr": r"{$C}_\mathrm{Carrington}",
-    "b": "B_{$C}",
+    "b": r"B_{$C}",
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
@@ -556,10 +556,10 @@ class TeXlabel(Base):
             .replace("_{}", "")
             .rstrip("_")
             .strip(" ")
-            #             .lstrip("\:")  # noqa: W605
-            #             .rstrip("\:")  # noqa: W605
-            #             .strip("\:")  # noqa: W605
-            #             .strip("\;")  # noqa: W605
+            #             .lstrip(r"\:")
+            #             .rstrip(r"\:")
+            #             .strip(r"\:")
+            #             .strip(r"\;")
             .strip(" ")
         )
 

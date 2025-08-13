@@ -40,7 +40,7 @@ class ManualLabel(ArbitraryLabel):
     def __str__(self):
         return (
             r"$\mathrm{%s} \; [%s]$"
-            % (  # noqa: W605
+            % (
                 self.tex.replace(" ", r" \; "),
                 self.unit,
             )
@@ -536,7 +536,7 @@ class SSN(ArbitraryLabel):
     def tex(self):
         return (r"\mathrm{%s SSN}" % self.pretty_kind).replace(
             " ", r" \; "
-        )  # noqa: W605
+        )
 
     @property
     def units(self):

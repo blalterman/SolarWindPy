@@ -26,7 +26,7 @@ class Timedelta(special.ArbitraryLabel):
 
     @property
     def with_units(self):
-        return f"${self.tex} \; [{self.units}]$"  # noqa: W605
+        return rf"${self.tex} \; [{self.units}]$"  # noqa: W605
 
     #     @property
     #     def dt(self):
@@ -50,7 +50,7 @@ class Timedelta(special.ArbitraryLabel):
     @property
     def units(self):
         try:
-            return "%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
+            return r"%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
         except AttributeError:
             return base._inU["unknown"]
 
@@ -90,7 +90,7 @@ class DateTime(special.ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{%s}" % self.kind.replace(" ", " \; ")  # noqa: W605
+        return r"\mathrm{%s}" % self.kind.replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
@@ -174,7 +174,7 @@ class Frequency(special.ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        return rf"${self.tex} \; [{self.units}]$"
 
     @property
     def other(self):
@@ -225,7 +225,7 @@ class January1st(special.ArbitraryLabel):
 
     @property
     def tex(self):
-        return r"\mathrm{January 1^{st} of Year}".replace(" ", " \; ")  # noqa: W605
+        return r"\mathrm{January 1^{st} of Year}".replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
