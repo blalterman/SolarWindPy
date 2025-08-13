@@ -47,12 +47,56 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
+    "sphinx.ext.doctest",      # Docstring example testing
+    "sphinx.ext.autosummary",  # Enhanced API documentation
     "sphinxcontrib.bibtex",
+    "numpydoc",               # Enhanced NumPy docstring support
 ]
 bibtex_bibfiles = ['solarwindpy.bib']  
 
 
 autosummary_generate = True
+
+# -- Napoleon configuration --------------------------------------------------
+# Configuration for NumPy/Google style docstrings
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_type_aliases = None
+napoleon_preprocess_types = False
+
+# -- NumPy doc configuration ------------------------------------------------
+# Enhanced NumPy docstring support
+numpydoc_show_class_members = False
+numpydoc_show_inherited_class_members = True
+numpydoc_class_members_toctree = False
+numpydoc_attributes_as_param_list = True
+numpydoc_xref_param_type = True
+numpydoc_xref_aliases = {
+    'ndarray': 'numpy.ndarray',
+    'DataFrame': 'pandas.DataFrame', 
+    'Series': 'pandas.Series',
+}
+numpydoc_xref_ignore = {
+    'optional', 'or', 'of', 'default', 'shape', 'type'
+}
+
+# -- Doctest configuration ---------------------------------------------------
+# Configuration for docstring example testing
+doctest_default_flags = 0
+doctest_global_setup = '''
+import numpy as np
+import pandas as pd
+import solarwindpy as swp
+'''
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
