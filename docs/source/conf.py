@@ -56,6 +56,12 @@ bibtex_bibfiles = ['solarwindpy.bib']
 
 
 autosummary_generate = True
+autosummary_imported_members = False
+# Generate separate pages for modules, classes, and functions
+autosummary_filename_map = {}
+
+# Configure autodoc to not show full content in parent pages
+autodoc_typehints = 'description'
 
 # -- Napoleon configuration --------------------------------------------------
 # Configuration for NumPy/Google style docstrings
@@ -75,9 +81,9 @@ napoleon_preprocess_types = False
 
 # -- NumPy doc configuration ------------------------------------------------
 # Enhanced NumPy docstring support
-numpydoc_show_class_members = False
+numpydoc_show_class_members = True  # Enable member tables for proper layout
 numpydoc_show_inherited_class_members = True
-numpydoc_class_members_toctree = False
+numpydoc_class_members_toctree = True  # Create separate pages for class members
 numpydoc_attributes_as_param_list = True
 numpydoc_xref_param_type = True
 numpydoc_xref_aliases = {
@@ -128,13 +134,13 @@ pygments_style = None
 
 # Set default values for autodoc. These are also used by apidoc.
 autodoc_default_options = {
-    "members": None,
-    "member-order": None,
-    "undoc-members": None,
-    "private-members": None,
-    "inherited-members": None,
-    "show-inheritance": None,
-    "exclude-members": "_abc_impl,_set_ions,_init_logger,_init_constants,_init_units,_clean_species_for_setting,_verify_datetimeindex,_conform_species",  # Need to be able to use all of these in exclude-members
+    "members": True,
+    "member-order": "bysource",
+    "undoc-members": True,
+    "private-members": False,
+    "inherited-members": False,
+    "show-inheritance": True,
+    "exclude-members": "_abc_impl,_set_ions,_init_logger,_init_constants,_init_units,_clean_species_for_setting,_verify_datetimeindex,_conform_species",
 }
 autoclass_content = "both"
 autodoc_member_order = "groupwise"
@@ -156,7 +162,10 @@ html_theme = "sphinx_rtd_theme"  # "alabaster"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_assets"]
+html_static_path = ["_assets", "_static"]
+
+# Custom CSS files for improved autosummary layout
+html_css_files = ["custom_autosummary.css"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

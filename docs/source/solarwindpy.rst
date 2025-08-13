@@ -1,26 +1,27 @@
 solarwindpy package
 ===================
 
-Subpackages
------------
+SolarWindPy is a Python package for analyzing solar wind plasma measurements.
 
-.. toctree::
-   :maxdepth: 4
+.. currentmodule:: solarwindpy
 
+.. autosummary::
+   :toctree: _autosummary
+   :template: module.rst
+   
    solarwindpy.core
    solarwindpy.fitfunctions
-   solarwindpy.instabilities
-   solarwindpy.plans
    solarwindpy.plotting
-   solarwindpy.scripts
    solarwindpy.solar_activity
-   solarwindpy.tests
+   solarwindpy.instabilities
    solarwindpy.tools
 
-Module contents
----------------
+Package-level Functions
+-----------------------
+
+.. autosummary::
+   :toctree: _autosummary
 
 .. automodule:: solarwindpy
    :members:
-   :show-inheritance:
-   :undoc-members:
+   :exclude-members: core, fitfunctions, plotting, solar_activity, instabilities, tools
