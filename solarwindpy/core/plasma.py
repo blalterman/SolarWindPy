@@ -44,11 +44,66 @@ from . import alfvenic_turbulence as alf_turb
 
 
 class Plasma(base.Base):
-    r"""Container for ions, magnetic field, and spacecraft information.
+    r"""Container for multi-species plasma physics data and analysis.
+
+    The Plasma class serves as the central container for solar wind plasma
+    analysis, combining ion moment data, magnetic field measurements, and
+    spacecraft trajectory information for comprehensive plasma physics calculations.
+    
+    This class enables analysis of multi-species plasma including protons, 
+    alpha particles, and heavier ions. It provides convenient access to ion 
+    species through attribute shortcuts and supports advanced plasma physics
+    calculations such as plasma beta, Coulomb collision frequencies, and 
+    thermal parameters.
 
     Attribute access is first attempted on the underlying :py:attr:`ions` table
     before falling back to ``super().__getattr__``. This allows convenient
-    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`.
+    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`
+    and ``plasma.p1`` for protons.
+    
+    Attributes
+    ----------
+    data : pandas.DataFrame
+        Multi-indexed DataFrame containing plasma measurements with columns
+        labeled by ("M", "C", "S") for measurement, component, and species.
+    ions : pandas.Series of Ion objects
+        Dictionary-like access to individual ion species objects.
+    species : list of str
+        Available ion species identifiers in the plasma.
+    spacecraft : Spacecraft, optional
+        Spacecraft trajectory and velocity information.
+    auxiliary_data : pandas.DataFrame, optional
+        Additional measurements such as quality flags or derived parameters.
+        
+    Notes
+    -----
+    Thermal speeds assume the relationship :math:`mw^2 = 2kT` where :math:`m` 
+    is ion mass, :math:`w` is thermal speed, :math:`k` is Boltzmann's constant,
+    and :math:`T` is temperature.
+    
+    The underlying data structure uses a three-level MultiIndex for columns:
+    - Level 0 (M): Measurement type ('n', 'v', 'w', 'b', etc.)
+    - Level 1 (C): Component ('x', 'y', 'z', 'par', 'per', etc.)  
+    - Level 2 (S): Species identifier ('p1', 'a', 'o6', etc.)
+    
+    Examples
+    --------
+    Create a plasma object from multi-species data:
+    
+    >>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas
+    >>> proton_density = plasma.p1.n      # Proton number density [cm^-3]
+    >>> alpha_velocity = plasma.a.v       # Alpha velocity vector [km/s]
+    
+    Calculate plasma physics parameters:
+    
+    >>> beta = plasma.beta()              # Plasma beta parameter
+    >>> coulomb = plasma.nc()             # Coulomb collision frequency [s^-1]
+    >>> temp_ratio = plasma.a.T / plasma.p1.T  # Alpha-proton temp ratio
+    
+    Access magnetic field data:
+    
+    >>> b_field = plasma.b                # Magnetic field vector [nT]
+    >>> b_mag = plasma.b.mag              # Magnetic field magnitude [nT]
     """
 
     def __init__(
@@ -146,6 +201,19 @@ class Plasma(base.Base):
 
     @property
     def epoch(self):
+        """Time index of the plasma data.
+        
+        Returns
+        -------
+        pandas.DatetimeIndex
+            Datetime index containing measurement timestamps.
+            
+        Examples
+        --------
+        >>> plasma.epoch
+        DatetimeIndex(['1995-01-01', '2015-03-23', '2022-10-09'], 
+                      dtype='datetime64[ns]', name='Epoch', freq=None)
+        """
         return self.data.index
 
     @property
@@ -181,9 +249,39 @@ class Plasma(base.Base):
 
     @property
     def log_plasma_at_init(self):
+        """Flag indicating whether to log plasma statistics during initialization.
+        
+        Returns
+        -------
+        bool
+            True if plasma statistics should be logged at initialization.
+            
+        See Also
+        --------
+        set_log_plasma_stats : Method to modify this setting
+        """
         return self._log_plasma_at_init
 
     def set_log_plasma_stats(self, new):
+        """Set flag for logging plasma statistics during initialization.
+        
+        Parameters
+        ----------
+        new : bool
+            Whether to enable logging of plasma statistics.
+            
+        Notes
+        -----
+        When enabled, summary statistics including density ranges, velocity 
+        distributions, and magnetic field statistics are logged during 
+        plasma initialization.
+        
+        Examples
+        --------
+        >>> plasma.set_log_plasma_stats(True)
+        >>> plasma.log_plasma_at_init
+        True
+        """
         self._log_plasma_at_init = bool(new)
 
     def save(
@@ -498,6 +596,31 @@ class Plasma(base.Base):
         return new
 
     def set_spacecraft(self, new):
+        """Set or update the spacecraft trajectory data.
+        
+        Parameters
+        ----------
+        new : Spacecraft or None
+            Spacecraft trajectory object containing position and velocity data.
+            Must have matching datetime index with plasma data.
+            
+        Raises
+        ------
+        AssertionError
+            If spacecraft index does not match plasma data index.
+            
+        Notes
+        -----
+        The spacecraft data is required for calculating certain plasma physics
+        parameters such as Coulomb collision frequencies that depend on the
+        plasma frame transformation.
+        
+        Examples
+        --------
+        >>> sc = Spacecraft(trajectory_data)
+        >>> plasma.set_spacecraft(sc)
+        >>> plasma.spacecraft.position  # Access trajectory data
+        """
         assert isinstance(new, spacecraft.Spacecraft) or new is None
 
         if new is not None:
@@ -512,6 +635,34 @@ class Plasma(base.Base):
         self._spacecraft = new
 
     def set_auxiliary_data(self, new):
+        """Set or update auxiliary measurement data.
+        
+        Parameters
+        ----------
+        new : pandas.DataFrame or None
+            Additional measurements such as data quality flags, derived
+            parameters, or instrument-specific metadata. Must have matching
+            datetime index with plasma data.
+            
+        Raises
+        ------
+        AssertionError
+            If auxiliary data index does not match plasma data index.
+            
+        Notes
+        -----
+        Auxiliary data provides additional context for plasma measurements
+        without being part of the core plasma physics calculations. Common
+        examples include quality flags, statistical uncertainties, or
+        instrument operational parameters.
+        
+        Examples
+        --------
+        >>> quality_flags = pd.DataFrame({'quality': [0, 1, 0]}, 
+        ...                              index=plasma.epoch)
+        >>> plasma.set_auxiliary_data(quality_flags)
+        >>> plasma.aux.quality  # Access auxiliary data
+        """
         assert isinstance(new, pd.DataFrame) or new is None
 
         if new is not None:
