@@ -6,8 +6,8 @@
 |-------------|-------|--------|
 | SyntaxWarning: invalid escape sequence | 12 | 🔸 43% REDUCED (21→12) |
 | Unknown section warnings (numpydoc) | 0 | ✅ **100% ELIMINATED** (21→0) |
+| Docutils warnings | 0 | ✅ **100% ELIMINATED** (2→0) |
 | Duplicate object description | 97+ | No change |
-| Docutils warnings | 3 | Slight increase |
 | FutureWarning (pandas) | 1 | ⚠️ Reverted (user request) |
 | Missing bibtex references | 4 | New category |
 
@@ -116,18 +116,44 @@
 - `solarwindpy/core/__init__.py` - All core class imports
 - Individual module files with their own documentation
 
-## Docutils warnings
+## Docutils warnings - ✅ **COMPLETED**
 
 **Description**: RST formatting issues including incomplete field lists and malformed inline emphasis.
 
-**Proposed Fixes**:
-1. **Fix formatting** - Add missing blank lines, correct emphasis syntax
-   - **Value**: Clean documentation rendering
-   - **Effort**: Low - targeted fixes
+**✅ STATUS**: **ALL 2 WARNINGS ELIMINATED** - 100% docutils warning elimination achieved!
 
-**Affected Files**:
-- `solarwindpy/core/alfvenic_turbulence.py:14` - Inline emphasis issue
-- `solarwindpy/core/alfvenic_turbulence.py:30` - Field list formatting
+**Implementation Details**:
+- **Commit**: `7059046` - Fixed RST formatting issues in docstrings
+- **Files Modified**: 2 files (alfvenic_turbulence.py, base.py)
+- **Warning Reduction**: Total warnings 160 → 158 (2 docutils warnings eliminated)
+
+**Completed Fixes**:
+
+**✅ Issue 1: Inline Emphasis in Journal Names**
+- **File**: `solarwindpy/core/alfvenic_turbulence.py`
+- **Problem**: Unescaped asterisks (*) in journal names interpreted as RST emphasis markers
+- **Solution**: Escaped all asterisks with backslashes
+- **Changes**:
+  - Line 13: `*Living Reviews in Solar Physics*` → `\*Living Reviews in Solar Physics\*`
+  - Line 15: `*Monthly Notices of the Royal Astronomical Society: Letters*` → `\*Monthly Notices...\*`
+  - Line 17: `*Astrophys. J.*` → `\*Astrophys. J.\*`
+
+**✅ Issue 2: Inline Interpreted Text Reference**
+- **File**: `solarwindpy/solar_activity/base.py`
+- **Problem**: Improper backtick usage creating invalid inline interpreted text
+- **Solution**: Used proper RST class reference syntax
+- **Changes**:
+  - Line 376: `` `pd.Interval`s corresponding...`` → `:class:`pd.Interval` objects corresponding...`
+
+**Results**:
+- ✅ **Zero docutils warnings** in documentation build
+- ✅ **Proper journal name rendering** with escaped italics formatting
+- ✅ **Enhanced cross-referencing** with :class: directive for better navigation
+- ✅ **Clean RST processing** with no formatting conflicts
+
+**Previously Affected Files (All Fixed)**:
+- ✅ `solarwindpy/core/alfvenic_turbulence.py` - Journal name emphasis issues → Proper escaped formatting
+- ✅ `solarwindpy/solar_activity/base.py` - Inline text reference issue → Proper class reference
 
 ## FutureWarning (pandas)
 
