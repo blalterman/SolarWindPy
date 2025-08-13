@@ -35,9 +35,10 @@ from . import base
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
 
-    Properties
+    Attributes
     ----------
     logger, data, bins, clip, cut, logx, labels.x, labels.y, clim, agg_axes
+    path, _gb_axes (abstract)
 
     Methods
     -------
@@ -45,14 +46,7 @@ class AggPlot(base.Base):
         Set property <>.
 
     calc_bins, make_cut, agg, clip_data, make_plot
-
-    Abstract Properties
-    -------------------
-    path, _gb_axes
-
-    Abstract Methods
-    ----------------
-    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot
+    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot (abstract)
     """
 
     @property

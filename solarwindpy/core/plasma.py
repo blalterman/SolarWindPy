@@ -223,7 +223,7 @@ class Plasma(base.Base):
 
     @property
     def sc(self):
-        r"""Shortcut to `spacecraft`."""
+        r"""Shortcut to :py:attr:`spacecraft`."""
         return self.spacecraft
 
     @property
@@ -244,7 +244,7 @@ class Plasma(base.Base):
 
     @property
     def aux(self):
-        r"""Shortcut to :py:meth:`auxiliary_data`."""
+        r"""Shortcut to :py:attr:`auxiliary_data`."""
         return self.auxiliary_data
 
     @property
@@ -496,7 +496,7 @@ class Plasma(base.Base):
 
     def _chk_species(self, *species):
         r"""
-        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:meth:`ions`.
+        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:attr:`ions`.
         """
         species = self._conform_species(*species)
         minimal_species = [s.split("+") for s in species]
@@ -814,7 +814,7 @@ class Plasma(base.Base):
     @property
     def b(self):
         r"""
-        Shortcut for `bfield`.
+        Shortcut for :py:attr:`bfield`.
         """
         return self.bfield
 
@@ -997,8 +997,8 @@ class Plasma(base.Base):
         beta: :py:class:`pd.DataFrame`
             See Parameters for more info.
 
-        Derivation
-        ----------
+        Notes
+        -----
         In uncertain units, the NRL Plasma Formulary (2016) defined
         :math:`\beta`:
 

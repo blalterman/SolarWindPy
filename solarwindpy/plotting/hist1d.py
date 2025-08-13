@@ -29,7 +29,7 @@ from .agg_plot import AggPlot
 class Hist1D(AggPlot):
     r"""Create 1D plot of `x`, optionally aggregating `y` in bins of `x`.
 
-    Properties
+    Attributes
     ----------
     _gb_axes, path
 

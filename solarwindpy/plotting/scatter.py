@@ -11,17 +11,11 @@ from . import base
 class Scatter(base.PlotWithZdata, base.CbarMaker):
     r"""Create a scatter plot.
 
-    Properties
+    Attributes
     ----------
 
     Methods
     -------
-
-    Abstract Properties
-    -------------------
-
-    Abstract Methods
-    ----------------
 
     Notes
     -----
@@ -65,7 +59,7 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         r"""
         Make a scatter plot on `ax` using `ax.scatter`.
 
-        Paremeters
+        Parameters
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.

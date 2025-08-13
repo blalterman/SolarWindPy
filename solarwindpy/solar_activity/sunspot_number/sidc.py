@@ -492,11 +492,8 @@ It causes a KeyError in `pd.cut`."""
 
     def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
         r"""Plot SSN on the color bar.
-
-        TODO
-        ----
-        Refactor and abstract to :pyclass:`ActivityIndicator`.
         """
+        # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
         ssn = self.data.loc[t0:t1, "ssn"]
 
         x = mpl.dates.date2num(ssn.index)

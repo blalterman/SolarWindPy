@@ -58,7 +58,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     logx, logy: bool
         If True, log10 scale the axis.
 
-    Properties
+    Attributes
     ----------
     data:
     bins:
@@ -350,7 +350,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         r"""
         Make a 2D plot on `ax` using `ax.pcolormesh`.
 
-        Paremeters
+        Parameters
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
@@ -636,7 +636,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     ):
         """Make a contour plot on `ax` using `ax.contour`.
 
-        Paremeters
+        Parameters
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.

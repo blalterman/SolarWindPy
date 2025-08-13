@@ -115,7 +115,7 @@ class Spacecraft(base.Base):
 
     @property
     def r(self):
-        r"""Shortcut to :py:meth:`position`."""
+        r"""Shortcut to :py:attr:`position`."""
         return self.position
 
     @property
@@ -140,7 +140,7 @@ class Spacecraft(base.Base):
 
     @property
     def v(self):
-        r"""Shortcut to :py:meth:`velocity`."""
+        r"""Shortcut to :py:attr:`velocity`."""
         return self.velocity
 
     @property

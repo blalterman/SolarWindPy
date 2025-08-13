@@ -307,5 +307,5 @@ class Ion(base.Base):
 
     @property
     def Wk(self):
-        r"""Shortcut to :py:meth:`~kinetic_energy_flux`."""
+        r"""Shortcut to :py:attr:`~kinetic_energy_flux`."""
         return self.kinetic_energy_flux

@@ -22,17 +22,11 @@ RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 class Base(ABC):
     r"""ABC for core plot tools.
 
-    Properties
+    Attributes
     ----------
 
     Methods
     -------
-
-    Abstract Properites
-    -------------------
-
-    Abstract Methods
-    ----------------
 
     """
 

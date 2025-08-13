@@ -462,8 +462,8 @@ They will be replaced by NaNs and excluded from the aggregation.
 
 class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
     r"""
-    Call Signature
-    ==============
+    Examples
+    --------
     splot = SpiralPlot2D(...)
     splot.initialize_mesh()"""
 
@@ -805,7 +805,7 @@ data : {z.size}
     ):
         """Make a contour plot on `ax` using `ax.contour`.
 
-        Paremeters
+        Parameters
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
