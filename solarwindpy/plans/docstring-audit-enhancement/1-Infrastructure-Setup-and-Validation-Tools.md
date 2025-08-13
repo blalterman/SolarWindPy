@@ -1,14 +1,14 @@
 # Phase 1: Infrastructure Setup and Validation Tools
 
 ## **Objective**
-Establish comprehensive docstring validation infrastructure and baseline documentation coverage metrics for the entire SolarWindPy codebase.
+Establish docstring format validation infrastructure and baseline coverage analysis for NumPy convention compliance across the SolarWindPy codebase.
 
 ## **Scope**
-Set up automated tools and processes to ensure NumPy docstring convention compliance across all 53 Python modules.
+Set up pydocstyle validation and baseline analysis tools to ensure strict NumPy docstring format compliance across all 53 Python modules.
 
 ## **Implementation Tasks**
 
-### **Task 1: Docstring Validation Tool Configuration** (1.5 hours)
+### **Task 1: Docstring Validation Tool Configuration** (1 hour)
 
 #### **pydocstyle Configuration Setup**
 ```ini
@@ -31,83 +31,76 @@ add-source = solarwindpy/
 - Configure pre-commit hook for docstring validation
 - Set up CI/CD pipeline integration for automated checking
 
-### **Task 2: Documentation Coverage Analysis Tools** (1 hour)
+### **Task 2: Format Compliance Baseline Analysis** (1 hour)
 
-#### **Coverage Baseline Script**
+#### **Format Compliance Analysis Script**
 ```python
 #!/usr/bin/env python
-"""Docstring coverage analysis for SolarWindPy modules."""
+"""Docstring format compliance analysis for SolarWindPy modules."""
 
 import ast
 import os
 from pathlib import Path
 
-class DocstringCoverageAnalyzer(ast.NodeVisitor):
-    """Analyze docstring coverage in Python modules."""
+class DocstringFormatAnalyzer(ast.NodeVisitor):
+    """Analyze docstring format compliance in Python modules."""
     
     def __init__(self):
         self.stats = {
-            'modules': 0,
-            'classes': 0,
-            'functions': 0,
-            'methods': 0,
-            'properties': 0,
-            'documented_modules': 0,
-            'documented_classes': 0,
-            'documented_functions': 0,
-            'documented_methods': 0,
-            'documented_properties': 0,
+            'total_docstrings': 0,
+            'numpy_format': 0,
+            'google_format': 0,
+            'informal_format': 0,
+            'missing_docstrings': 0,
         }
-        self.missing_docs = []
+        self.format_issues = []
 ```
 
 #### **Analysis Targets**
-- **Module-level docstrings**: Top-level module documentation
-- **Class docstrings**: All public classes
-- **Method docstrings**: Public methods and __init__ methods  
-- **Function docstrings**: All public functions
-- **Property docstrings**: Property getter/setter documentation
+- **Format Detection**: Identify NumPy vs Google vs informal docstring styles
+- **Missing Docstrings**: Functions/methods completely lacking documentation
+- **Parameter Format**: Inconsistent parameter documentation styles
+- **Returns Section**: Missing or improperly formatted returns documentation
 
 #### **Baseline Metrics Collection**
-- Current documentation coverage percentage by module
-- Identification of completely undocumented components
-- Priority ranking for enhancement based on public API importance
+- Current format compliance percentage by module
+- Identification of mixed docstring styles
+- Priority ranking for standardization based on format inconsistencies
 
-### **Task 3: NumPy Convention Validation Framework** (1 hour)
+### **Task 3: NumPy Format Validation Framework** (0.5 hours)
 
-#### **Custom Validation Rules**
+#### **Format Compliance Rules**
 ```python
-class SolarWindPyDocstringValidator:
-    """Custom docstring validation for scientific computing requirements."""
+class NumPyFormatValidator:
+    """Validate NumPy docstring format compliance."""
     
     REQUIRED_SECTIONS = {
         'functions': ['Parameters', 'Returns'],
         'methods': ['Parameters', 'Returns'],  
-        'classes': ['Parameters', 'Attributes'],
+        'classes': ['Parameters'],
         'properties': ['Returns'],
     }
     
-    SCIENTIFIC_REQUIREMENTS = {
-        'units_documentation': True,
-        'latex_equations': True,
-        'literature_references': True,
-        'example_code': True,
+    FORMAT_REQUIREMENTS = {
+        'parameter_format': True,  # param : type format
+        'section_headers': True,   # Proper section formatting
+        'consistent_style': True,  # NumPy format throughout
     }
 ```
 
-#### **Scientific Documentation Standards**
-- **Physical Units**: All physical quantities must specify units
-- **Mathematical Notation**: LaTeX formatting for equations
-- **Literature Citations**: References for physics algorithms
-- **Usage Examples**: Practical code examples in docstrings
+#### **Format Standardization Focus**
+- **Parameter Format**: Consistent `param : type` notation
+- **Section Headers**: Proper underline formatting for NumPy sections
+- **Type Documentation**: Standardized type annotations
+- **Returns Format**: Consistent return value documentation
 
 #### **Validation Workflow**
 1. **Format Compliance**: NumPy convention structure validation
-2. **Content Completeness**: Required sections presence check
-3. **Scientific Accuracy**: Units and notation validation
-4. **Example Execution**: Docstring example code testing
+2. **Section Presence**: Required sections existence check
+3. **Style Consistency**: Uniform formatting across modules
+4. **pydocstyle Integration**: Automated compliance checking
 
-### **Task 4: Sphinx Documentation Enhancement** (0.5 hours)
+### **Task 4: Sphinx Integration Setup** (0.5 hours)
 
 #### **Sphinx Configuration Updates**
 ```python
@@ -136,11 +129,11 @@ napoleon_config = {
 }
 ```
 
-#### **Documentation Build Enhancements**
-- **NumPy Style Support**: Full Napoleon extension configuration
-- **LaTeX Rendering**: MathJax integration for mathematical notation
-- **Example Testing**: Doctest integration for example validation
-- **API Reference**: Automated API documentation generation
+#### **Documentation Build Configuration**
+- **NumPy Style Support**: Napoleon extension for NumPy format
+- **Consistent Rendering**: Standardized docstring presentation
+- **Format Validation**: Sphinx build warnings for format issues
+- **API Reference**: Clean automated documentation generation
 
 ## **Validation and Testing Criteria**
 
@@ -150,31 +143,31 @@ napoleon_config = {
 - [ ] Custom validation rules detect compliance issues correctly
 - [ ] Sphinx builds enhanced documentation successfully
 
-### **Baseline Documentation Metrics**
-- [ ] **Current Coverage**: Percentage of documented components per module
-- [ ] **Priority List**: Ranked list of modules requiring enhancement
-- [ ] **Compliance Report**: NumPy convention violation summary
-- [ ] **Scientific Gaps**: Missing units, equations, or references
+### **Baseline Format Compliance Metrics**
+- [ ] **Format Distribution**: Percentage of NumPy vs other formats per module
+- [ ] **Priority List**: Modules with highest format inconsistency
+- [ ] **Compliance Report**: pydocstyle violation summary
+- [ ] **Missing Documentation**: Functions completely lacking docstrings
 
 ### **Infrastructure Quality Checks**
-- [ ] **CI/CD Integration**: Automated validation in pull requests
-- [ ] **Pre-commit Hooks**: Developer workflow integration
-- [ ] **Documentation Build**: Enhanced Sphinx output generation
-- [ ] **Example Testing**: Docstring code example validation
+- [ ] **pydocstyle Integration**: Automated format validation
+- [ ] **Pre-commit Hooks**: Format checking in developer workflow
+- [ ] **Sphinx Build**: Consistent documentation generation
+- [ ] **Format Validation**: NumPy convention compliance checking
 
 ## **Deliverables**
 
 ### **Configuration Files**
 - `.pydocstyle` - NumPy convention configuration
-- `scripts/docstring_coverage.py` - Coverage analysis tool
-- `scripts/validate_docstrings.py` - Custom validation framework
-- Updated `docs/conf.py` - Enhanced Sphinx configuration
+- `scripts/format_analysis.py` - Format compliance analysis tool
+- `scripts/validate_formats.py` - NumPy format validation framework
+- Updated `docs/conf.py` - NumPy-focused Sphinx configuration
 
 ### **Baseline Reports**
-- **Coverage Report**: Current documentation status by module
-- **Compliance Report**: NumPy convention violations summary
-- **Priority Matrix**: Enhancement priority by module and component type
-- **Gap Analysis**: Missing scientific documentation elements
+- **Format Report**: Current docstring format distribution by module
+- **Compliance Report**: pydocstyle violations summary
+- **Priority Matrix**: Standardization priority by format inconsistency
+- **Missing Documentation**: Functions requiring basic docstrings
 
 ### **Validation Pipeline**
 - **Pre-commit Integration**: Developer workflow validation
@@ -185,29 +178,29 @@ napoleon_config = {
 ## **Success Criteria**
 
 ### **Primary Infrastructure Goals**
-- **Validation Tools**: pydocstyle and custom validators operational
-- **Coverage Metrics**: Baseline documentation coverage established
-- **Enhancement Pipeline**: Automated validation and testing framework
-- **Sphinx Integration**: Enhanced documentation build capability
+- **Format Validation**: pydocstyle NumPy convention checking operational
+- **Baseline Analysis**: Current format compliance status established
+- **Standardization Pipeline**: Automated format validation framework
+- **Sphinx Integration**: NumPy-focused documentation build capability
 
 ### **Quality Assurance Standards**
-- **NumPy Compliance**: Validation rules enforce strict convention adherence
-- **Scientific Standards**: Units, equations, and references required
-- **Example Validation**: Code examples execute successfully
-- **Developer Integration**: Seamless workflow integration for contributors
+- **NumPy Compliance**: Validation rules enforce strict format adherence
+- **Format Consistency**: Uniform docstring style across all modules
+- **pydocstyle Integration**: Zero violations target for format compliance
+- **Developer Integration**: Seamless format checking in development workflow
 
 ## **Next Phase Prerequisites**
 
 ### **Infrastructure Readiness**
-- All validation tools configured and operational
-- Baseline coverage metrics documented and analyzed
-- Priority enhancement list established and reviewed
-- Documentation build pipeline tested and validated
+- Format validation tools configured and operational
+- Baseline format compliance metrics documented and analyzed
+- Priority standardization list established and reviewed
+- Documentation build pipeline tested for NumPy format support
 
 ### **Quality Framework**
-- NumPy docstring convention enforcement active
-- Scientific documentation standards defined and implemented
-- Example code validation framework operational
-- Automated compliance checking integrated into development workflow
+- NumPy docstring format enforcement active
+- Format consistency standards defined and implemented
+- pydocstyle validation framework operational
+- Automated format checking integrated into development workflow
 
-This infrastructure foundation enables systematic, automated, and high-quality docstring enhancement across the entire SolarWindPy codebase while maintaining scientific accuracy and consistency standards.
+This infrastructure foundation enables systematic, automated, and consistent docstring format standardization across the entire SolarWindPy codebase while maintaining existing scientific content accuracy.

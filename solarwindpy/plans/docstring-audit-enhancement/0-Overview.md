@@ -2,27 +2,27 @@
 
 ## **Executive Summary**
 
-**OBJECTIVE**: Complete docstring audit and enhancement of all 53 Python modules in SolarWindPy package for strict NumPy convention compliance.
+**OBJECTIVE**: Conservative docstring audit and format standardization of all 53 Python modules in SolarWindPy package for strict NumPy convention compliance.
 
-**SCOPE**: Comprehensive review and enhancement of module-level, class, method, function, and property docstrings across core/, fitfunctions/, plotting/, solar_activity/, instabilities/, and tools/ packages.
+**SCOPE**: Format standardization and consistency enhancement of existing docstrings across core/, fitfunctions/, plotting/, solar_activity/, instabilities/, and tools/ packages. Focus on compliance over content expansion.
 
-**QUALITY TARGET**: 100% NumPy docstring convention compliance with comprehensive documentation coverage.
+**QUALITY TARGET**: 100% NumPy docstring convention compliance through format standardization and minimal content enhancement.
 
 ## **Business Case and Value Proposition**
 
-### **Critical Documentation Gaps**
-- **Missing Module Docstrings**: Several modules lack comprehensive module-level documentation
-- **Incomplete Method Documentation**: Many `__init__` methods, properties, and helper functions lack docstrings
-- **Format Inconsistencies**: Mixed docstring styles, inconsistent parameter documentation
-- **Missing Examples**: Lack of usage examples in docstrings, especially for complex physics calculations
-- **LaTeX Issues**: Improper mathematical notation formatting in scientific modules
+### **Critical Documentation Issues**
+- **Format Inconsistencies**: Mixed docstring styles (Google/informal vs NumPy format)
+- **Parameter Documentation**: Inconsistent type notation and descriptions
+- **Missing Basic Docstrings**: Some methods and functions completely lack documentation
+- **LaTeX Formatting**: Inconsistent mathematical notation formatting
+- **Return Documentation**: Missing or incomplete Returns sections
 
-### **Benefits of Enhancement**
-- **Developer Experience**: Clear API documentation improves maintainability and onboarding  
-- **User Experience**: Better auto-generated documentation for scientific users
-- **Code Quality**: Standardized docstring format improves codebase consistency
-- **Scientific Integrity**: Proper mathematical notation for physics calculations
-- **IDE Integration**: Enhanced autocomplete and help systems
+### **Benefits of Standardization**
+- **Format Consistency**: Uniform NumPy docstring format across entire codebase
+- **Developer Experience**: Standardized documentation improves maintainability
+- **Tool Compatibility**: Better pydocstyle and Sphinx integration
+- **Code Quality**: Consistent formatting standards improve readability
+- **IDE Integration**: Enhanced autocomplete through standardized parameter documentation
 
 ## **Scope Analysis**
 
@@ -171,45 +171,45 @@ def function(param1, param2=None):
 
 ## **Phase Structure**
 
-### **Phase 1: Infrastructure Setup and Validation Tools** (Est. 4 hours)
+### **Phase 1: Infrastructure Setup and Validation Tools** (Est. 3 hours)
 - Set up pydocstyle configuration for NumPy convention
-- Create docstring validation scripts
-- Establish baseline documentation coverage metrics
-- Configure Sphinx integration for enhanced documentation builds
+- Create baseline documentation coverage analysis
+- Configure validation scripts for format compliance
+- Establish Sphinx integration for consistent builds
 
-### **Phase 2: Core Physics Modules Enhancement** (Est. 12 hours)  
+### **Phase 2: Core Physics Modules Format Standardization** (Est. 8 hours)  
 **Target: 9 core module files**
-- Focus on plasma physics algorithms and mathematical operations
-- Emphasize proper LaTeX equation formatting
-- Ensure comprehensive parameter documentation with physical units
-- Add physics-focused usage examples
+- Convert existing docstrings to strict NumPy format
+- Standardize parameter type notation (e.g., array_like)
+- Add missing Returns sections where functions return values
+- Standardize existing LaTeX equation formatting
 
-### **Phase 3: Fitfunctions Mathematical Modules Enhancement** (Est. 10 hours)
+### **Phase 3: Fitfunctions Mathematical Modules Format Standardization** (Est. 7 hours)
 **Target: 10 fitfunction module files**  
-- Mathematical function documentation with proper notation
-- Statistical analysis method documentation
-- Comprehensive parameter validation documentation
-- Algorithm reference citations
+- Convert docstrings to NumPy format compliance
+- Standardize mathematical notation formatting
+- Ensure consistent parameter documentation format
+- Add basic docstrings where completely missing
 
-### **Phase 4: Plotting Visualization Modules Enhancement** (Est. 14 hours)
+### **Phase 4: Plotting Visualization Modules Format Standardization** (Est. 10 hours)
 **Target: 18 plotting module files**
-- Visualization method documentation with examples
-- Plot customization parameter documentation  
-- Label formatting and styling documentation
-- Interactive plotting feature documentation
+- Convert mixed docstring styles to NumPy format
+- Standardize parameter documentation for plotting functions
+- Add basic module-level docstrings where missing
+- Ensure consistent Returns section formatting
 
-### **Phase 5: Specialized Modules Enhancement** (Est. 8 hours)
+### **Phase 5: Specialized Modules Format Standardization** (Est. 6 hours)
 **Target: 16 specialized module files (solar_activity, instabilities, tools, etc.)**
-- Solar activity data interface documentation
-- Plasma instability calculation documentation
-- Utility function comprehensive documentation
-- Package entry point documentation
+- Convert existing docstrings to NumPy format
+- Add basic docstrings for undocumented functions
+- Standardize parameter and return documentation
+- Ensure consistent module-level documentation
 
-### **Phase 6: Validation and Integration** (Est. 4 hours)
-- Run comprehensive docstring validation
-- Generate updated Sphinx documentation
-- Review and fix any remaining compliance issues
-- Update development documentation with new standards
+### **Phase 6: Validation and Integration** (Est. 3 hours)
+- Run comprehensive pydocstyle validation
+- Fix remaining format compliance issues
+- Validate Sphinx documentation builds
+- Ensure consistency across all modules
 
 ## **Success Criteria**
 
@@ -227,32 +227,32 @@ def function(param1, param2=None):
 
 ## **Timeline and Resource Allocation**
 
-### **Total Estimated Duration: 52 hours**
-- **Phase 1**: 4 hours (Infrastructure)
-- **Phase 2**: 12 hours (Core modules - 9 files)
-- **Phase 3**: 10 hours (Fitfunctions - 10 files)  
-- **Phase 4**: 14 hours (Plotting - 18 files)
-- **Phase 5**: 8 hours (Specialized - 16 files)
-- **Phase 6**: 4 hours (Validation)
+### **Total Estimated Duration: 37 hours**
+- **Phase 1**: 3 hours (Infrastructure)
+- **Phase 2**: 8 hours (Core modules - 9 files)
+- **Phase 3**: 7 hours (Fitfunctions - 10 files)  
+- **Phase 4**: 10 hours (Plotting - 18 files)
+- **Phase 5**: 6 hours (Specialized - 16 files)
+- **Phase 6**: 3 hours (Validation)
 
 ### **Resource Requirements**
-- **Technical Expertise**: Python documentation standards, scientific computing
-- **Domain Knowledge**: Plasma physics, statistical analysis, data visualization
-- **Tools**: pydocstyle, Sphinx, LaTeX rendering capabilities
+- **Technical Expertise**: Python documentation standards, NumPy docstring conventions
+- **Basic Domain Knowledge**: Understanding of existing code functionality
+- **Tools**: pydocstyle, Sphinx, basic LaTeX formatting knowledge
 
 ## **Risk Mitigation**
 
 ### **Potential Challenges**
-- **Complex Mathematical Notation**: LaTeX rendering in docstrings
+- **Format Conversion**: Converting mixed docstring styles to NumPy format
 - **Legacy Code**: Inconsistent existing documentation styles
-- **Scientific Accuracy**: Ensuring physics documentation correctness
-- **Large Scope**: 53 modules requiring systematic enhancement
+- **Format Compliance**: Ensuring strict pydocstyle compliance
+- **Large Scope**: 53 modules requiring systematic standardization
 
 ### **Mitigation Strategies**
-- **Incremental Validation**: Phase-by-phase validation and testing
-- **Physics Review**: Subject matter expert validation for scientific modules
-- **Template Standardization**: Consistent docstring templates across modules
-- **Automated Tooling**: Comprehensive validation pipeline
+- **Incremental Validation**: Phase-by-phase pydocstyle checking
+- **Conservative Approach**: Focus on format over content to avoid errors
+- **Template Standardization**: Consistent NumPy format patterns
+- **Automated Tooling**: pydocstyle validation pipeline
 
 ## **Long-term Benefits**
 
@@ -271,4 +271,4 @@ def function(param1, param2=None):
 - **Validation Pipeline**: Automated compliance checking in CI/CD
 - **Future-proofing**: Established patterns for new module development
 
-This comprehensive docstring audit and enhancement plan will elevate SolarWindPy's documentation to professional scientific software standards, significantly improving both developer and user experiences while maintaining the highest levels of scientific accuracy and integrity.
+This conservative docstring audit and format standardization plan will achieve 100% NumPy docstring convention compliance across SolarWindPy, providing consistent documentation formatting while maintaining scientific accuracy through minimal content changes.

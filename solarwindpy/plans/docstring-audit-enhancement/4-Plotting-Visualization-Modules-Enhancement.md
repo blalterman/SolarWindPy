@@ -1,435 +1,243 @@
-# Phase 4: Plotting Visualization Modules Enhancement
+# Phase 4: Plotting Visualization Modules Format Standardization
 
 ## **Objective**
-Comprehensive docstring enhancement for the 18 plotting modules that provide data visualization, publication-quality plotting, and interactive analysis capabilities for plasma physics research.
+Standardize docstring formats to NumPy convention compliance for the 18 plotting modules that provide data visualization, publication-quality plotting, and interactive analysis capabilities.
 
 ## **Scope**
-Target all plotting modules with emphasis on visualization method documentation, plot customization parameters, and matplotlib integration best practices.
+Convert existing docstrings to strict NumPy format while preserving visualization content and adding minimal missing basic documentation.
 
-## **Module Inventory and Enhancement Targets**
+## **Module Inventory and Format Standardization Targets**
 
 ### **Foundation Plotting Modules (4 modules)**
 
-#### **Module 1: `plotting/base.py` - Base Plotting Infrastructure** (2.5 hours)
-**Current Status**: Core plotting utilities with limited documentation
+#### **Module 1: `plotting/base.py` - Base Plotting Infrastructure** (2 hours)
+**Current Status**: Core plotting utilities requiring NumPy format conversion
 
-**Enhancement Requirements:**
-- **Base Classes**: Common plotting functionality and matplotlib integration
-- **Style Management**: Color schemes, fonts, and publication standards
-- **Figure Management**: Size, DPI, and output format handling
-- **Axis Configuration**: Scientific notation, units, and scaling
+**Standardization Requirements:**
+- **Base Classes**: Convert existing plotting class docstrings to NumPy format
+- **Method Documentation**: Standardize matplotlib parameter documentation
+- **Parameter Format**: Convert to consistent `param : type` notation
+- **Returns Documentation**: Add Returns sections for plotting methods
 
-**Key Documentation Targets:**
+#### **Module 2: `plotting/agg_plot.py` - Aggregated Plot Utilities** (1.5 hours)
+**Current Status**: Limited documentation requiring format standardization
+
+**Standardization Requirements:**
+- **Utility Functions**: Add basic docstrings where completely missing
+- **Parameter Format**: Standardize aggregation parameter documentation
+- **Returns Format**: Add proper return value documentation
+
+#### **Module 3: `plotting/histograms.py` - Histogram Plotting (deprecated)** (0.5 hours)
+**Current Status**: Deprecated module requiring minimal format updates
+
+**Standardization Requirements:**
+- **Deprecation Documentation**: Ensure proper deprecation notice formatting
+- **Legacy Format**: Convert existing docstrings to NumPy format
+- **Minimal Updates**: Focus only on format compliance
+
+#### **Module 4: `plotting/tools.py` - General Plotting Tools** (1.5 hours)
+**Current Status**: General utilities requiring format standardization
+
+**Standardization Requirements:**
+- **Tool Functions**: Convert existing utility docstrings to NumPy format
+- **Parameter Documentation**: Standardize plotting tool parameter format
+- **Helper Methods**: Add basic docstrings where missing
+
+### **Histogram Plotting Modules (2 modules)**
+
+#### **Module 5: `plotting/hist1d.py` - 1D Histogram Plots** (1.5 hours)
+**Standardization Requirements:**
+- **Histogram Functions**: Convert existing 1D histogram docstrings to NumPy format
+- **Parameter Format**: Standardize binning and styling parameter documentation
+- **Returns Documentation**: Add Returns sections for histogram objects
+
+#### **Module 6: `plotting/hist2d.py` - 2D Histogram Plots** (1.5 hours)
+**Standardization Requirements:**
+- **2D Histogram Functions**: Convert existing 2D plotting docstrings to NumPy format
+- **Parameter Format**: Standardize 2D binning parameter documentation
+- **Colormap Documentation**: Standardize colormap parameter formatting
+
+### **Specialized Visualization Modules (3 modules)**
+
+#### **Module 7: `plotting/scatter.py` - Scatter Plot Utilities** (1 hour)
+**Standardization Requirements:**
+- **Scatter Functions**: Convert scatter plot docstrings to NumPy format
+- **Parameter Format**: Standardize marker and color parameter documentation
+- **Statistical Overlays**: Convert statistical annotation documentation
+
+#### **Module 8: `plotting/spiral.py` - Spiral Mesh Calculations** (1 hour)
+**Standardization Requirements:**
+- **Spiral Functions**: Convert mesh calculation docstrings to NumPy format
+- **Mathematical Parameters**: Standardize spiral parameter documentation
+- **Coordinate Documentation**: Convert coordinate system parameter format
+
+#### **Module 9: `plotting/orbits.py` - Orbital Trajectory Plots** (1.5 hours)
+**Standardization Requirements:**
+- **Orbital Functions**: Convert trajectory plotting docstrings to NumPy format
+- **Coordinate Parameters**: Standardize orbital parameter documentation
+- **Trajectory Documentation**: Convert existing orbital mechanics documentation
+
+### **Interactive and Selection Modules (1 module)**
+
+#### **Module 10: `plotting/select_data_from_figure.py` - Interactive Data Selection** (1 hour)
+**Standardization Requirements:**
+- **Interactive Functions**: Convert selection tool docstrings to NumPy format
+- **Event Parameters**: Standardize matplotlib event parameter documentation
+- **Callback Documentation**: Convert callback function parameter format
+
+### **Labels Package Modules (8 modules)**
+
+#### **Module 11: `plotting/labels/__init__.py` - Labels Package Entry Point** (0.5 hours)
+**Standardization Requirements:**
+- **Module Docstring**: Add basic NumPy format module-level docstring
+- **Import Documentation**: Standardize labels package API documentation
+
+#### **Module 12: `plotting/labels/base.py` - Base Label Formatting** (1 hour)
+**Standardization Requirements:**
+- **Label Classes**: Convert base label formatting docstrings to NumPy format
+- **Formatting Parameters**: Standardize label formatting parameter documentation
+- **Text Processing**: Convert text processing method documentation
+
+#### **Module 13: `plotting/labels/special.py` - Special Scientific Labels** (1 hour)
+**Standardization Requirements:**
+- **Scientific Labels**: Convert specialized label docstrings to NumPy format
+- **Symbol Parameters**: Standardize scientific symbol parameter documentation
+- **LaTeX Format**: Ensure consistent LaTeX label formatting
+
+#### **Module 14: `plotting/labels/chemistry.py` - Chemical Species Labels** (0.5 hours)
+**Standardization Requirements:**
+- **Chemical Labels**: Convert chemical species docstrings to NumPy format
+- **Species Parameters**: Standardize chemical notation parameter documentation
+
+#### **Module 15: `plotting/labels/composition.py` - Composition Ratio Labels** (0.5 hours)
+**Standardization Requirements:**
+- **Ratio Labels**: Convert composition ratio docstrings to NumPy format
+- **Composition Parameters**: Standardize ratio parameter documentation
+
+#### **Module 16: `plotting/labels/datetime.py` - Time Formatting Labels** (0.5 hours)
+**Standardization Requirements:**
+- **Time Labels**: Convert datetime formatting docstrings to NumPy format
+- **Format Parameters**: Standardize time format parameter documentation
+
+#### **Module 17: `plotting/labels/elemental_abundance.py` - Element Abundance Labels** (0.5 hours)
+**Standardization Requirements:**
+- **Abundance Labels**: Convert element abundance docstrings to NumPy format
+- **Element Parameters**: Standardize abundance parameter documentation
+
+### **Package Infrastructure (1 module)**
+
+#### **Module 18: `plotting/__init__.py` - Package Entry Point** (0.5 hours)
+**Standardization Requirements:**
+- **Module Docstring**: Add basic NumPy format module-level docstring
+- **Import Documentation**: Standardize plotting package API documentation
+
+## **Format Standardization Standards**
+
+### **NumPy Convention Focus**
+- **Parameter Format**: Convert all parameters to `param : type` notation
+- **Returns Documentation**: Add Returns sections where functions return matplotlib objects
+- **Plotting Format**: Standardize matplotlib parameter documentation
+- **Type Consistency**: Use standardized type specifications (array_like, optional)
+
+### **Conservative Approach Guidelines**
+- **DO NOT** add Examples sections to functions that don't already have them
+- **DO NOT** add new plotting functionality or visualization content
+- **DO NOT** add new References sections unless converting existing informal references
+- **DO** preserve all existing matplotlib and visualization content
+- **DO** focus on format compliance over content expansion
+
+### **Plotting Documentation Standards**
 ```python
-class BasePlot:
-    """Base class for scientific plotting with matplotlib integration.
-    
-    Provides common functionality for creating publication-quality plots
-    with consistent styling, proper axis handling, and scientific
-    formatting standards for plasma physics visualizations.
+def scatter_plot(x, y, color=None, marker='o', size=50):
+    """Create scatter plot with scientific formatting.
     
     Parameters
     ----------
-    figsize : tuple, optional
-        Figure size in inches (width, height). Default is (10, 8).
-    dpi : int, optional
-        Figure resolution in dots per inch. Default is 100.
-    style : str, optional
-        Plotting style preset. Options: ['publication', 'presentation', 'notebook'].
-        Default is 'publication'.
-        
-    Attributes
-    ----------
-    fig : matplotlib.figure.Figure
-        The matplotlib figure object
-    ax : matplotlib.axes.Axes or list
-        Axis or list of axes for plotting
-    colors : dict
-        Color scheme for consistent plot styling
-        
-    Methods
-    -------
-    setup_axes(**kwargs)
-        Configure axes with scientific notation and units
-    apply_style(style_name)
-        Apply predefined styling to the plot
-    save(filename, **kwargs)
-        Save plot with publication-quality settings
-        
-    Examples
-    --------
-    Create a base plot with publication styling:
-    
-    >>> plot = BasePlot(figsize=(8, 6), style='publication')
-    >>> plot.setup_axes(xlabel='Time [s]', ylabel='Density [cm⁻³]')
-    >>> plot.save('plasma_density.pdf', dpi=300)
-    
-    Notes
-    -----
-    Default styling follows scientific publication standards with:
-    - Times New Roman fonts for consistency
-    - Appropriate line weights and marker sizes  
-    - Color-blind friendly color schemes
-    - Proper axis scaling and tick formatting
-    """
-```
-
-#### **Module 2: `plotting/agg_plot.py` - Aggregated Plot Utilities** (2 hours)
-**Enhancement Requirements:**
-- **Multi-panel Plotting**: Subplot management and layout optimization
-- **Data Aggregation**: Statistical summaries and composite visualizations
-- **Layout Management**: Figure composition and spacing
-- **Integration Points**: How aggregated plots work with other modules
-
-#### **Module 3: `plotting/tools.py` - General Plotting Tools** (2 hours)
-**Enhancement Requirements:**
-- **Utility Functions**: Common plotting operations and helpers
-- **Data Preparation**: Formatting data for visualization
-- **Customization Utilities**: Style and formatting helper functions
-- **Performance Optimization**: Efficient plotting for large datasets
-
-#### **Module 4: `plotting/select_data_from_figure.py` - Interactive Data Selection** (2 hours)
-**Enhancement Requirements:**
-- **Interactive Features**: Mouse-based data selection and zooming
-- **Event Handling**: Matplotlib event integration
-- **Data Extraction**: Converting plot coordinates to data values
-- **User Interface**: Interactive analysis workflow documentation
-
-### **Histogram and Distribution Modules (3 modules)**
-
-#### **Module 5: `plotting/histograms.py` - Legacy Histogram Interface** (1 hour)
-**Enhancement Requirements:**
-- **Legacy Support**: Backward compatibility documentation
-- **Migration Guide**: Transition to hist1d/hist2d modules
-- **Deprecation Warnings**: Clear upgrade path documentation
-
-#### **Module 6: `plotting/hist1d.py` - 1D Histogram Plotting** (2 hours)
-**Enhancement Requirements:**
-- **Distribution Visualization**: Single-variable histogram creation
-- **Statistical Overlays**: Mean, median, and distribution fitting
-- **Binning Strategies**: Automatic and manual bin selection
-- **Customization Options**: Styling and formatting parameters
-
-**Mathematical Documentation Focus:**
-```python
-def plot_histogram(data, bins='auto', density=False, **kwargs):
-    """Create publication-quality 1D histogram with statistical overlays.
-    
-    Generates histogram plots with automatic binning, statistical
-    summaries, and optional distribution fitting for plasma physics
-    data analysis.
-    
-    Parameters
-    ----------
-    data : array_like
-        Input data for histogram generation [data units]
-    bins : int, str, or array_like, optional
-        Histogram binning strategy:
-        - int: Number of equal-width bins
-        - str: Algorithm ('auto', 'sturges', 'fd', 'scott')  
-        - array: Explicit bin edges [data units]
-        Default is 'auto'.
-    density : bool, optional
-        If True, create probability density. If False, create counts.
-        Default is False.
-    statistics : bool, optional
-        Include statistical summary (mean, std, skew). Default is True.
-    fit_distribution : str, optional
-        Overlay distribution fit. Options: ['gaussian', 'lognormal', None].
-        Default is None.
+    x : array_like
+        X-axis data values
+    y : array_like
+        Y-axis data values
+    color : array_like or str, optional
+        Color specification for markers
+    marker : str, optional
+        Marker style specification
+    size : float or array_like, optional
+        Marker size specification
         
     Returns
     -------
-    fig : matplotlib.figure.Figure
-        Figure object containing the histogram
-    ax : matplotlib.axes.Axes  
-        Axes object for further customization
-    hist_data : dict
-        Dictionary containing histogram counts, bin edges, and statistics
-        
-    Examples
-    --------
-    Create histogram of plasma density measurements:
-    
-    >>> density_data = plasma.p1.n.dropna()
-    >>> fig, ax, stats = plot_histogram(
-    ...     density_data, 
-    ...     bins=50,
-    ...     density=True,
-    ...     fit_distribution='lognormal'
-    ... )
-    >>> ax.set_xlabel('Proton Density [cm⁻³]')
-    >>> ax.set_ylabel('Probability Density')
-    
-    Notes
-    -----
-    Automatic binning uses the Freedman-Diaconis rule for optimal
-    bin width selection based on data distribution characteristics.
-    
-    For plasma physics data, log-normal distributions are often
-    appropriate due to multiplicative physical processes.
-    """
-```
-
-#### **Module 7: `plotting/hist2d.py` - 2D Histogram Plotting** (2.5 hours)
-**Enhancement Requirements:**
-- **Joint Distributions**: Two-variable histogram and density plots
-- **Correlation Analysis**: Statistical relationship visualization
-- **Color Mapping**: Scientific color schemes and scaling
-- **Contour Integration**: Density contour overlay capabilities
-
-### **Specialized Visualization Modules (4 modules)**
-
-#### **Module 8: `plotting/scatter.py` - Scatter Plot Analysis** (2 hours)
-**Enhancement Requirements:**
-- **Correlation Plots**: Two-variable relationship visualization
-- **Color Coding**: Third variable encoding and interpretation
-- **Statistical Overlays**: Regression lines and confidence intervals
-- **Large Dataset Handling**: Efficient plotting for big data
-
-#### **Module 9: `plotting/spiral.py` - Spiral Mesh Calculations** (2 hours)
-**Enhancement Requirements:**
-- **Spiral Geometry**: Mathematical spiral generation and properties
-- **Mesh Operations**: Grid generation and coordinate transformations
-- **Physics Applications**: Spiral structures in plasma dynamics
-- **Visualization Integration**: How spirals integrate with plotting
-
-#### **Module 10: `plotting/orbits.py` - Orbital Trajectory Plots** (2 hours)
-**Enhancement Requirements:**
-- **Trajectory Visualization**: Spacecraft orbit and path plotting
-- **Coordinate Systems**: Various reference frames and projections  
-- **3D Capabilities**: Three-dimensional trajectory representation
-- **Physics Context**: Orbital mechanics in plasma environment
-
-### **Label and Annotation Modules (6 modules)**
-
-#### **Module 11: `plotting/labels/base.py` - Base Label Formatting** (1.5 hours)
-**Enhancement Requirements:**
-- **Text Formatting**: Scientific notation and unit handling
-- **LaTeX Integration**: Mathematical symbol and equation rendering
-- **Internationalization**: Multi-language support considerations
-- **Accessibility**: Color-blind and visually impaired accommodations
-
-#### **Module 12: `plotting/labels/special.py` - Special Scientific Labels** (1.5 hours)
-**Enhancement Requirements:**
-- **Physics Symbols**: Greek letters, subscripts, and scientific notation
-- **Unit Formatting**: Proper SI unit representation and powers
-- **Mathematical Expressions**: Complex equation rendering
-- **Standardization**: Consistent symbol usage across package
-
-#### **Module 13: `plotting/labels/chemistry.py` - Chemical Species Labels** (1.5 hours)
-**Enhancement Requirements:**
-- **Ion Notation**: Proper chemical species representation (H⁺, He²⁺)
-- **Isotope Labels**: Mass number and atomic number formatting
-- **Chemical Formulas**: Molecular species and reaction notation
-- **Physics Context**: Ion species in plasma physics applications
-
-#### **Module 14: `plotting/labels/composition.py` - Composition Ratio Labels** (1.5 hours)
-**Enhancement Requirements:**
-- **Ratio Formatting**: Fractional abundance representation
-- **Statistical Notation**: Uncertainty and confidence interval display
-- **Comparative Analysis**: Multi-species comparison formatting
-- **Units and Scaling**: Proper normalization and scaling documentation
-
-#### **Module 15: `plotting/labels/datetime.py` - Time Formatting Labels** (1.5 hours)
-**Enhancement Requirements:**
-- **Time Series**: Temporal axis formatting and tick spacing
-- **Multiple Time Scales**: Seconds to years with appropriate resolution
-- **Time Zone Handling**: UTC and local time considerations
-- **Epoch Formatting**: Scientific time standards (spacecraft time)
-
-#### **Module 16: `plotting/labels/elemental_abundance.py` - Element Abundance Labels** (1.5 hours)
-**Enhancement Requirements:**
-- **Abundance Notation**: Logarithmic and linear abundance scales
-- **Element Symbols**: Periodic table notation and isotope variants
-- **Solar Standards**: Reference abundance scales and normalization
-- **Comparative Displays**: Multi-element abundance comparisons
-
-### **Package Organization Modules (2 modules)**
-
-#### **Module 17: `plotting/labels/__init__.py` - Labels Package Entry** (0.5 hours)
-**Enhancement Requirements:**
-- **Label Package Overview**: Comprehensive module summary
-- **Import Structure**: Public API and convenience functions
-- **Usage Examples**: Common labeling patterns and workflows
-
-#### **Module 18: `plotting/__init__.py` - Main Plotting Package Entry** (0.5 hours)
-**Enhancement Requirements:**
-- **Package Architecture**: Complete plotting ecosystem overview
-- **Integration Guide**: How plotting modules work together
-- **Best Practices**: Publication-quality plotting workflows
-
-## **Visualization Documentation Standards**
-
-### **Plot Method Documentation Template**
-```python
-def create_scientific_plot(data, plot_type='scatter', **kwargs):
-    """Create publication-quality scientific visualization.
-    
-    Parameters
-    ----------
-    data : pandas.DataFrame or dict
-        Input data with columns for x, y, and optional color/size variables
-    plot_type : str, optional
-        Type of visualization. Options: ['scatter', 'line', 'histogram', 'contour'].
-        Default is 'scatter'.
-    xlabel : str, optional
-        X-axis label with units [units]
-    ylabel : str, optional
-        Y-axis label with units [units]
-    title : str, optional
-        Plot title
-    figsize : tuple, optional
-        Figure size in inches (width, height). Default is (10, 8).
-    colormap : str, optional
-        Matplotlib colormap name. Default is 'viridis'.
-    save_path : str, optional
-        File path to save the figure. If None, displays interactively.
-        
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-        The created figure object
-    ax : matplotlib.axes.Axes
-        The axes object for further customization
-        
-    Examples
-    --------
-    Create scatter plot of plasma parameters:
-    
-    >>> data = {'density': plasma.p1.n, 'temperature': plasma.p1.T}
-    >>> fig, ax = create_scientific_plot(
-    ...     data, 
-    ...     plot_type='scatter',
-    ...     xlabel='Proton Density [cm⁻³]',
-    ...     ylabel='Proton Temperature [K]',
-    ...     title='Plasma Parameter Correlation'
-    ... )
-    
-    Customize and save the plot:
-    
-    >>> ax.set_xscale('log')
-    >>> ax.set_yscale('log') 
-    >>> fig.savefig('plasma_correlation.pdf', dpi=300, bbox_inches='tight')
-    
-    Notes
-    -----
-    All plots follow scientific publication standards with appropriate
-    fonts, line weights, and color schemes suitable for both print
-    and digital media.
-    """
-```
-
-### **Interactive Feature Documentation**
-```python
-def interactive_data_selector(fig, ax, callback=None):
-    """Add interactive data selection capability to existing plot.
-    
-    Parameters
-    ----------
-    fig : matplotlib.figure.Figure
-        Figure containing the plot
-    ax : matplotlib.axes.Axes
-        Axes with data to select from
-    callback : callable, optional
-        Function called when selection is made: callback(selected_data)
-        
-    Returns
-    -------
-    selector : object
-        Selection handler object for managing interaction
-        
-    Examples
-    --------
-    Enable interactive selection on scatter plot:
-    
-    >>> fig, ax = plt.subplots()
-    >>> ax.scatter(x_data, y_data)
-    >>> def process_selection(data):
-    ...     print(f"Selected {len(data)} points")
-    >>> selector = interactive_data_selector(fig, ax, process_selection)
-    
-    Notes
-    -----
-    - Left click and drag to select rectangular regions
-    - Right click to clear current selection
-    - Double click to select all visible data
+    matplotlib.collections.PathCollection
+        Scatter plot collection object
     """
 ```
 
 ## **Implementation Strategy**
 
 ### **Phase 4 Module Processing Order**
-1. **base.py** - Foundation for all plotting functionality
-2. **tools.py** - Common utilities needed by other modules
-3. **agg_plot.py** - Multi-panel functionality
-4. **hist1d.py** - Single variable distributions
-5. **hist2d.py** - Joint distributions and correlations
-6. **scatter.py** - Correlation analysis plots
-7. **select_data_from_figure.py** - Interactive capabilities
-8. **spiral.py** - Specialized geometric calculations
-9. **orbits.py** - Trajectory visualization
-10. **labels/base.py** - Foundation for text formatting
-11. **labels/special.py** - Scientific notation and symbols
-12. **labels/chemistry.py** - Chemical species formatting
-13. **labels/composition.py** - Abundance ratio formatting
-14. **labels/datetime.py** - Time series formatting
-15. **labels/elemental_abundance.py** - Element abundance scales
-16. **histograms.py** - Legacy interface documentation
-17. **labels/__init__.py** - Labels package integration
-18. **__init__.py** - Main plotting package integration
+1. **base.py** - Foundation plotting infrastructure affecting all other modules
+2. **tools.py** - General utilities used across plotting functions
+3. **agg_plot.py** - Aggregation utilities
+4. **hist1d.py** - Common 1D histogram plotting
+5. **hist2d.py** - 2D histogram visualization
+6. **scatter.py** - Scatter plot utilities
+7. **spiral.py** - Specialized mesh calculations
+8. **orbits.py** - Orbital trajectory visualization
+9. **select_data_from_figure.py** - Interactive selection tools
+10. **labels/base.py** - Foundation label formatting
+11. **labels/special.py** - Scientific label utilities
+12. **labels/chemistry.py** - Chemical notation labels
+13. **labels/composition.py** - Composition ratio labels
+14. **labels/datetime.py** - Time formatting labels
+15. **labels/elemental_abundance.py** - Abundance labels
+16. **histograms.py** - Deprecated histogram module
+17. **labels/__init__.py** - Labels package entry
+18. **__init__.py** - Main plotting package entry
 
-### **Quality Assurance for Visualization**
-1. **Visual Testing**: Plot examples generate expected outputs
-2. **Interactive Testing**: User interaction features function correctly
-3. **Publication Quality**: Plots meet scientific publication standards
-4. **Performance Testing**: Efficient plotting for large datasets
-5. **Accessibility Validation**: Color-blind and visually impaired compatibility
+### **Quality Assurance Process**
+1. **Format Conversion**: Convert existing docstrings to NumPy format
+2. **Matplotlib Preservation**: Ensure existing plotting functionality remains accurate
+3. **pydocstyle Validation**: NumPy convention compliance check
+4. **Consistency Review**: Uniform formatting across all plotting modules
+5. **Sphinx Integration**: Verify plotting documentation renders correctly
 
 ## **Validation and Testing Criteria**
 
-### **Visualization Quality Standards**
-- [ ] **Plot Generation**: All documented examples produce valid matplotlib figures
-- [ ] **Style Consistency**: Uniform appearance across all plotting functions
-- [ ] **Interactive Features**: User interaction capabilities work as documented
-- [ ] **Publication Quality**: Plots suitable for scientific journals
+### **Format Standardization Standards**
+- [ ] **Parameter Format**: All parameters use NumPy `param : type` notation
+- [ ] **Returns Sections**: All functions returning matplotlib objects have Returns documentation
+- [ ] **Plotting Format**: Matplotlib parameter documentation standardized
+- [ ] **Type Consistency**: Standardized type specifications throughout
 
-### **Documentation Completeness**
-- [ ] **Parameter Coverage**: All plotting parameters with types and defaults documented
-- [ ] **Example Quality**: Practical examples with realistic scientific data
-- [ ] **Customization Options**: Clear documentation of styling and formatting capabilities
-- [ ] **Integration Guidance**: How plotting modules work together effectively
-
-### **Scientific Standards**
-- [ ] **Unit Handling**: Proper axis labeling with physical units
-- [ ] **Color Schemes**: Scientific color maps with accessibility considerations  
-- [ ] **Statistical Accuracy**: Correct implementation of statistical overlays
-- [ ] **Performance Documentation**: Guidelines for plotting large datasets
+### **Code Quality Checks**
+- [ ] **pydocstyle Compliance**: Zero NumPy convention violations
+- [ ] **Matplotlib Integrity**: Existing plotting functionality preserved
+- [ ] **Sphinx Integration**: Documentation builds without rendering issues
+- [ ] **Format Consistency**: Uniform parameter and return documentation
 
 ## **Success Criteria**
 
-### **Primary Visualization Goals**
-- **Complete Plotting Documentation**: All 18 modules with comprehensive visualization guidance
-- **Publication Quality**: Professional scientific plotting standards throughout
-- **Interactive Capabilities**: Well-documented user interaction features
-- **Accessibility Standards**: Color-blind and visually impaired accommodations
+### **Primary Format Standardization Goals**
+- **Format Compliance**: All 18 plotting modules follow NumPy docstring conventions
+- **Visualization Preservation**: Existing matplotlib and plotting content maintained accurately
+- **Consistency**: Uniform formatting across all plotting modules
+- **pydocstyle Clean**: Zero violations for NumPy format compliance
 
 ### **Quality Metrics**
-- **Visual Validation**: 100% of documented examples generate expected plots
-- **NumPy Compliance**: Perfect adherence to docstring conventions
-- **Performance Standards**: Efficient plotting documented for large datasets
-- **Integration Success**: Seamless module interaction documentation
+- **Zero pydocstyle Violations**: Clean NumPy format compliance
+- **Matplotlib Integrity**: No loss of existing plotting documentation
+- **Format Consistency**: Uniform parameter and return documentation
+- **Sphinx Compatibility**: Documentation builds without format warnings
 
-## **Integration with Overall Plan**
+## **Integration with Subsequent Phases**
 
-### **Dependencies from Previous Phases**
-- **Mathematical Framework**: LaTeX standards from fitfunctions modules
-- **Scientific Context**: Physics applications from core modules  
-- **Infrastructure**: Validation tools and documentation standards
+### **Dependencies for Phase 5 (Specialized Modules)**
+- **Format Standards**: Established NumPy convention patterns for visualization functions
+- **Parameter Documentation**: Consistent matplotlib parameter formatting
+- **Return Documentation**: Standardized matplotlib object return formatting
 
-### **Contributions to Final Success**
-- **User Experience**: High-quality visualization enhances package usability
-- **Scientific Impact**: Publication-quality plots support research dissemination
-- **Developer Tools**: Comprehensive plotting framework for future development
+### **Foundation for Package Documentation**
+- **Visualization Documentation**: Established patterns for plotting function documentation
+- **Format Consistency**: Proven NumPy format conversion processes for large modules
+- **Quality Framework**: pydocstyle validation for visualization modules
 
-This comprehensive enhancement of plotting modules establishes professional visualization standards, ensuring SolarWindPy provides publication-quality scientific plotting capabilities with excellent documentation, accessibility features, and integration with the broader plasma physics analysis framework.
+This conservative format standardization of plotting modules ensures NumPy convention compliance while preserving the matplotlib integration and visualization capabilities essential for scientific data analysis and publication-quality plots.
