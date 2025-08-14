@@ -1,0 +1,88 @@
+name: Documentation
+
+on:
+  push:
+    branches: ['**']  # Build on all branches
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-docs-${{ hashFiles('docs/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-docs-
+      
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt
+          pip install -e .
+      
+      - name: Lint documentation with doc8
+        run: doc8 README.rst docs CITATION.rst --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
+      
+      - name: Check documentation links
+        run: |
+          pip install sphinx-link-checker
+          sphinx-build -b linkcheck docs docs/build/linkcheck
+        continue-on-error: true
+      
+      - name: Build documentation
+        env:
+          SPHINXOPTS: -W --keep-going -n  # Warnings as errors, but show all
+        working-directory: docs
+        run: |
+          make clean
+          make html
+      
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: docs/build/html
+          retention-days: 30
+      
+      - name: Check documentation coverage
+        run: |
+          python -m sphinx.ext.coverage -d docs/build/doctrees -o docs/build/coverage docs
+        continue-on-error: true
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install dependencies
+        run: |
+          pip install -r docs/requirements.txt
+          pip install -e .
+      
+      - name: Build documentation for deployment
+        working-directory: docs
+        run: |
+          make clean
+          make html
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/html
+          cname: solarwindpy.github.io  # If you have a custom domain
