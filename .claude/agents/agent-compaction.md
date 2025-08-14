@@ -8,7 +8,7 @@ tags:
   - context-management
   - git-validation
 applies_to:
-  - solarwindpy/plans/*/compacted_state.md
+  - plans/*/compacted_state.md
   - session state management
   - long development sessions
 ---
@@ -47,7 +47,7 @@ Universal context compression and session continuity service for SolarWindPy pla
 
 ### 3. Structured State Generation
 - **Compacted State Format**: Generate standardized `compacted_state.md` files
-- **Plan-Specific Storage**: Create files in `solarwindpy/plans/<plan-name>/compacted_state.md`
+- **Plan-Specific Storage**: Create files in `plans/<plan-name>/compacted_state.md`
 - **Multi-Developer Safety**: Isolated compaction states prevent file conflicts
 - **Template Structure**: Consistent format with metadata, summaries, archives, and resumption data
 - **Directory Management**: Auto-create plan-specific subdirectories when needed
@@ -83,7 +83,7 @@ Universal context compression and session continuity service for SolarWindPy pla
 2. Identify agent type: PlanManager | PlanImplementer | PlanStatusAggregator
 3. Parse current context and extract essential elements
 4. Apply agent-specific compression algorithm
-5. Ensure plan-specific directory exists: mkdir -p solarwindpy/plans/<plan-name>/
+5. Ensure plan-specific directory exists: mkdir -p plans/<plan-name>/
 6. Generate structured compacted_state.md file
 7. Create atomic git commit with both files and compaction metadata
 8. Apply git tag with timestamp and compression ratio
@@ -127,7 +127,7 @@ Return to source agent:
 
 ### Directory Organization
 ```
-solarwindpy/plans/
+plans/
 ├── <plan-name>/
 │   ├── compacted_state.md          # This agent's output
 │   ├── [plan-name].md             # Original plan file

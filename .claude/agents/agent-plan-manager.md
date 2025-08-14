@@ -8,7 +8,7 @@ tags:
   - token-optimized
   - streamlined
 applies_to:
-  - solarwindpy/plans/*.md
+  - plans/*.md
   - plan/* branches
 ---
 
@@ -92,7 +92,7 @@ Process:
 
 ## File Structure
 ```
-solarwindpy/plans/
+plans/
 ├── 0-overview-template.md   # Master template for plan coordination
 ├── N-phase-template.md      # Standard template for individual phases
 ├── TEMPLATE-USAGE-GUIDE.md  # Template usage documentation

@@ -7,7 +7,7 @@ tags:
   - cross-plan-coordination
   - dependency-analysis
 applies_to:
-  - solarwindpy/plans/**/*.md
+  - plans/**/*.md
   - plan/* branches
 ---
 

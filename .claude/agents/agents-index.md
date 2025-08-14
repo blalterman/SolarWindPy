@@ -44,11 +44,11 @@ This index provides a centralized reference for all specialized agents working o
 
 | Agent | Priority | Primary Focus | Key Files |
 |-------|----------|--------------|-----------|
-| PlanManager | High | Multi-phase strategic planning with velocity tracking | `solarwindpy/plans/*/`, plan branches |
+| PlanManager | High | Multi-phase strategic planning with velocity tracking | `plans/*/`, plan branches |
 | PlanImplementer | High | Multi-phase plan execution with velocity intelligence | All implementation files |
 | GitIntegration | High | Centralized git operations and branch management | `plan/*`, `feature/*` branches |
-| PlanStatusAggregator | Medium | Cross-plan monitoring & dependency analysis | `solarwindpy/plans/**/*.md` |
-| CompactionAgent | Medium | Context compression & session continuity | `solarwindpy/plans/*/compacted_state.md` |
+| PlanStatusAggregator | Medium | Cross-plan monitoring & dependency analysis | `plans/**/*.md` |
+| CompactionAgent | Medium | Context compression & session continuity | `plans/*/compacted_state.md` |
 | PhysicsValidator | High | Physical correctness | `core/*.py`, `instabilities/*.py` |
 | DataFrameArchitect | High | Data structures | `core/*.py` |
 | TestEngineer | High | Testing | `tests/**/*.py` |
