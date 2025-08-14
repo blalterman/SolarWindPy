@@ -15,7 +15,8 @@ This plan outlines the steps required to evaluate a GitHub repository for compli
 
 1. **Repository Structure & Accessibility**
 
-   - Ensure the repository contains a `paper.md` (and, if used, `paper.bib`) in the root or specified directory.
+   - Ensure the repository contains a `paper.md`
+       - `paper.bib` covers the papers cited.
    - Confirm the repository’s issue tracker is open to the public.
    - Ensure all source code and documentation needed for installation and testing are present.
 
@@ -56,28 +57,28 @@ ______________________________________________________________________
 
 ## JOSS Requirements Review Checklist
 
-- [ ] **Repository is public and accessible without authentication**
+- [x] **Repository is public and accessible without authentication**
 - [x] **Repository contains research software (not just data, models, or notebooks)**
 - [x] **OSI-approved open-source license file is present** (`LICENSE`)
 - [x] **Repository includes `paper.md` in Markdown format**
 - [ ] **`paper.md` includes a non-specialist summary**
 - [ ] **`paper.md` includes a clear statement of need**
-- [ ] **`paper.md` lists all author names and affiliations**
-- [ ] **`paper.md` includes acknowledgments (if any)**
+- [x] **`paper.md` lists all author names and affiliations**
+- [x] **`paper.md` includes acknowledgments (if any)**
 - [ ] **`paper.md` includes references section**
 - [ ] **`paper.md` length is between 250 and 1000 words**
 - [ ] **All source code and documentation are present and installable**
-- [ ] **Repository’s issue tracker is open to the public**
-- [ ] **Repository demonstrates substantial scholarly effort (≥ 3 months work, non-trivial functionality)**
-- [ ] **Development history (commits, issues, PRs) supports claim of scholarly effort**
-- [ ] **Submitting author is a major contributor to the project**
-- [ ] **All listed authors have contributed significantly (not just supervisors)**
-- [ ] **All authors have GitHub accounts (for open peer review)**
+- [x] **Repository’s issue tracker is open to the public**
+- [x] **Repository demonstrates substantial scholarly effort (≥ 3 months work, non-trivial functionality)**
+- [x] **Development history (commits, issues, PRs) supports claim of scholarly effort**
+- [x] **Submitting author is a major contributor to the project**
+- [x] **All listed authors have contributed significantly (not just supervisors)**
+- [x] **All authors have GitHub accounts (for open peer review)**
 - [ ] **Can create a tagged software release**
-- [ ] **Can archive software on Zenodo or Figshare to obtain a DOI**
+- [x] **Can archive software on Zenodo or Figshare to obtain a DOI**
 - [x] **Repository and paper do not focus on research *using* the software, but on the software itself**
-- [ ] **No undisclosed conflicts of interest among authors**
-- [ ] **All co-authors have agreed to the submission**
+- [x] **No undisclosed conflicts of interest among authors**
+- [x] **All co-authors have agreed to the submission**
 
 ______________________________________________________________________
 
