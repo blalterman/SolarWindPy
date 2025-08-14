@@ -1,24 +1,57 @@
-name: update-workflow-doc
+name: Update Workflow Documentation
 
 on:
   pull_request:
-    types: [opened, reopened, closed]
+    types: [opened, reopened, closed, synchronize]
+  workflow_run:
+    workflows: ["CI", "Documentation", "Security Scan"]
+    types: [completed]
 
 jobs:
   update-doc:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
       - name: Update PR references
-        run: python scripts/update_pr_references.py --pr ${{ github.event.pull_request.number }} --action ${{ github.event.action }}
+        run: |
+          if [ -f "scripts/update_pr_references.py" ]; then
+            python scripts/update_pr_references.py \
+              --pr ${{ github.event.pull_request.number }} \
+              --action ${{ github.event.action }}
+          else
+            echo "Script not found, skipping PR reference update"
+          fi
+        continue-on-error: true
+      
+      - name: Generate workflow status
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "## Workflow Status Update" > workflow-status.md
+          echo "" >> workflow-status.md
+          echo "**Workflow**: ${{ github.event.workflow_run.name }}" >> workflow-status.md
+          echo "**Status**: ${{ github.event.workflow_run.conclusion }}" >> workflow-status.md
+          echo "**Run ID**: ${{ github.event.workflow_run.id }}" >> workflow-status.md
+          echo "**Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> workflow-status.md
+      
       - name: Commit changes
         run: |
           git config user.email "action@github.com"
           git config user.name "github-actions"
           if git diff --quiet; then
-            echo "No changes"
+            echo "No changes to commit"
           else
-            git commit -am "chore: update workflow PR references"
+            git add .
+            git commit -m "chore: update workflow documentation
+            
+            - Updated PR references
+            - Generated from workflow events
+            
+            [skip ci]"
             git push
           fi

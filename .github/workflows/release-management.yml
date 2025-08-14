@@ -1,0 +1,79 @@
+name: Release Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (without v prefix, e.g., 1.0.0)'
+        required: true
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+          - prerelease
+      prerelease_suffix:
+        description: 'Prerelease suffix (rc, beta, alpha)'
+        required: false
+        default: 'rc'
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [ "${{ github.event.inputs.release_type }}" == "prerelease" ]; then
+            VERSION="${VERSION}-${{ github.event.inputs.prerelease_suffix }}1"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Will create version: $VERSION"
+      
+      - name: Update version in files
+        run: |
+          # Update version in any version files if they exist
+          if [ -f "solarwindpy/__version__.py" ]; then
+            echo "__version__ = '${{ steps.version.outputs.version }}'" > solarwindpy/__version__.py
+          fi
+      
+      - name: Generate changelog
+        run: |
+          echo "# Release Notes for v${{ steps.version.outputs.version }}" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "## What's Changed" >> RELEASE_NOTES.md
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0)..HEAD >> RELEASE_NOTES.md
+      
+      - name: Create release branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "action@github.com"
+          git checkout -b release/${{ steps.version.outputs.version }}
+          git add .
+          git commit -m "chore: prepare release ${{ steps.version.outputs.version }}" || true
+          git push origin release/${{ steps.version.outputs.version }}
+      
+      - name: Create and push tag
+        run: |
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+          echo "Created tag ${{ steps.version.outputs.tag }}"
+      
+      - name: Trigger publish workflow
+        run: |
+          echo "Tag pushed. The publish workflow will now trigger automatically."
+          echo "Monitor the Actions tab for the publish workflow status."
