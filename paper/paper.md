@@ -53,34 +53,61 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
-The package builds on well-established libraries [matplotlib, numpy, scipy, and pandas] to ensure that the dependencies are stable.
+SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff,ACE:SWICS:SSN,ACE:SWICS:FStransition].
+
+The package builds on well-established libraries including NumPy [@Harris2020; @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010; @McKinney2011; @Mckinney2013] to ensure that the dependencies are stable.
 The plotting functionality retains the mapping between timeseries and aggregated observations to enable researchers to easily extract subsets of their observations for detailed analysis.
 It also contains a submodule to map the quantities plotted to their file names, improving the mapping from the user's analysis to the saved output.
-The non-linear fitting libraries are designed for multi-step fitting in which the user performs nested regression of one variable on parameters derived from fitting other quantities.
+The non-linear fitting libraries (utilizing scipy optimize) are designed for multi-step fitting in which the user performs nested regression of one variable on parameters derived from fitting other quantities.
 Submodules for the analysis of magnetohydrodynamic turbulence parameters and kinetic instabilities are also provided.
 The `solar_activity` submodule provides the user with seamless access to solar activity indicators provided by the LASP Interactive Solar IRradiance Datacenter (LISIRD) [@LISIRD] and the Solar Information Data Center (SIDC) at the Royal Observatory of Belgium [@SIDC].
 This tool enables easy comparison of solar wind parameters across different phases of the solar cycle and different solar cycles, which is an essential component of solar wind data analysis.
+SolarWindPy currently stores data in pandas DataFrames and Timeseries objects.
+However, there is a clear separation between the two libraries such that future development could transition to using more nuanced and scientifically-targeted data structures, for example those provided by xarray [@xarray], SunPy, or AstroPy.
 
 
 # References
 
-<!--
-Cite any works or software referenced above using the [@citation-key] format.
-All references must be listed in a separate BibTeX file (paper.bib).
--->
-
-Core scientific Python libraries include NumPy [@Harris2020; @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010; @McKinney2011; @Mckinney2013]
-Related space physics packages include AstroPy [@astropy:2013; @astropy:2018; @astropy:2022], SunPy [@sunpy_community2020; @MFC+20; @Barnes2020], PlasmaPy [@plasmapy_community_2025_16747747], pySpedas [@Grimes2022], and PyTplot [@pytplot2019].
-Solar activity data sources are provided by LISIRD [@LISIRD] and the Solar Information Data Center at the Royal Observatory of Belgium [@Vanlommel2005].
-The primary functionality was developed in support of [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff,ACE:SWICS:SSN,ACE:SWICS:FStransition].
-Development tools included [@claude_code_2024].
+[@astropy:2013]
+[@astropy:2018]
+[@astropy:2022]
+[@sunpy_community2020]
+[@MFC+20]
+[@Barnes2020]
+[@plasmapy_community_2025_16747747]
+[@niehof2022spacepy]
+[@spacepy_code]
+[@pysatcode]
+[@Stoneback2018]
+[@Stoneback2023]
+[@Grimes2022]
+[@pytplot2019]
+[@Alterman2018]
+[@Wind:SWE:Wk]
+[@Wind:SWE:ahe:xhel]
+[@Wind:SWE:ahe:dnn]
+[@Wind:SWE:ahe:phase]
+[@Wind:SWE:ahe:shutoff]
+[@ACE:SWICS:SSN]
+[@ACE:SWICS:FStransition]
+[@Harris2020]
+[@VanderWalt2011]
+[@scipy]
+[@Hunter2007]
+[@Mckinney2010]
+[@McKinney2011]
+[@Mckinney2013]
+[@LISIRD]
+[@SIDC]
+[@Vanlommel2005]
+[@claude_code_2024]
+[@xarray]
 
 # Acknowledgements
 
 Recognize anyone who helped or contributed but does not meet authorship criteria (funders, contributors, mentors, etc.).
 The author acknowledges NASA contrat NNX14AR78G and grants 80NSSC22K1011, 80NSSC22K0645, and 80NSSC20K1844.
 The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-The primary functionality of this software (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [Alterman2018,Wind:SWE:Wk,Wind:SWE:ahe:xhel,Wind:SWE:ahe:dnn,Wind:SWE:ahe:phase,Wind:SWE:ahe:herald].
-[Claude-code] was used to develop tests for the other submodules, write missing docstrings, and create the deployment workflow (including readthedocs).
+Claude-code [@claude_code_2024] was used to develop tests for submodules outside of `core`, write missing docstrings, and create the deployment workflow (including readthedocs).
 Code written by Claude-code was reviewed and verified by the author.
 
