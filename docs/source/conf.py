@@ -41,11 +41,16 @@ extensions = [
 
 bibtex_bibfiles = ['solarwindpy.bib']
 
+# -- Templates configuration ------------------------------------------------
+
+templates_path = ['_templates']
+
 # -- Autosummary configuration ----------------------------------------------
 
 # Generate separate pages for everything
 autosummary_generate = True
 autosummary_imported_members = False
+autosummary_generate_overwrite = True  # Allow regeneration with custom templates
 
 # -- Autodoc configuration --------------------------------------------------
 

@@ -12,8 +12,14 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-html:
+html: api
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+api:
+	@echo "Generating API documentation..."
+	@sphinx-apidoc -f -o $(SOURCEDIR)/api ../../solarwindpy/solarwindpy --separate
+	@echo "Adding :no-index: to module files..."
+	@python add_no_index.py
 
 clean:
 	@rm -rf "$(BUILDDIR)"
