@@ -3,6 +3,7 @@ solarwindpy.solar\_activity package
 
 .. automodule:: solarwindpy.solar_activity
    :members:
+   :no-index:
    :show-inheritance:
    :undoc-members:
 

@@ -1,10 +1,25 @@
 solarwindpy.core package
 ========================
 
-.. automodule:: solarwindpy.core
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. currentmodule:: solarwindpy.core
+
+Classes
+-------
+
+.. autosummary::
+   :toctree: .
+   :nosignatures:
+   
+   Base
+   Core
+   Vector
+   Tensor
+   Ion
+   Plasma
+   Spacecraft
+   Units
+   Constants
+   AlfvenicTurbulence
 
 Submodules
 ----------

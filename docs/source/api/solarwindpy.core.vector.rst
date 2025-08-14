@@ -1,14 +1,50 @@
-solarwindpy.core.vector module
-==============================
+﻿solarwindpy.core.Vector
+=======================
 
-.. automodule:: solarwindpy.core.vector
+.. currentmodule:: solarwindpy.core
 
-Classes
--------
+.. autoclass:: Vector
 
-.. autosummary::
-   :toctree: .
-   :nosignatures:
+   
+   .. automethod:: __init__
 
-   Vector
-   BField
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Vector.__init__
+      ~Vector.cos_theta
+      ~Vector.head
+      ~Vector.mi_tuples
+      ~Vector.project
+      ~Vector.set_data
+      ~Vector.tail
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Vector.cartesian
+      ~Vector.colat
+      ~Vector.colatitude
+      ~Vector.constants
+      ~Vector.data
+      ~Vector.lat
+      ~Vector.latitude
+      ~Vector.logger
+      ~Vector.lon
+      ~Vector.longitude
+      ~Vector.mag
+      ~Vector.magnitude
+      ~Vector.r
+      ~Vector.rho
+      ~Vector.unit_vector
+      ~Vector.units
+      ~Vector.uv
+   
+   

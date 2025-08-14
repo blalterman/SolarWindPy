@@ -1,10 +1,17 @@
 solarwindpy.plotting package
 ============================
 
-.. automodule:: solarwindpy.plotting
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. currentmodule:: solarwindpy.plotting
+
+Functions
+---------
+
+.. autosummary::
+   :toctree: .
+   :nosignatures:
+   
+   subplots
+   save
 
 Subpackages
 -----------

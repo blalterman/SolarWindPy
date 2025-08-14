@@ -3,6 +3,7 @@ solarwindpy.solar\_activity.sunspot\_number package
 
 .. automodule:: solarwindpy.solar_activity.sunspot_number
    :members:
+   :no-index:
    :show-inheritance:
    :undoc-members:
 

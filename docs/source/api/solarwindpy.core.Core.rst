@@ -1,9 +1,9 @@
-﻿solarwindpy.core.Base
+﻿solarwindpy.core.Core
 =====================
 
 .. currentmodule:: solarwindpy.core
 
-.. autoclass:: Base
+.. autoclass:: Core
 
    
    .. automethod:: __init__
@@ -13,11 +13,7 @@
 
    .. autosummary::
    
-      ~Base.__init__
-      ~Base.head
-      ~Base.mi_tuples
-      ~Base.set_data
-      ~Base.tail
+      ~Core.__init__
    
    
 
@@ -27,9 +23,9 @@
 
    .. autosummary::
    
-      ~Base.constants
-      ~Base.data
-      ~Base.logger
-      ~Base.units
+      ~Core.constants
+      ~Core.data
+      ~Core.logger
+      ~Core.units
    
    

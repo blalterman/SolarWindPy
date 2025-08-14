@@ -3,6 +3,7 @@ solarwindpy package
 
 .. automodule:: solarwindpy
    :members:
+   :no-index:
    :show-inheritance:
    :undoc-members:
 

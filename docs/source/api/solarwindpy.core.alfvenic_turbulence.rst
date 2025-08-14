@@ -5,3 +5,4 @@ solarwindpy.core.alfvenic\_turbulence module
    :members:
    :show-inheritance:
    :undoc-members:
+   :no-index:

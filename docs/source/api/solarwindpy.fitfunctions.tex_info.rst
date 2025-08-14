@@ -3,5 +3,6 @@ solarwindpy.fitfunctions.tex\_info module
 
 .. automodule:: solarwindpy.fitfunctions.tex_info
    :members:
+   :no-index:
    :show-inheritance:
    :undoc-members:

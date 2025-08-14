@@ -5,3 +5,4 @@ solarwindpy.core.units\_constants module
    :members:
    :show-inheritance:
    :undoc-members:
+   :no-index:

@@ -1,10 +1,7 @@
 solarwindpy.fitfunctions package
 ================================
 
-.. automodule:: solarwindpy.fitfunctions
-   :members:
-   :show-inheritance:
-   :undoc-members:
+This package contains fitting functions and utilities for scientific data analysis.
 
 Submodules
 ----------

@@ -3,6 +3,7 @@ solarwindpy.instabilities package
 
 .. automodule:: solarwindpy.instabilities
    :members:
+   :no-index:
    :show-inheritance:
    :undoc-members:
 
