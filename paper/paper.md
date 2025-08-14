@@ -19,8 +19,6 @@ bibliography: paper.bib
 
 # Summary
 
-A brief, non-specialist summary describing what your software does, the scientific problem it addresses, and its major features and capabilities. (Approx. 2-4 sentences.)
-
 The region of space within the Sun's envelope of influence is called the heliosphere.
 The field of heliophysics starts in the solar interior and extends out to the very local interstellar medium, just beyond the heliosphere.
 The solar wind is a stream of charged particles that continuously flows away from the Sun, carrying, mass, energy, and momentum along with an embedded magnetic field.
@@ -31,9 +29,6 @@ This software provides a unified framework for analyzing the solar wind and spac
 
 
 # Statement of Need
-
-Clearly state the purpose of the software and the gap it fills in the current ecosystem. Explain why this package is needed, who it is for, and how it differs from or improves on existing solutions.
-
 
 There is a growing ecosystem of python libraries to enable astrophysics, solar physics, plasma physics, and space physics.
 The table below cites key examples.
@@ -54,6 +49,7 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
 SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff,ACE:SWICS:SSN,ACE:SWICS:FStransition].
+It contains a well-developed test suite, which supports future development and provides quality assurance.
 
 The package builds on well-established libraries including NumPy [@Harris2020; @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010; @McKinney2011; @Mckinney2013] to ensure that the dependencies are stable.
 The plotting functionality retains the mapping between timeseries and aggregated observations to enable researchers to easily extract subsets of their observations for detailed analysis.
