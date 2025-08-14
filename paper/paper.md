@@ -76,6 +76,7 @@ SpacePy
 Pysat
 pySpedas
 PyTPlot
+
 matplotlib
 numpy
 scipy
@@ -87,6 +88,7 @@ Wind:SWE:ahe:xhel
 Wind:SWE:ahe:dnn
 Wind:SWE:ahe:phase
 Wind:SWE:ahe:herald
+Wind:SWE:Wk
 Claude-code
 
 # Acknowledgements
@@ -94,7 +96,7 @@ Claude-code
 Recognize anyone who helped or contributed but does not meet authorship criteria (funders, contributors, mentors, etc.).
 The author acknowledges NASA contrat NNX14AR78G and grants 80NSSC22K1011, 80NSSC22K0645, and 80NSSC20K1844.
 The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-The primary functionality of this software (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [Alterman2018,Wind:SWE:ahe:xhel,Wind:SWE:ahe:dnn,Wind:SWE:ahe:phase,Wind:SWE:ahe:herald].
+The primary functionality of this software (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [Alterman2018,Wind:SWE:Wk,Wind:SWE:ahe:xhel,Wind:SWE:ahe:dnn,Wind:SWE:ahe:phase,Wind:SWE:ahe:herald].
 [Claude-code] was used to develop tests for the other submodules, write missing docstrings, and create the deployment workflow (including readthedocs).
 Code written by Claude-code was reviewed and verified by the author.
 
