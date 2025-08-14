@@ -1,0 +1,40 @@
+name: Performance Benchmark
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install pytest-benchmark memory_profiler
+          pip install -e .
+      
+      - name: Run benchmarks
+        run: |
+          pytest tests/ -v --benchmark-only --benchmark-json=benchmark.json
+        continue-on-error: true
+      
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'pytest'
+          output-file-path: benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'  # Alert if 50% slower
+          fail-on-alert: false
