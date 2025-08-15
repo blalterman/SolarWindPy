@@ -11,7 +11,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        # Exclude problematic combinations if needed
+        exclude:
+          # Exclude Windows + Python 3.8 if there are known issues
+          # - os: windows-latest
+          #   python-version: '3.8'
       fail-fast: false  # Continue testing other combinations on failure
     
     runs-on: ${{ matrix.os }}
@@ -65,7 +70,7 @@ jobs:
       
       # Upload coverage reports
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
@@ -75,7 +80,7 @@ jobs:
       
       # Upload coverage artifacts
       - name: Upload coverage artifacts
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-${{ github.run_id }}
