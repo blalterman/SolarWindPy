@@ -30,8 +30,10 @@ jobs:
       
       - name: Run Bandit security scan
         run: |
-          bandit -r solarwindpy -ll -f json -o bandit-report.json
-          bandit -r solarwindpy -ll
+          mkdir -p security-results
+          bandit -r solarwindpy -ll -f json -o security-results/bandit-report.json
+          bandit -r solarwindpy -ll -f txt -o security-results/bandit-report.txt
+          bandit -r solarwindpy -ll  # Display to console
         continue-on-error: true
       
       - name: Run Safety check
@@ -39,24 +41,24 @@ jobs:
           # Install pytables separately with verbose output for debugging
           pip install --verbose tables
           pip install -r requirements-dev.txt
-          safety check --json > safety-report.json
-          safety check
+          safety check --json > security-results/safety-report.json
+          safety check --output text > security-results/safety-report.txt
+          safety check  # Display to console
         continue-on-error: true
       
       - name: Run pip-audit
         run: |
-          pip-audit --requirement requirements-dev.txt --format json > pip-audit-report.json
-          pip-audit --requirement requirements-dev.txt
+          pip-audit --requirement requirements-dev.txt --format json > security-results/pip-audit-report.json
+          pip-audit --requirement requirements-dev.txt --format text > security-results/pip-audit-report.txt
+          pip-audit --requirement requirements-dev.txt  # Display to console
         continue-on-error: true
       
       - name: Upload security reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-reports-${{ github.run_id }}
-          path: |
-            bandit-report.json
-            safety-report.json
-            pip-audit-report.json
+          path: security-results/
           retention-days: 90
       
       - name: Check for critical vulnerabilities
@@ -70,7 +72,7 @@ jobs:
           
           # Check bandit report
           try:
-              with open('bandit-report.json') as f:
+              with open('security-results/bandit-report.json') as f:
                   bandit = json.load(f)
                   high_severity = [r for r in bandit.get('results', []) 
                                    if r.get('issue_severity') == 'HIGH']

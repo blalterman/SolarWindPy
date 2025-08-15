@@ -33,14 +33,27 @@ jobs:
       
       - name: Run benchmarks
         run: |
-          pytest tests/ -v --benchmark-only --benchmark-json=benchmark.json
+          mkdir -p benchmark-results
+          pytest tests/ -v \
+                 --benchmark-only \
+                 --benchmark-json=benchmark-results/benchmark.json \
+                 --benchmark-histogram=benchmark-results/histogram \
+                 --benchmark-storage=benchmark-results/storage
         continue-on-error: true
+      
+      - name: Upload benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.run_id }}
+          path: benchmark-results/
+          retention-days: 90
       
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
           tool: 'pytest'
-          output-file-path: benchmark.json
+          output-file-path: benchmark-results/benchmark.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           comment-on-alert: true

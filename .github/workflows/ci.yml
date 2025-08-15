@@ -62,8 +62,16 @@ jobs:
       
       - name: Run tests with coverage
         run: |
-          pip install pytest-cov
-          pytest --cov=solarwindpy --cov-report=term --cov-report=xml --cov-report=html
+          pip install pytest-cov pytest-xdist pytest-html
+          mkdir -p test-results
+          pytest --cov=solarwindpy \
+                 --cov-report=term \
+                 --cov-report=xml \
+                 --cov-report=html \
+                 --junitxml=pytest-report.xml \
+                 --html=test-results/report.html \
+                 --self-contained-html \
+                 -v
       
       - name: Check for circular imports
         run: pytest tests/test_circular_imports.py -v
@@ -78,11 +86,26 @@ jobs:
           verbose: true
         continue-on-error: true  # Don't fail if token not configured
       
-      # Upload coverage artifacts
+      # Upload coverage artifacts (enhanced for debugging)
       - name: Upload coverage artifacts
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-${{ github.run_id }}
-          path: htmlcov/
+          path: |
+            htmlcov/
+            coverage.xml
+            .coverage
           retention-days: 90
+      
+      # Upload test results for all combinations (public repo = unlimited storage)
+      - name: Upload test results
+        if: always()  # Upload even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}-${{ github.run_id }}
+          path: |
+            test-results/
+            pytest-report.xml
+            .pytest_cache/
+          retention-days: 30

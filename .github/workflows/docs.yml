@@ -55,15 +55,24 @@ jobs:
           make html
       
       - name: Upload documentation artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: documentation-${{ github.run_id }}
-          path: docs/build/html
+          path: |
+            docs/build/html/
+            docs/build/doctrees/
+            docs/build/coverage/
+            docs/build/linkcheck/
           retention-days: 90
       
       - name: Check documentation coverage
         run: |
+          mkdir -p docs/build/coverage
           python -m sphinx.ext.coverage -d docs/build/doctrees -o docs/build/coverage docs
+          # Generate a summary report
+          echo "Documentation Coverage Summary:" > docs/build/coverage/summary.txt
+          find docs/build/coverage -name "*.txt" -exec cat {} \; >> docs/build/coverage/summary.txt
         continue-on-error: true
 
   deploy:
