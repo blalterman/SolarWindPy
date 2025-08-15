@@ -47,11 +47,11 @@ jobs:
           make html
       
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: documentation
+          name: documentation-${{ github.run_id }}
           path: docs/build/html
-          retention-days: 30
+          retention-days: 90
       
       - name: Check documentation coverage
         run: |

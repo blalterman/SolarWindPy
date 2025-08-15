@@ -42,9 +42,9 @@ jobs:
         continue-on-error: true
       
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: security-reports-${{ github.run_id }}
           path: |
             bandit-report.json
             safety-report.json
