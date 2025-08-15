@@ -70,10 +70,12 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - DateTime indices named "Epoch"
 - MultiIndex access via level names: `df.xs('v', level='M')`
 
-### Testing (TestEngineer Agent)
-- **Coverage**: ≥95% required
-- **Structure**: `/tests/` mirrors source structure  
-- **Quality**: Edge cases, physics constraints, numerical stability
+### Testing (Automated + TestEngineer Agent)
+- **Coverage**: ≥95% required (enforced by pre-commit hook)
+- **Structure**: `/tests/` mirrors source structure
+- **Automation**: Smart test execution via `.claude/hooks/test-runner.sh`
+- **Quality**: Physics constraints, numerical stability, scientific validation
+- **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
 
 ### Git Workflow (Automated via Hooks)
 - **Branches**: `plan/<name>` for planning, `feature/<name>` for implementation
@@ -91,9 +93,15 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 ## Quick Commands
 
 ```bash
+# Testing (enhanced automation):
+.claude/hooks/test-runner.sh --changed    # Test changed files
+.claude/hooks/test-runner.sh --physics    # Physics validation tests
+.claude/hooks/coverage-monitor.py         # Detailed coverage analysis
+.claude/scripts/generate-test.py          # Generate test scaffolding
+
 # Quality checks (automated via hooks):
-pytest -q              # Run tests
-black solarwindpy/     # Format code  
+pytest -q              # Run tests  
+black solarwindpy/     # Format code
 flake8                 # Check linting
 
 # Recipe management:
@@ -110,6 +118,15 @@ python scripts/update_conda_recipe.py
 "Use PhysicsValidator to verify thermal speed calculations"
 "Use DataFrameArchitect to optimize MultiIndex operations"
 "Use PlottingEngineer to create publication-quality figures"
+"Use TestEngineer to design physics-specific test strategies"
 ```
 
-The hook system handles routine validation automatically, while agents provide domain expertise for complex tasks. This ensures both efficiency and quality throughout the development process.
+## Testing Workflow Integration
+
+The testing system combines automation with domain expertise:
+- **Hooks**: Handle routine execution, coverage, and validation automatically
+- **TestEngineer Agent**: Provides scientific testing strategies and complex test design
+- **Templates**: Enable consistent test patterns across physics modules
+- **Smart Tools**: Context-aware test execution and coverage monitoring
+
+This ensures both efficiency and scientific rigor throughout the development process.

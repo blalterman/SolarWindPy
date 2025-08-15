@@ -75,6 +75,25 @@
         "command": ".claude/hooks/create-compaction.py",
         "blocking": true
       }]
+    },
+    "PreCommit": {
+      "hooks": [{
+        "command": ".claude/hooks/pre-commit-tests.sh",
+        "blocking": true
+      }]
+    },
+    "TestSuggestion": {
+      "matcher": {"prompt": "*test*|*coverage*"},
+      "hooks": [{
+        "command": "echo '🧪 Use .claude/hooks/test-runner.sh for smart test execution'",
+        "blocking": false
+      }, {
+        "command": "echo '📊 Use .claude/hooks/coverage-monitor.py for detailed coverage analysis'", 
+        "blocking": false
+      }, {
+        "command": "echo '🛠️ Use .claude/scripts/generate-test.py for test scaffolding'",
+        "blocking": false
+      }]
     }
   }
 }
