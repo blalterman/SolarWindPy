@@ -9,20 +9,31 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 ### 1. CI (ci.yml) ✅ CRITICAL
 **Purpose**: Core continuous integration for code quality and testing  
 **Triggers**: All pushes and PRs to any branch  
-**Matrix Testing**: Python 3.8-3.11 on Ubuntu, macOS, Windows (12 combinations)  
+**Matrix Testing**: Python 3.8-3.12 on Ubuntu, macOS, Windows (15 combinations)  
 **Required for Merge**: Yes (branch protection enabled)
 
 **Features**:
 - Matrix testing across multiple Python versions and operating systems
+- Automatic system dependency installation (HDF5 libraries on Linux)
+- Enhanced pytables installation with verbose debugging
 - Dependency caching for faster builds
 - Code linting with flake8
 - Documentation linting with doc8
-- Test execution with pytest and coverage reporting
+- Test execution with pytest and comprehensive HTML reporting
+- Coverage reporting with multiple formats (HTML, XML, raw)
 - Circular import validation
 - Coverage upload to Codecov (when token available)
-- Coverage artifacts for review
+- Enhanced artifacts: test results for all matrix combinations (leverages unlimited public repo storage)
+- JUnit XML output for external integrations
 
-**Success Criteria**: All matrix combinations must pass
+**Success Criteria**: All 15 matrix combinations must pass
+
+**Recent Enhancements** (August 2025):
+- ✅ Fixed deprecated upload-artifact@v3 → v4 (resolves workflow blocking)
+- ✅ Added system dependency management for pytables (HDF5 libraries)
+- ✅ Expanded Python support to include 3.12 (Ubuntu 24.04 default)
+- ✅ Enhanced artifact management with comprehensive debugging data
+- ✅ Leveraged unlimited public repository storage for extensive test artifacts
 
 ### 2. Security Scan (security.yml) ⚠️ SECURITY
 **Purpose**: Automated security vulnerability scanning  
@@ -34,9 +45,11 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 - Bandit security scan for Python code vulnerabilities
 - Safety check for dependency vulnerabilities (CVE database)
 - pip-audit for additional dependency security scanning
-- Security report artifacts (90-day retention)
+- Enhanced security report artifacts (90-day retention)
+- Multiple report formats (JSON for automation, text for humans)
+- Organized report structure in `security-results/` directory
 - Critical vulnerability detection with build failure
-- JSON report generation for automated analysis
+- Automatic system dependency installation for complete scans
 
 **Success Criteria**: No high-severity vulnerabilities detected
 
@@ -48,12 +61,14 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Features**:
 - Documentation build testing on all branches
-- Deployment to GitHub Pages from master
+- Deployment to GitHub Pages from master (Python 3.12)
+- Automatic system dependency installation for complete builds
 - Dependency caching for faster builds
-- Link checking with sphinx-link-checker
-- Documentation coverage reporting
-- Artifact upload for built documentation
+- Link checking with sphinx-link-checker (non-blocking)
+- Documentation coverage reporting with summary generation
+- Enhanced artifact uploads: HTML docs, doctrees, coverage, linkcheck results
 - Enhanced Sphinx options with warning detection
+- 90-day artifact retention for historical analysis
 
 **Success Criteria**: Documentation builds without errors
 
@@ -81,7 +96,7 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 **Applies to**: master, main, develop branches  
 
 **Protection Rules**:
-- Requires CI success (Ubuntu 3.11 and 3.8)
+- Requires CI success (Ubuntu 3.12 and 3.8)
 - Requires documentation build success
 - Requires security scan completion
 - Requires 1 approving review
@@ -125,11 +140,13 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 **Alert Threshold**: 150% (50% slowdown)  
 
 **Features**:
-- pytest-benchmark integration
+- pytest-benchmark integration with histogram generation
 - Memory profiling with memory_profiler
-- Historical performance tracking
-- Automated alerts on regressions
+- Enhanced benchmark artifacts: JSON data, histograms, storage database
+- Historical performance tracking with 90-day retention
+- Automated alerts on regressions (50% slowdown threshold)
 - Non-blocking alerts (continue-on-error)
+- Automatic system dependency installation (Python 3.12)
 
 **Success Criteria**: No significant performance regressions
 
@@ -159,6 +176,29 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 - Automatic documentation updates
 
 **Success Criteria**: Documentation stays current
+
+## Public Repository Benefits
+
+SolarWindPy benefits from being a **public repository** on GitHub, which provides:
+
+### Unlimited Resources
+- ✅ **Unlimited GitHub Actions minutes** on standard runners
+- ✅ **Unlimited artifact storage** (leveraged for comprehensive debugging)
+- ✅ **Parallel job execution** without cost constraints (15 CI matrix combinations)
+- ✅ **90-day maximum artifact retention** for all workflows
+
+### Enhanced Capabilities
+- **Comprehensive Testing**: Full matrix testing across 5 Python versions × 3 operating systems
+- **Rich Artifacts**: Test results, coverage data, security reports, documentation for all runs
+- **Historical Analysis**: 90-day retention enables trend analysis and regression tracking
+- **Debugging Support**: Extensive artifacts for troubleshooting failures across all environments
+
+### Cost Optimization Strategy
+Since resources are unlimited for public repositories, workflows are optimized for:
+- **Quality over efficiency**: Comprehensive testing rather than minimal coverage
+- **Debugging support**: Rich artifact generation for thorough analysis
+- **Historical tracking**: Long retention periods for trend analysis
+- **Developer experience**: Fast feedback through parallel execution
 
 ## Required Repository Secrets
 
@@ -190,7 +230,7 @@ graph LR
 When branch protection is enabled for master:
 
 1. **Required Status Checks**:
-   - CI (ubuntu-latest, 3.11)
+   - CI (ubuntu-latest, 3.12)
    - CI (ubuntu-latest, 3.8)
    - Documentation / build
    - Security Scan / security
@@ -224,6 +264,13 @@ When branch protection is enabled for master:
 1. **Matrix job failures**: Check specific OS/Python combination logs
 2. **Dependency issues**: Clear cache, check requirements-dev.txt
 3. **Test failures**: Run tests locally, check for platform-specific issues
+4. **pytables installation failures**: 
+   - **Error**: "Failed building wheel for tables" or "HDF5 library not found"
+   - **Solution**: Workflow automatically installs `libhdf5-dev pkg-config` on Linux
+   - **Local fix**: `sudo apt-get install libhdf5-dev pkg-config` (Ubuntu/Debian)
+5. **Deprecated action warnings**:
+   - **Error**: "This request has been automatically failed because it uses a deprecated version"
+   - **Solution**: All workflows updated to use actions/upload-artifact@v4 (August 2025)
 
 #### Security Scan Failures
 1. **High severity issues**: Review Bandit report, address vulnerabilities
