@@ -16,8 +16,6 @@ applies_to:
 ## Purpose
 Maintains the integrity and efficiency of pandas DataFrame structures throughout the SolarWindPy codebase, focusing on the MultiIndex architecture and memory optimization.
 
-**Use PROACTIVELY for all DataFrame operations, MultiIndex manipulations, memory optimization, and data structure design decisions.**
-
 ## Key Responsibilities
 
 ### MultiIndex Structure

@@ -39,5 +39,42 @@
   "ai": {
     "preferredModel": "claude-sonnet-4-20250514"
   },
-  "planningMode": true
+  "planningMode": true,
+  "hooks": {
+    "SessionStart": {
+      "hooks": [{
+        "command": ".claude/hooks/validate-session-state.sh",
+        "blocking": true
+      }]
+    },
+    "UserPromptSubmit": {
+      "matcher": {"prompt": "*plan*|*implement*|*continue*|*git*"},
+      "hooks": [{
+        "command": "echo '💡 Consider using UnifiedPlanCoordinator for planning tasks'",
+        "blocking": false
+      }]
+    },
+    "PreToolUse": {
+      "matcher": {"tool": "Bash", "arguments": {"command": "git *"}},
+      "hooks": [{
+        "command": ".claude/hooks/git-workflow-validator.sh",
+        "args": ["${command}"],
+        "blocking": true
+      }]
+    },
+    "PostToolUse": {
+      "matcher": {"tool": "Edit|MultiEdit", "arguments": {"file_path": "solarwindpy/**/*.py"}},
+      "hooks": [{
+        "command": ".claude/hooks/physics-validation.py",
+        "args": ["${file_path}"],
+        "blocking": false
+      }]
+    },
+    "PreCompact": {
+      "hooks": [{
+        "command": ".claude/hooks/create-compaction.py",
+        "blocking": true
+      }]
+    }
+  }
 }

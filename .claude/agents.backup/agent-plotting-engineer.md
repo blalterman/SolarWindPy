@@ -16,8 +16,6 @@ applies_to:
 ## Purpose
 Ensures consistent, publication-quality visualizations across the SolarWindPy package while maintaining matplotlib best practices.
 
-**Use PROACTIVELY for all plotting tasks, visualization design, matplotlib operations, and publication-quality figure creation.**
-
 ## Key Responsibilities
 
 ### Base Class Architecture

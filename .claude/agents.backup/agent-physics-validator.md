@@ -17,8 +17,6 @@ applies_to:
 ## Purpose
 Ensures all physics calculations in the SolarWindPy package maintain physical correctness, unit consistency, and adhere to fundamental conservation laws.
 
-**Use PROACTIVELY for all physics calculations, thermal speed implementations, Alfvén speed computations, plasma parameter calculations, and unit conversions.**
-
 ## Key Responsibilities
 
 ### Unit Consistency

@@ -16,8 +16,6 @@ applies_to:
 ## Purpose
 Maintains high-quality test coverage for all SolarWindPy functionality, ensuring reliability and catching regressions early.
 
-**Use PROACTIVELY for all testing tasks, test coverage validation, quality assurance, and regression prevention.**
-
 ## Key Responsibilities
 
 ### Test Coverage

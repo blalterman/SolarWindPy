@@ -2,24 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Agent-Driven Development Protocol
+## Development Workflow
 
-### Primary Workflow
-**ALL development work should use agents:**
+### Primary Workflow - Enhanced Hook System
+Use `Task` tool with specialized agents for domain work:
+- **UnifiedPlanCoordinator**: All planning, implementation, and status coordination
+- **PhysicsValidator**: Physics correctness and unit validation
+- **DataFrameArchitect**: MultiIndex data structure management
+- **NumericalStabilityGuard**: Numerical validation and edge cases
+- **PlottingEngineer**: Visualization and matplotlib operations
+- **FitFunctionSpecialist**: Curve fitting and statistical analysis
+- **TestEngineer**: Test coverage and quality assurance
 
-1. **Complex Tasks**: Use `Task` tool with PlanManager → creates plan → PlanImplementer executes
-2. **Git Operations**: GitIntegration agent handles all branch/commit operations  
-3. **Testing**: TestEngineer agent ensures comprehensive coverage
-4. **Domain Work**: Use specialized agents (PhysicsValidator, PlottingEngineer, etc.)
+### Automated Validation
+Hook system provides automatic validation:
+- **Session startup**: Branch validation and context loading
+- **Git operations**: Workflow enforcement and branch protection
+- **Physics edits**: Unit consistency and constraint checking
+- **Token limits**: Automatic compaction and state preservation
 
-### Agent Selection
-- **Check**: @.claude/agents/agents-index.md for complete agent catalog
-- **Coordinate**: Agents handle their domains; avoid manual operations  
-- **Escalate**: Use CompactionAgent for session continuity
+## Environment Setup
 
-## Development Commands
-
-### Environment Setup
 ```bash
 # Create and activate conda environment:
 conda env create -f solarwindpy-20250403.yml
@@ -33,96 +36,80 @@ conda activate solarwindpy-dev
 pip install -e .
 ```
 
-### Quality Commands (Agent-Coordinated)
-```bash
-# These should normally be handled by agents:
-pytest -q              # TestEngineer validates
-black solarwindpy/     # PerformanceOptimizer formats  
-flake8                 # TestEngineer checks
-```
+## Core Architecture
 
-### Conda Recipe Management
-```bash
-# Update recipe when version or dependencies change
-python scripts/update_conda_recipe.py
-```
+### Data Model
+The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` columns ("M", "C", "S"):
+- **M**: Measurement type (n, v, w, b, etc.)
+- **C**: Component (x, y, z for vectors, empty for scalars)  
+- **S**: Species (p1, p2, a, etc., empty for magnetic field)
 
-## Architecture Overview
-
-### Core Data Model
-The package uses a hierarchical data structure centered around `pandas.DataFrame` with three-level `MultiIndex` columns labeled ("M", "C", "S") for measurement, component, and species:
-- **Plasma** (`core/plasma.py`): Central container holding ions, magnetic field, and spacecraft data
+### Key Classes
+- **Plasma** (`core/plasma.py`): Central container for ions, magnetic field, spacecraft data
 - **Ion** (`core/ions.py`): Individual ion species with moments and properties
-- **Base** (`core/base.py`): Abstract base providing logging, units, and constants to all objects
-- **Spacecraft** (`core/spacecraft.py`): Trajectory and velocity information
+- **Base** (`core/base.py`): Abstract base providing logging, units, constants
 
 ### Module Organization
-- `core/`: Fundamental physics classes (plasma, ions, vectors, tensors, spacecraft)
-- `fitfunctions/`: Data fitting tools with abstract `FitFunction` base class
-- `plotting/`: Visualization tools including histograms, scatter plots, and specialized labels
-- `solar_activity/`: Solar indices tracking (LISIRD interface, sunspot numbers)
+- `core/`: Physics classes (plasma, ions, vectors, tensors, spacecraft)
+- `fitfunctions/`: Data fitting with abstract `FitFunction` base class
+- `plotting/`: Visualization tools and specialized labels
 - `instabilities/`: Plasma instability calculations
-- `tools/`: Utility functions
+- `tools/`: Utility functions including `units_constants`
 
-### Data Access Patterns
-- Plasma objects provide convenient attribute access: `plasma.a` returns alpha particle Ion
-- All data stored in DataFrames with datetime indices (typically "Epoch")
-- Heavy use of DataFrame views via `.xs()` to minimize memory usage
+## Development Standards
 
-## Key Development Patterns
+### Physics Rules (Automated via Hooks)
+- **Units**: SI internally, convert only for display
+- **Thermal speed**: mw² = 2kT convention
+- **Missing data**: NaN (never 0 or -999)
+- **Time series**: Maintain chronological order
+- **Alfvén speed**: V_A = B/√(μ₀ρ) with ion composition
 
-### Testing Strategy  
-**Use TestEngineer agent** - maintains `/tests/` structure, ≥95% coverage, fixtures
-See @.claude/agents/agent-test-engineer.md for testing protocols
+### Data Patterns (DataFrameArchitect Agent)
+- Use `.xs()` for DataFrame views, not copies
+- DateTime indices named "Epoch"
+- MultiIndex access via level names: `df.xs('v', level='M')`
 
-### Documentation
-**Use DocumentationMaintainer agent** - NumPy docstrings, Sphinx docs, examples
+### Testing (TestEngineer Agent)
+- **Coverage**: ≥95% required
+- **Structure**: `/tests/` mirrors source structure  
+- **Quality**: Edge cases, physics constraints, numerical stability
 
-### Git Operations
-**Use GitIntegration agent** - `plan/` and `feature/` branch management, commit tracking
-
-### Physics and Data Processing Rules
-- Preserve SI units internally, convert only for display
-- Missing data indicated by NaN, not zero or -999
-- Time series must maintain chronological order
-- Quality flags carried through analysis pipeline
-- Instability thresholds depend on plasma beta and anisotropy
-
-## Special Considerations
-
-### Physical Units
-- The `units_constants` module provides conversion factors and physical constants
-- Thermal speeds assume mw² = 2kT
-- Careful handling of unit conversions throughout calculations
-
-### Performance
-- Uses numba for performance-critical calculations
-- Leverages pandas/numpy vectorization where possible
-- Memory optimization through DataFrame views rather than copies
+### Git Workflow (Automated via Hooks)
+- **Branches**: `plan/<name>` for planning, `feature/<name>` for implementation
+- **Protection**: No direct master commits (enforced by hooks)
+- **Commits**: Conventional format with physics validation
+- **Quality**: Tests pass before commits (automated)
 
 ## Common Aliases
 
-The package provides convenient aliases in the main namespace:
 - `swp.Plasma` → `solarwindpy.core.plasma.Plasma`
 - `swp.pp` → `solarwindpy.plotting`
 - `swp.sa` → `solarwindpy.solar_activity`
 - `swp.sc` → `solarwindpy.spacecraft`
-- `swp.at` → `solarwindpy.alfvenic_turbulence`
 
-### Commit Standards
-Follow Conventional Commits format:
-- `feat(module):` for new features
-- `fix(module):` for bug fixes
-- `test(module):` for test additions/changes
-- `docs:` for documentation updates
-- Reference issues when applicable
+## Quick Commands
 
-## Current Status and Context
+```bash
+# Quality checks (automated via hooks):
+pytest -q              # Run tests
+black solarwindpy/     # Format code  
+flake8                 # Check linting
 
-For current development priorities and agent coordination:
-@claude_session_state.md
-@.claude/agents/agents-index.md
+# Recipe management:
+python scripts/update_conda_recipe.py
+```
 
-- CLAUDE.md
-- .claude/agents/agents-index.md
-- @claude_session_state.md
+## Agent Usage Examples
+
+```python
+# Planning and implementation
+"Use UnifiedPlanCoordinator to create plan for dark mode implementation"
+
+# Domain-specific work  
+"Use PhysicsValidator to verify thermal speed calculations"
+"Use DataFrameArchitect to optimize MultiIndex operations"
+"Use PlottingEngineer to create publication-quality figures"
+```
+
+The hook system handles routine validation automatically, while agents provide domain expertise for complex tasks. This ensures both efficiency and quality throughout the development process.

@@ -16,8 +16,6 @@ applies_to:
 ## Purpose
 Ensures robust and accurate curve fitting functionality for analyzing solar wind data patterns, distributions, and trends.
 
-**Use PROACTIVELY for all curve fitting tasks, optimization problems, distribution analysis, and statistical modeling.**
-
 ## Key Responsibilities
 
 ### Base Class Compliance

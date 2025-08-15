@@ -18,8 +18,6 @@ applies_to:
 ## Purpose
 Ensures numerical stability and prevents computational errors in all mathematical operations throughout the SolarWindPy package.
 
-**Use PROACTIVELY for all numerical computations, curve fitting algorithms, instability calculations, and edge case handling.**
-
 ## Key Responsibilities
 
 ### Overflow/Underflow Prevention
