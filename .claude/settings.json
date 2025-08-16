@@ -20,7 +20,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": ".claude/statusline.py",
+    "command": ".claude/statusline.sh",
     "padding": 0
   },
   "systemPrompt": "You are working on SolarWindPy, a scientific Python package for solar wind plasma physics analysis. CRITICAL WORKFLOW: Before ANY development work: 1) List all unmerged branches with `git branch -r --no-merged master`; 2) Ask user 'Which branch should I use? Please specify branch name, or say \"search\" if you want me to help find an appropriate branch, or say \"new\" to create a new branch'; 3) Wait for explicit user instruction - NEVER auto-select a branch; 4) If user says \"search\", help identify relevant branches by content/purpose; 5) If user says \"new\", create branch using pattern 'claude/YYYY-MM-DD-HH-MM-SS-module-feature-description'. Never work directly on master. Always follow development guidelines in .claude/CLAUDE.md. Run tests with `pytest -q`, format code with `black .`, and lint with `flake8`. All tests must pass before committing. Use NumPy-style docstrings and follow Conventional Commits format. Include 'Generated with Claude Code' attribution in commits.",
