@@ -1,0 +1,369 @@
+{
+  "description": "Comprehensive validation and monitoring system for Claude Settings ecosystem",
+  "version": "1.0.0",
+  "validation": {
+    "componentTesting": {
+      "permissions": {
+        "tests": [
+          {
+            "name": "Hook execution permissions",
+            "command": ".claude/hooks/test-runner.sh --help",
+            "expectedResult": "success",
+            "description": "Verify all hooks can execute with their arguments"
+          },
+          {
+            "name": "Python hook permissions", 
+            "command": "python .claude/hooks/physics-validation.py --help",
+            "expectedResult": "success",
+            "description": "Verify Python hooks have execution permissions"
+          },
+          {
+            "name": "Granular git permissions",
+            "command": "git add .claude/validation-monitoring.json",
+            "expectedResult": "success",
+            "description": "Verify granular git permissions work"
+          },
+          {
+            "name": "Denied operations blocked",
+            "command": "git add ~/.ssh/id_rsa",
+            "expectedResult": "blocked",
+            "description": "Verify security deny patterns work"
+          }
+        ]
+      },
+      "hooks": {
+        "tests": [
+          {
+            "name": "Session start validation",
+            "trigger": "session_start",
+            "expectedHooks": ["validate-session-state.sh"],
+            "timeout": 30,
+            "description": "Verify session start hooks execute"
+          },
+          {
+            "name": "Physics validation on edits",
+            "trigger": "Edit(solarwindpy/core/*.py)",
+            "expectedHooks": ["physics-validation.py"],
+            "timeout": 45,
+            "description": "Verify physics validation triggers on core edits"
+          },
+          {
+            "name": "Test execution on changes",
+            "trigger": "PostEdit",
+            "expectedHooks": ["test-runner.sh --changed"],
+            "timeout": 120,
+            "description": "Verify tests run after code changes"
+          },
+          {
+            "name": "Coverage monitoring on stop",
+            "trigger": "session_stop",
+            "expectedHooks": ["coverage-monitor.py"],
+            "timeout": 60,
+            "description": "Verify coverage analysis runs on session end"
+          }
+        ]
+      },
+      "agentRouting": {
+        "tests": [
+          {
+            "name": "Physics file routing",
+            "input": "Edit solarwindpy/core/plasma.py",
+            "expectedAgents": ["PhysicsValidator", "DataFrameArchitect"],
+            "description": "Verify correct agent suggestions for physics files"
+          },
+          {
+            "name": "Planning keyword routing",
+            "input": "Help me plan the implementation of dark mode",
+            "expectedAgents": ["UnifiedPlanCoordinator"],
+            "description": "Verify planning tasks route to coordinator"
+          },
+          {
+            "name": "Visualization routing",
+            "input": "Create a publication-quality plot",
+            "expectedAgents": ["PlottingEngineer"],
+            "description": "Verify visualization tasks route correctly"
+          },
+          {
+            "name": "Multi-domain routing",
+            "input": "Implement new instability analysis with plots and tests",
+            "expectedAgents": ["UnifiedPlanCoordinator", "PhysicsValidator", "PlottingEngineer", "TestEngineer"],
+            "description": "Verify complex tasks get multiple agent suggestions"
+          }
+        ]
+      }
+    },
+    "integrationTesting": {
+      "endToEndWorkflows": [
+        {
+          "name": "Physics calculation workflow",
+          "steps": [
+            "Edit physics calculation in core module",
+            "Physics validation hook executes",
+            "Changed tests run automatically", 
+            "Coverage analysis updates"
+          ],
+          "expectedResults": [
+            "Physics validation passes",
+            "Tests pass successfully",
+            "Coverage maintains threshold"
+          ]
+        },
+        {
+          "name": "New feature development workflow",
+          "steps": [
+            "Plan new feature implementation",
+            "Create implementation with tests",
+            "Run quality checks",
+            "Commit changes"
+          ],
+          "expectedResults": [
+            "UnifiedPlanCoordinator provides planning guidance",
+            "TestEngineer ensures adequate coverage",
+            "All quality gates pass"
+          ]
+        },
+        {
+          "name": "Plotting development workflow",
+          "steps": [
+            "Create new visualization function",
+            "Test plot generation",
+            "Validate figure quality",
+            "Update documentation"
+          ],
+          "expectedResults": [
+            "PlottingEngineer provides visualization expertise",
+            "Plot tests execute successfully",
+            "Figure quality meets standards"
+          ]
+        }
+      ]
+    },
+    "performanceTesting": {
+      "hooks": {
+        "executionTime": {
+          "test-runner.sh --changed": { "maxTime": 120, "unit": "seconds" },
+          "physics-validation.py --quick": { "maxTime": 45, "unit": "seconds" },
+          "coverage-monitor.py": { "maxTime": 60, "unit": "seconds" },
+          "validate-session-state.sh": { "maxTime": 30, "unit": "seconds" }
+        },
+        "resourceUsage": {
+          "maxMemoryMB": 512,
+          "maxCpuPercent": 80,
+          "maxConcurrentHooks": 3
+        }
+      },
+      "agentRouting": {
+        "responseTime": {
+          "patternMatching": { "maxTime": 100, "unit": "milliseconds" },
+          "contextAnalysis": { "maxTime": 500, "unit": "milliseconds" },
+          "agentSuggestion": { "maxTime": 200, "unit": "milliseconds" }
+        }
+      }
+    },
+    "securityTesting": {
+      "permissionBoundaries": [
+        {
+          "test": "Attempt to read sensitive files",
+          "commands": ["Read(~/.ssh/id_rsa)", "Read(.env)", "Read(/etc/passwd)"],
+          "expectedResult": "blocked",
+          "severity": "critical"
+        },
+        {
+          "test": "Attempt dangerous operations",
+          "commands": ["Bash(rm -rf /)", "Bash(sudo su)", "Bash(curl malicious-site.com)"],
+          "expectedResult": "blocked", 
+          "severity": "critical"
+        },
+        {
+          "test": "Command injection attempts",
+          "commands": ["Bash(echo 'safe'; rm -rf /)"],
+          "expectedResult": "blocked",
+          "severity": "high"
+        }
+      ],
+      "inputValidation": [
+        {
+          "test": "Path traversal protection",
+          "inputs": ["../../../etc/passwd", "..\\..\\windows\\system32"],
+          "expectedResult": "sanitized",
+          "severity": "high"
+        },
+        {
+          "test": "Script injection protection", 
+          "inputs": ["$(rm -rf /)", "`malicious_command`", "'; DROP TABLE users; --"],
+          "expectedResult": "blocked",
+          "severity": "critical"
+        }
+      ]
+    }
+  },
+  "monitoring": {
+    "dashboards": {
+      "systemHealth": {
+        "metrics": [
+          "Hook execution success rate",
+          "Average hook execution time",
+          "Resource utilization",
+          "Error frequency"
+        ],
+        "alertThresholds": {
+          "hookFailureRate": "> 5%",
+          "averageExecutionTime": "> 150% of baseline",
+          "memoryUsage": "> 90%",
+          "errorRate": "> 1%"
+        }
+      },
+      "agentPerformance": {
+        "metrics": [
+          "Agent suggestion accuracy",
+          "Response time",
+          "User acceptance rate",
+          "Task completion success"
+        ],
+        "alertThresholds": {
+          "suggestionAccuracy": "< 80%",
+          "responseTime": "> 1 second", 
+          "acceptanceRate": "< 70%",
+          "completionRate": "< 90%"
+        }
+      },
+      "securityMetrics": {
+        "metrics": [
+          "Permission denial count",
+          "Security violation attempts",
+          "Successful access control enforcement",
+          "Audit log completeness"
+        ],
+        "alertThresholds": {
+          "violationAttempts": "> 0",
+          "denialRate": "unexpected patterns",
+          "accessControlFailures": "> 0",
+          "auditGaps": "> 0"
+        }
+      }
+    },
+    "realTimeMonitoring": {
+      "hookExecution": {
+        "trackingPoints": ["start", "completion", "timeout", "error"],
+        "logLevel": "INFO",
+        "alerting": "immediate for critical failures"
+      },
+      "resourceUsage": {
+        "samplingInterval": "10 seconds",
+        "metrics": ["CPU", "memory", "disk I/O", "network"],
+        "alerting": "threshold-based with escalation"
+      },
+      "securityEvents": {
+        "tracking": ["permission denials", "access attempts", "validation failures"],
+        "logLevel": "WARN",
+        "alerting": "immediate for security violations"
+      }
+    },
+    "performanceBaselines": {
+      "hookExecutionTimes": {
+        "baseline": "current implementation averages",
+        "acceptableVariance": "±20%",
+        "regressionThreshold": "+50%"
+      },
+      "systemResponseTimes": {
+        "baseline": "sub-second for most operations",
+        "acceptableVariance": "±30%",
+        "regressionThreshold": "+100%"
+      },
+      "resourceUtilization": {
+        "baseline": "current usage patterns",
+        "acceptableVariance": "±25%",
+        "regressionThreshold": "+75%"
+      }
+    }
+  },
+  "rollbackProcedures": {
+    "graduated": {
+      "level1": {
+        "description": "Disable problematic hooks temporarily",
+        "action": "Set disableAllHooks: true in settings",
+        "scope": "Non-destructive, temporary",
+        "rollbackTime": "immediate"
+      },
+      "level2": {
+        "description": "Restore previous settings configuration",
+        "action": "Restore from .claude/backups/",
+        "scope": "Settings only",
+        "rollbackTime": "< 1 minute"
+      },
+      "level3": {
+        "description": "Reset to minimal safe configuration",
+        "action": "Use emergency reset configuration",
+        "scope": "All automation disabled",
+        "rollbackTime": "< 2 minutes"
+      },
+      "level4": {
+        "description": "Complete ecosystem rollback",
+        "action": "Git revert to previous working state",
+        "scope": "Full system reset",
+        "rollbackTime": "< 5 minutes"
+      }
+    },
+    "emergencyProcedures": {
+      "hookFailure": {
+        "detection": "Hook execution timeout or error",
+        "response": "Disable specific hook, log incident",
+        "escalation": "If multiple hooks fail, disable all hooks"
+      },
+      "securityBreach": {
+        "detection": "Security policy violation",
+        "response": "Immediate lockdown, audit log analysis",
+        "escalation": "Complete system reset if needed"
+      },
+      "performanceDegradation": {
+        "detection": "Resource usage exceeds thresholds",
+        "response": "Throttle automation, identify cause",
+        "escalation": "Disable non-essential automation"
+      }
+    }
+  },
+  "successMetrics": {
+    "quantitative": {
+      "hookExecutionSuccessRate": { "target": "≥ 99%", "measurement": "successful executions / total executions" },
+      "agentSuggestionAccuracy": { "target": "≥ 85%", "measurement": "relevant suggestions / total suggestions" },
+      "securityPolicyEnforcement": { "target": "≥ 100%", "measurement": "blocked violations / total violation attempts" },
+      "workflowCompletionTimeImprovement": { "target": "≥ 15%", "measurement": "time reduction vs baseline" }
+    },
+    "qualitative": {
+      "userSatisfaction": "Improved development experience",
+      "workflowEfficiency": "Reduced manual tasks and context switching",
+      "codeQuality": "Consistent enforcement of quality standards",
+      "systemReliability": "Stable, predictable automation behavior"
+    }
+  },
+  "troubleshootingGuide": {
+    "commonIssues": {
+      "hookNotExecuting": {
+        "symptoms": "Expected hook doesn't run",
+        "causes": ["Permission denied", "Hook file not found", "Timeout"],
+        "solutions": ["Check permissions in settings", "Verify hook exists", "Increase timeout"]
+      },
+      "agentNotSuggested": {
+        "symptoms": "Expected agent not suggested",
+        "causes": ["Pattern not matched", "Routing configuration issue"],
+        "solutions": ["Check routing patterns", "Verify keyword matching", "Review context triggers"]
+      },
+      "performanceIssues": {
+        "symptoms": "Slow execution, high resource usage",
+        "causes": ["Resource limits exceeded", "Inefficient hook execution"],
+        "solutions": ["Review resource thresholds", "Optimize hook implementations", "Reduce concurrent operations"]
+      },
+      "securityViolations": {
+        "symptoms": "Operations blocked unexpectedly",
+        "causes": ["Overly restrictive permissions", "False positive security detection"],
+        "solutions": ["Review deny patterns", "Adjust permission granularity", "Update security configuration"]
+      }
+    },
+    "diagnosticCommands": {
+      "checkHookExecution": ".claude/hooks/test-runner.sh --help",
+      "validatePermissions": "grep -E '(allow|deny)' .claude/settings.local.json",
+      "checkSystemHealth": ".claude/hooks/coverage-monitor.py",
+      "reviewAuditLogs": "tail -50 .claude/logs/security-audit.log"
+    }
+  }
+}
