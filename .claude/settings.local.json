@@ -5,11 +5,246 @@
       "Bash(conda info:*)",
       "Bash(echo $CONDA_DEFAULT_ENV)",
       "Bash(doc8:*)",
-      "Bash(pytest:*)",
-      "Bash(find:*)",
       "WebFetch(domain:docs.anthropic.com)",
-      "Bash(git add:*)"
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh workflow run list:*)",
+      
+      "Bash(.claude/hooks/test-runner.sh)",
+      "Bash(.claude/hooks/test-runner.sh --all)",
+      "Bash(.claude/hooks/test-runner.sh --changed)", 
+      "Bash(.claude/hooks/test-runner.sh --physics)",
+      "Bash(.claude/hooks/test-runner.sh --fast)",
+      "Bash(.claude/hooks/test-runner.sh --coverage)",
+      "Bash(.claude/hooks/test-runner.sh --help)",
+      "Bash(.claude/hooks/coverage-monitor.py)",
+      "Bash(.claude/hooks/pre-commit-tests.sh)",
+      "Bash(.claude/hooks/git-workflow-validator.sh)",
+      "Bash(.claude/hooks/git-workflow-validator.sh --enforce-branch)",
+      "Bash(.claude/hooks/git-workflow-validator.sh --check-tests)", 
+      "Bash(.claude/hooks/git-workflow-validator.sh --validate-message)",
+      "Bash(.claude/hooks/validate-session-state.sh)",
+      "Bash(python .claude/hooks/physics-validation.py)",
+      "Bash(python .claude/hooks/physics-validation.py solarwindpy/**/*.py)",
+      "Bash(python .claude/hooks/physics-validation.py --strict)",
+      "Bash(python .claude/hooks/physics-validation.py --report)",
+      "Bash(python .claude/hooks/physics-validation.py --fix)",
+      "Bash(python .claude/hooks/create-compaction.py)",
+      "Bash(python .claude/scripts/generate-test.py)",
+      "Bash(python .claude/scripts/generate-test.py *)",
+      
+      "Bash(pytest --cov=solarwindpy)",
+      "Bash(pytest --cov=solarwindpy --cov-report=*)",
+      "Bash(pytest --cov=solarwindpy --cov-report=* -q)",
+      "Bash(pytest --cov=solarwindpy --cov-report=* -q --tb=short)",
+      "Bash(pytest -q)",
+      "Bash(pytest -v)",
+      "Bash(pytest tests/*)",
+      "Bash(pytest solarwindpy/*)",
+      
+      "Bash(git add solarwindpy/**)",
+      "Bash(git add tests/**)",
+      "Bash(git add .claude/**)", 
+      "Bash(git add *.py)",
+      "Bash(git add *.md)",
+      "Bash(git add *.yml)",
+      "Bash(git add *.yaml)",
+      "Bash(git add *.json)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log)",
+      "Bash(git log --oneline)",
+      "Bash(git log -n *)",
+      "Bash(git commit)",
+      "Bash(git commit -m *)",
+      "Bash(git push)",
+      "Bash(git push origin *)",
+      "Bash(git checkout *)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
+      
+      "Bash(find solarwindpy/ -name *.py -type f)",
+      "Bash(find tests/ -name *.py -type f)",
+      "Bash(find .claude/ -name *.py -type f)",
+      "Bash(find .claude/ -name *.sh -type f)",
+      
+      "Bash(black solarwindpy/)",
+      "Bash(black tests/)",
+      "Bash(black solarwindpy/ tests/)",
+      "Bash(flake8 solarwindpy/)",
+      "Bash(flake8 tests/)",
+      "Bash(flake8 solarwindpy/ tests/)",
+      
+      "Bash(python scripts/update_conda_recipe.py)",
+      "Bash(python scripts/requirements_to_conda_env.py)",
+      "Bash(python scripts/requirements_to_conda_env.py --name *)",
+      
+      "Bash(conda env create -f *.yml)",
+      "Bash(conda activate *)",
+      "Bash(pip install -e .)",
+      
+      "Bash(mkdir -p .claude/logs)",
+      "Bash(mkdir -p .claude/backups)",
+      "Bash(touch .claude/logs/security-audit.log)"
     ],
-    "deny": []
+    "deny": [
+      "Read(./.env*)",
+      "Read(./secrets/**)",
+      "Read(./.token*)",
+      "Read(~/.ssh/**)",
+      "Read(/etc/**)",
+      "Edit(./.env*)",
+      "Edit(./secrets/**)",
+      "Edit(./.token*)",
+      "Edit(~/.ssh/**)",
+      "Write(./.env*)",
+      "Write(./secrets/**)",
+      "Write(./.token*)",
+      "Write(~/.ssh/**)",
+      
+      "Bash(rm -rf *)",
+      "Bash(chmod +x *)",
+      "Bash(sudo *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(pip install *)",
+      "Bash(conda install *)",
+      
+      "WebFetch(domain:!docs.anthropic.com)",
+      
+      "Bash(eval *)",
+      "Bash(exec *)", 
+      "Bash(source *)",
+      "Bash(. *)",
+      "Bash(git add ~/.ssh/**)",
+      "Bash(git add /etc/**)",
+      "Bash(git add secrets/**)",
+      "Bash(git add .env*)"
+    ]
+  },
+  
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-session-state.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*plan*",
+        "hooks": [
+          {
+            "type": "command", 
+            "command": ".claude/hooks/git-workflow-validator.sh --enforce-branch",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/physics-validation.py --quick",
+            "timeout": 45
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit", 
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/physics-validation.py --quick",
+            "timeout": 45
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/physics-validation.py --quick", 
+            "timeout": 45
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/test-runner.sh --changed",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command", 
+            "command": ".claude/hooks/test-runner.sh --changed",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/test-runner.sh --changed",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-commit-tests.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/create-compaction.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*", 
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/coverage-monitor.py",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
   }
 }
