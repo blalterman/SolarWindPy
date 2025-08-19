@@ -10,6 +10,7 @@ astropy
 numba
 tabulate
 pytest
+pytest-cov>=4.1.0
 black
 flake8
 pytables
