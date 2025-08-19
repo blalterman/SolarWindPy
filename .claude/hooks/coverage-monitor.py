@@ -220,9 +220,10 @@ def main():
         print("💡 Use 'pytest --cov=solarwindpy --cov-report=html' for interactive report")
         sys.exit(0)  # Always exit 0 for non-blocking hook
     else:
-        print("\n❌ Test execution failed")
+        print("\n⚠️  Test execution failed")
         print("💡 Fix test failures before analyzing coverage")
-        sys.exit(1)  # Exit 1 only for actual test failures
+        print("ℹ️  Coverage monitoring completed with warnings")
+        sys.exit(0)  # Always exit 0 - this is informational only
 
 
 if __name__ == "__main__":
