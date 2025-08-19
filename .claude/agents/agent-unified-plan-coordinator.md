@@ -60,9 +60,10 @@ User: "Create plan for implementing dark mode"
 Process:
 1. Create plan branch: git checkout -b plan/dark-mode-implementation
 2. Initialize from templates with time estimates and complexity scoring
-3. Break down into phases with task-level estimates (5-30 min granularity)
-4. Set up tracking metadata, dependencies, and acceptance criteria
-5. Record initial velocity baseline for this plan type
+3. **VALIDATE PROPOSITIONS**: Ensure comprehensive Risk, Value, Cost, Token, and Usage propositions completed
+4. Break down into phases with task-level estimates (5-30 min granularity)
+5. Set up tracking metadata, dependencies, and acceptance criteria
+6. Record initial velocity baseline for this plan type
 ```
 
 ### Plan Discovery & Continuation
@@ -105,11 +106,16 @@ Process:
 User: "Mark plan as completed" or automatic detection when all phases done
 Process:
 1. Verify plan completion status (all phases marked [x], status = "Completed")
-2. Preserve plan branches for auditing (log to .claude/branch-preservation.log)
-3. Move plan directory from plans/<name>/ to plans/completed/<name>/
-4. Update cross-plan dependencies and remove from active tracking
-5. Record completion metrics for velocity learning
-6. NEVER delete branches - preserve for audit trail
+2. Generate closeout documentation using plans/closeout-template.md
+   - Auto-populate metrics from .velocity/metrics.json
+   - Extract key decisions from phase implementation notes
+   - Capture lessons learned and technical architecture decisions
+   - Record velocity intelligence for future estimation improvements
+3. Preserve plan branches for auditing (log to .claude/branch-preservation.log)
+4. Move plan directory from plans/<name>/ to plans/completed/<name>/
+5. Update cross-plan dependencies and remove from active tracking
+6. Record completion metrics for velocity learning
+7. NEVER delete branches - preserve for audit trail
 ```
 
 ## Integration with SolarWindPy Workflow
@@ -180,6 +186,8 @@ plans/<plan-name>/
 - **Detect completed plans** and automatically archive to `plans/completed/` with branch preservation
 - **Recommend compaction** when approaching token limits
 - **Propose velocity adjustments** based on learning data
+- **ENFORCE PROPOSITIONS**: Block plan progression without complete Risk, Value, Cost, Token, and Usage analysis
+- **Validate proposition quality** using research software development standards
 
 ### Communication Style
 - **Progress-focused**: Always lead with current status and next actions

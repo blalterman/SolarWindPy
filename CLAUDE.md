@@ -14,12 +14,21 @@ Use `Task` tool with specialized agents for domain work:
 - **FitFunctionSpecialist**: Curve fitting and statistical analysis
 - **TestEngineer**: Test coverage and quality assurance
 
+### Plan Development Requirements
+**All plans MUST include comprehensive propositions analysis using `plans/0-overview-template.md`:**
+- **Risk Proposition**: Technical, scientific, and operational risk assessment with mitigation strategies
+- **Value Proposition**: Quantified scientific, developer, and user benefits with ROI timeline
+- **Cost Proposition**: Development time, testing effort, maintenance costs, and opportunity cost analysis
+- **Token Proposition**: AI-assisted development efficiency with planning/implementation token estimates and future savings
+- **Usage Proposition**: Target users, adoption requirements, and coverage scope for research impact assessment
+
 ### Automated Validation
 Hook system provides automatic validation:
 - **Session startup**: Branch validation and context loading
 - **Git operations**: Workflow enforcement and branch protection
 - **Physics edits**: Unit consistency and constraint checking
 - **Token limits**: Automatic compaction and state preservation
+- **Plan completion**: Automatic closeout documentation generation
 
 ## Environment Setup
 
@@ -87,6 +96,10 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Validation**: PR source branch validated (plan/* only)
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
+- **Plan Completion**: Automatic closeout documentation via `plans/closeout-template.md`
+  - Generated before archival to `plans/completed/`
+  - Captures implementation decisions and lessons learned
+  - Populates velocity metrics for future estimation improvements
 
 ### Git Tag Conventions
 Two distinct tag namespaces maintain separation between operational and release concerns:
