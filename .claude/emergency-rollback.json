@@ -1,0 +1,111 @@
+{
+  "description": "Emergency rollback procedures for Claude Settings ecosystem",
+  "version": "1.0.0",
+  "procedures": {
+    "immediate": {
+      "disableAllHooks": {
+        "command": "echo '{\"disableAllHooks\": true}' > .claude/emergency-disable.json",
+        "description": "Immediately disable all hook execution",
+        "timeToEffect": "immediate",
+        "scope": "hooks only"
+      },
+      "minimalistSettings": {
+        "command": "cp .claude/backups/minimal-settings.json .claude/settings.local.json",
+        "description": "Restore minimal safe configuration",
+        "timeToEffect": "< 30 seconds",
+        "scope": "settings only"
+      }
+    },
+    "graduated": {
+      "level1_hookDisable": {
+        "description": "Disable problematic hooks while keeping permissions",
+        "steps": [
+          "Identify failing hooks from logs",
+          "Add disableAllHooks: true to settings",
+          "Verify system stability"
+        ],
+        "rollbackTime": "immediate",
+        "destructiveness": "minimal"
+      },
+      "level2_settingsRestore": {
+        "description": "Restore previous working settings",
+        "steps": [
+          "List available backups: ls .claude/backups/",
+          "Select most recent working backup",
+          "cp .claude/backups/BACKUP_FILE .claude/settings.local.json",
+          "Verify system functionality"
+        ],
+        "rollbackTime": "< 1 minute",
+        "destructiveness": "low"
+      },
+      "level3_minimalConfig": {
+        "description": "Reset to minimal safe configuration",
+        "steps": [
+          "Backup current settings",
+          "Apply minimal configuration",
+          "Test basic functionality",
+          "Gradually re-enable features"
+        ],
+        "rollbackTime": "< 2 minutes",
+        "destructiveness": "medium"
+      },
+      "level4_fullReset": {
+        "description": "Complete ecosystem rollback via git",
+        "steps": [
+          "git stash # Save current work",
+          "git checkout master",
+          "git branch -D feature/claude-settings-ecosystem-alignment",
+          "Verify system returns to baseline"
+        ],
+        "rollbackTime": "< 5 minutes",
+        "destructiveness": "high"
+      }
+    }
+  },
+  "backupStrategy": {
+    "automatic": {
+      "beforeChanges": "Create timestamped backup before any settings modification",
+      "schedule": "On every settings update",
+      "retention": "Keep last 10 backups",
+      "location": ".claude/backups/"
+    },
+    "manual": {
+      "command": "cp .claude/settings.local.json .claude/backups/manual-$(date +%Y%m%d-%H%M%S).json",
+      "description": "Create manual backup with timestamp",
+      "usage": "Before major changes or testing"
+    }
+  },
+  "triggerConditions": {
+    "automatic": [
+      "Hook execution failure rate > 10%",
+      "System resource usage > 95%",
+      "Security violation detected",
+      "Claude Code becomes unresponsive"
+    ],
+    "manual": [
+      "User reports system instability",
+      "Development workflow blocked",
+      "Unexpected behavior observed",
+      "Performance significantly degraded"
+    ]
+  },
+  "recoveryValidation": {
+    "basicFunctionality": [
+      "Claude Code starts successfully",
+      "Basic file operations work",
+      "Permission system functional",
+      "No security violations"
+    ],
+    "advancedFeatures": [
+      "Hooks execute when expected",
+      "Agent routing works correctly",
+      "Performance meets baselines",
+      "All automation features operational"
+    ]
+  },
+  "emergencyContacts": {
+    "systemAdmin": "Check logs in .claude/logs/",
+    "troubleshooting": "Refer to .claude/validation-monitoring.json troubleshooting section",
+    "documentation": "See .claude/ecosystem-documentation.md"
+  }
+}
