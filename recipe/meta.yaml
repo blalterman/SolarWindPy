@@ -1,5 +1,5 @@
 {% set name = "solarwindpy" %}
-{% set version = "0.1.dev607+gc0bc6b5" %}
+{% set version = "0.1.dev1034+gb4f715534.d20250819" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: fccb60370b682a48d3eda8b0fb0e948641e57c193c58657bbef3da8cafe3a7a7
+  sha256: 5e9f04a491ca1dfd2348bdd475ba468b05f6230b3b1b891ea34c70296e597de0
 
 build:
   noarch: python
