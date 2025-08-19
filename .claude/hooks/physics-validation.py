@@ -97,6 +97,17 @@ def main():
     
     filepath = sys.argv[1]
     
+    # Input validation - sanitize filepath
+    import re
+    if re.search(r'[;&|`$()<>]', filepath):
+        print(f"⚠️  Invalid characters in filepath: {filepath}")
+        sys.exit(1)
+    
+    # Prevent directory traversal
+    if '../' in filepath or filepath.startswith('/'):
+        print(f"⚠️  Invalid filepath (directory traversal): {filepath}")
+        sys.exit(1)
+    
     # Only validate Python files in relevant directories
     if not filepath.endswith('.py'):
         print(f"⏭️  Skipping non-Python file: {filepath}")

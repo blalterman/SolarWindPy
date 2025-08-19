@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "routing": {
     "filePatterns": {
-      "solarwindpy/core/*.py": ["PhysicsValidator", "DataFrameArchitect"],
+      "solarwindpy/core/plasma.py": ["DataFrameArchitect"],
+      "solarwindpy/core/ions.py": ["DataFrameArchitect"],
+      "solarwindpy/core/base.py": ["PhysicsValidator"],
+      "solarwindpy/core/units_constants.py": ["PhysicsValidator"],
+      "solarwindpy/core/vector.py": ["PhysicsValidator"],
+      "solarwindpy/core/tensor.py": ["PhysicsValidator"],
+      "solarwindpy/core/spacecraft.py": ["DataFrameArchitect"],
       "solarwindpy/instabilities/*.py": ["PhysicsValidator", "NumericalStabilityGuard"],
       "solarwindpy/plotting/*.py": ["PlottingEngineer"],
       "solarwindpy/fitfunctions/*.py": ["FitFunctionSpecialist", "NumericalStabilityGuard"],
