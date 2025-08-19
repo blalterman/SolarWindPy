@@ -40,6 +40,7 @@ Located in `plans/abandoned/`:
 
 2. **pr-review-remediation** - 📍 Branch: `plan/pr-review-remediation`
    - Status: Planning (0/3 phases, 0/12 tasks)
+
    - **Directory**: `plans/pr-review-remediation/` ✅
    - Focus: Security improvements, performance optimization
    - Estimated: 3.5 hours
@@ -49,6 +50,7 @@ Located in `plans/abandoned/`:
    - **Directory**: `plans/documentation-rendering-fixes/` ✅
    - Focus: Fix Sphinx build warnings, HTML rendering issues
    - Estimated: 11.5 hours
+   - **Action**: Migrated from `solarwindpy/plans/` to root `plans/`
 
 #### Lower Priority Plans
 4. **session-continuity-protocol** - 📍 Directory: `plans/session-continuity-protocol/`
@@ -98,7 +100,8 @@ Located in `plans/abandoned/`:
 1. **Investigate orphaned branch**:
    - `feature/git-integration-agent` - determine if obsolete (only true orphan)
 2. **Archive old sessions**: Move session-compaction plans to archive
-3. **Continue active development**: All 3 high-priority plans have directories ready
+3. **Clean orphan branches**: Investigate plan/fitfunctions-testing branch
+4. **Continue active development**: All 3 high-priority plans have directories ready
 
 ### Development Priority
 1. **deployment-semver-pypi-rtd**: Critical for package distribution
@@ -106,9 +109,10 @@ Located in `plans/abandoned/`:
 3. **documentation-rendering-fixes**: Addresses critical documentation issues
 
 ## Statistics
-- **Total branches**: 21 (plan/ and feature/)
-- **Completed plans**: 13 branches (62%)
-- **Active development**: 5 plans, 6 branches (29%)
+- **Total plans tracked**: 23 unique plans
+- **Completion rate**: 65% (15/23)
+- **Abandonment rate**: 9% (2/23)
+- **Active development**: 26% (6/23)
 - **True orphaned branches**: 1 branch (5%)
 - **Repository health**: Excellent - all active plans properly documented
 

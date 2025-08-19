@@ -55,6 +55,14 @@ if [[ $command == *"merge"* ]] && [[ $branch == "plan/"* ]]; then
     echo "$timestamp,$plan_name,merge,$commit_count" >> "$metrics_file"
     
     echo "✅ Metrics recorded for plan: $plan_name"
+    
+    # Check for completed plans and auto-archive
+    echo "🔍 Checking for completed plans to archive..."
+    if python3 .claude/hooks/plan-completion-manager.py 2>/dev/null; then
+        echo "✅ Plan completion scan completed"
+    else
+        echo "⚠️  Plan completion scan failed (non-critical)"
+    fi
 fi
 
 # Validate feature branch operations
@@ -84,6 +92,28 @@ if [[ $command == *"commit"* ]] && [[ $command == *"-m"* ]]; then
             echo "💡 Recommended: feat(module): description"
             echo "   Types: feat, fix, docs, test, refactor, perf, chore"
         fi
+    fi
+fi
+
+# Prevent deletion of plan and feature branches (preserve for auditing)
+if [[ $command == *"branch -d"* ]] || [[ $command == *"branch -D"* ]]; then
+    branch_to_delete=$(echo "$command" | sed -n 's/.*branch -[dD] \([^ ]*\).*/\1/p')
+    if [[ $branch_to_delete =~ ^(plan|feature)/ ]]; then
+        echo "❌ ERROR: Cannot delete plan or feature branches"
+        echo "🔒 Branches preserved for auditing purposes"
+        echo "💡 If you need to clean up, use: git branch --move $branch_to_delete archived/$branch_to_delete"
+        exit 1
+    fi
+fi
+
+# Prevent deletion of remote plan and feature branches
+if [[ $command == *"push"* ]] && [[ $command == *"--delete"* ]]; then
+    branch_to_delete=$(echo "$command" | sed -n 's/.*--delete \([^ ]*\).*/\1/p')
+    if [[ $branch_to_delete =~ ^(plan|feature)/ ]]; then
+        echo "❌ ERROR: Cannot delete remote plan or feature branches"
+        echo "🔒 Branches preserved for auditing purposes"
+        echo "💡 Remote branches will remain for audit trail"
+        exit 1
     fi
 fi
 

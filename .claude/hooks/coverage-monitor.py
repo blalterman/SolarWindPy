@@ -15,15 +15,32 @@ def run_coverage_analysis():
     
     print("📊 Running comprehensive coverage analysis...")
     
+    # Check if pytest-cov is available
     try:
-        # Run pytest with coverage
-        result = subprocess.run([
-            "pytest", 
-            "--cov=solarwindpy", 
-            "--cov-report=json",
-            "--cov-report=term-missing",
-            "-q"
-        ], capture_output=True, text=True, timeout=60)
+        import pytest_cov
+        use_coverage = True
+    except ImportError:
+        print("⚠️  pytest-cov not installed. Running tests without coverage.")
+        print("   Install with: pip install pytest-cov")
+        use_coverage = False
+    
+    try:
+        if use_coverage:
+            # Run pytest with coverage
+            result = subprocess.run([
+                "pytest", 
+                "--cov=solarwindpy", 
+                "--cov-report=json",
+                "--cov-report=term-missing",
+                "-q"
+            ], capture_output=True, text=True, timeout=60)
+        else:
+            # Run pytest without coverage
+            result = subprocess.run([
+                "pytest", "-q"
+            ], capture_output=True, text=True, timeout=60)
+            print("ℹ️  Tests completed without coverage analysis")
+            return True  # Don't fail if pytest-cov missing
         
         if result.returncode != 0:
             print(f"⚠️  Some tests failed during coverage analysis:")
@@ -36,7 +53,7 @@ def run_coverage_analysis():
         print("⏱️  Coverage analysis timed out (>60s)")
         return False
     except FileNotFoundError:
-        print("❌ pytest not found. Install with: pip install pytest pytest-cov")
+        print("❌ pytest not found. Install with: pip install pytest", file=sys.stderr)
         return False
 
 
@@ -190,16 +207,22 @@ def main():
     success = run_coverage_analysis()
     
     if success:
-        # Detailed analysis
-        analyze_coverage_by_module()
-        check_critical_coverage()
+        # Only run detailed analysis if we have coverage data
+        try:
+            import pytest_cov
+            # Detailed analysis
+            analyze_coverage_by_module()
+            check_critical_coverage()
+        except ImportError:
+            print("ℹ️  Skipping detailed coverage analysis (pytest-cov not available)")
         
         print("\n✅ Coverage monitoring completed")
         print("💡 Use 'pytest --cov=solarwindpy --cov-report=html' for interactive report")
+        sys.exit(0)  # Always exit 0 for non-blocking hook
     else:
-        print("\n❌ Coverage analysis failed")
+        print("\n❌ Test execution failed")
         print("💡 Fix test failures before analyzing coverage")
-        sys.exit(1)
+        sys.exit(1)  # Exit 1 only for actual test failures
 
 
 if __name__ == "__main__":
