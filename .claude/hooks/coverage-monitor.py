@@ -172,7 +172,7 @@ def check_critical_coverage():
         # Use grep to find critical functions in source
         for pattern in critical_patterns:
             result = subprocess.run([
-                "grep", "-r", "--include=*.py", f"def.*{pattern}", "solarwindpy/"
+                "grep", "-r", "--include=*.py", "--max-count=100", f"def.*{pattern}", "solarwindpy/"
             ], capture_output=True, text=True)
             
             if result.stdout:
@@ -181,7 +181,7 @@ def check_critical_coverage():
                 
                 # Suggest testing if not already covered
                 test_result = subprocess.run([
-                    "grep", "-r", "--include=*.py", f"test.*{pattern}", "tests/"
+                    "grep", "-r", "--include=*.py", "--max-count=50", f"test.*{pattern}", "tests/"
                 ], capture_output=True, text=True)
                 
                 if not test_result.stdout:

@@ -5,8 +5,46 @@
 set -e
 
 # Configuration
-MAX_TEST_TIME=120  # 2 minutes timeout
 PARALLEL_JOBS=4
+
+# Calculate adaptive timeout based on file types and count
+calculate_timeout() {
+    local changed_files="$1"
+    local file_count=0
+    local base_timeout=120
+    
+    if [[ -n "$changed_files" ]]; then
+        file_count=$(echo "$changed_files" | wc -l | tr -d ' ')
+        
+        # Check for physics files (need more time)
+        if echo "$changed_files" | grep -q "solarwindpy/instabilities/\|solarwindpy/core/"; then
+            base_timeout=180
+        elif echo "$changed_files" | grep -q "solarwindpy/plotting/"; then
+            base_timeout=120
+        elif echo "$changed_files" | grep -q "tests/"; then
+            base_timeout=120
+        else
+            base_timeout=60
+        fi
+        
+        # Scale by file count (15s per file)
+        local timeout=$((base_timeout + file_count * 15))
+        
+        # Apply bounds
+        if [[ $timeout -gt 300 ]]; then
+            timeout=300
+        elif [[ $timeout -lt 30 ]]; then
+            timeout=30
+        fi
+        
+        echo $timeout
+    else
+        echo 120  # Default for all tests
+    fi
+}
+
+# Default timeout (will be overridden by adaptive calculation)
+MAX_TEST_TIME=120
 
 show_help() {
     echo "SolarWindPy Smart Test Runner"
@@ -70,7 +108,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "🧪 SolarWindPy Smart Test Runner"
-echo "⏱️  Timeout: ${MAX_TEST_TIME}s | Parallel: ${PARALLEL_JOBS} jobs"
+echo "⏱️  Timeout: ${MAX_TEST_TIME}s (adaptive) | Parallel: ${PARALLEL_JOBS} jobs"
 
 # Build pytest command
 PYTEST_CMD="pytest"
@@ -107,6 +145,9 @@ elif [[ "$RUN_CHANGED" == "true" ]]; then
         exit 0
     fi
     
+    # Calculate adaptive timeout based on changed files
+    MAX_TEST_TIME=$(calculate_timeout "$changed_py_files")
+    
     echo "📁 Changed files:"
     echo "$changed_py_files" | sed 's/^/   /'
     
@@ -138,6 +179,8 @@ elif [[ "$RUN_PHYSICS" == "true" ]]; then
     echo "🔬 Running physics validation tests"
     TEST_TARGETS="tests/core/ tests/instabilities/"
     PYTEST_ARGS="$PYTEST_ARGS -k 'physics or thermal or alfven or conservation or instability'"
+    # Physics tests need more time
+    MAX_TEST_TIME=180
     
 elif [[ -n "$PATTERN" ]]; then
     echo "🔍 Running tests matching pattern: $PATTERN"
@@ -146,6 +189,8 @@ elif [[ -n "$PATTERN" ]]; then
     
 else
     echo "🎯 Running default test suite (core + essential)"
+    # Use default timeout for full test suite
+    MAX_TEST_TIME=120
     TEST_TARGETS="tests/core/ tests/fitfunctions/"
 fi
 
