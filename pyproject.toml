@@ -15,6 +15,12 @@ exclude = '''
 requires = ["setuptools>=61", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools_scm]
+# Only consider v* tags for versioning (exclude compaction tags)
+tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+.*)$"
+# Use git describe with version tags only
+git_describe_command = "git describe --dirty --tags --long --match 'v*'"
+
 [project]
 name = "solarwindpy"
 description = "Python package for solar wind data analysis."

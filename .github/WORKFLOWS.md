@@ -287,6 +287,18 @@ When branch protection is enabled for master:
 2. **Missing tokens**: Configure PYPI_API_TOKEN when available
 3. **Test failures**: Fix issues before tagging
 
+#### setuptools_scm Version Detection Issues
+1. **Invalid version errors**: Check for non-semantic tags interfering with version detection
+   - **Error**: `InvalidVersion: Invalid version: '20pct'`
+   - **Cause**: Operational tags (like `compaction-*`) conflict with version tags
+   - **Solution**: Use namespaced operational tags (`claude/compaction/*`)
+2. **Build failures**: setuptools_scm configured to only recognize `v*` tags
+   - Check `pyproject.toml` has proper `[tool.setuptools_scm]` configuration
+   - Verify no conflicting tags exist with `git tag --list`
+3. **Tag namespace separation**:
+   - **Release tags**: `v1.0.0`, `v2.1.3-alpha` (for PyPI releases)
+   - **Operational tags**: `claude/compaction/2025-08-19-20pct` (for session state)
+
 ### Recovery Procedures
 
 #### Rollback Failed Release

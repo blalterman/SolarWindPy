@@ -88,6 +88,25 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
 
+### Git Tag Conventions
+Two distinct tag namespaces maintain separation between operational and release concerns:
+
+#### Release Tags (Semantic Versioning)
+- **Pattern**: `v{major}.{minor}.{patch}[-{prerelease}]`
+- **Examples**: `v1.0.0`, `v2.1.3-alpha`, `v1.5.0-beta.2`
+- **Purpose**: Official package releases, PyPI distribution
+- **Automation**: GitHub workflow creates these for releases
+- **Used by**: setuptools_scm for version detection
+
+#### Compaction Tags (Operational)
+- **Pattern**: `claude/compaction/{date}-{compression}pct`
+- **Examples**: `claude/compaction/2025-08-19-20pct`
+- **Purpose**: Session state preservation at token boundaries
+- **Automation**: Created by `.claude/hooks/create-compaction.py`
+- **Used by**: Claude session management and rollback
+
+**Important**: setuptools_scm is configured to only recognize `v*` tags for versioning, preventing compaction tags from interfering with package version detection.
+
 ## Common Aliases
 
 - `swp.Plasma` → `solarwindpy.core.plasma.Plasma`

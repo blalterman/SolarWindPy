@@ -39,7 +39,7 @@ def create_git_tag(branch, timestamp, tokens, target_tokens):
         # Create a meaningful tag name
         date_part = timestamp.split('T')[0]  # Just the date part
         compression_pct = int((1 - target_tokens/tokens) * 100) if tokens > 0 else 0
-        tag_name = f"compaction-{date_part}-{compression_pct}pct"
+        tag_name = f"claude/compaction/{date_part}-{compression_pct}pct"
         
         # Check if tag already exists
         existing_tags = subprocess.check_output(['git', 'tag', '-l', tag_name + '*'], text=True).strip()
@@ -49,7 +49,7 @@ def create_git_tag(branch, timestamp, tokens, target_tokens):
             tag_name = f"{tag_name}-{suffix}"
         
         # Create the tag with a descriptive message
-        tag_message = f"Compaction milestone: {compression_pct}% reduction ({tokens:,} → {target_tokens:,} tokens) on {branch}"
+        tag_message = f"Claude compaction: {compression_pct}% reduction ({tokens:,} → {target_tokens:,} tokens) on {branch}"
         subprocess.run(['git', 'tag', '-a', tag_name, '-m', tag_message], 
                       check=True, capture_output=True)
         
