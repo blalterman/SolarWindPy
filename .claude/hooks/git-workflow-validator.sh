@@ -79,6 +79,27 @@ if [[ $branch == "feature/"* ]]; then
     fi
 fi
 
+# Validate PR creation source branch
+if [[ $command == *"gh pr create"* ]] || [[ $command == *"hub pull-request"* ]]; then
+    if [[ $branch == "feature/"* ]]; then
+        echo "❌ ERROR: Cannot create PR from feature branch"
+        echo "📋 Workflow: PRs must be created from plan branches"
+        echo "💡 Steps to fix:"
+        echo "   1. Merge feature branch to plan branch:"
+        echo "      git checkout plan/${branch#feature/}"
+        echo "      git merge $branch"
+        echo "   2. Push plan branch:"
+        echo "      git push origin plan/${branch#feature/}"
+        echo "   3. Create PR from plan branch"
+        exit 1
+    elif [[ ! $branch == "plan/"* ]] && [[ ! $branch == "master" ]]; then
+        echo "⚠️  WARNING: Creating PR from non-standard branch: $branch"
+        echo "💡 Recommended: Use plan/* branches for PRs"
+    else
+        echo "✅ PR creation from plan branch approved"
+    fi
+fi
+
 # Commit message validation for conventional commits
 if [[ $command == *"commit"* ]] && [[ $command == *"-m"* ]]; then
     commit_msg=$(echo "$command" | sed -n 's/.*-m[[:space:]]*["\'"'"']\([^"'"'"']*\)["\'"'"'].*/\1/p')

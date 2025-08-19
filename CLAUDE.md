@@ -79,7 +79,12 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 
 ### Git Workflow (Automated via Hooks)
 - **Branches**: `plan/<name>` for planning, `feature/<name>` for implementation
+- **PR Workflow**: PRs MUST be created from plan/* branches to master
+  - Feature branches merge to plan branches
+  - Plan branches create PRs to master
+  - Workflow: feature → plan → PR → master
 - **Protection**: No direct master commits (enforced by hooks)
+- **Validation**: PR source branch validated (plan/* only)
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
 
