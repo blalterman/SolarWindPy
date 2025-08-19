@@ -10,12 +10,12 @@ if using this module.
 
 References
 ----------
-[1] Bruno, R., & Carbone, V. (2013). \*Living Reviews in Solar Physics\*,
+[1] Bruno, R., & Carbone, V. (2013). *Living Reviews in Solar Physics*,
     10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2
-[2] Telloni, D., & Bruno, R. (2016). \*Monthly Notices of the Royal Astronomical
-    Society: Letters\*, 463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
+[2] Telloni, D., & Bruno, R. (2016). *Monthly Notices of the Royal Astronomical
+    Society: Letters*, 463(1), L79–L83. https://doi.org/10.1093/mnrasl/slw135
 [3] Woodham, L. D., Wicks, R. T., Verscharen, D., & Owen, C. J. (2018).
-    \*Astrophys. J.\*, 856, 49.
+    *Astrophys. J.*, 856, 49.
 """
 
 

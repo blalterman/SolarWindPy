@@ -1529,7 +1529,7 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(
                 ValueError,
                 # Match this sentence at start of string.
-                "^Plasma must contain \(core\) protons to estimate electrons.",  # noqa: W605
+                r"^Plasma must contain \(core\) protons to estimate electrons.",
             ):
                 self.object_testing.estimate_electrons()
 

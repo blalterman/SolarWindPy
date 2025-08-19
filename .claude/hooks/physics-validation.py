@@ -98,7 +98,6 @@ def main():
     filepath = sys.argv[1]
     
     # Input validation - sanitize filepath
-    import re
     if re.search(r'[;&|`$()<>]', filepath):
         print(f"⚠️  Invalid characters in filepath: {filepath}")
         sys.exit(1)
