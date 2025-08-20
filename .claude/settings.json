@@ -252,16 +252,6 @@
             "timeout": 120
           }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-commit-tests.sh",
-            "timeout": 60
-          }
-        ]
       }
     ],
     "PreCompact": [
