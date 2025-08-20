@@ -1,8 +1,8 @@
-# Phase 4: Release Automation & Validation
+# Phase 3: Release Automation
 
 ## Phase Metadata
-- **Phase**: 4/4
-- **Estimated Duration**: 2-3 hours
+- **Phase**: 3/4
+- **Estimated Duration**: 2-2.5 hours
 - **Dependencies**: Phases 1-3 (complete deployment infrastructure)
 - **Status**: Not Started
 
@@ -53,11 +53,11 @@ This final phase integrates all previous deployment components into a cohesive r
   - Notes: Check release notes, prerelease status, and artifact inclusion
   - Validation: GitHub releases page inspection
 
-- [ ] **Validate ReadTheDocs build trigger** (Est: 15 min) - Confirm documentation builds automatically
+- [ ] **Validate semantic version parsing** (Est: 15 min) - Confirm version detection and validation works correctly
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Verify versioned documentation accessibility
-  - Validation: Check https://solarwindpy.readthedocs.io/en/v0.1.0-rc1/
+  - Notes: Verify setuptools_scm correctly parses version from git tags
+  - Validation: Check setuptools_scm version output matches expected format
 
 - [ ] **Validate PyPI workflow execution** (Est: 10 min) - Confirm graceful failure with informative messages
   - Commit: `<checksum>`
@@ -102,7 +102,7 @@ This final phase integrates all previous deployment components into a cohesive r
 - [ ] bump_version.py creates valid semantic version tags with proper progression
 - [ ] v0.1.0-rc1 test release executes complete deployment pipeline
 - [ ] GitHub release is created automatically with proper metadata and artifacts
-- [ ] ReadTheDocs builds versioned documentation for release candidate
+- [ ] Semantic versioning validation prevents invalid releases
 - [ ] PyPI workflow fails gracefully with actionable error messages
 - [ ] Release process documentation provides clear user guidance
 - [ ] Rollback procedures are documented and tested
@@ -120,14 +120,14 @@ This final phase integrates all previous deployment components into a cohesive r
 2. **Version Bump**: `python scripts/bump_version.py rc` creates valid v0.1.0-rc1 tag
 3. **Tag Push**: `git push origin v0.1.0-rc1` triggers all deployment workflows
 4. **GitHub Release**: Automatic release creation with artifacts and metadata
-5. **ReadTheDocs Build**: Versioned documentation at /en/v0.1.0-rc1/
+5. **Version Validation**: setuptools_scm correctly detects v0.1.0-rc1
 6. **PyPI Graceful Failure**: Informative error with token setup guidance
 7. **Badge Updates**: All status badges reflect new release candidate
 
 ## 🔧 Phase Technical Requirements
 **Dependencies**: All previous phases, packaging library for version validation
 **Environment**: Development environment with git, GitHub CLI (optional)
-**Services**: GitHub (releases), ReadTheDocs (builds), PyPI (graceful failure)
+**Services**: GitHub (releases), PyPI (graceful failure), setuptools_scm (version detection)
 **Scripts**: Python 3.8+ compatible with comprehensive error handling
 
 ## 📂 Phase Affected Areas
@@ -137,7 +137,7 @@ This final phase integrates all previous deployment components into a cohesive r
 - `/Users/balterma/observatories/code/SolarWindPy/docs/DEPLOYMENT_STATUS.md` - New capability summary
 - Git tags: v0.1.0-rc1 for testing
 - GitHub releases: https://github.com/blalterman/SolarWindPy/releases
-- ReadTheDocs: https://solarwindpy.readthedocs.io/
+- setuptools_scm: Version detection from git tags
 
 ## 📊 Phase Progress Tracking
 
@@ -149,7 +149,7 @@ This final phase integrates all previous deployment components into a cohesive r
 
 ### Blockers & Issues
 - **Dependencies**: Requires completion of Phases 1-3 for complete testing
-- **Manual ReadTheDocs**: Some validation requires ReadTheDocs project setup from Phase 3
+- **Manual GitHub Setup**: Some validation requires GitHub repository access and permissions
 
 ### Next Actions
 1. Complete Phases 1-3 to establish deployment infrastructure
@@ -171,7 +171,7 @@ This final phase integrates all previous deployment components into a cohesive r
 **Immediate Capabilities** (without PyPI tokens):
 - ✅ Semantic version validation and enforcement
 - ✅ GitHub release automation with artifacts
-- ✅ ReadTheDocs versioned documentation
+- ✅ Semantic version validation and detection
 - ✅ Release readiness validation
 - ✅ Version management tools
 - ⚠️ PyPI publishing (graceful failure with guidance)
@@ -186,7 +186,7 @@ This final phase integrates all previous deployment components into a cohesive r
 **Script Rollback**: Helper scripts are additive - can be deleted without affecting core functionality
 **Tag Rollback**: Test tags can be deleted if needed (`git tag -d v0.1.0-rc1 && git push origin :v0.1.0-rc1`)
 **Release Rollback**: GitHub releases can be edited or deleted
-**Documentation Rollback**: ReadTheDocs builds can be hidden or rebuilt
+**Version Rollback**: Git tags can be deleted and recreated with proper versioning
 **Workflow Rollback**: All deployment components can be individually reverted
 **Risk Level**: Low - all additions are non-destructive and easily reversible
 
