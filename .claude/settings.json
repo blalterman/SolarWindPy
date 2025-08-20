@@ -156,7 +156,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/validate-session-state.sh",
+            "command": "bash .claude/hooks/validate-session-state.sh",
             "timeout": 30
           }
         ]
@@ -168,7 +168,7 @@
         "hooks": [
           {
             "type": "command", 
-            "command": ".claude/hooks/git-workflow-validator.sh --enforce-branch",
+            "command": "bash .claude/hooks/git-workflow-validator.sh --enforce-branch",
             "timeout": 15
           }
         ]
@@ -180,7 +180,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/git-workflow-validator.sh",
+            "command": "bash .claude/hooks/git-workflow-validator.sh",
             "args": ["${command}"],
             "timeout": 15,
             "blocking": true
@@ -228,7 +228,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
           }
         ]
@@ -238,7 +238,7 @@
         "hooks": [
           {
             "type": "command", 
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
           }
         ]
@@ -248,7 +248,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
           }
         ]

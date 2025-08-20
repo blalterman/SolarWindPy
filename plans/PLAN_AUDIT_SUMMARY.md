@@ -1,5 +1,5 @@
 # SolarWindPy Plan Audit Summary
-*Generated: 2025-08-19, Updated: 2025-08-19 (Comprehensive Branch Analysis)*
+*Generated: 2025-08-19, Updated: 2025-08-20 (Plan Simplification & Over-Engineering Elimination)*
 
 ## Audit Overview
 Comprehensive audit of all plans and branches across the repository to determine completion status, organize plans properly, and identify orphaned branches.
@@ -26,11 +26,12 @@ Located in `plans/completed/`:
 15. **test-directory-consolidation** - Test organization ✅ Merged & Archived
 16. **test-planning-agents-architecture** - Agent architecture ✅ Merged & Archived
 
-### ❌ Abandoned Plans (2 total)
+### ❌ Abandoned Plans (3 total)
 Located in `plans/abandoned/`:
 
 1. **compaction-agent-system** - Over-engineered compaction system
 2. **hook-system-enhancement** - Over-engineered for SolarWindPy scale
+3. **readthedocs-automation** - Over-engineered documentation system (replaced by readthedocs-simplified)
 
 ### 🚧 Active Plans (3 confirmed)
 
@@ -42,12 +43,12 @@ Located in `plans/abandoned/`:
    - Estimated: 8-12 hours
    - **Note**: Directory exists only on plan branch, not master
 
-2. **readthedocs-automation** - 📍 Directory: `plans/readthedocs-automation/`
-   - Status: Development Priority - Has closeout file but marked "Planning" in overview
-   - **Directory**: `plans/readthedocs-automation/` ✅
-   - Focus: Automated ReadTheDocs deployment with zero manual RST editing
-   - **Priority**: High - Critical for documentation infrastructure
-   - **Anomaly**: Closeout exists but no branch or completion evidence
+2. **readthedocs-simplified** - 📍 Directory: `plans/readthedocs-simplified/` ✅ **NEW**
+   - Status: Planning (4 phases structured)
+   - **Directory**: `plans/readthedocs-simplified/` ✅ (created on master)
+   - Focus: Pragmatic ReadTheDocs deployment in 2 hours vs 10+
+   - **Priority**: High - Immediate CI/CD unblocking needed
+   - **Replaces**: readthedocs-automation (abandoned for over-engineering)
 
 3. **github-issues-migration** - 📍 Branch: `plan/github-issues-migration`
    - Status: Active development (recent commits 22 minutes ago)
@@ -148,11 +149,11 @@ Located in `plans/abandoned/`:
 ## Statistics
 - **Total plans tracked**: 27 unique plans
 - **Completion rate**: 59% (16/27)
-- **Abandonment rate**: 7% (2/27)
+- **Abandonment rate**: 11% (3/27)
 - **Active development**: 11% (3/27)
-- **Plans requiring verification**: 22% (6/27)
+- **Plans requiring verification**: 19% (5/27)
 - **Branch-specific plans**: 2 plans (deployment-semver-pypi-rtd, github-issues-migration)
-- **Repository health**: Good - active plans properly documented, verification needed for ambiguous cases
+- **Repository health**: Good - active plans properly documented, over-engineering eliminated
 
 ## Recently Completed
 ### pr-review-remediation (Completed 2025-08-19)
