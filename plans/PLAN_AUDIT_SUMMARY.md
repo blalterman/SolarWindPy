@@ -1,5 +1,5 @@
 # SolarWindPy Plan Audit Summary
-*Generated: 2025-08-19, Updated: 2025-08-19*
+*Generated: 2025-08-19, Updated: 2025-08-19 (Comprehensive Branch Analysis)*
 
 ## Audit Overview
 Comprehensive audit of all plans and branches across the repository to determine completion status, organize plans properly, and identify orphaned branches.
@@ -10,19 +10,21 @@ Comprehensive audit of all plans and branches across the repository to determine
 Located in `plans/completed/`:
 
 1. **circular-import-audit** - Import dependency analysis
-2. **claude-settings-ecosystem-alignment** - Security ecosystem deployment (just deployed)
-3. **combined_test_plan_with_checklist_fitfunctions** - FitFunctions testing framework  
-4. **combined_test_plan_with_checklist_plotting** - Plotting module testing
-5. **combined_test_plan_with_checklist_solar_activity** - Solar activity testing
-6. **compaction-agent-modernization** - Agent system modernization
-7. **compaction-hook-enhancement** - Hook system enhancements
-8. **docstring-audit-enhancement** - Documentation quality improvements
-9. **fitfunctions-testing-implementation** - Testing infrastructure
-10. **pr-review-remediation** - Critical security fixes and PR workflow validation (COMPLETED 2025-08-19)
-11. **requirements-management-consolidation** - Dependency management
-12. **single-ecosystem-plan-implementation** - Ecosystem integration
-13. **test-directory-consolidation** - Test organization
-14. **test-planning-agents-architecture** - Agent architecture
+2. **claude-settings-ecosystem-alignment** - Security ecosystem deployment ✅ Merged & Archived
+3. **combined_plan_with_checklist_documentation** - Documentation testing framework
+4. **combined_test_plan_with_checklist_fitfunctions** - FitFunctions testing framework  
+5. **combined_test_plan_with_checklist_plotting** - Plotting module testing
+6. **combined_test_plan_with_checklist_solar_activity** - Solar activity testing
+7. **compaction-agent-modernization** - Agent system modernization ✅ Merged & Archived
+8. **compaction-hook-enhancement** - Hook system enhancements ✅ Merged & Archived
+9. **docstring-audit-enhancement** - Documentation quality improvements ✅ Merged & Archived
+10. **fitfunctions-testing-implementation** - Testing infrastructure ✅ Merged & Archived
+11. **numpy-docstring-conversion-plan** - NumPy docstring standardization
+12. **pr-review-remediation** - Critical security fixes and PR workflow validation ✅ Merged via PR #264
+13. **requirements-management-consolidation** - Dependency management ✅ Merged & Archived
+14. **single-ecosystem-plan-implementation** - Ecosystem integration
+15. **test-directory-consolidation** - Test organization ✅ Merged & Archived
+16. **test-planning-agents-architecture** - Agent architecture ✅ Merged & Archived
 
 ### ❌ Abandoned Plans (2 total)
 Located in `plans/abandoned/`:
@@ -30,37 +32,76 @@ Located in `plans/abandoned/`:
 1. **compaction-agent-system** - Over-engineered compaction system
 2. **hook-system-enhancement** - Over-engineered for SolarWindPy scale
 
-### 🚧 Active/In-Progress Plans (4 total)
+### 🚧 Active Plans (3 confirmed)
 
 #### High Priority Plans
 1. **deployment-semver-pypi-rtd** - 📍 Branch: `plan/deployment-semver-pypi-rtd`
-   - Status: Planning (0/4 phases, 0/32 tasks)
-   - **Directory**: `plans/deployment-semver-pypi-rtd/` ✅
+   - Status: Planning (4 phases structured)
+   - **Directory**: `plans/deployment-semver-pypi-rtd/` ✅ (exists on branch)
    - Focus: PyPI deployment, semantic versioning, ReadTheDocs
    - Estimated: 8-12 hours
+   - **Note**: Directory exists only on plan branch, not master
 
-2. **documentation-rendering-fixes** - 📍 Branch: `plan/documentation-rendering-fixes`
-   - Status: Planning (0/6 phases, 0/25 tasks)
+2. **readthedocs-automation** - 📍 Directory: `plans/readthedocs-automation/`
+   - Status: Development Priority - Has closeout file but marked "Planning" in overview
+   - **Directory**: `plans/readthedocs-automation/` ✅
+   - Focus: Automated ReadTheDocs deployment with zero manual RST editing
+   - **Priority**: High - Critical for documentation infrastructure
+   - **Anomaly**: Closeout exists but no branch or completion evidence
+
+3. **github-issues-migration** - 📍 Branch: `plan/github-issues-migration`
+   - Status: Active development (recent commits 22 minutes ago)
+   - **Directory**: `plans/github-issues-migration/` ✅ (exists on branch)
+   - Focus: Migrate plan tracking to GitHub Issues with propositions framework
+   - **Note**: Directory exists only on plan branch, not master
+
+### 🔍 Plans Requiring Status Verification (5 total)
+
+#### Documentation-Related Plans
+1. **documentation-template-fix** - 📍 Directory: `plans/documentation-template-fix/`
+   - Status: Planning phases only, no implementation evidence
+   - Focus: RST template persistence issues
+   - **Assessment**: May be superseded by ReadTheDocs automation
+
+2. **documentation-workflow-fix** - 📍 Directory: `plans/documentation-workflow-fix/`
+   - Status: Planning phases only, no branch
+   - Focus: Documentation build workflow improvements
+   - **Assessment**: May be superseded by other documentation work
+
+3. **documentation-rendering-fixes** - 📍 Branch: `plan/documentation-rendering-fixes`
+   - Status: Lower priority (6 phases structured, feature work available)
    - **Directory**: `plans/documentation-rendering-fixes/` ✅
+   - **Feature Branch**: `feature/documentation-rendering-fixes` (6 days ago)
    - Focus: Fix Sphinx build warnings, HTML rendering issues
-   - Estimated: 11.5 hours
-   - **Action**: Migrated from `solarwindpy/plans/` to root `plans/`
+   - **Assessment**: Active but lower priority compared to ReadTheDocs automation
 
-#### Lower Priority Plans
+#### Infrastructure Plans
 4. **session-continuity-protocol** - 📍 Directory: `plans/session-continuity-protocol/`
-   - Status: Planning (0/4 phases)
+   - Status: 4 planning phases, no branch or implementation
    - Focus: Session management and context switching prevention
+   - **Assessment**: Planning only, unclear if active
 
-#### Archive Candidates
-5. **session-compaction-2025-08-12** - Compacted session state (outdated)
-6. **session-compaction-2025-08-13** - Compacted session state (outdated)
+5. **github-workflows-repair** - 📍 Directory: `plans/github-workflows-repair/`
+   - Status: Single repair plan file, no phase structure
+   - Focus: Comprehensive GitHub workflow security and enhancement
+   - **Assessment**: Detailed plan but not following standard phase structure
+
+6. **systemprompt-optimization** - 📍 Directory: `plans/systemprompt-optimization/`
+   - Status: Has phases and closeout file
+   - **Assessment**: May be completed, needs verification
+
+### 📦 Archive Candidates
+1. **documentation-rebuild-session** - Single compacted state file
+2. **session-compaction-2025-08-12** - Compacted session state (outdated)
+3. **session-compaction-2025-08-13** - Compacted session state (outdated)
 
 ### 🧹 Cleanup Actions Performed
 
 #### Branch and Plan Analysis (2025-08-19)
-**Total branches analyzed**: 21 (plan/ and feature/ branches)
+**Total plan branches analyzed**: 13
+**Branch-specific directories discovered**: 2 plans (deployment-semver-pypi-rtd, github-issues-migration)
 
-**✅ Completed plans with branches**: 13 branches have corresponding completed plans
+**✅ Completed plans with branches**: 10 branches merged to master
 - feature/compaction-agent-modernization → plans/completed/
 - feature/docstring-audit-enhancement → plans/completed/
 - feature/fitfunctions-testing → plans/completed/
@@ -78,10 +119,13 @@ Located in `plans/abandoned/`:
 **🗑️ Abandoned plans with branches**: 1 branch
 - plan/hook-system-enhancement → plans/abandoned/
 
-**❌ Orphaned branches (no plan directories)**: 3 branches
-- feature/git-integration-agent (orphan - no plan)
-- feature/pr-review-remediation (feature branch for active plan/pr-review-remediation)
-- feature/documentation-rendering-fixes (feature branch for active plan/documentation-rendering-fixes)
+**🔄 Active branches with unmerged work**: 3 branches
+- plan/deployment-semver-pypi-rtd (directory exists on branch)
+- plan/documentation-rendering-fixes (feature branch has recent work)
+- plan/github-issues-migration (active development, recent commits)
+
+**📋 Feature branches identified**: 1 active
+- feature/documentation-rendering-fixes (6 days ago, unmerged to plan branch)
 
 #### Migration Analysis
 - **✅ No solarwindpy/plans/ directory found** - no migration needed
@@ -102,12 +146,13 @@ Located in `plans/abandoned/`:
 2. **documentation-rendering-fixes**: Addresses critical documentation issues
 
 ## Statistics
-- **Total plans tracked**: 23 unique plans
-- **Completion rate**: 70% (16/23)
-- **Abandonment rate**: 9% (2/23)
-- **Active development**: 17% (4/23)
-- **True orphaned branches**: 1 branch (5%)
-- **Repository health**: Excellent - all active plans properly documented
+- **Total plans tracked**: 27 unique plans
+- **Completion rate**: 59% (16/27)
+- **Abandonment rate**: 7% (2/27)
+- **Active development**: 11% (3/27)
+- **Plans requiring verification**: 22% (6/27)
+- **Branch-specific plans**: 2 plans (deployment-semver-pypi-rtd, github-issues-migration)
+- **Repository health**: Good - active plans properly documented, verification needed for ambiguous cases
 
 ## Recently Completed
 ### pr-review-remediation (Completed 2025-08-19)
