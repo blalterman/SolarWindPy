@@ -6,3 +6,4 @@ sphinx
 sphinx_rtd_theme
 sphinxcontrib-spelling
 sphinxcontrib-bibtex
+numpydoc
