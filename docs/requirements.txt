@@ -2,6 +2,7 @@
 # DO NOT EDIT MANUALLY - regenerate with scripts/generate_docs_requirements.py
 
 doc8
+numpydoc
 sphinx
 sphinx_rtd_theme
 sphinxcontrib-spelling
