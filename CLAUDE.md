@@ -90,7 +90,7 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Quality**: Tests pass before commits (automated)
 
 ### Git Tag Conventions
-Two distinct tag namespaces maintain separation between operational and release concerns:
+Clean tag namespace focused on releases:
 
 #### Release Tags (Semantic Versioning)
 - **Pattern**: `v{major}.{minor}.{patch}[-{prerelease}]`
@@ -99,14 +99,15 @@ Two distinct tag namespaces maintain separation between operational and release 
 - **Automation**: GitHub workflow creates these for releases
 - **Used by**: setuptools_scm for version detection
 
-#### Compaction Tags (Operational)
-- **Pattern**: `claude/compaction/{date}-{compression}pct`
-- **Examples**: `claude/compaction/2025-08-19-20pct`
+#### Session State Management (File-Based)
+- **Location**: `.claude/compaction-{date}-{time}-{compression}pct.md`
+- **Examples**: `compaction-2025-08-20-171234-35pct.md`
 - **Purpose**: Session state preservation at token boundaries
 - **Automation**: Created by `.claude/hooks/create-compaction.py`
 - **Used by**: Claude session management and rollback
+- **Git Status**: Ignored via `.gitignore` (ephemeral files)
 
-**Important**: setuptools_scm is configured to only recognize `v*` tags for versioning, preventing compaction tags from interfering with package version detection.
+**Migration**: Compaction previously used git tags (`claude/compaction/*`) but migrated to files for cleaner git namespace and reduced CI/CD complexity. All historical compaction tags removed (2025-08-20).
 
 ## Common Aliases
 
