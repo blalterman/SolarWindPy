@@ -66,7 +66,7 @@ def translate_package_name(pip_name: str) -> str:
     return PIP_TO_CONDA_NAMES.get(pip_name.strip(), pip_name.strip())
 
 
-def generate_environment(req_path: str, env_name: str) -> None:
+def generate_environment(req_path: str, env_name: str, overwrite: bool = False) -> None:
     """Create ``<env_name>.yml`` from a requirements file.
 
     Automatically translates pip package names to conda equivalents where needed.
@@ -77,6 +77,8 @@ def generate_environment(req_path: str, env_name: str) -> None:
         Path to the requirements file.
     env_name : str
         Name of the Conda environment.
+    overwrite : bool
+        Whether to overwrite existing environment files.
     """
     with open(req_path) as req_file:
         pip_packages = [
@@ -96,8 +98,14 @@ def generate_environment(req_path: str, env_name: str) -> None:
 
     target_name = Path(f"{env_name}.yml")
 
-    if target_name.exists():
-        raise ValueError("Target environment name exists. Please pick a new name.")
+    if target_name.exists() and not overwrite:
+        # Generate unique name with timestamp
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M")
+        new_name = f"{env_name}-{timestamp}"
+        target_name = Path(f"{new_name}.yml")
+        env["name"] = new_name
+        print(f"Warning: {env_name}.yml exists, creating {target_name}")
 
     with open(target_name, "w") as out_file:
         yaml.safe_dump(env, out_file, sort_keys=False)
@@ -116,9 +124,14 @@ def main() -> None:
         default="solarwindpy-dev",
         help="Name of the Conda environment.",
     )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing environment files.",
+    )
     args = parser.parse_args()
 
-    generate_environment(args.requirements, args.name)
+    generate_environment(args.requirements, args.name, args.overwrite)
 
 
 if __name__ == "__main__":
