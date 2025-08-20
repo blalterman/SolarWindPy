@@ -1,0 +1,29 @@
+name: solarwindpy-20250820
+channels:
+- conda-forge
+- defaults
+dependencies:
+- numpy
+- scipy
+- pandas
+- numexpr
+- bottleneck
+- h5py
+- pyyaml
+- matplotlib
+- astropy
+- numba
+- tabulate
+- pytest
+- pytest-cov>=4.1.0
+- black
+- flake8
+- pytables
+- doc8
+- flake8-docstrings
+- pydocstyle
+- numpydoc
+- sphinx
+- sphinx_rtd_theme
+- sphinxcontrib-spelling
+- sphinxcontrib-bibtex
