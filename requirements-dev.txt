@@ -13,7 +13,7 @@ pytest
 pytest-cov>=4.1.0
 black
 flake8
-pytables
+tables
 doc8
 flake8-docstrings
 pydocstyle
