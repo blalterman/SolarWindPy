@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -91,7 +113,7 @@
 
 
 <div class="viewcode-block" id="subplots">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.subplots">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.subplots">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale_height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a grid of subplots with a scaled figure size.</span>
 
@@ -126,7 +148,7 @@
 
 
 <div class="viewcode-block" id="save">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.save">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.save">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="n">fig</span><span class="p">,</span>
     <span class="n">spath</span><span class="p">,</span>
@@ -217,7 +239,7 @@
 
 
 <div class="viewcode-block" id="joint_legend">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.joint_legend">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.joint_legend">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">joint_legend</span><span class="p">(</span><span class="o">*</span><span class="n">axes</span><span class="p">,</span> <span class="n">idx_for_legend</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a combined legend for multiple axes.</span>
 
@@ -279,7 +301,7 @@
 
 
 <div class="viewcode-block" id="multipanel_figure_shared_cbar">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.multipanel_figure_shared_cbar">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.multipanel_figure_shared_cbar">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">multipanel_figure_shared_cbar</span><span class="p">(</span>
     <span class="n">nrows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">ncols</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -342,7 +364,7 @@
 
 
 <div class="viewcode-block" id="build_ax_array_with_common_colorbar">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.build_ax_array_with_common_colorbar">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.build_ax_array_with_common_colorbar">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">build_ax_array_with_common_colorbar</span><span class="p">(</span>
     <span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cbar_loc</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">fig_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gs_kwargs</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
@@ -476,7 +498,7 @@
 
 
 <div class="viewcode-block" id="calculate_nrows_ncols">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.tools.calculate_nrows_ncols">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.tools.html#solarwindpy.plotting.calculate_nrows_ncols">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_nrows_ncols</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine a sensible ``(nrows, ncols)`` pair for ``n`` axes.</span>
 

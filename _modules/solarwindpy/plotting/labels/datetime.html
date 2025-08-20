@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.labels.datetime &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.labels.datetime &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -84,10 +106,12 @@
 
 
 <div class="viewcode-block" id="Timedelta">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Timedelta">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Timedelta</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Label for a time interval.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Timedelta.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
 
@@ -97,14 +121,15 @@
 <span class="sd">            Value convertible via :func:`pandas.tseries.frequencies.to_offset`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_units</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>  <span class="c1"># noqa: W605</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>  <span class="c1"># noqa: W605</span>
 
     <span class="c1">#     @property</span>
     <span class="c1">#     def dt(self):</span>
@@ -128,12 +153,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> \; \mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+            <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> \; \mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Timedelta.set_offset">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Timedelta.set_offset">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.set_offset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
@@ -146,10 +171,12 @@
 
 
 <div class="viewcode-block" id="DateTime">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.DateTime">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DateTime</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic datetime label.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="DateTime.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
 
@@ -159,7 +186,8 @@
 <span class="sd">            Text used to build the label, e.g. ``&quot;Year&quot;`` or ``&quot;Month&quot;``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_kind</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_kind</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_units</span>
@@ -174,14 +202,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
 
 <div class="viewcode-block" id="DateTime.set_kind">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.DateTime.set_kind">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.set_kind">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span> <span class="o">=</span> <span class="n">new</span></div>
 </div>
@@ -189,10 +217,12 @@
 
 
 <div class="viewcode-block" id="Epoch">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Epoch">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Epoch</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create epoch analysis labels, e.g. ``Hour of Day``.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Epoch.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">of_thing</span><span class="p">,</span> <span class="n">space</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
 
@@ -208,7 +238,8 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_smaller</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_larger</span><span class="p">(</span><span class="n">of_thing</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_space</span><span class="p">(</span><span class="n">space</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_space</span><span class="p">(</span><span class="n">space</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_units</span>
@@ -243,19 +274,19 @@
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
 
 <div class="viewcode-block" id="Epoch.set_larger">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Epoch.set_larger">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_larger">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_larger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_larger</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Epoch.set_smaller">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Epoch.set_smaller">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_smaller">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_smaller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_smaller</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Epoch.set_space">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Epoch.set_space">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_space">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\;&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\:&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized Space </span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -266,17 +297,20 @@
 
 
 <div class="viewcode-block" id="Frequency">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Frequency">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Frequency</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Frequency of another quantity.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Frequency.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_other</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2"> \; [</span><span class="si">{}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">other</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -295,7 +329,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
 
 <div class="viewcode-block" id="Frequency.set_other">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Frequency.set_other">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.set_other">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">):</span>
             <span class="n">other</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
@@ -303,19 +337,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_other</span> <span class="o">=</span> <span class="n">other</span></div>
 
 
-<div class="viewcode-block" id="Frequency._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Frequency._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span>
         <span class="k">if</span> <span class="s2">&quot;??&quot;</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;UNK&quot;</span>
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;frequency_of_</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">path</span></div>
-
+        <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="Frequency.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.Frequency.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
 </div>
@@ -323,12 +354,15 @@
 
 
 <div class="viewcode-block" id="January1st">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.datetime.January1st">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">January1st</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Label for the first day of the year.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="January1st.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_units</span>
@@ -339,7 +373,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{January 1^</span><span class="si">{st}</span><span class="s2"> of Year}&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{January 1^</span><span class="si">{st}</span><span class="s2"> of Year}&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

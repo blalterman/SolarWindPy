@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.labels.special &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.labels.special &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -85,12 +107,15 @@
 
 
 <div class="viewcode-block" id="ArbitraryLabel">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ArbitraryLabel">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ArbitraryLabel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ArbitraryLabel</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for custom labels.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="ArbitraryLabel.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ArbitraryLabel.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -108,20 +133,23 @@
 
 
 <div class="viewcode-block" id="ManualLabel">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ManualLabel">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ManualLabel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ManualLabel</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Label defined by raw LaTeX text and unit.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="ManualLabel.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ManualLabel.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_tex</span><span class="p">(</span><span class="n">tex</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2">} \; [</span><span class="si">%s</span><span class="s2">]$&quot;</span>
-            <span class="o">%</span> <span class="p">(</span>  <span class="c1"># noqa: W605</span>
+            <span class="o">%</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
             <span class="p">)</span>
@@ -146,13 +174,13 @@
         <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="ManualLabel.set_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ManualLabel.set_tex">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ManualLabel.set_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ManualLabel.set_unit">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ManualLabel.set_unit">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ManualLabel.set_unit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
         <span class="n">unit</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">_inU</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">)</span></div>
@@ -161,12 +189,15 @@
 
 
 <div class="viewcode-block" id="Vsw">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Vsw">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Vsw">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Vsw</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Solar wind speed.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Vsw.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Vsw.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
 
     <span class="c1">#     def __str__(self):</span>
     <span class="c1">#         return r&quot;$%s \; [\mathrm{km \, s^{-1}}]$&quot; % self.tex</span>
@@ -186,14 +217,17 @@
 
 
 <div class="viewcode-block" id="CarringtonRotation">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CarringtonRotation">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CarringtonRotation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CarringtonRotation</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Carrington rotation count.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="CarringtonRotation.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CarringtonRotation.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short_label</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_short_label</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">short_label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_short_label</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">short_label</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2"> \; [\#]$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
@@ -216,14 +250,17 @@
 
 
 <div class="viewcode-block" id="Count">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Count">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Count">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Count</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Count histogram label.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Count.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Count.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2"> \; [</span><span class="si">{}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -245,7 +282,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span>
 
 <div class="viewcode-block" id="Count.set_axnorm">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Count.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Count.set_axnorm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -254,8 +291,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span> <span class="o">=</span> <span class="n">norm</span></div>
 
 
-<div class="viewcode-block" id="Count._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Count._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
         <span class="k">if</span> <span class="n">axnorm</span><span class="p">:</span>
@@ -272,11 +307,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Count}</span><span class="s2">&quot;</span>
 
-        <span class="k">return</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Count._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Count._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
 
@@ -284,11 +316,10 @@
         <span class="k">if</span> <span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;norm&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">path</span></div>
-
+        <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="Count.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Count.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Count.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
@@ -297,12 +328,15 @@
 
 
 <div class="viewcode-block" id="Power">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Power">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Power">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Power</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Power spectrum label.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Power.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Power.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>
@@ -322,16 +356,19 @@
 
 
 <div class="viewcode-block" id="Probability">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Probability">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Probability</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Probability that a quantity meets a comparison criterion.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Probability.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Probability.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_label</span><span class="p">,</span> <span class="n">comparison</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_other_label</span><span class="p">(</span><span class="n">other_label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_comparison</span><span class="p">(</span><span class="n">comparison</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2"> \; [</span><span class="si">{}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -357,31 +394,26 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comparison</span>
 
 <div class="viewcode-block" id="Probability.set_other_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability.set_other_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Probability.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
 
 
 <div class="viewcode-block" id="Probability.set_comparison">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability.set_comparison">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Probability.set_comparison">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_comparison</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Probability._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Prob.}(</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Probability._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span>
         <span class="n">other</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -404,11 +436,10 @@
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prob-</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="Probability.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Probability.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Probability.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
@@ -417,10 +448,12 @@
 
 
 <div class="viewcode-block" id="CountOther">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CountOther</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Count of samples of another label fulfilling a comparison.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="CountOther.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_label</span><span class="p">,</span> <span class="n">comparison</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_line_for_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -428,7 +461,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_comparison</span><span class="p">(</span><span class="n">comparison</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_new_line_for_units</span><span class="p">(</span><span class="n">new_line_for_units</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{tex}</span><span class="s2"> </span><span class="si">{sep}</span><span class="s2"> [</span><span class="si">{units}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -462,37 +496,32 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span>
 
 <div class="viewcode-block" id="CountOther.set_new_line_for_units">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther.set_new_line_for_units">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther.set_new_line_for_units">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_new_line_for_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CountOther.set_other_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther.set_other_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
 
 
 <div class="viewcode-block" id="CountOther.set_comparison">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther.set_comparison">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther.set_comparison">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_comparison</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CountOther._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Count.}(</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="CountOther._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span>
         <span class="n">other</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -514,11 +543,10 @@
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cnt-</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="CountOther.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.CountOther.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.CountOther.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
@@ -527,10 +555,12 @@
 
 
 <div class="viewcode-block" id="MathFcn">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathFcn</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Math function applied to another label.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="MathFcn.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="n">other_label</span><span class="p">,</span> <span class="n">dimensionless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new_line_for_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -538,7 +568,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_function</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_dimensionless</span><span class="p">(</span><span class="n">dimensionless</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_new_line_for_units</span><span class="p">(</span><span class="n">new_line_for_units</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;$</span><span class="se">\n</span><span class="s2">$&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_line_for_units</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;\;&quot;</span>
@@ -576,20 +607,20 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span>
 
 <div class="viewcode-block" id="MathFcn.set_new_line_for_units">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn.set_new_line_for_units">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.set_new_line_for_units">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_new_line_for_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MathFcn.set_other_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn.set_other_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
 
 
 <div class="viewcode-block" id="MathFcn.set_function">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn.set_function">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.set_function">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -597,24 +628,19 @@
 
 
 <div class="viewcode-block" id="MathFcn.set_dimensionless">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn.set_dimensionless">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.set_dimensionless">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_dimensionless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dimensionless</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MathFcn._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1">#         try:</span>
         <span class="c1">#             tex = other.tex</span>
         <span class="c1">#         except AttributeError:</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span><span class="o">.</span><span class="n">tex</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \, &quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="MathFcn._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_label</span>
         <span class="n">other</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -629,11 +655,10 @@
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fcn</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">path</span></div>
-
+        <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="MathFcn.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.MathFcn.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.MathFcn.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
@@ -642,13 +667,16 @@
 
 
 <div class="viewcode-block" id="Distance2Sun">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Distance2Sun">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Distance2Sun">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Distance2Sun</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Distance to the Sun.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Distance2Sun.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Distance2Sun.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="n">units</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2"> \; [\mathrm{</span><span class="si">%s</span><span class="s2">}]$&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -666,7 +694,7 @@
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{Distance \; to \; Sun}&quot;</span>
 
 <div class="viewcode-block" id="Distance2Sun.set_units">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Distance2Sun.set_units">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Distance2Sun.set_units">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
         <span class="n">units</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">trans</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rs&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;R_{\bigodot}&quot;</span><span class="p">,</span> <span class="s2">&quot;re&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;R_{\oplus}&quot;</span><span class="p">,</span> <span class="s2">&quot;au&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{AU}</span><span class="s2">&quot;</span><span class="p">}</span>
@@ -681,13 +709,16 @@
 
 
 <div class="viewcode-block" id="SSN">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.SSN">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.SSN">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SSN</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sunspot number label.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="SSN.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.SSN.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_kind</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_kind</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2"> \; [\#]$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
@@ -719,14 +750,14 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2"> SSN}&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pretty_kind</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
             <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
-        <span class="p">)</span>  <span class="c1"># noqa: W605</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;dimless&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SSN.set_kind">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.SSN.set_kind">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.SSN.set_kind">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;M13&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;NM&quot;</span><span class="p">,</span> <span class="s2">&quot;NM13&quot;</span><span class="p">,</span> <span class="s2">&quot;ND&quot;</span><span class="p">,</span> <span class="s2">&quot;NY&quot;</span><span class="p">)</span>
@@ -737,16 +768,19 @@
 
 
 <div class="viewcode-block" id="ComparisonLable">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ComparisonLable">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ComparisonLable</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Label comparing two other labels via a function.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="ComparisonLable.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ComparisonLable.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">,</span> <span class="n">fcn_name</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_constituents</span><span class="p">(</span><span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_function</span><span class="p">(</span><span class="n">fcn_name</span><span class="p">,</span> <span class="n">fcn</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2"> \; [</span><span class="si">{}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -781,7 +815,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_name</span>
 
 <div class="viewcode-block" id="ComparisonLable.set_constituents">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable.set_constituents">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ComparisonLable.set_constituents">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_constituents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labelA</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span>
@@ -811,7 +845,7 @@
 
 
 <div class="viewcode-block" id="ComparisonLable.set_function">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable.set_function">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ComparisonLable.set_function">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn_name</span><span class="p">,</span> <span class="n">fcn</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">fcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -834,8 +868,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_function_name</span> <span class="o">=</span> <span class="n">fcn_name</span></div>
 
 
-<div class="viewcode-block" id="ComparisonLable._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">labelA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelA</span>
         <span class="n">labelB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelB</span>
@@ -857,11 +889,8 @@
         <span class="k">while</span> <span class="n">tex</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\,\,&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\,\,&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span>
 
-
-<div class="viewcode-block" id="ComparisonLable._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">labelA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelA</span>
         <span class="n">labelB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelB</span>
@@ -882,11 +911,10 @@
         <span class="n">function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function_name</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">function</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pathA</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pathB</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="ComparisonLable.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.ComparisonLable.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.ComparisonLable.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
@@ -895,17 +923,20 @@
 
 
 <div class="viewcode-block" id="Xcorr">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Xcorr</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-correlation coefficient between two labels.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Xcorr.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">short_tex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_constituents</span><span class="p">(</span><span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_method</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_short_tex</span><span class="p">(</span><span class="n">short_tex</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">{}</span><span class="s2"> \; [</span><span class="si">{}</span><span class="s2">]$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -939,7 +970,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span>
 
 <div class="viewcode-block" id="Xcorr.set_constituents">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr.set_constituents">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr.set_constituents">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_constituents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labelA</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span>
@@ -951,19 +982,17 @@
 
 
 <div class="viewcode-block" id="Xcorr.set_method">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr.set_method">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr.set_method">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Xcorr.set_short_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr.set_short_tex">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr.set_short_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_short_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_short_tex</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Xcorr._build_tex">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr._build_tex">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">labelA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelA</span>
         <span class="n">labelB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelB</span>
@@ -987,11 +1016,8 @@
         <span class="k">while</span> <span class="n">tex</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\,\,&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\,\,&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tex</span> <span class="o">=</span> <span class="n">tex</span>
 
-
-<div class="viewcode-block" id="Xcorr._build_path">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr._build_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">labelA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelA</span>
         <span class="n">labelB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelB</span>
@@ -1012,11 +1038,10 @@
         <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Xcorr</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pathA</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pathB</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="Xcorr.build_label">
-<a class="viewcode-back" href="../../../../solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.special.Xcorr.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.Xcorr.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>

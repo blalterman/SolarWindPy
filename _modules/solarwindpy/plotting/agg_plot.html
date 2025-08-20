@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -109,13 +131,14 @@
 
 
 <div class="viewcode-block" id="AggPlot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AggPlot</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;ABC for aggregating data in 1D and 2D.</span>
 
-<span class="sd">    Properties</span>
+<span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    logger, data, bins, clip, cut, logx, labels.x, labels.y, clim, agg_axes</span>
+<span class="sd">    path, _gb_axes (abstract)</span>
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
@@ -123,14 +146,7 @@
 <span class="sd">        Set property &lt;&gt;.</span>
 
 <span class="sd">    calc_bins, make_cut, agg, clip_data, make_plot</span>
-
-<span class="sd">    Abstract Properties</span>
-<span class="sd">    -------------------</span>
-<span class="sd">    path, _gb_axes</span>
-
-<span class="sd">    Abstract Methods</span>
-<span class="sd">    ----------------</span>
-<span class="sd">    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot</span>
+<span class="sd">    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot (abstract)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
@@ -228,7 +244,7 @@
 
     <span class="c1"># Old version that cuts at percentiles.</span>
 <div class="viewcode-block" id="AggPlot.clip_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.clip_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.clip_data">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">clip_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
         <span class="n">q0</span> <span class="o">=</span> <span class="mf">0.0001</span>
@@ -272,7 +288,7 @@
     <span class="c1">#         return data</span>
 
 <div class="viewcode-block" id="AggPlot.set_clim">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.set_clim">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed number of</span>
 <span class="sd">        counts per bin to return after calling :py:meth:`agg`.</span>
@@ -283,7 +299,7 @@
 
 
 <div class="viewcode-block" id="AggPlot.set_alim">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.set_alim">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_alim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_alim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed value when</span>
 <span class="sd">        aggregating. This is different from `clim` because it uses the</span>
@@ -295,7 +311,7 @@
 
 
 <div class="viewcode-block" id="AggPlot.calc_bins_intervals">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.calc_bins_intervals">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.calc_bins_intervals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calc_bins_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate histogram bins.</span>
@@ -383,7 +399,7 @@
 
 
 <div class="viewcode-block" id="AggPlot.make_cut">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.make_cut">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.make_cut">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_cut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the `Categorical` quantities for the aggregation axes.&quot;&quot;&quot;</span>
         <span class="n">intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span>
@@ -404,8 +420,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cut</span> <span class="o">=</span> <span class="n">cut</span></div>
 
 
-<div class="viewcode-block" id="AggPlot._agg_runner">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot._agg_runner">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_agg_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`</span>
 <span class="sd">        can aggregate (Inbound, Outbound, and Both).</span>
@@ -443,11 +457,8 @@
         <span class="c1">#             # if &gt; 1 intervals, pass level. Otherwise, don&#39;t as this raises a NotImplementedError. (20190619)</span>
         <span class="c1">#             agg = agg.reindex(index=v, level=k if agg.index.nlevels &gt; 1 else None)</span>
 
-        <span class="k">return</span> <span class="n">agg</span></div>
+        <span class="k">return</span> <span class="n">agg</span>
 
-
-<div class="viewcode-block" id="AggPlot._agg_reindexer">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot._agg_reindexer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_agg_reindexer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
         <span class="c1">#         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)</span>
         <span class="c1"># Ensure all bins are represented in the data. (20190605)</span>
@@ -456,11 +467,10 @@
             <span class="c1"># if &gt; 1 intervals, pass level. Otherwise, don&#39;t as this raises a NotImplementedError. (20190619)</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">k</span> <span class="k">if</span> <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">nlevels</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">agg</span></div>
-
+        <span class="k">return</span> <span class="n">agg</span>
 
 <div class="viewcode-block" id="AggPlot.agg">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.agg">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Perform the aggregation along the agg axes.</span>
 
@@ -487,7 +497,7 @@
 
 
 <div class="viewcode-block" id="AggPlot.get_plotted_data_boolean_series">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_plotted_data_boolean_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a boolean ``pd.Series`` identifying each plotted measurement.</span>
 
@@ -521,7 +531,7 @@
 
 
 <div class="viewcode-block" id="AggPlot.get_subset_above_threshold">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_subset_above_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the subset of data above a given threshold using `fcn` to</span>
 <span class="sd">        aggregate. If `axnorm` set, this is used.</span>
@@ -594,7 +604,7 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="AggPlot.set_axnorm">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.AggPlot.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_axnorm">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The method by which the gridded data is normalized.&quot;&quot;&quot;</span>

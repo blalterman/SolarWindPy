@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -103,7 +125,7 @@
 
 
 <div class="viewcode-block" id="get_counts_per_bin">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.get_counts_per_bin">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.get_counts_per_bin">[docs]</a>
 <span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_counts_per_bin</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">nbins</span> <span class="o">=</span> <span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -123,7 +145,7 @@
 
 
 <div class="viewcode-block" id="calculate_bin_number_with_numba">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba">[docs]</a>
 <span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bin_number_with_numba</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">fill</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
@@ -147,13 +169,16 @@
 
 
 <div class="viewcode-block" id="SpiralMesh">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpiralMesh</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="SpiralMesh.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">initial_xedges</span><span class="p">,</span> <span class="n">initial_yedges</span><span class="p">,</span> <span class="n">min_per_bin</span><span class="o">=</span><span class="mi">250</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_min_per_bin</span><span class="p">(</span><span class="n">min_per_bin</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_edges</span><span class="p">(</span><span class="n">initial_xedges</span><span class="p">,</span> <span class="n">initial_yedges</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cell_filter_thresholds</span> <span class="o">=</span> <span class="n">SpiralFilterThresholds</span><span class="p">(</span><span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cell_filter_thresholds</span> <span class="o">=</span> <span class="n">SpiralFilterThresholds</span><span class="p">(</span><span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -220,7 +245,7 @@
         <span class="k">return</span> <span class="n">tk</span>
 
 <div class="viewcode-block" id="SpiralMesh.set_cell_filter_thresholds">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.set_cell_filter_thresholds">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_cell_filter_thresholds">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_cell_filter_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update the :py:meth:`mesh_cell_filter_thresholds`.</span>
 
@@ -247,26 +272,26 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.set_initial_edges">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.set_initial_edges">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_initial_edges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_initial_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xedges</span><span class="p">,</span> <span class="n">yedges</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_edges</span> <span class="o">=</span> <span class="n">InitialSpiralEdges</span><span class="p">(</span><span class="n">xedges</span><span class="p">,</span> <span class="n">yedges</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># SpiralMeshData(x, y)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.set_min_per_bin">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.set_min_per_bin">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_min_per_bin">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_min_per_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_min_per_bin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.initialize_bins">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.initialize_bins">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.initialize_bins">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Leaves initial edges altered when we change maximum edge.</span>
         <span class="n">xbins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_edges</span><span class="o">.</span><span class="n">x</span>
@@ -302,7 +327,7 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.process_one_spiral_step">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.process_one_spiral_step">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.process_one_spiral_step">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">process_one_spiral_step</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">min_per_bin</span><span class="p">):</span>
         <span class="c1">#         print(&quot;Processing spiral step&quot;, flush=True)</span>
@@ -347,8 +372,6 @@
         <span class="k">return</span> <span class="n">new_cells</span><span class="p">,</span> <span class="n">nbins_to_replace</span></div>
 
 
-<div class="viewcode-block" id="SpiralMesh._visualize_logged_stats">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh._visualize_logged_stats">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_visualize_logged_stats</span><span class="p">(</span><span class="n">stats_str</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
@@ -404,11 +427,10 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
         <span class="n">tax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">stats</span></div>
-
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">stats</span>
 
 <div class="viewcode-block" id="SpiralMesh.generate_mesh">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.generate_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.generate_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;__main__&quot;</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
@@ -486,7 +508,7 @@
     <span class="c1">#         return final_bins</span>
 
 <div class="viewcode-block" id="SpiralMesh.calculate_bin_number">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.calculate_bin_number">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.calculate_bin_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bin_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -554,7 +576,7 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.place_spectra_in_mesh">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.place_spectra_in_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.place_spectra_in_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">place_spectra_in_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generate_mesh</span><span class="p">()</span>
         <span class="n">bin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_bin_number</span><span class="p">()</span>
@@ -562,7 +584,7 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.build_cat">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralMesh.build_cat">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.build_cat">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_cat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">bin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">id</span>
         <span class="n">fill</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">fill</span>
@@ -579,14 +601,16 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpiralPlot2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Call Signature</span>
-<span class="sd">    ==============</span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
 <span class="sd">    splot = SpiralPlot2D(...)</span>
 <span class="sd">    splot.initialize_mesh()&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="SpiralPlot2D.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">initial_bins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">clip_data</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
@@ -595,7 +619,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">()</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_initial_bins</span><span class="p">(</span><span class="n">initial_bins</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -614,7 +639,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mesh</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.agg">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Aggregate the z-values into their bins.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;aggregating z-data&quot;</span><span class="p">)</span>
@@ -665,7 +690,7 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.build_grouped">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.build_grouped">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.build_grouped">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_grouped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">cat</span>
         <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
@@ -683,7 +708,7 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.calc_initial_bins">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.calc_initial_bins">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.calc_initial_bins">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calc_initial_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
@@ -729,7 +754,7 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.initialize_mesh">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.initialize_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.initialize_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
@@ -752,7 +777,7 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.set_clim">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed counts per bin</span>
 <span class="sd">        returned after calling :py:meth:`add`.</span>
@@ -763,7 +788,7 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
@@ -774,8 +799,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="SpiralPlot2D._limit_color_norm">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D._limit_color_norm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
         <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
         <span class="n">v0</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.01</span><span class="p">]</span>
@@ -784,11 +807,10 @@
             <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">v0</span>
         <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">v1</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span></div>
-
+        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.make_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -916,8 +938,6 @@
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cbar_or_mappable</span></div>
 
 
-<div class="viewcode-block" id="SpiralPlot2D._verify_contour_passthrough_kwargs">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D._verify_contour_passthrough_kwargs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_contour_passthrough_kwargs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
     <span class="p">):</span>
@@ -930,11 +950,10 @@
         <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
-        <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span></div>
-
+        <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.plot_contours">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.spiral.SpiralPlot2D.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -954,7 +973,7 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a contour plot on `ax` using `ax.contour`.</span>
 
-<span class="sd">        Paremeters</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ax: mpl.axes.Axes, None</span>
 <span class="sd">            If None, create an `Axes` instance from `plt.subplots`.</span>

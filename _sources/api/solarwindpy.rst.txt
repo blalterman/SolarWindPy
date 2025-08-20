@@ -1,0 +1,25 @@
+solarwindpy package
+===================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.core
+   solarwindpy.fitfunctions
+   solarwindpy.instabilities
+   solarwindpy.plotting
+   solarwindpy.scripts
+   solarwindpy.solar_activity
+   solarwindpy.tools
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

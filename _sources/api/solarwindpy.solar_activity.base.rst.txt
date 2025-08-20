@@ -1,0 +1,8 @@
+solarwindpy.solar\_activity.base module
+=======================================
+
+.. automodule:: solarwindpy.solar_activity.base
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

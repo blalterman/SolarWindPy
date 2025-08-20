@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -237,8 +259,10 @@
 
 
 <div class="viewcode-block" id="SIDC_ID">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDC_ID</span><span class="p">(</span><span class="n">ID</span><span class="p">):</span>
+<div class="viewcode-block" id="SIDC_ID.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Key identifies the SSN used.</span>
 
@@ -257,7 +281,8 @@
 
 <span class="sd">        URLs replace the wild card in ``http://www.sidc.be/silso/INFO/*``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SIDC_ID</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SIDC_ID</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_url_base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -279,20 +304,20 @@
 
 
 <div class="viewcode-block" id="SIDCLoader">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDCLoader</span><span class="p">(</span><span class="n">DataLoader</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data_path</span> <span class="o">/</span> <span class="s2">&quot;sidc&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
 
 <div class="viewcode-block" id="SIDCLoader.convert_nans">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.convert_nans">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.convert_nans">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_nans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SIDCLoader.download_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.download_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.download_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_path</span><span class="p">,</span> <span class="n">old_data_path</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Download and save the data to `new_data_path`. If `old_data_path` exists,</span>
 <span class="sd">        remove it.</span>
@@ -364,7 +389,7 @@
 
 
 <div class="viewcode-block" id="SIDCLoader.load_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.load_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.load_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
 
@@ -386,10 +411,12 @@
 
 
 <div class="viewcode-block" id="SIDC">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDC</span><span class="p">(</span><span class="n">ActivityIndicator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Solar sunspot number data from the SIDC.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="SIDC.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parameters</span>
 <span class="sd">        ----------</span>
@@ -402,7 +429,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_extrema</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_extrema_kind</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge</span><span class="p">()</span></div>
+
 
     <span class="c1">#     @property</span>
     <span class="c1">#     def extrema(self):</span>
@@ -417,7 +445,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssn_band_intervals</span>
 
 <div class="viewcode-block" id="SIDC.load_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.load_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.load_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">loader</span> <span class="o">=</span> <span class="n">SIDCLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
         <span class="n">loader</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
@@ -425,13 +453,13 @@
 
 
 <div class="viewcode-block" id="SIDC.set_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.set_extrema">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.set_extrema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extrema</span> <span class="o">=</span> <span class="n">SSNExtrema</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SIDC.interpolate_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.interpolate_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.interpolate_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_index</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;ssn&quot;</span><span class="p">):</span>
         <span class="n">interpolated</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SIDC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">target_index</span>
@@ -441,7 +469,7 @@
 
 
 <div class="viewcode-block" id="SIDC.calculate_extrema_kind">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_extrema_kind">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_extrema_kind">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_extrema_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine whether an SSN observation belongs to a cycle Minimum or Maximum.</span>
 
@@ -472,7 +500,7 @@
 
 
 <div class="viewcode-block" id="SIDC.calculate_edge">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_edge">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_edge">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine whether an SSN observation belongs to a rising or falling</span>
 <span class="sd">        edge.</span>
@@ -506,8 +534,6 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># AttributeError:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_ssn</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SIDC._run_normalization">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC._run_normalization">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">norm_fcn</span><span class="p">):</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">cut_spec_by_interval</span><span class="p">(</span><span class="n">indicator</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;Cycle&quot;</span><span class="p">)</span>
         <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
@@ -520,11 +546,10 @@
             <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">]</span>
             <span class="n">normed</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_fcn</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
         <span class="n">normed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">normed</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">normed</span></div>
-
+        <span class="k">return</span> <span class="n">normed</span>
 
 <div class="viewcode-block" id="SIDC.run_normalization">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.run_normalization">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.run_normalization">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm_by</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">):</span>
         <span class="c1"># Note: &quot;max&quot; and &quot;feature-scale&quot; are the same if the min(SSN) = 0.</span>
         <span class="k">assert</span> <span class="n">norm_by</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span> <span class="s2">&quot;feature-scale&quot;</span><span class="p">)</span>
@@ -566,7 +591,7 @@
     <span class="n">run_normalization</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">ActivityIndicator</span><span class="o">.</span><span class="n">run_normalization</span>
 
 <div class="viewcode-block" id="SIDC.cut_spec_by_ssn_band">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.cut_spec_by_ssn_band">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.cut_spec_by_ssn_band">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">cut_spec_by_ssn_band</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;ssn&quot;</span><span class="p">,</span> <span class="n">dssn</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Cut the sunspot number at each spectrum in intervals of width +/- dssn.&quot;&quot;&quot;</span>
 
@@ -608,14 +633,11 @@
 
 
 <div class="viewcode-block" id="SIDC.plot_on_colorbar">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.plot_on_colorbar">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.plot_on_colorbar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_on_colorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cax</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">vertical_cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot SSN on the color bar.</span>
-
-<span class="sd">        TODO</span>
-<span class="sd">        ----</span>
-<span class="sd">        Refactor and abstract to :pyclass:`ActivityIndicator`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.</span>
         <span class="n">ssn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">t0</span><span class="p">:</span><span class="n">t1</span><span class="p">,</span> <span class="s2">&quot;ssn&quot;</span><span class="p">]</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">ssn</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -668,10 +690,10 @@
 
 
 <div class="viewcode-block" id="SSNExtrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SSNExtrema</span><span class="p">(</span><span class="n">IndicatorExtrema</span><span class="p">):</span>
 <div class="viewcode-block" id="SSNExtrema.load_or_set_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.sunspot_number.html#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.load_or_set_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.load_or_set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_or_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

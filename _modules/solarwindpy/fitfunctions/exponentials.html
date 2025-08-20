@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -91,8 +113,10 @@
 
 
 <div class="viewcode-block" id="Exponential">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.exponentials.Exponential">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.Exponential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="Exponential.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.Exponential.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit ``A * exp(-c x)`` to the data.</span>
 
@@ -106,7 +130,8 @@
 <span class="sd">            Additional options forwarded to :class:`FitFunction`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -148,8 +173,10 @@
 
 
 <div class="viewcode-block" id="ExponentialPlusC">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExponentialPlusC</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="ExponentialPlusC.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit ``A * exp(-c x) + d`` to the data.</span>
 
@@ -163,7 +190,8 @@
 <span class="sd">            Additional options forwarded to :class:`FitFunction`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -206,8 +234,10 @@
 
 
 <div class="viewcode-block" id="ExponentialCDF">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExponentialCDF</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="ExponentialCDF.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit an exponential cumulative distribution function.</span>
 
@@ -221,7 +251,8 @@
 <span class="sd">            Additional options forwarded to :class:`FitFunction`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -236,7 +267,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span>
 
 <div class="viewcode-block" id="ExponentialCDF.set_y0">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_y0">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_y0">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_y0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="n">new</span></div>
@@ -260,7 +291,7 @@
         <span class="k">return</span> <span class="n">TeX</span>
 
 <div class="viewcode-block" id="ExponentialCDF.set_TeX_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_TeX_info">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_TeX_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Include ``A`` value in the TeX annotation.&quot;&quot;&quot;</span>
 

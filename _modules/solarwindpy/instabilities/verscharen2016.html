@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -182,7 +204,7 @@
 
 
 <div class="viewcode-block" id="beta_ani_inst">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.beta_ani_inst">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.beta_ani_inst">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">beta_ani_inst</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the anisotropy threshold for a given beta.</span>
 
@@ -220,7 +242,7 @@
 
 
 <div class="viewcode-block" id="StabilityCondition">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StabilityCondition</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate plasma stability using the Verscharen et al. fits.</span>
 
@@ -243,6 +265,8 @@
 <span class="sd">        Integer label describing the dominant instability.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="StabilityCondition.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">growth_rate</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">anisotropy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the object.</span>
 
@@ -256,7 +280,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_instability_parameters</span><span class="p">(</span><span class="n">growth_rate</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_beta_ani</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">anisotropy</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_stability_criteria</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_stability_criteria</span><span class="p">()</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the class name.&quot;&quot;&quot;</span>
@@ -387,7 +412,7 @@
         <span class="k">return</span> <span class="n">format_dict</span>
 
 <div class="viewcode-block" id="StabilityCondition.set_instability_parameters">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_instability_parameters">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_instability_parameters">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_instability_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">growth_rate</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Take the instability parameters corresponding to ``growth_rate``.</span>
 
@@ -403,7 +428,7 @@
 
 
 <div class="viewcode-block" id="StabilityCondition.set_beta_ani">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_beta_ani">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_beta_ani">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_beta_ani</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">anisotropy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the beta and anisotropy values.&quot;&quot;&quot;</span>
 
@@ -412,8 +437,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="StabilityCondition._calc_instability_thresholds">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition._calc_instability_thresholds">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_instability_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the instability thresholds.</span>
 
@@ -426,11 +449,8 @@
         <span class="p">}</span>
         <span class="n">instability_thresholds</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">instability_thresholds</span><span class="p">)</span>
         <span class="n">instability_thresholds</span> <span class="o">=</span> <span class="n">instability_thresholds</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_instability_thresholds</span> <span class="o">=</span> <span class="n">instability_thresholds</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_instability_thresholds</span> <span class="o">=</span> <span class="n">instability_thresholds</span>
 
-
-<div class="viewcode-block" id="StabilityCondition._calc_is_unstable">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition._calc_is_unstable">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_is_unstable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine if a measurement is unstable to each instability.</span>
 
@@ -467,11 +487,8 @@
             <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_unstable</span> <span class="o">=</span> <span class="n">is_unstable</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_unstable</span> <span class="o">=</span> <span class="n">is_unstable</span>
 
-
-<div class="viewcode-block" id="StabilityCondition._calc_stability_bin">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition._calc_stability_bin">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_stability_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Identify which instability (if any) each measurement is unstable to.</span>
 
@@ -503,11 +520,10 @@
             <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="n">stability_bin</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stability_bin</span> <span class="o">=</span> <span class="n">stability_bin</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stability_bin</span> <span class="o">=</span> <span class="n">stability_bin</span>
 
 <div class="viewcode-block" id="StabilityCondition.calculate_stability_criteria">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.calculate_stability_criteria">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.calculate_stability_criteria">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_stability_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Run the full instability calculation.</span>
 
@@ -523,7 +539,7 @@
 
 
 <div class="viewcode-block" id="StabilityContours">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityContours">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StabilityContours</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Precompute and plot instability contours.</span>
 
@@ -533,9 +549,12 @@
 <span class="sd">        Parallel proton beta values used for the contours.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="StabilityContours.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_beta</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_instability_contours</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_instability_contours</span><span class="p">()</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -545,14 +564,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span>
 
 <div class="viewcode-block" id="StabilityContours.set_beta">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityContours.set_beta">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.set_beta">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_beta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
-<div class="viewcode-block" id="StabilityContours._calc_instability_contours">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityContours._calc_instability_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_instability_contours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Because we can call the contours many times, but only</span>
@@ -565,15 +582,14 @@
         <span class="n">contours</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">contours</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">contours</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span> <span class="o">=</span> <span class="n">contours</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span> <span class="o">=</span> <span class="n">contours</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">contours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span>
 
 <div class="viewcode-block" id="StabilityContours.plot_contours">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fix_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_gamma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tk_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
@@ -661,8 +677,6 @@
             <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="StabilityContours._add_table_legend">
-<a class="viewcode-back" href="../../../solarwindpy.instabilities.html#solarwindpy.instabilities.verscharen2016.StabilityContours._add_table_legend">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_table_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -739,7 +753,6 @@
             <span class="n">handletextpad</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
             <span class="n">framealpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
         <span class="p">)</span></div>
-</div>
 
 
         <span class="c1"># plt.show()</span>

@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions.gaussians module &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=91d1861b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.fitfunctions.lines module" href="solarwindpy.fitfunctions.lines.html" />
+    <link rel="prev" title="solarwindpy.fitfunctions.exponentials module" href="solarwindpy.fitfunctions.exponentials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">solarwindpy</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.html">solarwindpy package</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.fitfunctions.html">solarwindpy.fitfunctions package</a></li>
+      <li class="breadcrumb-item active">solarwindpy.fitfunctions.gaussians module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/solarwindpy.fitfunctions.gaussians.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-fitfunctions-gaussians-module">
+<h1>solarwindpy.fitfunctions.gaussians module<a class="headerlink" href="#solarwindpy-fitfunctions-gaussians-module" title="Link to this heading"></a></h1>
+<p>Gaussian-based fit functions.</p>
+<p>The classes here implement standard Gaussian shapes and common
+variations used throughout the package.  Each class inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> and defines the
+target function, initial parameter estimates, and LaTeX output helpers.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#Gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#Gaussian.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Fit a standard Gaussian profile.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span></dt>
+<dd><p>Get the function that`curve_fit` fits.</p>
+<p>The function is set at instantiation. It doesn’t make sense to change
+it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
+kwarg.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p0</span></span></dt>
+<dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[mu,</span> <span class="pre">sigma,</span> <span class="pre">A]</span></code> for the fit.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span></dt>
+<dd><p>Function written in LaTeX.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#Gaussian.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Fit the function with the independent values <cite>xobs</cite> and dependent
+values <cite>yobs</cite> using <cite>least_squares</cite> and returning the <cite>OptimizeResult</cite>
+object, but treating weights as in <cite>curve_fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_exception</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, return exceptions from fitting routine, instead of raising.
+This is useful when looping through many fits and wanting to
+identify failed fits after the fact.</p></li>
+<li><p><strong>kwargs</strong> – <p>Unless specified here, defaults are as defined by <cite>curve_fit</cite>.</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kwarg</p></th>
+<th class="head"><p>default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>p0</p></td>
+<td><p>Setup by <cite>{self.__class__.__name__}</cite></p></td>
+</tr>
+<tr class="row-odd"><td><p>return_full</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>method</p></td>
+<td><p>”trf”</p></td>
+</tr>
+<tr class="row-odd"><td><p>loss</p></td>
+<td><p>”huber”</p></td>
+</tr>
+<tr class="row-even"><td><p>max_nfev</p></td>
+<td><p>10000</p></td>
+</tr>
+<tr class="row-odd"><td><p>f_scale</p></td>
+<td><p>0.1</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianNormalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianNormalized"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianNormalized.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Fit a normalized Gaussian where the integral equals <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span></dt>
+<dd><p>Get the function that`curve_fit` fits.</p>
+<p>The function is set at instantiation. It doesn’t make sense to change
+it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
+kwarg.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p0</span></span></dt>
+<dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[mu,</span> <span class="pre">sigma,</span> <span class="pre">n]</span></code> for the fit.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span></dt>
+<dd><p>Function written in LaTeX.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianNormalized.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Fit the function with the independent values <cite>xobs</cite> and dependent
+values <cite>yobs</cite> using <cite>least_squares</cite> and returning the <cite>OptimizeResult</cite>
+object, but treating weights as in <cite>curve_fit</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_exception</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, return exceptions from fitting routine, instead of raising.
+This is useful when looping through many fits and wanting to
+identify failed fits after the fact.</p></li>
+<li><p><strong>kwargs</strong> – <p>Unless specified here, defaults are as defined by <cite>curve_fit</cite>.</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kwarg</p></th>
+<th class="head"><p>default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>p0</p></td>
+<td><p>Setup by <cite>{self.__class__.__name__}</cite></p></td>
+</tr>
+<tr class="row-odd"><td><p>return_full</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>method</p></td>
+<td><p>”trf”</p></td>
+</tr>
+<tr class="row-odd"><td><p>loss</p></td>
+<td><p>”huber”</p></td>
+</tr>
+<tr class="row-even"><td><p>max_nfev</p></td>
+<td><p>10000</p></td>
+</tr>
+<tr class="row-odd"><td><p>f_scale</p></td>
+<td><p>0.1</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianLn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianLn"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<p>Gaussian where taking <span class="math notranslate nohighlight">\(\ln(x)\)</span>.</p>
+<p>[1] <a class="reference external" href="https://mathworld.wolfram.com/LogNormalDistribution.html">https://mathworld.wolfram.com/LogNormalDistribution.html</a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianLn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Fit a Gaussian in logarithmic space.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span></dt>
+<dd><p>Get the function that`curve_fit` fits.</p>
+<p>The function is set at instantiation. It doesn’t make sense to change
+it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
+kwarg.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p0</span></span></dt>
+<dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[ln(mu),</span> <span class="pre">ln(sigma),</span> <span class="pre">ln(A)]</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span></dt>
+<dd><p>Function written in LaTeX.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normal_parameters</span></span></dt>
+<dd><p>Calculate the normal parameters from log-normal parameters.</p>
+<div class="math notranslate nohighlight">
+\[\mu = \exp[m + (s^2)/2]
+\sigma = \sqrt{\exp[s^2 + 2m] (\exp[s^2] - 1)}\]</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_report_normal_parameters</span></span></dt>
+<dd><p>Report normal parameters, not log-normal parameters in the TeX info.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_TeX_report_normal_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianLn.set_TeX_report_normal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span></dt>
+<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to
+<code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
+appropriate uncertainty.</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">set_TeX_trans_argnames</span></code> to translate the argnames for TeX.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.fitfunctions.exponentials.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.exponentials module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.fitfunctions.lines.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.lines module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

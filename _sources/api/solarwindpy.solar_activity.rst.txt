@@ -1,0 +1,29 @@
+solarwindpy.solar\_activity package
+===================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.solar_activity.lisird
+   solarwindpy.solar_activity.sunspot_number
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.solar_activity.base
+   solarwindpy.solar_activity.plots
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.solar_activity
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

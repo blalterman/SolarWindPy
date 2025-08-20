@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.tex_info &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.fitfunctions.tex_info &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -96,8 +118,10 @@
 
 
 <div class="viewcode-block" id="TeXinfo">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TeXinfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TeXinfo.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">popt</span><span class="p">,</span>
@@ -132,7 +156,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_chisq_dof</span><span class="p">(</span><span class="n">chisq_dof</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_rsq</span><span class="p">(</span><span class="n">rsq</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_guess_info</span><span class="p">(</span><span class="n">initial_guess_info</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_npts</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_npts</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span>
@@ -244,7 +269,7 @@
         <span class="c1">#         rel_err = [template.format(k, np.abs(v)) for k, v in TeX.items()]</span>
 
         <span class="n">rel_err</span> <span class="o">=</span> <span class="n">tabulate</span><span class="p">(</span>
-            <span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> \;\;\; &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">TeX</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>  <span class="c1"># noqa: W605</span>
+            <span class="p">[[</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> \;\;\; &quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">TeX</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
             <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3e&quot;</span><span class="p">,</span>
             <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -254,8 +279,6 @@
 
         <span class="k">return</span> <span class="n">rel_err</span>
 
-<div class="viewcode-block" id="TeXinfo._check_and_add_math_escapes">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo._check_and_add_math_escapes">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_add_math_escapes</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Add dollar-sign math escapes to a string.</span>
@@ -273,11 +296,8 @@
             <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">x</span></div>
+        <span class="k">return</span> <span class="n">x</span>
 
-
-<div class="viewcode-block" id="TeXinfo._calc_precision">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo._calc_precision">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_precision</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Primarily for use with the `val_uncert_2_string` and other methods</span>
@@ -291,11 +311,8 @@
         <span class="c1"># &quot;1.250000e-04&quot;; take the exponent &quot;4&quot;, excluding the sign.</span>
         <span class="n">precision</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">precision</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">precision</span></div>
+        <span class="k">return</span> <span class="n">precision</span>
 
-
-<div class="viewcode-block" id="TeXinfo._simplify_for_paper">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo._simplify_for_paper">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_simplify_for_paper</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
         <span class="c1">#         text_info = []</span>
@@ -314,11 +331,8 @@
                 <span class="n">formatted_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
 
         <span class="c1">#         all_info = text_info + numeric_info</span>
-        <span class="k">return</span> <span class="n">formatted_info</span></div>
+        <span class="k">return</span> <span class="n">formatted_info</span>
 
-
-<div class="viewcode-block" id="TeXinfo._add_additional_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo._add_additional_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_additional_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Append extra text to an existing info string.&quot;&quot;&quot;</span>
 
@@ -336,11 +350,8 @@
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Additional info must be a string&quot;</span><span class="p">)</span>
 
             <span class="n">combined_info</span> <span class="o">=</span> <span class="n">info</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">additional_info</span>
-            <span class="k">return</span> <span class="n">combined_info</span></div>
+            <span class="k">return</span> <span class="n">combined_info</span>
 
-
-<div class="viewcode-block" id="TeXinfo._build_fit_parameter_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo._build_fit_parameter_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_fit_parameter_info</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">chisq_dof</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -436,11 +447,10 @@
 
         <span class="n">info</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;inf&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\infty&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">info</span></div>
-
+        <span class="k">return</span> <span class="n">info</span>
 
 <div class="viewcode-block" id="TeXinfo.annotate_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.annotate_info">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.annotate_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">annotate_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Add the `TeX_info` annotation to ax.</span>
 
@@ -482,7 +492,7 @@
 
 
 <div class="viewcode-block" id="TeXinfo.build_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.build_info">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.build_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_info</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -574,7 +584,7 @@
 
 
 <div class="viewcode-block" id="TeXinfo.set_initial_guess_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_initial_guess_info">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_initial_guess_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_initial_guess_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -590,7 +600,7 @@
 
 
 <div class="viewcode-block" id="TeXinfo.set_npts">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_npts">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_npts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_npts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected npts type (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">new</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
@@ -601,7 +611,7 @@
 
 
 <div class="viewcode-block" id="TeXinfo.set_popt_psigma">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_popt_psigma">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_popt_psigma">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_popt_psigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">popt</span><span class="p">,</span> <span class="n">psigma</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">popt</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">psigma</span><span class="p">:</span>
@@ -611,7 +621,7 @@
 
 
 <div class="viewcode-block" id="TeXinfo.set_TeX_argnames">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_argnames">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_argnames">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Define the mapping to format LaTeX function argnames.&quot;&quot;&quot;</span>
         <span class="c1"># Save a tuple so immutable.</span>
@@ -632,25 +642,25 @@
 
 
 <div class="viewcode-block" id="TeXinfo.set_TeX_function">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_function">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_function">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TeX_function</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_TeX_function</span> <span class="o">=</span> <span class="n">TeX_function</span></div>
 
 
 <div class="viewcode-block" id="TeXinfo.set_chisq_dof">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_chisq_dof">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_chisq_dof">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_chisq_dof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chisq_dof</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
 <div class="viewcode-block" id="TeXinfo.set_rsq">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_rsq">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.set_rsq">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_rsq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rsq</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
 <div class="viewcode-block" id="TeXinfo.val_uncert_2_string">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.tex_info.html#solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">val_uncert_2_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">uncertainty</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert a value, uncertainty pair to a string where the value is</span>
 <span class="sd">        reported to the first non-zero digit of the uncertainty.</span>

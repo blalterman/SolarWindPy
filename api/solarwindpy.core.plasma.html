@@ -1,0 +1,1218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.core.plasma module &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=91d1861b"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.core.spacecraft module" href="solarwindpy.core.spacecraft.html" />
+    <link rel="prev" title="solarwindpy.core.ions module" href="solarwindpy.core.ions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">solarwindpy</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.html">solarwindpy package</a></li>
+          <li class="breadcrumb-item"><a href="solarwindpy.core.html">solarwindpy.core package</a></li>
+      <li class="breadcrumb-item active">solarwindpy.core.plasma module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/solarwindpy.core.plasma.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-core-plasma-module">
+<h1>solarwindpy.core.plasma module<a class="headerlink" href="#solarwindpy-core-plasma-module" title="Link to this heading"></a></h1>
+<p>The Plasma class that contains all Ions, magnetic field, and spacecraft information.</p>
+<section id="propoded-updates">
+<h2>Propoded Updates<a class="headerlink" href="#propoded-updates" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>-It would be cute if one could call <cite>plasma % a</cite>, i.e. plasma mod</dt><dd><p>an ion and return a new plasma without that ion in it. Well, either
+mod or subtract. Subtract and add probably make more sense. (20180129)</p>
+</dd>
+<dt>-See (<a class="reference external" href="https://drive.google.com/drive/folders/0ByIrJAE4KMTtaGhRcXkxNHhmY2M">https://drive.google.com/drive/folders/0ByIrJAE4KMTtaGhRcXkxNHhmY2M</a>)</dt><dd><p>for the various methods that might be worth considering including __getattr__
+vs __getattribute__, __hash__, __deepcopy__, __copy__, etc. (20180129)</p>
+</dd>
+<dt>-Convert <cite>Plasma.__call__</cite> to <cite>Plasma.__getitem__</cite> and <cite>Plasma.__iter__</cite> to</dt><dd><p>to allow iterating over ions. (20180316)
+N.B. This could have complicated results as to how we actually access the
+underlying data and objects stored in the DataFrame.</p>
+</dd>
+</dl>
+<p>-Define <cite>__format__</cite> methods for use with <cite>str.format</cite>. (20180316)</p>
+<p>-Define <cite>Plasma.__len__</cite> to return the number of ions in the plasma. (20180316)</p>
+<p>-Split each class into its own file. Suggested by EM. (BLA 20180217)</p>
+<dl class="simple">
+<dt>-Add <cite>Plasma.dropna(*args, **kwargs)</cite> that passes everything to <cite>plasma.data.dropna</cite></dt><dd><p>and then calls <cite>self.__Plasma__set_ions()</cite> to update the ions after drop. (20180404)</p>
+</dd>
+<dt>-Moved <cite>_conform_species</cite> to base.Base so that it is accessable for</dt><dd><p>alfvenic_turbulence.py. Did not move tests out of <cite>test_plasma.py</cite>.  (20181121)</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Plasma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_plasma_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Container for multi-species plasma physics data and analysis.</p>
+<p>The Plasma class serves as the central container for solar wind plasma
+analysis, combining ion moment data, magnetic field measurements, and
+spacecraft trajectory information for comprehensive plasma physics calculations.</p>
+<p>This class enables analysis of multi-species plasma including protons,
+alpha particles, and heavier ions. It provides convenient access to ion
+species through attribute shortcuts and supports advanced plasma physics
+calculations such as plasma beta, Coulomb collision frequencies, and
+thermal parameters.</p>
+<p>Attribute access is first attempted on the underlying <code class="xref py py-attr docutils literal notranslate"><span class="pre">ions</span></code> table
+before falling back to <code class="docutils literal notranslate"><span class="pre">super().__getattr__</span></code>. This allows convenient
+shorthand such as <code class="docutils literal notranslate"><span class="pre">plasma.a</span></code> to access the alpha particle <code class="xref py py-class docutils literal notranslate"><span class="pre">Ion</span></code>
+and <code class="docutils literal notranslate"><span class="pre">plasma.p1</span></code> for protons.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd><p>Multi-indexed DataFrame containing plasma measurements with columns
+labeled by (“M”, “C”, “S”) for measurement, component, and species.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ions</span></span></dt>
+<dd><p>Dictionary-like access to individual ion species objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a> of Ion objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">species</span></span></dt>
+<dd><p>Available ion species identifiers in the plasma.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">spacecraft</span></span></dt>
+<dd><p>Spacecraft trajectory and velocity information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Spacecraft, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">auxiliary_data</span></span></dt>
+<dd><p>Additional measurements such as quality flags or derived parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a>, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>Thermal speeds assume the relationship <span class="math notranslate nohighlight">\(mw^2 = 2kT\)</span> where <span class="math notranslate nohighlight">\(m\)</span>
+is ion mass, <span class="math notranslate nohighlight">\(w\)</span> is thermal speed, <span class="math notranslate nohighlight">\(k\)</span> is Boltzmann’s constant,
+and <span class="math notranslate nohighlight">\(T\)</span> is temperature.</p>
+<p>The underlying data structure uses a three-level MultiIndex for columns:
+- Level 0 (M): Measurement type (‘n’, ‘v’, ‘w’, ‘b’, etc.)
+- Level 1 (C): Component (‘x’, ‘y’, ‘z’, ‘par’, ‘per’, etc.)
+- Level 2 (S): Species identifier (‘p1’, ‘a’, ‘o6’, etc.)</p>
+<p class="rubric">Examples</p>
+<p>Create a plasma object from multi-species data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>  <span class="c1"># Protons and alphas</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span>      <span class="c1"># Proton number density [cm^-3]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alpha_velocity</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">v</span>       <span class="c1"># Alpha velocity vector [km/s]</span>
+</pre></div>
+</div>
+<p>Calculate plasma physics parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span>              <span class="c1"># Plasma beta parameter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coulomb</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">nc</span><span class="p">()</span>             <span class="c1"># Coulomb collision frequency [s^-1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">temp_ratio</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># Alpha-proton temp ratio</span>
+</pre></div>
+</div>
+<p>Access magnetic field data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b_field</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">b</span>                <span class="c1"># Magnetic field vector [nT]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b_mag</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">mag</span>              <span class="c1"># Magnetic field magnitude [nT]</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_plasma_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Contains the magnetic field and core ion moments. Columns are a
+three-level <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code></a> labelled <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code>
+for measurement, component, and species. The index should contain
+datetime information, for example <code class="docutils literal notranslate"><span class="pre">Epoch</span></code> when loading from a CDF
+file.</p></li>
+<li><p><strong>*species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Iterable of species contained in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+<li><p><strong>spacecraft</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Spacecraft</span></code>, optional) – Spacecraft trajectory and velocity information. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
+Coulomb number <code class="xref py py-meth docutils literal notranslate"><span class="pre">nc()</span></code> method will raise a
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
+<li><p><strong>auxiliary_data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, optional) – Additional measurements to carry with the plasma, for example data
+quality flags. The column labelling scheme must match <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+<li><p><strong>log_plasma_stats</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Log summary statistics when <code class="docutils literal notranslate"><span class="pre">data</span></code> is set.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Thermal speeds assume <span class="math notranslate nohighlight">\(mw^2 = 2kT\)</span>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;1995-01-01&quot;</span><span class="p">),</span>
+<span class="go">                       1: pd.to_datetime(&quot;2015-03-23&quot;),</span>
+<span class="go">                       2: pd.to_datetime(&quot;2022-10-09&quot;)}, name=&quot;Epoch&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">(&quot;b&quot;, &quot;x&quot;, &quot;&quot;): {0: 0.5, 1: 0.6, 2: 0.7},</span>
+<span class="go">(&quot;b&quot;, &quot;y&quot;, &quot;&quot;): {0: -0.25, 1: -0.26, 2: 0.27},</span>
+<span class="go">(&quot;b&quot;, &quot;z&quot;, &quot;&quot;): {0: 0.3, 1: 0.4, 2: -0.7},</span>
+<span class="go">(&quot;n&quot;, &quot;&quot;, &quot;a&quot;): {0: 0.5, 1: 1.0, 2: 1.5},</span>
+<span class="go">(&quot;n&quot;, &quot;&quot;, &quot;p1&quot;): {0: 1.0, 1: 2.0, 2: 3.0},</span>
+<span class="go">(&quot;v&quot;, &quot;x&quot;, &quot;a&quot;): {0: 125.0, 1: 250.0, 2: 375.0},</span>
+<span class="go">(&quot;v&quot;, &quot;x&quot;, &quot;p1&quot;): {0: 100.0, 1: 200.0, 2: 300.0},</span>
+<span class="go">(&quot;v&quot;, &quot;y&quot;, &quot;a&quot;): {0: 250.0, 1: 375.0, 2: 750.0},</span>
+<span class="go">(&quot;v&quot;, &quot;y&quot;, &quot;p1&quot;): {0: 200.0, 1: 300.0, 2: 600.0},</span>
+<span class="go">(&quot;v&quot;, &quot;z&quot;, &quot;a&quot;): {0: 500.0, 1: 750.0, 2: 1000.0},</span>
+<span class="go">(&quot;v&quot;, &quot;z&quot;, &quot;p1&quot;): {0: 400.0, 1: 600.0, 2: 800.0},</span>
+<span class="go">(&quot;w&quot;, &quot;par&quot;, &quot;a&quot;): {0: 3.0, 1: 4.0, 2: 5.0},</span>
+<span class="go">(&quot;w&quot;, &quot;par&quot;, &quot;p1&quot;): {0: 10.0, 1: 20.0, 2: 30.0},</span>
+<span class="go">(&quot;w&quot;, &quot;per&quot;, &quot;a&quot;): {0: 7.0, 1: 9.0, 2: 10.0},</span>
+<span class="go">(&quot;w&quot;, &quot;per&quot;, &quot;p1&quot;): {0: 7.0, 1: 26.0, 2: 28.0},</span>
+<span class="go">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">epoch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">T</span>
+<span class="go">Epoch     1995-01-01  2015-03-23  2022-10-09</span>
+<span class="go">M C   S</span>
+<span class="go">b x             0.50        0.60        0.70</span>
+<span class="go">  y            -0.25       -0.26        0.27</span>
+<span class="go">  z             0.30        0.40       -0.70</span>
+<span class="go">n     a         0.50        1.00        1.50</span>
+<span class="go">      p1        1.00        2.00        3.00</span>
+<span class="go">v x   a       125.00      250.00      375.00</span>
+<span class="go">      p1      100.00      200.00      300.00</span>
+<span class="go">  y   a       250.00      375.00      750.00</span>
+<span class="go">      p1      200.00      300.00      600.00</span>
+<span class="go">  z   a       500.00      750.00     1000.00</span>
+<span class="go">      p1      400.00      600.00      800.00</span>
+<span class="go">w par a         3.00        4.00        5.00</span>
+<span class="go">      p1       10.00       20.00       30.00</span>
+<span class="go">  per a         7.00        9.00       10.00</span>
+<span class="go">      p1        7.00       26.00       28.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">epoch</span></span></dt>
+<dd><p>Time index of the plasma data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Datetime index containing measurement timestamps.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.1)">pandas.DatetimeIndex</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span>
+<span class="go">DatetimeIndex([&#39;1995-01-01&#39;, &#39;2015-03-23&#39;, &#39;2022-10-09&#39;],</span>
+<span class="go">              dtype=&#39;datetime64[ns]&#39;, name=&#39;Epoch&#39;, freq=None)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spacecraft</span></span></dt>
+<dd><p><cite>Spacecraft</cite> object stored in <cite>plasma</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sc</span></span></dt>
+<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">spacecraft</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">auxiliary_data</span></span></dt>
+<dd><p>Any data that does not fall into the following categories.
+Epoch is index.</p>
+<blockquote>
+<div><p>-magnetic field
+-ion velocity
+-ion number density
+-ion thermal speed</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aux</span></span></dt>
+<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">auxiliary_data</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_plasma_at_init</span></span></dt>
+<dd><p>Flag indicating whether to log plasma statistics during initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if plasma statistics should be logged at initialization.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_log_plasma_stats</span></code></dt><dd><p>Method to modify this setting</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_log_plasma_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_log_plasma_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set flag for logging plasma statistics during initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to enable logging of plasma statistics.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>When enabled, summary statistics including density ranges, velocity
+distributions, and magnetic field statistics are logged during
+plasma initialization.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_log_plasma_stats</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">log_plasma_at_init</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sckey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">akey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC_AUX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Save the plasma’s underlying data and aux DataFrame to an HDF5 file at <cite>fname</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (str or <cite>pathlib.Path</cite>.) – File name pointing to the save location.
+The typical use when creating a data file in <cite>Create_Datafile.ipynb</cite>
+is <cite>fname(“swe”, “h5”, strip_date=True)</cite>.</p></li>
+<li><p><strong>dkey</strong> (<em>None</em>) – The HDF5 file key at which to store the data.</p></li>
+<li><p><strong>sckey</strong> (<em>None</em>) – The HDF5 file key at which to store the spacecraft data.</p></li>
+<li><p><strong>akey</strong> (<em>None</em>) – The HDF5 file key at which to store the auxiliary_data.</p></li>
+<li><p><strong>data_modifier_fcn</strong> (<em>None</em><em>, </em><em>FunctionType</em>) – <p>A function to modify the data saved, e.g. if you don’t want to save
+a specific species in the data file, you can pass.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def modify_data(data):</dt><dd><p>return data.drop(“a”, axis=1, level=”S”)</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>It can only take one argument, <cite>data</cite>.</p>
+</p></li>
+<li><p><strong>spacecraft_modifier_fcn</strong> (<em>None</em><em>, </em><em>FunctionType</em>) – A function to modifie the spacecraft data saved. See <cite>data_modifier_fcn</cite>
+for syntax.</p></li>
+<li><p><strong>aux_modifier_fcn</strong> (<em>None</em><em>, </em><em>FunctionType</em>) – A function to modify the auxiliary_data saved. See
+<cite>data_modifier_fcn</cite> for syntax.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sckey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">akey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC_AUX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Load data from an HDF5 file at <cite>fname</cite> and create a plasma.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><em>pathlib.Path</em></a>) – The file from which to load the data.</p></li>
+<li><p><strong>species</strong> (<em>list-like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The species to load. If none are passed, they are automatically
+selected from the data.</p></li>
+<li><p><strong>dkey</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>&quot;FC&quot;</em>) – The key for getting data from HDF5 file.</p></li>
+<li><p><strong>sckey</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>&quot;SC&quot;</em>) – The key for getting spacecraft data from the HDF5 file.</p></li>
+<li><p><strong>akey</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>&quot;FC_AUX&quot;</em>) – key for getting auxiliary data from HDF5 file.</p></li>
+<li><p><strong>start</strong> (None, parsable by <cite>pd.to_datetime</cite>) – If not None, time to start/stop for loading data.</p></li>
+<li><p><strong>stop</strong> (None, parsable by <cite>pd.to_datetime</cite>) – If not None, time to start/stop for loading data.</p></li>
+<li><p><strong>kwargs</strong> – Passed to <cite>Plasma.__init__</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span></dt>
+<dd><p>Tuple of species contained in plasma.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ions</span></span></dt>
+<dd><p><cite>pd.Series</cite> containing the ions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">drop_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Plasma</span></span></span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.drop_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Return a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code> without the specified species.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Species to remove from the plasma.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new plasma containing only the remaining species.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Plasma</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If all species are removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_spacecraft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_spacecraft"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set or update the spacecraft trajectory data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new</strong> (<em>Spacecraft</em><em> or </em><em>None</em>) – Spacecraft trajectory object containing position and velocity data.
+Must have matching datetime index with plasma data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If spacecraft index does not match plasma data index.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The spacecraft data is required for calculating certain plasma physics
+parameters such as Coulomb collision frequencies that depend on the
+plasma frame transformation.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sc</span> <span class="o">=</span> <span class="n">Spacecraft</span><span class="p">(</span><span class="n">trajectory_data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="n">sc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">spacecraft</span><span class="o">.</span><span class="n">position</span>  <span class="c1"># Access trajectory data</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_auxiliary_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_auxiliary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set or update auxiliary measurement data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><em>pandas.DataFrame</em></a><em> or </em><em>None</em>) – Additional measurements such as data quality flags, derived
+parameters, or instrument-specific metadata. Must have matching
+datetime index with plasma data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If auxiliary data index does not match plasma data index.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Auxiliary data provides additional context for plasma measurements
+without being part of the core plasma physics calculations. Common
+examples include quality flags, statistical uncertainties, or
+instrument operational parameters.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quality_flags</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;quality&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]},</span>
+<span class="gp">... </span>                             <span class="n">index</span><span class="o">=</span><span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_auxiliary_data</span><span class="p">(</span><span class="n">quality_flags</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">aux</span><span class="o">.</span><span class="n">quality</span>  <span class="c1"># Access auxiliary data</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set the data and log statistics about it.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bfield</span></span></dt>
+<dd><p>Magnetic field data.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">bfield</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">number_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.number_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the plasma number densities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p></li>
+<li><p><strong>skipna</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default True</em>) – Follows <cite>pd.DataFrame.sum</cite> convention. If True, NA excluded from
+results. If False, NA propagates. False is helpful to identify
+when a species is not measured using NaNs in its number density.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>n</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.n"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">number_density()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">mass_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.mass_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the plasma mass densities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>rho</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">rho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.rho"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">mass_density()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">thermal_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.thermal_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the thermal speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. A total species (“s0+s1+…”) cannot be passed
+because the result is physically amibguous.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>w</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.w"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">thermal_speed()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.pth"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the thermal pressure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pth</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the thermal temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>temp</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get perpendicular, parallel, and scalar plasma beta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. Species handling controlled by <code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>beta</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>In uncertain units, the NRL Plasma Formulary (2016) defined
+<span class="math notranslate nohighlight">\(\beta\)</span>:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\beta = \frac{8 \pi n k_B T}{B^2} = \frac{2 k_b T / m}{B^2 / 4 \phi \rho}\)</span></p>
+</div></blockquote>
+<p>and the Alfven speed as:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(C_A^2 = B^2 / 4 \pi \rho\)</span>.</p>
+</div></blockquote>
+<p>I define thermal speed as:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(w^2 = \frac{2 k_B T}{m}\)</span>.</p>
+</div></blockquote>
+<p>Combining these equations, we get:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\beta = w^2 / C_A^2\)</span>,</p>
+</div></blockquote>
+<p>which is independent of dimensional constants. Given I define
+<span class="math notranslate nohighlight">\(p_{th} = \frac{1}{2} \rho w^2\)</span> and <span class="math notranslate nohighlight">\(C_A^2 = \frac{1}{\mu_0}B^2 \rho\)</span> in SI units, I can
+rewrite <span class="math notranslate nohighlight">\(\beta\)</span></p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\beta = \frac{2 p_{th}}{\rho} \frac{\mu_0 \rho}{B^2} = \frac{2 \mu_0 p_{th}}{B^2}\)</span>.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">anisotropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.anisotropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Pressure anisotropy.</p>
+<p>Note that for a single species, the pressure anisotropy is just the
+temperature anisotropy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. Species handling is primarily controlled
+by <code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ani</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.Series</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get an ion velocity or calculate the center-of-mass velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed and contains
+“+”, return a pd.Series containing the center-of-mass velocity
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code>. If contains a single species,
+return that ion’s velocity.</p></li>
+<li><p><strong>project_m2q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>False</em>) – If True, project velocity by <span class="math notranslate nohighlight">\(\sqrt{m/q}\)</span>. Disables center-of-
+mass species.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>velocity</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.Series</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.v"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <cite>velocity</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the differential flow between species <cite>s0</cite> and
+species <cite>s1</cite>: <span class="math notranslate nohighlight">\(v_{s0} - v_{s1}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – If either species contains a “+”, the center-of-mass velocity
+for the indicated species is used.</p></li>
+<li><p><strong>s1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – If either species contains a “+”, the center-of-mass velocity
+for the indicated species is used.</p></li>
+<li><p><strong>project_m2q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>False</em>) – If True, project each speed by <span class="math notranslate nohighlight">\(\sqrt{m/q}\)</span>. Disables center-
+of-mass species.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dv</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vector.Vector</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector.Vector</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pdynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.pdynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the dynamic or drift pressure for the given species.</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2\)</span></p>
+</div></blockquote>
+<p>The calculation is done in the plasma frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<em>list-like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – List-like of individual species, e.g. [“a”, “p1”].
+Can NOT be a list-like including sums, e.g. [“a”, “p1+p2”].</p></li>
+<li><p><strong>project_m2q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>False</em>) – If True, project the velocities by <span class="math notranslate nohighlight">\(\sqrt{m/q}\)</span>. Allows for only
+two species to be passed and takes the differential flow between them.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pdv</strong> – Dynamic pressure due to <cite>species</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pdv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.pdv"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pdynamic()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">sound_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.sound_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the sound speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – TODO: What controls species?</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>cs</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame or pd.Series depending on <cite>species</cite> inputs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.cs"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">sound_speed()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.ca"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the isotropic MHD Alfven speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Species controlled by <code class="xref py py-meth docutils literal notranslate"><span class="pre">mass_density()</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ca</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame or pd.Series depending on <cite>species</cite> inputs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">afsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdynamic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.afsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the square of anisotropy factor.</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)\)</span></p>
+</div></blockquote>
+<dl>
+<dt>N.B. Because of the <span class="math notranslate nohighlight">\(1 +\)</span>, afsq(s0, s1).sum(axis=1) is not the</dt><dd><p>same as afsq(s0+s1). The two are related by:</p>
+<blockquote>
+<div><p>afsq.(s0+s1) = 1 + (afsq(s0, s1) - 1).sum(axis=1)</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p></li>
+<li><p><strong>pydnamic</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – If str, the component of the dynamic pressure to use when
+calculating <span class="math notranslate nohighlight">\(p_{\tilde{v}}\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>afsq</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame depending on the len(species).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">caani</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdynamic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.caani"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the anisotropic MHD Alfven speed:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(C_{A;Ani} = C_A\sqrt{AFSQ}\)</span></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. In either case, all species are summed over and
+a pd.Series is returned. This addresses complications from the
+<cite>stuple = self._chk_species(*species)</cite> mass densities in Ca and AFSQ,
+the latter via <code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code>.</p></li>
+<li><p><strong>pydnamic</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – If str, the component of the dynamic pressure to use when
+calculating <span class="math notranslate nohighlight">\(p_{\tilde{v}}\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>caani</strong> – Only pd.Series is returned because of the combination of mass
+density and pressure terms in the CaAni equation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ca</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">afsq</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">lnlambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.lnlambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the Coulomb logarithm between species s0 and s1.</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})\)</span></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. It cannot be a sum of species,
+nor can it be an iterable of species.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>lnlambda</strong> – Only <cite>pd.Series</cite> is returned because Coulomb require
+species alignment in such a fashion that array
+operations using <cite>pd.DataFrame</cite> alignment won’t work.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nuc</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">nuc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">both_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.nuc"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the momentum collision rate following [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sa</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The test, field particle species. Each can only identify a single
+ion species and it cannot be an iterable of lists, etc.</p></li>
+<li><p><strong>sb</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The test, field particle species. Each can only identify a single
+ion species and it cannot be an iterable of lists, etc.</p></li>
+<li><p><strong>both_species</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, calculate the effective collision rate for a
+two-ion-species plasma following Eq. (23). Otherwise, calculate
+it following Eq. (18).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nu</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If nu.name is “sa-sb”, then <cite>both_species=False</cite> in calclulation.
+If nu.name is “sa+sb”, then <cite>both_species=True</cite>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lnlambda</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">nc</span></code></p>
+</div>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Hernández, R., &amp; Marsch, E. (1985). Collisional time scales for</dt><dd><p>temperature and velocity exchange between drifting Maxwellians.
+Journal of Geophysical Research, 90(A11), 11062.
+&lt;<a class="reference external" href="https://doi.org/10.1029/JA090iA11p11062">https://doi.org/10.1029/JA090iA11p11062</a>&gt;.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">nc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">both_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.nc"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the Coulomb number between species <cite>sa</cite> and <cite>sb</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sa</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Species identifying the ions to use in calculation. Can’t be a
+combination of things like “s0+s1”, “s0,s1”, nor (“s0”, “s1”).</p></li>
+<li><p><strong>sb</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Species identifying the ions to use in calculation. Can’t be a
+combination of things like “s0+s1”, “s0,s1”, nor (“s0”, “s1”).</p></li>
+<li><p><strong>both_species</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Passed to <cite>nuc</cite>. If True, calculate the two-ion-plasma collision frequency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nc</strong> – Coulomb number</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nuc</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">lnlambda</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">vdf_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.vdf_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
+core VDF at the peak beam velocity.</p>
+<p>To avoid overflow erros, we return ln(ratio).</p>
+<p>The VDF for species <span class="math notranslate nohighlight">\(i\)</span> at velocity <span class="math notranslate nohighlight">\(v_j\)</span> is:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(f_i(v_j) = \frac{n_i}{(\pi w_i ^2)^{3/2}} \exp[ -(\frac{v_j - v_i}{w_i})^2]\)</span></p>
+</div></blockquote>
+<p>The beam to core VDF ratio evaluated at the proton beam velocity is:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\frac{f_2}{f_1}|_{v_2} = \frac{n_2}{n_1} ( \frac{w_1}{w_2} )^3 \exp[ (\frac{v_2 - v_1}{w_1})^2 ]\)</span></p>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number density, <span class="math notranslate nohighlight">\(w\)</span> gives the thermal speed, and
+<span class="math notranslate nohighlight">\(u\)</span> is the bulk velocity.</p>
+<p>In the case of a Bimaxwellian, we <span class="math notranslate nohighlight">\(w^3 = w_\parallel w_\perp^2\)</span>
+<span class="math notranslate nohighlight">\((\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_\perp^2\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plasma</strong> (<em>pd.DataFrame</em>) – Contains the number densities, vector velocities, and thermal speeds
+of the beam and core species.</p></li>
+<li><p><strong>beam</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>&quot;p2&quot;</em>) – The beam population, defaults to proton beams.</p></li>
+<li><p><strong>core</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>&quot;p1&quot;</em>) – The core population, defaults to proton core.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>f2f1</strong> – Natural logarithm of the beam to core VDF ratio.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This routine was written for Faraday cup data quality validation, so
+alpha particle velocities are projected with by <span class="math notranslate nohighlight">\(\sqrt{2.0}\)</span> to
+the velocity window in which they are measured.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">estimate_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.estimate_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Estimate the electron parameters with a scalar temperature.</p>
+<p>Assume temperature is the same as proton scalar temerature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">heat_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.heat_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the parallel heat flux</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)\)</span></p>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(v\)</span> is each species’ velocity in the Center-of-Mass frame and
+<span class="math notranslate nohighlight">\(w\)</span> is each species parallel thermal speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>strings</em>) – The species to use. If a sum is indicated, take the sum
+of the input species.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>q</strong> – Dimensionality depends on species inputs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>pd.Series</cite> or <cite>pd.DataFrame</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">qpar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.qpar"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">heat_flux()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">build_alfvenic_turbulence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.build_alfvenic_turbulence"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Create an Alfvenic turbulence instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Species identifier. When no <cite>,</cite> present, use center-of-mass
+velocity as the velocity term. Alternatively, may contain up to
+one <cite>,</cite>. This is a unique <cite>Plasma</cite> case in which <cite>s0+s1,s0+s1+s2</cite>
+is a valid identifier. Here, the 2nd species is treated as the
+mass density passed to <cite>AlfvenTurbulence</cite> and used for converting
+magentic field in Alfven units.</p></li>
+<li><p><strong>kwargs</strong> – Passed to <cite>rolling</cite> method in
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AlfvenicTurbulence</span></code>
+to specify window size.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">S</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.S"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">specific_entropy()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">specific_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.specific_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the specific entropy following [1] as</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(p_\mathrm{th} \rho^{-\gamma}\)</span></p>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(gamma=5/3\)</span>, <span class="math notranslate nohighlight">\(p_\mathrm{th}\)</span> is the thermal presure,
+and <span class="math notranslate nohighlight">\(rho\)</span> is the mass density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>list-like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>Comma separated strings (“a,p1”) are invalid.
+Comma separated lists (“a”, “p1”) are valid.
+Total effective species (“a+p1”) are valid and use</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(p_\mathrm{th} = \sum_s p_{\mathrm{th},s}\)</span>
+<span class="math notranslate nohighlight">\(\rho = \sum_s \rho_s\)</span>.</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.</dt><dd><p>11–100). &lt;<a class="reference external" href="https://doi.org/10.1007/978-94-009-7194-3_2">https://doi.org/10.1007/978-94-009-7194-3_2</a>&gt;.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">kinetic_energy_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.kinetic_energy_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculate the plasma kinetic energy flux.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Each species is a string. If only one string is passed, it can
+contain “+”. If this is the case, the species are summed over and
+a pd.Series is returned. Otherwise, the individual quantities are
+returned as a pd.DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>rho</strong> – See Parameters for more info.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series or pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Wk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.Wk"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Shortcut to <code class="xref py py-meth docutils literal notranslate"><span class="pre">kinetic_energy_flux()</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.core.ions.html" class="btn btn-neutral float-left" title="solarwindpy.core.ions module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.core.spacecraft.html" class="btn btn-neutral float-right" title="solarwindpy.core.spacecraft module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

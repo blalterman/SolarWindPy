@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -114,7 +136,7 @@
 
 <span class="c1"># class Hist2D(base.Plot2D, AggPlot):</span>
 <div class="viewcode-block" id="Hist2D">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Hist2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">,</span> <span class="n">AggPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a 2D histogram with an optional z-value using an equal number</span>
 <span class="sd">    of bins along the x and y axis.</span>
@@ -136,7 +158,7 @@
 <span class="sd">    logx, logy: bool</span>
 <span class="sd">        If True, log10 scale the axis.</span>
 
-<span class="sd">    Properties</span>
+<span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    data:</span>
 <span class="sd">    bins:</span>
@@ -163,6 +185,8 @@
 <span class="sd">        Make a 2D plot of the data with an optional color bar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Hist2D.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x</span><span class="p">,</span>
@@ -186,22 +210,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_bins_intervals</span><span class="p">(</span><span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">bin_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_cut</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_alim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_alim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_gb_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Hist2D._maybe_convert_to_log_scale">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._maybe_convert_to_log_scale">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">y</span>
 
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
-
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
     <span class="c1">#     def set_path(self, new, add_scale=True):</span>
     <span class="c1">#         # Bug: path doesn&#39;t auto-set log information.</span>
@@ -233,7 +255,7 @@
     <span class="c1">#     set_path.__doc__ = base.Base.set_path.__doc__</span>
 
 <div class="viewcode-block" id="Hist2D.set_labels">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
@@ -272,7 +294,7 @@
     <span class="c1">#         self._clip = clip</span>
 
 <div class="viewcode-block" id="Hist2D.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
@@ -284,7 +306,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.set_axnorm">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_axnorm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The method by which the gridded data is normalized.</span>
 
@@ -317,8 +339,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
-<div class="viewcode-block" id="Hist2D._axis_normalizer">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._axis_normalizer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_axis_normalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Takes care of row, column, total, and density normaliation.</span>
 
@@ -385,11 +405,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized axnorm (</span><span class="si">{</span><span class="n">axnorm</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">agg</span></div>
-
+        <span class="k">return</span> <span class="n">agg</span>
 
 <div class="viewcode-block" id="Hist2D.agg">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
@@ -412,18 +431,13 @@
         <span class="k">return</span> <span class="n">agg</span></div>
 
 
-<div class="viewcode-block" id="Hist2D._make_cbar">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._make_cbar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_cbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">ticks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
             <span class="s2">&quot;ticks&quot;</span><span class="p">,</span>
             <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Hist2D._limit_color_norm">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._limit_color_norm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">):</span>
             <span class="c1"># Don&#39;t limit us to (1%, 99%) interval.</span>
@@ -436,11 +450,10 @@
             <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">v0</span>
         <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">v1</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span></div>
-
+        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Hist2D.make_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -454,7 +467,7 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a 2D plot on `ax` using `ax.pcolormesh`.</span>
 
-<span class="sd">        Paremeters</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ax: mpl.axes.Axes, None</span>
 <span class="sd">            If None, create an `Axes` instance from `plt.subplots`.</span>
@@ -573,7 +586,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.get_border">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.get_border">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.get_border">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_border</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the top and bottom edges of the plot.</span>
 
@@ -606,8 +619,6 @@
         <span class="k">return</span> <span class="n">border</span></div>
 
 
-<div class="viewcode-block" id="Hist2D._plot_one_edge">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._plot_one_edge">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_one_edge</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="p">,</span>
@@ -655,11 +666,10 @@
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Hist2D.plot_edges">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.plot_edges">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.plot_edges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sg_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Overplot the edges.</span>
 
@@ -694,8 +704,6 @@
         <span class="k">return</span> <span class="n">etop</span><span class="p">,</span> <span class="n">ebottom</span></div>
 
 
-<div class="viewcode-block" id="Hist2D._get_contour_levels">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._get_contour_levels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_contour_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">pass</span>
@@ -717,11 +725,8 @@
                 <span class="sa">f</span><span class="s2">&quot;Unrecognized axis normalization </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="si">}</span><span class="s2"> for default levels.&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">levels</span></div>
+        <span class="k">return</span> <span class="n">levels</span>
 
-
-<div class="viewcode-block" id="Hist2D._verify_contour_passthrough_kwargs">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D._verify_contour_passthrough_kwargs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_contour_passthrough_kwargs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
     <span class="p">):</span>
@@ -734,11 +739,10 @@
         <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
-        <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span></div>
-
+        <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
 <div class="viewcode-block" id="Hist2D.plot_contours">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -758,7 +762,7 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a contour plot on `ax` using `ax.contour`.</span>
 
-<span class="sd">        Paremeters</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ax: mpl.axes.Axes, None</span>
 <span class="sd">            If None, create an `Axes` instance from `plt.subplots`.</span>
@@ -922,7 +926,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.project_1d">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.project_1d">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.project_1d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">project_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">only_plotted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a `Hist1D` from the data stored in this `His2D`.</span>
 
@@ -996,7 +1000,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.make_joint_h2_h1_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_joint_h2_h1_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kwargs_1d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
@@ -1069,7 +1073,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.id_data_above_contour">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.id_data_above_contour">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.id_data_above_contour">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">id_data_above_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gets data above the `level`.</span>
 
@@ -1105,7 +1109,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.take_data_in_yrange_across_x">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">take_data_in_yrange_across_x</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ranges_by_x</span><span class="p">,</span> <span class="n">get_x_bounds</span><span class="p">,</span> <span class="n">get_y_bounds</span><span class="p">,</span>
     <span class="p">):</span>

@@ -1,0 +1,8 @@
+solarwindpy.core.vector module
+==============================
+
+.. automodule:: solarwindpy.core.vector
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

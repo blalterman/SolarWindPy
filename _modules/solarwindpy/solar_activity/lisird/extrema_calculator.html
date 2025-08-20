@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -88,7 +110,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtremaCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine extrema in an activity index time series.</span>
 
@@ -120,6 +142,8 @@
 <span class="sd">            ========== ============ ============</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="ExtremaCalculator.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">activity_index</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create the calculator.</span>
 
@@ -141,7 +165,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">activity_index</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_threshold</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">find_threshold_crossings</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">find_extrema</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">find_extrema</span><span class="p">()</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -203,7 +228,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formatted_extrema</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.set_name">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;delk2&quot;</span><span class="p">,</span> <span class="s2">&quot;delwb&quot;</span><span class="p">,</span> <span class="s2">&quot;k2vk3&quot;</span><span class="p">,</span> <span class="s2">&quot;viored&quot;</span><span class="p">,</span> <span class="s2">&quot;delk1&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -213,7 +238,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.set_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;delk1&quot;</span><span class="p">,</span> <span class="s2">&quot;delk2&quot;</span><span class="p">,</span> <span class="s2">&quot;delwb&quot;</span><span class="p">,</span> <span class="s2">&quot;emdx&quot;</span><span class="p">,</span> <span class="s2">&quot;k2vk3&quot;</span><span class="p">,</span> <span class="s2">&quot;k3&quot;</span><span class="p">,</span> <span class="s2">&quot;viored&quot;</span><span class="p">):</span>
@@ -230,8 +255,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="n">window</span></div>
 
 
-<div class="viewcode-block" id="ExtremaCalculator._format_axis">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._format_axis">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
         <span class="n">left</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
@@ -252,31 +275,22 @@
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">hdl</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">lbl</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Year&quot;</span><span class="p">)</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Year&quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="ExtremaCalculator._plot_data">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._plot_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rolled&quot;</span><span class="p">)</span></div>
-
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rolled&quot;</span><span class="p">)</span>
 
     <span class="c1">#         x = mpl.dates.date2num(self.raw.index)</span>
     <span class="c1">#         y = self.raw.values</span>
     <span class="c1">#         ax.plot(x, y, color=&quot;C2&quot;, label=&quot;Raw&quot;)</span>
 
-<div class="viewcode-block" id="ExtremaCalculator._plot_threshold">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._plot_threshold">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
 
-
-<div class="viewcode-block" id="ExtremaCalculator._plot_extrema_ranges">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._plot_extrema_ranges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_extrema_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
             <span class="p">{</span><span class="s2">&quot;cut&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_in_extrema_finding_intervals</span><span class="p">,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">},</span>
@@ -290,19 +304,13 @@
             <span class="n">v</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
             <span class="n">ngroup</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="ExtremaCalculator._plot_threshold_crossings">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._plot_threshold_crossings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_threshold_crossings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">crossings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_crossings</span>
         <span class="n">crossings</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Changes&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="ExtremaCalculator._plot_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._plot_extrema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="n">maxima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Max&quot;</span><span class="p">]</span>
         <span class="n">minima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Min&quot;</span><span class="p">]</span>
@@ -310,11 +318,10 @@
         <span class="k">for</span> <span class="n">ex</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;limegreen&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Max&quot;</span><span class="p">,</span> <span class="s2">&quot;Min&quot;</span><span class="p">)):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">ex</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">lbl</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span></div>
-
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">lbl</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.set_threshold">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionType</span>
@@ -344,8 +351,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span> <span class="o">=</span> <span class="n">threshold</span></div>
 
 
-<div class="viewcode-block" id="ExtremaCalculator._find_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._find_extrema">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_extrema</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;cut&quot;</span><span class="p">:</span> <span class="n">cut</span><span class="p">,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -379,11 +384,8 @@
         <span class="n">maxima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;Max&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">maxima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">minima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">minima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-        <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span></div>
+        <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span>
 
-
-<div class="viewcode-block" id="ExtremaCalculator._validate_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator._validate_extrema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;LymanAlpha&quot;</span><span class="p">:</span>
@@ -415,11 +417,10 @@
         <span class="n">maxima</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk_max</span><span class="p">]</span>
         <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tk_min</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span></div>
-
+        <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.find_threshold_crossings">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_threshold_crossings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
@@ -437,7 +438,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.cut_data_into_extrema_finding_intervals">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">cut_data_into_extrema_finding_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span>
@@ -458,7 +459,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.format_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_extrema</span><span class="p">(</span><span class="n">extrema</span><span class="p">):</span>
         <span class="n">minima</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Min&quot;</span><span class="p">]</span>
@@ -481,7 +482,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.find_extrema">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># raw = self.raw</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
@@ -498,7 +499,7 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.make_plot">
-<a class="viewcode-back" href="../../../../solarwindpy.solar_activity.lisird.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crossings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extrema</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">(</span><span class="n">scale_width</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
 

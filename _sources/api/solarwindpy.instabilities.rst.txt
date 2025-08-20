@@ -1,0 +1,20 @@
+solarwindpy.instabilities package
+=================================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.instabilities.beta_ani
+   solarwindpy.instabilities.verscharen2016
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.instabilities
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

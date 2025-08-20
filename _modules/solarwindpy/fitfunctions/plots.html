@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -96,8 +118,10 @@
 
 
 <div class="viewcode-block" id="FFPlot">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FFPlot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="FFPlot.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">TeX_info</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">fitfunction_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.</span>
 
@@ -120,7 +144,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_fit_result</span><span class="p">(</span><span class="n">fit_result</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_fitfunction_name</span><span class="p">(</span><span class="n">fitfunction_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">LogAxes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">AxesLabels</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">AxesLabels</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
@@ -181,7 +206,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_fit</span>
 
 <div class="viewcode-block" id="FFPlot.set_fitfunction_name">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_fitfunction_name">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_fitfunction_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_fitfunction_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the descriptive name for saved plots.&quot;&quot;&quot;</span>
 
@@ -189,7 +214,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.set_fit_result">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_fit_result">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_fit_result">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_fit_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the optimization result object.&quot;&quot;&quot;</span>
 
@@ -197,7 +222,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.set_observations">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_observations">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_observations">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set raw and fitted values used for plotting.&quot;&quot;&quot;</span>
 
@@ -209,8 +234,6 @@
 
     <span class="c1">#         self._robust_residuals = robust_residuals</span>
 
-<div class="viewcode-block" id="FFPlot._estimate_markevery">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._estimate_markevery">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_estimate_markevery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Heuristic marker spacing for large datasets.&quot;&quot;&quot;</span>
 
@@ -227,11 +250,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">markevery</span><span class="p">:</span>
             <span class="n">markevery</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">return</span> <span class="n">markevery</span></div>
+        <span class="k">return</span> <span class="n">markevery</span>
 
-
-<div class="viewcode-block" id="FFPlot._format_hax">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._format_hax">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_hax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_rax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and</span>
 <span class="sd">        :py:meth:`plot_fit` results.</span>
@@ -256,11 +276,8 @@
         <span class="c1">#             ax.xaxis.get_label().set_visible(False)</span>
         <span class="c1">#             [t.set_visible(False) for t in ax.xaxis.get_ticklabels()]</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="FFPlot._format_rax">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot._format_rax">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_rax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">pct</span><span class="p">):</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
 
@@ -284,11 +301,10 @@
 
         <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">ax</span></div>
-
+        <span class="k">return</span> <span class="n">ax</span>
 
 <div class="viewcode-block" id="FFPlot.plot_raw">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,</span>
 <span class="sd">        :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.</span>
@@ -370,7 +386,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.plot_used">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_used">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_used">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_used</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.used.x`,</span>
 <span class="sd">        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.</span>
@@ -481,7 +497,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.plot_fit">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_fit">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">annotate_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the fit.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -517,7 +533,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.plot_raw_used_fit">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw_used_fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -593,7 +609,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.plot_residuals">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_residuals">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_residuals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_residuals</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">subplots_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
@@ -649,8 +665,8 @@
             <span class="n">marker</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span>
             <span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;linestyle&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
-            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; \; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">title</span><span class="p">()])</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
-                <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">title</span><span class="p">()])</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
             <span class="p">)</span>
             <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2">}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
             <span class="c1">#             label = (r&quot;$\mathrm{%s \; %s}$&quot; % (label, kind.title()).replace(&quot; \; &quot;, &quot;&quot;)</span>
@@ -674,8 +690,8 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="n">pct</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-                <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
-                    <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+                <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
                 <span class="p">),</span>
                 <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
                 <span class="n">color</span><span class="o">=</span><span class="s2">&quot;forestgreen&quot;</span><span class="p">,</span>
@@ -692,8 +708,8 @@
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
                     <span class="n">r</span><span class="p">,</span>
-                    <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>  <span class="c1"># noqa: W605</span>
-                        <span class="s2">&quot; \; &quot;</span>  <span class="c1"># noqa: W605</span>
+                    <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
+                        <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
                     <span class="p">),</span>
                     <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkorange&quot;</span><span class="p">,</span>
@@ -713,7 +729,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.plot_raw_used_fit_resid">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit_resid">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit_resid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw_used_fit_resid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -778,7 +794,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.residuals">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.residuals">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.residuals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
 <span class="sd">        If pct, normalize by fit yvalues.</span>
@@ -810,7 +826,7 @@
     <span class="c1">#         return r</span>
 
 <div class="viewcode-block" id="FFPlot.set_labels">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
 <span class="sd">        is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
@@ -828,7 +844,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.set_log">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_log">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_log">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set :py:class:`LogAxes`.</span>
 
@@ -842,7 +858,7 @@
 
 
 <div class="viewcode-block" id="FFPlot.set_TeX_info">
-<a class="viewcode-back" href="../../../solarwindpy.fitfunctions.html#solarwindpy.fitfunctions.plots.FFPlot.set_TeX_info">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_TeX_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign :class:`TeXinfo` used for annotations.&quot;&quot;&quot;</span>
 

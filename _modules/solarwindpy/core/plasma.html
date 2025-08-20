@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -120,15 +142,72 @@
 
 
 <div class="viewcode-block" id="Plasma">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Plasma</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Container for ions, magnetic field, and spacecraft information.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Container for multi-species plasma physics data and analysis.</span>
+
+<span class="sd">    The Plasma class serves as the central container for solar wind plasma</span>
+<span class="sd">    analysis, combining ion moment data, magnetic field measurements, and</span>
+<span class="sd">    spacecraft trajectory information for comprehensive plasma physics calculations.</span>
+<span class="sd">    </span>
+<span class="sd">    This class enables analysis of multi-species plasma including protons, </span>
+<span class="sd">    alpha particles, and heavier ions. It provides convenient access to ion </span>
+<span class="sd">    species through attribute shortcuts and supports advanced plasma physics</span>
+<span class="sd">    calculations such as plasma beta, Coulomb collision frequencies, and </span>
+<span class="sd">    thermal parameters.</span>
 
 <span class="sd">    Attribute access is first attempted on the underlying :py:attr:`ions` table</span>
 <span class="sd">    before falling back to ``super().__getattr__``. This allows convenient</span>
-<span class="sd">    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`.</span>
+<span class="sd">    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`</span>
+<span class="sd">    and ``plasma.p1`` for protons.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pandas.DataFrame</span>
+<span class="sd">        Multi-indexed DataFrame containing plasma measurements with columns</span>
+<span class="sd">        labeled by (&quot;M&quot;, &quot;C&quot;, &quot;S&quot;) for measurement, component, and species.</span>
+<span class="sd">    ions : pandas.Series of Ion objects</span>
+<span class="sd">        Dictionary-like access to individual ion species objects.</span>
+<span class="sd">    species : list of str</span>
+<span class="sd">        Available ion species identifiers in the plasma.</span>
+<span class="sd">    spacecraft : Spacecraft, optional</span>
+<span class="sd">        Spacecraft trajectory and velocity information.</span>
+<span class="sd">    auxiliary_data : pandas.DataFrame, optional</span>
+<span class="sd">        Additional measurements such as quality flags or derived parameters.</span>
+<span class="sd">        </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Thermal speeds assume the relationship :math:`mw^2 = 2kT` where :math:`m` </span>
+<span class="sd">    is ion mass, :math:`w` is thermal speed, :math:`k` is Boltzmann&#39;s constant,</span>
+<span class="sd">    and :math:`T` is temperature.</span>
+<span class="sd">    </span>
+<span class="sd">    The underlying data structure uses a three-level MultiIndex for columns:</span>
+<span class="sd">    - Level 0 (M): Measurement type (&#39;n&#39;, &#39;v&#39;, &#39;w&#39;, &#39;b&#39;, etc.)</span>
+<span class="sd">    - Level 1 (C): Component (&#39;x&#39;, &#39;y&#39;, &#39;z&#39;, &#39;par&#39;, &#39;per&#39;, etc.)  </span>
+<span class="sd">    - Level 2 (S): Species identifier (&#39;p1&#39;, &#39;a&#39;, &#39;o6&#39;, etc.)</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Create a plasma object from multi-species data:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; plasma = Plasma(data, &#39;p1&#39;, &#39;a&#39;)  # Protons and alphas</span>
+<span class="sd">    &gt;&gt;&gt; proton_density = plasma.p1.n      # Proton number density [cm^-3]</span>
+<span class="sd">    &gt;&gt;&gt; alpha_velocity = plasma.a.v       # Alpha velocity vector [km/s]</span>
+<span class="sd">    </span>
+<span class="sd">    Calculate plasma physics parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; beta = plasma.beta()              # Plasma beta parameter</span>
+<span class="sd">    &gt;&gt;&gt; coulomb = plasma.nc()             # Coulomb collision frequency [s^-1]</span>
+<span class="sd">    &gt;&gt;&gt; temp_ratio = plasma.a.T / plasma.p1.T  # Alpha-proton temp ratio</span>
+<span class="sd">    </span>
+<span class="sd">    Access magnetic field data:</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; b_field = plasma.b                # Magnetic field vector [nT]</span>
+<span class="sd">    &gt;&gt;&gt; b_mag = plasma.b.mag              # Magnetic field magnitude [nT]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Plasma.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
@@ -214,7 +293,8 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_ions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="n">spacecraft</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_auxiliary_data</span><span class="p">(</span><span class="n">auxiliary_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_auxiliary_data</span><span class="p">(</span><span class="n">auxiliary_data</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
@@ -224,6 +304,19 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Time index of the plasma data.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.DatetimeIndex</span>
+<span class="sd">            Datetime index containing measurement timestamps.</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; plasma.epoch</span>
+<span class="sd">        DatetimeIndex([&#39;1995-01-01&#39;, &#39;2015-03-23&#39;, &#39;2022-10-09&#39;], </span>
+<span class="sd">                      dtype=&#39;datetime64[ns]&#39;, name=&#39;Epoch&#39;, freq=None)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
 
     <span class="nd">@property</span>
@@ -233,7 +326,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to `spacecraft`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:attr:`spacecraft`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacecraft</span>
 
     <span class="nd">@property</span>
@@ -254,21 +347,51 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">aux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`auxiliary_data`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:attr:`auxiliary_data`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_data</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">log_plasma_at_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flag indicating whether to log plasma statistics during initialization.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if plasma statistics should be logged at initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        set_log_plasma_stats : Method to modify this setting</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_plasma_at_init</span>
 
 <div class="viewcode-block" id="Plasma.set_log_plasma_stats">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.set_log_plasma_stats">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.set_log_plasma_stats">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_log_plasma_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set flag for logging plasma statistics during initialization.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new : bool</span>
+<span class="sd">            Whether to enable logging of plasma statistics.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        When enabled, summary statistics including density ranges, velocity </span>
+<span class="sd">        distributions, and magnetic field statistics are logged during </span>
+<span class="sd">        plasma initialization.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_plasma_at_init</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.save">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.save">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fname</span><span class="p">,</span>
@@ -375,7 +498,7 @@
 
 
 <div class="viewcode-block" id="Plasma.load_from_file">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.load_from_file">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.load_from_file">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_from_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -474,8 +597,6 @@
         <span class="k">return</span> <span class="n">plasma</span></div>
 
 
-<div class="viewcode-block" id="Plasma._set_species">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma._set_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize `species` property to make overriding `set_data`</span>
@@ -483,14 +604,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_species_for_setting</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> init with species </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> init with species </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
-
-<div class="viewcode-block" id="Plasma._chk_species">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma._chk_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_chk_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:meth:`ions`.</span>
+<span class="sd">        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:attr:`ions`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conform_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
         <span class="n">minimal_species</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
@@ -519,8 +637,7 @@
             <span class="p">)</span>
             <span class="c1"># print(msg % (requested, available, unavailable), flush=True, end=&quot;\n&quot;)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="n">requested</span><span class="p">,</span> <span class="n">available</span><span class="p">,</span> <span class="n">unavailable</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">species</span></div>
-
+        <span class="k">return</span> <span class="n">species</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -546,7 +663,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
 
 <div class="viewcode-block" id="Plasma.drop_species">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.drop_species">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.drop_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">drop_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Plasma&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new :class:`Plasma` without the specified species.</span>
 
@@ -594,8 +711,33 @@
 
 
 <div class="viewcode-block" id="Plasma.set_spacecraft">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.set_spacecraft">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.set_spacecraft">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_spacecraft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set or update the spacecraft trajectory data.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new : Spacecraft or None</span>
+<span class="sd">            Spacecraft trajectory object containing position and velocity data.</span>
+<span class="sd">            Must have matching datetime index with plasma data.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If spacecraft index does not match plasma data index.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The spacecraft data is required for calculating certain plasma physics</span>
+<span class="sd">        parameters such as Coulomb collision frequencies that depend on the</span>
+<span class="sd">        plasma frame transformation.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory_data)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.position  # Access trajectory data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">spacecraft</span><span class="o">.</span><span class="n">Spacecraft</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -611,8 +753,36 @@
 
 
 <div class="viewcode-block" id="Plasma.set_auxiliary_data">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.set_auxiliary_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.set_auxiliary_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_auxiliary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set or update auxiliary measurement data.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new : pandas.DataFrame or None</span>
+<span class="sd">            Additional measurements such as data quality flags, derived</span>
+<span class="sd">            parameters, or instrument-specific metadata. Must have matching</span>
+<span class="sd">            datetime index with plasma data.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        AssertionError</span>
+<span class="sd">            If auxiliary data index does not match plasma data index.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Auxiliary data provides additional context for plasma measurements</span>
+<span class="sd">        without being part of the core plasma physics calculations. Common</span>
+<span class="sd">        examples include quality flags, statistical uncertainties, or</span>
+<span class="sd">        instrument operational parameters.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({&#39;quality&#39;: [0, 1, 0]}, </span>
+<span class="sd">        ...                              index=plasma.epoch)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_auxiliary_data(quality_flags)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.aux.quality  # Access auxiliary data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -626,8 +796,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
-<div class="viewcode-block" id="Plasma._log_object_at_load">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma._log_object_at_load">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_log_object_at_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -672,11 +840,10 @@
                 <span class="n">name</span><span class="p">,</span>
                 <span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_string</span><span class="p">(),</span>
                 <span class="n">stats</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(),</span>
-            <span class="p">)</span></div>
-
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="Plasma.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the data and log statistics about it.&quot;&quot;&quot;</span>
         <span class="c1">#         assert isinstance(new, pd.DataFrame)</span>
@@ -771,12 +938,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Shortcut for `bfield`.</span>
+<span class="sd">        Shortcut for :py:attr:`bfield`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bfield</span>
 
 <div class="viewcode-block" id="Plasma.number_density">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.number_density">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.number_density">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">number_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the plasma number densities.</span>
@@ -811,7 +978,7 @@
 
 
 <div class="viewcode-block" id="Plasma.n">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.n">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.n">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shortcut to :py:meth:`number_density`.</span>
@@ -820,7 +987,7 @@
 
 
 <div class="viewcode-block" id="Plasma.mass_density">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.mass_density">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.mass_density">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mass_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the plasma mass densities.</span>
@@ -850,14 +1017,14 @@
 
 
 <div class="viewcode-block" id="Plasma.rho">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.rho">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.rho">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`mass_density`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.thermal_speed">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.thermal_speed">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.thermal_speed">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">thermal_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the thermal speed.</span>
 
@@ -890,14 +1057,14 @@
 
 
 <div class="viewcode-block" id="Plasma.w">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.w">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.w">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`thermal_speed`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermal_speed</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.pth">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.pth">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.pth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">pth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the thermal pressure.</span>
@@ -933,7 +1100,7 @@
 
 
 <div class="viewcode-block" id="Plasma.temperature">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.temperature">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.temperature">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the thermal temperature.</span>
@@ -965,7 +1132,7 @@
 
 
 <div class="viewcode-block" id="Plasma.beta">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.beta">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.beta">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get perpendicular, parallel, and scalar plasma beta.</span>
@@ -980,8 +1147,8 @@
 <span class="sd">        beta: :py:class:`pd.DataFrame`</span>
 <span class="sd">            See Parameters for more info.</span>
 
-<span class="sd">        Derivation</span>
-<span class="sd">        ----------</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
 <span class="sd">        In uncertain units, the NRL Plasma Formulary (2016) defined</span>
 <span class="sd">        :math:`\beta`:</span>
 
@@ -1021,7 +1188,7 @@
 
 
 <div class="viewcode-block" id="Plasma.anisotropy">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.anisotropy">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.anisotropy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">anisotropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pressure anisotropy.</span>
@@ -1062,7 +1229,7 @@
 
 
 <div class="viewcode-block" id="Plasma.velocity">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.velocity">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.velocity">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get an ion velocity or calculate the center-of-mass velocity.</span>
@@ -1127,7 +1294,7 @@
 
 
 <div class="viewcode-block" id="Plasma.v">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.v">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.v">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shortcut to `velocity`.</span>
@@ -1136,7 +1303,7 @@
 
 
 <div class="viewcode-block" id="Plasma.dv">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.dv">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.dv">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">dv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the differential flow between species `s0` and</span>
@@ -1176,7 +1343,7 @@
 
 
 <div class="viewcode-block" id="Plasma.pdynamic">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.pdynamic">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.pdynamic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">pdynamic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the dynamic or drift pressure for the given species.</span>
@@ -1263,14 +1430,14 @@
 
 
 <div class="viewcode-block" id="Plasma.pdv">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.pdv">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.pdv">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">pdv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`pdynamic`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdynamic</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="n">project_m2q</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.sound_speed">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.sound_speed">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.sound_speed">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sound_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the sound speed.</span>
 
@@ -1305,14 +1472,14 @@
 
 
 <div class="viewcode-block" id="Plasma.cs">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.cs">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.cs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">cs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`sound_speed`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sound_speed</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.ca">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.ca">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.ca">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">ca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the isotropic MHD Alfven speed.</span>
@@ -1353,7 +1520,7 @@
 
 
 <div class="viewcode-block" id="Plasma.afsq">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.afsq">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.afsq">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">afsq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">pdynamic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the square of anisotropy factor.</span>
 
@@ -1431,7 +1598,7 @@
 
 
 <div class="viewcode-block" id="Plasma.caani">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.caani">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.caani">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">caani</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">pdynamic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the anisotropic MHD Alfven speed:</span>
@@ -1480,7 +1647,7 @@
 
 
 <div class="viewcode-block" id="Plasma.lnlambda">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.lnlambda">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.lnlambda">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">lnlambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Coulomb logarithm between species s0 and s1.</span>
@@ -1564,7 +1731,7 @@
 
 
 <div class="viewcode-block" id="Plasma.nuc">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.nuc">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.nuc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">nuc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">,</span> <span class="n">both_species</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the momentum collision rate following [1].</span>
@@ -1694,7 +1861,7 @@
 
 
 <div class="viewcode-block" id="Plasma.nc">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.nc">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.nc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">nc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">,</span> <span class="n">both_species</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Coulomb number between species `sa` and `sb`.</span>
@@ -1762,7 +1929,7 @@
 
 
 <div class="viewcode-block" id="Plasma.vdf_ratio">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.vdf_ratio">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.vdf_ratio">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">vdf_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="n">core</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton</span>
@@ -1869,7 +2036,7 @@
 
 
 <div class="viewcode-block" id="Plasma.estimate_electrons">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.estimate_electrons">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.estimate_electrons">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">estimate_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Estimate the electron parameters with a scalar temperature.</span>
@@ -1983,7 +2150,7 @@
 
 
 <div class="viewcode-block" id="Plasma.heat_flux">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.heat_flux">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.heat_flux">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">heat_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the parallel heat flux</span>
@@ -2042,7 +2209,7 @@
 
 
 <div class="viewcode-block" id="Plasma.qpar">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.qpar">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.qpar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">qpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shortcut to :py:meth:`heat_flux`.</span>
@@ -2051,7 +2218,7 @@
 
 
 <div class="viewcode-block" id="Plasma.build_alfvenic_turbulence">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.build_alfvenic_turbulence">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.build_alfvenic_turbulence">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_alfvenic_turbulence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># raise NotImplementedError(&quot;Still working on module dev&quot;)</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create an Alfvenic turbulence instance.</span>
@@ -2102,14 +2269,14 @@
 
 
 <div class="viewcode-block" id="Plasma.S">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.S">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.S">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">S</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`specific_entropy`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">specific_entropy</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Plasma.specific_entropy">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.specific_entropy">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.specific_entropy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">specific_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the specific entropy following [1] as</span>
 
@@ -2156,7 +2323,7 @@
 
 
 <div class="viewcode-block" id="Plasma.kinetic_energy_flux">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.kinetic_energy_flux">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.kinetic_energy_flux">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">kinetic_energy_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the plasma kinetic energy flux.</span>
@@ -2187,7 +2354,7 @@
 
 
 <div class="viewcode-block" id="Plasma.Wk">
-<a class="viewcode-back" href="../../../solarwindpy.core.html#solarwindpy.core.plasma.Plasma.Wk">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.core.Plasma.Wk">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">Wk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut to :py:meth:`~kinetic_energy_flux`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

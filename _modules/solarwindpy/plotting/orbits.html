@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -104,11 +126,14 @@
 
 
 <div class="viewcode-block" id="OrbitPlot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitPlot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitPlot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OrbitPlot</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="OrbitPlot.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitPlot.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbit</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_orbit</span><span class="p">(</span><span class="n">orbit</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_disable_both</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -132,7 +157,7 @@
         <span class="k">return</span> <span class="n">gb</span>
 
 <div class="viewcode-block" id="OrbitPlot.set_path">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitPlot.set_path">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitPlot.set_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">orbit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set path information, accounting for orbit info.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -141,7 +166,7 @@
 
 
 <div class="viewcode-block" id="OrbitPlot.set_orbit">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitPlot.set_orbit">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitPlot.set_orbit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_orbit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;`IntervalIndex` corresponding to the times we want to subset the orbit.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">):</span>
@@ -150,7 +175,7 @@
 
 
 <div class="viewcode-block" id="OrbitPlot.make_cut">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitPlot.make_cut">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitPlot.make_cut">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_cut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">make_cut</span><span class="p">()</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut</span>
@@ -173,20 +198,20 @@
 
 
 <div class="viewcode-block" id="OrbitHist1D">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist1D">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OrbitHist1D</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="n">histograms</span><span class="o">.</span><span class="n">Hist1D</span><span class="p">):</span>
+<div class="viewcode-block" id="OrbitHist1D.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="OrbitHist1D._format_axis">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist1D._format_axis">[docs]</a>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
-
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="OrbitHist1D.agg">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist1D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">fcn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fcn&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -217,7 +242,7 @@
 
 
 <div class="viewcode-block" id="OrbitHist1D.make_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist1D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make a plot on `ax`.</span>
 
@@ -252,13 +277,14 @@
 
 
 <div class="viewcode-block" id="OrbitHist2D">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OrbitHist2D</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="n">histograms</span><span class="o">.</span><span class="n">Hist2D</span><span class="p">):</span>
+<div class="viewcode-block" id="OrbitHist2D.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">orbit</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="OrbitHist2D._format_in_out_axes">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D._format_in_out_axes">[docs]</a>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_in_out_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inbound</span><span class="p">,</span> <span class="n">outbound</span><span class="p">):</span>
         <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Formatting in out axes&quot;)</span>
         <span class="c1">#         log_mem_usage()</span>
@@ -276,8 +302,7 @@
         <span class="n">sout</span> <span class="o">=</span> <span class="n">outbound</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sin</span><span class="p">,</span> <span class="n">sout</span><span class="p">):</span>
             <span class="n">spine</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s2">&quot;cyan&quot;</span><span class="p">)</span>
-            <span class="n">spine</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)</span></div>
-
+            <span class="n">spine</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)</span>
 
         <span class="c1"># TODO: Get top and bottom axes to line up without `tight_layout`, which</span>
         <span class="c1">#       puts colorbar into an unusable location.</span>
@@ -292,8 +317,6 @@
     <span class="c1">#                 tax.set_xlim(* (np.array(ax.get_xlim()) / conversion))</span>
     <span class="c1">#                 tax.set_xlabel(labels.special.Distance2Sun(&quot;AU&quot;))</span>
 
-<div class="viewcode-block" id="OrbitHist2D._prune_lower_yaxis_ticks">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D._prune_lower_yaxis_ticks">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_prune_lower_yaxis_ticks</span><span class="p">(</span><span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span><span class="p">):</span>
         <span class="n">nbins</span> <span class="o">=</span> <span class="n">ax0</span><span class="o">.</span><span class="n">get_yticks</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
@@ -301,11 +324,8 @@
             <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span>
                     <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">)</span>
-                <span class="p">)</span></div>
+                <span class="p">)</span>
 
-
-<div class="viewcode-block" id="OrbitHist2D._format_in_out_both_axes">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D._format_in_out_both_axes">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_in_out_both_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axi</span><span class="p">,</span> <span class="n">axo</span><span class="p">,</span> <span class="n">axb</span><span class="p">,</span> <span class="n">cbari</span><span class="p">,</span> <span class="n">cbaro</span><span class="p">,</span> <span class="n">cbarb</span><span class="p">):</span>
         <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Formatting in out both axes&quot;)</span>
         <span class="c1">#         log_mem_usage()</span>
@@ -320,11 +340,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_prune_lower_yaxis_ticks</span><span class="p">(</span><span class="n">axi</span><span class="p">,</span> <span class="n">axo</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prune_lower_yaxis_ticks</span><span class="p">(</span><span class="n">cbari</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">cbaro</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prune_lower_yaxis_ticks</span><span class="p">(</span><span class="n">cbari</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">cbaro</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
 
 <div class="viewcode-block" id="OrbitHist2D.agg">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and Both</span>
 <span class="sd">        orbit legs.</span>
@@ -369,7 +388,7 @@
 
 
 <div class="viewcode-block" id="OrbitHist2D.project_1d">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D.project_1d">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.project_1d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">project_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make a `Hist1D` from the data stored in this `His2D`.</span>
 
@@ -427,8 +446,6 @@
         <span class="k">return</span> <span class="n">h1</span></div>
 
 
-<div class="viewcode-block" id="OrbitHist2D._put_agg_on_ax">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D._put_agg_on_ax">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_put_agg_on_ax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">agg</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">limit_color_norm</span><span class="p">,</span> <span class="n">cbar_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored actually putting `agg` onto `ax` because Python was crashing</span>
 <span class="sd">        due to the way too many `agg` runs. (20190731)</span>
@@ -479,11 +496,10 @@
         <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Done putting agg on axis&quot;)</span>
         <span class="c1">#         log_mem_usage()</span>
 
-        <span class="k">return</span> <span class="n">cbar</span></div>
-
+        <span class="k">return</span> <span class="n">cbar</span>
 
 <div class="viewcode-block" id="OrbitHist2D.make_one_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D.make_one_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_one_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_one_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">kind</span><span class="p">,</span>
@@ -537,7 +553,7 @@
 
 
 <div class="viewcode-block" id="OrbitHist2D.make_in_out_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_in_out_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limit_color_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
@@ -579,7 +595,7 @@
 
 
 <div class="viewcode-block" id="OrbitHist2D.make_in_out_both_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_both_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_both_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_in_out_both_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limit_color_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>

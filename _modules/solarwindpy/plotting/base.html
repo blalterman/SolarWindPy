@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+gb8b0d04e8 documentation</title>
+  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+gec872f02a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8c892861"></script>
+      <script src="../../../_static/documentation_options.js?v=91d1861b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,13 +39,35 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">SolarWindPy Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/modules.html">solarwindpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/solarwindpy.html">solarwindpy package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/solarwindpy.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../documentation_review.html">Documentation Review Plan</a></li>
 </ul>
 
@@ -96,30 +118,27 @@
 
 
 <div class="viewcode-block" id="Base">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;ABC for core plot tools.</span>
 
-<span class="sd">    Properties</span>
+<span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
 
-<span class="sd">    Abstract Properites</span>
-<span class="sd">    -------------------</span>
-
-<span class="sd">    Abstract Methods</span>
-<span class="sd">    ----------------</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Base.__init__">
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.__init__">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">AxesLabels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">LogAxes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
@@ -197,7 +216,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
 
 <div class="viewcode-block" id="Base.set_log">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base.set_log">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.set_log">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span>
@@ -209,7 +228,7 @@
 
 
 <div class="viewcode-block" id="Base.set_labels">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
 <span class="sd">        is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
@@ -231,7 +250,7 @@
 
 
 <div class="viewcode-block" id="Base.set_path">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base.set_path">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.set_path">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">add_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Build the plot save path.</span>
@@ -295,8 +314,6 @@
         <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">scale_info</span></div>
 
 
-<div class="viewcode-block" id="Base._add_axis_labels">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base._add_axis_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_axis_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">xlbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span>
         <span class="n">ylbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">y</span>
@@ -308,11 +325,8 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlbl</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ylbl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylbl</span><span class="p">)</span></div>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylbl</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Base._set_axis_scale">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base._set_axis_scale">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_axis_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">logx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span>
         <span class="n">logy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span>
@@ -323,17 +337,13 @@
         <span class="k">if</span> <span class="n">logx</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span></div>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="Base._format_axis">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base._format_axis">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_axis_labels</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="n">transpose_axes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_axis_scale</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="n">transpose_axes</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;inout&quot;</span><span class="p">)</span></div>
-
+        <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;inout&quot;</span><span class="p">)</span>
 
     <span class="c1">#         x = self.data.loc[:, &quot;x&quot;]</span>
     <span class="c1">#         minx, maxx = x.min(), x.max()</span>
@@ -353,14 +363,14 @@
     <span class="c1">#         self.autoscale_view()</span>
 
 <div class="viewcode-block" id="Base.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.set_data">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="Base.make_plot">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.Base.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.make_plot">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -369,10 +379,8 @@
 
 
 <div class="viewcode-block" id="DataLimFormatter">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.DataLimFormatter">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.DataLimFormatter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataLimFormatter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<div class="viewcode-block" id="DataLimFormatter._format_axis">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.DataLimFormatter._format_axis">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -388,15 +396,12 @@
         <span class="n">corners</span> <span class="o">=</span> <span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">),</span> <span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">update_datalim</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span></div>
-</div>
 
 
 
 <div class="viewcode-block" id="CbarMaker">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.CbarMaker">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.CbarMaker">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CbarMaker</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<div class="viewcode-block" id="CbarMaker._make_cbar">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.CbarMaker._make_cbar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_cbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a colorbar on `ax` using `mappable`.</span>
 
@@ -438,15 +443,14 @@
         <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cbar</span></div>
-</div>
 
 
 
 <div class="viewcode-block" id="PlotWithZdata">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.PlotWithZdata">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlotWithZdata</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <div class="viewcode-block" id="PlotWithZdata.set_data">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.PlotWithZdata.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clip_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span>
 
@@ -465,7 +469,7 @@
 
 
 <div class="viewcode-block" id="PlotWithZdata.set_path">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.PlotWithZdata.set_path">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">add_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># Bug: path doesn&#39;t auto-set log information.</span>
         <span class="n">path</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">scale_info</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">add_scale</span><span class="p">)</span>
@@ -497,7 +501,7 @@
     <span class="n">set_path</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Base</span><span class="o">.</span><span class="n">set_path</span><span class="o">.</span><span class="vm">__doc__</span>
 
 <div class="viewcode-block" id="PlotWithZdata.set_labels">
-<a class="viewcode-back" href="../../../solarwindpy.plotting.html#solarwindpy.plotting.agg_plot.PlotWithZdata.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
