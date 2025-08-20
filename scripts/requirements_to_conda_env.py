@@ -4,6 +4,11 @@
 This script reads ``requirements.txt`` or a user-specified file and
 produces ``<env_name>.yml`` suitable for ``conda env create``.
 
+The script automatically handles package name differences between pip and conda:
+- PyTables: pip uses 'tables', conda uses 'pytables' 
+- This translation ensures requirements files can use pip names while
+  generating correct conda environment files
+
 Examples
 --------
 Run with the default requirements file::
@@ -24,9 +29,47 @@ import yaml
 
 from pathlib import Path
 
+# Package name translation map: pip_name -> conda_name
+# This handles cases where pip and conda use different package names
+PIP_TO_CONDA_NAMES = {
+    "tables": "pytables",  # PyTables: pip uses 'tables', conda uses 'pytables'
+}
+
+
+def translate_package_name(pip_name: str) -> str:
+    """Translate pip package names to conda package names.
+    
+    Parameters
+    ----------
+    pip_name : str
+        Package name as used by pip (may include version specifiers)
+        
+    Returns
+    -------
+    str
+        Package name translated for conda, preserving version specifiers
+        
+    Notes
+    -----
+    This function handles the package naming differences between pip and conda.
+    For example, PyTables is installed as 'pip install tables' but 
+    'conda install pytables'.
+    """
+    # Handle version specifiers (e.g., "package>=1.0.0")
+    for operator in [">=", "<=", "==", "!=", ">", "<", "~="]:
+        if operator in pip_name:
+            package, version = pip_name.split(operator, 1)
+            translated_package = PIP_TO_CONDA_NAMES.get(package.strip(), package.strip())
+            return f"{translated_package}{operator}{version}"
+    
+    # No version specifier, direct translation
+    return PIP_TO_CONDA_NAMES.get(pip_name.strip(), pip_name.strip())
+
 
 def generate_environment(req_path: str, env_name: str) -> None:
     """Create ``<env_name>.yml`` from a requirements file.
+
+    Automatically translates pip package names to conda equivalents where needed.
 
     Parameters
     ----------
@@ -36,16 +79,19 @@ def generate_environment(req_path: str, env_name: str) -> None:
         Name of the Conda environment.
     """
     with open(req_path) as req_file:
-        packages = [
+        pip_packages = [
             line.strip()
             for line in req_file
             if line.strip() and not line.startswith("#")
         ]
+    
+    # Translate pip package names to conda equivalents
+    conda_packages = [translate_package_name(pkg) for pkg in pip_packages]
 
     env = {
         "name": env_name,
         "channels": ["conda-forge", "defaults"],
-        "dependencies": packages,
+        "dependencies": conda_packages,
     }
 
     target_name = Path(f"{env_name}.yml")

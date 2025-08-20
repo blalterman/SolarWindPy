@@ -17,7 +17,7 @@
       "Bash(.claude/hooks/test-runner.sh --fast)",
       "Bash(.claude/hooks/test-runner.sh --coverage)",
       "Bash(.claude/hooks/test-runner.sh --help)",
-      "Bash(.claude/hooks/coverage-monitor.py)",
+      "Bash(python .claude/hooks/coverage-monitor.py)",
       "Bash(.claude/hooks/pre-commit-tests.sh)",
       "Bash(.claude/hooks/git-workflow-validator.sh)",
       "Bash(.claude/hooks/git-workflow-validator.sh --enforce-branch)",
@@ -272,7 +272,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/coverage-monitor.py",
+            "command": "python .claude/hooks/coverage-monitor.py",
             "timeout": 60
           }
         ]

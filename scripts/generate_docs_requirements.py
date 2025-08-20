@@ -40,7 +40,8 @@ def generate_docs_requirements(
         "sphinx_rtd_theme", 
         "sphinxcontrib-spelling",
         "sphinxcontrib-bibtex",
-        "doc8"  # RST linting for documentation workflows
+        "doc8",  # RST linting for documentation workflows
+        "numpydoc"  # NumPy-style docstring extension for Sphinx
     }
     
     source_path = Path(source_file)
