@@ -192,6 +192,7 @@
 
 ### Process Completion
 - [ ] Feature branch merged to plan branch
+- [ ] Pull request created to merge plan branch to master
 - [ ] Plan branch prepared for archival
 - [ ] Velocity metrics recorded in .velocity/metrics.json
 - [ ] Cross-plan dependencies updated

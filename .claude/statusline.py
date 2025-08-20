@@ -1,4 +1,24 @@
 #!/usr/bin/env python3
+"""
+statusline.py - Advanced statusline for Claude Code
+
+This Python script generates a rich, color-coded statusline showing:
+- Model name, current directory, conda environment, git branch
+- Token usage estimation with color-coded thresholds
+- Context compaction indicator
+- Session duration tracking
+
+Integration with Claude Code:
+This script is wrapped by statusline.sh for easy Claude Code integration.
+Configure in .claude/settings.json:
+    "statusLine": {
+      "type": "command", 
+      "command": ".claude/statusline.sh"
+    }
+
+Direct usage:
+    echo '{}' | python3 statusline.py
+"""
 import json
 import sys
 import os

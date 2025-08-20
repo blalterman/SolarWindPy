@@ -110,4 +110,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# setuptools_scm auto-generated version files
+solarwindpy/_version.py
+
+# Claude compaction files (timestamped, ephemeral)
+.claude/compaction-*.md
+**/compacted_state.md
+
 .claude/settings.local.json
