@@ -35,10 +35,10 @@ jobs:
         run: |
           mkdir -p benchmark-results
           pytest tests/ -v \
-                 --benchmark-only \
                  --benchmark-json=benchmark-results/benchmark.json \
                  --benchmark-histogram=benchmark-results/histogram \
-                 --benchmark-storage=benchmark-results/storage
+                 --benchmark-storage=benchmark-results/storage \
+                 --benchmark-autosave
         continue-on-error: true
       
       - name: Upload benchmark artifacts
