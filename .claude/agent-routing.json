@@ -1,0 +1,199 @@
+{
+  "description": "Domain-specific agent routing configuration for SolarWindPy development",
+  "version": "1.0.0",
+  "routing": {
+    "filePatterns": {
+      "solarwindpy/core/plasma.py": ["DataFrameArchitect"],
+      "solarwindpy/core/ions.py": ["DataFrameArchitect"],
+      "solarwindpy/core/base.py": ["PhysicsValidator"],
+      "solarwindpy/core/units_constants.py": ["PhysicsValidator"],
+      "solarwindpy/core/vector.py": ["PhysicsValidator"],
+      "solarwindpy/core/tensor.py": ["PhysicsValidator"],
+      "solarwindpy/core/spacecraft.py": ["DataFrameArchitect"],
+      "solarwindpy/instabilities/*.py": ["PhysicsValidator", "NumericalStabilityGuard"],
+      "solarwindpy/plotting/*.py": ["PlottingEngineer"],
+      "solarwindpy/fitfunctions/*.py": ["FitFunctionSpecialist", "NumericalStabilityGuard"],
+      "tests/*.py": ["TestEngineer"],
+      ".claude/hooks/*.py": ["TestEngineer"],
+      ".claude/hooks/*.sh": ["TestEngineer"],
+      "*.md": ["UnifiedPlanCoordinator"],
+      "plans/*.md": ["UnifiedPlanCoordinator"]
+    },
+    "keywordTriggers": {
+      "plan": ["UnifiedPlanCoordinator"],
+      "planning": ["UnifiedPlanCoordinator"],
+      "implement": ["UnifiedPlanCoordinator"],
+      "plot": ["PlottingEngineer"],
+      "visualization": ["PlottingEngineer"],
+      "figure": ["PlottingEngineer"],
+      "physics": ["PhysicsValidator"],
+      "units": ["PhysicsValidator"],
+      "thermal": ["PhysicsValidator"],
+      "alfven": ["PhysicsValidator"],
+      "dataframe": ["DataFrameArchitect"],
+      "multiindex": ["DataFrameArchitect"],
+      "pandas": ["DataFrameArchitect"],
+      "test": ["TestEngineer"],
+      "coverage": ["TestEngineer"],
+      "pytest": ["TestEngineer"],
+      "fit": ["FitFunctionSpecialist"],
+      "curve": ["FitFunctionSpecialist"],
+      "regression": ["FitFunctionSpecialist"],
+      "optimization": ["FitFunctionSpecialist"],
+      "numerical": ["NumericalStabilityGuard"],
+      "stability": ["NumericalStabilityGuard"],
+      "precision": ["NumericalStabilityGuard"]
+    },
+    "contextTriggers": {
+      "multiStepTask": ["UnifiedPlanCoordinator"],
+      "complexImplementation": ["UnifiedPlanCoordinator"],
+      "physicsConcepts": ["PhysicsValidator"],
+      "dataAnalysis": ["DataFrameArchitect"],
+      "visualizationTasks": ["PlottingEngineer"],
+      "testingTasks": ["TestEngineer"],
+      "fittingTasks": ["FitFunctionSpecialist"],
+      "numericalTasks": ["NumericalStabilityGuard"]
+    }
+  },
+  "agents": {
+    "UnifiedPlanCoordinator": {
+      "description": "Planning, implementation, and cross-plan coordination",
+      "capabilities": ["planning", "implementation", "coordination", "project_management"],
+      "priority": 1,
+      "usagePatterns": [
+        "Multi-step tasks requiring planning",
+        "Complex implementations with multiple components",
+        "Cross-module coordination",
+        "Project-level decision making"
+      ]
+    },
+    "PhysicsValidator": {
+      "description": "Physics correctness, unit validation, scientific accuracy",
+      "capabilities": ["physics_validation", "unit_checking", "scientific_accuracy", "constraint_validation"],
+      "priority": 2,
+      "usagePatterns": [
+        "Physics calculations and formulas",
+        "Unit consistency checking",
+        "Scientific constraint validation",
+        "Thermal speed and Alfvén speed calculations"
+      ]
+    },
+    "DataFrameArchitect": {
+      "description": "MultiIndex operations, pandas optimization",
+      "capabilities": ["dataframe_design", "multiindex_operations", "pandas_optimization", "memory_efficiency"],
+      "priority": 2,
+      "usagePatterns": [
+        "DataFrame structure design",
+        "MultiIndex operations and queries",
+        "Memory optimization for large datasets",
+        "Data manipulation and transformation"
+      ]
+    },
+    "NumericalStabilityGuard": {
+      "description": "Numerical validation, edge cases, stability",
+      "capabilities": ["numerical_stability", "precision_analysis", "edge_case_handling", "algorithm_optimization"],
+      "priority": 2,
+      "usagePatterns": [
+        "Numerical computation stability",
+        "Floating point precision issues",
+        "Algorithm optimization for stability",
+        "Edge case validation"
+      ]
+    },
+    "PlottingEngineer": {
+      "description": "Visualization, matplotlib, publication-quality figures",
+      "capabilities": ["data_visualization", "matplotlib_expertise", "publication_graphics", "interactive_plots"],
+      "priority": 2,
+      "usagePatterns": [
+        "Creating scientific visualizations",
+        "Publication-quality figure generation",
+        "Interactive plotting and dashboards",
+        "Data presentation and storytelling"
+      ]
+    },
+    "FitFunctionSpecialist": {
+      "description": "Curve fitting, statistical analysis, data modeling",
+      "capabilities": ["curve_fitting", "statistical_analysis", "model_optimization", "data_modeling"],
+      "priority": 2,
+      "usagePatterns": [
+        "Curve fitting and regression analysis",
+        "Statistical model development",
+        "Parameter optimization",
+        "Data modeling and prediction"
+      ]
+    },
+    "TestEngineer": {
+      "description": "Test coverage, quality assurance, testing strategies",
+      "capabilities": ["test_strategy", "coverage_analysis", "quality_assurance", "automated_testing"],
+      "priority": 3,
+      "usagePatterns": [
+        "Test design and implementation",
+        "Coverage analysis and improvement",
+        "Quality assurance processes",
+        "Testing strategy development"
+      ]
+    }
+  },
+  "routingLogic": {
+    "priorities": {
+      "1": "Always suggest for matching patterns",
+      "2": "Suggest when domain expertise is clearly needed",
+      "3": "Suggest for specific technical tasks"
+    },
+    "fallback": {
+      "default": "UnifiedPlanCoordinator",
+      "reason": "Comprehensive planning and coordination capabilities"
+    },
+    "coordination": {
+      "multipleMatches": "Suggest primary agent based on task complexity",
+      "handoffProtocol": "UnifiedPlanCoordinator manages transitions between specialists",
+      "conflictResolution": "Priority-based with user preference consideration"
+    }
+  },
+  "integrationHooks": {
+    "preTaskAnalysis": {
+      "description": "Analyze task requirements and suggest appropriate agents",
+      "implementation": "Parse user input for file patterns, keywords, and context clues"
+    },
+    "dynamicRouting": {
+      "description": "Route tasks to appropriate agents based on analysis",
+      "implementation": "Match patterns against routing configuration and suggest agents"
+    },
+    "agentHandoff": {
+      "description": "Coordinate transitions between different domain specialists",
+      "implementation": "UnifiedPlanCoordinator manages complex workflows requiring multiple agents"
+    }
+  },
+  "usageExamples": {
+    "planning": {
+      "input": "Help me plan the implementation of dark mode for the plotting module",
+      "routing": ["UnifiedPlanCoordinator", "PlottingEngineer"],
+      "rationale": "Planning task with plotting domain expertise needed"
+    },
+    "physics": {
+      "input": "Fix the thermal speed calculation in the Ion class",
+      "routing": ["PhysicsValidator"],
+      "rationale": "Physics calculation requiring unit and formula validation"
+    },
+    "dataframe": {
+      "input": "Optimize the MultiIndex operations in plasma.py",
+      "routing": ["DataFrameArchitect"],
+      "rationale": "DataFrame optimization requiring pandas expertise"
+    },
+    "visualization": {
+      "input": "Create publication-quality plots for the solar wind analysis",
+      "routing": ["PlottingEngineer"],
+      "rationale": "Visualization task requiring matplotlib expertise"
+    },
+    "testing": {
+      "input": "Improve test coverage for the instabilities module",
+      "routing": ["TestEngineer"],
+      "rationale": "Testing task requiring coverage analysis expertise"
+    },
+    "complex": {
+      "input": "Implement a new plasma instability analysis with visualization and testing",
+      "routing": ["UnifiedPlanCoordinator", "PhysicsValidator", "PlottingEngineer", "TestEngineer"],
+      "rationale": "Multi-domain task requiring coordination and multiple specialists"
+    }
+  }
+}

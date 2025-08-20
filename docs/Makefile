@@ -17,7 +17,7 @@ html: api
 
 api:
 	@echo "Generating API documentation..."
-	@sphinx-apidoc -f -o $(SOURCEDIR)/api ../../solarwindpy/solarwindpy --separate
+	@sphinx-apidoc -f -o $(SOURCEDIR)/api ../solarwindpy --separate
 	@echo "Adding :no-index: to module files..."
 	@python add_no_index.py
 

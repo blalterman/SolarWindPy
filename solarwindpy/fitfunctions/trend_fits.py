@@ -199,7 +199,7 @@ class TrendFit(object):
 
         in_trend = y_ok & w_ok
 
-        legend_title = "${}={} \; {}$\n{}"  # noqa: W605
+        legend_title = r"${}={} \; {}$" + "\n{}"
 
         #         xlbl = self.labels.x
         #         try:

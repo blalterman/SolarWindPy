@@ -10,6 +10,7 @@ The SolarWindPy planning system uses a **unified multi-phase architecture** for 
 solarwindpy/plans/
 ├── 0-overview-template.md      # Master template for plan coordination
 ├── N-phase-template.md         # Standard template for individual phases
+├── closeout-template.md        # Template for plan completion documentation
 ├── plan_template.md           # ⚠️ DEPRECATED - Legacy single-file format
 └── TEMPLATE-USAGE-GUIDE.md    # This guide
 ```
@@ -80,6 +81,28 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 4. **Task Tracking**: Use commit checksum tracking for git integration
 5. **Acceptance Criteria**: Phase-specific success metrics
 6. **Cross-References**: Link back to 0-Overview.md
+
+### Step 4: Add Closeout Phase (Final Phase)
+
+**When plan implementation is complete:**
+```bash
+# Copy closeout template
+cp solarwindpy/plans/closeout-template.md solarwindpy/plans/[plan-name]/[N]-Closeout.md
+```
+
+**Required Customizations:**
+1. **Plan Name**: Match the plan being closed out
+2. **Completion Metadata**: Actual duration, phases completed, success rate
+3. **Objectives Achievement**: Status of primary objectives from 0-Overview.md
+4. **Phase-by-Phase Learnings**: Document key challenges and solutions for each phase
+5. **Velocity Intelligence**: Actual vs estimated time for future planning accuracy
+6. **Lessons Learned**: Capture reusable patterns and improvement opportunities
+
+**Critical Purpose:**
+- **Knowledge Preservation**: Prevent loss of implementation insights
+- **Velocity Learning**: Improve estimation accuracy for future plans
+- **Pattern Documentation**: Capture reusable approaches for similar work
+- **Cross-Plan Intelligence**: Share learnings across the planning ecosystem
 
 ## 🏗️ Architecture Benefits
 

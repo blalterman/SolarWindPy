@@ -1,0 +1,319 @@
+{
+  "description": "Intelligent workflow automation framework for SolarWindPy development",
+  "version": "1.0.0",
+  "automation": {
+    "fileChangeAnalysis": {
+      "patterns": {
+        "core/*.py": {
+          "triggers": ["physics-validation", "unit-testing", "dataframe-optimization"],
+          "automatedActions": [
+            "Run physics validation hooks",
+            "Execute related unit tests",
+            "Check MultiIndex usage patterns"
+          ],
+          "suggestedAgents": ["PhysicsValidator", "DataFrameArchitect"]
+        },
+        "instabilities/*.py": {
+          "triggers": ["physics-validation", "numerical-stability", "unit-testing"],
+          "automatedActions": [
+            "Validate physics calculations",
+            "Check numerical stability",
+            "Run instability-specific tests"
+          ],
+          "suggestedAgents": ["PhysicsValidator", "NumericalStabilityGuard"]
+        },
+        "plotting/*.py": {
+          "triggers": ["visualization-testing", "style-checking"],
+          "automatedActions": [
+            "Validate plot generation",
+            "Check matplotlib best practices",
+            "Test figure output quality"
+          ],
+          "suggestedAgents": ["PlottingEngineer"]
+        },
+        "fitfunctions/*.py": {
+          "triggers": ["fit-validation", "statistical-testing", "numerical-stability"],
+          "automatedActions": [
+            "Validate curve fitting algorithms",
+            "Test statistical accuracy",
+            "Check numerical convergence"
+          ],
+          "suggestedAgents": ["FitFunctionSpecialist", "NumericalStabilityGuard"]
+        },
+        "tests/*.py": {
+          "triggers": ["test-execution", "coverage-analysis"],
+          "automatedActions": [
+            "Run modified tests",
+            "Update coverage reports",
+            "Validate test quality"
+          ],
+          "suggestedAgents": ["TestEngineer"]
+        }
+      }
+    },
+    "userIntentDetection": {
+      "taskTypes": {
+        "planning": {
+          "keywords": ["plan", "design", "architecture", "strategy", "implement"],
+          "patterns": ["How should I", "What's the best way", "Help me plan"],
+          "automation": {
+            "suggestAgent": "UnifiedPlanCoordinator",
+            "preActions": ["analyze_codebase", "check_existing_patterns"],
+            "postActions": ["create_todo_list", "suggest_implementation_steps"]
+          }
+        },
+        "physics": {
+          "keywords": ["thermal", "alfven", "units", "physics", "magnetic field", "velocity"],
+          "patterns": ["calculate", "formula", "equation", "physical"],
+          "automation": {
+            "suggestAgent": "PhysicsValidator",
+            "preActions": ["validate_current_physics", "check_unit_consistency"],
+            "postActions": ["run_physics_tests", "validate_constraints"]
+          }
+        },
+        "dataframe": {
+          "keywords": ["dataframe", "multiindex", "pandas", "data structure", "optimization"],
+          "patterns": ["optimize", "restructure", "efficient"],
+          "automation": {
+            "suggestAgent": "DataFrameArchitect",
+            "preActions": ["analyze_current_structure", "check_memory_usage"],
+            "postActions": ["validate_operations", "test_performance"]
+          }
+        },
+        "visualization": {
+          "keywords": ["plot", "figure", "chart", "visualization", "graph"],
+          "patterns": ["create plot", "visualize", "show", "display"],
+          "automation": {
+            "suggestAgent": "PlottingEngineer", 
+            "preActions": ["check_plotting_patterns", "validate_data_format"],
+            "postActions": ["test_plot_generation", "validate_figure_quality"]
+          }
+        },
+        "testing": {
+          "keywords": ["test", "coverage", "pytest", "validation", "quality"],
+          "patterns": ["test", "cover", "validate", "check"],
+          "automation": {
+            "suggestAgent": "TestEngineer",
+            "preActions": ["analyze_test_coverage", "identify_test_gaps"],
+            "postActions": ["run_comprehensive_tests", "update_coverage_reports"]
+          }
+        },
+        "fitting": {
+          "keywords": ["fit", "curve", "regression", "optimization", "model"],
+          "patterns": ["fit", "optimize", "model", "regression"],
+          "automation": {
+            "suggestAgent": "FitFunctionSpecialist",
+            "preActions": ["validate_data_quality", "check_fit_requirements"],
+            "postActions": ["test_fit_accuracy", "validate_parameters"]
+          }
+        }
+      }
+    },
+    "workflowStateTracking": {
+      "phases": {
+        "planning": {
+          "description": "Initial planning and design phase",
+          "automatedActions": [
+            "Create comprehensive todo list",
+            "Analyze codebase for patterns",
+            "Suggest implementation approach"
+          ],
+          "nextPhase": "implementation",
+          "triggers": ["plan created", "requirements analyzed"]
+        },
+        "implementation": {
+          "description": "Active development and coding phase",
+          "automatedActions": [
+            "Run pre-commit hooks",
+            "Validate physics on edits",
+            "Execute relevant tests"
+          ],
+          "nextPhase": "testing",
+          "triggers": ["code written", "changes made"]
+        },
+        "testing": {
+          "description": "Testing and validation phase",
+          "automatedActions": [
+            "Run comprehensive test suite",
+            "Generate coverage reports",
+            "Validate physics constraints"
+          ],
+          "nextPhase": "review",
+          "triggers": ["tests pass", "coverage adequate"]
+        },
+        "review": {
+          "description": "Code review and quality assurance phase",
+          "automatedActions": [
+            "Run final quality checks",
+            "Generate documentation",
+            "Prepare for commit/PR"
+          ],
+          "nextPhase": "planning",
+          "triggers": ["quality approved", "ready for commit"]
+        }
+      }
+    },
+    "smartAutomation": {
+      "testSelection": {
+        "coreChanges": {
+          "trigger": "core/*.py modified",
+          "actions": [
+            "Run physics validation tests",
+            "Execute core module tests",
+            "Check unit consistency"
+          ]
+        },
+        "newFunctions": {
+          "trigger": "new function/class detected",
+          "actions": [
+            "Generate test scaffolding",
+            "Run coverage analysis",
+            "Suggest test cases"
+          ]
+        },
+        "dataChanges": {
+          "trigger": "DataFrame operations modified",
+          "actions": [
+            "Test MultiIndex operations",
+            "Validate data integrity",
+            "Check memory usage"
+          ]
+        }
+      },
+      "qualityGates": {
+        "preCommit": {
+          "triggers": ["git commit initiated"],
+          "automatedChecks": [
+            "Code formatting (black)",
+            "Linting (flake8)",
+            "Basic test execution",
+            "Physics validation"
+          ],
+          "blockingConditions": [
+            "Formatting errors",
+            "Linting failures",
+            "Test failures",
+            "Physics constraint violations"
+          ]
+        },
+        "prePush": {
+          "triggers": ["git push initiated"],
+          "automatedChecks": [
+            "Full test suite execution",
+            "Coverage analysis",
+            "Documentation generation",
+            "Performance regression testing"
+          ],
+          "blockingConditions": [
+            "Test failures",
+            "Coverage below threshold",
+            "Performance regressions"
+          ]
+        }
+      },
+      "documentationSuggestions": {
+        "apiChanges": {
+          "trigger": "public API modified",
+          "suggestions": [
+            "Update docstrings",
+            "Add usage examples",
+            "Update type hints"
+          ]
+        },
+        "newFeatures": {
+          "trigger": "new functionality added",
+          "suggestions": [
+            "Add feature documentation",
+            "Create usage examples",
+            "Update README if needed"
+          ]
+        }
+      }
+    },
+    "contextualHelp": {
+      "workflowShortcuts": {
+        "quickTest": {
+          "command": "Run quick tests for current changes",
+          "automation": ".claude/hooks/test-runner.sh --changed --fast"
+        },
+        "physicsCheck": {
+          "command": "Validate physics in current file",
+          "automation": "python .claude/hooks/physics-validation.py --quick"
+        },
+        "coverageUpdate": {
+          "command": "Update coverage analysis",
+          "automation": ".claude/hooks/coverage-monitor.py"
+        },
+        "qualityCheck": {
+          "command": "Run all quality checks",
+          "automation": ".claude/hooks/pre-commit-tests.sh"
+        }
+      },
+      "smartSuggestions": {
+        "whenToUseAgents": {
+          "multiStepTask": "Use UnifiedPlanCoordinator for complex multi-step implementations",
+          "physicsCalculation": "Use PhysicsValidator for any physics-related calculations or validations",
+          "dataOptimization": "Use DataFrameArchitect for DataFrame operations and memory optimization",
+          "plotCreation": "Use PlottingEngineer for visualization and figure generation",
+          "testDesign": "Use TestEngineer for comprehensive testing strategies",
+          "curveFunction": "Use FitFunctionSpecialist for fitting and statistical analysis",
+          "numericalIssues": "Use NumericalStabilityGuard for numerical stability concerns"
+        }
+      }
+    },
+    "adaptiveLearning": {
+      "userPatterns": {
+        "trackingMetrics": [
+          "frequently used agents",
+          "common workflow patterns",
+          "preferred automation levels",
+          "typical task sequences"
+        ],
+        "adaptations": [
+          "Adjust agent suggestions based on usage",
+          "Optimize automation triggers for user preferences",
+          "Customize workflow phases for user patterns"
+        ]
+      },
+      "systemOptimization": {
+        "performanceMetrics": [
+          "hook execution times",
+          "test execution efficiency",
+          "automation accuracy",
+          "user satisfaction indicators"
+        ],
+        "optimizations": [
+          "Reduce unnecessary hook executions",
+          "Optimize test selection algorithms",
+          "Improve agent routing accuracy"
+        ]
+      }
+    }
+  },
+  "transparencyControls": {
+    "userFeedback": {
+      "actionNotifications": true,
+      "reasoningExplanation": true,
+      "automationSummary": true
+    },
+    "userControl": {
+      "disableAutomation": ".claude/disable-automation",
+      "customizeAutomation": ".claude/automation-preferences.json",
+      "overrideActions": "always prompt for potentially intrusive actions"
+    }
+  },
+  "integrationPoints": {
+    "hookSystem": {
+      "description": "Hooks execute automated actions based on triggers",
+      "implementation": "settings.local.json hooks configuration"
+    },
+    "agentRouting": {
+      "description": "Agent suggestions based on context analysis",
+      "implementation": "agent-routing.json pattern matching"
+    },
+    "workflowTracking": {
+      "description": "State-aware automation based on current phase",
+      "implementation": "internal state tracking with phase transitions"
+    }
+  }
+}
