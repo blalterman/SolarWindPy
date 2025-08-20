@@ -110,4 +110,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# setuptools_scm auto-generated version files
+solarwindpy/_version.py
+
 .claude/settings.local.json
