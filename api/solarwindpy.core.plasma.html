@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma module &mdash; SolarWindPy 0.1.dev1+g8546cae2c documentation</title>
+  <title>solarwindpy.core.plasma module &mdash; SolarWindPy 0.1.dev1+gaeb1fe39c documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4c298603"></script>
+      <script src="../_static/documentation_options.js?v=5abb0a8d"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -155,7 +155,7 @@ and <code class="docutils literal notranslate"><span class="pre">plasma.p1</span
 labeled by (“M”, “C”, “S”) for measurement, component, and species.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -166,7 +166,7 @@ labeled by (“M”, “C”, “S”) for measurement, component, and species.<
 <dd><p>Dictionary-like access to individual ion species objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a> of Ion objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)">pandas.Series</a> of Ion objects</p>
 </dd>
 </dl>
 </dd></dl>
@@ -199,7 +199,7 @@ labeled by (“M”, “C”, “S”) for measurement, component, and species.<
 <dd><p>Additional measurements such as quality flags or derived parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a>, optional</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a>, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -237,8 +237,8 @@ and <span class="math notranslate nohighlight">\(T\)</span> is temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Contains the magnetic field and core ion moments. Columns are a
-three-level <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code></a> labelled <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Contains the magnetic field and core ion moments. Columns are a
+three-level <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code></a> labelled <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code>
 for measurement, component, and species. The index should contain
 datetime information, for example <code class="docutils literal notranslate"><span class="pre">Epoch</span></code> when loading from a CDF
 file.</p></li>
@@ -246,7 +246,7 @@ file.</p></li>
 <li><p><strong>spacecraft</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Spacecraft</span></code>, optional) – Spacecraft trajectory and velocity information. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
 Coulomb number <code class="xref py py-meth docutils literal notranslate"><span class="pre">nc()</span></code> method will raise a
 <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
-<li><p><strong>auxiliary_data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, optional) – Additional measurements to carry with the plasma, for example data
+<li><p><strong>auxiliary_data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, optional) – Additional measurements to carry with the plasma, for example data
 quality flags. The column labelling scheme must match <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
 <li><p><strong>log_plasma_stats</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Log summary statistics when <code class="docutils literal notranslate"><span class="pre">data</span></code> is set.</p></li>
 </ul>
@@ -310,7 +310,7 @@ quality flags. The column labelling scheme must match <code class="docutils lite
 <dd class="field-odd"><p>Datetime index containing measurement timestamps.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.1)">pandas.DatetimeIndex</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.2)">pandas.DatetimeIndex</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -510,7 +510,7 @@ plasma frame transformation.</p>
 <dd><p>Set or update auxiliary measurement data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><em>pandas.DataFrame</em></a><em> or </em><em>None</em>) – Additional measurements such as data quality flags, derived
+<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><em>pandas.DataFrame</em></a><em> or </em><em>None</em>) – Additional measurements such as data quality flags, derived
 parameters, or instrument-specific metadata. Must have matching
 datetime index with plasma data.</p>
 </dd>

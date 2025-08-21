@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator module &mdash; SolarWindPy 0.1.dev1+g8546cae2c documentation</title>
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator module &mdash; SolarWindPy 0.1.dev1+gaeb1fe39c documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4c298603"></script>
+      <script src="../_static/documentation_options.js?v=5abb0a8d"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -119,7 +119,7 @@ local minima and maxima based on a threshold value.</p>
 <dd><p>Smoothed version of the activity index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)">pandas.Series</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -130,7 +130,7 @@ local minima and maxima based on a threshold value.</p>
 <dd><p>Unsmoothed input data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)">pandas.Series</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -141,7 +141,7 @@ local minima and maxima based on a threshold value.</p>
 <dd><p>Threshold used to classify maxima and minima.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)">pandas.Series</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -152,7 +152,7 @@ local minima and maxima based on a threshold value.</p>
 <dd><p>Series with <code class="docutils literal notranslate"><span class="pre">&quot;Max&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Min&quot;</span></code> labels at the extrema times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)">pandas.Series</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)">pandas.Series</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -175,7 +175,7 @@ columns:</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,7 +188,7 @@ columns:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Identifier for the activity index.</p></li>
-<li><p><strong>activity_index</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.1)"><em>pandas.Series</em></a>) – Raw activity measurements.</p></li>
+<li><p><strong>activity_index</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)"><em>pandas.Series</em></a>) – Raw activity measurements.</p></li>
 <li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>callable</em><em>, </em><em>optional</em>) – If a scalar, it is used directly to classify maxima and minima.
 If a callable, it is invoked with <code class="docutils literal notranslate"><span class="pre">activity_index</span></code> to compute the
 threshold. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, the value is looked up from an internal
@@ -266,7 +266,7 @@ table or computed with <a class="reference external" href="https://numpy.org/doc
 </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)">pandas.DataFrame</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)">pandas.DataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
