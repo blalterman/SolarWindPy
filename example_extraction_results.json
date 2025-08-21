@@ -1,0 +1,76 @@
+{
+  "scan_timestamp": "2025-08-21T06:00:00Z",
+  "total_examples": 7,
+  "examples": [
+    {
+      "id": "module_example_0",
+      "code": "df = pd.DataFrame(...)",
+      "file_path": "solarwindpy/tools/__init__.py",
+      "line_start": 17,
+      "line_end": 17,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module_example_1",
+      "code": "new_df, mask = swap_protons(df)",
+      "file_path": "solarwindpy/tools/__init__.py",
+      "line_start": 18,
+      "line_end": 18,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module.normal_parameters_example_0",
+      "code": "normal_parameters(m, s)",
+      "file_path": "solarwindpy/tools/__init__.py",
+      "line_start": 28,
+      "line_end": 28,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module.swap_protons_example_0",
+      "code": "new_df, mask = swap_protons(df)",
+      "file_path": "solarwindpy/tools/__init__.py",
+      "line_start": 21,
+      "line_end": 21,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module.TeXinfo.val_uncert_2_string_example_0",
+      "code": "a = 3.1415",
+      "file_path": "solarwindpy/fitfunctions/tex_info.py",
+      "line_start": 9,
+      "line_end": 9,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module.TeXinfo.val_uncert_2_string_example_1",
+      "code": "b = 0.01",
+      "file_path": "solarwindpy/fitfunctions/tex_info.py",
+      "line_start": 10,
+      "line_end": 10,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    },
+    {
+      "id": "module.TeXinfo.val_uncert_2_string_example_2",
+      "code": "val_uncert_2_string(a, b)\n# Expected output:\n# \"3.14 \\pm 0.01\"",
+      "file_path": "solarwindpy/fitfunctions/tex_info.py",
+      "line_start": 11,
+      "line_end": 13,
+      "example_type": "doctest",
+      "dependencies": [],
+      "issues": []
+    }
+  ]
+}
