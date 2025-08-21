@@ -1,0 +1,1204 @@
+file_path,function_name,line_number,docstring,num_lines,args,test_type,physics_domain,complexity,is_physics_test,is_edge_case,is_integration,is_performance
+tests/core/test_alfvenic_turbulence.py,test_set_data_requires_datetimeindex,519,``set_data`` raises ``TypeError`` for non-``DatetimeIndex`` inputs.,12,0,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_set_data_warns_on_mismatched_index,533,Mismatched indices trigger a warning.,14,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_str,152,,2,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_species,155,,2,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test__clean_species_for_setting,158,,23,1,unit,alfvenic_turbulence,moderate,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_data,182,,5,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_meaurements,188,,4,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_averaging_info,193,,5,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_bfield,259,,7,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_velocity,267,,6,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_z_plus,274,,8,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_z_minus,283,,8,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_e_plus,292,,9,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_e_minus,302,,9,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_kinetic_energy,312,,7,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_magnetic_energy,320,,7,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_total_energy,328,,7,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_residual_energy,336,,10,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_normalized_residual_energy,347,,12,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_sigma_r,360,,3,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_cross_helicity,364,,7,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_normalized_cross_helicity,372,,12,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_alfven_ratio,385,,10,1,physics,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_elsasser_ratio,396,,12,1,unit,alfvenic_turbulence,simple,True,False,False,False
+tests/core/test_alfvenic_turbulence.py,test_eq,409,,52,1,unit,alfvenic_turbulence,complex,True,False,False,False
+tests/core/test_base_head_tail.py,test_head,25,,2,1,unit,general,simple,False,False,False,False
+tests/core/test_base_head_tail.py,test_tail,28,,2,1,unit,general,simple,False,False,False,False
+tests/core/test_base_mi_tuples.py,test_mi_tuples_returns_index_with_names,7,,5,0,unit,general,simple,False,False,False,False
+tests/core/test_core_verify_datetimeindex.py,test_non_datetime_index_warning,18,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_core_verify_datetimeindex.py,test_non_monotonic_datetime_index_warning,26,,7,1,unit,general,simple,False,False,False,False
+tests/core/test_ions.py,test_species,89,,2,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_n,92,,10,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_mass_density,103,,12,1,physics,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_v,116,,6,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_w,123,,6,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_anisotropy,130,,6,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_pth,137,,7,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_temperature,145,,8,1,physics,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_specific_entropy,154,,30,1,unit,ions,moderate,True,False,False,False
+tests/core/test_ions.py,test_cs,185,,10,1,unit,ions,simple,True,False,False,False
+tests/core/test_ions.py,test_init_with_species,244,,21,1,unit,ions,moderate,True,False,False,False
+tests/core/test_ions.py,test_init_version_comparison,266,,21,1,unit,ions,moderate,True,False,False,False
+tests/core/test_ions.py,test_eq,288,,42,1,unit,ions,moderate,True,False,False,False
+tests/core/test_plasma.py,test_ions,120,,9,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_conform_species,130,"
+        Just test that the species is a valid input.
+        ",46,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_success,177,,24,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,203,"
+        This method must be subclassed to test for species that fail the
+        `_chk_species` tests.
+
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",12,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_species,216,,2,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test__set_species,219,,5,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_bfield,225,,5,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_number_density,231,,47,1,physics,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_mass_density,279,,47,1,physics,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_thermal_speed,327,,33,1,performance,plasma,moderate,True,False,False,True
+tests/core/test_plasma.py,test_pth,361,,38,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_temperature,402,,34,1,physics,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_beta,437,,46,1,physics,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_anisotropy,484,,59,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_velocity,544,,75,1,physics,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_dv,620,,245,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_ca,866,,41,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_afsq,909,,71,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_caani,981,,74,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_lnlambda,1056,,152,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_nuc,1209,"
+        We calculate the collision frequency for differential
+        flow following Hernandez & Marsch (JGR 1985,
+        doi:10.1029/JA090iA11p11062) Eq. (18).
+        ",120,1,physics,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_spacecraft_in_plasma,1330,,39,1,physics,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_nc_without_spacecraft,1370,,13,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_nc_with_spacecraft,1384,,138,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_estimate_electrons,1523,,91,1,physics,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_pdynamic_without_m2q_projection,1637,,148,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_pdynamic_with_m2q_projection,1786,,85,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_heatflux,1872,,94,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_set_auxiliary_data,1999,,15,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_epoch,2015,,7,1,unit,plasma,simple,True,False,False,False
+tests/core/test_plasma.py,test_build_alfvenic_turbulence,2026,,191,1,physics,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_drop_species,2218,,42,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_VDFratio,2261,,96,1,unit,plasma,complex,True,False,False,False
+tests/core/test_plasma.py,test_specific_entropy,2358,,46,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2410,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",23,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2436,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",23,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2462,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",23,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2488,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",24,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2515,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",24,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2542,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",23,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma.py,test_chk_species_fail,2568,"
+        The code will look something like:
+            for s in bad_species:
+                with self.assertRaisesRegex(ValueError,
+                                            ""Requested species unavailable.""):
+                    self.object_testing._chk_species(*s)
+        ",23,1,unit,plasma,moderate,True,False,False,False
+tests/core/test_plasma_io.py,test_save_and_load,5,,8,1,unit,plasma,simple,True,False,False,False
+tests/core/test_quantities.py,test_data,24,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_eq,31,,24,1,unit,general,moderate,False,False,False,False
+tests/core/test_quantities.py,test_neq,56,,16,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_empty_data_catch,73,,5,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_components,84,,10,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_mag,95,,14,1,physics,general,simple,True,False,False,False
+tests/core/test_quantities.py,test_rho,110,,7,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_colat,118,,9,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_longitude,128,,10,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_r,139,,12,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_cartesian,152,,3,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_unit_vector,156,,14,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_project,171,,53,1,unit,general,complex,False,False,False,False
+tests/core/test_quantities.py,test_cos_theta,225,,47,1,unit,general,moderate,False,False,False,False
+tests/core/test_quantities.py,test_pressure,296,,38,1,physics,general,moderate,True,False,False,False
+tests/core/test_quantities.py,test_components,367,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_v,448,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_b,455,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_b_v,462,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_b_w,467,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_gse,473,,6,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_b_gse,481,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_gse_v,487,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_gse_w,493,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_va_vp1,498,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_v_w,503,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_quantities.py,test_wp1_wp2,508,,4,1,unit,general,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_position,71,,8,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_velocity,80,,7,1,physics,spacecraft,simple,True,False,False,False
+tests/core/test_spacecraft.py,test_data,88,,3,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_name,92,,3,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_frame,96,,3,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_distance2sun,100,,30,1,unit,spacecraft,moderate,False,False,False,False
+tests/core/test_spacecraft.py,test_position,152,,5,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_velocity,158,,5,1,physics,spacecraft,simple,True,False,False,False
+tests/core/test_spacecraft.py,test_carrington,164,,3,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_position,191,,6,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_spacecraft.py,test_velocity,198,,6,1,physics,spacecraft,simple,True,False,False,False
+tests/core/test_spacecraft.py,test_carrington,205,,8,1,unit,spacecraft,simple,False,False,False,False
+tests/core/test_units_constants.py,test_units_attributes,9,,6,0,physics,general,simple,True,False,False,False
+tests/core/test_units_constants.py,test_constants_attributes,17,,6,0,unit,general,simple,False,False,False,False
+tests/fitfunctions/test_core.py,test_clean_raw_obs,30,,8,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_core.py,test_build_one_obs_mask,40,,9,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_core.py,test_build_outside_mask,51,,7,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_core.py,test_set_fit_obs_combined_masks,60,,23,0,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_core.py,test_set_argnames,85,,3,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_core.py,test_run_least_squares,90,,25,2,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_core.py,test_calc_popt_pcov_psigma_chisq,117,,15,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_core.py,test_make_fit_success_failure,134,,26,3,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_core.py,test_str_call_and_properties,170,,24,1,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_function_signature_and_output,22,Test function signatures and basic output for exponential classes.,20,4,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_p0_zero_size_input,57,Test p0 behavior with zero-size input arrays.,8,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_p0_estimation,67,Test initial parameter estimation for Exponential class.,11,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_plus_c_p0_estimation,80,Test initial parameter estimation for ExponentialPlusC class.,13,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_cdf_p0_estimation,95,Test initial parameter estimation for ExponentialCDF class.,11,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_TeX_function_strings,116,Test TeX function representation strings.,6,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_make_fit_success_regular,124,Test successful fitting for regular exponential classes.,18,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_make_fit_success_cdf,144,Test successful fitting for ExponentialCDF class.,20,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_make_fit_insufficient_data,166,Test fitting failure with insufficient data.,22,0,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_numerical_stability,190,Test exponential function handles large negative exponents.,10,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_plus_c_constant_term,202,Test that ExponentialPlusC handles constant offset correctly.,10,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_cdf_monotonicity,214,Test that ExponentialCDF produces monotonically increasing output.,14,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_str_and_call_methods_regular,230,Test string representation and callable interface for regular exponentials.,17,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_str_and_call_methods_cdf,249,Test string representation and callable interface for ExponentialCDF.,19,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_decay_behavior,270,Test that Exponential produces proper decay behavior.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_property_access_before_fit,289,Test accessing properties before fitting raises appropriate errors.,15,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_exponential_with_weights,306,Test exponential fitting with observation weights.,13,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_exponentials.py,test_edge_case_single_parameter_bounds,322,Test behavior with extreme parameter values.,16,1,edge,fitting,simple,False,True,False,False
+tests/fitfunctions/test_gaussians.py,test_function_signature_and_output,25,,10,4,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_gaussians.py,test_p0_zero_size_input,38,,6,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_gaussians.py,test_p0_estimation,54,,35,2,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_gaussians.py,test_TeX_function_strings,113,,5,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_gaussians.py,test_make_fit_TeX_argnames_success,121,,13,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_gaussians.py,test_make_fit_TeX_argnames_failure,137,,6,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_lines.py,test_function_signature_and_output,20,Test function signatures and basic output for line classes.,15,4,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_lines.py,test_p0_zero_size_input,38,Test p0 behavior with zero-size input arrays.,8,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_p0_estimation,48,Test initial parameter estimation for Line class.,15,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_lines.py,test_line_x_intercept_p0_estimation,65,Test initial parameter estimation for LineXintercept class.,12,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_lines.py,test_TeX_function_strings,86,Test TeX function representation strings.,6,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_make_fit_success,95,Test successful fitting for line classes.,17,2,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_lines.py,test_make_fit_insufficient_data,115,Test fitting failure with insufficient data.,10,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_lines.py,test_line_x_intercept_property,127,Test x_intercept property for Line class.,15,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_x_intercept_y_intercept_property,144,Test y_intercept property for LineXintercept class.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_perfect_fit,162,Test Line with perfect linear data (no noise).,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_x_intercept_perfect_fit,180,Test LineXintercept with perfect linear data.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_str_and_call_methods,199,Test string representation and callable interface.,15,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_with_weights,216,Test Line fitting with observation weights.,13,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_horizontal_data,231,Test Line with horizontal data (zero slope).,12,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_vertical_like_data_fails,245,Test Line with nearly vertical data fails gracefully.,17,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_p0_with_duplicate_x_values,264,Test Line p0 calculation with duplicate x values.,12,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_property_access_before_fit,279,Test accessing properties before fitting.,15,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_intercept_properties_require_fit,296,Test that intercept properties require fitting first.,21,0,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_lines.py,test_line_edge_cases,319,Test Line with edge case parameter values.,12,0,edge,fitting,simple,False,True,False,False
+tests/fitfunctions/test_lines.py,test_line_numerical_precision,333,Test Line with data requiring high numerical precision.,15,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_function_signature_and_output,16,Test function signatures and basic output for Moyal class.,22,4,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_p0_zero_size_input,61,Test p0 calculation with zero-size input.,9,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_moyal_p0_estimation,72,Test p0 parameter estimation for Moyal.,15,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_moyal.py,test_TeX_function_strings,95,Test TeX function string generation.,7,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_make_fit_success_moyal,104,Test successful fitting for Moyal class.,18,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_moyal.py,test_make_fit_insufficient_data,124,Test fitting with insufficient data.,10,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_moyal.py,test_property_access_before_fit,136,Test accessing properties before fitting.,17,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_moyal_with_weights,155,Test Moyal fitting with observation weights.,13,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_str_and_call_methods,170,Test string representation and call functionality.,19,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_moyal_edge_cases,191,Test edge cases for Moyal implementation.,22,0,edge,fitting,moderate,False,True,False,False
+tests/fitfunctions/test_moyal.py,test_moyal_constructor_issues,215,Test the known constructor issues with Moyal.,20,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_moyal.py,test_moyal_function_mathematical_properties,237,Test mathematical properties of the Moyal function implementation.,22,0,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_plots.py,test_str_returns_class_name,56,Ensure ``FFPlot.__str__`` yields the class name.,5,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_initial_properties_and_path,63,,15,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_setters,80,,13,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_set_observations_mismatched_length,95,,6,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_plots.py,test_set_observations_short_y_fit,103,Ensure shorter ``y_fit`` arrays trigger an assertion.,7,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_estimate_markevery,112,,5,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_plots.py,test_format_helpers,119,,22,0,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_plots.py,test_plot_methods_and_annotations,143,,36,1,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_plots.py,test_plot_raw_used_fit_resid,181,,23,1,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_plots.py,test_label_log_texinfo,206,,13,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_plot_residuals_simple_pct_false,221,,11,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_plot_residuals_robust,234,,12,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_plots.py,test_plot_residuals_missing_fun_no_exception,248,,11,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_function_signature_and_output,22,Test function signatures and basic output for power law classes.,16,4,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_p0_zero_size_input,55,Test p0 behavior with zero-size input arrays.,8,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_p0_estimation,65,Test initial parameter estimation for PowerLaw class.,9,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_plus_c_p0_estimation,76,Test initial parameter estimation for PowerLawPlusC class.,12,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_off_center_p0_estimation,90,Test initial parameter estimation for PowerLawOffCenter class.,10,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_power_laws.py,test_TeX_function_strings,110,Test TeX function representation strings.,6,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_make_fit_success,119,Test successful fitting for power law classes.,15,2,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_power_laws.py,test_make_fit_insufficient_data,137,Test fitting failure with insufficient data.,10,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_perfect_fit,149,Test PowerLaw with perfect power law data.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_plus_c_perfect_fit,167,Test PowerLawPlusC with perfect data.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_off_center_perfect_fit,185,Test PowerLawOffCenter with perfect data.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_numerical_stability,203,Test power law functions handle extreme values.,15,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_zero_handling,220,Test power law behavior with zero and near-zero values.,14,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_off_center_centering,236,Test that PowerLawOffCenter properly handles centering.,11,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_str_and_call_methods,250,Test string representation and callable interface.,16,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_with_weights,268,Test power law fitting with observation weights.,13,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_scaling_behavior,283,Test that PowerLaw exhibits proper scaling behavior.,16,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_property_access_before_fit,302,Test accessing properties before fitting.,15,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_negative_x_handling,319,Test power law behavior with negative x values.,15,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_integer_vs_float_exponents,336,Test that integer and float exponents give consistent results.,12,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_power_laws.py,test_power_law_edge_case_exponents,350,Test power laws with edge case exponent values.,18,0,edge,fitting,simple,False,True,False,False
+tests/fitfunctions/test_tex_info.py,test_properties_and_str,29,,14,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_constructor_and_setters_errors,45,,12,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_set_popt_psigma_errors,59,,7,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_tex_info.py,test_set_chisq_dof_type_error,68,,4,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_set_rsq_type_error,74,,4,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_set_TeX_function_type_error,80,,4,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_check_and_add_math_escapes,86,,6,0,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_tex_info.py,test_calc_precision,94,,4,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_simplify_for_paper,100,,5,0,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_add_additional_info_with_str,107,,6,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_add_additional_info,115,,6,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_fit_parameter_info,123,,12,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_fit_parameter_info_errors,137,_build_fit_parameter_info should reject unknown kwargs.,4,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_annotate_info,143,,7,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_info_and_val_uncert,152,,7,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_info_with_initial_guess,161,,4,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_info_relative_error_e_format,167,,5,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_tex_info.py,test_build_info_strip_uncert_simplify,174,,6,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fit_properties.py,test_popt1d_keys_property,19,,3,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fit_properties.py,test_trend_logx_true_make_trend_func,24,Ensure ``trend_logx`` propagates to the trend function.,8,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_type_enforcement_and_properties,68,,12,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_make_ffunc1ds_make_1dfits,82,,8,1,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_make_1dfits_moves_bad_fit,92,,23,1,physics,fitting,moderate,True,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_make_trend_func_success_and_failure,117,,6,2,physics,fitting,simple,True,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_plotting_methods_return_axes,125,,33,2,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_plot_all_popt_1d_returns_errorbar_artists,159,,34,1,unit,fitting,moderate,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_plot_all_ffuncs,194,,8,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_set_agged_set_fitfunctions_set_shared_labels,204,,12,2,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_set_agged_rejects_non_dataframe,218,,3,1,unit,fitting,simple,False,False,False,False
+tests/fitfunctions/test_trend_fits.py,test_labels_instance_and_update,223,,4,1,unit,fitting,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_manual_label_attributes,40,Ensure each ``ManualLabel`` exposes the correct values.,6,4,physics,visualization,moderate,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_all_labels_are_manual_labels,51,Test that all chemistry labels are ManualLabel instances.,11,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_mass_per_charge_properties,63,Test mass per charge label properties.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_fip_properties,71,Test First Ionization Potential label properties.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_charge_properties,78,Test ion charge label properties.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_mass_properties,85,Test ion mass label properties.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_string_representation,92,Test string representations of chemistry labels.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_label_uniqueness,108,"Test that all labels have unique tex, units, and paths.",20,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_label_inheritance,129,Test that labels inherit from base classes correctly.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_tex_formatting,144,Test TeX formatting is correct.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_unit_formatting,152,Test unit formatting is correct.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_chemistry.py,test_path_types,160,Test that all paths are Path objects.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_label_comparison,172,Test label comparison based on string representation.,19,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_label_hashing,192,Test that labels can be hashed.,16,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_module_attributes,209,Test that the chemistry module has all expected attributes.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_label_immutability,218,Test that label properties are effectively immutable.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_chemistry.py,test_scientific_accuracy,230,Test that labels represent scientifically accurate concepts.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_set_species_charge_known_species,21,"Check that a known species does not trigger a warning.
+
+    Parameters
+    ----------
+    caplog : pytest.LogCaptureFixture
+        Logging capture fixture.
+    ",13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_set_species_charge_unknown_species,36,"Check that an unknown species logs a warning.
+
+    Parameters
+    ----------
+    caplog : pytest.LogCaptureFixture
+        Logging capture fixture.
+    ",11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_set_species_charge_invalid_charge,49,Ensure invalid charge raises ``ValueError``.,4,0,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_units_equal,55,``ChargeState`` has ``#`` units when ion units match.,4,0,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_units_different,61,``ChargeState`` units combine when ion units differ.,6,0,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_ion_initialization,72,Test basic Ion initialization.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_ion_inheritance,78,Test that Ion inherits from Base.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_species_title_case,84,Test that species is converted to title case.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_tex_property,92,Test TeX representation of ion.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_units_property,101,Test ion units property.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_path_property,106,Test path generation for ions.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_path_with_valid_charges,112,Test path generation with various valid charges.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_known_species_list,127,Test the known species list.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_all_known_species_no_warning,132,Test that all known species don't trigger warnings.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_valid_charges,139,Test various valid charge formats.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_invalid_charges,147,Test invalid charge formats raise ValueError.,7,1,edge,visualization,simple,True,True,False,False
+tests/plotting/labels/test_composition.py,test_string_representation,155,Test string representations through base class.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_ion_comparison,162,Test ion comparison functionality.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_ion_hashing,174,Test that ions can be hashed.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_initialization_with_tuples,191,Test ChargeState initialization with tuples.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_initialization_with_ions,199,Test ChargeState initialization with Ion objects.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_inheritance,207,Test that ChargeState inherits from Base.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_tex,213,Test TeX representation of charge state.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_path,218,Test path generation for charge state.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_same_units,225,Test charge state units when both ions have same units.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_different_units,231,Test charge state units when ions have different units.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_mixed_initialization,238,Test ChargeState with mix of Ion and tuple.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_comparison,246,Test charge state comparison functionality.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_hashing,258,Test that charge states can be hashed.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_string_representation,271,Test string representation of charge state.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_module_all,281,Test module __all__ exports.,3,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_module_attributes,285,Test module has expected attributes.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_known_species_completeness,291,Test that known_species covers common solar wind ions.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_scientific_accuracy,297,Test that composition labels represent scientifically accurate concepts.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_ion_in_charge_state_roundtrip,315,Test creating ions and using them in charge states.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_complex_charge_state_ratios,330,Test complex charge state ratios with different species.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_composition.py,test_charge_state_path_uniqueness,338,Test that different charge states have unique paths.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_latex_and_path,8,Verify ``Timedelta`` LaTeX and path string.,5,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_label,15,Verify ``DateTime`` label formatting.,5,0,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_label,22,Verify ``Epoch`` label formatting.,5,0,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_label,29,Validate ``Frequency`` label output.,5,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_label,36,Validate ``January1st`` label output.,5,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_inheritance,46,Test that Timedelta inherits from ArbitraryLabel.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_various_offsets,52,Test Timedelta with various pandas offsets.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_tex_property,65,Test TeX property of Timedelta.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_invalid_offset,70,Test Timedelta with invalid offset.,5,1,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_path_generation,76,Test path generation for different offsets.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_units_formatting,86,Test units formatting.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_string_representation,93,Test string representation.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_with_units_property,101,Test with_units property.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_set_offset,109,Test set_offset method.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_inheritance,122,Test that DateTime inherits from ArbitraryLabel.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_various_kinds,128,Test DateTime with various kinds.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_tex_formatting,141,Test TeX formatting with spaces.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_path_generation,147,Test path generation.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_string_representation,155,Test string representation.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_set_kind,163,Test set_kind method.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_datetime_with_units_property,171,Test with_units property.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_inheritance,182,Test that Epoch inherits from ArbitraryLabel.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_basic_properties,188,Test basic Epoch properties.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_case_conversion,195,Test case conversion for smaller and larger.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_tex_formatting,201,Test TeX formatting.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_path_generation,207,Test path generation.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_different_spacing,215,Test different spacing options.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_invalid_space,224,Test invalid space raises ValueError.,4,1,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_string_representation,229,Test string representation.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_epoch_setter_methods,238,Test setter methods.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_inheritance,255,Test that Frequency inherits from ArbitraryLabel.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_with_string_offset,261,Test Frequency with string offset.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_with_timedelta_object,267,Test Frequency with Timedelta object.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_tex_property,273,Test TeX property.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_units_property,278,Test units property.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_path_generation,286,Test path generation.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_with_invalid_offset,292,Test Frequency with invalid offset.,5,1,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_string_representation,298,Test string representation.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_frequency_set_other,308,Test set_other method.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_inheritance,320,Test that January1st inherits from ArbitraryLabel.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_tex_property,326,Test TeX property.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_path_property,332,Test path property.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_string_representation,337,Test string representation.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_january1st_with_units_property,347,Test with_units property.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_datetime.py,test_module_classes,357,Test that module has expected classes.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_class_inheritance_chain,368,Test inheritance chain for all classes.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_timedelta_in_frequency,388,Test using Timedelta in Frequency.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_different_epoch_combinations,394,Test different epoch combinations.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_label_uniqueness,409,Test that different labels generate unique paths.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_datetime.py,test_scientific_accuracy,422,Test that labels represent scientifically accurate concepts.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_module_all_attribute,348,Test module __all__ attribute is correctly defined.,5,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_module_imports,355,Test module can be imported correctly.,7,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_basic_initialization,14,Test basic ElementalAbundance initialization.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_initialization_with_options,22,Test initialization with all options.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_species_case_conversion,30,Test species names are converted to title case.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_initialization_boolean_conversion,36,Test boolean parameters are properly converted.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_species_property,46,Test species property returns correct value.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_reference_species_property,51,Test reference_species property returns correct value.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_photospheric_property,56,Test photospheric property returns correct value.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_pct_unit_property,63,Test pct_unit property returns correct value.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_units_dimensionless,74,Test units property with dimensionless numbers.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_units_percentage,79,Test units property with percentage.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_tex_basic_ratio,88,Test basic ratio TeX formatting.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_tex_photospheric_ratio,96,Test photospheric ratio TeX formatting.,8,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_tex_with_known_species,105,Test TeX formatting with known species translations.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_tex_with_unknown_species,113,Test TeX formatting with unknown species.,8,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_path_basic_ratio,126,Test path generation for basic ratio.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_path_photospheric_ratio,133,Test path generation for photospheric ratio.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_path_special_characters,141,Test path generation handles special characters.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_set_species_basic,154,Test set_species method with valid species.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_set_species_case_conversion,161,Test set_species converts to title case.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_set_species_unknown_warning,168,Test set_species warns for unknown species.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_set_species_unknown_reference_warning,176,Test set_species warns for unknown reference species.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_inheritance_from_base,188,Test ElementalAbundance inherits from Base.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_string_representation,194,Test string representation uses with_units property.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_comparison_operators,201,Test comparison operators work correctly.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_hash_functionality,210,Test ElementalAbundance objects are hashable.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_known_species_import,220,Test known_species is properly imported.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_known_species_validation,228,Test validation against known species.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_unknown_species_validation,239,Test validation warns for unknown species.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_common_abundance_ratios,252,Test common abundance ratios used in solar wind.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_photospheric_vs_solar_wind,264,Test photospheric vs solar wind abundance comparison.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_percentage_vs_ratio_units,274,Test percentage vs ratio unit formatting.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_multiple_abundance_uniqueness,282,Test multiple abundance objects maintain uniqueness.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_scientific_accuracy,296,Test scientific accuracy of abundance representations.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_same_species_ratio,313,Test abundance ratio of same species.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_empty_string_species,324,Test handling of empty string species.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_elemental_abundance.py,test_numeric_species_names,333,Test handling of numeric species names.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_init.py,test_clean_str_list_for_printing,38,Test grouping produced by ``_clean_str_list_for_printing``.,6,0,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_init.py,test_available_labels_output,46,"Check that ``available_labels`` prints all major sections.
+
+    Parameters
+    ----------
+    capsys : pytest.CaptureFixture
+        Pytest fixture used to capture standard output.
+    ",19,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_run_species_substitution,47,Verify direct species substitution helper.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_attributes,59,Check attributes of a typical :class:`TeXlabel`.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_ratio_attributes,70,Check attributes of a ratio :class:`TeXlabel`.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_equality_and_hash,81,Ensure equality and hashing are based on ``str``.,10,3,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_comparison_operators,93,Test comparison operators for TeXlabel objects.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_axnorm_types,105,Test different axis normalization types.,17,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_error_measurement,124,Test error measurement handling.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_newline_units,130,Test newline separation for units.,3,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_species_substitution_comprehensive,135,Test comprehensive species substitution patterns.,21,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_measurement_translation,158,Test measurement translation.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_component_translation,173,Test component translation.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_units_translation,189,Test units translation.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_path_generation,204,Test path generation for different inputs.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_ratio_label_same_units,218,Test ratio labels with same units become dimensionless.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_ratio_label_different_units,225,Test ratio labels with different units.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_template_substitution,233,Test template substitution for complex measurements.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_tex_cleanup,244,Test TeX string cleanup operations.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_base_class_properties,256,Test Base class properties and methods.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_mcs_namedtuple,269,Test MCS namedtuple functionality.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_texlabel_set_methods,277,Test TeXlabel setter methods.,22,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_axnorm_validation,301,Test axis normalization validation.,11,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_labels_base.py,test_path_special_characters,314,Test path handling with special characters.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_labels_base.py,test_empty_string_handling,327,Test handling of empty strings in MCS components.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_creation,46,Test basic ManualLabel creation.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_string_representation,52,Test string representation.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_tex_stripping,60,Test TeX string stripping of dollar signs.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_unit_translation,65,Test unit translation using base._inU.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,70,Test path generation.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_custom_path,75,Test custom path specification.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_empty_unit_handling,80,Test handling of empty units.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_properties,90,Test Vsw label properties.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_string_representation,96,Test string representation.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_short_label,107,Test short label format.,4,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_long_label,112,Test long label format.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_string_representation,119,Test string representation.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_path,125,Test path property.,3,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_count,133,Test basic count label.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_normalized_count,139,Test normalized count label.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_all_normalization_types,145,Test all normalization types.,14,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_path_with_normalization,160,Test path generation with normalization.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_invalid_normalization,166,Test invalid normalization raises assertion.,4,1,edge,visualization,simple,True,True,False,False
+tests/plotting/labels/test_special.py,test_set_axnorm_case_conversion,171,Test case conversion in set_axnorm.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_properties,180,Test Power label properties.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_string_representation,187,Test string representation.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_probability,198,Test basic probability label.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_empty_comparison,206,Test probability with empty comparison.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,211,Test path generation with comparison operators.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_comparison_operator_conversion,218,Test conversion of comparison operators in path.,15,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_string_label,234,Test probability with string label.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_count_other,246,Test basic CountOther label.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_newline_units,253,Test newline for units option.,6,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,260,Test path generation for CountOther.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_math_function,270,Test basic math function label.,6,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_non_dimensionless,277,Test non-dimensionless math function.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_newline_units,283,Test newline for units.,4,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,288,Test path generation for math functions.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_function_path_cleaning,294,Test function name cleaning for path.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_valid_units,304,Test valid distance units.,6,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_unit_translation,311,Test unit translation.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_invalid_units,323,Test invalid units raise NotImplementedError.,4,1,edge,visualization,simple,True,True,False,False
+tests/plotting/labels/test_special.py,test_properties,328,Test Distance2Sun properties.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_valid_kinds,339,Test valid SSN kinds.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_pretty_kind_translation,346,Test pretty kind translation.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_case_conversion,359,Test case conversion for SSN kind.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_invalid_kind,364,Test invalid SSN kind raises assertion.,4,1,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_special.py,test_tex_formatting,369,Test TeX formatting.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,375,Test path generation.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_comparison,384,Test basic comparison label.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_predefined_functions,392,Test predefined comparison functions.,9,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_custom_function,402,Test custom function definition.,8,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_invalid_function_keys,411,Test invalid function keys raise ValueError.,6,2,edge,visualization,simple,False,True,False,False
+tests/plotting/labels/test_special.py,test_unit_validation,418,Test unit validation for comparison labels.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_different_units_error,425,Test different units raise ValueError.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_string_labels,431,Test comparison with string labels.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_type_validation,437,Test type validation for labels.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_basic_xcorr,449,Test basic cross-correlation label.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_short_tex_format,457,Test short TeX format.,6,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_long_tex_format,464,Test long TeX format.,6,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_method_title_case,471,Test method conversion to title case.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_units,477,Test cross-correlation units.,5,2,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_path_generation,483,Test path generation.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_string_labels,490,Test cross-correlation with string labels.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_type_validation,496,Test type validation for xcorr labels.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_abstract_methods,508,Test that ArbitraryLabel cannot be instantiated directly.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_inheritance_structure,513,Test inheritance from base.Base.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_mixed_label_comparison,524,Test comparison using mixed label types.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/labels/test_special.py,test_probability_with_manual_label,530,Test probability with manual label.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/labels/test_special.py,test_math_function_with_vsw,536,Test math function with Vsw label.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_agg_plot.py,test_edges_property,70,Test that edges property constructs correct bin-edge arrays.,16,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_agg_plot.py,test_categoricals_property,87,Test that categoricals property returns categorical bins mapping.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_agg_plot.py,test_intervals_property,101,Test that intervals property returns correct IntervalIndex objects.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_cut_property,119,Test that cut property returns the internal _cut DataFrame.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clim_property,130,Test that clim property returns the internal _clim tuple.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_alim_property,142,Test that alim property returns the internal _alim tuple.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_axes_property,154,Test that agg_axes returns the correct aggregation column.,18,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_joint_property,173,Test that joint returns a Series with a MultiIndex.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_grouped_property,187,Test that grouped returns a GroupBy on the correct axes.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_axnorm_property,198,Test that axnorm returns the internal _axnorm value.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_series_lower,217,Test clip_data with Series and 'l' (lower) clipping.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_series_upper,225,Test clip_data with Series and 'u' (upper) clipping.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_series_both,233,Test clip_data with Series and both upper/lower clipping.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_dataframe_lower,245,Test clip_data with DataFrame and 'l' clipping.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_dataframe_upper,256,Test clip_data with DataFrame and 'u' clipping.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_dataframe_both,267,Test clip_data with DataFrame and both clipping.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_unsupported_type_raises_error,283,Test that clip_data raises AttributeError on unsupported input types.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_clip_data_case_insensitive,291,Test that clip_data handles case-insensitive mode strings.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_set_clim_valid_numbers,306,Test set_clim with valid number inputs.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_set_clim_none_values,317,Test set_clim with None values.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_set_clim_invalid_types,330,Test set_clim with invalid types raises AssertionError.,12,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_agg_plot.py,test_set_alim_valid_numbers,343,Test set_alim with valid number inputs.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_set_alim_none_values,354,Test set_alim with None values.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_set_alim_invalid_types,364,Test set_alim with invalid types raises AssertionError.,9,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_agg_plot.py,test_calc_bins_intervals_default,378,Test calc_bins_intervals with default parameters.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_calc_bins_intervals_custom_nbins,390,Test calc_bins_intervals with custom number of bins.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_calc_bins_intervals_different_nbins_per_axis,401,Test calc_bins_intervals with different bins per axis.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_calc_bins_intervals_with_precision,415,Test calc_bins_intervals with custom precision.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_make_cut_creates_cut_dataframe,426,Test that make_cut creates the _cut DataFrame.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_agg_plot.py,test_make_cut_with_clipping,436,Test make_cut with data clipping enabled.,8,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_default_behavior,449,Test agg method with default parameters.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_with_count_function,459,Test agg method with count function.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_with_mean_function,468,Test agg method with mean function.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_with_clim_filtering,483,Test agg method with count limits applied.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_with_kwargs,494,Test agg method with additional kwargs.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_get_plotted_data_boolean_series,506,Test get_plotted_data_boolean_series method.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_get_subset_above_threshold,518,Test get_subset_above_threshold method.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_get_subset_above_threshold_with_custom_function,530,Test get_subset_above_threshold with custom aggregation function.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_plot_with_minimal_data,545,Test AggPlot with minimal data.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_agg_plot.py,test_agg_plot_with_nan_data,559,Test AggPlot handling of NaN values.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_abstract_properties_and_methods,575,Test that abstract properties and methods are properly implemented.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_agg_plot.py,test_logger_functionality,587,Test that logging functionality works.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_log_axes_creation,66,Test LogAxes namedtuple with defaults.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_axes_labels_creation,77,Test AxesLabels namedtuple with defaults.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_range_limits_creation,90,Test RangeLimits namedtuple with defaults.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_base_instantiation_via_subclass,105,Test that Base can be instantiated via subclass with proper initialization.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_base_cannot_be_instantiated_directly,123,Test that Base cannot be instantiated directly.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_str_returns_class_name,128,Test that __str__ returns the class name.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_logger_initialization,133,Test that logger is properly initialized.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_data_property,140,Test that data property returns internal _data.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_clip_property,147,Test that clip property returns internal _clip.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_log_property,156,Test that log property returns internal _log.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_labels_property,163,Test that labels property returns internal _labels.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_path_property,170,Test that path property returns internal _path.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_log_defaults,181,Test set_log() with defaults toggles log.x and log.y appropriately.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_log_explicit_values,194,"Test set_log(x=True, y=False) correctly updates log axes.",15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_log_partial_specification,210,Test set_log with only x or y specified.,16,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_log_type_coercion,227,Test that set_log converts values to bool.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_updates_labels_and_regenerates_path,244,Test set_labels() updates labels and regenerates path.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_partial_update,257,Test setting only some labels preserves others.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_auto_update_path_false,270,Test set_labels with auto_update_path=False.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_unexpected_kwarg_raises_keyerror,282,Test that set_labels(unexpected=...) raises KeyError.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_multiple_unexpected_kwargs,292,Test error message with multiple unexpected kwargs.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_auto_mode,308,Test set_path with 'auto' mode.,16,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_auto_mode_with_scale,325,Test set_path with 'auto' mode and add_scale=True.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_explicit_path,334,Test set_path with explicit path.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_none,346,Test set_path with None.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_label_attribute_handling,358,Test set_path handles labels with .path attributes.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_string_sanitization,373,Test that set_path sanitizes string labels.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_add_axis_labels,389,Test _add_axis_labels method.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_add_axis_labels_transpose,401,Test _add_axis_labels with transpose_axes=True.,11,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_add_axis_labels_none_handling,414,Test _add_axis_labels with None labels.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_axis_scale,426,Test _set_axis_scale method.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_axis_scale_transpose,438,Test _set_axis_scale with transpose_axes=True.,11,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_format_axis_complete,451,Test _format_axis method calls all formatting functions.,16,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_base.py,test_set_data_basic,472,Test basic set_data functionality.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_data_without_z,487,Test set_data without z parameter creates default z=1.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_data_with_clip,499,Test set_data with clip_data=True.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_data_drops_nan,510,Test that set_data drops NaN values.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_data_all_nan_raises_error,526,Test that set_data raises ValueError when all data is NaN.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_auto_with_scale,536,Test set_path auto mode with add_scale=True (default).,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_path_explicit,548,Test set_path with explicit path.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_set_labels_preserves_z,556,Test that set_labels properly handles z label.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_format_axis_calls_super_and_sets_limits,572,Test that _format_axis calls super and sets data limits.,33,1,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_base.py,test_make_cbar_with_ax,611,Test _make_cbar with ax parameter.,23,2,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_base.py,test_make_cbar_with_cax,636,Test _make_cbar with cax parameter.,22,2,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_base.py,test_make_cbar_ax_and_cax_error,659,Test that passing both ax and cax raises ValueError.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_base.py,test_make_cbar_no_ax_or_cax_error,673,Test that not passing ax or cax raises ValueError.,11,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_base.py,test_make_cbar_custom_label,686,Test _make_cbar with custom label parameter.,21,2,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_base.py,test_abstract_methods_not_implemented,712,Test that abstract methods raise NotImplementedError if not implemented.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_logger_name_format,723,Test that logger name includes module and class name.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_base.py,test_multiple_label_updates,731,Test multiple sequential label updates.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_base.py,test_log_scale_persistence,747,Test that log scale settings persist across operations.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_synthetic_time_series_fixture,436,Test synthetic time series data fixture.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_synthetic_plasma_data_fixture,447,Test synthetic plasma data fixture.,8,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_plot_helper_functionality,456,Test PlotTestHelper functionality.,17,3,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_temporary_file_fixtures,474,Test temporary file fixtures.,15,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_dataset_fixtures,490,Test dataset fixtures have expected properties.,16,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_scatter_data_fixture,507,Test scatter data fixture.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_histogram_data_fixture,515,Test histogram data fixture.,8,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_contour_data_fixture,524,Test contour data fixture.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_performance_tracker,532,Test performance tracking functionality.,25,2,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_fixtures_utilities.py,test_solar_wind_event_generator,558,Test solar wind event data generator.,14,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_mock_figure_fixture,577,Test mock figure fixture.,7,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_mock_axes_fixture,585,Test mock axes fixture.,13,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_plot_with_synthetic_data,603,Test plotting with synthetic data using fixtures.,18,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_fixtures_utilities.py,test_save_plot_with_temp_files,622,Test saving plots using temporary file fixtures.,19,5,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_histograms.py,test_module_exports_aggplot,21,Test that AggPlot is correctly exported.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_module_exports_hist1d,26,Test that Hist1D is correctly exported.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_module_exports_hist2d,31,Test that Hist2D is correctly exported.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_all_exports_accessible,36,Test that all expected exports are accessible.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_imported_classes_are_correct_types,43,Test that imported classes are the correct types.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_instantiation_count_histogram,65,Test __init__(x_series) produces a count histogram.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_instantiation_aggregation_histogram,81,"Test __init__(x, y_series) aggregates y values.",11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_logx_transform,93,"Test __init__(..., logx=True) applies log₁₀ transform to x.",12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_gb_axes_property,106,"Test that _gb_axes property returns ('x',).",4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_set_path_auto,111,Test set_path('auto') builds path from labels.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_set_path_custom,123,"Test set_path('custom', add_scale=False) sets _path to Path('custom').",9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_set_data_with_clipping,133,"Test set_data(x, y, clip=True) stores DataFrame with columns x,y & clip.",8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist1d_clip_attribute,142,Test that .clip attribute equals clip flag.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_set_axnorm_density,160,Test set_axnorm('d') sets density normalization and updates label.,10,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_set_axnorm_total,171,Test set_axnorm('t') sets total normalization.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_set_axnorm_invalid_raises_assertion_error,179,Test that set_axnorm('x') raises AssertionError.,6,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_none,186,Test _axis_normalizer(None) returns input unchanged.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_density,196,Test _axis_normalizer('d') computes PDF correctly.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_total,206,Test _axis_normalizer('t') normalizes by max.,14,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_invalid_raises_value_error,221,Test that _axis_normalizer('bad') raises ValueError.,10,1,edge,visualization,simple,True,True,False,False
+tests/plotting/test_histograms.py,test_agg_count_with_density_works,242,Test agg(fcn='count') with axnorm='d' works.,8,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_agg_sum_with_density_raises_value_error,251,"Test that agg(fcn='sum', axnorm='d') raises ValueError.",7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_agg_output_reindexed_correctly,259,Test that agg() output is reindexed correctly.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_set_labels_y_updates_label,282,Test set_labels(y='new') updates y-label.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_set_labels_z_raises_value_error,290,Test that set_labels(z='z') raises ValueError.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_make_plot_returns_correct_structure,307,"Test make_plot(ax) returns (ax,(pl,cl,bl)) with drawstyle='steps-mid'.",12,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_make_plot_transpose_axes,320,"Test make_plot(ax, transpose_axes=True) swaps axes.",11,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_make_plot_invalid_fcn_raises_value_error,332,Test that make_plot(fcn='bad') raises ValueError.,12,1,edge,visualization,simple,True,True,False,False
+tests/plotting/test_histograms.py,test_hist2d_instantiation_count_heatmap,357,"Test __init__(x, y) produces 2D count heatmap.",16,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_instantiation_aggregation_heatmap,374,"Test __init__(x, y, z) aggregates mean of z.",12,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_gb_axes_property,387,"Test that _gb_axes returns ('x','y').",4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_log_scale_conversion,392,Test _maybe_convert_to_log_scale with logx/logy=True.,23,1,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_set_data_with_log_transform,416,"Test set_data(x, y, z, clip) applies log transform.",13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_set_labels_z,430,Test set_labels(z='z') updates z-label.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_set_axnorm_valid_options,449,"Test that set_axnorm('c'), 'r', 't', 'd' work; invalid → AssertionError.",13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_each_norm_branch,463,Test _axis_normalizer() for each norm branch.,23,1,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_custom_function,487,"Test that _axis_normalizer(('c','sum')) applies custom function.",9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_histograms.py,test_axis_normalizer_invalid_raises_value_error,497,Test that _axis_normalizer('bad') raises ValueError.,7,1,edge,visualization,simple,True,True,False,False
+tests/plotting/test_histograms.py,test_hist1d_inherits_from_aggplot,509,Test that Hist1D properly inherits from AggPlot.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_histograms.py,test_hist2d_inherits_from_aggplot,524,Test that Hist2D properly inherits from AggPlot.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_integration.py,test_module_integration,549,Test that all plotting modules can be imported and work together.,21,0,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_integration.py,test_cross_platform_compatibility,572,Test that plotting works consistently across platforms.,21,0,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_integration.py,test_time_series_integration_workflow,62,Test complete time series plotting workflow.,32,1,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_integration.py,test_correlation_analysis_workflow,95,Test correlation analysis workflow.,48,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_integration.py,test_distribution_analysis_workflow,144,Test distribution analysis workflow.,84,1,unit,visualization,complex,False,False,False,False
+tests/plotting/test_integration.py,test_chemistry_labels_integration,237,Test integration of chemistry labels with plots.,56,1,integration,visualization,complex,False,False,True,False
+tests/plotting/test_integration.py,test_datetime_labels_integration,294,Test integration of datetime labels with time series plots.,47,1,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_integration.py,test_plot_saving_workflow,350,Test complete workflow of creating and saving plots.,53,1,unit,visualization,complex,False,False,False,False
+tests/plotting/test_integration.py,test_data_export_integration,404,Test integration of plotting with data export.,43,1,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_integration.py,test_missing_data_integration,456,Test handling of missing data in integrated workflows.,48,1,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_integration.py,test_invalid_parameter_integration,505,Test handling of invalid parameters in integrated workflows.,42,1,edge,visualization,moderate,False,True,False,False
+tests/plotting/test_orbits.py,test_module_imports,29,Test that all required imports are accessible.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_classes_available,37,Test that orbit classes are accessible.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_plot_inheritance,46,Test OrbitPlot inheritance structure.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_plot_initialization,88,Test OrbitPlot initialization.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_plot_invalid_orbit_type,96,Test that invalid orbit type raises TypeError.,7,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_orbits.py,test_disable_both_property,104,Test _disable_both property is True by default.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_property,109,Test orbit property returns the IntervalIndex.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_key_property,117,Test _orbit_key returns 'Orbit'.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_grouped_property,122,Test grouped property groups by _gb_axes + _orbit_key.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_set_orbit_sorting,130,Test set_orbit sorts the intervals.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_set_orbit_validates_type,143,Test set_orbit validates IntervalIndex type.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_set_path_with_orbit,150,Test set_path with orbit parameter.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_make_cut_method_exists,163,Test make_cut method exists and processes orbit intervals.,10,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_orbit_hist_1d_initialization,190,Test OrbitHist1D initialization basics.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_format_axis_method_exists,199,Test _format_axis method exists.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_make_plot_method_exists,205,Test make_plot method exists.,5,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_orbit_hist_2d_initialization,228,Test OrbitHist2D initialization basics.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_format_in_out_axes_method_exists,237,Test _format_in_out_axes method exists.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_prune_lower_yaxis_ticks,242,Test _prune_lower_yaxis_ticks prunes ticks correctly.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_project_1d_method_exists,257,Test project_1d method exists.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_make_one_plot_method_exists,262,Test make_one_plot method exists.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_make_one_plot_kind_validation,267,Test make_one_plot kind validation logic.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_orbits.py,test_disable_both_property_default,277,Test that _disable_both is True by default in OrbitPlot classes.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_plot_inheritance_chain,298,Test that inheritance chain works correctly.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_interval_validation,307,Test that orbit intervals are properly validated across classes.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_empty_orbit_intervals,332,Test handling of empty orbit intervals.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_single_orbit_interval,340,Test handling of single orbit interval.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_overlapping_orbit_intervals,349,Test handling of overlapping orbit intervals.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_module_docstring,364,Test that module has docstring.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_plot_docstring,369,Test that OrbitPlot has class documentation.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_hist_1d_docstring,374,Test that OrbitHist1D methods have docstrings.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_orbit_hist_2d_docstring,379,Test that OrbitHist2D methods have docstrings.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_large_orbit_dataset,391,Test handling of large orbit datasets.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_orbits.py,test_memory_usage_with_large_data,404,Test memory efficiency with large datasets.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_performance.py,test_performance_regression,594,Test for performance regressions in basic operations.,22,0,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_memory_leak_detection,618,Test for memory leaks in plotting operations.,24,0,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_performance.py,test_line_plot_performance,50,Test line plot performance with various data sizes.,34,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_scatter_plot_performance,85,Test scatter plot performance with various data sizes.,35,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_histogram_performance,121,Test histogram performance with large datasets.,30,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_memory_usage_scalability,152,Test memory usage scaling with data size.,33,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_performance.py,test_contour_plot_performance,195,Test contour plot performance with 2D data.,29,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_subplot_performance,225,Test performance of multi-subplot layouts.,29,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_repeated_plot_performance,255,Test performance of repeated plot creation/destruction.,36,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_pandas_integration_performance,301,Test performance when plotting with pandas DataFrames.,34,1,integration,visualization,moderate,True,False,True,False
+tests/plotting/test_performance.py,test_different_data_types_performance,336,Test performance with different numpy data types.,25,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_sparse_data_performance,362,Test performance with sparse/irregular data.,32,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_performance.py,test_memory_cleanup,413,Test that memory is properly released after plots are closed.,29,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_performance.py,test_large_figure_memory,443,Test memory usage with large figure sizes.,29,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_performance.py,test_space_physics_timeseries_performance,483,Test performance with typical space physics time series.,58,1,performance,visualization,complex,True,False,False,True
+tests/plotting/test_performance.py,test_high_resolution_contour_performance,542,Test performance with high-resolution 2D data.,50,1,performance,visualization,moderate,True,False,False,True
+tests/plotting/test_scatter.py,test_module_imports,28,Test that all required imports are accessible.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_scatter_class_available,35,Test that Scatter class is accessible from module.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_scatter_inheritance,40,Test that Scatter inherits from correct base classes.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_basic_initialization,60,"Test basic initialization with x, y data only.",9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_initialization_with_z_data,70,Test initialization with z data for color mapping.,7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_initialization_with_clip_data_true,78,Test initialization with clip_data=True.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_initialization_with_clip_data_false,84,Test initialization with clip_data=False.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_labels_initialization,90,Test that labels are properly initialized.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_log_initialization,104,Test that log axes are properly initialized.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_path_initialization,112,Test that path is initialized to None.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_invalid_input_types,118,Test behavior with non-pandas Series inputs.,9,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_scatter.py,test_empty_data_handling,128,Test behavior with empty pandas Series.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_mismatched_data_lengths,136,"Test error handling for different length x, y, z.",7,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_nan_data_handling,144,Test handling of NaN values in data.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_set_data_method,165,Test the set_data method.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_set_data_with_z,174,Test set_data with z data.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_data_property_access,181,Test access to stored data via properties.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_data_integrity,191,Test that data remains unchanged after storage.,8,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_clip_property,200,Test the clip property.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_default_labels,218,Test that default labels are set correctly.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_labels_with_z_data,226,Test labels when z data is provided.,7,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_label_customization,234,Test updating axis labels via namedtuple replacement.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_label_persistence,247,Test that labels maintain values across operations.,13,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_log_scale_defaults,261,Test default log scale settings.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_log_scale_configuration,268,Test setting logarithmic scales via namedtuple replacement.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_basic,290,Test basic scatter plot generation.,16,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_with_z_data,308,Test scatter plot generation with z data.,24,2,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_with_provided_ax,334,Test plot generation with provided axes.,15,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_no_colorbar,351,Test plot generation with colorbar disabled.,13,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_kwargs_passed,366,Test that kwargs are passed to ax.scatter.,20,2,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_format_axis_method,387,Test the _format_axis method.,22,1,physics,visualization,moderate,True,False,False,False
+tests/plotting/test_scatter.py,test_colorbar_creation_with_z_data,422,Test colorbar creation when z data is provided.,19,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_no_colorbar_with_uniform_z,443,Test no colorbar when z data is uniform.,14,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_colorbar_kwargs_passed,459,Test that colorbar kwargs are passed correctly.,23,2,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_scatter.py,test_plot_with_z_data_inheritance,493,Test inheritance from PlotWithZdata.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_cbar_maker_inheritance,506,Test inheritance from CbarMaker.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_base_class_properties_accessible,516,Test that base class properties are accessible.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_invalid_data_types,540,Test handling of non-pandas Series data types.,11,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_scatter.py,test_nan_inf_handling,552,Test handling of NaN and infinite values.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_missing_data,566,Test behavior with incomplete data.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_single_point_data,578,Test handling of single data point.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_negative_values_with_log,589,Test behavior with negative values when log scale is set.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_empty_data_after_processing,603,Test handling when data becomes empty after processing.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_large_datasets,616,Test performance with large datasets.,15,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_memory_usage,632,Test efficient memory usage.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_class_docstring_exists,654,Test that class has docstring.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_init_docstring_exists,659,Test that __init__ method has docstring.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_make_plot_docstring_exists,664,Test that make_plot method has docstring.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_scatter.py,test_docstring_parameter_documentation,669,Test that parameters are documented in docstrings.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_scatter.py,test_full_workflow_2d,694,Test complete workflow for 2D scatter plot.,23,2,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_scatter.py,test_full_workflow_3d_with_colorbar,719,Test complete workflow for 3D scatter plot with colorbar.,27,2,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_select_data_from_figure.py,test_module_imports,30,Test that all required imports are accessible.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_module_all_export,39,Test that __all__ exports are correct.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_date_axes_namedtuple,45,Test DateAxes namedtuple structure.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_select_from_plot_2d_class_available,55,Test that SelectFromPlot2D class is accessible from module.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_init_basic,106,Test basic initialization.,18,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_init_with_colorbar,126,Test initialization with colorbar consideration.,11,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_init_date_axes,139,Test initialization with date axes.,9,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_init_text_kwargs,150,Test initialization with custom text kwargs.,10,4,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_invalid_plotter_type,162,Test that invalid plotter type raises AttributeError when accessing plotter attributes.,12,3,edge,visualization,simple,False,True,False,False
+tests/plotting/test_select_data_from_figure.py,test_ax_property,213,Test ax property.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_corners_property,218,Test corners property.,9,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_date_axes_property,228,Test date_axes property.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_is_multipanel_property,234,Test is_multipanel property.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_plotter_property,239,Test plotter property.,4,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_selector_property,244,Test selector property.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_text_property,250,Test text property.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_num_initial_patches_property,256,Test num_initial_patches property.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_num_selection_patches_property,262,Test num_selection_patches property.,5,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_logger_property,268,Test logger property.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_init_corners,313,Test _init_corners method.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_add_corners,320,Test _add_corners method.,16,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_finalize_text_single_panel,380,Test _finalize_text method for single panel.,17,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_finalize_text_multi_panel,398,Test _finalize_text method for multi panel.,17,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_update_text_no_dates,416,Test _update_text method without date axes.,20,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_update_text_with_dates,438,Test _update_text method with date axes.,25,3,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_onselect,509,Test onselect method.,28,3,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_set_ax,538,Test set_ax method.,18,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_start_text_single_panel,557,Test start_text method for single panel.,17,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_start_text_multi_panel,575,Test start_text method for multi panel.,17,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_start_text_custom_kwargs,593,Test start_text method with custom kwargs.,13,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_start_selector,607,Test start_selector method.,8,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_basic,664,Test basic sample_data functionality.,16,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_frac_not_implemented,681,Test that sample_data with frac raises NotImplementedError.,6,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_with_log_axes,688,Test sample_data with logarithmic axes.,15,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_empty_region,704,Test sample_data with region containing no data.,12,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_with_other_selector,717,Test sample_data with other_SelectFromPlot2D.,15,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_with_other_selector_list,733,Test sample_data with list of other selectors.,17,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_insufficient_samples,751,Test sample_data when not enough samples available without replacement.,24,2,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_disconnect,829,Test disconnect method.,18,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_disconnect_with_other_selector,848,Test disconnect with other SelectFromPlot2D.,21,2,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_disconnect_with_scatter_kwargs,870,Test disconnect with custom scatter kwargs.,18,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_scatter_sample,889,Test scatter_sample method.,12,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_scatter_sample_with_log_axes,902,Test scatter_sample with logarithmic axes.,12,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_scatter_sample_custom_kwargs,915,Test scatter_sample with custom kwargs.,13,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_plot_failed_samples,929,Test plot_failed_samples method.,12,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_plot_failed_samples_empty,942,Test plot_failed_samples with no failed samples.,13,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_set_date_axes,994,Test set_date_axes method.,13,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_value_error_reraise,1046,Test that ValueError other than sample size is re-raised.,12,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_missing_already_selected,1059,Test sample_data when already_selected indices are missing.,21,2,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_sample_data_other_selector_no_sampled_indices,1081,Test sample_data with other selector that has no sampled_indices attribute.,16,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_select_data_from_figure.py,test_full_workflow,1103,Test complete selection workflow.,49,2,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_spiral.py,test_module_imports,36,Test that all required imports are accessible.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_numba_functions_available,45,Test that numba-accelerated functions are accessible.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_classes_available,52,Test that spiral classes are accessible.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_namedtuple_definitions,59,Test that named tuples are properly defined.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_initial_spiral_edges_structure,74,Test InitialSpiralEdges named tuple.,10,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_bin_id_structure,85,Test SpiralMeshBinID named tuple.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_filter_thresholds_structure,98,Test SpiralFilterThresholds named tuple with defaults.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_namedtuple_immutability,110,Test that named tuples are immutable.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_get_counts_per_bin_basic,135,Test basic functionality of get_counts_per_bin.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_get_counts_per_bin_empty_bins,147,Test get_counts_per_bin with empty bins.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_get_counts_per_bin_boundary_points,159,Test boundary point handling in get_counts_per_bin.,12,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_spiral.py,test_calculate_bin_number_with_numba_basic,172,Test basic functionality of calculate_bin_number_with_numba.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_calculate_bin_number_with_numba_outside_points,188,Test calculate_bin_number_with_numba with points outside mesh.,16,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_numba_function_performance,205,Test that numba functions handle reasonably large datasets.,16,1,performance,visualization,simple,True,False,False,True
+tests/plotting/test_spiral.py,test_spiral_mesh_initialization,234,Test SpiralMesh initialization.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_properties,248,Test SpiralMesh property access.,18,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_set_methods,267,Test SpiralMesh setter methods.,23,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_initialize_bins,291,Test spiral mesh bin initialization.,19,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_cell_filter_invalid_kwargs,311,Test that invalid kwargs raise errors.,10,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_initialization,332,Test SpiralPlot2D initialization.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_with_z_data,341,Test SpiralPlot2D initialization with z data.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_log_scaling,348,Test SpiralPlot2D with logarithmic scaling.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_initial_bins_calculation,359,Test initial bins calculation.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_clim_setting,372,Test color limit setting.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_plot_2d_initialization_mesh,387,Test mesh initialization in SpiralPlot2D.,10,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_spiral_mesh_full_workflow,410,Test complete spiral mesh workflow.,15,1,integration,visualization,simple,False,False,True,False
+tests/plotting/test_spiral.py,test_numba_functions_integration,426,Test integration between numba functions.,20,1,integration,visualization,simple,False,False,True,False
+tests/plotting/test_spiral.py,test_empty_data_handling,451,Test handling of empty data.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_invalid_bin_parameters,461,Test invalid bin parameter handling.,8,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_spiral.py,test_mismatched_data_lengths,470,"Test handling of mismatched x, y data lengths.",11,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_spiral.py,test_numba_function_edge_cases,482,Test numba functions with edge case inputs.,14,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_spiral.py,test_numba_compilation,501,Test that numba functions compile successfully.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_large_dataset_handling,516,Test handling of reasonably large datasets.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_module_docstring,535,Test that module has docstring.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_function_docstrings,540,Test that functions have docstrings.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_spiral.py,test_class_docstrings,547,Test that classes have docstrings.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_module_imports,31,Test that all required imports are accessible.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_functions_available,40,Test that all utility functions are accessible.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_module_docstring,55,Test that module has comprehensive docstring.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_subplots_default_parameters,65,Test subplots with default parameters.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_subplots_multiple_rows_cols,75,Test subplots with multiple rows and columns.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_subplots_scaling,89,Test figure size scaling.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_subplots_with_kwargs,101,Test subplots with additional kwargs.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_subplots_single_row_col,115,Test subplots with single row/column returns array.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_figure_basic,139,Test basic figure saving.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_axes_input,152,Test saving with Axes input instead of Figure.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_pdf_only,165,Test saving PDF only.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_png_only,177,Test saving PNG only.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_with_info,189,Test saving with attribution info.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_with_logging,203,Test save function with logging enabled.,14,2,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_input_validation,218,Test save function input validation.,15,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_basic,238,Test basic joint legend functionality.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_duplicate_labels,256,Test joint legend with duplicate labels.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_custom_idx,271,Test joint legend with custom axis index.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_with_kwargs,284,Test joint legend with additional kwargs.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_errorbar_handling,302,Test joint legend with errorbar containers.,16,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_joint_legend_sorting,319,Test that legend labels are sorted alphabetically.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_multipanel_function_exists,337,Test that multipanel function exists and is callable.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_multipanel_basic_structure,342,Test basic multipanel figure structure.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_multipanel_parameters,356,Test multipanel parameter handling.,10,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_build_ax_array_function_exists,371,Test that build_ax_array function exists and is callable.,4,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_build_ax_array_basic_interface,376,Test basic interface without axis sharing.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_build_ax_array_invalid_location,390,Test invalid colorbar location raises error.,6,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_tools.py,test_build_ax_array_location_validation,397,Test colorbar location validation.,13,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_calculate_perfect_squares,415,Test calculation for perfect squares.,12,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_calculate_prime_numbers,428,Test calculation for prime numbers.,8,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_calculate_small_numbers,437,Test calculation for small numbers.,9,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_tools.py,test_calculate_larger_numbers,447,Test calculation for larger numbers.,9,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_calculate_aspect_ratio_preference,457,Test that function prefers wider layouts.,5,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_calculate_edge_cases,463,Test edge cases.,9,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_tools.py,test_subplots_save_integration,477,Test integration between subplots and save.,16,1,integration,visualization,simple,False,False,True,False
+tests/plotting/test_tools.py,test_multipanel_joint_legend_integration,494,Test integration between multipanel and joint legend.,21,1,integration,visualization,moderate,False,False,True,False
+tests/plotting/test_tools.py,test_calculate_nrows_ncols_with_basic_plotting,516,Test using calculate_nrows_ncols with basic plotting.,11,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_save_invalid_inputs,532,Test save function with invalid inputs.,13,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_tools.py,test_multipanel_invalid_parameters,546,Test multipanel with edge case parameters.,10,1,edge,visualization,simple,False,True,False,False
+tests/plotting/test_tools.py,test_build_ax_array_basic_validation,557,Test build_ax_array basic validation.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_function_docstrings,576,Test that all functions have comprehensive docstrings.,19,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_tools.py,test_docstring_examples,596,Test that functions have usage examples in docstrings.,14,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_visual_validation.py,test_visual_validation_framework_availability,382,Test that visual validation framework components are available.,11,0,unit,visualization,simple,False,False,False,False
+tests/plotting/test_visual_validation.py,test_reproducible_random_plots,395,Test that plots with random data are reproducible with seed.,22,0,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_matplotlib_backend,22,Test matplotlib backend is properly configured.,4,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_visual_validation.py,test_matplotlib_interactive_mode,27,Test matplotlib interactive mode is disabled.,3,1,physics,visualization,simple,True,False,False,False
+tests/plotting/test_visual_validation.py,test_figure_creation,31,Test basic figure creation works in test environment.,6,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_visual_validation.py,test_plot_generation,38,Test basic plot generation works.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_visual_validation.py,test_line_plot_visual,70,Test basic line plot visual output.,17,1,unit,visualization,simple,False,False,False,False
+tests/plotting/test_visual_validation.py,test_scatter_plot_visual,90,Test scatter plot visual output.,23,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_histogram_visual,114,Test histogram visual output.,21,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_time_series_plot_visual,152,Test time series plotting visual output.,27,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_correlation_plot_visual,180,Test correlation/scatter plot visual output.,25,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_distribution_plot_visual,206,Test distribution plotting visual output.,44,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_subplot_layout_visual,259,Test subplot layout and spacing.,41,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_colorbar_layout_visual,301,Test colorbar layout and positioning.,31,1,unit,visualization,moderate,False,False,False,False
+tests/plotting/test_visual_validation.py,test_invalid_data_handling,341,Test handling of invalid data in plots.,21,1,edge,visualization,moderate,False,True,False,False
+tests/plotting/test_visual_validation.py,test_empty_data_handling,363,Test handling of empty data.,17,1,unit,visualization,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_init_basic,53,Test basic ExtremaCalculator initialization.,11,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_name_invalid_names,65,Test set_name with invalid names raises ValueError.,9,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_name_valid_names,75,Test set_name with valid names.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_data_window_smoothing,85,Test set_data handles window smoothing correctly.,18,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_data_cak_filtering,104,Test set_data filters CaK data before 1977.,19,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_threshold_scalar,124,Test set_threshold with scalar threshold.,10,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_threshold_callable,135,Test set_threshold with callable threshold.,20,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_set_threshold_automatic,156,Test automatic threshold lookup.,25,2,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_find_threshold_crossings,182,Test find_threshold_crossings detects crossing points.,17,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_cut_data_into_extrema_finding_intervals,200,Test cut_data_into_extrema_finding_intervals creates proper intervals.,16,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_find_extrema_static_method,217,Test _find_extrema static method logic.,24,2,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_validate_extrema,242,Test _validate_extrema applies proper filtering.,19,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_format_extrema_static_method,262,Test format_extrema static method.,13,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_find_extrema_full_workflow,276,Test find_extrema complete workflow.,14,2,integration,solar_activity,simple,True,False,True,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_make_plot_basic,292,Test make_plot creates basic plot.,18,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_make_plot_with_options,311,Test make_plot with optional elements - simplified to avoid complex mocking.,19,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_properties_access,331,Test all property accessors.,17,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_comprehensive_workflow,349,Test complete ExtremaCalculator workflow with realistic data.,31,2,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_empty_data_handling,385,Test behavior with empty or minimal data.,11,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_nan_data_handling,397,Test behavior with NaN values in data.,24,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_constant_data_handling,422,Test behavior with constant data values.,20,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_threshold_edge_cases,443,Test threshold handling edge cases.,20,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_window_edge_cases,464,Test window parameter edge cases.,15,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/lisird/test_extrema_calculator.py,test_malformed_data_types,480,Test handling of malformed or unexpected data types.,17,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_valid_key_initialization,19,Test LISIRD_ID initialization with valid keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_url_base_property,27,Test that _url_base returns the correct LISIRD base URL.,5,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_trans_url_mapping,33,Test the _trans_url property provides correct URL mappings.,15,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_url_construction_valid_keys,49,Test URL construction for valid LISIRD keys.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_invalid_key_error_handling,63,Test that invalid keys raise appropriate errors.,8,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_inheritance_from_id_base_class,72,Test that LISIRD_ID inherits from ID base class.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_key_case_sensitivity,83,Test that keys are case-sensitive.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_url_property_consistency,96,Test that url property is consistent and repeatable.,11,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_all_mapped_keys_produce_valid_urls,108,Test that all keys in the mapping produce valid URL strings.,15,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_empty_key_handling,128,Test behavior with empty or None keys.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_whitespace_key_handling,138,Test behavior with whitespace in keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_numeric_key_handling,146,Test behavior with numeric keys.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_special_characters_in_key,156,Test behavior with special characters in keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/lisird/test_lisird_id.py,test_url_construction_consistency,164,Test that URL construction is deterministic and correct.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_recognition,26,Test that sunspot_number is recognized as a Python package.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_init_file_presence,37,Test that __init__.py file exists and is valid Python.,6,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_hierarchy,44,Test proper nesting within solar_activity parent package.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_docstring,53,Test that package has descriptive docstring.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_sidc_module_import,66,Test that 'from . import sidc' executes successfully.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_sidc_module_accessibility,74,Test sidc module accessible after package import.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_relative_import_syntax,88,Test that relative import syntax works correctly.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_no_import_errors,97,Test that import statement doesn't raise ImportError.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_full_package_import,109,Test import solarwindpy.solar_activity.sunspot_number.,6,1,integration,solar_activity,simple,False,False,True,False
+tests/solar_activity/sunspot_number/test_init.py,test_from_import,116,Test from solarwindpy.solar_activity import sunspot_number.,6,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_submodule_import,123,Test from solarwindpy.solar_activity.sunspot_number import sidc.,6,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_aliased_imports,130,Test import with aliases works correctly.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_sidc_exposure,143,Test SIDC module properly exposed through package.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_no_namespace_pollution,151,Test no unnecessary namespace pollution.,19,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_clean_imports,171,Test clean import behavior without side effects.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_symbol_accessibility,185,Test required symbols accessible through package.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_parent_package_access,199,Test accessible from parent solar_activity package.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_namespace_consistency,207,Test consistent with parent package namespace.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_hierarchy_integrity,215,Test maintains proper package hierarchy.,7,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_cross_module_compatibility,223,Test compatibility with other solar activity modules.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_multiple_imports,240,Test behavior with repeated imports.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_import_from_different_contexts,248,Test imports from different execution contexts.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_sidc_module_unavailable,263,Test behavior when SIDC module unavailable.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_import_speed,282,Test package imports quickly.,12,1,performance,solar_activity,simple,False,False,False,True
+tests/solar_activity/sunspot_number/test_init.py,test_minimal_overhead,295,Test minimal package initialization overhead.,10,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_import_style,310,Test import statements follow recommended style.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_validation,319,Test validation of package structure.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_integration_validation,329,Test validation of integration with other modules.,11,1,integration,solar_activity,simple,False,False,True,False
+tests/solar_activity/sunspot_number/test_init.py,test_direct_sidc_access,345,Test direct access to SIDC functionality.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_package_level_access,353,Test access through package level.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_init.py,test_full_import_path,361,Test using full import path.,7,1,integration,solar_activity,simple,False,False,True,False
+tests/solar_activity/sunspot_number/test_init.py,test_compatibility_with_solar_activity_functions,369,Test compatibility with solar_activity level functions.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_initialization,63,Test SIDC initialization with dummy loader and SSNExtrema.,29,6,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_load_data,94,Test load_data method.,17,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_set_extrema,113,Test set_extrema method.,12,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_calculate_extrema_kind,126,Test calculate_extrema_kind method.,27,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_calculate_edge,154,Test calculate_edge method.,24,3,edge,solar_activity,moderate,False,True,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_run_normalization_max,179,Test run_normalization with max normalization.,26,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_run_normalization_zscore,206,Test run_normalization with zscore normalization.,26,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_run_normalization_invalid_method,233,Test run_normalization with invalid method raises error.,9,2,edge,solar_activity,simple,True,True,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_cut_spec_by_ssn_band,243,Test cut_spec_by_ssn_band method.,18,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_cut_spec_by_ssn_band_normalized_validation,262,Test that cut_spec_by_ssn_band validates dssn for normalized data.,14,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_interpolate_data,277,Test interpolate_data method.,21,2,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_properties_access,299,Test property accessors.,19,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_inheritance_from_activity_indicator,319,Test that SIDC inherits from ActivityIndicator.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_normalized_property_without_nssn_column,336,Test normalized property when nssn column doesn't exist.,17,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_normalized_property_with_existing_nssn,354,Test normalized property when nssn column exists.,15,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_calculate_extrema_kind_empty_data,370,Test calculate_extrema_kind with empty data.,13,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_calculate_edge_empty_data,384,Test calculate_edge with empty data.,13,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/sunspot_number/test_sidc.py,test_plot_on_colorbar_method_exists,398,Test that plot_on_colorbar method exists and is callable.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_valid_key_initialization,19,Test SIDC_ID initialization with valid keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_url_base_property,27,Test that _url_base returns the correct SIDC base URL.,5,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_trans_url_mapping,33,Test the _trans_url property provides correct URL mappings.,17,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_url_construction_valid_keys,51,Test URL construction for valid SIDC keys.,15,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_invalid_key_error_handling,67,Test that invalid keys raise appropriate errors.,7,1,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_inheritance_from_id_base_class,75,Test that SIDC_ID inherits from ID base class.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_key_case_sensitivity,86,Test that keys are case-sensitive.,11,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_url_property_consistency,98,Test that url property is consistent and repeatable.,11,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_all_mapped_keys_produce_valid_urls,110,Test that all keys in the mapping produce valid URL strings.,15,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_empty_key_handling,130,Test behavior with empty or None keys.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_whitespace_key_handling,140,Test behavior with whitespace in keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_numeric_key_handling,148,Test behavior with numeric keys.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_special_characters_in_key,158,Test behavior with special characters in keys.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_url_construction_consistency,166,Test that URL construction is deterministic and correct.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_key_length_variations,179,Test that key length variations are handled properly.,21,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_id.py,test_similar_valid_keys,201,Test that similar but distinct valid keys work correctly.,19,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_convert_nans_basic,22,Test convert_nans replaces -1 with np.nan.,26,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_convert_nans_no_minus_ones,49,Test convert_nans when there are no -1 values.,15,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_convert_nans_all_minus_ones,65,Test convert_nans when all values are -1.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_inheritance_from_data_loader,80,Test that SIDCLoader inherits from DataLoader.,11,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_data_path_property_structure,92,Test that data_path property creates correct path structure.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_data_path_with_different_keys,102,Test data_path property with different SIDC keys.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_method_existence,113,Test that required methods exist.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_download_data_calls_read_csv,128,Test that download_data calls pandas.read_csv.,24,3,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_download_data_invalid_key_raises_error,153,Test that invalid keys in download_data raise NotImplementedError.,11,2,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_load_data_calls_parent_and_ssn_extrema,167,Test that load_data calls parent load_data and uses SSNExtrema.,33,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_convert_nans_mixed_dtypes,205,Test convert_nans with mixed data types.,24,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_initialization_with_real_sidc_id,230,Test initialization with a real SIDC_ID object.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_sidc_loader.py,test_path_creation_does_not_create_directories,241,Test that accessing data_path doesn't create actual directories.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_initialization_no_args,40,Test SSNExtrema initialization with no arguments.,17,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_load_or_set_data_empty_args,58,Test load_or_set_data with empty args and kwargs.,41,2,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_load_or_set_data_with_args_raises_error,100,Test that passing args/kwargs raises ValueError.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_load_or_set_data_with_kwargs_raises_error,108,Test that passing kwargs raises ValueError.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_load_or_set_data_with_both_args_and_kwargs_raises_error,116,Test that passing both args and kwargs raises ValueError.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_inheritance_from_indicator_extrema,124,Test that SSNExtrema inherits from IndicatorExtrema.,16,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_csv_file_path_resolution,141,Test that the CSV file path is resolved correctly.,22,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_data_format_after_loading,164,Test that data has correct format after loading.,41,1,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_file_not_found_handling,210,Test behavior when CSV file doesn't exist.,11,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_malformed_csv_handling,222,Test behavior with malformed CSV data.,10,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_empty_csv_handling,233,Test behavior with empty CSV data.,17,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_invalid_date_format_handling,251,Test behavior with invalid date formats in CSV.,20,1,edge,solar_activity,simple,True,True,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_class_name_in_error_message,272,Test that class name appears correctly in error messages.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_method_signature_validation,282,Test that method accepts various argument patterns for validation.,16,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/sunspot_number/test_ssn_extrema.py,test_successful_initialization_creates_expected_attributes,299,Test that successful initialization creates expected attributes.,29,1,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/test_base.py,test_base_instantiation_abstract,29,Test that Base cannot be instantiated directly (abstract class).,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_base_subclass_logger_initialization,39,Test logger initialization in a concrete subclass.,15,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_base_string_representation,55,Test __str__ method returns class name.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_base_logger_property,64,Test logger property access.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_id_valid_key_initialization,95,Test ID initialization with valid key.,10,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_id_invalid_key_raises_error,106,Test that invalid key raises NotImplementedError.,4,2,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/test_base.py,test_id_set_key_valid,111,Test set_key method with valid key.,9,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_id_set_key_invalid,121,Test set_key method with invalid key.,6,2,edge,solar_activity,simple,False,True,False,False
+tests/solar_activity/test_base.py,test_id_url_construction_with_subdirectory,128,Test URL construction handles subdirectories correctly.,6,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_id_logger_inheritance,135,Test that ID inherits logger from Base class.,7,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_initialization,196,Test DataLoader initialization.,15,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_get_data_ctime_no_files,212,Test get_data_ctime when no CSV files exist.,6,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_get_data_ctime_with_files,219,Test get_data_ctime with existing dated files.,12,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_get_data_age,232,Test get_data_age calculation.,20,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_maybe_update_stale_data,253,Test maybe_update_stale_data when data is stale.,22,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/test_base.py,test_dataloader_load_data,276,Test load_data method.,19,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_id_property,332,Test ID property getter and setter.,9,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_set_id_validation,342,Test set_id validates ID instance.,11,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_loader_property,354,Test loader property.,10,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_norm_by_error,365,Test norm_by property raises error when not set.,6,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_interpolate_data,372,Test interpolate_data method.,20,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_activity_indicator_interpolate_data_with_nans,393,Test interpolate_data raises error with NaN data.,17,2,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_initialization,459,Test IndicatorExtrema initialization.,8,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_calculate_intervals,468,Test cycle interval calculation.,14,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_cut_spec_by_interval,483,Test cutting time series by solar cycle intervals.,13,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_cut_spec_invalid_kind,497,Test cut_spec_by_interval with invalid kind.,7,3,edge,solar_activity,simple,True,True,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_calculate_extrema_bands,505,Test calculation of extrema bands (time windows around extrema).,16,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_calculate_extrema_bands_dual_window,522,Test extrema bands with different left and right windows.,12,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_cut_about_extrema_bands,535,Test cutting epochs relative to extrema bands.,17,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_indicator_extrema_bands_error_before_calculation,553,Test that accessing extrema_bands before calculation raises error.,6,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_base.py,test_base_class_inheritance_chain,564,Test that inheritance chain works correctly.,7,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_abstract_method_enforcement,572,Test that abstract methods are properly enforced.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_base.py,test_namedtuple_imports,587,Test that namedtuple imports work correctly.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_structure,82,Test that get_all_indices() returns correct structure and columns.,16,3,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_columns_exact,99,Test exact column structure matches expected format.,12,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_datetime_index,112,Test that result index is properly formatted DatetimeIndex.,15,3,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_data_aggregation,128,Test that data from different sources is properly aggregated.,21,3,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_mgii_date_conversion,150,Test that MgII data index is properly converted to date-only.,32,3,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_error_handling,183,Test error handling when mocked classes raise exceptions.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_imports_available,193,Test that necessary imports are available in the module.,10,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_get_all_indices_function_exists,204,Test that get_all_indices function is available.,4,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_package_all_exports,213,Test that __all__ exports are correct.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_ssn_alias,223,Test that ssn is properly aliased to sunspot_number.,3,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_submodule_imports,227,Test that required submodules are imported.,12,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_lisird_mocking_pattern,244,Test that LISIRD can be properly mocked.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_sidc_mocking_pattern,258,Test that SIDC can be properly mocked.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_init.py,test_complete_get_all_indices_workflow,314,Test complete workflow from start to finish.,22,3,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/test_plots.py,test_init_basic,65,Test basic IndicatorPlot initialization.,9,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_plots.py,test_init_with_plasma_index,75,Test IndicatorPlot initialization with plasma index.,11,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_plot_data_no_plasma_index,87,Test plot_data property without plasma index restriction.,14,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_plot_data_with_plasma_index,102,Test plot_data property with plasma index restriction.,16,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_set_data,119,Test set_data method.,14,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_plots.py,test_make_plot_no_ax,136,Test make_plot method when no axes is provided.,31,3,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/test_plots.py,test_make_plot_with_ax,169,Test make_plot method with provided axes.,15,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_format_axis_abstract_method,185,Test that _format_axis is properly defined as abstract.,25,1,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/test_plots.py,test_ssn_ykey_property,215,Test that SSNPlot uses 'ssn' as ykey - focus on what's testable.,13,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_plots.py,test_format_axis_ylim_setting,229,Test that _format_axis sets y-axis limits for SSN data.,11,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_ssn_plot_data_structure,242,Test SSN plot data handling patterns.,22,2,unit,solar_activity,moderate,False,False,False,False
+tests/solar_activity/test_plots.py,test_empty_data_handling,269,Test plotting with empty or minimal data.,13,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_missing_column_handling,283,Test behavior when requested column doesn't exist.,8,1,unit,solar_activity,simple,False,False,False,False
+tests/solar_activity/test_plots.py,test_log_scale_formatting,293,Test log scale setting in axis formatting.,16,2,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_data_type_consistency,310,Test that plot data maintains proper data types.,26,1,physics,solar_activity,moderate,True,False,False,False
+tests/solar_activity/test_plots.py,test_malformed_plasma_index,342,Test behavior with malformed plasma index.,10,1,physics,solar_activity,simple,True,False,False,False
+tests/solar_activity/test_plots.py,test_future_plasma_index,356,Test plasma index that extends beyond indicator data.,14,1,physics,solar_activity,simple,True,False,False,False
+tests/test_circular_imports.py,test_static_dependency_analysis,85,Test that static analysis finds no circular dependencies.,12,1,unit,general,simple,False,False,False,False
+tests/test_circular_imports.py,test_individual_module_imports,98,Test that each module can be imported individually.,23,1,unit,general,moderate,False,False,False,False
+tests/test_circular_imports.py,test_key_module_imports,122,Test that key modules can be imported without circular import errors.,19,1,unit,general,simple,False,False,False,False
+tests/test_circular_imports.py,test_import_order_independence,142,Test that import order doesn't cause circular import issues.,27,1,unit,general,moderate,False,False,False,False
+tests/test_circular_imports.py,test_cross_module_import_scenarios,170,Test various cross-module import scenarios.,39,1,unit,general,moderate,False,False,False,False
+tests/test_circular_imports.py,test_main_package_import,210,Test that the main package can be imported without circular imports.,9,1,physics,general,simple,True,False,False,False
+tests/test_circular_imports.py,test_public_api_imports,220,Test that public API imports work without circular imports.,30,1,unit,general,moderate,False,False,False,False
+tests/test_circular_imports.py,test_dynamic_import_comprehensive,251,Run comprehensive dynamic import test.,24,1,unit,general,moderate,False,False,False,False
+tests/test_circular_imports.py,test_import_time_performance,276,Test that imports complete in reasonable time (may indicate circular issues).,27,1,performance,general,moderate,True,False,False,True
+tests/test_circular_imports.py,test_no_wildcard_imports_in_init,313,Test that __init__.py files don't use wildcard imports (which can hide circular imports).,17,1,unit,general,simple,False,False,False,False
+tests/test_circular_imports.py,test_relative_import_consistency,331,Test that relative imports are used consistently within packages.,32,1,unit,general,moderate,False,False,False,False
+tests/test_issue_titles.py,test_infer_issue_title_preserves_numbers,7,,10,1,unit,general,simple,False,False,False,False
+tests/test_issue_titles.py,test_infer_issue_title_uses_frontmatter_name,19,,6,1,physics,general,simple,True,False,False,False
+tests/test_planning_agents_architecture.py,test_planning_agents_architecture_meta,197,Meta-test: validate that this test file itself follows good practices.,14,0,unit,general,simple,False,False,False,False
+tests/test_planning_agents_architecture.py,test_plan_branch_isolation,19,Test that plan branches maintain proper isolation from master and feature branches.,14,1,physics,general,simple,True,False,False,False
+tests/test_planning_agents_architecture.py,test_checksum_management_format,34,Test checksum placeholder replacement functionality and format validation.,18,1,physics,general,simple,True,False,False,False
+tests/test_planning_agents_architecture.py,test_cross_branch_coordination_documentation,53,Test that cross-branch coordination is properly documented.,17,1,unit,general,simple,False,False,False,False
+tests/test_planning_agents_architecture.py,test_merge_workflow_completion,71,Test that the complete merge workflow was documented and completed.,21,1,unit,general,moderate,False,False,False,False
+tests/test_planning_agents_architecture.py,test_acceptance_criteria_validation,93,Test that all acceptance criteria were met and documented.,22,1,unit,general,moderate,False,False,False,False
+tests/test_planning_agents_architecture.py,test_plan_template_usage,116,Test that the plan properly uses the plan template structure.,22,1,unit,general,moderate,False,False,False,False
+tests/test_planning_agents_architecture.py,test_time_estimation_tracking,139,Test that time estimation and tracking functionality works.,20,1,physics,general,simple,True,False,False,False
+tests/test_planning_agents_architecture.py,test_git_branch_operations,164,Test basic git operations that planning agents would use.,14,1,unit,general,simple,False,False,False,False
+tests/test_planning_agents_architecture.py,test_checksum_pattern_matching,179,Test checksum pattern matching functionality.,16,1,physics,general,simple,True,False,False,False
+tests/test_statusline.py,test_color_codes,20,Test ANSI color codes are correct.,6,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_colorize_with_no_color_env,27,Test NO_COLOR environment variable disables colors.,5,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_colorize_with_non_tty,33,Test colors disabled when not TTY.,5,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_colorize_with_tty,39,Test colors applied when TTY and NO_COLOR not set.,6,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_color_methods,46,Test individual color methods.,7,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_token_thresholds,58,Test token threshold values.,4,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_compaction_thresholds,63,Test compaction threshold values.,4,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_session_thresholds,68,Test session duration threshold values.,4,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_token_usage_green,77,Test green color for low token usage.,16,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_token_usage_yellow,94,Test yellow color for medium token usage.,13,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_token_usage_red,108,Test red color for high token usage.,13,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_token_usage_missing_file,122,Test handling of missing transcript file.,5,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_compaction_green_low,132,Test green for low file size.,13,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_compaction_yellow,146,Test yellow for medium file size.,13,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_compaction_red,160,Test red for high file size.,13,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_usage_green_fresh,178,Test green for fresh session.,8,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_usage_thresholds_logic,187,Test that usage indicator logic follows correct thresholds.,5,1,unit,general,simple,False,False,False,False
+tests/test_statusline.py,test_create_status_line_basic,200,Test basic status line creation.,23,1,unit,general,moderate,False,False,False,False
