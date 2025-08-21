@@ -173,4 +173,11 @@ git commit -m "docs: complete Phase 1 discovery and inventory for documentation 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+**Then create compacted state for session continuity:**
+```bash
+python .claude/hooks/create-compaction.py \
+  --trigger "Phase 1 completion - comprehensive discovery and inventory complete" \
+  --context "47 examples catalogued, ready for Phase 2 environment setup"
+```
+
 **Phase 1 Complete** ✅
