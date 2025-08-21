@@ -1,0 +1,329 @@
+name: Doctest Validation
+
+on:
+  push:
+    branches: [ master, plan/* ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run weekly to catch environmental changes
+    - cron: '0 6 * * 0'
+
+jobs:
+  doctest-validation:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache conda environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-20250403.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-conda-
+    
+    - name: Set up conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        environment-file: solarwindpy-20250403.yml
+        activate-environment: solarwindpy-20250403
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        use-only-tar-bz2: true  # For cache compatibility
+    
+    - name: Install package in development mode
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        pip install -e .
+    
+    - name: Verify installation
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        python -c "import solarwindpy; print(f'SolarWindPy version: {solarwindpy.__version__}')"
+        python -c "import numpy, pandas, matplotlib; print('All dependencies available')"
+    
+    - name: Run enhanced doctests with pytest
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        python -m pytest \
+          --doctest-modules \
+          --doctest-report=all \
+          --tb=short \
+          --verbose \
+          --junitxml=pytest-doctest-results.xml \
+          solarwindpy/
+      continue-on-error: true
+    
+    - name: Run physics validation on doctests
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        python doctest_physics_validator.py \
+          solarwindpy/ \
+          --output-report doctest_physics_report_${{ matrix.python-version }}.json \
+          --text-report doctest_text_report_${{ matrix.python-version }}.txt
+      continue-on-error: true
+    
+    - name: Generate compliance summary
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        python -c "
+        import json
+        import os
+        
+        # Load physics validation results
+        report_file = 'doctest_physics_report_${{ matrix.python-version }}.json'
+        if os.path.exists(report_file):
+            with open(report_file, 'r') as f:
+                results = json.load(f)
+            
+            # Generate summary
+            summary = {
+                'python_version': '${{ matrix.python-version }}',
+                'total_files': results.get('files_processed', 0),
+                'total_tests': results.get('total_tests_attempted', 0),
+                'test_failures': results.get('total_tests_failed', 0),
+                'physics_violations': results.get('total_physics_violations', 0),
+                'overall_success': results.get('overall_success', False),
+                'success_rate': results.get('summary', {}).get('success_rate', 0),
+                'compliance_rate': results.get('summary', {}).get('physics_compliance_rate', 0)
+            }
+            
+            with open('doctest_summary_${{ matrix.python-version }}.json', 'w') as f:
+                json.dump(summary, f, indent=2)
+                
+            print(f'Summary generated for Python ${{ matrix.python-version }}')
+            print(f'Tests: {summary[\"total_tests\"]}, Success rate: {summary[\"success_rate\"]:.1f}%')
+            print(f'Physics compliance: {summary[\"compliance_rate\"]:.1f}%')
+        else:
+            print('No physics validation report found')
+        "
+    
+    - name: Upload doctest results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: doctest-results-py${{ matrix.python-version }}
+        path: |
+          doctest_physics_report_${{ matrix.python-version }}.json
+          doctest_text_report_${{ matrix.python-version }}.txt
+          doctest_summary_${{ matrix.python-version }}.json
+          pytest-doctest-results.xml
+        retention-days: 30
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const pythonVersion = '${{ matrix.python-version }}';
+          
+          try {
+            // Load summary if available
+            const summaryFile = `doctest_summary_${pythonVersion}.json`;
+            let summary = {};
+            
+            if (fs.existsSync(summaryFile)) {
+              summary = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
+            }
+            
+            // Load detailed results if available
+            const reportFile = `doctest_physics_report_${pythonVersion}.json`;
+            let violations = [];
+            
+            if (fs.existsSync(reportFile)) {
+              const report = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
+              
+              // Extract key violations for display
+              if (report.file_results) {
+                for (const fileResult of report.file_results) {
+                  for (const violation of fileResult.physics_violations || []) {
+                    violations.push({
+                      type: violation.type,
+                      message: violation.message,
+                      file: fileResult.file
+                    });
+                  }
+                }
+              }
+            }
+            
+            // Generate comment
+            const successIcon = summary.overall_success ? '✅' : '❌';
+            const complianceIcon = (summary.compliance_rate || 0) >= 95 ? '✅' : '⚠️';
+            
+            let comment = `## Doctest Validation Results - Python ${pythonVersion}
+            
+            ${successIcon} **Overall Status**: ${summary.overall_success ? 'PASSED' : 'ISSUES FOUND'}
+            
+            ### Summary
+            - **Files Processed**: ${summary.total_files || 'N/A'}
+            - **Tests Run**: ${summary.total_tests || 'N/A'}
+            - **Test Failures**: ${summary.test_failures || 'N/A'}
+            - **Physics Violations**: ${summary.physics_violations || 'N/A'}
+            - **Success Rate**: ${(summary.success_rate || 0).toFixed(1)}%
+            - **Physics Compliance**: ${complianceIcon} ${(summary.compliance_rate || 0).toFixed(1)}%
+            
+            `;
+            
+            // Add violation details if any
+            if (violations.length > 0) {
+              comment += `### Key Physics Violations Found
+            
+            `;
+              
+              const displayViolations = violations.slice(0, 5); // Show first 5
+              for (const violation of displayViolations) {
+                comment += `- **${violation.type}**: ${violation.message}\\n`;
+              }
+              
+              if (violations.length > 5) {
+                comment += `- ... and ${violations.length - 5} more violations\\n`;
+              }
+              
+              comment += `
+            📄 Full report available in the workflow artifacts.
+            `;
+            } else {
+              comment += `🎉 No physics violations detected!
+            `;
+            }
+            
+            // Only comment if this is the first Python version to avoid spam
+            if (pythonVersion === '3.9') {
+              // Find existing comment to update instead of creating new ones
+              const { data: comments } = await github.rest.issues.listComments({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              
+              const existingComment = comments.find(comment => 
+                comment.body.includes('Doctest Validation Results') &&
+                comment.user.type === 'Bot'
+              );
+              
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  comment_id: existingComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            }
+            
+          } catch (error) {
+            console.log(`Error processing results for Python ${pythonVersion}: ${error.message}`);
+            
+            // Create a basic failure comment
+            const failureComment = `## Doctest Validation Results - Python ${pythonVersion}
+            
+            ❌ **Status**: FAILED
+            
+            Error occurred during validation. Check the workflow logs for details.
+            `;
+            
+            if (pythonVersion === '3.9') {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: failureComment
+              });
+            }
+          }
+
+  aggregate-results:
+    runs-on: ubuntu-latest
+    needs: doctest-validation
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+    
+    - name: Aggregate results across Python versions
+      run: |
+        python3 -c "
+        import json
+        import os
+        import glob
+        
+        # Find all summary files
+        summary_files = glob.glob('artifacts/*/doctest_summary_*.json')
+        
+        if not summary_files:
+            print('No summary files found')
+            exit(0)
+        
+        aggregated = {
+            'total_files': 0,
+            'total_tests': 0,
+            'total_failures': 0,
+            'total_violations': 0,
+            'python_versions': [],
+            'all_passed': True
+        }
+        
+        for file_path in summary_files:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+            
+            aggregated['total_files'] += data.get('total_files', 0)
+            aggregated['total_tests'] += data.get('total_tests', 0)
+            aggregated['total_failures'] += data.get('test_failures', 0)
+            aggregated['total_violations'] += data.get('physics_violations', 0)
+            aggregated['python_versions'].append(data.get('python_version', 'unknown'))
+            
+            if not data.get('overall_success', False):
+                aggregated['all_passed'] = False
+        
+        # Calculate overall rates
+        aggregated['overall_success_rate'] = (
+            (aggregated['total_tests'] - aggregated['total_failures']) / 
+            max(aggregated['total_tests'], 1) * 100
+        )
+        
+        with open('aggregated_results.json', 'w') as f:
+            json.dump(aggregated, f, indent=2)
+        
+        print('Aggregated Results:')
+        print(f'Python versions tested: {aggregated[\"python_versions\"]}')
+        print(f'Total tests: {aggregated[\"total_tests\"]}')
+        print(f'Success rate: {aggregated[\"overall_success_rate\"]:.1f}%')
+        print(f'Physics violations: {aggregated[\"total_violations\"]}')
+        print(f'All versions passed: {aggregated[\"all_passed\"]}')
+        "
+    
+    - name: Upload aggregated results
+      uses: actions/upload-artifact@v3
+      with:
+        name: aggregated-doctest-results
+        path: aggregated_results.json
+        retention-days: 90
