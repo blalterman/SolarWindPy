@@ -315,17 +315,69 @@ class ExampleValidator:
             inventory_data = json.load(f)
         
         examples = []
-        for ex_data in inventory_data['examples']:
-            example = CodeExample(
-                code=ex_data['code'],
-                file_path=ex_data['file_path'],
-                line_start=ex_data['line_start'],
-                line_end=ex_data['line_end'],
-                example_type=ex_data['example_type'],
-                example_id=ex_data['id']
-            )
-            example.dependencies = ex_data.get('dependencies', [])
-            examples.append(example)
+        example_id = 0
+        
+        # Process RST documentation files
+        for file_path, file_data in inventory_data.get('rst_documentation_files', {}).items():
+            for i, code_block in enumerate(file_data.get('code_blocks', [])):
+                # Skip bash examples for now
+                if code_block.get('type', '').endswith('bash'):
+                    continue
+                    
+                example_id += 1
+                line_ranges = file_data.get('line_ranges', [[0, 0]])
+                line_range = line_ranges[i] if i < len(line_ranges) else [0, 0]
+                
+                example = CodeExample(
+                    code=code_block['content'],
+                    file_path=file_path,
+                    line_start=line_range[0],
+                    line_end=line_range[1],
+                    example_type='rst_code_block',
+                    example_id=f"rst_example_{example_id}"
+                )
+                example.dependencies = code_block.get('dependencies', [])
+                examples.append(example)
+        
+        # Process README.rst examples
+        for file_path, file_data in inventory_data.get('readme_rst', {}).items():
+            for i, code_block in enumerate(file_data.get('code_blocks', [])):
+                # Skip bash examples for now
+                if code_block.get('type', '').endswith('bash'):
+                    continue
+                    
+                example_id += 1
+                line_ranges = file_data.get('line_ranges', [[0, 0]])
+                line_range = line_ranges[i] if i < len(line_ranges) else [0, 0]
+                
+                example = CodeExample(
+                    code=code_block['content'],
+                    file_path=file_path,
+                    line_start=line_range[0],
+                    line_end=line_range[1],
+                    example_type='readme_code_block',
+                    example_id=f"readme_example_{example_id}"
+                )
+                example.dependencies = code_block.get('dependencies', [])
+                examples.append(example)
+        
+        # Process Python docstring examples
+        for file_path, file_data in inventory_data.get('python_docstring_examples', {}).items():
+            for i, doctest_block in enumerate(file_data.get('doctest_blocks', [])):
+                example_id += 1
+                line_ranges = file_data.get('line_ranges', [[0, 0]])
+                line_range = line_ranges[i] if i < len(line_ranges) else [0, 0]
+                
+                example = CodeExample(
+                    code=doctest_block['content'],
+                    file_path=file_path,
+                    line_start=line_range[0],
+                    line_end=line_range[1],
+                    example_type='doctest',
+                    example_id=f"doctest_example_{example_id}"
+                )
+                example.dependencies = doctest_block.get('dependencies', [])
+                examples.append(example)
         
         print(f"Validating {len(examples)} examples...")
         
