@@ -111,10 +111,17 @@ html_theme_options = {
     'style_external_links': True,  # Mark external links with icon
 }
 
-# Workaround for Sphinx ≥6.0 navigation_depth bug
-# Force deeper navigation in the HTML output
+# RTD-specific features and context
 html_context = {
-    'navigation_depth': 4,
+    'navigation_depth': 4,  # Workaround for Sphinx ≥6.0 navigation_depth bug
+    'github_user': 'blalterman',
+    'github_repo': 'SolarWindPy', 
+    'github_version': 'master',
+    'conf_py_path': '/docs/source/',
+    'github_url': 'https://github.com/blalterman/SolarWindPy',
+    'display_github': True,
+    'commit': os.environ.get('READTHEDOCS_GIT_COMMIT_HASH', 'master'),
+    'rtd_version': os.environ.get('READTHEDOCS_VERSION', 'latest'),
 }
 
 # Static files (CSS, JavaScript, images)
@@ -128,13 +135,39 @@ html_css_files = [
 # Custom JavaScript files (for enhanced scientific features)
 html_js_files = []
 
+# RTD-specific configuration
+# Enable version switching and downloads for RTD
+if os.environ.get('READTHEDOCS'):
+    html_context['versions'] = [('latest', '/en/latest/')]
+    html_context['downloads'] = [('pdf', '/en/latest/_downloads/SolarWindPy.pdf')]
+    
+    # Analytics integration for RTD
+    html_theme_options.update({
+        'analytics_id': 'G-PLACEHOLDER',  # Replace with actual GA4 tracking ID
+        'analytics_anonymize_ip': True,
+    })
+
 # Favicon configuration
 html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------
 
-# LaTeX output configuration
-latex_elements = {}
+# PDF output configuration (enabled for RTD)
+latex_engine = 'pdflatex'
+latex_elements = {
+    'papersize': 'letterpaper',
+    'pointsize': '10pt',
+    'preamble': r'''
+        \usepackage{amsmath,amsfonts,amssymb}
+        \usepackage{graphicx}
+        \usepackage{hyperref}
+        \usepackage[utf8]{inputenc}
+    ''',
+}
+
+# EPUB output configuration (enabled for RTD)
+epub_show_urls = 'footnote'
+epub_use_index = True
 
 # Grouping the document tree into LaTeX files
 latex_documents = [

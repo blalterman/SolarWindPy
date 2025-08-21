@@ -1,9 +1,19 @@
-# Documentation requirements generated from requirements-dev.txt
-# DO NOT EDIT MANUALLY - regenerate with scripts/generate_docs_requirements.py
+# RTD-specific documentation requirements
+# Enhanced with version pinning for RTD compatibility
 
+# Core documentation dependencies
+sphinx>=6.0,<8.0
+sphinx_rtd_theme>=1.0.0
+numpydoc>=1.5.0
+sphinxcontrib-bibtex>=2.5.0
+
+# Quality and spell checking
 doc8
-numpydoc
-sphinx
-sphinx_rtd_theme
 sphinxcontrib-spelling
-sphinxcontrib-bibtex
+
+# Scientific documentation support
+matplotlib>=3.5.0
+numpy>=1.20.0
+pandas>=1.3.0
+scipy>=1.7.0
+astropy>=5.0.0
