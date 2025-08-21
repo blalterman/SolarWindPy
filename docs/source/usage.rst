@@ -54,8 +54,14 @@ Create a plasma object with proton data:
        ('b', 'z', ''),     # Magnetic field z
    ], names=['M', 'C', 'S'])
    
-   # Simple thermal speeds for example (normally calculated from temperature)
-   w_thermal = np.random.normal(50, 10, 100)  # km/s
+   # Calculate thermal speeds from temperature using mw² = 2kT convention
+   from solarwindpy.core.units_constants import Constants
+   const = Constants()
+   k_B = const.kb  # Boltzmann constant [J/K]
+   m_p = const.m['p1']  # Proton mass [kg]
+   
+   # Thermal speed: w = sqrt(2kT/m)
+   w_thermal = np.sqrt(2 * k_B * T_p / m_p) / 1000  # Convert to km/s
    
    # Sample magnetic field data
    b_field = np.random.normal([5, -2, 3], [1, 1, 1], (100, 3))  # nT
