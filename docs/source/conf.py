@@ -122,8 +122,14 @@ html_static_path = ['_static']
 
 # Additional CSS files
 html_css_files = [
-    'custom.css',  # Will be created in Phase 2
+    'custom.css',  # Custom scientific documentation styling
 ]
+
+# Custom JavaScript files (for enhanced scientific features)
+html_js_files = []
+
+# Favicon configuration
+html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------
 
