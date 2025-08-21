@@ -5,7 +5,7 @@ SolarWindPy is a comprehensive toolkit for analyzing solar wind plasma and
 magnetic field data.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: User Guide
 
    installation
@@ -13,7 +13,7 @@ magnetic field data.
    tutorial
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: API Reference
 
    api_reference

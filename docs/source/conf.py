@@ -102,11 +102,28 @@ intersphinx_mapping = {
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     'navigation_depth': 4,
-    'collapse_navigation': False,
+    'collapse_navigation': True,  # Cleaner initial view with expand/collapse
     'sticky_navigation': True,
     'includehidden': True,
-    'titles_only': False
+    'titles_only': False,
+    'prev_next_buttons_location': 'both',  # Navigation buttons top and bottom
+    'style_nav_header_background': '#2980B9',  # Professional blue header
+    'style_external_links': True,  # Mark external links with icon
 }
+
+# Workaround for Sphinx ≥6.0 navigation_depth bug
+# Force deeper navigation in the HTML output
+html_context = {
+    'navigation_depth': 4,
+}
+
+# Static files (CSS, JavaScript, images)
+html_static_path = ['_static']
+
+# Additional CSS files
+html_css_files = [
+    'custom.css',  # Will be created in Phase 2
+]
 
 # -- Options for other output formats ----------------------------------------
 
