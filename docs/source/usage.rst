@@ -41,9 +41,39 @@ Create a plasma object with proton data:
    v_p = np.random.normal(400, 50, (100, 3))  # km/s
    T_p = np.random.normal(1e5, 2e4, 100)  # K
    
+   # Create MultiIndex DataFrame with proper structure
+   columns = pd.MultiIndex.from_tuples([
+       ('n', '', 'p1'),    # Proton density
+       ('v', 'x', 'p1'),   # Proton velocity x
+       ('v', 'y', 'p1'),   # Proton velocity y
+       ('v', 'z', 'p1'),   # Proton velocity z
+       ('w', 'par', 'p1'), # Parallel thermal speed
+       ('w', 'per', 'p1'), # Perpendicular thermal speed
+       ('b', 'x', ''),     # Magnetic field x
+       ('b', 'y', ''),     # Magnetic field y
+       ('b', 'z', ''),     # Magnetic field z
+   ], names=['M', 'C', 'S'])
+   
+   # Simple thermal speeds for example (normally calculated from temperature)
+   w_thermal = np.random.normal(50, 10, 100)  # km/s
+   
+   # Sample magnetic field data
+   b_field = np.random.normal([5, -2, 3], [1, 1, 1], (100, 3))  # nT
+   
+   data = pd.DataFrame({
+       ('n', '', 'p1'): n_p,
+       ('v', 'x', 'p1'): v_p[:, 0],
+       ('v', 'y', 'p1'): v_p[:, 1],
+       ('v', 'z', 'p1'): v_p[:, 2],
+       ('w', 'par', 'p1'): w_thermal,
+       ('w', 'per', 'p1'): w_thermal,
+       ('b', 'x', ''): b_field[:, 0],
+       ('b', 'y', ''): b_field[:, 1],
+       ('b', 'z', ''): b_field[:, 2],
+   }, index=epoch, columns=columns)
+   
    # Create plasma object
-   plasma = swp.Plasma(epoch=epoch)
-   plasma.add_ion_species('p1', density=n_p, velocity=v_p, temperature=T_p)
+   plasma = swp.Plasma(data, 'p1')
 
 Working with MultiIndex DataFrames
 -----------------------------------
@@ -69,13 +99,15 @@ Calculate derived quantities:
 .. code-block:: python
 
    # Thermal speed (mw² = 2kT convention)
-   thermal_speed = plasma.get_ion('p1').thermal_speed()
+   thermal_speed = plasma.p1.thermal_speed()
    
-   # Plasma beta
-   beta = plasma.get_ion('p1').beta()
+   # Plasma beta for protons
+   beta = plasma.beta('p1')
    
-   # Alfvén speed
-   alfven_speed = plasma.alfven_speed()
+   # Access ion properties directly
+   proton_density = plasma.p1.n      # Number density [cm^-3]
+   proton_velocity = plasma.p1.v     # Velocity vector [km/s]
+   proton_temp = plasma.p1.T         # Temperature [K]
 
 Data Visualization
 ------------------
@@ -84,17 +116,25 @@ Use the plotting module for scientific visualizations:
 
 .. code-block:: python
 
-   import solarwindpy.plotting as swpp
+   import matplotlib.pyplot as plt
+   import solarwindpy.plotting.labels as labels
    
-   # Create time series plot
-   fig, ax = swpp.time_series(plasma.data.xs('n', level='M'), 
-                             title='Proton Density')
+   # Create time series plot of proton density
+   fig, ax = plt.subplots()
+   proton_density = plasma.data.xs('n', level='M').xs('p1', level='S')
+   ax.plot(proton_density.index, proton_density.values)
+   ax.set_ylabel(labels.density('p1'))
+   ax.set_title('Proton Density Time Series')
+   plt.show()
    
    # Scientific scatter plot with proper labels
-   swpp.scatter(plasma.data.xs('v', level='M').xs('x', level='C'),
-               plasma.data.xs('T', level='M'),
-               xlabel=swpp.labels.velocity_x(),
-               ylabel=swpp.labels.temperature())
+   fig, ax = plt.subplots()
+   vx = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')
+   temp = plasma.data.xs('w', level='M').xs('par', level='S').xs('p1', level='S')
+   ax.scatter(vx, temp)
+   ax.set_xlabel(labels.velocity_x('p1'))
+   ax.set_ylabel(labels.thermal_speed_par('p1'))
+   plt.show()
 
 Error Handling and Missing Data
 -------------------------------
@@ -106,8 +146,13 @@ SolarWindPy follows scientific best practices:
    # Missing data represented as NaN (never 0 or -999)
    data_with_gaps = plasma.data.dropna()
    
-   # Validate physical constraints
-   plasma.validate_physics()  # Checks for unphysical values
+   # Check for physical constraints manually
+   # Density should be positive
+   assert (plasma.p1.n > 0).all(), "Density must be positive"
+   
+   # Temperature should be positive  
+   thermal_data = plasma.data.xs('w', level='M')
+   assert (thermal_data > 0).all().all(), "Thermal speeds must be positive"
 
 Advanced Features
 -----------------
@@ -119,13 +164,23 @@ For more complex analyses:
    # Fit functions for statistical analysis
    from solarwindpy.fitfunctions import Gaussian
    
-   fit = Gaussian()
-   fit.fit(temperature_data)
+   # Get thermal speed data for fitting
+   w_par = plasma.data.xs('w', level='M').xs('par', level='C').xs('p1', level='S')
+   x_data = w_par.index.astype('int64') // 10**9  # Convert to seconds
+   y_data = w_par.values
    
-   # Instability analysis
-   from solarwindpy.instabilities import beta_ani_inst
+   fit = Gaussian(x_data, y_data)
+   fit.fit()
    
-   stability = beta_ani_inst(beta_parallel, beta_perpendicular)
+   # Instability analysis  
+   from solarwindpy.instabilities.verscharen2016 import beta_ani_inst
+   
+   # Calculate plasma betas
+   beta_par = plasma.beta('p1').par
+   beta_per = plasma.beta('p1').per
+   
+   # Check instability threshold
+   instability_threshold = beta_ani_inst(beta_par)
 
 Best Practices
 --------------

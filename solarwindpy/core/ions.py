@@ -63,11 +63,16 @@ class Ion(base.Base):
         --------
         Create a proton ion from measurement data:
         
+        >>> import pandas as pd
+        >>> import numpy as np
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ('n', '', 'p1'), ('v', 'x', 'p1'), ('w', 'par', 'p1')
+        ... ], names=['M', 'C', 'S'])
+        >>> df = pd.DataFrame(np.random.rand(2, 3), columns=columns)
         >>> proton_data = df.xs('p1', level='S', axis=1)
         >>> proton = Ion(proton_data, 'p1')
-        >>> proton.n  # Number density
-        >>> proton.v  # Velocity vector
-        >>> proton.T  # Temperature from thermal speed
+        >>> proton.species
+        'p1'
         """
         self.set_species(species)
         super().__init__(data)
