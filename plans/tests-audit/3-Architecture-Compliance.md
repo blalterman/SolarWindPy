@@ -125,7 +125,7 @@ This phase ensures all tests properly validate this architecture and identify te
 - `tests/core/` - Architecture compliance validation for core DataFrame tests
 - `tests/plotting/` - MultiIndex handling in visualization tests
 - `tests/fitfunctions/` - DataFrame architecture in fitting function tests
-- `.claude/artifacts/tests-audit/ARCHITECTURE_COMPLIANCE_REPORT.md` - Generated compliance report
+- `plans/tests-audit/artifacts/ARCHITECTURE_COMPLIANCE_REPORT.md` - Generated compliance report
 - MultiIndex pattern documentation and best practices
 
 ## 📊 Phase Progress Tracking
@@ -169,7 +169,7 @@ This phase ensures all tests properly validate this architecture and identify te
 
 ### Git Commit Instructions
 Upon completion of all Phase 3 tasks:
-1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/3-Architecture-Compliance.md`
+1. **Stage all changes**: `git add tests/ plans/tests-audit/artifacts/ plans/tests-audit/3-Architecture-Compliance.md`
 2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 3 - architecture compliance verification
    
    - Validated MultiIndex DataFrame patterns (M,C,S) across all tests

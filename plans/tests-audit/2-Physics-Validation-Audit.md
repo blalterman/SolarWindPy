@@ -125,7 +125,7 @@ This phase ensures scientific accuracy and physics consistency across the test s
 - `tests/core/` - Physics validation of core plasma tests
 - `tests/instabilities/` - Physics validation of instability calculation tests
 - `tests/fitfunctions/` - Physics validation of fitting function tests
-- `.claude/artifacts/tests-audit/PHYSICS_VALIDATION_REPORT.md` - Generated validation report
+- `plans/tests-audit/artifacts/PHYSICS_VALIDATION_REPORT.md` - Generated validation report
 - Physics constraint documentation and gap analysis
 
 ## 📊 Phase Progress Tracking
@@ -169,7 +169,7 @@ This phase ensures scientific accuracy and physics consistency across the test s
 
 ### Git Commit Instructions
 Upon completion of all Phase 2 tasks:
-1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/2-Physics-Validation-Audit.md`
+1. **Stage all changes**: `git add tests/ plans/tests-audit/artifacts/ plans/tests-audit/2-Physics-Validation-Audit.md`
 2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 2 - physics validation audit
    
    - Validated SI unit consistency across all physics calculations

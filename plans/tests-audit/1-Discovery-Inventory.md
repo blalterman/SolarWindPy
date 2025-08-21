@@ -101,7 +101,7 @@ This foundational phase establishes the complete baseline for the test suite aud
 
 ## 📂 Phase Affected Areas
 - `tests/` - Read-only analysis of all test files
-- `.claude/artifacts/tests-audit/` - Create inventory artifacts directory
+- `plans/tests-audit/artifacts/` - Create inventory artifacts directory
 - `plans/tests-audit/` - Update phase documentation with progress
 - Coverage reports and baseline documentation
 
@@ -120,7 +120,7 @@ This foundational phase establishes the complete baseline for the test suite aud
 
 ### Next Actions
 - Start with Task Group 1: Test Discovery & Enumeration
-- Set up artifacts directory: `.claude/artifacts/tests-audit/`
+- Set up artifacts directory: `plans/tests-audit/artifacts/`
 - Coordinate with TestEngineer agent for systematic test analysis
 - Begin baseline coverage analysis
 
@@ -145,7 +145,7 @@ This foundational phase establishes the complete baseline for the test suite aud
 
 ### Git Commit Instructions
 Upon completion of all Phase 1 tasks:
-1. **Stage all changes**: `git add .claude/artifacts/tests-audit/ plans/tests-audit/1-Discovery-Inventory.md`
+1. **Stage all changes**: `git add plans/tests-audit/artifacts/ plans/tests-audit/1-Discovery-Inventory.md`
 2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 1 - test discovery and inventory
    
    - Enumerated all 1,132 test functions across 63 test files

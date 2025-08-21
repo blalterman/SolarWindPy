@@ -217,7 +217,7 @@ def main():
         print(f"  {complexity}: {count}")
     
     # Save detailed data to CSV
-    output_dir = Path('.claude/artifacts/tests-audit')
+    output_dir = Path('plans/tests-audit/artifacts')
     output_dir.mkdir(parents=True, exist_ok=True)
     
     csv_path = output_dir / 'TEST_INVENTORY.csv'

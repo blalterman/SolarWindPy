@@ -10,7 +10,7 @@
 - **Structure**: Multi-Phase
 - **Total Phases**: 6
 - **Dependencies**: None
-- **Affects**: tests/*, .claude/artifacts/tests-audit/, documentation files
+- **Affects**: tests/*, plans/tests-audit/artifacts/, documentation files
 - **Estimated Duration**: 12-18 hours
 - **Status**: Completed
 
@@ -56,7 +56,7 @@ This audit will leverage specialized agents (TestEngineer, PhysicsValidator, Dat
 
 ## 📂 Affected Areas
 - `tests/` - All 63 test files requiring audit and enhancement
-- `.claude/artifacts/tests-audit/` - Audit deliverables and reports
+- `plans/tests-audit/artifacts/` - Audit deliverables and reports
 - Test documentation and naming conventions
 - Coverage configuration and reporting
 - Physics validation test patterns

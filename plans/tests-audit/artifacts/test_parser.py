@@ -388,7 +388,7 @@ if __name__ == '__main__':
         print(f"  {complexity}: {count}")
     
     # Generate CSV report
-    csv_path = '/Users/balterma/observatories/code/SolarWindPy-2/.claude/artifacts/tests-audit/TEST_INVENTORY.csv'
+    csv_path = '/Users/balterma/observatories/code/SolarWindPy-2/plans/tests-audit/artifacts/TEST_INVENTORY.csv'
     parser.generate_csv_report(csv_path)
     print(f"\nCSV inventory saved to: {csv_path}")
     

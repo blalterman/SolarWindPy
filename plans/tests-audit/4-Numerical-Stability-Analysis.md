@@ -133,7 +133,7 @@ Numerical stability is critical for scientific computing reliability. This phase
 - `tests/core/` - Enhanced numerical stability for core physics tests
 - `tests/instabilities/` - Stability analysis for instability calculation tests
 - `tests/fitfunctions/` - Numerical stability in fitting and optimization tests
-- `.claude/artifacts/tests-audit/NUMERICAL_STABILITY_REPORT.md` - Generated stability report
+- `plans/tests-audit/artifacts/NUMERICAL_STABILITY_REPORT.md` - Generated stability report
 - Numerical protection patterns and edge case test library
 
 ## 📊 Phase Progress Tracking
@@ -177,7 +177,7 @@ Numerical stability is critical for scientific computing reliability. This phase
 
 ### Git Commit Instructions
 Upon completion of all Phase 4 tasks:
-1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/4-Numerical-Stability-Analysis.md`
+1. **Stage all changes**: `git add tests/ plans/tests-audit/artifacts/ plans/tests-audit/4-Numerical-Stability-Analysis.md`
 2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 4 - numerical stability enhancements
    
    - Added comprehensive edge case tests for B≈0, n→0, extreme temperatures

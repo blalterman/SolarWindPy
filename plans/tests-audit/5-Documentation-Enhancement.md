@@ -147,8 +147,8 @@ Comprehensive test documentation is essential for scientific software maintainab
 
 ## 📂 Phase Affected Areas
 - `tests/` - All test files enhanced with YAML documentation and improved naming
-- `.claude/artifacts/tests-audit/TEST_DOCUMENTATION_REPORT.md` - Documentation enhancement report
-- `.claude/artifacts/tests-audit/TEST_NAMING_CONVENTIONS.md` - Naming standards documentation
+- `plans/tests-audit/artifacts/TEST_DOCUMENTATION_REPORT.md` - Documentation enhancement report
+- `plans/tests-audit/artifacts/TEST_NAMING_CONVENTIONS.md` - Naming standards documentation
 - Documentation validation tools and quality metrics
 - Test maintainability and scientific understanding improvements
 
@@ -194,7 +194,7 @@ Comprehensive test documentation is essential for scientific software maintainab
 
 ### Git Commit Instructions
 Upon completion of all Phase 5 tasks:
-1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/5-Documentation-Enhancement.md`
+1. **Stage all changes**: `git add tests/ plans/tests-audit/artifacts/ plans/tests-audit/5-Documentation-Enhancement.md`
 2. **Create atomic commit**: `git commit -m "docs(tests): complete Phase 5 - comprehensive test documentation
    
    - Added YAML documentation blocks to all 1,132 test functions

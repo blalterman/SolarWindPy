@@ -7,7 +7,7 @@
 - **Status**: ✅ COMPLETED
 
 ## 🎯 Phase Objective
-Generate comprehensive audit deliverables including TEST_INVENTORY files, AUDIT_FINDINGS.md with risk ratings, coverage reports, and archive all artifacts in .claude/artifacts/tests-audit/. Create a complete audit package that documents the test suite transformation and provides actionable recommendations for ongoing maintenance.
+Generate comprehensive audit deliverables including TEST_INVENTORY files, AUDIT_FINDINGS.md with risk ratings, coverage reports, and archive all artifacts in plans/tests-audit/artifacts/. Create a complete audit package that documents the test suite transformation and provides actionable recommendations for ongoing maintenance.
 
 ## 🧠 Phase Context
 This final phase consolidates all audit findings into professional deliverables:
@@ -76,7 +76,7 @@ This final phase consolidates all audit findings into professional deliverables:
   - Notes: Ensure reusability for future audit iterations
 
 ### Task Group 4: Deliverable Organization & Quality Assurance
-- [x] **Organize artifacts directory** (Est: 15 min) - Structure .claude/artifacts/tests-audit/ with clear organization
+- [x] **Organize artifacts directory** (Est: 15 min) - Structure plans/tests-audit/artifacts/ with clear organization
   - Commit: `a7c3cf1`
   - Status: Completed
   - Notes: Create subdirectories for reports, data, tools, and documentation
@@ -141,7 +141,7 @@ This final phase consolidates all audit findings into professional deliverables:
 - **Standards**: Professional documentation formatting, clear organization
 
 ## 📂 Phase Affected Areas
-- `.claude/artifacts/tests-audit/` - Complete audit deliverable archive
+- `plans/tests-audit/artifacts/` - Complete audit deliverable archive
 - `plans/tests-audit/` - Final plan documentation and completion status
 - `plans/completed/tests-audit/` - Archived completed plan
 - Coverage reports and audit certification
@@ -189,7 +189,7 @@ This final phase consolidates all audit findings into professional deliverables:
 
 ### Git Commit Instructions
 Upon completion of all Phase 6 tasks:
-1. **Stage all changes**: `git add .claude/artifacts/tests-audit/ plans/tests-audit/6-Audit-Deliverables.md plans/completed/tests-audit/`
+1. **Stage all changes**: `git add plans/tests-audit/artifacts/ plans/tests-audit/6-Audit-Deliverables.md plans/completed/tests-audit/`
 2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 6 - audit deliverables and reports
    
    - Generated comprehensive audit report with all findings

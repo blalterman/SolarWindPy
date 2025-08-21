@@ -22,7 +22,7 @@
   - ✅ MultiIndex architecture compliance verification
   - ✅ Numerical stability edge case tests (34 tests designed)
   - ✅ Critical vulnerability identification and remediation specs
-  - ✅ Comprehensive audit reports (17 deliverable files in .claude/artifacts/tests-audit/)
+  - ✅ Comprehensive audit reports (17 deliverable files in plans/tests-audit/artifacts/)
 
 ### 📈 Success Metrics
 - **Acceptance Criteria Met**: 7/8 (87.5%)
@@ -178,7 +178,7 @@
   - Test inventory scripts: `.claude/scripts/test-discovery.py`
   - Physics validation patterns: `tests/physics_validation/`
   - YAML documentation templates: `.claude/templates/test-yaml-block.yaml`
-  - Audit artifacts: `.claude/artifacts/tests-audit/`
+  - Audit artifacts: `plans/tests-audit/artifacts/`
 - **Configuration Dependencies**: pytest configuration, coverage settings, specialized agent coordination framework
 - **External Dependencies**: pytest, pytest-cov, pyyaml, pandas, numpy, specialized physics testing libraries
 
@@ -244,9 +244,9 @@
 - [x] Velocity metrics recorded in closeout documentation
 - [x] Cross-plan dependencies updated
 - [x] Branch preservation logged
-- [x] Audit artifacts archived in .claude/artifacts/tests-audit/
+- [x] Audit artifacts archived in plans/tests-audit/artifacts/
 
 ---
 
-*Plan completed on 2025-08-21 by UnifiedPlanCoordinator - Ready for archival with all deliverables in .claude/artifacts/tests-audit/*  
+*Plan completed on 2025-08-21 by UnifiedPlanCoordinator - Ready for archival with all deliverables in plans/tests-audit/artifacts/*  
 *Closeout generated from closeout-template.md v1.0*
