@@ -25,6 +25,8 @@ import os
 import subprocess
 from pathlib import Path
 import time
+import re
+from datetime import datetime, timezone
 
 # ANSI color codes for terminal output
 class Colors:
@@ -97,8 +99,47 @@ def get_conda_env():
         return conda_env
     return ''
 
+def get_recent_compaction_info():
+    """Get information about recent compactions to adjust token estimates."""
+    try:
+        # Look for compaction files in .claude directory
+        claude_dir = Path('.claude')
+        if not claude_dir.exists():
+            return None
+        
+        # Find most recent compaction file
+        compaction_files = list(claude_dir.glob('compaction-*.md'))
+        if not compaction_files:
+            return None
+        
+        # Get the most recently modified compaction file
+        recent_compaction = max(compaction_files, key=lambda f: f.stat().st_mtime)
+        
+        # Check if it's recent (within last 10 minutes)
+        file_age = time.time() - recent_compaction.stat().st_mtime
+        if file_age > 600:  # 10 minutes
+            return None
+        
+        # Parse the compaction file for target tokens
+        with open(recent_compaction, 'r') as f:
+            content = f.read()
+        
+        # Extract target tokens from the compaction metadata
+        target_match = re.search(r'Target Tokens.*?~(\d+(?:,\d+)*)', content)
+        if target_match:
+            target_tokens = int(target_match.group(1).replace(',', ''))
+            return {
+                'target_tokens': target_tokens,
+                'file_age_minutes': file_age / 60,
+                'filename': recent_compaction.name
+            }
+        
+        return None
+    except Exception:
+        return None
+
 def estimate_token_usage(data):
-    """Estimate token usage from transcript file with color coding."""
+    """Estimate token usage from transcript file with color coding and compaction adjustment."""
     try:
         transcript_path = data.get('transcript_path', '')
         if not transcript_path or not os.path.exists(transcript_path):
@@ -107,6 +148,16 @@ def estimate_token_usage(data):
         # Rough estimate: ~4 chars per token
         file_size = os.path.getsize(transcript_path)
         estimated_tokens = file_size // 4
+        
+        # Check for recent compaction and adjust if needed
+        compaction_info = get_recent_compaction_info()
+        if compaction_info:
+            # If compaction happened recently, use the smaller of:
+            # 1. Current transcript estimate
+            # 2. Target tokens from compaction + some buffer for new content
+            target_with_buffer = compaction_info['target_tokens'] + (estimated_tokens * 0.1)
+            if estimated_tokens > target_with_buffer:
+                estimated_tokens = int(target_with_buffer)
         
         # Format token count
         if estimated_tokens > 1000000:

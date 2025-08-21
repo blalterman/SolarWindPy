@@ -19,7 +19,7 @@ Hook system provides automatic validation:
 - **Session startup**: Branch validation and context loading
 - **Git operations**: Workflow enforcement and branch protection
 - **Physics edits**: Unit consistency and constraint checking
-- **Token limits**: Automatic compaction and state preservation
+- **Token limits**: Automatic file-based compaction and state preservation
 - **Plan value propositions**: Automated generation and validation
 
 ## Environment Setup
@@ -90,7 +90,7 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Quality**: Tests pass before commits (automated)
 
 ### Git Tag Conventions
-Two distinct tag namespaces maintain separation between operational and release concerns:
+Only semantic versioning tags are used for releases:
 
 #### Release Tags (Semantic Versioning)
 - **Pattern**: `v{major}.{minor}.{patch}[-{prerelease}]`
@@ -99,14 +99,15 @@ Two distinct tag namespaces maintain separation between operational and release 
 - **Automation**: GitHub workflow creates these for releases
 - **Used by**: setuptools_scm for version detection
 
-#### Compaction Tags (Operational)
-- **Pattern**: `claude/compaction/{date}-{compression}pct`
-- **Examples**: `claude/compaction/2025-08-19-20pct`
+### Session State Management (File-Based)
+- **Location**: `.claude/compacted_state.md` and timestamped backups
+- **Pattern**: `compaction-{date}-{time}-{compression}pct.md`
+- **Examples**: `compaction-2025-08-19-143022-20pct.md`
 - **Purpose**: Session state preservation at token boundaries
 - **Automation**: Created by `.claude/hooks/create-compaction.py`
-- **Used by**: Claude session management and rollback
+- **Storage**: File-based system, no git tags created
 
-**Important**: setuptools_scm is configured to only recognize `v*` tags for versioning, preventing compaction tags from interfering with package version detection.
+**Important**: setuptools_scm is configured to only recognize `v*` tags for versioning, ensuring clean version detection.
 
 ## Common Aliases
 
