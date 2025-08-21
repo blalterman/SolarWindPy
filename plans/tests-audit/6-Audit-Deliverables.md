@@ -185,6 +185,36 @@ This final phase consolidates all audit findings into professional deliverables:
 - Establishes maintenance procedures for ongoing test suite quality
 - Creates reusable artifacts and validation tools
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 6 tasks:
+1. **Stage all changes**: `git add .claude/artifacts/tests-audit/ plans/tests-audit/6-Audit-Deliverables.md plans/completed/tests-audit/`
+2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 6 - audit deliverables and reports
+   
+   - Generated comprehensive audit report with all findings
+   - Created executive summary for stakeholder review
+   - Compiled test coverage improvements (77.1% → ≥95%)
+   - Archived all audit artifacts in organized structure
+   - Documented methodology for future audit cycles
+   - Created handoff procedures for ongoing maintenance
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Final Audit Completion
+**⚡ PLAN COMPLETE**: After committing Phase 6, **prompt user for final compaction and closeout**:
+```
+Phase 6 (Audit Deliverables) and the complete Physics-Focused Test Suite Audit 
+are now finished! All 6 phases completed with atomic git commits.
+
+Final step: Please run `/compact` to preserve the completed audit state, then 
+proceed to 7-Closeout.md for plan archival and lessons learned documentation.
+
+🎉 AUDIT SUCCESS: Test coverage improved from 77.1% to ≥95% with comprehensive 
+physics validation, architecture compliance, and numerical stability enhancements!
+```
+
 ---
 *Phase 6 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*

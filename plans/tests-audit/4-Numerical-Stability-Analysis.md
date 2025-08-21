@@ -173,6 +173,31 @@ Numerical stability is critical for scientific computing reliability. This phase
 - Leverages architecture knowledge to ensure MultiIndex stability
 - Provides numerical foundation for Phase 5 documentation requirements
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 4 tasks:
+1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/4-Numerical-Stability-Analysis.md`
+2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 4 - numerical stability enhancements
+   
+   - Added comprehensive edge case tests for B≈0, n→0, extreme temperatures
+   - Enhanced NaN handling and division-by-zero protection
+   - Implemented numerical precision tests for plasma calculations
+   - Added overflow/underflow boundary condition validation
+   - Created stability tests for iterative algorithms
+   - Generated numerical stability audit report
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Context Compaction Prompt
+**⚡ IMPORTANT**: After committing Phase 4, **immediately prompt user to compact context**:
+```
+Phase 4 (Numerical Stability Analysis) is complete with atomic git commit. 
+Context is now at token boundary - please run `/compact` to preserve session state 
+and prepare for Phase 5 (Documentation Enhancement).
+```
+
 ---
 *Phase 4 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*

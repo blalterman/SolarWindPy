@@ -165,6 +165,31 @@ This phase ensures all tests properly validate this architecture and identify te
 - Provides architecture foundation for Phase 4 numerical stability
 - Informs Phase 5 documentation of proper usage patterns
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 3 tasks:
+1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/3-Architecture-Compliance.md`
+2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 3 - architecture compliance verification
+   
+   - Validated MultiIndex DataFrame patterns (M,C,S) across all tests
+   - Enhanced .xs() usage compliance and performance optimization
+   - Verified DateTime index patterns and naming conventions
+   - Added memory efficiency tests for large datasets
+   - Ensured proper DataFrame view vs copy usage
+   - Generated architecture compliance audit report
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Context Compaction Prompt
+**⚡ IMPORTANT**: After committing Phase 3, **immediately prompt user to compact context**:
+```
+Phase 3 (Architecture Compliance) is complete with atomic git commit. 
+Context is now at token boundary - please run `/compact` to preserve session state 
+and prepare for Phase 4 (Numerical Stability Analysis).
+```
+
 ---
 *Phase 3 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*

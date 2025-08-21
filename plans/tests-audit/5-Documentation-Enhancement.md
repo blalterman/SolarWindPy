@@ -190,6 +190,31 @@ Comprehensive test documentation is essential for scientific software maintainab
 - Includes Phase 4 stability requirements in edge case explanations
 - Provides comprehensive documentation foundation for Phase 6 deliverables
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 5 tasks:
+1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/5-Documentation-Enhancement.md`
+2. **Create atomic commit**: `git commit -m "docs(tests): complete Phase 5 - comprehensive test documentation
+   
+   - Added YAML documentation blocks to all 1,132 test functions
+   - Enhanced test naming conventions for scientific clarity
+   - Created automated documentation validation tools
+   - Generated TEST_DOCUMENTATION_REPORT.md with coverage metrics
+   - Improved physics explanation accuracy in test docstrings
+   - Established maintainable documentation standards
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Context Compaction Prompt
+**⚡ IMPORTANT**: After committing Phase 5, **immediately prompt user to compact context**:
+```
+Phase 5 (Documentation Enhancement) is complete with atomic git commit. 
+Context is now at token boundary - please run `/compact` to preserve session state 
+and prepare for Phase 6 (Audit Deliverables).
+```
+
 ---
 *Phase 5 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*

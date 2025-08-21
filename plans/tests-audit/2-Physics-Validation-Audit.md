@@ -165,6 +165,31 @@ This phase ensures scientific accuracy and physics consistency across the test s
 - Informs Phase 4 numerical stability requirements
 - Establishes physics accuracy foundation for documentation
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 2 tasks:
+1. **Stage all changes**: `git add tests/ .claude/artifacts/tests-audit/ plans/tests-audit/2-Physics-Validation-Audit.md`
+2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 2 - physics validation audit
+   
+   - Validated SI unit consistency across all physics calculations
+   - Verified thermal speed convention (mw² = 2kT) in all thermal tests
+   - Confirmed Alfvén speed formula (V_A = B/√(μ₀ρ)) with ion composition
+   - Added conservation law tests for energy, momentum, and mass
+   - Enhanced solar wind parameter range validation
+   - Generated comprehensive physics validation report
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Context Compaction Prompt
+**⚡ IMPORTANT**: After committing Phase 2, **immediately prompt user to compact context**:
+```
+Phase 2 (Physics Validation Audit) is complete with atomic git commit. 
+Context is now at token boundary - please run `/compact` to preserve session state 
+and prepare for Phase 3 (Architecture Compliance).
+```
+
 ---
 *Phase 2 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*

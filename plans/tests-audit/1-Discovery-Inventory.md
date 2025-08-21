@@ -141,6 +141,30 @@ This foundational phase establishes the complete baseline for the test suite aud
 - Provides comprehensive test inventory for all subsequent phases
 - Establishes baseline metrics for coverage and quality improvements
 
+## 🔄 Phase Completion Protocol
+
+### Git Commit Instructions
+Upon completion of all Phase 1 tasks:
+1. **Stage all changes**: `git add .claude/artifacts/tests-audit/ plans/tests-audit/1-Discovery-Inventory.md`
+2. **Create atomic commit**: `git commit -m "feat(tests): complete Phase 1 - test discovery and inventory
+   
+   - Enumerated all 1,132 test functions across 63 test files
+   - Created comprehensive test classification and metadata
+   - Generated TEST_INVENTORY.csv and TEST_INVENTORY.md artifacts
+   - Established baseline coverage metrics (77.1%)
+   - Identified ~200 additional tests needed for ≥95% target
+   
+   🤖 Generated with Claude Code
+   Co-Authored-By: Claude <noreply@anthropic.com>"`
+
+### Context Compaction Prompt
+**⚡ IMPORTANT**: After committing Phase 1, **immediately prompt user to compact context**:
+```
+Phase 1 (Discovery & Inventory) is complete with atomic git commit. 
+Context is now at token boundary - please run `/compact` to preserve session state 
+and prepare for Phase 2 (Physics Validation Audit).
+```
+
 ---
 *Phase 1 of 6 - Physics-Focused Test Suite Audit - Last Updated: 2025-08-21*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*
