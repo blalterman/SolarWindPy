@@ -1,0 +1,628 @@
+{
+  "directory": "solarwindpy",
+  "files_processed": 51,
+  "total_tests_attempted": 0,
+  "total_tests_failed": 0,
+  "total_examples_run": 0,
+  "total_physics_violations": 0,
+  "file_results": [
+    {
+      "file": "solarwindpy/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/moyal.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/exponentials.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/core.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/lines.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/plots.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/trend_fits.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/tex_info.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/power_laws.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/fitfunctions/gaussians.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/tools/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/vector.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/spacecraft.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/units_constants.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/ions.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/plasma.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/alfvenic_turbulence.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/tensor.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/core/base.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/plots.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/base.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/instabilities/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/instabilities/beta_ani.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/instabilities/verscharen2016.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/histograms.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/hist1d.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/select_data_from_figure.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/tools.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/hist2d.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/orbits.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/agg_plot.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/scatter.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/spiral.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/base.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/scripts/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/elemental_abundance.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/chemistry.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/composition.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/datetime.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/special.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/plotting/labels/base.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "'NoneType' object has no attribute 'get_doctest'"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/lisird/lisird.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/lisird/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/lisird/extrema_calculator.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/sunspot_number/__init__.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    },
+    {
+      "file": "solarwindpy/solar_activity/sunspot_number/sidc.py",
+      "tests_attempted": 0,
+      "tests_failed": 0,
+      "examples_run": 0,
+      "physics_violations": [],
+      "validation_stats": {},
+      "success": false,
+      "errors": [
+        "attempted relative import with no known parent package"
+      ]
+    }
+  ],
+  "overall_success": false,
+  "summary": {
+    "success_rate": 0.0,
+    "physics_compliance_rate": 0.0,
+    "files_with_violations": 0
+  }
+}

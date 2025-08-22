@@ -1,5 +1,5 @@
 {
-  "validation_timestamp": 1755761648.3183308,
+  "validation_timestamp": 1755804411.091936,
   "summary": {
     "total_examples": 21,
     "successful_executions": 3,
@@ -11,7 +11,7 @@
       "TypeError": 2,
       "AttributeError": 1
     },
-    "average_execution_time": 3.612609136672247e-05,
+    "average_execution_time": 3.092629568917411e-05,
     "examples_with_output": 1
   },
   "detailed_results": [
@@ -21,7 +21,7 @@
       "line_range": "23-28",
       "example_type": "rst_code_block",
       "execution_success": true,
-      "execution_time": 4.887580871582031e-05,
+      "execution_time": 3.600120544433594e-05,
       "error_type": null,
       "error_message": null,
       "has_stdout": false,
@@ -30,7 +30,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.315846
+      "timestamp": 1755804411.0897129
     },
     {
       "example_id": "rst_example_2",
@@ -38,7 +38,7 @@
       "line_range": "34-47",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 0.00028204917907714844,
+      "execution_time": 0.0002582073211669922,
       "error_type": "TypeError",
       "error_message": "Plasma.__init__() got an unexpected keyword argument 'epoch'",
       "has_stdout": false,
@@ -47,7 +47,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.316428
+      "timestamp": 1755804411.0902321
     },
     {
       "example_id": "rst_example_3",
@@ -55,7 +55,7 @@
       "line_range": "53-63",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 6.031990051269531e-05,
+      "execution_time": 4.100799560546875e-05,
       "error_type": "NameError",
       "error_message": "name 'plasma' is not defined",
       "has_stdout": false,
@@ -64,7 +64,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3166568
+      "timestamp": 1755804411.090409
     },
     {
       "example_id": "rst_example_4",
@@ -72,7 +72,7 @@
       "line_range": "69-78",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 3.886222839355469e-05,
+      "execution_time": 2.7894973754882812e-05,
       "error_type": "NameError",
       "error_message": "name 'plasma' is not defined",
       "has_stdout": false,
@@ -81,7 +81,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3168151
+      "timestamp": 1755804411.090531
     },
     {
       "example_id": "rst_example_5",
@@ -89,7 +89,7 @@
       "line_range": "85-97",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 6.29425048828125e-05,
+      "execution_time": 5.1975250244140625e-05,
       "error_type": "AttributeError",
       "error_message": "module 'solarwindpy.plotting' has no attribute 'time_series'",
       "has_stdout": false,
@@ -98,7 +98,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.316979
+      "timestamp": 1755804411.090671
     },
     {
       "example_id": "rst_example_6",
@@ -106,7 +106,7 @@
       "line_range": "104-111",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 1.8835067749023438e-05,
+      "execution_time": 1.811981201171875e-05,
       "error_type": "NameError",
       "error_message": "name 'plasma' is not defined",
       "has_stdout": false,
@@ -115,7 +115,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317097
+      "timestamp": 1755804411.09077
     },
     {
       "example_id": "rst_example_7",
@@ -123,7 +123,7 @@
       "line_range": "117-129",
       "example_type": "rst_code_block",
       "execution_success": false,
-      "execution_time": 4.291534423828125e-05,
+      "execution_time": 3.314018249511719e-05,
       "error_type": "TypeError",
       "error_message": "Gaussian.__init__() missing 2 required positional arguments: 'xobs' and 'yobs'",
       "has_stdout": false,
@@ -132,7 +132,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3172321
+      "timestamp": 1755804411.090883
     },
     {
       "example_id": "rst_example_8",
@@ -140,7 +140,7 @@
       "line_range": "16-20",
       "example_type": "rst_code_block",
       "execution_success": true,
-      "execution_time": 2.2172927856445312e-05,
+      "execution_time": 1.4781951904296875e-05,
       "error_type": null,
       "error_message": null,
       "has_stdout": false,
@@ -149,7 +149,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 1,
-      "timestamp": 1755761648.317267
+      "timestamp": 1755804411.0909061
     },
     {
       "example_id": "rst_example_9",
@@ -157,7 +157,7 @@
       "line_range": "63-67",
       "example_type": "rst_code_block",
       "execution_success": true,
-      "execution_time": 2.5033950805664062e-05,
+      "execution_time": 1.8358230590820312e-05,
       "error_type": null,
       "error_message": null,
       "has_stdout": true,
@@ -166,7 +166,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317297
+      "timestamp": 1755804411.090928
     },
     {
       "example_id": "doctest_example_10",
@@ -174,7 +174,7 @@
       "line_range": "93-95",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 3.1948089599609375e-05,
+      "execution_time": 2.6226043701171875e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -183,7 +183,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317418
+      "timestamp": 1755804411.0910358
     },
     {
       "example_id": "doctest_example_11",
@@ -191,7 +191,7 @@
       "line_range": "97-101",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 1.3113021850585938e-05,
+      "execution_time": 1.4066696166992188e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -200,7 +200,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317504
+      "timestamp": 1755804411.0911229
     },
     {
       "example_id": "doctest_example_12",
@@ -208,7 +208,7 @@
       "line_range": "143-157",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 1.5735626220703125e-05,
+      "execution_time": 1.5020370483398438e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -217,7 +217,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3176
+      "timestamp": 1755804411.0912158
     },
     {
       "example_id": "doctest_example_13",
@@ -225,7 +225,7 @@
       "line_range": "75-79",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 1.0967254638671875e-05,
+      "execution_time": 1.0013580322265625e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -234,7 +234,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317686
+      "timestamp": 1755804411.091295
     },
     {
       "example_id": "doctest_example_14",
@@ -251,12 +251,29 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3177621
+      "timestamp": 1755804411.091372
     },
     {
       "example_id": "doctest_example_15",
       "file_path": "solarwindpy/tools/__init__.py",
       "line_range": "70-72",
+      "example_type": "doctest",
+      "execution_success": false,
+      "execution_time": 9.059906005859375e-06,
+      "error_type": "SyntaxError",
+      "error_message": "invalid syntax (<string>, line 1)",
+      "has_stdout": false,
+      "has_stderr": false,
+      "imports_valid": true,
+      "missing_imports": [],
+      "import_errors": [],
+      "outputs_count": 0,
+      "timestamp": 1755804411.091449
+    },
+    {
+      "example_id": "doctest_example_16",
+      "file_path": "solarwindpy/tools/__init__.py",
+      "line_range": "88-90",
       "example_type": "doctest",
       "execution_success": false,
       "execution_time": 8.821487426757812e-06,
@@ -268,24 +285,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3178391
-    },
-    {
-      "example_id": "doctest_example_16",
-      "file_path": "solarwindpy/tools/__init__.py",
-      "line_range": "88-90",
-      "example_type": "doctest",
-      "execution_success": false,
-      "execution_time": 9.298324584960938e-06,
-      "error_type": "SyntaxError",
-      "error_message": "invalid syntax (<string>, line 1)",
-      "has_stdout": false,
-      "has_stderr": false,
-      "imports_valid": true,
-      "missing_imports": [],
-      "import_errors": [],
-      "outputs_count": 0,
-      "timestamp": 1755761648.317912
+      "timestamp": 1755804411.091522
     },
     {
       "example_id": "doctest_example_17",
@@ -302,7 +302,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.317984
+      "timestamp": 1755804411.0915961
     },
     {
       "example_id": "doctest_example_18",
@@ -310,7 +310,7 @@
       "line_range": "m-u",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 1.3113021850585938e-05,
+      "execution_time": 1.2874603271484375e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -319,7 +319,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.318065
+      "timestamp": 1755804411.0916789
     },
     {
       "example_id": "doctest_example_19",
@@ -336,7 +336,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.318142
+      "timestamp": 1755804411.091756
     },
     {
       "example_id": "doctest_example_20",
@@ -344,7 +344,7 @@
       "line_range": "m-u",
       "example_type": "doctest",
       "execution_success": false,
-      "execution_time": 1.1920928955078125e-05,
+      "execution_time": 1.2159347534179688e-05,
       "error_type": "SyntaxError",
       "error_message": "invalid syntax (<string>, line 1)",
       "has_stdout": false,
@@ -353,7 +353,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.3182259
+      "timestamp": 1755804411.0918322
     },
     {
       "example_id": "doctest_example_21",
@@ -370,7 +370,7 @@
       "missing_imports": [],
       "import_errors": [],
       "outputs_count": 0,
-      "timestamp": 1755761648.318301
+      "timestamp": 1755804411.091908
     }
   ]
 }

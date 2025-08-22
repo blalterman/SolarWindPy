@@ -8,7 +8,8 @@ Usage Guide
 Overview
 --------
 
-SolarWindPy provides a comprehensive framework for analyzing solar wind plasma and magnetic field data. The package is organized around several key concepts:
+SolarWindPy provides a comprehensive framework for analyzing solar wind plasma and 
+magnetic field data. The package is organized around several key concepts:
 
 - **Plasma**: Central container for multi-species plasma data
 - **Ion**: Individual ion species with moments and properties  
