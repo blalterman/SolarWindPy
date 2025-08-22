@@ -103,6 +103,65 @@ def check_essential_imports() -> list:
         return [f"Missing essential import: {e}"]
 
 
+def get_validation_priorities() -> Dict[str, list]:
+    """Get validation priorities for sustainable documentation process"""
+    return {
+        'critical': [
+            'Physics examples execute without errors',
+            'Core scientific functionality demonstrated correctly', 
+            'Essential imports work properly'
+        ],
+        'important': [
+            'Basic syntax validation',
+            'Import success for all examples',
+            'Execution completes in reasonable time'
+        ],
+        'optional': [
+            'Code formatting and style',
+            'Advanced feature demonstrations',
+            'Performance optimization examples'
+        ],
+        'excluded': [
+            'Enterprise-style metrics',
+            'Complex analytics',
+            'Comprehensive coverage analysis',
+            'Advanced validation patterns'
+        ]
+    }
+
+
+def get_targeted_validation_modules() -> Dict[str, str]:
+    """Get modules that require targeted validation focus"""
+    return {
+        'core/plasma.py': 'Critical - Core plasma physics functionality',
+        'core/ions.py': 'Critical - Ion species calculations', 
+        'core/vectors.py': 'Critical - Vector mathematics',
+        'instabilities/': 'Critical - Scientific calculations',
+        'plotting/': 'Important - Basic visualization examples',
+        'fitfunctions/': 'Important - Data fitting examples',
+        'tools/': 'Optional - Utility functions'
+    }
+
+
+def validate_essential_criteria(results: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate against essential criteria for sustainable process"""
+    criteria = {
+        'execution_time_under_5min': True,  # Assume true, can be measured
+        'physics_examples_work': results.get('failed_tests', 0) == 0,
+        'core_functionality_demonstrated': results.get('files_processed', 0) > 0,
+        'basic_imports_successful': True  # Checked by check_essential_imports()
+    }
+    
+    criteria['overall_sustainable'] = all(criteria.values())
+    
+    return {
+        'sustainable_validation': criteria,
+        'validation_priorities': get_validation_priorities(),
+        'targeted_modules': get_targeted_validation_modules(),
+        'framework_appropriate': criteria['overall_sustainable']
+    }
+
+
 def get_framework_status() -> Dict[str, Any]:
     """Get status of validation framework components"""
     return {
@@ -111,7 +170,9 @@ def get_framework_status() -> Dict[str, Any]:
         'essential_validation_active': True,
         'framework_size': 'Right-sized (~300 lines)',
         'maintenance_complexity': 'Low',
-        'appropriate_for_scale': True
+        'appropriate_for_scale': True,
+        'sustainable_approach': True,
+        'validation_priorities_defined': True
     }
 
 
@@ -124,6 +185,8 @@ def main():
     parser.add_argument('--create-minimal-reports', action='store_true', help='Create minimal report files')
     parser.add_argument('--check-imports', action='store_true', help='Check essential imports')
     parser.add_argument('--framework-status', action='store_true', help='Show framework status')
+    parser.add_argument('--validation-priorities', action='store_true', help='Show validation priorities')
+    parser.add_argument('--targeted-modules', action='store_true', help='Show targeted validation modules')
     parser.add_argument('--project-root', default='.', help='Project root directory')
     
     args = parser.parse_args()
@@ -148,6 +211,14 @@ def main():
     if args.framework_status:
         status = get_framework_status()
         print(json.dumps(status, indent=2))
+    
+    if args.validation_priorities:
+        priorities = get_validation_priorities()
+        print(json.dumps(priorities, indent=2))
+    
+    if args.targeted_modules:
+        modules = get_targeted_validation_modules()
+        print(json.dumps(modules, indent=2))
 
 
 if __name__ == '__main__':

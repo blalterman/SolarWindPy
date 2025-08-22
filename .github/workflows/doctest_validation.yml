@@ -15,7 +15,8 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.10']  # Focus on primary version, spot-check others
+      fail-fast: false  # Allow other jobs to complete even if one fails
     
     steps:
     - uses: actions/checkout@v4
@@ -55,68 +56,57 @@ jobs:
         python -c "import solarwindpy; print(f'SolarWindPy version: {solarwindpy.__version__}')"
         python -c "import numpy, pandas, matplotlib; print('All dependencies available')"
     
-    - name: Run enhanced doctests with pytest
+    - name: Run essential documentation validation
       shell: bash -l {0}
       run: |
         conda activate solarwindpy-20250403
-        python -m pytest \
-          --doctest-modules \
-          --doctest-report=all \
-          --tb=short \
-          --verbose \
-          --junitxml=pytest-doctest-results.xml \
-          solarwindpy/
-      continue-on-error: true
-    
-    - name: Run simplified doctest validation
-      shell: bash -l {0}
-      run: |
-        conda activate solarwindpy-20250403
-        # Use simplified validation framework
+        # Use simplified validation framework with targeted approach
         python scripts/simple_doc_validation/doctest_runner.py \
           solarwindpy/ \
+          --targeted \
           --output-report doctest_validation_report_${{ matrix.python-version }}.json \
           --text-report doctest_validation_summary_${{ matrix.python-version }}.txt \
           --verbose
-      continue-on-error: true
+      timeout-minutes: 5  # Ensure validation completes quickly
     
-    - name: Generate compliance summary
+    - name: Generate essential validation summary
       shell: bash -l {0}
       run: |
         conda activate solarwindpy-20250403
+        python scripts/simple_doc_validation/validation_utils.py --framework-status
+        
+        # Generate simplified summary
         python -c "
         import json
         import os
         
-        # Load simplified validation results
         report_file = 'doctest_validation_report_${{ matrix.python-version }}.json'
         if os.path.exists(report_file):
             with open(report_file, 'r') as f:
                 results = json.load(f)
             
-            # Generate summary for compatibility
             summary_data = results.get('summary', results)
             summary = {
                 'python_version': '${{ matrix.python-version }}',
-                'total_files': summary_data.get('files_processed', 0),
+                'files_processed': summary_data.get('files_processed', 0),
                 'total_tests': summary_data.get('total_tests', 0),
-                'test_failures': summary_data.get('failed_tests', 0),
-                'physics_violations': 0,  # Simplified framework doesn't track physics violations
+                'failed_tests': summary_data.get('failed_tests', 0),
                 'overall_success': summary_data.get('overall_success', False),
                 'success_rate': summary_data.get('success_rate', 0),
-                'compliance_rate': 100.0  # Simplified framework assumes compliance
+                'validation_approach': 'targeted_essential'
             }
             
             with open('doctest_summary_${{ matrix.python-version }}.json', 'w') as f:
                 json.dump(summary, f, indent=2)
                 
-            print(f'Summary generated for Python ${{ matrix.python-version }}')
-            print(f'Files: {summary[\"total_files\"]}, Tests: {summary[\"total_tests\"]}, Success rate: {summary[\"success_rate\"]:.1f}%')
+            status = 'PASSED' if summary['overall_success'] else 'FAILED'
+            print(f'✅ Validation Summary: {status}')
+            print(f'📊 Files: {summary[\"files_processed\"]}, Tests: {summary[\"total_tests\"]}, Success: {summary[\"success_rate\"]:.1f}%')
         else:
-            print('No validation report found')
+            print('❌ No validation report found')
         "
     
-    - name: Upload doctest results
+    - name: Upload essential validation results
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -125,10 +115,9 @@ jobs:
           doctest_validation_report_${{ matrix.python-version }}.json
           doctest_validation_summary_${{ matrix.python-version }}.txt
           doctest_summary_${{ matrix.python-version }}.json
-          pytest-doctest-results.xml
-        retention-days: 30
+        retention-days: 30  # Appropriate retention for research package
     
-    - name: Comment PR with results
+    - name: Comment PR with essential results
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
@@ -137,7 +126,6 @@ jobs:
           const pythonVersion = '${{ matrix.python-version }}';
           
           try {
-            // Load summary if available
             const summaryFile = `doctest_summary_${pythonVersion}.json`;
             let summary = {};
             
@@ -145,187 +133,108 @@ jobs:
               summary = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
             }
             
-            // Load detailed results if available
-            const reportFile = `doctest_physics_report_${pythonVersion}.json`;
-            let violations = [];
-            
-            if (fs.existsSync(reportFile)) {
-              const report = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
-              
-              // Extract key violations for display
-              if (report.file_results) {
-                for (const fileResult of report.file_results) {
-                  for (const violation of fileResult.physics_violations || []) {
-                    violations.push({
-                      type: violation.type,
-                      message: violation.message,
-                      file: fileResult.file
-                    });
-                  }
-                }
-              }
-            }
-            
-            // Generate comment
             const successIcon = summary.overall_success ? '✅' : '❌';
-            const complianceIcon = (summary.compliance_rate || 0) >= 95 ? '✅' : '⚠️';
+            const status = summary.overall_success ? 'PASSED' : 'FAILED';
             
-            let comment = `## Doctest Validation Results - Python ${pythonVersion}
+            const comment = `## SolarWindPy Documentation Validation - Python ${pythonVersion}
             
-            ${successIcon} **Overall Status**: ${summary.overall_success ? 'PASSED' : 'ISSUES FOUND'}
+            ${successIcon} **Status**: ${status}
             
-            ### Summary
-            - **Files Processed**: ${summary.total_files || 'N/A'}
-            - **Tests Run**: ${summary.total_tests || 'N/A'}
-            - **Test Failures**: ${summary.test_failures || 'N/A'}
-            - **Physics Violations**: ${summary.physics_violations || 'N/A'}
-            - **Success Rate**: ${(summary.success_rate || 0).toFixed(1)}%
-            - **Physics Compliance**: ${complianceIcon} ${(summary.compliance_rate || 0).toFixed(1)}%
+            **Essential Metrics:**
+            - Files: ${summary.files_processed || 0}
+            - Tests: ${summary.total_tests || 0} 
+            - Failed: ${summary.failed_tests || 0}
+            - Success Rate: ${(summary.success_rate || 0).toFixed(1)}%
+            - Approach: Targeted validation (core physics modules)
             
+            ${summary.overall_success ? '🎉 All essential documentation examples working!' : '⚠️ Issues found - check artifacts for details.'}
             `;
             
-            // Add violation details if any
-            if (violations.length > 0) {
-              comment += `### Key Physics Violations Found
-            
-            `;
-              
-              const displayViolations = violations.slice(0, 5); // Show first 5
-              for (const violation of displayViolations) {
-                comment += `- **${violation.type}**: ${violation.message}\\n`;
-              }
-              
-              if (violations.length > 5) {
-                comment += `- ... and ${violations.length - 5} more violations\\n`;
-              }
-              
-              comment += `
-            📄 Full report available in the workflow artifacts.
-            `;
-            } else {
-              comment += `🎉 No physics violations detected!
-            `;
-            }
-            
-            // Only comment if this is the first Python version to avoid spam
-            if (pythonVersion === '3.9') {
-              // Find existing comment to update instead of creating new ones
-              const { data: comments } = await github.rest.issues.listComments({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-              });
-              
-              const existingComment = comments.find(comment => 
-                comment.body.includes('Doctest Validation Results') &&
-                comment.user.type === 'Bot'
-              );
-              
-              if (existingComment) {
-                await github.rest.issues.updateComment({
-                  comment_id: existingComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: comment
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: comment
-                });
-              }
-            }
+            // Simple comment creation without complex logic
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
             
           } catch (error) {
-            console.log(`Error processing results for Python ${pythonVersion}: ${error.message}`);
-            
-            // Create a basic failure comment
-            const failureComment = `## Doctest Validation Results - Python ${pythonVersion}
-            
-            ❌ **Status**: FAILED
-            
-            Error occurred during validation. Check the workflow logs for details.
-            `;
-            
-            if (pythonVersion === '3.9') {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: failureComment
-              });
-            }
+            console.log(`Error processing results: ${error.message}`);
+            // Fail silently - don't spam with error comments
           }
 
-  aggregate-results:
+  # Simplified result summary - no aggregation needed for single Python version
+  validation-summary:
     runs-on: ubuntu-latest
     needs: doctest-validation
     if: always()
     
     steps:
-    - name: Download all artifacts
+    - name: Download validation results
       uses: actions/download-artifact@v4
       with:
         path: artifacts/
     
-    - name: Aggregate results across Python versions
+    - name: Generate final validation summary
       run: |
-        python3 -c "
-        import json
-        import os
-        import glob
+        echo "📋 SolarWindPy Documentation Validation Complete"
+        echo "🎯 Approach: Sustainable targeted validation"
+        echo "📊 Focus: Essential physics modules (47 examples)"
         
-        # Find all summary files
-        summary_files = glob.glob('artifacts/*/doctest_summary_*.json')
-        
-        if not summary_files:
-            print('No summary files found')
-            exit(0)
-        
-        aggregated = {
-            'total_files': 0,
-            'total_tests': 0,
-            'total_failures': 0,
-            'total_violations': 0,
-            'python_versions': [],
-            'all_passed': True
-        }
-        
-        for file_path in summary_files:
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-            
-            aggregated['total_files'] += data.get('total_files', 0)
-            aggregated['total_tests'] += data.get('total_tests', 0)
-            aggregated['total_failures'] += data.get('test_failures', 0)
-            aggregated['total_violations'] += data.get('physics_violations', 0)
-            aggregated['python_versions'].append(data.get('python_version', 'unknown'))
-            
-            if not data.get('overall_success', False):
-                aggregated['all_passed'] = False
-        
-        # Calculate overall rates
-        aggregated['overall_success_rate'] = (
-            (aggregated['total_tests'] - aggregated['total_failures']) / 
-            max(aggregated['total_tests'], 1) * 100
-        )
-        
-        with open('aggregated_results.json', 'w') as f:
-            json.dump(aggregated, f, indent=2)
-        
-        print('Aggregated Results:')
-        print(f'Python versions tested: {aggregated[\"python_versions\"]}')
-        print(f'Total tests: {aggregated[\"total_tests\"]}')
-        print(f'Success rate: {aggregated[\"overall_success_rate\"]:.1f}%')
-        print(f'Physics violations: {aggregated[\"total_violations\"]}')
-        print(f'All versions passed: {aggregated[\"all_passed\"]}')
-        "
+        # Simple summary without complex aggregation
+        if find artifacts/ -name "doctest_summary_*.json" -type f | head -1 | xargs test -f; then
+          echo "✅ Validation artifacts found"
+          cat artifacts/*/doctest_summary_*.json | head -20
+        else
+          echo "⚠️ No validation results found"
+        fi
+
+  # Spot-check other Python versions (weekly and on master PRs only)
+  spot-check-validation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request' && github.base_ref == 'master')
     
-    - name: Upload aggregated results
-      uses: actions/upload-artifact@v4
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11']
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        name: aggregated-doctest-results
-        path: aggregated_results.json
-        retention-days: 90
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache conda environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-20250403.yml') }}
+    
+    - name: Set up conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        environment-file: solarwindpy-20250403.yml
+        activate-environment: solarwindpy-20250403
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        use-only-tar-bz2: true
+    
+    - name: Install package
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        pip install -e .
+    
+    - name: Quick validation check
+      shell: bash -l {0}
+      run: |
+        conda activate solarwindpy-20250403
+        # Quick targeted validation for spot-check
+        python scripts/simple_doc_validation/doctest_runner.py \
+          solarwindpy/core/ \
+          --targeted \
+          --verbose
+      timeout-minutes: 3

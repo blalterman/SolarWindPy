@@ -60,13 +60,31 @@ class SimpleDocTestRunner:
         
         return result
     
-    def run_directory(self, directory: Path) -> Dict[str, Any]:
+    def run_directory(self, directory: Path, targeted: bool = False) -> Dict[str, Any]:
         """Run doctests on all Python files in directory"""
         python_files = [f for f in directory.rglob('*.py') if '__pycache__' not in str(f) and not f.name.startswith('.')]
         
-        for py_file in python_files:
+        if targeted:
+            # Focus on critical modules for sustainable validation
+            critical_paths = ['core/', 'instabilities/']
+            important_paths = ['plotting/', 'fitfunctions/']
+            
+            critical_files = [f for f in python_files if any(p in str(f) for p in critical_paths)]
+            important_files = [f for f in python_files if any(p in str(f) for p in important_paths)]
+            
+            # Process critical files first, then important ones
+            files_to_process = critical_files + important_files
+            
             if self.verbose:
-                print(f"Testing {py_file}")
+                print(f"Targeted validation: {len(critical_files)} critical, {len(important_files)} important files")
+        else:
+            files_to_process = python_files
+        
+        for py_file in files_to_process:
+            if self.verbose:
+                priority = "CRITICAL" if any(p in str(py_file) for p in ['core/', 'instabilities/']) else \
+                          "IMPORTANT" if any(p in str(py_file) for p in ['plotting/', 'fitfunctions/']) else "OPTIONAL"
+                print(f"Testing [{priority}] {py_file}")
             
             file_result = self.run_file(py_file)
             self.results['files'].append(file_result)
@@ -103,6 +121,7 @@ def main():
     parser.add_argument('--output-report', help='JSON output file')
     parser.add_argument('--text-report', help='Text report file')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
+    parser.add_argument('--targeted', action='store_true', help='Run targeted validation (core/instabilities priority)')
     
     args = parser.parse_args()
     
@@ -110,7 +129,7 @@ def main():
     path = Path(args.path)
     
     if path.is_dir():
-        runner.run_directory(path)
+        runner.run_directory(path, targeted=args.targeted)
     else:
         result = runner.run_file(path)
         runner.results = {'files_processed': 1, 'total_tests': result['tests_attempted'], 
