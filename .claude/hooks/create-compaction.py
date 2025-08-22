@@ -33,30 +33,20 @@ def get_git_info():
         return "unknown", "", ""
 
 
-def create_git_tag(branch, timestamp, tokens, target_tokens):
-    """Create a git tag for this compaction milestone."""
+def create_compaction_filename(branch, timestamp, tokens, target_tokens):
+    """Create a unique filename for this compaction milestone."""
     try:
-        # Create a meaningful tag name
+        # Create a meaningful filename
         date_part = timestamp.split('T')[0]  # Just the date part
+        time_part = timestamp.split('T')[1][:8].replace(':', '')  # HHMMSS format
         compression_pct = int((1 - target_tokens/tokens) * 100) if tokens > 0 else 0
-        tag_name = f"claude/compaction/{date_part}-{compression_pct}pct"
+        filename = f"compaction-{date_part}-{time_part}-{compression_pct}pct.md"
         
-        # Check if tag already exists
-        existing_tags = subprocess.check_output(['git', 'tag', '-l', tag_name + '*'], text=True).strip()
-        if existing_tags:
-            # Add a suffix if tag exists
-            suffix = len(existing_tags.splitlines()) + 1
-            tag_name = f"{tag_name}-{suffix}"
+        return filename
         
-        # Create the tag with a descriptive message
-        tag_message = f"Claude compaction: {compression_pct}% reduction ({tokens:,} → {target_tokens:,} tokens) on {branch}"
-        subprocess.run(['git', 'tag', '-a', tag_name, '-m', tag_message], 
-                      check=True, capture_output=True)
-        
-        return tag_name
-        
-    except subprocess.CalledProcessError:
-        return None
+    except Exception:
+        # Fallback to simple timestamp
+        return f"compaction-{timestamp.replace(':', '').replace('-', '')}.md"
 
 
 def get_enhanced_git_info():
@@ -569,23 +559,22 @@ def create_compaction():
 *Automated intelligent compaction - {timestamp}*
 """
 
-    # Create git tag for this compaction milestone
-    git_tag = create_git_tag(branch, timestamp, tokens, target_tokens)
-    if git_tag:
-        compaction_content += f"""
-## Compaction Tag
-Git tag: `{git_tag}` - Use `git show {git_tag}` to view this milestone
-"""
-        print(f"🏷️  Created git tag: {git_tag}")
-    else:
-        compaction_content += """
-## Compaction Tag
-Git tagging failed - compaction saved without tag
+    # Create unique filename for this compaction milestone
+    compaction_filename = create_compaction_filename(branch, timestamp, tokens, target_tokens)
+    compaction_content += f"""
+## Compaction File
+Filename: `{compaction_filename}` - Unique timestamp-based compaction file
+No git tags created - using file-based state preservation
 """
 
-    # Write compaction file
+    # Write compaction files
     compaction_file = Path('.claude/compacted_state.md')
     with open(compaction_file, 'w') as f:
+        f.write(compaction_content)
+    
+    # Also save with unique timestamp filename in .claude directory
+    unique_compaction = Path('.claude') / compaction_filename
+    with open(unique_compaction, 'w') as f:
         f.write(compaction_content)
     
     # Also write to plan directory if available
@@ -596,6 +585,7 @@ Git tagging failed - compaction saved without tag
         print(f"✅ Compaction saved to: {plan_compaction}")
     
     print(f"✅ Compaction created: {compaction_file}")
+    print(f"✅ Timestamped compaction: {unique_compaction}")
     print(f"📊 Token reduction: {tokens:,} → {target_tokens:,} ({((tokens - target_tokens) / tokens * 100):.1f}% savings)")
 
 

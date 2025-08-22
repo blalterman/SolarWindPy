@@ -10,7 +10,7 @@ The SolarWindPy planning system uses a **unified multi-phase architecture** for 
 solarwindpy/plans/
 ├── 0-overview-template.md      # Master template for plan coordination
 ├── N-phase-template.md         # Standard template for individual phases
-├── closeout-template.md        # Completion documentation template
+├── closeout-template.md        # Template for plan completion documentation
 ├── plan_template.md           # ⚠️ DEPRECATED - Legacy single-file format
 └── TEMPLATE-USAGE-GUIDE.md    # This guide
 ```
@@ -82,13 +82,34 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 5. **Acceptance Criteria**: Phase-specific success metrics
 6. **Cross-References**: Link back to 0-Overview.md
 
+### Step 4: Add Closeout Phase (Final Phase)
+
+**When plan implementation is complete:**
+```bash
+# Copy closeout template
+cp solarwindpy/plans/closeout-template.md solarwindpy/plans/[plan-name]/[N]-Closeout.md
+```
+
+**Required Customizations:**
+1. **Plan Name**: Match the plan being closed out
+2. **Completion Metadata**: Actual duration, phases completed, success rate
+3. **Objectives Achievement**: Status of primary objectives from 0-Overview.md
+4. **Phase-by-Phase Learnings**: Document key challenges and solutions for each phase
+5. **Velocity Intelligence**: Actual vs estimated time for future planning accuracy
+6. **Lessons Learned**: Capture reusable patterns and improvement opportunities
+
+**Critical Purpose:**
+- **Knowledge Preservation**: Prevent loss of implementation insights
+- **Velocity Learning**: Improve estimation accuracy for future plans
+- **Pattern Documentation**: Capture reusable approaches for similar work
+- **Cross-Plan Intelligence**: Share learnings across the planning ecosystem
+
 ## 🏗️ Architecture Benefits
 
 - **Resource Conflict Detection**: "Affects" field prevents concurrent modifications
 - **Dependency Management**: Clear prerequisite tracking
 - **Quality Assurance**: Phase-level acceptance criteria ensure thoroughness
 - **Template Consistency**: All plans follow identical structure
-- **Decision Framework**: Propositions provide data-driven go/no-go criteria
 
 ## 📊 Template Field Specifications
 
@@ -108,24 +129,6 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 | **Affects** | Comma-separated | Files/directories modified | "/tests/, solarwindpy/tests/, conftest.py" |
 | **Estimated Duration** | String | Total time estimate | "5.5 hours" |
 | **Status** | Enum | Current plan state | "Planning \| In Progress \| Completed" |
-
-### Required Propositions Section (0-Overview.md)
-
-**Purpose**: Data-driven decision making for research software development
-
-| Proposition | Purpose | Required Elements |
-|-------------|---------|-------------------|
-| **Risk Proposition** | Identify and mitigate project risks | Technical, Scientific, Operational risks + Mitigation strategies |
-| **Value Proposition** | Quantify benefits and ROI | Scientific, Developer, User value + ROI timeline |
-| **Cost Proposition** | Estimate resource requirements | Development time, Review time, Maintenance cost, Opportunity cost |
-| **Token Proposition** | Optimize AI-assisted development | Planning tokens, Implementation tokens, Future savings, Net ROI |
-| **Usage Proposition** | Assess adoption and impact | Target users, Usage frequency, Coverage scope, Adoption requirements |
-
-**Quality Standards**:
-- **Quantified whenever possible**: Use numbers, percentages, time estimates
-- **Research-specific context**: Address scientific computing and physics validation needs
-- **Honest uncertainty**: Include confidence intervals and risk factors
-- **Comparative analysis**: Reference similar past work or alternatives
 
 ### Required Phase Fields (N-Phase-Name.md)
 
@@ -172,45 +175,10 @@ cp solarwindpy/plans/N-phase-template.md solarwindpy/plans/[plan-name]/2-Phase-N
 
 ### Agent Usage
 
-**All Plans**: Use UnifiedPlanCoordinator
+**All Plans**: Use PlanManager + PlanImplementer
 - Planning coordination with velocity tracking
 - Implementation execution with git integration
 - Automatic time estimation learning
-- Automatic closeout documentation generation
-
-### Plan Completion & Closeout
-
-**Automatic Closeout Generation**: Plans automatically generate closeout documentation when completed
-- **Template**: `plans/closeout-template.md` provides structured knowledge capture
-- **Automation**: Triggered by `plan-completion-manager.py` before archival
-- **Content**: Implementation decisions, lessons learned, velocity metrics, technical architecture
-- **Location**: Created as `9-Closeout.md` in plan directory before move to `plans/completed/`
-
-**Closeout Benefits**:
-- Preserves 85% of implementation decisions typically lost
-- Reduces future planning time by 40-60% through documented patterns
-- Enables knowledge transfer for research software with multi-year lifecycles
-- Provides audit trail for scientific computing decisions
-
-### Propositions Best Practices
-
-**Example: Well-Written Propositions**
-
-```markdown
-### Risk Proposition
-**Technical Risks**: 
-- MEDIUM: NumPy API changes may require validation updates (15% probability)
-- LOW: MultiIndex column restructuring affects 3 core modules
-
-**Mitigation Strategies**:
-- Pin NumPy version constraints in requirements.txt
-- Comprehensive test suite with 95%+ coverage on affected modules
-```
-
-**Decision Criteria**:
-- **GREEN (Proceed)**: Low-medium risk, high value, reasonable cost, positive token ROI
-- **YELLOW (Conditional)**: Medium-high risk but critical value, or high cost with exceptional benefit
-- **RED (Reconsider)**: High risk without proportional value, or negative token ROI over 12 months
 
 ## 💡 Best Practices
 

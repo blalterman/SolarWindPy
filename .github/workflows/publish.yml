@@ -24,15 +24,15 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Need full history for setuptools_scm
       
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       
-      - name: Verify tag format
+      - name: Verify tag format and version consistency
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         run: |
           TAG=${GITHUB_REF#refs/tags/}
@@ -40,7 +40,23 @@ jobs:
             echo "Error: Tag $TAG does not match version pattern v*.*.* (e.g., v1.0.0)"
             exit 1
           fi
-          echo "Publishing version $TAG"
+          
+          # Install setuptools_scm to check version consistency
+          pip install setuptools_scm
+          
+          # Get version from setuptools_scm
+          DETECTED_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          EXPECTED_VERSION=${TAG#v}  # Remove 'v' prefix
+          
+          if [ "$DETECTED_VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "Error: Version mismatch!"
+            echo "  Git tag version: $EXPECTED_VERSION"
+            echo "  setuptools_scm detected: $DETECTED_VERSION"
+            echo "Ensure tag version matches setuptools_scm configuration"
+            exit 1
+          fi
+          
+          echo "✅ Publishing version $TAG (verified: $DETECTED_VERSION)"
       
       - name: Install dependencies
         run: |
@@ -86,6 +102,19 @@ jobs:
           skip-existing: true
         continue-on-error: true  # Don't fail if token not configured yet
       
+      - name: TestPyPI Status Check
+        if: failure() && (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'rc'))
+        run: |
+          echo "⚠️  TestPyPI publication failed (likely due to missing token)"
+          echo ""
+          echo "🔧 To enable TestPyPI publishing:"
+          echo "   1. Go to https://test.pypi.org/manage/account/token/"
+          echo "   2. Create a new API token with scope 'Entire account'"
+          echo "   3. Add token as repository secret 'TEST_PYPI_API_TOKEN'"
+          echo "   4. Re-run this workflow or create a new tag"
+          echo ""
+          echo "📦 Package was built successfully and is available in workflow artifacts"
+      
       # Production PyPI deployment (only for non-RC tags)
       - name: Publish to PyPI
         if: |
@@ -101,13 +130,54 @@ jobs:
           skip-existing: true
         continue-on-error: true  # Don't fail if token not configured yet
       
+      - name: PyPI Status Check
+        if: failure() && (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'rc'))
+        run: |
+          echo "⚠️  PyPI publication failed (likely due to missing token)"
+          echo ""
+          echo "🔧 To enable PyPI publishing:"
+          echo "   1. Go to https://pypi.org/manage/account/token/"
+          echo "   2. Create a new API token with scope 'Entire account'"
+          echo "   3. Add token as repository secret 'PYPI_API_TOKEN'"
+          echo "   4. Re-run this workflow or create a new tag"
+          echo ""
+          echo "📦 Package was built successfully and is available in workflow artifacts"
+          echo "🚨 Production releases require manual PyPI token configuration"
+      
       - name: Create GitHub Release
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
           generate_release_notes: true
           draft: false
-          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'dev') }}
+          name: "SolarWindPy ${{ github.ref_name }}"
+          body: |
+            ## 🚀 SolarWindPy Release ${{ github.ref_name }}
+            
+            **Version**: `${{ github.ref_name }}`
+            **Commit**: ${{ github.sha }}
+            **Build Date**: ${{ github.run_started_at }}
+            
+            ### 📦 Installation
+            ```bash
+            pip install solarwindpy==${{ github.ref_name }}
+            ```
+            
+            ### 🔍 Package Verification  
+            ```python
+            import solarwindpy
+            print(solarwindpy.__version__)  # Should show ${{ github.ref_name }}
+            ```
+            
+            ### 📋 What's Included
+            - **Source Distribution** (`.tar.gz`): Full source code with setup metadata
+            - **Wheel Package** (`.whl`): Pre-built binary distribution for faster installation
+            
+            ---
+            *Auto-generated release from GitHub Actions*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

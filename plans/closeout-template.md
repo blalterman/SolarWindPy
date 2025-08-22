@@ -1,11 +1,11 @@
 # Plan Closeout - [Plan Name]
 
 ## Closeout Metadata
-- **Plan Name**: [Plan Name from 0-Overview.md]
+- **Plan Name**: [Plan Name]
 - **Completed Date**: [YYYY-MM-DD]
-- **Total Duration**: [Actual hours] (Estimated: [estimated hours])
-- **Phases Completed**: [N]/[N]
-- **Final Status**: ✅ COMPLETED
+- **Total Duration**: [Actual hours] (Estimated: [X] hours)
+- **Phases Completed**: [X]/[Y]
+- **Final Status**: [✅ COMPLETED | ⚠️ PARTIALLY COMPLETED | ❌ CANCELLED]
 - **Success Rate**: [percentage based on acceptance criteria met]
 - **Implementation Branch**: [feature/plan-name]
 - **Plan Branch**: [plan/plan-name] - PRESERVED
@@ -14,7 +14,7 @@
 ## 📊 Executive Summary
 
 ### 🎯 Objectives Achievement
-- **Primary Objective**: [Restate main objective from 0-Overview.md]
+- **Primary Objective**: [Restate primary objective from 0-Overview.md]
 - **Achievement Status**: [✅ Fully Achieved | ⚠️ Partially Achieved | ❌ Not Achieved]
 - **Key Deliverables**: 
   - [List major deliverables completed]
@@ -25,6 +25,12 @@
 - **Test Coverage**: [percentage]% (Target: ≥95%)
 - **Code Quality**: [All checks passed | Issues noted below]
 - **Performance Impact**: [Describe any performance changes]
+
+### 🎯 Scope Audit Results
+- **SolarWindPy Alignment Score**: [0-100] (Target: ≥80)
+- **Scientific Research Relevance**: [High | Medium | Low]
+- **Scope Creep Detected**: [Yes | No] - [Details if yes]
+- **Out-of-Scope Elements**: [List any features that exceeded original scope]
 
 ## 🏗️ Technical Architecture Decisions
 
@@ -43,6 +49,12 @@
 - **SolarWindPy Ecosystem**: [How implementation fits with core/, plotting/, fitfunctions/]
 - **API Design**: [Public interface decisions and rationale]
 - **Backwards Compatibility**: [Compatibility considerations and any breaking changes]
+
+### Scope Boundary Decisions
+- **Core SolarWindPy Modules Affected**: [List modules: core/, plotting/, etc.]
+- **Scientific Computing Focus**: [How implementation maintained research focus]
+- **Scope Exclusions**: [Features explicitly excluded to maintain focus]
+- **Domain Boundary Enforcement**: [How scope was controlled during implementation]
 
 ## 📋 Implementation Insights
 
@@ -63,6 +75,11 @@
 - **Technical Surprises**: [Unexpected technical findings or requirements]
 - **Domain Knowledge**: [New understanding of physics/scientific computing domain]
 - **Tool/Framework Insights**: [Learnings about development tools, testing, etc.]
+
+### Scope Management Insights
+- **Scope Creep Incidents**: [Describe any scope expansion attempts and resolution]
+- **Scientific Focus Challenges**: [Times when maintaining research focus was difficult]
+- **Boundary Decisions**: [Key decisions to exclude non-scientific features]
 
 ## 🧪 Quality Assurance
 
@@ -120,6 +137,11 @@
 - **Physics Validation**: [Validation approaches applicable to other physics implementations]
 - **Documentation Patterns**: [Effective documentation strategies for scientific software]
 
+### Scope Management Lessons
+- **Effective Scope Controls**: [What worked to maintain project focus]
+- **Scope Audit Value**: [How scope auditing helped the project]
+- **Future Scope Guidelines**: [Recommendations for scope management in future plans]
+
 ## 🔮 Future Recommendations
 
 ### Immediate Follow-up Tasks
@@ -136,6 +158,11 @@
 - **Complementary Plans**: [Other plans that would synergize with this implementation]
 - **Dependency Updates**: [Recommendations for dependency or infrastructure improvements]
 - **Research Directions**: [Scientific computing or physics research directions this enables]
+
+### Scope Evolution Recommendations
+- **Potential Scope Expansions**: [Justified extensions within SolarWindPy's mission]
+- **Boundary Maintenance**: [Areas requiring continued scope vigilance]
+- **Scientific Computing Alignment**: [How future work should maintain research focus]
 
 ## 📚 Knowledge Transfer
 
@@ -155,6 +182,31 @@
 - **Technical Skills**: [Specific technical skills required for future modifications]
 - **SolarWindPy Context**: [Package-specific knowledge essential for this component]
 
+## 🎯 Scope Audit Summary
+
+### Final Scope Assessment
+- **Initial Scope Alignment Score**: [from plan creation]
+- **Final Scope Alignment Score**: [at completion]
+- **Scope Variance**: [percentage drift from original scope]
+
+### Module Impact Analysis
+| Module | Planned Impact | Actual Impact | Scope Compliance |
+|--------|---------------|---------------|------------------|
+| core/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| plotting/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| fitfunctions/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| [etc.] | | | |
+
+### Scientific Research Value
+- **Research Capabilities Added**: [Specific scientific computing capabilities]
+- **Physics Accuracy Improvements**: [How implementation enhanced physics calculations]
+- **Data Analysis Enhancements**: [Improvements to scientific data processing]
+
+### Scope Boundary Enforcement
+- **Features Rejected**: [List features excluded to maintain scope]
+- **Scope Decisions Documented**: [Key scope limitation decisions and rationale]
+- **Mission Alignment**: [How work advances SolarWindPy's scientific mission]
+
 ## 🏷️ Reference Information
 
 ### Commit History
@@ -173,102 +225,6 @@
 - **Dependent Plans**: [Plans that now depend on this work]
 - **Related Initiatives**: [Parallel or complementary development efforts]
 
-## 📊 Propositions Analysis
-
-### Risk Proposition Assessment
-**Original Risk Estimates vs Actual**:
-- **Technical Risks**: [Compare planned vs encountered technical risks]
-  - Planned: [Original technical risk assessment]
-  - Actual: [Risks that materialized and their impact]
-  - Variance: [Over/under estimated risk severity]
-- **Scientific Risks**: [Physics validation and computational challenges]
-  - Planned: [Original scientific risk assessment]
-  - Actual: [Scientific complexity and validation challenges encountered]
-  - Variance: [Risk assessment accuracy]
-- **Operational Risks**: [Maintenance and knowledge transfer challenges]
-  - Planned: [Original operational risk assessment]
-  - Actual: [Operational complexity experienced]
-  - Variance: [Mitigation strategy effectiveness]
-
-**Risk Mitigation Effectiveness**:
-- [How well did planned mitigation strategies work]
-- [Additional mitigations required during implementation]
-- [Lessons for future risk assessment]
-
-### Value Proposition Validation
-**Planned vs Delivered Value**:
-- **Scientific Value**: [Research capabilities delivered vs planned]
-  - Target: [Original scientific value proposition]
-  - Achieved: [Actual scientific benefits realized]
-  - Evidence: [Specific examples of value delivery]
-- **Developer Value**: [Code quality and productivity benefits]
-  - Target: [Original developer benefits planned]
-  - Achieved: [Actual developer experience improvements]
-  - Metrics: [Quantified productivity or quality gains]
-- **User Value**: [End-user experience and capability improvements]
-  - Target: [Original user benefits planned]
-  - Achieved: [Actual user experience enhancements]
-  - Usage: [Early adoption and feedback indicators]
-
-**ROI Timeline Assessment**:
-- [Immediate benefits realized vs planned]
-- [Medium-term value trajectory vs expectations]
-- [Long-term strategic value outlook]
-
-### Cost Proposition Accuracy
-**Time Estimation Analysis**:
-- **Development Time**: [Actual vs estimated implementation hours]
-  - Estimated: [Original development time estimate]
-  - Actual: [Total development time invested]
-  - Variance: [Percentage over/under estimate with factors]
-- **Review & Testing**: [QA and validation effort comparison]
-  - Estimated: [Original testing time estimate]
-  - Actual: [Total testing and review time]
-  - Variance: [Testing complexity vs expectations]
-- **Hidden Costs**: [Unexpected costs not captured in original estimate]
-  - [Documentation overhead, integration complexity, etc.]
-
-**Resource Allocation Lessons**:
-- [What cost factors were underestimated]
-- [What activities took less time than expected]
-- [Recommendations for future cost estimation]
-
-### Token Proposition Outcomes
-**Token Efficiency Results**:
-- **Planning Tokens**: [Actual vs estimated planning token usage]
-- **Implementation Tokens**: [Actual vs estimated implementation token usage]
-- **Token ROI**: [Break-even timeline and efficiency gains realized]
-- **Future Savings**: [Documented patterns and automation that will reduce future token costs]
-
-**AI-Assisted Development Effectiveness**:
-- [How well AI assistance worked for this domain/task type]
-- [Token-intensive activities vs highly efficient activities]
-- [Recommendations for token optimization in similar future work]
-
-### Usage Proposition Verification
-**Adoption and Impact Assessment**:
-- **Target Users**: [Actual vs planned user base and adoption]
-- **Usage Frequency**: [Early usage patterns vs expectations]
-- **Coverage Scope**: [Actual vs planned impact on workflows/users]
-- **Adoption Challenges**: [Barriers to adoption not anticipated]
-
-**Success Metrics**:
-- [Quantified usage metrics where available]
-- [User feedback and satisfaction indicators]
-- [Integration with existing research workflows]
-
-### Proposition Learning Summary
-**Key Insights for Future Planning**:
-- [Which proposition types were most/least accurate]
-- [Systematic biases in estimation (optimism, complexity underestimation, etc.)]
-- [Domain-specific factors that affect proposition accuracy for SolarWindPy]
-- [Recommendations for improving future proposition quality]
-
-**Velocity Intelligence Updates**:
-- [Complexity factors to adjust for similar work]
-- [Planning patterns that worked well vs poorly]
-- [Research software specific considerations for future estimates]
-
 ---
 
 ## 📋 Closeout Checklist
@@ -279,6 +235,9 @@
 - [ ] Code quality checks (black, flake8) passing
 - [ ] Physics validation tests passing
 - [ ] Documentation updated (API, examples, guides)
+- [ ] Scope audit validated (alignment score ≥80)
+- [ ] All work remains within SolarWindPy scientific computing domain
+- [ ] No unauthorized scope creep occurred
 
 ### Knowledge Preservation
 - [ ] All technical decisions documented above
@@ -288,6 +247,7 @@
 
 ### Process Completion
 - [ ] Feature branch merged to plan branch
+- [ ] Pull request created to merge plan branch to master
 - [ ] Plan branch prepared for archival
 - [ ] Velocity metrics recorded in .velocity/metrics.json
 - [ ] Cross-plan dependencies updated

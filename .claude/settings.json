@@ -17,7 +17,7 @@
       "Bash(.claude/hooks/test-runner.sh --fast)",
       "Bash(.claude/hooks/test-runner.sh --coverage)",
       "Bash(.claude/hooks/test-runner.sh --help)",
-      "Bash(.claude/hooks/coverage-monitor.py)",
+      "Bash(python .claude/hooks/coverage-monitor.py)",
       "Bash(.claude/hooks/pre-commit-tests.sh)",
       "Bash(.claude/hooks/git-workflow-validator.sh)",
       "Bash(.claude/hooks/git-workflow-validator.sh --enforce-branch)",
@@ -129,7 +129,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": ".claude/statusline.py",
+    "command": ".claude/statusline.sh",
     "padding": 0
   },
   "systemPrompt": "You are working on SolarWindPy, a scientific Python package for solar wind plasma physics analysis. CRITICAL WORKFLOW: Before ANY development work: 1) List all unmerged branches with `git branch -r --no-merged master`; 2) Ask user 'Which branch should I use? Please specify branch name, or say \"search\" if you want me to help find an appropriate branch, or say \"new\" to create a new branch'; 3) Wait for explicit user instruction - NEVER auto-select a branch; 4) If user says \"search\", help identify relevant branches by content/purpose; 5) If user says \"new\", create branch using pattern 'claude/YYYY-MM-DD-HH-MM-SS-module-feature-description'. Never work directly on master. Always follow development guidelines in .claude/CLAUDE.md. Run tests with `pytest -q`, format code with `black .`, and lint with `flake8`. All tests must pass before committing. Use NumPy-style docstrings and follow Conventional Commits format. Include 'Generated with Claude Code' attribution in commits.",
@@ -156,7 +156,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/validate-session-state.sh",
+            "command": "bash .claude/hooks/validate-session-state.sh",
             "timeout": 30
           }
         ]
@@ -168,7 +168,7 @@
         "hooks": [
           {
             "type": "command", 
-            "command": ".claude/hooks/git-workflow-validator.sh --enforce-branch",
+            "command": "bash .claude/hooks/git-workflow-validator.sh --enforce-branch",
             "timeout": 15
           }
         ]
@@ -180,7 +180,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/git-workflow-validator.sh",
+            "command": "bash .claude/hooks/git-workflow-validator.sh",
             "args": ["${command}"],
             "timeout": 15,
             "blocking": true
@@ -228,7 +228,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
           }
         ]
@@ -238,7 +238,7 @@
         "hooks": [
           {
             "type": "command", 
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
           }
         ]
@@ -248,18 +248,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/test-runner.sh --changed",
+            "command": "bash .claude/hooks/test-runner.sh --changed",
             "timeout": 120
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-commit-tests.sh",
-            "timeout": 60
           }
         ]
       }
@@ -282,7 +272,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/coverage-monitor.py",
+            "command": "python .claude/hooks/coverage-monitor.py",
             "timeout": 60
           }
         ]

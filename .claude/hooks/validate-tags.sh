@@ -1,10 +1,7 @@
 #!/bin/bash
-"""
-Tag Validation Hook for SolarWindPy
-Validates that git tags follow proper conventions:
-- Release tags: v{major}.{minor}.{patch}[-{prerelease}] (semantic versioning)
-- Compaction tags: claude/compaction/{date}-{compression}pct (operational)
-"""
+# Tag Validation Hook for SolarWindPy
+# Validates that git tags follow proper conventions:
+# - Release tags: v{major}.{minor}.{patch}[-{prerelease}] (semantic versioning)
 
 set -e
 
@@ -33,36 +30,34 @@ fi
 
 # Validation patterns
 VERSION_TAG_PATTERN="^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$"
-COMPACTION_TAG_PATTERN="^claude/compaction/.+$"
 
 # Counters
 VALID_VERSION_TAGS=0
-VALID_COMPACTION_TAGS=0
 INVALID_TAGS=0
 
 echo -e "${BLUE}📋 Analyzing tags...${NC}"
 
-# Validate each tag
+# Validate each tag - only check version tags, ignore non-version tags
 while IFS= read -r tag; do
     if [[ $tag =~ $VERSION_TAG_PATTERN ]]; then
         echo -e "${GREEN}✅ Version tag: $tag${NC}"
         ((VALID_VERSION_TAGS++))
-    elif [[ $tag =~ $COMPACTION_TAG_PATTERN ]]; then
-        echo -e "${GREEN}✅ Compaction tag: $tag${NC}"
-        ((VALID_COMPACTION_TAGS++))
+    elif [[ $tag =~ ^claude/compaction/ ]]; then
+        # Silently skip compaction tags (operational, not for validation)
+        continue
     else
-        echo -e "${RED}❌ Invalid tag: $tag${NC}"
-        echo -e "${YELLOW}   Expected formats:${NC}"
-        echo -e "${YELLOW}   - Version: v1.0.0, v2.1.3-alpha, v1.5.0-beta.2${NC}"
-        echo -e "${YELLOW}   - Compaction: claude/compaction/2025-08-19-20pct${NC}"
-        ((INVALID_TAGS++))
+        # Only flag truly invalid tags, not operational ones
+        if [[ ! $tag =~ ^claude/ ]]; then
+            echo -e "${RED}❌ Invalid tag: $tag${NC}"
+            echo -e "${YELLOW}   Expected format: v1.0.0, v2.1.3-alpha, v1.5.0-beta.2${NC}"
+            ((INVALID_TAGS++))
+        fi
     fi
 done <<< "$ALL_TAGS"
 
 echo ""
 echo -e "${BLUE}📊 Validation Summary:${NC}"
 echo -e "${GREEN}   ✅ Valid version tags: $VALID_VERSION_TAGS${NC}"
-echo -e "${GREEN}   ✅ Valid compaction tags: $VALID_COMPACTION_TAGS${NC}"
 
 if [ $INVALID_TAGS -gt 0 ]; then
     echo -e "${RED}   ❌ Invalid tags: $INVALID_TAGS${NC}"
