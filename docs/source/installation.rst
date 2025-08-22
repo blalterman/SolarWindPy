@@ -8,10 +8,11 @@ Installation
 Requirements
 ------------
 
-SolarWindPy requires Python 3.11 or later and has the following core dependencies:
+SolarWindPy requires Python 3.11 or later and has the following core
+dependencies:
 
 - NumPy ≥ 1.20.0
-- Pandas ≥ 1.3.0  
+- Pandas ≥ 1.3.0
 - SciPy ≥ 1.7.0
 - Matplotlib ≥ 3.5.0
 - Astropy ≥ 5.0.0
@@ -25,7 +26,8 @@ The recommended way to install SolarWindPy is from PyPI using :command:`pip`:
 
    pip install solarwindpy
 
-This will install the latest stable release along with all required dependencies.
+This will install the latest stable release along with all required
+dependencies.
 
 Development Installation
 ------------------------
@@ -48,7 +50,8 @@ For contributors, install the additional development tools:
 Conda Environment Setup
 ------------------------
 
-For a complete scientific Python environment, use the provided conda environment file:
+For a complete scientific Python environment, use the provided conda
+environment file:
 
 .. code-block:: bash
 
