@@ -1,52 +1,16 @@
-# ReadTheDocs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html
-
 version: 2
 
-# Build documentation with Sphinx
-sphinx:
-  builder: html
-  configuration: docs/source/conf.py
-  fail_on_warning: false
-
-# Build additional formats (PDF, ePub)
-formats:
-  - pdf
-  - epub
-
-# Environment configuration
 build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-  jobs:
-    post_checkout:
-      # Install git-lfs if needed for large assets
-      - git lfs install || echo "git-lfs not available, skipping"
-      - git lfs pull || echo "git-lfs pull failed, skipping"
-    post_install:
-      # Verify package installation
-      - python -c "import solarwindpy; print(f'SolarWindPy version: {solarwindpy.__version__}')"
-      - sphinx-build --version
 
-# Python environment
 python:
   install:
+    - requirements: requirements.txt
     - requirements: docs/requirements.txt
     - method: pip
       path: .
-      extra_requirements:
-        - dev
 
-# Search integration with custom ranking
-search:
-  ranking:
-    "api/*": -1
-    "usage.html": 5
-    "installation.html": 3
-    "tutorial.html": 4
-    "tutorial/*": 2
-
-# Subprojects configuration
-submodules:
-  exclude: all
+sphinx:
+  configuration: docs/source/conf.py
