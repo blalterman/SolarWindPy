@@ -41,7 +41,7 @@ The current local plans system in `plans/` directories provides excellent struct
 - Zero data loss during migration
 - Single "plan:phase" label system (not plan:phase-1, plan:phase-2)
 - Complete rewrite of issues_from_plans.py (not update)
-- 46 total labels for comprehensive categorization
+- 41 total labels for comprehensive categorization
 
 ## 🔧 Technical Requirements
 **Core Dependencies**:
@@ -78,12 +78,13 @@ The current local plans system in `plans/` directories provides excellent struct
 
 ## ✅ Acceptance Criteria
 - [ ] All 5 phases completed successfully with full validation
-- [ ] 46 GitHub labels created and organized in 8 categories
+- [ ] 41 GitHub labels created and organized in 8 categories
 - [ ] 3 issue templates supporting propositions framework
 - [ ] PropositionsAwareMigrator handles 100% of current plan features
 - [ ] Zero data loss validated through comprehensive migration testing
 - [ ] 85% implementation decision capture preserved in GitHub format
 - [ ] Velocity learning metrics successfully migrated and accessible
+- [ ] Completed and abandoned plans migrated with full metadata preservation
 - [ ] Team trained and comfortable with new GitHub-native workflow
 - [ ] All tests pass and code coverage maintained ≥ 95%
 - [ ] Documentation updated and comprehensive migration guide available
@@ -205,6 +206,12 @@ The current local plans system in `plans/` directories provides excellent struct
 - Monitor security advisories for scientific computing packages
 - Consider using conda for better package management
 
+**Security Scope Clarification:**
+- This assessment covers **code-level security only**
+- **NO FAIR data principle compliance** (requires core data structure changes)
+- Focus on development workflow and dependency security
+- Research data repository integration explicitly excluded from scope
+
 **Authentication/Access Control Impact Analysis:**
 - No direct authentication system modifications identified
 - Standard scientific computing access patterns maintained
@@ -250,6 +257,12 @@ The current local plans system in `plans/` directories provides excellent struct
 ### SolarWindPy Alignment Assessment
 **Alignment Score**: 24/100
 
+**Score Interpretation:**
+- Low alignment score reflects **infrastructure/tooling** nature of this plan
+- Does not indicate core solar wind physics development
+- Acceptable for development process improvements
+- Maintains focus on supporting SolarWindPy scientific mission
+
 **Alignment Score Breakdown:**
 - Module Relevance: 0/40 points
 - Scientific Keywords: 14/30 points
@@ -274,9 +287,10 @@ Moderate scientific computing relevance with research applications
 ### Scope Boundary Enforcement
 **Recommended Scope Controls:**
 - Limit implementation to affected modules: plans/, .claude/hooks/, .claude/scripts/, CLAUDE.md, .github/ISSUE_TEMPLATE/, issues_from_plans.py
-- Maintain focus on solar wind physics research goals
-- Validate all changes preserve scientific accuracy
-- Ensure computational methods follow SolarWindPy conventions
+- **Maintain strict focus on SolarWindPy scientific mission support**
+- Validate all changes preserve scientific workflow integrity
+- Ensure development processes align with solar wind physics research needs
+- **Infrastructure changes must directly support scientific computing goals**
 
 **Out-of-Scope Elements to Avoid:**
 - Web development or interface features unrelated to scientific analysis

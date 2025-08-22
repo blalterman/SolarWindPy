@@ -32,6 +32,11 @@ With successful migration completed, this final phase ensures team adoption and 
   - Status: Pending
   - Notes: New commands, workflows, automation features
 
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
 ### Task Group 2: Migration and Transition Guides
 - [ ] **Create migration retrospective** (Est: 20 min) - Document migration process and lessons learned
   - Commit: `<checksum>`
@@ -45,6 +50,11 @@ With successful migration completed, this final phase ensures team adoption and 
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: GitHub CLI issues, API limits, workflow problems
+
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
 
 ### Task Group 3: Team Training Materials
 - [ ] **Create training presentation** (Est: 40 min) - Comprehensive team workshop materials

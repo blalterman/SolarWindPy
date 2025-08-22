@@ -32,6 +32,11 @@ This phase represents the critical transition from local plans to GitHub Issues.
   - Status: Pending
   - Notes: 100% data preservation, propositions integrity, link preservation
 
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
 ### Task Group 2: Staged Migration Execution
 - [ ] **Migrate test plans** (Est: 45 min) - Small-scale migration with comprehensive validation
   - Commit: `<checksum>`
@@ -49,6 +54,35 @@ This phase represents the critical transition from local plans to GitHub Issues.
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Work-in-progress preservation, velocity metrics migration
+
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
+### Completed/Abandoned Plans Migration Analysis:
+
+**Risk Assessment**: Low data loss (read-only archives), Medium metadata reconstruction needs, High API rate limits for bulk operations.
+
+**Value Proposition**: Knowledge preservation, GitHub superior search, cross-referencing capabilities, learning repository for future decisions.
+
+**Cost Analysis**: ~2 hours for 10-15 plans, minimal storage, zero maintenance, immediate discoverability ROI.
+
+**Token Optimization**: ~500 tokens local search → ~50 tokens GitHub search (90% reduction).
+
+**Usage & Scope**: 2-3 monthly references, date/domain/outcome patterns, <30s retrieval target, 15/100 alignment (acceptable infrastructure).
+
+### Velocity Metrics Migration Analysis:
+
+**Risk Assessment**: Medium format incompatibility (.velocity/ parsing), Low accuracy (structured data), Medium GitHub metadata limits.
+
+**Value Proposition**: Continuous learning across migration, improved estimation accuracy, team performance insights, data-driven decisions.
+
+**Cost Analysis**: ~3 hours processing + 2 hours dashboard + quarterly maintenance, immediate planning accuracy value.
+
+**Token Optimization**: ~1000 tokens analysis → ~100 tokens dashboard (90% reduction).
+
+**Usage & Scope**: Weekly planning access, accuracy/completion/complexity metrics, 20% estimation improvement target, 10/100 alignment (acceptable).
 
 ### Task Group 3: Comprehensive Validation
 - [ ] **Validate propositions preservation** (Est: 40 min) - All 5 proposition types correctly migrated
@@ -68,6 +102,11 @@ This phase represents the critical transition from local plans to GitHub Issues.
   - Status: Pending
   - Notes: Resource conflicts, prerequisites, coordination data
 
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
 ### Task Group 4: System Integration Testing
 - [ ] **Test GitHub workflow integration** (Est: 35 min) - CLI scripts with migrated issues
   - Commit: `<checksum>`
@@ -85,6 +124,11 @@ This phase represents the critical transition from local plans to GitHub Issues.
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Load times, search performance, bulk operations
+
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
 
 ### Task Group 5: Rollback Preparation & Documentation
 - [ ] **Create rollback procedures** (Est: 30 min) - Complete restoration process if migration fails

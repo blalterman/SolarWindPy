@@ -89,7 +89,7 @@ This phase transforms the manual migration tool into an automated workflow syste
 ## ✅ Phase Acceptance Criteria
 - [ ] All `.claude/hooks/` Python scripts replaced with equivalent gh CLI functionality
 - [ ] Plan creation, status, migration, and completion scripts fully functional
-- [ ] Automated labeling system accurately categorizes plans across 46 labels
+- [ ] Automated labeling system accurately categorizes plans across 41 labels
 - [ ] Cross-plan dependency detection and conflict resolution automated
 - [ ] Velocity tracking integration maintains historical data accuracy
 - [ ] Git workflow validation seamlessly integrates GitHub Issues

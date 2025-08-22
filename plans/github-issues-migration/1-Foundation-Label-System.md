@@ -23,7 +23,7 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Lifecycle tracking matching current plan statuses
-- [ ] **Create type labels** (Est: 25 min) - type:feature, type:bugfix, type:refactor, type:docs, type:test, type:infrastructure
+- [ ] **Create type labels** (Est: 25 min) - type:feature, type:bugfix, type:refactor, type:docs, type:test, type:infrastructure, type:chore
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Work categorization for velocity tracking
@@ -43,10 +43,15 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Change impact assessment for release planning
-- [ ] **Create propositions labels** (Est: 20 min) - propositions:risk, propositions:value, propositions:cost, propositions:token, propositions:usage
+- [ ] **Create propositions labels** (Est: 20 min) - propositions:risk, propositions:value, propositions:cost, propositions:token, propositions:usage, propositions:scope
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Propositions framework tracking and analysis
+
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
 
 ### Task Group 2: Issue Templates Creation
 - [ ] **Create overview template** (Est: 60 min) - .github/ISSUE_TEMPLATE/plan-overview.yml
@@ -62,6 +67,11 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Status: Pending
   - Notes: Implementation decisions capture (85% automation target)
 
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
 ### Task Group 3: Repository Configuration
 - [ ] **Configure issue settings** (Est: 15 min) - Enable discussions, configure default labels
   - Commit: `<checksum>`
@@ -76,11 +86,16 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Status: Pending
   - Notes: Ensure propositions framework renders correctly
 
+### 🔄 Context Management Point
+**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+
+To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+
 ### Task Group 4: Initial Validation
 - [ ] **Test label hierarchy** (Est: 25 min) - Verify label combinations and filtering work correctly
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Validate 46-label system usability
+  - Notes: Validate 41-label system usability
 - [ ] **Create sample issues** (Est: 40 min) - Test overview, phase, and closeout templates
   - Commit: `<checksum>`
   - Status: Pending
@@ -91,7 +106,7 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Notes: Required for automation workflows in later phases
 
 ## ✅ Phase Acceptance Criteria
-- [ ] All 46 labels created and properly categorized across 8 groups
+- [ ] All 41 labels created and properly categorized across 8 groups
 - [ ] 3 issue templates (overview, phase, closeout) render correctly
 - [ ] Templates preserve complete propositions framework structure
 - [ ] Sample issues demonstrate propositions metadata preservation
@@ -108,7 +123,7 @@ This phase creates the GitHub-native infrastructure required to support the full
 - Validate markdown rendering across different GitHub views
 
 **Label System Testing**:
-- Test all 46 labels for correct categorization
+- Test all 41 labels for correct categorization
 - Verify color coding and visual distinction
 - Test complex label combinations and filtering
 - Validate search functionality across label hierarchies
@@ -133,7 +148,7 @@ This phase creates the GitHub-native infrastructure required to support the full
 
 ## 📂 Phase Affected Areas
 - `.github/ISSUE_TEMPLATE/` - New issue templates
-- Repository labels - Complete 46-label system
+- Repository labels - Complete 41-label system
 - Repository settings - Issue and discussion configuration
 - Team documentation - Label usage and workflow guides
 
@@ -160,7 +175,7 @@ This phase creates the GitHub-native infrastructure required to support the full
 
 ### Implementation Decisions
 - Single "plan:phase" label chosen over numbered variants for simplicity
-- 46 total labels provides comprehensive categorization without overwhelming UI
+- 41 total labels provides comprehensive categorization without overwhelming UI
 - YAML frontmatter in templates enables structured metadata preservation
 - Color-coded priority system follows GitHub conventional patterns
 
