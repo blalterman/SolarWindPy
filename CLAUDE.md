@@ -21,6 +21,7 @@ Hook system provides automatic validation:
 - **Physics edits**: Unit consistency and constraint checking
 - **Token limits**: Automatic file-based compaction and state preservation
 - **Plan value propositions**: Automated generation and validation
+- **Scope auditing**: Scientific research focus and SolarWindPy alignment validation
 
 ## Environment Setup
 
@@ -166,6 +167,7 @@ All plans MUST include comprehensive value propositions automatically generated 
 - 💰 **Resource & Cost Analysis**: Development investment and ROI calculations  
 - ⚠️ **Risk Assessment & Mitigation**: Technical, project, and workflow risks
 - 🔒 **Security Proposition**: Code-level security assessment (NO FAIR compliance)
+- 🎯 **Scope Audit**: SolarWindPy alignment and scientific research focus validation
 - 💾 **Token Usage Optimization**: Claude session efficiency metrics
 - ⏱️ **Time Investment Analysis**: Development time and savings breakdown
 - 🎯 **Usage & Adoption Metrics**: Use cases and success criteria
@@ -173,9 +175,10 @@ All plans MUST include comprehensive value propositions automatically generated 
 ### Value Generation Workflow
 1. **UnifiedPlanCoordinator** creates basic plan structure from `plans/0-overview-template.md`
 2. Calls `.claude/hooks/plan-value-generator.py` for automated proposition generation
-3. Inserts generated content into template placeholders
-4. Optional validation via `.claude/hooks/plan-value-validator.py`
-5. Plan ready with comprehensive value assessment
+3. **NEW**: Calls `.claude/hooks/plan-scope-auditor.py` for scientific focus validation
+4. Inserts generated content including scope audit into template placeholders
+5. Optional validation via `.claude/hooks/plan-value-validator.py` (includes scope validation)
+6. Plan ready with comprehensive value assessment and scope compliance
 
 ### Hook Usage
 ```bash
@@ -184,7 +187,12 @@ python .claude/hooks/plan-value-generator.py \
   --plan-file plans/new-plan/0-Overview.md \
   --exclude-fair  # Default: no FAIR compliance
 
-# Validate plan completeness (optional)
+# Generate scope audit (called by plan-value-generator.py)
+python .claude/hooks/plan-scope-auditor.py \
+  --plan-file plans/new-plan/0-Overview.md \
+  --output-format markdown
+
+# Validate plan completeness including scope audit (optional)
 python .claude/hooks/plan-value-validator.py \
   --plan-file plans/new-plan/0-Overview.md \
   --report-format text
@@ -193,6 +201,7 @@ python .claude/hooks/plan-value-validator.py \
 ### Plan Creation Standards
 - **Value Propositions**: Required for all new plans (auto-generated)
 - **Security Assessment**: Code-level only, NO FAIR data compliance  
+- **Scope Audit**: Validates alignment with SolarWindPy scientific mission (target score ≥80/100)
 - **Token Optimization**: Must demonstrate 60-80% savings through hooks
 - **Backward Compatibility**: Existing plans work unchanged
 - **Migration Path**: Optional enhancement for active plans

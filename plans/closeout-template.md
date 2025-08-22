@@ -26,6 +26,12 @@
 - **Code Quality**: [All checks passed | Issues noted below]
 - **Performance Impact**: [Describe any performance changes]
 
+### 🎯 Scope Audit Results
+- **SolarWindPy Alignment Score**: [0-100] (Target: ≥80)
+- **Scientific Research Relevance**: [High | Medium | Low]
+- **Scope Creep Detected**: [Yes | No] - [Details if yes]
+- **Out-of-Scope Elements**: [List any features that exceeded original scope]
+
 ## 🏗️ Technical Architecture Decisions
 
 ### Core Design Choices
@@ -43,6 +49,12 @@
 - **SolarWindPy Ecosystem**: [How implementation fits with core/, plotting/, fitfunctions/]
 - **API Design**: [Public interface decisions and rationale]
 - **Backwards Compatibility**: [Compatibility considerations and any breaking changes]
+
+### Scope Boundary Decisions
+- **Core SolarWindPy Modules Affected**: [List modules: core/, plotting/, etc.]
+- **Scientific Computing Focus**: [How implementation maintained research focus]
+- **Scope Exclusions**: [Features explicitly excluded to maintain focus]
+- **Domain Boundary Enforcement**: [How scope was controlled during implementation]
 
 ## 📋 Implementation Insights
 
@@ -63,6 +75,11 @@
 - **Technical Surprises**: [Unexpected technical findings or requirements]
 - **Domain Knowledge**: [New understanding of physics/scientific computing domain]
 - **Tool/Framework Insights**: [Learnings about development tools, testing, etc.]
+
+### Scope Management Insights
+- **Scope Creep Incidents**: [Describe any scope expansion attempts and resolution]
+- **Scientific Focus Challenges**: [Times when maintaining research focus was difficult]
+- **Boundary Decisions**: [Key decisions to exclude non-scientific features]
 
 ## 🧪 Quality Assurance
 
@@ -120,6 +137,11 @@
 - **Physics Validation**: [Validation approaches applicable to other physics implementations]
 - **Documentation Patterns**: [Effective documentation strategies for scientific software]
 
+### Scope Management Lessons
+- **Effective Scope Controls**: [What worked to maintain project focus]
+- **Scope Audit Value**: [How scope auditing helped the project]
+- **Future Scope Guidelines**: [Recommendations for scope management in future plans]
+
 ## 🔮 Future Recommendations
 
 ### Immediate Follow-up Tasks
@@ -136,6 +158,11 @@
 - **Complementary Plans**: [Other plans that would synergize with this implementation]
 - **Dependency Updates**: [Recommendations for dependency or infrastructure improvements]
 - **Research Directions**: [Scientific computing or physics research directions this enables]
+
+### Scope Evolution Recommendations
+- **Potential Scope Expansions**: [Justified extensions within SolarWindPy's mission]
+- **Boundary Maintenance**: [Areas requiring continued scope vigilance]
+- **Scientific Computing Alignment**: [How future work should maintain research focus]
 
 ## 📚 Knowledge Transfer
 
@@ -154,6 +181,31 @@
 - **Domain Expertise**: [Physics or scientific computing knowledge needed for maintenance]
 - **Technical Skills**: [Specific technical skills required for future modifications]
 - **SolarWindPy Context**: [Package-specific knowledge essential for this component]
+
+## 🎯 Scope Audit Summary
+
+### Final Scope Assessment
+- **Initial Scope Alignment Score**: [from plan creation]
+- **Final Scope Alignment Score**: [at completion]
+- **Scope Variance**: [percentage drift from original scope]
+
+### Module Impact Analysis
+| Module | Planned Impact | Actual Impact | Scope Compliance |
+|--------|---------------|---------------|------------------|
+| core/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| plotting/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| fitfunctions/ | [Low/Medium/High] | [Low/Medium/High] | [✅/⚠️/❌] |
+| [etc.] | | | |
+
+### Scientific Research Value
+- **Research Capabilities Added**: [Specific scientific computing capabilities]
+- **Physics Accuracy Improvements**: [How implementation enhanced physics calculations]
+- **Data Analysis Enhancements**: [Improvements to scientific data processing]
+
+### Scope Boundary Enforcement
+- **Features Rejected**: [List features excluded to maintain scope]
+- **Scope Decisions Documented**: [Key scope limitation decisions and rationale]
+- **Mission Alignment**: [How work advances SolarWindPy's scientific mission]
 
 ## 🏷️ Reference Information
 
@@ -183,6 +235,9 @@
 - [ ] Code quality checks (black, flake8) passing
 - [ ] Physics validation tests passing
 - [ ] Documentation updated (API, examples, guides)
+- [ ] Scope audit validated (alignment score ≥80)
+- [ ] All work remains within SolarWindPy scientific computing domain
+- [ ] No unauthorized scope creep occurred
 
 ### Knowledge Preservation
 - [ ] All technical decisions documented above
