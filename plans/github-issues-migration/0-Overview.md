@@ -43,127 +43,6 @@ The current local plans system in `plans/` directories provides excellent struct
 - Complete rewrite of issues_from_plans.py (not update)
 - 46 total labels for comprehensive categorization
 
-## 📈 Plan Propositions
-
-### Risk Proposition
-**Technical Risks**:
-- HIGH: Propositions framework complexity - GitHub markdown limitations may constrain rich metadata
-- MEDIUM: API rate limits during bulk migration (5000 requests/hour for authenticated users)
-- MEDIUM: Loss of local file-based workflow and offline capabilities
-- MEDIUM: Integration complexity with existing .claude/hooks/ validation system
-
-**Scientific Risks**:
-- HIGH: Knowledge transfer risk - 85% implementation decision capture must be preserved
-- MEDIUM: Velocity learning data migration complexity and historical metrics preservation
-- LOW: Physics validation workflow integration with GitHub-native issue tracking
-
-**Operational Risks**:
-- HIGH: Team adoption risk - significant workflow change requiring training and habit modification
-- MEDIUM: Search workflow changes - GitHub search vs local file grep patterns
-- MEDIUM: Backup and disaster recovery procedures need complete redesign
-- LOW: Performance impact during large-scale operations (100+ issues)
-
-**Risk Mitigation Strategies**:
-- Parallel system operation during transition (local plans preserved)
-- Comprehensive automated validation of propositions preservation
-- Staged rollout with pilot projects before full migration
-- Complete backup procedures and rollback plans documented
-- GitHub API wrapper with rate limiting and retry logic
-
-### Value Proposition
-**Scientific Value**:
-- HIGH: Enhanced collaboration - 85% implementation decision preservation with web-native access
-- HIGH: Improved knowledge transfer through searchable, linkable decision history
-- MEDIUM: Better grant reporting through structured, timestamped development progress
-- MEDIUM: Enhanced reproducibility through GitHub's audit trail and version control
-
-**Developer Value**:
-- HIGH: 75-85% token reduction per session (105K → 20K average)
-- HIGH: Zero local maintenance overhead - GitHub handles infrastructure
-- HIGH: Native CI/CD integration with plan validation and automated workflows
-- MEDIUM: Enhanced cross-team visibility and contribution opportunities
-- MEDIUM: Better priority management through GitHub's native sorting and filtering
-
-**User Value**:
-- HIGH: Instant search across all plans, phases, and implementation history
-- HIGH: Web interface access from any device without local repository setup
-- MEDIUM: Real-time notifications and collaboration features
-- MEDIUM: Integration with GitHub's ecosystem (projects, milestones, discussions)
-- LOW: Public visibility enabling community contributions (if desired)
-
-**ROI Timeline**:
-- Immediate (0-1 weeks): Token savings and reduced session overhead
-- Medium-term (1-3 months): Enhanced collaboration and improved planning velocity
-- Long-term (6+ months): Knowledge base accumulation and institutional memory preservation
-
-### Cost Proposition
-**Development Time**:
-- 24-32 hours total implementation across 5 phases
-- High confidence interval (±4 hours) due to well-defined scope
-- Complexity factors: GitHub API integration (1.2x), propositions preservation (1.4x)
-
-**Review & Testing Time**:
-- 5-8 hours comprehensive validation including migration testing
-- 2-3 hours peer review and team feedback integration
-- 1-2 hours final validation with real plan migration
-
-**Maintenance Cost**:
-- SAVINGS: 120-180 hours/year eliminated (10-15 hours/month local system maintenance)
-- ANNUAL: ~2-4 hours GitHub integration updates and label management
-- ONE-TIME: 4-6 hours team training and workflow transition
-
-**Opportunity Cost**:
-- One week development time deferred from other high-priority work
-- UI improvements and user-facing features delayed by 1-2 sprints
-- OFFSET: Maintenance savings recover investment in 2-3 months
-
-### Token Proposition
-**Planning Tokens**:
-- 33,000 tokens for comprehensive plan design and propositions analysis
-- 8,000 tokens for cross-system dependency analysis and risk assessment
-- 5,000 tokens for migration strategy validation and rollback planning
-
-**Implementation Tokens**:
-- 70,000 tokens for PropositionsAwareMigrator development and testing
-- 15,000 tokens for GitHub issue templates and label system creation
-- 12,000 tokens for CLI integration and automation workflow setup
-- 8,000 tokens for comprehensive validation and migration testing
-
-**Future Token Savings**:
-- 85,000 tokens per session saved (105K → 20K average)
-- 25,000 tokens per month saved through reduced planning overhead
-- 15,000 tokens quarterly saved through automated status tracking
-
-**Net Token ROI**:
-- Break-even point: 2 development sessions post-migration
-- Annual savings: 20.4M tokens (240 sessions × 85K savings)
-- 5-year ROI: 102M tokens saved after 153K investment
-
-### Usage Proposition
-**Target Users**:
-- PRIMARY: Core SolarWindPy developers (3-5 active contributors)
-- SECONDARY: Research collaborators and external contributors (10-20)
-- TERTIARY: Academic institutions and plasma physics community (100+ reference users)
-- QUATERNARY: Grant reviewers and funding agencies requiring development transparency
-
-**Usage Frequency**:
-- Daily: Active development sessions with plan tracking and progress updates
-- Weekly: Cross-plan coordination and priority reviews
-- Monthly: Velocity analysis and resource allocation decisions
-- Quarterly: Institutional reporting and knowledge transfer assessments
-
-**Coverage Scope**:
-- 100% of structured development planning workflow
-- 100% of implementation decision documentation and closeout processes
-- 90% of cross-plan coordination and resource conflict resolution
-- 85% of velocity learning and historical development analysis
-
-**Adoption Requirements**:
-- 2-hour comprehensive team workshop covering new workflow
-- Quick reference guide for GitHub Issues vs local plans mapping
-- Pair programming sessions for first 2-3 GitHub-native plans
-- NO tool installation required - web-native with optional CLI enhancement
-
 ## 🔧 Technical Requirements
 **Core Dependencies**:
 - GitHub CLI (`gh`) for automation and scripting
@@ -228,6 +107,345 @@ The current local plans system in `plans/` directories provides excellent struct
 - Search and discovery testing across migrated issue database
 - Performance testing for large-scale operations (100+ issues)
 - Rollback procedure validation with test data
+
+## 📊 Value Proposition Analysis
+
+### Scientific Software Development Value
+**Research Efficiency Improvements:**
+- **General Development**: Improved code quality and maintainability
+
+**Development Quality Enhancements:**
+- Systematic evaluation of plan impact on scientific workflows
+- Enhanced decision-making through quantified value metrics
+- Improved coordination with SolarWindPy's physics validation system
+
+### Developer Productivity Value
+**Planning Efficiency:**
+- **Manual Planning Time**: ~225 minutes for 5 phases
+- **Automated Planning Time**: ~40 minutes with value propositions
+- **Time Savings**: 185 minutes (82% reduction)
+- **Reduced Cognitive Load**: Systematic framework eliminates ad-hoc analysis
+
+**Token Usage Optimization:**
+- **Manual Proposition Writing**: ~1800 tokens
+- **Automated Hook Generation**: ~300 tokens  
+- **Net Savings**: 1500 tokens (83% reduction)
+- **Session Extension**: Approximately 15 additional minutes of productive work
+
+## 💰 Resource & Cost Analysis
+
+### Development Investment
+**Implementation Time Breakdown:**
+- **Base estimate**: 8 hours (moderate plan)
+- **Complexity multiplier**: 1.0x
+- **Final estimate**: 8.0 hours
+- **Confidence interval**: 6.4-10.4 hours
+- **Per-phase average**: 1.6 hours
+
+**Maintenance Considerations:**
+- Ongoing maintenance: ~2-4 hours per quarter
+- Testing updates: ~1-2 hours per major change
+- Documentation updates: ~30 minutes per feature addition
+
+### Token Usage Economics  
+**Current vs Enhanced Token Usage:**
+- Manual proposition writing: ~1800 tokens
+- Automated generation: ~400 tokens
+  - Hook execution: 100 tokens
+  - Content insertion: 150 tokens
+  - Validation: 50 tokens
+  - Context overhead: 100 tokens
+
+**Net Savings: 1400 tokens (78% reduction)**
+
+**Break-even Analysis:**
+- Development investment: ~10-15 hours
+- Token savings per plan: 1400 tokens
+- Break-even point: 10 plans
+- Expected annual volume: 20-30 plans
+
+### Operational Efficiency
+- Runtime overhead: <2% additional planning time
+- Storage requirements: <5MB additional template data
+- Performance impact: Negligible on core SolarWindPy functionality
+
+## ⚠️ Risk Assessment & Mitigation
+
+### Technical Implementation Risks
+| Risk | Probability | Impact | Mitigation Strategy |
+|------|------------|--------|-------------------|
+| Integration compatibility issues | Low | Medium | Thorough integration testing, backward compatibility validation |
+| Performance degradation | Low | Low | Performance benchmarking, optimization validation |
+
+### Project Management Risks
+- **Timeline slippage risk (Medium)**: Multiple phases increase coordination complexity
+  - *Mitigation*: Clear phase dependencies, regular milestone reviews
+- **Scope creep risk (Medium)**: Value propositions may reveal additional requirements
+  - *Mitigation*: Strict scope boundaries, change control process
+- **Resource availability risk (Low)**: Developer time allocation conflicts
+  - *Mitigation*: Resource planning, conflict identification system
+- **Token budget overrun (Low)**: Complex plans may exceed session limits
+  - *Mitigation*: Token monitoring, automatic compaction at phase boundaries
+
+### Scientific Workflow Risks
+- **User workflow disruption (Low)**: Interface changes may affect researcher productivity
+  - *Mitigation*: Backward compatibility, gradual feature introduction
+- **Documentation lag (Medium)**: Implementation may outpace documentation updates
+  - *Mitigation*: Documentation-driven development, parallel doc updates
+
+## 🔒 Security Proposition
+
+### Code-Level Security Assessment
+**Dependency Vulnerability Assessment:**
+- **No specific dependencies identified** - general Python security best practices apply
+
+**Recommended Actions:**
+- Run `pip audit` to scan for known vulnerabilities
+- Pin dependency versions in requirements.txt
+- Monitor security advisories for scientific computing packages
+- Consider using conda for better package management
+
+**Authentication/Access Control Impact Analysis:**
+- No direct authentication system modifications identified
+- Standard scientific computing access patterns maintained
+- No elevated privilege requirements detected
+- Multi-user environment compatibility preserved
+
+**Attack Surface Analysis:**
+- **Minimal exposure increase**: Internal library modifications only
+
+**Mitigation Strategies:**
+- Validate all external inputs and user-provided data
+- Sanitize file paths and prevent directory traversal
+- Use parameterized queries for any database operations
+- Implement proper error handling to prevent information disclosure
+
+### Scientific Computing Environment Security
+**Development Workflow Security:**
+- Git workflow integrity maintained through branch protection
+- Code review requirements enforced for security-sensitive changes
+- Automated testing validates security assumptions
+- Multi-phase development allows incremental security review
+
+**CI/CD Pipeline Security:**
+- Automated dependency scanning in development workflow
+- Test environment isolation prevents production data exposure
+- Secrets management for any required credentials
+- Build reproducibility ensures supply chain integrity
+
+### Scope Limitations
+**This security assessment covers:**
+- Code-level security and dependency analysis
+- Development workflow security implications
+- Scientific computing environment considerations
+
+**Explicitly excluded from this assessment:**
+- Data principle compliance (requires core data structure changes)
+- Research data repository integration (outside scope)
+
+**Note**: For comprehensive research data security, consider separate compliance initiative.
+
+## 🎯 Scope Audit
+
+### SolarWindPy Alignment Assessment
+**Alignment Score**: 24/100
+
+**Alignment Score Breakdown:**
+- Module Relevance: 0/40 points
+- Scientific Keywords: 14/30 points
+- Research Impact: 0/20 points
+- Scope Risk Control: 10/10 points
+
+**Assessment**: Low alignment, significant scope concerns
+
+### Scientific Research Relevance
+**Relevance Level**: Medium
+
+Moderate scientific computing relevance with research applications
+
+### Module Impact Analysis
+**Affected SolarWindPy Modules:**
+- Development workflow infrastructure only
+- No direct impact on core scientific modules
+
+### Scope Risk Identification
+**No significant scope risks identified** - Plan appears well-focused on scientific computing objectives
+
+### Scope Boundary Enforcement
+**Recommended Scope Controls:**
+- Limit implementation to affected modules: plans/, .claude/hooks/, .claude/scripts/, CLAUDE.md, .github/ISSUE_TEMPLATE/, issues_from_plans.py
+- Maintain focus on solar wind physics research goals
+- Validate all changes preserve scientific accuracy
+- Ensure computational methods follow SolarWindPy conventions
+
+**Out-of-Scope Elements to Avoid:**
+- Web development or interface features unrelated to scientific analysis
+- General-purpose software infrastructure not specific to research computing
+- Business logic or user management functionality
+- Non-scientific data processing or visualization features
+
+**Scientific Computing Alignment:**
+This plan should advance SolarWindPy's mission to provide accurate, efficient tools for solar wind physics research and space weather analysis.
+
+## 💾 Token Usage Optimization
+
+### Current Token Usage Patterns
+**Manual Planning Token Breakdown:**
+- Initial planning discussion: ~800 tokens
+- Value proposition writing: ~600 tokens (moderate plan)
+- Revision and refinement: ~300 tokens
+- Context switching overhead: ~200 tokens
+- **Total current usage: ~1900 tokens per plan**
+
+**Inefficiency Sources:**
+- Multi-phase coordination: ~200 additional tokens
+- Repetitive manual analysis for similar plan types
+- Context regeneration between planning sessions
+- Inconsistent proposition quality requiring revisions
+
+### Optimized Token Usage Strategy
+**Hook-Based Generation Efficiency:**
+- Hook execution and setup: 100 tokens
+- Plan metadata extraction: 50 tokens
+- Content generation coordination: 150 tokens
+- Template insertion and formatting: 75 tokens
+- Optional validation: 50 tokens
+- **Total optimized usage: ~425 tokens per plan**
+
+**Optimization Techniques:**
+- Programmatic generation eliminates manual analysis
+- Template-based approach ensures consistency
+- Cached calculations reduce redundant computation
+- Structured format enables better context compression
+
+### Context Preservation Benefits
+**Session Continuity Improvements:**
+- Structured value propositions enable efficient compaction
+- Decision rationale preserved for future reference
+- Consistent format improves session bridging
+- Reduced context regeneration between sessions
+
+**Compaction Efficiency:**
+- Value propositions compress well due to structured format
+- Multi-phase plans benefit from milestone-based compaction
+- Key metrics preserved even in heavily compacted states
+- Phase-by-phase progress tracking reduces context loss
+- Automated generation allows context-aware detail levels
+
+## ⏱️ Time Investment Analysis
+
+### Implementation Time Breakdown
+**Phase-by-Phase Time Estimates (5 phases):**
+- Planning and design: 2 hours
+- Implementation: 8.0 hours (base: 8, multiplier: 1.0x)
+- Testing and validation: 2 hours
+- Documentation updates: 1 hours
+- **Total estimated time: 13.0 hours**
+
+**Confidence Intervals:**
+- Optimistic (80%): 10.4 hours
+- Most likely (100%): 13.0 hours
+- Pessimistic (130%): 16.9 hours
+
+### Time Savings Analysis
+**Per-Plan Time Savings:**
+- Manual planning process: 90 minutes
+- Automated hook-based planning: 20 minutes
+- Net savings per plan: 70 minutes (78% reduction)
+
+**Long-term Efficiency Gains:**
+- Projected annual plans: 25
+- Annual time savings: 29.2 hours
+- Equivalent to 3.6 additional development days per year
+
+**Qualitative Benefits:**
+- Reduced decision fatigue through systematic evaluation
+- Consistent quality eliminates rework cycles
+- Improved plan accuracy through structured analysis
+
+### Break-Even Calculation
+**Investment vs. Returns:**
+- One-time development investment: 14 hours
+- Time savings per plan: 1.2 hours
+- Break-even point: 12.0 plans
+
+**Payback Timeline:**
+- Estimated monthly plan volume: 2.5 plans
+- Break-even timeline: 4.8 months
+- ROI positive after: ~12 plans
+
+**Long-term ROI:**
+- Year 1: 200-300% ROI (25-30 plans)
+- Year 2+: 500-600% ROI (ongoing benefits)
+- Compound benefits from improved plan quality
+
+## 🎯 Usage & Adoption Metrics
+
+### Target Use Cases
+**Primary Applications:**
+- All new plan creation (immediate value through automated generation)
+- Major feature development planning for SolarWindPy modules
+- Scientific project planning requiring systematic value assessment
+
+**Secondary Applications:**
+- Existing plan enhancement during major updates
+- Cross-plan value comparison for resource prioritization
+- Quality assurance for plan completeness and consistency
+- Decision audit trails for scientific project management
+
+### Adoption Strategy
+**Phased Rollout Approach:**
+
+**Phase 1 - Pilot (Month 1):**
+- Introduce enhanced templates for new plans only
+- Target 5-8 pilot plans for initial validation
+- Gather feedback from UnifiedPlanCoordinator users
+- Refine hook accuracy based on real usage
+
+**Phase 2 - Gradual Adoption (Months 2-3):**
+- Default enhanced templates for all new plans
+- Optional migration for 3-5 active existing plans
+- Training materials and best practices documentation
+- Performance monitoring and optimization
+
+**Phase 3 - Full Integration (Months 4-6):**
+- Enhanced templates become standard for all planning
+- Migration of remaining active plans (optional)
+- Advanced features and customization options
+- Integration with cross-plan analysis tools
+
+**Success Factors:**
+- Opt-in enhancement reduces resistance
+- Immediate value visible through token savings
+- Backward compatibility maintains existing workflows
+- Progressive enhancement enables gradual learning
+
+### Success Metrics
+**Quantitative Success Metrics:**
+
+**Short-term (1-3 months):**
+- Enhanced template adoption rate: >80% for new plans
+- Token usage reduction: 60-80% demonstrated across plan types
+- Hook execution success rate: >95% reliability
+- Planning time reduction: >60% measured improvement
+
+**Medium-term (3-6 months):**
+- Plan quality scores: Objective improvement in completeness
+- Value proposition accuracy: >90% relevant and actionable
+- User satisfaction: Positive feedback from regular users
+- Security assessment utility: Demonstrable risk identification
+
+**Long-term (6-12 months):**
+- Full adoption: 90%+ of all plans use enhanced templates
+- Compound efficiency: Planning velocity improvements
+- Quality improvement: Reduced plan revision cycles
+- Knowledge capture: Better decision documentation
+
+**Qualitative Success Indicators:**
+- Developers prefer enhanced planning process
+- Plan reviews are more efficient and comprehensive
+- Scientific value propositions improve project prioritization
+- Security considerations are systematically addressed
 
 ## 📊 Progress Tracking
 
