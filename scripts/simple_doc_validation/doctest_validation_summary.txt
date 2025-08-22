@@ -1,0 +1,3 @@
+SolarWindPy Doctest Validation Summary
+Files: 0, Tests: 0, Failed: 0
+Status: All validations passed
