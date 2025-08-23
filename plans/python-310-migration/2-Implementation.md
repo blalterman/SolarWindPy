@@ -214,10 +214,12 @@ Aligns with NumPy 2.x and Astropy 7.x dependency requirements"
 ```
 
 ## 🔄 Compaction Point
-After completing implementation:
+After completing Phase 2:
 ```bash
 python .claude/hooks/create-compaction.py --compression high --plan python-310-migration
 ```
+
+**User Action Required**: Please manually compact the context using `/compact` after Phase 2 completes to preserve session state and reduce token usage before proceeding to Phase 3.
 
 ## 🔗 Dependencies
 - Phase 1: Planning & Setup (completed)

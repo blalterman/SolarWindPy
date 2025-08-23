@@ -117,6 +117,19 @@
   - Compatibility removal: [multiplier] (e.g., 1.0x standard effort)
 - **Developer Productivity**: [session rating - high/medium/low with factors]
 
+## 📝 Git Commit for Phase 5
+After completing closeout documentation:
+```bash
+git add plans/python-310-migration/5-Closeout.md
+git commit -m "plan: complete Phase 5 - Closeout documentation
+
+- Documented velocity learning metrics for future planning
+- Captured technical lessons learned and architectural decisions  
+- Recorded actual time vs estimates for velocity improvement
+- Archived plan with comprehensive closeout analysis
+- Ready for plan archival to plans/completed/"
+```
+
 ## 🎓 Lessons Learned
 
 ### What Worked Well
@@ -223,6 +236,14 @@
 - [ ] Appropriate scope for pre-1.0 software maintained
 - [ ] 40% CI reduction achieved
 - [ ] Clean master integration without over-engineering
+
+## 🔄 Final Compaction Point
+After completing Phase 5 closeout:
+```bash
+python .claude/hooks/create-compaction.py --compression maximum --plan python-310-migration
+```
+
+**User Action Required**: Please manually compact the context using `/compact` after Phase 5 completes to preserve final session state and prepare for plan archival.
 
 ---
 

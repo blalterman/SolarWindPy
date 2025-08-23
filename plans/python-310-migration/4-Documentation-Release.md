@@ -211,10 +211,12 @@ git commit -m "docs: update documentation for Python 3.10+ requirement
 ```
 
 ## 🔄 Compaction Point
-After PR creation (before merge):
+After completing Phase 4:
 ```bash
 python .claude/hooks/create-compaction.py --compression maximum --plan python-310-migration
 ```
+
+**User Action Required**: Please manually compact the context using `/compact` after Phase 4 completes (PR created and merged) to preserve session state before proceeding to Phase 5 closeout.
 
 ## ⚠️ Pre-Merge Checklist
 

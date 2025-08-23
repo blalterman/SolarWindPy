@@ -241,10 +241,12 @@ Ready for documentation and merge phase"
 ```
 
 ## 🔄 Compaction Point
-After completing validation:
+After completing Phase 3:
 ```bash
 python .claude/hooks/create-compaction.py --compression medium --plan python-310-migration
 ```
+
+**User Action Required**: Please manually compact the context using `/compact` after Phase 3 completes to preserve session state and reduce token usage before proceeding to Phase 4.
 
 ## ⚠️ Issue Handling
 
