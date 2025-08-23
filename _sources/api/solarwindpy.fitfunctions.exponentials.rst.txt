@@ -3,6 +3,5 @@ solarwindpy.fitfunctions.exponentials module
 
 .. automodule:: solarwindpy.fitfunctions.exponentials
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

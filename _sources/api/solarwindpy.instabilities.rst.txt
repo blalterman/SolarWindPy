@@ -15,6 +15,5 @@ Module contents
 
 .. automodule:: solarwindpy.instabilities
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

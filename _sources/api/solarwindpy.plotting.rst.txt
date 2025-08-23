@@ -31,6 +31,5 @@ Module contents
 
 .. automodule:: solarwindpy.plotting
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

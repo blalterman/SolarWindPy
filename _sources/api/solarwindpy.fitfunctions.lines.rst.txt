@@ -3,6 +3,5 @@ solarwindpy.fitfunctions.lines module
 
 .. automodule:: solarwindpy.fitfunctions.lines
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

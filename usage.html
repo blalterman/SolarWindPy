@@ -1,33 +1,63 @@
 
 
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; SolarWindPy 0.1.dev1+g4f9a93e90 documentation</title>
+  
+  <title>Usage Guide &mdash; SolarWindPy 0.1.dev1+g18a5d7c4a documentation</title>
+  <link rel="icon" type="image/x-icon" href="_static/favicon.ico">
+
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=7043b09b"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/documentation_options.js?v=d7fc6263"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tutorial" href="tutorial.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
@@ -45,29 +75,24 @@
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial/quickstart.html">Quickstart</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tutorial/quickstart.html#installation">Installation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-plasma-analysis">Basic Plasma Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-multiindex-dataframes">Working with MultiIndex DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#physics-calculations">Physics Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-visualization">Data Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-and-missing-data">Error Handling and Missing Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-features">Advanced Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/modules.html">solarwindpy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/solarwindpy.html">solarwindpy package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -78,41 +103,410 @@
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">SolarWindPy</a>
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Usage</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>Usage Guide</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
 </div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
-<p>The library exposes a set of tools for manipulating solar wind data. After
-installation, import the desired functions and classes:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plasma</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">normal_parameters</span>
+  <section id="usage-guide">
+<h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Link to this heading"></a></h1>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id1">Overview</a></p></li>
+<li><p><a class="reference internal" href="#quick-start" id="id2">Quick Start</a></p></li>
+<li><p><a class="reference internal" href="#basic-plasma-analysis" id="id3">Basic Plasma Analysis</a></p></li>
+<li><p><a class="reference internal" href="#working-with-multiindex-dataframes" id="id4">Working with MultiIndex DataFrames</a></p></li>
+<li><p><a class="reference internal" href="#physics-calculations" id="id5">Physics Calculations</a></p></li>
+<li><p><a class="reference internal" href="#data-visualization" id="id6">Data Visualization</a></p></li>
+<li><p><a class="reference internal" href="#error-handling-and-missing-data" id="id7">Error Handling and Missing Data</a></p></li>
+<li><p><a class="reference internal" href="#advanced-features" id="id8">Advanced Features</a></p></li>
+<li><p><a class="reference internal" href="#best-practices" id="id9">Best Practices</a></p></li>
+<li><p><a class="reference internal" href="#next-steps" id="id10">Next Steps</a></p></li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>SolarWindPy provides a comprehensive framework for analyzing solar wind plasma
+and magnetic field data. The package is organized around several key concepts:</p>
+<ul class="simple">
+<li><p><strong>Plasma</strong>: Central container for multi-species plasma data</p></li>
+<li><p><strong>Ion</strong>: Individual ion species with moments and properties</p></li>
+<li><p><strong>MultiIndex DataFrames</strong>: Hierarchical data structure for scientific
+measurements</p></li>
+<li><p><strong>Physics Conventions</strong>: Consistent units and calculations throughout</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Quick Start</a><a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<p>Import the core components:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">])</span>
-<span class="n">params</span> <span class="o">=</span> <span class="n">normal_parameters</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 </pre></div>
 </div>
-<p>See the <a class="reference internal" href="tutorial.html"><span class="doc">Tutorial</span></a> for a guided introduction and more examples.</p>
+</section>
+<section id="basic-plasma-analysis">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Basic Plasma Analysis</a><a class="headerlink" href="#basic-plasma-analysis" title="Link to this heading"></a></h2>
+<p>Create a plasma object with proton data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create sample data</span>
+<span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span><span class="p">)</span>
+
+<span class="c1"># Proton density, velocity, temperature</span>
+<span class="n">n_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># cm^-3</span>
+<span class="n">v_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># km/s</span>
+<span class="n">T_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1e5</span><span class="p">,</span> <span class="mf">2e4</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># K</span>
+
+<span class="c1"># Create MultiIndex DataFrame with proper structure</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>    <span class="c1"># Proton density</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>   <span class="c1"># Proton velocity x</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>   <span class="c1"># Proton velocity y</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>   <span class="c1"># Proton velocity z</span>
+    <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="c1"># Parallel thermal speed</span>
+    <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="c1"># Perpendicular thermal speed</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>     <span class="c1"># Magnetic field x</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>     <span class="c1"># Magnetic field y</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>     <span class="c1"># Magnetic field z</span>
+<span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">])</span>
+
+<span class="c1"># Calculate thermal speeds from temperature using mw² = 2kT convention</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.core.units_constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="n">const</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">()</span>
+<span class="n">k_B</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">kb</span>  <span class="c1"># Boltzmann constant [J/K]</span>
+<span class="n">m_p</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;p1&#39;</span><span class="p">]</span>  <span class="c1"># Proton mass [kg]</span>
+
+<span class="c1"># Thermal speed: w = sqrt(2kT/m)</span>
+<span class="n">w_thermal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k_B</span> <span class="o">*</span> <span class="n">T_p</span> <span class="o">/</span> <span class="n">m_p</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>  <span class="c1"># Convert to km/s</span>
+
+<span class="c1"># Sample magnetic field data</span>
+<span class="n">b_field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># nT</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">n_p</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">v_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">v_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">v_p</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">w_thermal</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">):</span> <span class="n">w_thermal</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="n">b_field</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="n">b_field</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="n">b_field</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+
+<span class="c1"># Create plasma object</span>
+<span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-multiindex-dataframes">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Working with MultiIndex DataFrames</a><a class="headerlink" href="#working-with-multiindex-dataframes" title="Link to this heading"></a></h2>
+<p>SolarWindPy uses a three-level MultiIndex structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access specific measurements</span>
+<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">proton_velocity_x</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+
+<span class="c1"># The MultiIndex levels are:</span>
+<span class="c1"># M: Measurement (n, v, w, b, etc.)</span>
+<span class="c1"># C: Component (x, y, z for vectors, empty for scalars)</span>
+<span class="c1"># S: Species (p1, p2, a, etc.)</span>
+</pre></div>
+</div>
+</section>
+<section id="physics-calculations">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Physics Calculations</a><a class="headerlink" href="#physics-calculations" title="Link to this heading"></a></h2>
+<p>Calculate derived quantities:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Thermal speed (mw² = 2kT convention)</span>
+<span class="n">thermal_speed</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">thermal_speed</span><span class="p">()</span>
+
+<span class="c1"># Plasma beta for protons</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Access ion properties directly</span>
+<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span>      <span class="c1"># Number density [cm^-3]</span>
+<span class="n">proton_velocity</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">v</span>     <span class="c1"># Velocity vector [km/s]</span>
+<span class="n">proton_temp</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">T</span>         <span class="c1"># Temperature [K]</span>
+</pre></div>
+</div>
+</section>
+<section id="data-visualization">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Data Visualization</a><a class="headerlink" href="#data-visualization" title="Link to this heading"></a></h2>
+<p>Use the plotting module for scientific visualizations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.plotting.labels</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">labels</span>
+
+<span class="c1"># Create time series plot of proton density</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">proton_density</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">proton_density</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">density</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Proton Density Time Series&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Scientific scatter plot with proper labels</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">vx</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">velocity_x</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">thermal_speed_par</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling-and-missing-data">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Error Handling and Missing Data</a><a class="headerlink" href="#error-handling-and-missing-data" title="Link to this heading"></a></h2>
+<p>SolarWindPy follows scientific best practices:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Missing data represented as NaN (never 0 or -999)</span>
+<span class="n">data_with_gaps</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="c1"># Check for physical constraints manually</span>
+<span class="c1"># Density should be positive</span>
+<span class="k">assert</span> <span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Density must be positive&quot;</span>
+
+<span class="c1"># Temperature should be positive</span>
+<span class="n">thermal_data</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="p">(</span><span class="n">thermal_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Thermal speeds must be positive&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-features">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Advanced Features</a><a class="headerlink" href="#advanced-features" title="Link to this heading"></a></h2>
+<p>For more complex analyses:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit functions for statistical analysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
+
+<span class="c1"># Get thermal speed data for fitting</span>
+<span class="n">w_par</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">x_data</span> <span class="o">=</span> <span class="n">w_par</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># Convert to seconds</span>
+<span class="n">y_data</span> <span class="o">=</span> <span class="n">w_par</span><span class="o">.</span><span class="n">values</span>
+
+<span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">)</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Instability analysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.instabilities.verscharen2016</span><span class="w"> </span><span class="kn">import</span> <span class="n">beta_ani_inst</span>
+
+<span class="c1"># Calculate plasma betas</span>
+<span class="n">beta_par</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">par</span>
+<span class="n">beta_per</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">per</span>
+
+<span class="c1"># Check instability threshold</span>
+<span class="n">instability_threshold</span> <span class="o">=</span> <span class="n">beta_ani_inst</span><span class="p">(</span><span class="n">beta_par</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="best-practices">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Best Practices</a><a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Units</strong>: All internal calculations use SI units</p></li>
+<li><p><strong>Time</strong>: Use pandas DatetimeIndex for temporal data</p></li>
+<li><p><strong>Missing Data</strong>: Represent gaps as NaN, not fill values</p></li>
+<li><p><strong>Physics</strong>: Validate results against known constraints</p></li>
+<li><p><strong>Performance</strong>: Use vectorized operations with NumPy/Pandas</p></li>
+</ol>
+</section>
+<section id="next-steps">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Next Steps</a><a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>See the <a class="reference internal" href="tutorial.html"><span class="doc">Tutorial</span></a> for detailed examples</p></li>
+<li><p>Browse the <a class="reference internal" href="api_reference.html"><span class="doc">API Reference</span></a> for complete function documentation</p></li>
+<li><p>Check out specific modules for specialized functionality</p></li>
+</ul>
+</section>
 </section>
 
 
@@ -126,7 +520,9 @@ installation, import the desired functions and classes:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -143,7 +539,19 @@ installation, import the desired functions and classes:</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
 
 </body>
 </html>

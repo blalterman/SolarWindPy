@@ -1,20 +1,27 @@
 
 
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.verscharen2016 module &mdash; SolarWindPy 0.1.dev1+g4f9a93e90 documentation</title>
+  
+  <title>solarwindpy.instabilities.verscharen2016 module &mdash; SolarWindPy 0.1.dev1+g18a5d7c4a documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7043b09b"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/documentation_options.js?v=d7fc6263"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -22,14 +29,37 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="solarwindpy.plotting package" href="solarwindpy.plotting.html" />
-    <link rel="prev" title="solarwindpy.instabilities.beta_ani module" href="solarwindpy.instabilities.beta_ani.html" /> 
+    <link rel="prev" title="solarwindpy.instabilities.beta_ani module" href="solarwindpy.instabilities.beta_ani.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
@@ -47,15 +77,8 @@
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorial/quickstart.html">Quickstart</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#installation">Installation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -63,7 +86,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -80,32 +103,246 @@
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">SolarWindPy</a>
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="modules.html">solarwindpy</a></li>
-          <li class="breadcrumb-item"><a href="solarwindpy.html">solarwindpy package</a></li>
-          <li class="breadcrumb-item"><a href="solarwindpy.instabilities.html">solarwindpy.instabilities package</a></li>
-      <li class="breadcrumb-item active">solarwindpy.instabilities.verscharen2016 module</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/solarwindpy.instabilities.verscharen2016.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <a href="../api_reference.html">API Reference</a>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.instabilities.verscharen2016 module</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+      <div class="module-hierarchy">
+        
+        
+        
+        <span class="hierarchy-label">Module:</span>
+        
+          
+          
+            <a href="solarwindpy.html" class="module-link">
+              solarwindpy
+            </a>
+            <span class="hierarchy-separator">.</span>
+          
+        
+          
+          
+            <a href="solarwindpy.instabilities.html" class="module-link">
+              instabilities
+            </a>
+            <span class="hierarchy-separator">.</span>
+          
+        
+          
+          
+            <strong class="current-module">verscharen2016</strong>
+          
+        
+      </div>
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+        <a href="../api_reference.html" class="action-btn api-btn" title="Back to API Reference">
+          📚 API
+        </a>
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
 </div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-instabilities-verscharen2016-module">
-<h1>solarwindpy.instabilities.verscharen2016 module<a class="headerlink" href="#solarwindpy-instabilities-verscharen2016-module" title="Link to this heading"></a></h1>
+  <section id="module-solarwindpy.instabilities.verscharen2016">
+<span id="solarwindpy-instabilities-verscharen2016-module"></span><h1>solarwindpy.instabilities.verscharen2016 module<a class="headerlink" href="#module-solarwindpy.instabilities.verscharen2016" title="Link to this heading"></a></h1>
 <p>Instability thresholds from Verscharen et al. (2016).</p>
 <p>The empirical fits of <span id="id1">[]</span> are implemented to
 evaluate when a plasma becomes unstable in the <code class="docutils literal notranslate"><span class="pre">(beta,</span> <span class="pre">R)</span></code> plane.</p>
@@ -120,8 +357,8 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </div>
 </div>
 <dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">beta_ani_inst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#beta_ani_inst"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.beta_ani_inst">
+<span class="sig-name descname"><span class="pre">beta_ani_inst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#beta_ani_inst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.beta_ani_inst" title="Link to this definition"></a></dt>
 <dd><p>Return the anisotropy threshold for a given beta.</p>
 <p>Implements Eq. (5) of <span id="id2">[]</span>:</p>
 <div class="math notranslate nohighlight">
@@ -145,14 +382,15 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">beta_ani_inst</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.367</span><span class="p">,</span> <span class="n">b</span><span class="o">=-</span><span class="mf">0.408</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.011</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">beta_ani_inst</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.367</span><span class="p">,</span> <span class="n">b</span><span class="o">=-</span><span class="mf">0.408</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.011</span><span class="p">)</span>  
+<span class="go">array([       nan, 1.1367783..., 1.36534751..., 1.93857946..., 3.40240693...])</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StabilityCondition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StabilityCondition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Evaluate plasma stability using the Verscharen et al. fits.</p>
 <dl class="field-list simple">
@@ -165,8 +403,8 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">instability_thresholds</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_thresholds">
+<span class="sig-name descname"><span class="pre">instability_thresholds</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_thresholds" title="Link to this definition"></a></dt>
 <dd><p>Threshold anisotropies for each instability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -176,8 +414,8 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">is_unstable</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.is_unstable">
+<span class="sig-name descname"><span class="pre">is_unstable</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.is_unstable" title="Link to this definition"></a></dt>
 <dd><p>Boolean mask indicating unstable modes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -187,8 +425,8 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">stability_bin</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_bin">
+<span class="sig-name descname"><span class="pre">stability_bin</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_bin" title="Link to this definition"></a></dt>
 <dd><p>Integer label describing the dominant instability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -198,8 +436,8 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize the object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -213,56 +451,56 @@ Fluctuations and Plasma Instabilities</em>, Astrophys. J., <strong>831</strong>,
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fill</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.fill">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fill</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.fill" title="Link to this definition"></a></dt>
 <dd><p>Used for building data containers and checking that all entries are visited.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_parameters</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_parameters</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_parameters" title="Link to this definition"></a></dt>
 <dd><p>The Pandas DataFrame of instability parameters.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.data" title="Link to this definition"></a></dt>
 <dd><p>DataFrame with beta and anisotropy measurements.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.beta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.beta" title="Link to this definition"></a></dt>
 <dd><p>The beta values of the object.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">anisotropy</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.anisotropy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">anisotropy</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.anisotropy" title="Link to this definition"></a></dt>
 <dd><p>The anisotropy values of the object.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_map</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_map</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map" title="Link to this definition"></a></dt>
 <dd><p>The map of ints to strings identifying the instabilities.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_map_inverse</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map_inverse">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_map_inverse</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map_inverse" title="Link to this definition"></a></dt>
 <dd><p>The inverse of <code class="docutils literal notranslate"><span class="pre">stability_map</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_thresholds</span></span></dt>
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_thresholds</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>The value of the anisotropy for which the plasma goes unstable.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_tests</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_tests">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instability_tests</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_tests" title="Link to this definition"></a></dt>
 <dd><p>The tests used for each instability threshold.</p>
 <p>The keys are <code class="docutils literal notranslate"><span class="pre">&quot;AIC&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;MM&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;FMW&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;OFI&quot;</span></code> for
 Alfven/Ion-Cyclotron, Mirror Mode, Fast Magnetosonic / Whistler, and
@@ -270,38 +508,38 @@ Oblique Firehose. The values are NumPy ufuncs.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_unstable</span></span></dt>
+<dt class="sig sig-object py" id="id3">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_unstable</span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd><p>Boolean DataFrame indicating instability to a given instability.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_bin</span></span></dt>
+<dt class="sig sig-object py" id="id4">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stability_bin</span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd><p>The integer corresponding to the (in)stability condition.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmap</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.cmap">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmap</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.cmap" title="Link to this definition"></a></dt>
 <dd><p>A linearly segmented colormap for the (in)stability condition.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.norm">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.norm" title="Link to this definition"></a></dt>
 <dd><p>The normalization instance used for plotting the stability bin.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_kwargs</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.cbar_kwargs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cbar_kwargs</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.cbar_kwargs" title="Link to this definition"></a></dt>
 <dd><p>Keyword arguments for drawing a colorbar.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_instability_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.set_instability_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.set_instability_parameters">
+<span class="sig-name descname"><span class="pre">set_instability_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">growth_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.set_instability_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_instability_parameters" title="Link to this definition"></a></dt>
 <dd><p>Take the instability parameters corresponding to <code class="docutils literal notranslate"><span class="pre">growth_rate</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -311,14 +549,14 @@ Oblique Firehose. The values are NumPy ufuncs.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_beta_ani</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.set_beta_ani"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.set_beta_ani">
+<span class="sig-name descname"><span class="pre">set_beta_ani</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anisotropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.set_beta_ani"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_beta_ani" title="Link to this definition"></a></dt>
 <dd><p>Set the beta and anisotropy values.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">calculate_stability_criteria</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.calculate_stability_criteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityCondition.calculate_stability_criteria">
+<span class="sig-name descname"><span class="pre">calculate_stability_criteria</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityCondition.calculate_stability_criteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityCondition.calculate_stability_criteria" title="Link to this definition"></a></dt>
 <dd><p>Run the full instability calculation.</p>
 <p>This method calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">_calc_instability_thresholds()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">_calc_is_unstable()</span></code>, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_calc_stability_bin()</span></code> in that
@@ -328,8 +566,8 @@ order. Use this method over calling the private methods individually.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StabilityContours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StabilityContours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Precompute and plot instability contours.</p>
 <dl class="field-list simple">
@@ -338,29 +576,29 @@ order. Use this method over calling the private methods individually.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours.beta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours.beta" title="Link to this definition"></a></dt>
 <dd><p>Proton core parallel beta.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.set_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours.set_beta">
+<span class="sig-name descname"><span class="pre">set_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.set_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours.set_beta" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">contours</span></span></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours.contours">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">contours</span></span><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours.contours" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tk_kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.plot_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours">
+<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tk_kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/instabilities/verscharen2016.html#StabilityContours.plot_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours" title="Link to this definition"></a></dt>
 <dd><p>Add the instability contours to the plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -390,7 +628,9 @@ and any combination thereof.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -407,7 +647,19 @@ and any combination thereof.</p></li>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
 
 </body>
 </html>

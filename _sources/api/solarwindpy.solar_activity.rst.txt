@@ -24,6 +24,5 @@ Module contents
 
 .. automodule:: solarwindpy.solar_activity
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

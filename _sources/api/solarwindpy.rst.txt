@@ -20,6 +20,5 @@ Module contents
 
 .. automodule:: solarwindpy
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

@@ -1,33 +1,65 @@
 
 
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities package &mdash; SolarWindPy 0.1.dev1+g4f9a93e90 documentation</title>
+  
+  <title>solarwindpy.instabilities package &mdash; SolarWindPy 0.1.dev1+g18a5d7c4a documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7043b09b"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/documentation_options.js?v=d7fc6263"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="solarwindpy.instabilities.beta_ani module" href="solarwindpy.instabilities.beta_ani.html" />
-    <link rel="prev" title="solarwindpy.fitfunctions.trend_fits module" href="solarwindpy.fitfunctions.trend_fits.html" /> 
+    <link rel="prev" title="solarwindpy.fitfunctions.trend_fits module" href="solarwindpy.fitfunctions.trend_fits.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
@@ -45,15 +77,8 @@
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorial/quickstart.html">Quickstart</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#installation">Installation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutorial/quickstart.html#basic-usage">Basic Usage</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -61,7 +86,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -78,26 +103,233 @@
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">SolarWindPy</a>
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="modules.html">solarwindpy</a></li>
-          <li class="breadcrumb-item"><a href="solarwindpy.html">solarwindpy package</a></li>
-      <li class="breadcrumb-item active">solarwindpy.instabilities package</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/solarwindpy.instabilities.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <a href="../api_reference.html">API Reference</a>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.instabilities package</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+      <div class="module-hierarchy">
+        
+        
+        
+        <span class="hierarchy-label">Module:</span>
+        
+          
+          
+            <a href="solarwindpy.html" class="module-link">
+              solarwindpy
+            </a>
+            <span class="hierarchy-separator">.</span>
+          
+        
+          
+          
+            <strong class="current-module">instabilities</strong>
+          
+        
+      </div>
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+        <a href="../api_reference.html" class="action-btn api-btn" title="Back to API Reference">
+          📚 API
+        </a>
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
 </div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
@@ -107,13 +339,55 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="solarwindpy.instabilities.beta_ani.html">solarwindpy.instabilities.beta_ani module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html">solarwindpy.instabilities.verscharen2016 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solarwindpy.instabilities.beta_ani.html">solarwindpy.instabilities.beta_ani module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot"><code class="docutils literal notranslate"><span class="pre">BetaRPlot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot.__init__"><code class="docutils literal notranslate"><span class="pre">BetaRPlot.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot.make_plot"><code class="docutils literal notranslate"><span class="pre">BetaRPlot.make_plot()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html">solarwindpy.instabilities.verscharen2016 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.beta_ani_inst"><code class="docutils literal notranslate"><span class="pre">beta_ani_inst()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition"><code class="docutils literal notranslate"><span class="pre">StabilityCondition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_thresholds"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.instability_thresholds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.is_unstable"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.is_unstable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_bin"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.stability_bin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.__init__"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.fill"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.fill</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_parameters"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.instability_parameters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.data"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.beta"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.anisotropy"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.anisotropy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.stability_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.stability_map_inverse"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.stability_map_inverse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#id0"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.instability_thresholds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_tests"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.instability_tests</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#id3"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.is_unstable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#id4"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.stability_bin</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.cmap"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.cmap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.norm"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.norm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.cbar_kwargs"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.cbar_kwargs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_instability_parameters"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.set_instability_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.set_beta_ani"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.set_beta_ani()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityCondition.calculate_stability_criteria"><code class="docutils literal notranslate"><span class="pre">StabilityCondition.calculate_stability_criteria()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours"><code class="docutils literal notranslate"><span class="pre">StabilityContours</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.__init__"><code class="docutils literal notranslate"><span class="pre">StabilityContours.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.beta"><code class="docutils literal notranslate"><span class="pre">StabilityContours.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.set_beta"><code class="docutils literal notranslate"><span class="pre">StabilityContours.set_beta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.contours"><code class="docutils literal notranslate"><span class="pre">StabilityContours.contours</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.instabilities.verscharen2016.html#solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours"><code class="docutils literal notranslate"><span class="pre">StabilityContours.plot_contours()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="module-solarwindpy.instabilities">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-solarwindpy.instabilities" title="Link to this heading"></a></h2>
 <p>Tools for evaluating plasma instabilities.</p>
 <p>This subpackage bundles functionality for visualizing and
 quantifying kinetic instabilities in the solar wind.  It exposes the
@@ -139,7 +413,9 @@ following modules:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019, B. L. Alterman.</p>
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -156,7 +432,19 @@ following modules:</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
 
 </body>
 </html>

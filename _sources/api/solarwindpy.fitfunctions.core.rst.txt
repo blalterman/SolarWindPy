@@ -3,6 +3,5 @@ solarwindpy.fitfunctions.core module
 
 .. automodule:: solarwindpy.fitfunctions.core
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:

@@ -3,6 +3,5 @@ solarwindpy.core.plasma module
 
 .. automodule:: solarwindpy.core.plasma
    :members:
-   :show-inheritance:
    :undoc-members:
-   :no-index:
+   :show-inheritance:
