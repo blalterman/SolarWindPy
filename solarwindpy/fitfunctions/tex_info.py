@@ -386,7 +386,8 @@ class TeXinfo(object):
         )
 
     def build_info(
-        self, **kwargs,
+        self,
+        **kwargs,
     ):
         r"""
         Generate a TeX-formatted string with the desired info

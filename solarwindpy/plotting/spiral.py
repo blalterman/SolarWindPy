@@ -838,7 +838,8 @@ data : {z.size}
             If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
         kwargs:
             Passed to :py:meth:`ax.pcolormesh`.
-            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`."""
+            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+        """
         levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop(
@@ -892,9 +893,9 @@ data : {z.size}
         y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
 
         if self.log.x:
-            x = 10.0 ** x
+            x = 10.0**x
         if self.log.y:
-            y = 10.0 ** y
+            y = 10.0**y
 
         tk_finite = np.isfinite(C)
         x = x[tk_finite]
@@ -945,6 +946,7 @@ data : {z.size}
         self._format_axis(ax)
 
         return ax, lbls, cbar_or_mappable, qset
+
 
 #    def plot_surface(self):
 #

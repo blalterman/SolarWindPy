@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-r""":py:mod:`Gaussian` and related `FitFunction` sublcasses.
-"""
+r""":py:mod:`Gaussian` and related `FitFunction` sublcasses."""
 import pdb  # noqa: F401
 import numpy as np
 

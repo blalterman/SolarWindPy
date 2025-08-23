@@ -33,12 +33,12 @@ class Ion(base.Base):
 
     def __init__(self, data: pd.DataFrame, species: str):
         """Initialize an Ion instance with plasma measurement data.
-        
+
         Parameters
         ----------
         data : pandas.DataFrame
             Ion measurement data with MultiIndex columns formatted as
-            ("M", "C") where M is measurement type (n, v, w, T) and 
+            ("M", "C") where M is measurement type (n, v, w, T) and
             C is component (x, y, z, par, per, etc.).
         species : str
             Ion species identifier following standard conventions:
@@ -46,23 +46,23 @@ class Ion(base.Base):
             - 'a' for alpha particles (He2+)
             - 'o6' for O6+ ions
             - Other species as needed
-            
+
         Notes
         -----
         The Ion class provides access to fundamental plasma measurements:
-        
-        - n: Number density [cm^-3] 
+
+        - n: Number density [cm^-3]
         - v: Velocity vector [km/s]
         - w: Thermal speed [km/s] (assumes mw² = 2kT)
         - T: Temperature [K] (derived from thermal speed)
-        
+
         Physical constants and mass values are automatically assigned
         based on the species identifier using standard atomic masses.
-        
+
         Examples
         --------
         Create a proton ion from measurement data:
-        
+
         >>> proton_data = df.xs('p1', level='S', axis=1)
         >>> proton = Ion(proton_data, 'p1')
         >>> proton.n  # Number density
@@ -74,12 +74,12 @@ class Ion(base.Base):
 
     def __eq__(self, other: object) -> bool:
         """Check equality between Ion objects.
-        
+
         Parameters
         ----------
         other : object
             Object to compare with.
-            
+
         Returns
         -------
         bool
@@ -286,12 +286,12 @@ class Ion(base.Base):
     @property
     def kinetic_energy_flux(self):
         r"""Calculate the kinetic energy flux.
-        
+
         The kinetic energy flux is calculated as:
-        
+
         .. math::
             W_k = \frac{1}{2} \rho v^3
-            
+
         Returns
         -------
         pd.Series

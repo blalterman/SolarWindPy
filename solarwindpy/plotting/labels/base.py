@@ -63,7 +63,15 @@ for i, s in (
 ):
     _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
 
-_trans_axnorm = {None: "", "c": "Col.", "r": "Row", "t": "Total", "d": "Density", "rd": "1D Probability Density", "cd": "1D Probability Density"}
+_trans_axnorm = {
+    None: "",
+    "c": "Col.",
+    "r": "Row",
+    "t": "Total",
+    "d": "Density",
+    "rd": "1D Probability Density",
+    "cd": "1D Probability Density",
+}
 
 _all_species_re = sorted(_trans_species.keys())[
     ::-1

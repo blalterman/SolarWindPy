@@ -6,7 +6,9 @@ from pathlib import Path
 
 def _load_labels_module():
     """Load the labels module without importing the full package."""
-    pkg_root = Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels"
+    pkg_root = (
+        Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels"
+    )
     root_pkg = types.ModuleType("swlabels")
     root_pkg.__path__ = [str(pkg_root)]
     sys.modules["swlabels"] = root_pkg

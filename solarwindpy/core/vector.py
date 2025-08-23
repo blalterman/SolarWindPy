@@ -112,7 +112,7 @@ class Vector(base.Base):
     @property
     def colat(self):
         """Shortcut to colatitude property.
-        
+
         Returns
         -------
         pd.Series
@@ -136,7 +136,7 @@ class Vector(base.Base):
     @property
     def lat(self):
         """Shortcut to latitude property.
-        
+
         Returns
         -------
         pd.Series
@@ -147,7 +147,7 @@ class Vector(base.Base):
     @property
     def latitude(self):
         """Latitude of the vector.
-        
+
         Returns
         -------
         pd.Series

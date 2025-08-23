@@ -42,7 +42,7 @@ class Core(ABC):
 
     def __str__(self) -> str:
         """Return string representation of the object.
-        
+
         Returns
         -------
         str
@@ -52,12 +52,12 @@ class Core(ABC):
 
     def __eq__(self, other: Any) -> bool:
         """Check equality between Base objects.
-        
+
         Parameters
         ----------
         other : Any
             Object to compare with.
-            
+
         Returns
         -------
         bool
@@ -79,7 +79,7 @@ class Core(ABC):
     @property
     def logger(self) -> logging.Logger:
         """Logger instance for this object.
-        
+
         Returns
         -------
         logging.Logger
@@ -90,7 +90,7 @@ class Core(ABC):
     @property
     def units(self) -> uc.Units:
         """Units conversion factors.
-        
+
         Returns
         -------
         uc.Units
@@ -101,7 +101,7 @@ class Core(ABC):
     @property
     def constants(self) -> uc.Constants:
         """Physical constants.
-        
+
         Returns
         -------
         uc.Constants
@@ -112,7 +112,7 @@ class Core(ABC):
     @property
     def data(self) -> pd.DataFrame:
         """Underlying DataFrame containing the data.
-        
+
         Returns
         -------
         pd.DataFrame
@@ -251,7 +251,7 @@ class Base(Core):
 
     def head(self):
         """Return the first few rows of the data.
-        
+
         Returns
         -------
         pd.DataFrame
@@ -261,7 +261,7 @@ class Base(Core):
 
     def tail(self):
         """Return the last few rows of the data.
-        
+
         Returns
         -------
         pd.DataFrame

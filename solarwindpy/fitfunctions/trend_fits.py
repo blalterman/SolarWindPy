@@ -321,7 +321,12 @@ class TrendFit(object):
             y1 = y - w
             y2 = y + w
             window = ax.fill_between(
-                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+                x,
+                y1,
+                y2,
+                color=window_color,
+                alpha=window_alpha,
+                **window_kwargs,
             )
 
             plotted = (line, window)
