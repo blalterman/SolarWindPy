@@ -68,7 +68,6 @@ jobs:
           --text-report doctest_validation_summary_${{ matrix.python-version }}.txt \
           --verbose
       timeout-minutes: 5  # Ensure validation completes quickly
-      continue-on-error: true  # Allow incomplete doctests in research package
     
     - name: Generate essential validation summary
       shell: bash -l {0}
