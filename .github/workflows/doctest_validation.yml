@@ -35,13 +35,15 @@ jobs:
           ${{ runner.os }}-conda-
     
     - name: Set up conda environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
+      timeout-minutes: 10
       with:
         environment-file: solarwindpy-20250403.yml
         activate-environment: solarwindpy-20250403
         python-version: ${{ matrix.python-version }}
         auto-activate-base: false
-        use-only-tar-bz2: true  # For cache compatibility
+        use-only-tar-bz2: true
+        miniforge-version: latest  # For cache compatibility
     
     - name: Install package in development mode
       shell: bash -l {0}
@@ -214,13 +216,15 @@ jobs:
         key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-20250403.yml') }}
     
     - name: Set up conda environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
+      timeout-minutes: 10
       with:
         environment-file: solarwindpy-20250403.yml
         activate-environment: solarwindpy-20250403
         python-version: ${{ matrix.python-version }}
         auto-activate-base: false
         use-only-tar-bz2: true
+        miniforge-version: latest
     
     - name: Install package
       shell: bash -l {0}

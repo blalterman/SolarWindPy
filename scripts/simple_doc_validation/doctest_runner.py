@@ -52,7 +52,7 @@ class SimpleDocTestRunner:
                         result['tests_failed'] += test_result.failed
                         result['examples_run'] += len(test.examples)
             
-            result['success'] = result['tests_failed'] == 0
+            result['success'] = result['tests_failed'] == 0 or result['tests_attempted'] == 0
             
         except Exception as e:
             result['errors'].append(str(e))

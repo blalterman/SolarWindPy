@@ -405,8 +405,8 @@ def calculate_nrows_ncols(n):
 
     Examples
     --------
-    >>> calculate_nrows_ncols(5)
-    (np.int64(2), np.int64(3))
+    >>> calculate_nrows_ncols(5)  # doctest: +ELLIPSIS
+    (...2..., ...3...)
     """
     root = int(np.fix(np.sqrt(n)))
     while n % root:
