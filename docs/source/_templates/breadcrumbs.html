@@ -1,0 +1,232 @@
+{# Enhanced breadcrumbs for scientific documentation navigation #}
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    {# Standard breadcrumb trail #}
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="{{ pathto(master_doc) }}">{{ project }}</a>
+        </li>
+        
+        {# Build breadcrumb trail from pagename #}
+        {% set parts = pagename.split('/') %}
+        {% for part in parts[:-1] %}
+          {% if part == 'api' %}
+            <li class="breadcrumb-item">
+              <a href="{{ pathto('api_reference') }}">API Reference</a>
+            </li>
+          {% elif part.startswith('solarwindpy.') %}
+            {% set module_parts = part.split('.') %}
+            {% if module_parts|length > 1 %}
+              <li class="breadcrumb-item">
+                <a href="{{ pathto('api/' + '.'.join(module_parts[:2])) }}">{{ module_parts[1]|title }}</a>
+              </li>
+            {% endif %}
+          {% else %}
+            <li class="breadcrumb-item">
+              <span>{{ part|title }}</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+        
+        {# Current page #}
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>{{ title }}</span>
+        </li>
+      </ol>
+    </nav>
+
+    {# Module hierarchy for API docs #}
+    {% if pagename.startswith('api/solarwindpy.') %}
+      <div class="module-hierarchy">
+        {% set module_name = pagename.replace('api/', '').replace('.rst', '') %}
+        {% set module_parts = module_name.split('.') %}
+        
+        <span class="hierarchy-label">Module:</span>
+        {% for i in range(module_parts|length) %}
+          {% set partial_module = '.'.join(module_parts[:i+1]) %}
+          {% if i < module_parts|length - 1 %}
+            <a href="{{ pathto('api/' + partial_module) }}" class="module-link">
+              {{ module_parts[i] }}
+            </a>
+            <span class="hierarchy-separator">.</span>
+          {% else %}
+            <strong class="current-module">{{ module_parts[i] }}</strong>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {# Quick action buttons #}
+    <div class="breadcrumb-actions">
+      {% if pagename.startswith('api/') %}
+        <a href="{{ pathto('api_reference') }}" class="action-btn api-btn" title="Back to API Reference">
+          📚 API
+        </a>
+      {% endif %}
+      
+      {% if pagename != 'index' %}
+        <a href="{{ pathto('index') }}" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      {% endif %}
+      
+      {% if 'github_url' in html_context %}
+        <a href="{{ html_context.github_url }}" class="action-btn github-btn" title="View on GitHub" target="_blank">
+          🔗 GitHub
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>

@@ -102,16 +102,72 @@ intersphinx_mapping = {
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     'navigation_depth': 4,
-    'collapse_navigation': False,
+    'collapse_navigation': True,  # Cleaner initial view with expand/collapse
     'sticky_navigation': True,
     'includehidden': True,
-    'titles_only': False
+    'titles_only': False,
+    'prev_next_buttons_location': 'both',  # Navigation buttons top and bottom
+    'style_nav_header_background': '#2980B9',  # Professional blue header
+    'style_external_links': True,  # Mark external links with icon
 }
+
+# RTD-specific features and context
+html_context = {
+    'navigation_depth': 4,  # Workaround for Sphinx ≥6.0 navigation_depth bug
+    'github_user': 'blalterman',
+    'github_repo': 'SolarWindPy', 
+    'github_version': 'master',
+    'conf_py_path': '/docs/source/',
+    'github_url': 'https://github.com/blalterman/SolarWindPy',
+    'display_github': True,
+    'commit': os.environ.get('READTHEDOCS_GIT_COMMIT_HASH', 'master'),
+    'rtd_version': os.environ.get('READTHEDOCS_VERSION', 'latest'),
+}
+
+# Static files (CSS, JavaScript, images)
+html_static_path = ['_static']
+
+# Additional CSS files
+html_css_files = [
+    'custom.css',  # Custom scientific documentation styling
+]
+
+# Custom JavaScript files (for enhanced scientific features)
+html_js_files = []
+
+# RTD-specific configuration
+# Enable version switching and downloads for RTD
+if os.environ.get('READTHEDOCS'):
+    html_context['versions'] = [('latest', '/en/latest/')]
+    html_context['downloads'] = [('pdf', '/en/latest/_downloads/SolarWindPy.pdf')]
+    
+    # Analytics integration for RTD
+    html_theme_options.update({
+        'analytics_id': 'G-PLACEHOLDER',  # Replace with actual GA4 tracking ID
+        'analytics_anonymize_ip': True,
+    })
+
+# Favicon configuration
+html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------
 
-# LaTeX output configuration
-latex_elements = {}
+# PDF output configuration (enabled for RTD)
+latex_engine = 'pdflatex'
+latex_elements = {
+    'papersize': 'letterpaper',
+    'pointsize': '10pt',
+    'preamble': r'''
+        \usepackage{amsmath,amsfonts,amssymb}
+        \usepackage{graphicx}
+        \usepackage{hyperref}
+        \usepackage[utf8]{inputenc}
+    ''',
+}
+
+# EPUB output configuration (enabled for RTD)
+epub_show_urls = 'footnote'
+epub_use_index = True
 
 # Grouping the document tree into LaTeX files
 latex_documents = [

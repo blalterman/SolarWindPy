@@ -539,10 +539,11 @@ class TeXinfo(object):
         --------
         The generated string uses :math:`\pm` to denote the uncertainty.
 
+        >>> tex = TeXinfo({}, {}, "", None, None)
         >>> a = 3.1415
         >>> b = 0.01
-        >>> val_uncert_2_string(a, b)
-        "3.14 \pm 0.01"
+        >>> tex.val_uncert_2_string(a, b)
+        '3.14e+00 \\pm 1e-02'
         """
 
         vprecision = 3

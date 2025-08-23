@@ -1,0 +1,134 @@
+{# Custom sidebar template for enhanced navigation #}
+
+<div class="scientific-sidebar">
+  <div class="sidebar-section">
+    <h3>Quick Navigation</h3>
+    <ul class="sidebar-nav-list">
+      <li><a href="{{ pathto('installation') }}">Installation</a></li>
+      <li><a href="{{ pathto('usage') }}">Usage Guide</a></li>
+      <li><a href="{{ pathto('tutorial') }}">Tutorial</a></li>
+      <li><a href="{{ pathto('api_reference') }}">API Reference</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Core Modules</h3>
+    <ul class="sidebar-nav-list">
+      <li><a href="{{ pathto('api/solarwindpy.core') }}">Core Classes</a></li>
+      <li><a href="{{ pathto('api/solarwindpy.plotting') }}">Plotting Tools</a></li>
+      <li><a href="{{ pathto('api/solarwindpy.fitfunctions') }}">Fit Functions</a></li>
+      <li><a href="{{ pathto('api/solarwindpy.instabilities') }}">Instabilities</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Scientific Context</h3>
+    <div class="sidebar-info-box">
+      <p><strong>Physics Conventions:</strong></p>
+      <ul class="sidebar-physics-list">
+        <li>SI units internally</li>
+        <li>Thermal speed: mw² = 2kT</li>
+        <li>Alfvén speed: V_A = B/√(μ₀ρ)</li>
+        <li>Missing data as NaN</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Data Structure</h3>
+    <div class="sidebar-info-box">
+      <p><strong>MultiIndex DataFrame:</strong></p>
+      <ul class="sidebar-physics-list">
+        <li><strong>M:</strong> Measurement (n, v, w, b)</li>
+        <li><strong>C:</strong> Component (x, y, z)</li>
+        <li><strong>S:</strong> Species (p1, p2, a)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-sidebar {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+}
+
+.sidebar-section h3 {
+  color: #2c3e50;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #bdc3c7;
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-list li {
+  margin: 5px 0;
+}
+
+.sidebar-nav-list a {
+  color: #2980b9;
+  text-decoration: none;
+  display: block;
+  padding: 3px 0;
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+}
+
+.sidebar-nav-list a:hover {
+  color: #3498db;
+  border-left-color: #3498db;
+  background-color: #f8f9fa;
+}
+
+.sidebar-info-box {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+  margin-top: 8px;
+}
+
+.sidebar-info-box p {
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.sidebar-physics-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+}
+
+.sidebar-physics-list li {
+  margin: 3px 0;
+  color: #34495e;
+  padding-left: 10px;
+  position: relative;
+}
+
+.sidebar-physics-list li:before {
+  content: "•";
+  color: #3498db;
+  position: absolute;
+  left: 0;
+}
+</style>
