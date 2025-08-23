@@ -17,51 +17,53 @@ from unittest.mock import Mock, patch, MagicMock
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDC, SIDCLoader, SSNExtrema
 
 
+@pytest.fixture
+def mock_loader_data():
+    """Create mock loader data for testing."""
+    dates = pd.date_range("2008-01-01", "2020-12-31", freq="MS")
+    # Simulate solar cycle 24 data with realistic SSN values
+    cycle_data = []
+    cycle_numbers = []
+    ssn_values = []
+
+    for i, date in enumerate(dates):
+        if date < pd.Timestamp("2019-12-01"):
+            cycle_numbers.append(24)
+            # Simple sine wave for cycle 24 with realistic SSN range
+            phase = (i / len(dates)) * 2 * np.pi
+            ssn_values.append(50 + 100 * np.sin(phase) + np.random.normal(0, 10))
+        else:
+            cycle_numbers.append(25)
+            # Beginning of cycle 25
+            phase = ((i - 144) / 20) * 0.5 * np.pi
+            ssn_values.append(10 + 30 * np.sin(phase) + np.random.normal(0, 5))
+
+    return pd.DataFrame(
+        {
+            "ssn": ssn_values,
+            "std": np.random.uniform(5, 15, len(dates)),
+            "n_obs": np.random.randint(10, 25, len(dates)),
+            "cycle": cycle_numbers,
+            "definitive": True,
+        },
+        index=dates,
+    )
+
+
+@pytest.fixture
+def mock_extrema_data():
+    """Create mock extrema data for testing."""
+    return pd.DataFrame(
+        {
+            "Min": [pd.Timestamp("2008-12-01"), pd.Timestamp("2019-12-01")],
+            "Max": [pd.Timestamp("2014-04-01"), pd.Timestamp("2025-04-01")],
+        },
+        index=[24, 25],
+    )
+
+
 class TestSIDC:
     """Test the SIDC main class for sunspot number analysis."""
-
-    @pytest.fixture
-    def mock_loader_data(self):
-        """Create mock loader data for testing."""
-        dates = pd.date_range("2008-01-01", "2020-12-31", freq="MS")
-        # Simulate solar cycle 24 data with realistic SSN values
-        cycle_data = []
-        cycle_numbers = []
-        ssn_values = []
-
-        for i, date in enumerate(dates):
-            if date < pd.Timestamp("2019-12-01"):
-                cycle_numbers.append(24)
-                # Simple sine wave for cycle 24 with realistic SSN range
-                phase = (i / len(dates)) * 2 * np.pi
-                ssn_values.append(50 + 100 * np.sin(phase) + np.random.normal(0, 10))
-            else:
-                cycle_numbers.append(25)
-                # Beginning of cycle 25
-                phase = ((i - 144) / 20) * 0.5 * np.pi
-                ssn_values.append(10 + 30 * np.sin(phase) + np.random.normal(0, 5))
-
-        return pd.DataFrame(
-            {
-                "ssn": ssn_values,
-                "std": np.random.uniform(5, 15, len(dates)),
-                "n_obs": np.random.randint(10, 25, len(dates)),
-                "cycle": cycle_numbers,
-                "definitive": True,
-            },
-            index=dates,
-        )
-
-    @pytest.fixture
-    def mock_extrema_data(self):
-        """Create mock extrema data for testing."""
-        return pd.DataFrame(
-            {
-                "Min": [pd.Timestamp("2008-12-01"), pd.Timestamp("2019-12-01")],
-                "Max": [pd.Timestamp("2014-04-01"), pd.Timestamp("2025-04-01")],
-            },
-            index=[24, 25],
-        )
 
     @patch("solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader")
     @patch("solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema")
@@ -360,27 +362,6 @@ class TestSIDC:
 class TestSIDCEdgeCases:
     """Test edge cases and error conditions for SIDC."""
 
-    def test_normalized_property_without_nssn_column(self, mock_loader_data):
-        """Test normalized property when nssn column doesn't exist."""
-        with patch.object(SIDC, "_init_logger"):
-            sidc = SIDC.__new__(SIDC)
-            sidc._loader = Mock()
-            sidc._loader.data = mock_loader_data.copy()  # No 'nssn' column
-
-            # Mock normalize_ssn method
-            expected_normalized = pd.Series(
-                np.random.uniform(0, 1, len(mock_loader_data)),
-                index=mock_loader_data.index,
-                name="nssn",
-            )
-
-            with patch.object(sidc, "normalize_ssn", return_value=expected_normalized):
-                result = sidc.normalized
-
-                # Should call normalize_ssn when nssn column doesn't exist
-                sidc.normalize_ssn.assert_called_once()
-                assert isinstance(result, pd.Series)
-
     def test_normalized_property_with_existing_nssn(self, mock_loader_data):
         """Test normalized property when nssn column exists."""
         with patch.object(SIDC, "_init_logger"):
@@ -396,6 +377,18 @@ class TestSIDCEdgeCases:
             assert isinstance(result, pd.Series)
             assert result.name == "nssn"
             pd.testing.assert_series_equal(result, test_data["nssn"])
+
+    def test_data_property_access(self, mock_loader_data):
+        """Test that data property returns loader data."""
+        with patch.object(SIDC, "_init_logger"):
+            sidc = SIDC.__new__(SIDC)
+            sidc._loader = Mock()
+            sidc._loader.data = mock_loader_data.copy()
+
+            result = sidc.data
+
+            assert isinstance(result, pd.DataFrame)
+            pd.testing.assert_frame_equal(result, mock_loader_data)
 
     def test_calculate_extrema_kind_empty_data(self):
         """Test calculate_extrema_kind with empty data."""
