@@ -4,6 +4,7 @@
 - **Timestamp**: 2025-08-22T05:27:59Z
 - **Branch**: plan/pr-270-doc-validation-fixes
 - **Plan**: pr-270-doc-validation-fixes
+
 - **Pre-Compaction Context**: ~8,491 tokens (1,799 lines)
 - **Target Compression**: medium (35% reduction)
 - **Target Tokens**: ~5,519 tokens
@@ -25,6 +26,7 @@
   - **Final estimate**: 8,491 tokens
 
 ## Git State
+
 ### Current Branch: plan/pr-270-doc-validation-fixes
 ### Last Commit: dbe38f3 - refactor: right-size documentation validation framework (blalterman, 35 seconds ago)
 
@@ -48,7 +50,7 @@ M .claude/compacted_state.md
  D final_validation_report.json
  D pytest_doctest_config.py
 ... and 3 more files
-```
+
 
 ### Uncommitted Changes Summary:
 ```
@@ -64,7 +66,6 @@ M .claude/compacted_state.md
  validation_results.json         | 376 --------------------------
  validation_workflow_guide.md    | 411 -----------------------------
  11 files changed, 10 insertions(+), 3789 deletions(-)
-```
 
 ## Critical Context Summary
 
