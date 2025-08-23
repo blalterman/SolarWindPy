@@ -2,15 +2,15 @@
 
 ## Phase Metadata
 - **Phase**: 2/5
-- **Estimated Duration**: 8-10 hours
+- **Estimated Duration**: 5-6 hours
 - **Dependencies**: Phase 1 (labels and templates)
 - **Status**: Not Started
 
 ## 🎯 Phase Objective
-Completely rewrite `plans/issues_from_plans.py` as `PropositionsAwareMigrator` class with comprehensive support for propositions framework preservation, closeout documentation migration, and velocity metrics transfer.
+Completely rewrite `plans/issues_from_plans.py` as `PropositionsAwareMigrator` class with comprehensive support for propositions framework preservation and closeout documentation migration.
 
 ## 🧠 Phase Context
-The existing `issues_from_plans.py` is a basic script focused on simple YAML frontmatter. The new PropositionsAwareMigrator must handle the complete propositions framework, preserve 85% implementation decision capture, and maintain velocity learning data across the migration.
+The existing `issues_from_plans.py` is a basic script focused on simple YAML frontmatter. The new PropositionsAwareMigrator must handle the complete propositions framework, preserve 85% implementation decision capture, and focus on reliability over complex feature migration.
 
 ## 📋 Implementation Tasks
 
@@ -61,10 +61,6 @@ To compact: Save current progress, start fresh session with compacted state, and
 To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
 
 ### Task Group 3: Advanced Features
-- [ ] **Implement velocity metrics migration** (Est: 55 min) - Preserve historical velocity data
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: .velocity/ directory data to GitHub issue metadata
 - [ ] **Create batch processing system** (Est: 40 min) - Handle large-scale migrations efficiently
   - Commit: `<checksum>`
   - Status: Pending
@@ -201,8 +197,8 @@ To compact: Save current progress, start fresh session with compacted state, and
 ## 📊 Phase Progress Tracking
 
 ### Current Status
-- **Tasks Completed**: 0/18
-- **Time Invested**: 0h of 9h estimated
+- **Tasks Completed**: 0/17
+- **Time Invested**: 0h of 6h estimated
 - **Completion Percentage**: 0%
 - **Last Updated**: 2025-08-19
 

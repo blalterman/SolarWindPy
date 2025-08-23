@@ -2,15 +2,15 @@
 
 ## Phase Metadata
 - **Phase**: 3/5
-- **Estimated Duration**: 4-5 hours
+- **Estimated Duration**: 3-4 hours
 - **Dependencies**: Phase 2 (PropositionsAwareMigrator)
 - **Status**: Not Started
 
 ## 🎯 Phase Objective
-Integrate PropositionsAwareMigrator with GitHub CLI (`gh`) scripts, replace Python-based `.claude/hooks/` with shell scripts, and create automated workflows for plan lifecycle management in GitHub Issues.
+Integrate PropositionsAwareMigrator with essential GitHub CLI (`gh`) scripts and create streamlined utilities for multi-computer plan synchronization in GitHub Issues.
 
 ## 🧠 Phase Context
-This phase transforms the manual migration tool into an automated workflow system. The existing `.claude/hooks/` Python scripts need replacement with `gh` CLI-based shell scripts that integrate seamlessly with GitHub Issues while preserving all validation and automation capabilities.
+This phase creates essential CLI tools for multi-computer plan synchronization. Focus on 3 core utilities that enable instant plan access across development machines while maintaining validation capabilities.
 
 ## 📋 Implementation Tasks
 
@@ -23,14 +23,10 @@ This phase transforms the manual migration tool into an automated workflow syste
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Dashboard generation using GitHub API and CLI
-- [ ] **Create plan migration script** (Est: 40 min) - `gh-migrate-plans.sh` wrapper for PropositionsAwareMigrator
+- [ ] **Create plan sync script** (Est: 40 min) - `gh-sync-plans.sh` for multi-computer synchronization
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Batch migration with progress reporting
-- [ ] **Create plan completion script** (Est: 35 min) - `gh-complete-plan.sh` for automatic closeout
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: Implementation decision capture and archival
+  - Notes: Bidirectional sync between local plans and GitHub Issues
 
 ### Task Group 2: Hook System Replacement
 - [ ] **Replace plan-completion-manager.py** (Est: 50 min) - Convert to gh CLI-based shell script
@@ -50,23 +46,15 @@ This phase transforms the manual migration tool into an automated workflow syste
   - Status: Pending
   - Notes: Load active plans from GitHub Issues into session context
 
-### Task Group 3: Automation Workflows
-- [ ] **Create automated labeling system** (Est: 35 min) - Auto-apply labels based on content analysis
+### Task Group 3: Multi-Computer Workflow Integration
+- [ ] **Create computer sync validation** (Est: 35 min) - Validate plan access across 3 development machines
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Domain detection, complexity estimation, propositions validation
-- [ ] **Implement cross-plan dependency automation** (Est: 45 min) - Automatic issue linking and conflict detection
+  - Notes: Test instant plan access from macOS, Linux, Windows environments
+- [ ] **Implement sync conflict resolution** (Est: 25 min) - Handle concurrent edits across machines
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Resource conflict detection using GitHub API
-- [ ] **Create velocity tracking automation** (Est: 40 min) - Automatic time tracking and metrics updates
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: GitHub issue metadata updates for velocity learning
-- [ ] **Implement notification system** (Est: 30 min) - Automated status updates and alerts
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: Slack/email integration for plan status changes
+  - Notes: GitHub's native conflict resolution for plan updates
 
 ### Task Group 4: Integration Testing & Validation
 - [ ] **Test CLI script integration** (Est: 35 min) - Validate all gh CLI scripts work correctly
@@ -77,7 +65,7 @@ This phase transforms the manual migration tool into an automated workflow syste
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Compare old vs new hook behavior and outcomes
-- [ ] **Test automation workflows** (Est: 30 min) - Validate automated labeling and linking
+- [ ] **Test essential workflows** (Est: 30 min) - Validate core CLI tools
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Cross-plan coordination and conflict detection accuracy
@@ -94,7 +82,7 @@ This phase transforms the manual migration tool into an automated workflow syste
 - [ ] Velocity tracking integration maintains historical data accuracy
 - [ ] Git workflow validation seamlessly integrates GitHub Issues
 - [ ] Performance meets or exceeds current Python-based hook system
-- [ ] All automation workflows tested and validated with real scenarios
+- [ ] All essential CLI tools tested and validated with real scenarios
 - [ ] Documentation updated for new CLI-based workflow
 - [ ] Team training materials prepared for transition
 
@@ -105,11 +93,11 @@ This phase transforms the manual migration tool into an automated workflow syste
 - GitHub API integration and authentication testing
 - Progress reporting and user interaction validation
 
-**Automation Workflow Testing**:
-- Automated labeling accuracy across diverse plan content
-- Cross-plan dependency detection with complex scenarios
-- Velocity tracking data integrity and update accuracy
-- Notification system reliability and appropriate triggering
+**Multi-Computer Workflow Testing**:
+- Plan synchronization across 3 development machines
+- Instant access validation from any machine
+- Conflict resolution for concurrent plan updates
+- Cross-machine context switching efficiency
 
 **Integration Testing**:
 - End-to-end plan lifecycle testing (create → implement → complete)
@@ -126,8 +114,6 @@ This phase transforms the manual migration tool into an automated workflow syste
 
 **GitHub Integration**:
 - Repository admin permissions for automated operations
-- GitHub Actions workflow integration (optional)
-- Webhook configuration for real-time synchronization
 - API rate limit monitoring and management
 
 **System Integration**:
@@ -146,8 +132,8 @@ This phase transforms the manual migration tool into an automated workflow syste
 ## 📊 Phase Progress Tracking
 
 ### Current Status
-- **Tasks Completed**: 0/14
-- **Time Invested**: 0h of 4.5h estimated
+- **Tasks Completed**: 0/11
+- **Time Invested**: 0h of 3.5h estimated
 - **Completion Percentage**: 0%
 - **Last Updated**: 2025-08-19
 

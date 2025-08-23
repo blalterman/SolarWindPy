@@ -2,15 +2,15 @@
 
 ## Phase Metadata
 - **Phase**: 4/5
-- **Estimated Duration**: 4-5 hours
+- **Estimated Duration**: 3-4 hours
 - **Dependencies**: Phase 3 (CLI Integration & Automation)
 - **Status**: Not Started
 
 ## 🎯 Phase Objective
-Execute comprehensive migration of existing plans to GitHub Issues with rigorous validation, zero data loss verification, and complete propositions framework preservation. Establish parallel system validation and rollback procedures.
+Execute selective migration of active and high-value completed plans to GitHub Issues with rigorous validation, zero data loss verification, and complete propositions framework preservation. Prioritize active plans for immediate multi-computer access.
 
 ## 🧠 Phase Context
-This phase represents the critical transition from local plans to GitHub Issues. All existing plans must be migrated with 100% data preservation, including propositions framework, implementation decisions, velocity metrics, and cross-plan dependencies. Validation must confirm zero data loss before local system decommissioning.
+This phase represents the selective transition from local plans to GitHub Issues. Active plans and select high-value completed plans will be migrated with 100% data preservation of propositions framework, implementation decisions, and cross-plan dependencies. Focus on enabling immediate multi-computer access over comprehensive historical migration.
 
 ## 📋 Implementation Tasks
 
@@ -53,7 +53,7 @@ To compact: Save current progress, start fresh session with compacted state, and
 - [ ] **Migrate active plans** (Est: 75 min) - Current plans/ directory and plan/* branches
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Work-in-progress preservation, velocity metrics migration
+  - Notes: Work-in-progress preservation, plan status migration
 
 ### 🔄 Context Management Point
 **IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
@@ -72,17 +72,21 @@ To compact: Save current progress, start fresh session with compacted state, and
 
 **Usage & Scope**: 2-3 monthly references, date/domain/outcome patterns, <30s retrieval target, 15/100 alignment (acceptable infrastructure).
 
-### Velocity Metrics Migration Analysis:
+### Selective Migration Strategy:
 
-**Risk Assessment**: Medium format incompatibility (.velocity/ parsing), Low accuracy (structured data), Medium GitHub metadata limits.
+**Priority 1: Active Plans**
+- All plans in current plans/ root directory
+- All active plan/* branches for multi-computer access
+- Focus on immediate productivity gains
 
-**Value Proposition**: Continuous learning across migration, improved estimation accuracy, team performance insights, data-driven decisions.
+**Priority 2: High-Value Completed Plans**
+- Plans with significant implementation decisions
+- Plans with reusable propositions patterns
+- Plans serving as reference for future work
 
-**Cost Analysis**: ~3 hours processing + 2 hours dashboard + quarterly maintenance, immediate planning accuracy value.
-
-**Token Optimization**: ~1000 tokens analysis → ~100 tokens dashboard (90% reduction).
-
-**Usage & Scope**: Weekly planning access, accuracy/completion/complexity metrics, 20% estimation improvement target, 10/100 alignment (acceptable).
+**Priority 3: Historical Plans (Optional)**
+- Comprehensive migration only if time permits
+- Focus on most recent and most referenced plans
 
 ### Task Group 3: Comprehensive Validation
 - [ ] **Validate propositions preservation** (Est: 40 min) - All 5 proposition types correctly migrated
@@ -93,10 +97,6 @@ To compact: Save current progress, start fresh session with compacted state, and
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Closeout documentation and lessons learned migration
-- [ ] **Validate velocity metrics** (Est: 30 min) - Historical velocity data successfully transferred
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: .velocity/ directory data in GitHub issue metadata
 - [ ] **Validate cross-plan dependencies** (Est: 25 min) - Plan relationships preserved through GitHub links
   - Commit: `<checksum>`
   - Status: Pending
@@ -209,15 +209,14 @@ To compact: Save current progress, start fresh session with compacted state, and
 ## 📂 Phase Affected Areas
 - All existing plans in `plans/` and `plans/completed/`
 - Active plan branches (`plan/*`) with work-in-progress
-- Velocity metrics in `.velocity/` directories
 - Cross-plan coordination and dependency documentation
 - Team workflow procedures and documentation
 
 ## 📊 Phase Progress Tracking
 
 ### Current Status
-- **Tasks Completed**: 0/18
-- **Time Invested**: 0h of 4.5h estimated
+- **Tasks Completed**: 0/16
+- **Time Invested**: 0h of 3.5h estimated
 - **Completion Percentage**: 0%
 - **Last Updated**: 2025-08-19
 

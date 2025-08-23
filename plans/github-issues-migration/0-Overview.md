@@ -11,15 +11,15 @@
 - **Total Phases**: 5
 - **Dependencies**: None
 - **Affects**: plans/, .claude/hooks/, .claude/scripts/, CLAUDE.md, .github/ISSUE_TEMPLATE/, issues_from_plans.py
-- **Estimated Duration**: 24-32 hours
+- **Estimated Duration**: 16-21 hours
 - **Status**: Planning
 
 ## Phase Overview
-- [ ] **Phase 1: Foundation & Label System** (Est: 6-8 hours) - GitHub labels setup and issue templates creation
-- [ ] **Phase 2: Migration Tool Complete Rewrite** (Est: 8-10 hours) - PropositionsAwareMigrator implementation
-- [ ] **Phase 3: CLI Integration & Automation** (Est: 4-5 hours) - gh CLI scripts and workflow automation
-- [ ] **Phase 4: Validated Migration** (Est: 4-5 hours) - Migrate existing plans with validation
-- [ ] **Phase 5: Documentation & Training** (Est: 2-4 hours) - Update documentation and team training
+- [ ] **Phase 1: Foundation & Label System** (Est: 3-4 hours) - GitHub labels setup and issue templates creation
+- [ ] **Phase 2: Migration Tool Complete Rewrite** (Est: 5-6 hours) - PropositionsAwareMigrator implementation
+- [ ] **Phase 3: CLI Integration & Automation** (Est: 3-4 hours) - gh CLI scripts and workflow automation
+- [ ] **Phase 4: Validated Migration** (Est: 3-4 hours) - Migrate existing plans with validation
+- [ ] **Phase 5: Documentation & Training** (Est: 1-2 hours) - Update documentation and team training
 
 ## Phase Files
 1. [1-Foundation-Label-System.md](./1-Foundation-Label-System.md)
@@ -29,19 +29,19 @@
 5. [5-Documentation-Training.md](./5-Documentation-Training.md)
 
 ## 🎯 Objective
-Migrate SolarWindPy's local plans system to GitHub Issues while preserving the comprehensive propositions framework (Risk, Value, Cost, Token, Usage), automatic closeout documentation (85% implementation decision capture), and velocity learning capabilities.
+Migrate SolarWindPy's local plans system to GitHub Issues while preserving the comprehensive propositions framework (Risk, Value, Cost, Token, Usage) and automatic closeout documentation (85% implementation decision capture). Primary objective: Enable instant plan synchronization across 3 development computers, eliminating 100+ hours/year lost to cross-machine friction and preventing data loss from local-only plan branches.
 
 ## 🧠 Context
-The current local plans system in `plans/` directories provides excellent structured planning with detailed propositions analysis and automatic closeout documentation. However, it creates token overhead (~105K per session) and lacks the collaborative features, search capabilities, and CI/CD integration that GitHub Issues provide. This migration aims to preserve all current capabilities while gaining GitHub's native features.
+The current local plans system in `plans/` directories provides excellent structured planning with detailed propositions analysis and automatic closeout documentation. However, plans become trapped on local branches across multiple development machines, creating significant cross-computer friction and risk of data loss. With 3 active development computers, the inability to instantly sync and access plans from any machine wastes 100+ hours annually in context switching overhead, branch management, and duplicated work. This migration aims to preserve all current capabilities while enabling instant multi-computer synchronization through GitHub's native features.
 
 **Key Requirements:**
 - Preserve 85% automatic closeout documentation capture
 - Maintain comprehensive propositions framework
-- Support velocity learning and metrics tracking
 - Zero data loss during migration
 - Single "plan:phase" label system (not plan:phase-1, plan:phase-2)
 - Complete rewrite of issues_from_plans.py (not update)
-- 41 total labels for comprehensive categorization
+- 20-25 total labels for practical categorization
+- Multi-computer synchronization as primary value driver
 
 ## 🔧 Technical Requirements
 **Core Dependencies**:
@@ -78,14 +78,13 @@ The current local plans system in `plans/` directories provides excellent struct
 
 ## ✅ Acceptance Criteria
 - [ ] All 5 phases completed successfully with full validation
-- [ ] 41 GitHub labels created and organized in 8 categories
+- [ ] 20-25 GitHub labels created and organized in 5 essential categories
 - [ ] 3 issue templates supporting propositions framework
-- [ ] PropositionsAwareMigrator handles 100% of current plan features
+- [ ] PropositionsAwareMigrator handles 100% of current plan features (excluding velocity migration)
 - [ ] Zero data loss validated through comprehensive migration testing
 - [ ] 85% implementation decision capture preserved in GitHub format
-- [ ] Velocity learning metrics successfully migrated and accessible
-- [ ] Completed and abandoned plans migrated with full metadata preservation
-- [ ] Team trained and comfortable with new GitHub-native workflow
+- [ ] Completed and active plans migrated with full metadata preservation
+- [ ] Multi-computer synchronization workflow validated across 3 machines
 - [ ] All tests pass and code coverage maintained ≥ 95%
 - [ ] Documentation updated and comprehensive migration guide available
 - [ ] Rollback procedures documented and tested
@@ -115,6 +114,12 @@ The current local plans system in `plans/` directories provides excellent struct
 **Research Efficiency Improvements:**
 - **General Development**: Improved code quality and maintainability
 
+**Multi-Computer Development Efficiency:**
+- Plans instantly accessible from all 3 development machines
+- Eliminates branch synchronization overhead and context switching friction
+- Prevents data loss from local-only plan branches across machines
+- Reduces cross-computer development friction by 100+ hours annually
+
 **Development Quality Enhancements:**
 - Systematic evaluation of plan impact on scientific workflows
 - Enhanced decision-making through quantified value metrics
@@ -127,6 +132,12 @@ The current local plans system in `plans/` directories provides excellent struct
 - **Time Savings**: 185 minutes (82% reduction)
 - **Reduced Cognitive Load**: Systematic framework eliminates ad-hoc analysis
 
+**Multi-Computer Workflow Optimization:**
+- **Current Cross-Machine Friction**: ~2 hours per plan (branch sync, context restoration)
+- **GitHub Issues Access**: ~5 minutes instant access from any machine
+- **Time Savings**: 115 minutes per plan (93% reduction)
+- **Annual Efficiency Gain**: 100+ hours saved across 25-30 plans
+
 **Token Usage Optimization:**
 - **Manual Proposition Writing**: ~1800 tokens
 - **Automated Hook Generation**: ~300 tokens  
@@ -137,11 +148,11 @@ The current local plans system in `plans/` directories provides excellent struct
 
 ### Development Investment
 **Implementation Time Breakdown:**
-- **Base estimate**: 8 hours (moderate plan)
-- **Complexity multiplier**: 1.0x
-- **Final estimate**: 8.0 hours
-- **Confidence interval**: 6.4-10.4 hours
-- **Per-phase average**: 1.6 hours
+- **Base estimate**: 18.5 hours (multi-phase plan with simplified scope)
+- **Complexity multiplier**: 0.9x (reduced scope and removed velocity migration)
+- **Final estimate**: 16.7 hours
+- **Confidence interval**: 16-21 hours
+- **Per-phase average**: 3.3 hours
 
 **Maintenance Considerations:**
 - Ongoing maintenance: ~2-4 hours per quarter
@@ -465,8 +476,8 @@ This plan should advance SolarWindPy's mission to provide accurate, efficient to
 
 ### Overall Status
 - **Phases Completed**: 0/5
-- **Tasks Completed**: 0/43
-- **Time Invested**: 0h of 28h estimated
+- **Tasks Completed**: 0/32
+- **Time Invested**: 0h of 18h estimated
 - **Last Updated**: 2025-08-19
 
 ### Implementation Notes

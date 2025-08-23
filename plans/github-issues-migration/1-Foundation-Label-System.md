@@ -2,19 +2,19 @@
 
 ## Phase Metadata
 - **Phase**: 1/5
-- **Estimated Duration**: 6-8 hours
+- **Estimated Duration**: 3-4 hours
 - **Dependencies**: None
 - **Status**: Not Started
 
 ## 🎯 Phase Objective
-Establish the foundational GitHub infrastructure including comprehensive label system (46 labels across 8 categories), issue templates supporting propositions framework, and initial repository configuration for plan migration.
+Establish the foundational GitHub infrastructure including practical label system (20-25 labels across 5 essential categories), issue templates supporting propositions framework, and initial repository configuration for plan migration.
 
 ## 🧠 Phase Context
-This phase creates the GitHub-native infrastructure required to support the full propositions framework and closeout documentation. The label system must support hierarchical categorization while the issue templates must preserve all current plan metadata and structure.
+This phase creates the GitHub-native infrastructure required to support the full propositions framework and closeout documentation. The label system focuses on essential categorization for single-developer workflow while the issue templates preserve all current plan metadata and structure.
 
 ## 📋 Implementation Tasks
 
-### Task Group 1: GitHub Labels System (46 labels)
+### Task Group 1: GitHub Labels System (20-25 labels)
 - [ ] **Create priority labels** (Est: 30 min) - priority:critical, priority:high, priority:medium, priority:low
   - Commit: `<checksum>`
   - Status: Pending
@@ -35,18 +35,6 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Commit: `<checksum>`
   - Status: Pending
   - Notes: Scientific domain categorization for specialist routing
-- [ ] **Create complexity labels** (Est: 20 min) - complexity:trivial, complexity:simple, complexity:moderate, complexity:complex, complexity:expert
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: Effort estimation and resource allocation
-- [ ] **Create impact labels** (Est: 25 min) - impact:breaking, impact:major, impact:minor, impact:patch, impact:internal
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: Change impact assessment for release planning
-- [ ] **Create propositions labels** (Est: 20 min) - propositions:risk, propositions:value, propositions:cost, propositions:token, propositions:usage, propositions:scope
-  - Commit: `<checksum>`
-  - Status: Pending
-  - Notes: Propositions framework tracking and analysis
 
 ### 🔄 Context Management Point
 **IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
@@ -95,7 +83,7 @@ To compact: Save current progress, start fresh session with compacted state, and
 - [ ] **Test label hierarchy** (Est: 25 min) - Verify label combinations and filtering work correctly
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Validate 41-label system usability
+  - Notes: Validate 20-25 label system usability
 - [ ] **Create sample issues** (Est: 40 min) - Test overview, phase, and closeout templates
   - Commit: `<checksum>`
   - Status: Pending
@@ -106,7 +94,7 @@ To compact: Save current progress, start fresh session with compacted state, and
   - Notes: Required for automation workflows in later phases
 
 ## ✅ Phase Acceptance Criteria
-- [ ] All 41 labels created and properly categorized across 8 groups
+- [ ] All 20-25 labels created and properly categorized across 5 essential groups
 - [ ] 3 issue templates (overview, phase, closeout) render correctly
 - [ ] Templates preserve complete propositions framework structure
 - [ ] Sample issues demonstrate propositions metadata preservation
@@ -123,7 +111,7 @@ To compact: Save current progress, start fresh session with compacted state, and
 - Validate markdown rendering across different GitHub views
 
 **Label System Testing**:
-- Test all 41 labels for correct categorization
+- Test all 20-25 labels for correct categorization
 - Verify color coding and visual distinction
 - Test complex label combinations and filtering
 - Validate search functionality across label hierarchies
@@ -155,8 +143,8 @@ To compact: Save current progress, start fresh session with compacted state, and
 ## 📊 Phase Progress Tracking
 
 ### Current Status
-- **Tasks Completed**: 0/15
-- **Time Invested**: 0h of 7h estimated
+- **Tasks Completed**: 0/12
+- **Time Invested**: 0h of 3.5h estimated
 - **Completion Percentage**: 0%
 - **Last Updated**: 2025-08-19
 
@@ -175,7 +163,7 @@ To compact: Save current progress, start fresh session with compacted state, and
 
 ### Implementation Decisions
 - Single "plan:phase" label chosen over numbered variants for simplicity
-- 41 total labels provides comprehensive categorization without overwhelming UI
+- 20-25 total labels provides practical categorization for single-developer workflow
 - YAML frontmatter in templates enables structured metadata preservation
 - Color-coded priority system follows GitHub conventional patterns
 
