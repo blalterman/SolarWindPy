@@ -7,29 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-08-23
+
 ### Added
-- Automated PyPI deployment pipeline with semantic versioning
-- Release automation scripts for version management
-- Comprehensive deployment documentation
+- **Initial stable release on PyPI** - First public release of SolarWindPy
+- **Semantic versioning with setuptools_scm** - Automatic version detection from git tags
+- **Automated deployment pipeline via GitHub Actions** - Complete CI/CD for PyPI publishing
+- **Core plasma physics calculations and data structures** - Multi-species plasma analysis
+- **Plotting and visualization capabilities** - Publication-quality scientific plots
+- **Instability analysis tools** - Solar wind plasma instability calculations
+- **Comprehensive test coverage** - ≥95% code coverage with scientific validation
+- **Release automation scripts** - check_release_ready.py and bump_version.py tools
+- **Comprehensive documentation** - Release process and deployment guides
 
 ### Changed
-- Enhanced GitHub Actions workflows for production deployment
-- Improved version detection with setuptools_scm
+- **Migrated from development to stable release** - Production-ready package
+- **Enhanced package metadata for PyPI distribution** - Complete project configuration
+- **Improved version detection with setuptools_scm** - Tag-based versioning
+- **Enhanced GitHub Actions workflows** - Production deployment automation
 
 ### Fixed
-- Graceful handling of missing PyPI tokens during setup period
+- **Graceful handling of missing PyPI tokens** - Continues deployment without tokens
+- **Code formatting standardization** - Black formatting across entire codebase
+- **Test fixture scope issues** - Module-level fixtures for cross-class access
+- **Documentation validation** - Comprehensive doctest and example validation
 
 ### Security
-- Added validation gates for release deployment
-
-## [0.1.0] - TBD
-
-### Added
-- Initial release of SolarWindPy scientific package
-- Core plasma physics calculations and data structures
-- Plotting and visualization capabilities
-- Instability analysis tools
-- Comprehensive test suite with ≥95% coverage
-
-### Note
-This changelog will be updated with actual release dates and detailed changes as releases are made. The version 0.1.0 represents the first planned release with the automated deployment pipeline.
+- **Added validation gates for release deployment** - Multi-stage verification process
+- **PyPI token security** - Secure repository secrets management
