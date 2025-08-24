@@ -12,12 +12,12 @@
 - **Dependencies**: None
 - **Affects**: pyproject.toml, .github/workflows/ci.yml, solarwindpy/__init__.py, README.rst
 - **Estimated Duration**: 20 hours (appropriately scoped for pre-1.0 software)
-- **Status**: Planning
+- **Status**: In Progress (Phase 3 Complete)
 
 ## Phase Overview
-- [ ] **Phase 1: Planning & Setup** (Est: 2 hours) - Initialize plan with value propositions
-- [ ] **Phase 2: Implementation** (Est: 8 hours) - Update Python requirements and CI
-- [ ] **Phase 3: Testing & Validation** (Est: 8 hours) - Comprehensive testing
+- [x] **Phase 1: Planning & Setup** (Est: 2 hours) - Initialize plan with value propositions
+- [x] **Phase 2: Implementation** (Est: 8 hours) - Update Python requirements and CI
+- [x] **Phase 3: Testing & Validation** (Est: 8 hours) - Comprehensive testing (with findings)
 - [ ] **Phase 4: Documentation & Release** (Est: 2 hours) - Simple docs and merge to master
 - [ ] **Phase 5: Closeout** (Est: 1 hour) - Archive and velocity metrics
 
