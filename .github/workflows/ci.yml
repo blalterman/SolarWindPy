@@ -29,7 +29,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       
       # Add caching for faster builds
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
