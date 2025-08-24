@@ -131,7 +131,8 @@ def beta_ani_inst(beta, a=None, b=None, c=None):
     Examples
     --------
     >>> beta = np.logspace(-2, 2, 5)
-    >>> beta_ani_inst(beta, a=0.367, b=-0.408, c=0.011)
+    >>> beta_ani_inst(beta, a=0.367, b=-0.408, c=0.011)  # doctest: +ELLIPSIS
+    array([       nan, 1.1367783..., 1.36534751..., 1.93857946..., 3.40240693...])
     """
     # Effectively, type checking.
     a = float(a)

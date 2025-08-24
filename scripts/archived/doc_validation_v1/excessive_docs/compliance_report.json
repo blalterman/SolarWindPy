@@ -1,0 +1,60 @@
+============================================================
+SOLARWINDPY PHYSICS COMPLIANCE REPORT
+============================================================
+
+Overall Status: COMPLIANT
+Files Checked: 3
+Total Violations: 6
+Execution Time: 0.61s
+
+Violations by Severity:
+  INFO: 5
+  WARNING: 1
+
+Violations by Rule:
+  alfven_speed_density: 1
+  alfven_speed_formula: 1
+  missing_unit_conversion: 1
+  multiindex_level_access: 3
+
+Detailed Violations:
+----------------------------------------
+1. INFO: Physics calculation may need unit conversion consideration
+   File: docs/source/usage.rst:block_2
+   Line: 28
+   Code: # Thermal speed: w = sqrt(2kT/m)
+
+2. WARNING: Alfvén speed calculation missing μ₀ (permeability)
+   File: solarwindpy/core/plasma.py
+   Line: 1464
+   Code: caani = ca.multiply(afsq.pipe(np.sqrt))
+   Expected: B / sqrt(mu_0 * rho)
+   Actual: Missing mu_0 term
+
+3. INFO: Alfvén speed needs mass density (ρ = Σ n_i * m_i)
+   File: solarwindpy/core/plasma.py
+   Line: 1464
+   Code: caani = ca.multiply(afsq.pipe(np.sqrt))
+   Expected: Include ion composition in mass density
+   Actual: May be missing ion composition
+
+4. INFO: Consider using level names in .xs() for clarity
+   File: solarwindpy/core/plasma.py
+   Line: 1811
+   Code: n1 = self.data.xs(("n", "", core), axis=1)
+   Expected: .xs('value', level='M')
+   Actual: Missing level specification
+
+5. INFO: Consider using level names in .xs() for clarity
+   File: solarwindpy/core/plasma.py
+   Line: 1812
+   Code: n2 = self.data.xs(("n", "", beam), axis=1)
+   Expected: .xs('value', level='M')
+   Actual: Missing level specification
+
+6. INFO: Consider using level names in .xs() for clarity
+   File: solarwindpy/core/plasma.py
+   Line: 2105
+   Code: pth = self.pth(*species).xs(
+   Expected: .xs('value', level='M')
+   Actual: Missing level specification

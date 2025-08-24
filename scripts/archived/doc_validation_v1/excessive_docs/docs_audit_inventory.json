@@ -1,0 +1,382 @@
+{
+  "audit_metadata": {
+    "created_date": "2025-08-21",
+    "phase": "Phase 1: Discovery & Inventory",
+    "branch": "plan/readthedocs-customization-enhancement",
+    "total_examples_found": 47,
+    "files_with_examples": 13
+  },
+  "rst_documentation_files": {
+    "docs/source/usage.rst": {
+      "line_ranges": [
+        [23, 28],
+        [34, 47],
+        [53, 63],
+        [69, 78],
+        [85, 97],
+        [104, 111],
+        [117, 129]
+      ],
+      "code_blocks": [
+        {
+          "type": "code-block:: python",
+          "content": "import solarwindpy as swp\nimport numpy as np\nimport pandas as pd",
+          "dependencies": ["solarwindpy", "numpy", "pandas"],
+          "issues": []
+        },
+        {
+          "type": "code-block:: python",
+          "content": "# Create sample data\nepoch = pd.date_range('2023-01-01', periods=100, freq='1min')\n\n# Proton density, velocity, temperature\nn_p = np.random.normal(5.0, 1.0, 100)  # cm^-3\nv_p = np.random.normal(400, 50, (100, 3))  # km/s\nT_p = np.random.normal(1e5, 2e4, 100)  # K\n\n# Create plasma object\nplasma = swp.Plasma(epoch=epoch)\nplasma.add_ion_species('p1', density=n_p, velocity=v_p, temperature=T_p)",
+          "dependencies": ["solarwindpy", "pandas", "numpy"],
+          "issues": ["Deprecated Plasma(epoch=) constructor", "add_ion_species method does not exist"]
+        },
+        {
+          "type": "code-block:: python",
+          "content": "# Access specific measurements\nproton_density = plasma.data.xs('n', level='M').xs('p1', level='S')\nproton_velocity_x = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')\n\n# The MultiIndex levels are:\n# M: Measurement (n, v, w, b, etc.)\n# C: Component (x, y, z for vectors, empty for scalars)\n# S: Species (p1, p2, a, etc.)",
+          "dependencies": ["pandas"],
+          "issues": ["Missing data structure initialization"]
+        },
+        {
+          "type": "code-block:: python",
+          "content": "# Thermal speed (mw² = 2kT convention)\nthermal_speed = plasma.get_ion('p1').thermal_speed()\n\n# Plasma beta\nbeta = plasma.get_ion('p1').beta()\n\n# Alfvén speed\nalfven_speed = plasma.alfven_speed()",
+          "dependencies": ["solarwindpy"],
+          "issues": ["Missing imports and data setup"]
+        },
+        {
+          "type": "code-block:: python",
+          "content": "import solarwindpy.plotting as swpp\n\n# Create time series plot\nfig, ax = swpp.time_series(plasma.data.xs('n', level='M'), \n                          title='Proton Density')\n\n# Scientific scatter plot with proper labels\nswpp.scatter(plasma.data.xs('v', level='M').xs('x', level='C'),\n            plasma.data.xs('T', level='M'),\n            xlabel=swpp.labels.velocity_x(),\n            ylabel=swpp.labels.temperature())",
+          "dependencies": ["solarwindpy.plotting"],
+          "issues": ["time_series function may not exist", "Missing data setup"]
+        },
+        {
+          "type": "code-block:: python",
+          "content": "# Missing data represented as NaN (never 0 or -999)\ndata_with_gaps = plasma.data.dropna()\n\n# Validate physical constraints\nplasma.validate_physics()  # Checks for unphysical values",
+          "dependencies": ["solarwindpy"],
+          "issues": ["validate_physics method may not exist"]
+        },
+        {
+          "type": "code-block:: python",
+          "content": "# Fit functions for statistical analysis\nfrom solarwindpy.fitfunctions import Gaussian\n\nfit = Gaussian()\nfit.fit(temperature_data)\n\n# Instability analysis\nfrom solarwindpy.instabilities import beta_ani_inst\n\nstability = beta_ani_inst(beta_parallel, beta_perpendicular)",
+          "dependencies": ["solarwindpy.fitfunctions", "solarwindpy.instabilities"],
+          "issues": ["Undefined temperature_data", "beta_ani_inst function reference may be incorrect"]
+        }
+      ],
+      "total_examples": 7,
+      "major_issues": ["Deprecated Plasma constructor", "Non-existent methods", "Missing imports"]
+    },
+    "docs/source/tutorial/quickstart.rst": {
+      "line_ranges": [
+        [9, 12],
+        [16, 20]
+      ],
+      "code_blocks": [
+        {
+          "type": "code-block:: bash",
+          "content": "pip install solarwindpy",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: python",
+          "content": "import solarwindpy as sw\nsw.__version__",
+          "dependencies": ["solarwindpy"],
+          "issues": ["Inconsistent alias (sw vs swp)"]
+        }
+      ],
+      "total_examples": 2,
+      "major_issues": ["Inconsistent import alias"]
+    },
+    "docs/source/installation.rst": {
+      "line_ranges": [
+        [24, 27],
+        [37, 41],
+        [44, 47],
+        [54, 57],
+        [63, 67]
+      ],
+      "code_blocks": [
+        {
+          "type": "code-block:: bash",
+          "content": "pip install solarwindpy",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "git clone https://github.com/blalterman/SolarWindPy.git\ncd SolarWindPy\npip install -e .",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "pip install -r requirements-dev.txt",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "conda env create -f solarwindpy-20250403.yml\nconda activate solarwindpy-20250403",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: python",
+          "content": "import solarwindpy as swp\nprint(f\"SolarWindPy version: {swp.__version__}\")",
+          "dependencies": ["solarwindpy"],
+          "issues": []
+        }
+      ],
+      "total_examples": 5,
+      "major_issues": []
+    }
+  },
+  "readme_rst": {
+    "README.rst": {
+      "line_ranges": [
+        [27, 32],
+        [35, 41],
+        [44, 47],
+        [50, 53],
+        [56, 59],
+        [64, 68]
+      ],
+      "code_blocks": [
+        {
+          "type": "code-block:: bash",
+          "content": "conda env create -f solarwindpy-20250403.yml\nconda activate solarwindpy-20250403\npip install -e .",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "python scripts/requirements_to_conda_env.py --name solarwindpy-dev\nconda env create -f solarwindpy-dev.yml\nconda activate solarwindpy-dev\npip install -e .",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "pytest -q",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "python scripts/update_conda_recipe.py",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "pre-commit install",
+          "dependencies": [],
+          "issues": []
+        },
+        {
+          "type": "code-block:: bash",
+          "content": "cd docs\nmake html SPHINXOPTS=-W",
+          "dependencies": [],
+          "issues": []
+        }
+      ],
+      "total_examples": 6,
+      "major_issues": []
+    }
+  },
+  "python_docstring_examples": {
+    "solarwindpy/core/plasma.py": {
+      "line_ranges": [
+        [93, 95],
+        [97, 101],
+        [143, 157],
+        [182, 184],
+        [221, 223],
+        [242, 244],
+        [264, 267]
+      ],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": ">>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas\n>>> proton_density = plasma.p1.n      # Proton number density [cm^-3]\n>>> alpha_velocity = plasma.a.v       # Alpha velocity vector [km/s]",
+          "dependencies": ["solarwindpy.core.plasma"],
+          "issues": ["Undefined 'data' variable"]
+        },
+        {
+          "type": "doctest",
+          "content": ">>> beta = plasma.beta()              # Plasma beta parameter\n>>> coulomb = plasma.nc()             # Coulomb collision frequency [s^-1]\n>>> temp_ratio = plasma.a.T / plasma.p1.T  # Alpha-proton temp ratio\n>>> b_field = plasma.b                # Magnetic field vector [nT]\n>>> b_mag = plasma.b.mag              # Magnetic field magnitude [nT]",
+          "dependencies": ["solarwindpy.core.plasma"],
+          "issues": ["Missing plasma object initialization"]
+        },
+        {
+          "type": "doctest",
+          "content": "Complex DataFrame construction example",
+          "dependencies": ["pandas"],
+          "issues": ["Very complex, needs validation"]
+        }
+      ],
+      "total_examples": 8,
+      "major_issues": ["Undefined variables", "Missing setup"]
+    },
+    "solarwindpy/core/ions.py": {
+      "line_ranges": [[75, 79]],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": ">>> proton_data = df.xs('p1', level='S', axis=1)\n>>> proton = Ion(proton_data, 'p1')\n>>> proton.n  # Number density\n>>> proton.v  # Velocity vector\n>>> proton.T  # Temperature from thermal speed",
+          "dependencies": ["pandas", "solarwindpy.core.ions"],
+          "issues": ["Undefined 'df' variable"]
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": ["Undefined variables"]
+    },
+    "solarwindpy/fitfunctions/tex_info.py": {
+      "line_ranges": [[29, 33]],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": ">>> a = 3.1415\n>>> b = 0.01\n>>> val_uncert_2_string(a, b)\n\"3.14 \\pm 0.01\"",
+          "dependencies": ["solarwindpy.fitfunctions.tex_info"],
+          "issues": []
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": []
+    },
+    "solarwindpy/tools/__init__.py": {
+      "line_ranges": [[70, 72], [88, 90], [104, 106]],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": ">>> df = pd.DataFrame(...)\n>>> new_df, mask = swap_protons(df)",
+          "dependencies": ["pandas", "solarwindpy.tools"],
+          "issues": ["Incomplete DataFrame construction"]
+        },
+        {
+          "type": "doctest",
+          "content": ">>> new_df, mask = swap_protons(df)",
+          "dependencies": ["pandas", "solarwindpy.tools"],
+          "issues": ["Undefined 'df' variable"]
+        },
+        {
+          "type": "doctest",
+          "content": ">>> normal_parameters(m, s)",
+          "dependencies": ["solarwindpy.tools"],
+          "issues": ["Undefined 'm', 's' variables"]
+        }
+      ],
+      "total_examples": 3,
+      "major_issues": ["Undefined variables", "Incomplete examples"]
+    },
+    "solarwindpy/core/spacecraft.py": {
+      "line_ranges": ["multiple"],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": "spacecraft doctest examples",
+          "dependencies": ["solarwindpy.core.spacecraft"],
+          "issues": ["Need detailed analysis"]
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": ["Requires detailed analysis"]
+    },
+    "solarwindpy/instabilities/verscharen2016.py": {
+      "line_ranges": ["multiple"],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": "instability calculation examples",
+          "dependencies": ["solarwindpy.instabilities"],
+          "issues": ["Need detailed analysis"]
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": ["Requires detailed analysis"]
+    },
+    "solarwindpy/instabilities/beta_ani.py": {
+      "line_ranges": ["multiple"],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": "beta anisotropy examples",
+          "dependencies": ["solarwindpy.instabilities"],
+          "issues": ["Need detailed analysis"]
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": ["Requires detailed analysis"]
+    },
+    "solarwindpy/plotting/tools.py": {
+      "line_ranges": ["multiple"],
+      "doctest_blocks": [
+        {
+          "type": "doctest",
+          "content": "plotting utility examples",
+          "dependencies": ["solarwindpy.plotting"],
+          "issues": ["Need detailed analysis"]
+        }
+      ],
+      "total_examples": 1,
+      "major_issues": ["Requires detailed analysis"]
+    }
+  },
+  "immediate_issues_identified": {
+    "broken_imports": [
+      "solarwindpy.plotting time_series function",
+      "solarwindpy.instabilities beta_ani_inst function"
+    ],
+    "deprecated_api": [
+      "Plasma(epoch=) constructor in usage.rst",
+      "add_ion_species method does not exist"
+    ],
+    "missing_multiindex": [
+      "usage.rst examples assume MultiIndex structure without setup",
+      "Missing data initialization in most examples"
+    ],
+    "undefined_variables": [
+      "'data' variable in plasma.py doctests",
+      "'df' variable in ions.py and tools/__init__.py",
+      "'temperature_data' in usage.rst advanced examples"
+    ],
+    "inconsistent_aliases": [
+      "sw vs swp import aliases across different files"
+    ],
+    "incomplete_examples": [
+      "tools/__init__.py has ellipsis in DataFrame construction",
+      "Many examples lack proper setup/imports"
+    ]
+  },
+  "common_patterns": {
+    "import_patterns": [
+      "import solarwindpy as swp",
+      "import solarwindpy as sw",
+      "import solarwindpy.plotting as swpp",
+      "from solarwindpy.fitfunctions import *",
+      "from solarwindpy.instabilities import *"
+    ],
+    "data_access_patterns": [
+      "plasma.data.xs(level='M')",
+      "plasma.data.xs(level='S')",
+      "plasma.data.xs(level='C')",
+      "plasma.get_ion('p1')",
+      "plasma.p1.n",
+      "plasma.a.v"
+    ],
+    "common_operations": [
+      "thermal_speed()",
+      "beta()",
+      "alfven_speed()",
+      "validate_physics()",
+      "dropna()"
+    ]
+  },
+  "next_phase_priorities": [
+    "Fix deprecated Plasma constructor usage",
+    "Standardize import aliases (swp vs sw)",
+    "Add proper data setup to all examples",
+    "Validate all method calls exist",
+    "Test all docstring examples with doctest",
+    "Create consistent MultiIndex setup patterns",
+    "Address FutureWarnings from pandas operations"
+  ]
+}

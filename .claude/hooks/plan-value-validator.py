@@ -55,6 +55,19 @@ class SolarWindPyPlanValueValidator:
                     'ontology', 'data format integrity'
                 ]
             },
+            'scope_audit': {
+                'pattern': r'## 🎯 Scope Audit',
+                'required_subsections': [
+                    'SolarWindPy Alignment Assessment',
+                    'Scientific Research Relevance',
+                    'Module Impact Analysis'
+                ],
+                'required_patterns': [
+                    r'Alignment Score.*\d+/100',
+                    r'Relevance Level.*(?:High|Medium|Low)',
+                    r'Scope Boundary Enforcement'
+                ]
+            },
             'token_optimization': {
                 'pattern': r'## 💾 Token Usage Optimization',
                 'required_subsections': [
@@ -190,6 +203,13 @@ class SolarWindPyPlanValueValidator:
             result['issues'].extend(time_result['issues'])
             result['warnings'].extend(time_result['warnings'])
             if time_result['issues']:
+                result['passed'] = False
+        
+        elif section_key == 'scope_audit':
+            scope_result = self._validate_scope_section(section_content, strict)
+            result['issues'].extend(scope_result['issues'])
+            result['warnings'].extend(scope_result['warnings'])
+            if scope_result['issues']:
                 result['passed'] = False
         
         # Assess content quality
@@ -357,6 +377,58 @@ class SolarWindPyPlanValueValidator:
                 result['warnings'].append(
                     f"Time estimate {time_value} seems low for meaningful work"
                 )
+        
+        return result
+    
+    def _validate_scope_section(self, section_content: str, strict: bool) -> Dict:
+        """Validate scope audit section specifically."""
+        result = {'issues': [], 'warnings': []}
+        
+        # Check for alignment score
+        alignment_score_pattern = r'Alignment Score[:\s]*(\d+)/100'
+        alignment_match = re.search(alignment_score_pattern, section_content, re.IGNORECASE)
+        
+        if not alignment_match:
+            result['issues'].append("Missing alignment score (should be X/100 format)")
+        else:
+            score = int(alignment_match.group(1))
+            if score < 40:
+                result['warnings'].append(f"Low alignment score ({score}/100) - scope review recommended")
+            elif score < 60:
+                result['warnings'].append(f"Moderate alignment score ({score}/100) - consider scope refinement")
+        
+        # Check for relevance level
+        relevance_pattern = r'Relevance Level[:\s]*(High|Medium|Low)'
+        if not re.search(relevance_pattern, section_content, re.IGNORECASE):
+            result['issues'].append("Missing scientific research relevance level assessment")
+        
+        # Check for module impact analysis
+        module_indicators = ['core/', 'plotting/', 'fitfunctions/', 'instabilities/', 'spacecraft/', 'tools/', 'tests/', 'docs/']
+        has_module_analysis = any(module in section_content.lower() for module in module_indicators)
+        
+        if not has_module_analysis:
+            result['warnings'].append("No specific SolarWindPy module impact identified")
+        
+        # Check for scope boundary enforcement section
+        boundary_indicators = ['scope boundary', 'out-of-scope', 'scientific computing', 'solar wind physics']
+        has_boundary_discussion = any(indicator in section_content.lower() for indicator in boundary_indicators)
+        
+        if not has_boundary_discussion:
+            result['issues'].append("Missing scope boundary enforcement discussion")
+        
+        # Check for scientific computing focus
+        scientific_indicators = ['physics', 'research', 'scientific', 'computation', 'analysis']
+        scientific_count = sum(1 for indicator in scientific_indicators if indicator in section_content.lower())
+        
+        if scientific_count < 2:
+            result['warnings'].append("Limited scientific computing terminology - verify research focus")
+        
+        # Check for out-of-scope risk patterns (should be minimal or addressed)
+        risky_patterns = ['web', 'ui', 'frontend', 'backend', 'database', 'api']
+        found_risks = [pattern for pattern in risky_patterns if pattern in section_content.lower()]
+        
+        if found_risks:
+            result['warnings'].append(f"Potential out-of-scope elements mentioned: {', '.join(found_risks)}")
         
         return result
     
