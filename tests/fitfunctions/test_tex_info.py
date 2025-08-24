@@ -57,7 +57,9 @@ def test_constructor_and_setters_errors():
 
 
 def test_set_popt_psigma_errors(texinfo):
-    with pytest.raises(ValueError):  # Function actually raises ValueError when iterating over string
+    with pytest.raises(
+        ValueError
+    ):  # Function actually raises ValueError when iterating over string
         texinfo.set_popt_psigma("bad", {"a": 1})
     with pytest.raises(AttributeError):  # String doesn't have .items() method
         texinfo.set_popt_psigma({"a": 1}, "bad")
@@ -136,7 +138,9 @@ def test_build_fit_parameter_info(texinfo):
 
 def test_build_fit_parameter_info_errors(texinfo):
     """_build_fit_parameter_info should reject unknown kwargs."""
-    with pytest.raises(TypeError):  # Function actually raises TypeError for unknown kwargs
+    with pytest.raises(
+        TypeError
+    ):  # Function actually raises TypeError for unknown kwargs
         texinfo._build_fit_parameter_info(bogus=True)
 
 

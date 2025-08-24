@@ -325,7 +325,7 @@ class TestBField(VectorTestBase, base.SWEData):
                 "<dir(ot)>",
                 *dir(self.object_testing),
                 sep="\n",
-                end="\n\n"
+                end="\n\n",
             )
 
         pdt.assert_series_equal(pb, self.object_testing.pressure)

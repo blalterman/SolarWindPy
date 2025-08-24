@@ -56,7 +56,7 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         for label in labels:
             assert isinstance(label, ManualLabel)
 
@@ -97,7 +97,7 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         for label in labels:
             str_repr = str(label)
             assert str_repr.startswith("$")
@@ -113,15 +113,15 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         # Test unique tex
         tex_values = [label.tex for label in labels]
         assert len(tex_values) == len(set(tex_values))
-        
+
         # Test unique units
         unit_values = [label.unit for label in labels]
         assert len(unit_values) == len(set(unit_values))
-        
+
         # Test unique paths
         path_values = [str(label.path) for label in labels]
         assert len(path_values) == len(set(path_values))
@@ -129,17 +129,17 @@ class TestChemistryLabels:
     def test_label_inheritance(self):
         """Test that labels inherit from base classes correctly."""
         from solarwindpy.plotting.labels.base import Base
-        
+
         labels = [
             chemistry.mass_per_charge,
             chemistry.fip,
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         for label in labels:
             assert isinstance(label, Base)  # Should inherit from Base
-            assert hasattr(label, 'logger')  # Should have logger from Base
+            assert hasattr(label, "logger")  # Should have logger from Base
 
     def test_tex_formatting(self):
         """Test TeX formatting is correct."""
@@ -165,7 +165,7 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         for label in labels:
             assert isinstance(label.path, Path)
 
@@ -178,11 +178,11 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         # Test equality (should be equal to themselves)
         for label in labels:
             assert label == label
-        
+
         # Test inequality (different labels should not be equal)
         for i, label1 in enumerate(labels):
             for j, label2 in enumerate(labels):
@@ -197,19 +197,19 @@ class TestChemistryLabels:
             chemistry.charge,
             chemistry.mass,
         ]
-        
+
         # Should be able to create a set (requires hashing)
         label_set = set(labels)
         assert len(label_set) == len(labels)
-        
+
         # Should be able to use as dictionary keys
         label_dict = {label: str(label) for label in labels}
         assert len(label_dict) == len(labels)
 
     def test_module_attributes(self):
         """Test that the chemistry module has all expected attributes."""
-        expected_attrs = ['mass_per_charge', 'fip', 'charge', 'mass']
-        
+        expected_attrs = ["mass_per_charge", "fip", "charge", "mass"]
+
         for attr in expected_attrs:
             assert hasattr(chemistry, attr)
             label = getattr(chemistry, attr)
@@ -220,7 +220,7 @@ class TestChemistryLabels:
         original_tex = chemistry.mass.tex
         original_unit = chemistry.mass.unit
         original_path = chemistry.mass.path
-        
+
         # These properties should be read-only
         # (We can't directly test immutability, but we can test they return consistent values)
         assert chemistry.mass.tex == original_tex
@@ -232,12 +232,12 @@ class TestChemistryLabels:
         # Mass per charge should use atomic mass units per elementary charge
         assert "AMU" in chemistry.mass_per_charge.unit
         assert "e^{-1}" in chemistry.mass_per_charge.unit
-        
+
         # FIP should use electron volts
         assert "eV" in chemistry.fip.unit
-        
+
         # Charge should use elementary charge units
         assert "e" in chemistry.charge.unit
-        
+
         # Mass should use atomic mass units
         assert "AMU" in chemistry.mass.unit

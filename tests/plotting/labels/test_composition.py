@@ -79,13 +79,13 @@ class TestIon:
         """Test that Ion inherits from Base."""
         ion = composition.Ion("O", "6")
         assert isinstance(ion, Base)
-        assert hasattr(ion, 'logger')
+        assert hasattr(ion, "logger")
 
     def test_species_title_case(self):
         """Test that species is converted to title case."""
         ion = composition.Ion("fe", "2")
         assert ion.species == "Fe"
-        
+
         ion2 = composition.Ion("FE", "3")
         assert ion2.species == "Fe"
 
@@ -93,7 +93,7 @@ class TestIon:
         """Test TeX representation of ion."""
         ion = composition.Ion("Fe", "2")
         assert ion.tex == "{Fe}^{2}"
-        
+
         # Test with different charge formats
         ion_plus = composition.Ion("O", "6")
         assert ion_plus.tex == "{O}^{6}"
@@ -114,12 +114,12 @@ class TestIon:
         # Test basic numeric charges
         ion1 = composition.Ion("Fe", "2")
         assert str(ion1.path) == "Fe_2"
-        
+
         # Test special charges
         ion_i = composition.Ion("Fe", "i")
         expected_path = "Fe_i"
         assert str(ion_i.path) == expected_path
-        
+
         ion_j = composition.Ion("O", "j")
         expected_path = "O_j"
         assert str(ion_j.path) == expected_path
@@ -139,7 +139,7 @@ class TestIon:
     def test_valid_charges(self):
         """Test various valid charge formats."""
         valid_charges = ["1", "2", "3", "10", "i", "j"]
-        
+
         for charge in valid_charges:
             ion = composition.Ion("O", charge)
             assert ion.charge == charge
@@ -147,7 +147,7 @@ class TestIon:
     def test_invalid_charges(self):
         """Test invalid charge formats raise ValueError."""
         invalid_charges = ["a", "x", "1.5", "+", "-", ""]
-        
+
         for charge in invalid_charges:
             with pytest.raises(ValueError, match="Invalid charge"):
                 composition.Ion("O", charge)
@@ -162,12 +162,12 @@ class TestIon:
     def test_ion_comparison(self):
         """Test ion comparison functionality."""
         ion1 = composition.Ion("Fe", "2")
-        ion2 = composition.Ion("Fe", "2") 
+        ion2 = composition.Ion("Fe", "2")
         ion3 = composition.Ion("O", "6")
-        
+
         # Same ions should be equal
         assert ion1 == ion2
-        
+
         # Different ions should not be equal
         assert ion1 != ion3
 
@@ -175,11 +175,11 @@ class TestIon:
         """Test that ions can be hashed."""
         ion1 = composition.Ion("Fe", "2")
         ion2 = composition.Ion("O", "6")
-        
+
         # Should be able to create a set
         ion_set = {ion1, ion2}
         assert len(ion_set) == 2
-        
+
         # Should be able to use as dictionary keys
         ion_dict = {ion1: "iron", ion2: "oxygen"}
         assert len(ion_dict) == 2
@@ -208,7 +208,7 @@ class TestChargeState:
         """Test that ChargeState inherits from Base."""
         cs = composition.ChargeState(("O", "6"), ("O", "7"))
         assert isinstance(cs, Base)
-        assert hasattr(cs, 'logger')
+        assert hasattr(cs, "logger")
 
     def test_charge_state_tex(self):
         """Test TeX representation of charge state."""
@@ -248,10 +248,10 @@ class TestChargeState:
         cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
         cs2 = composition.ChargeState(("O", "6"), ("O", "7"))
         cs3 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
-        
+
         # Same charge states should be equal
         assert cs1 == cs2
-        
+
         # Different charge states should not be equal
         assert cs1 != cs3
 
@@ -259,11 +259,11 @@ class TestChargeState:
         """Test that charge states can be hashed."""
         cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
         cs2 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
-        
+
         # Should be able to create a set
         cs_set = {cs1, cs2}
         assert len(cs_set) == 2
-        
+
         # Should be able to use as dictionary keys
         cs_dict = {cs1: "oxygen", cs2: "iron"}
         assert len(cs_dict) == 2
@@ -284,9 +284,9 @@ class TestCompositionModule:
 
     def test_module_attributes(self):
         """Test module has expected attributes."""
-        assert hasattr(composition, 'Ion')
-        assert hasattr(composition, 'ChargeState')
-        assert hasattr(composition, 'known_species')
+        assert hasattr(composition, "Ion")
+        assert hasattr(composition, "ChargeState")
+        assert hasattr(composition, "known_species")
 
     def test_known_species_completeness(self):
         """Test that known_species covers common solar wind ions."""
@@ -301,7 +301,7 @@ class TestCompositionModule:
         assert "O" in o6_o7.tex
         assert "6" in o6_o7.tex
         assert "7" in o6_o7.tex
-        
+
         # Test iron charge states
         fe10_fe11 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
         assert "Fe" in fe10_fe11.tex
@@ -317,10 +317,10 @@ class TestCompositionIntegration:
         # Create ions
         o6 = composition.Ion("O", "6")
         o7 = composition.Ion("O", "7")
-        
+
         # Use in charge state
         cs = composition.ChargeState(o6, o7)
-        
+
         # Verify roundtrip
         assert cs.ionA.species == "O"
         assert cs.ionA.charge == "6"
@@ -340,6 +340,6 @@ class TestCompositionIntegration:
         cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
         cs2 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
         cs3 = composition.ChargeState(("O", "7"), ("O", "6"))  # Reversed
-        
+
         paths = [str(cs1.path), str(cs2.path), str(cs3.path)]
         assert len(paths) == len(set(paths))  # All unique

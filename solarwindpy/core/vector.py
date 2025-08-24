@@ -5,7 +5,6 @@ This module provides a Vector class and its subclass BField for handling
 vector operations and magnetic field calculations.
 """
 
-from typing import Union
 import numpy as np
 import pandas as pd
 
@@ -112,7 +111,7 @@ class Vector(base.Base):
     @property
     def colat(self):
         """Shortcut to colatitude property.
-        
+
         Returns
         -------
         pd.Series
@@ -136,7 +135,7 @@ class Vector(base.Base):
     @property
     def lat(self):
         """Shortcut to latitude property.
-        
+
         Returns
         -------
         pd.Series
@@ -147,7 +146,7 @@ class Vector(base.Base):
     @property
     def latitude(self):
         """Latitude of the vector.
-        
+
         Returns
         -------
         pd.Series
@@ -229,7 +228,7 @@ class Vector(base.Base):
         """
         return self.unit_vector
 
-    def project(self, other: Union["Vector", pd.DataFrame]) -> pd.DataFrame:
+    def project(self, other: "Vector | pd.DataFrame") -> pd.DataFrame:
         """Project self onto ``other``.
 
         Parameters
@@ -264,7 +263,7 @@ class Vector(base.Base):
         )
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
-    def cos_theta(self, other: Union["Vector", pd.DataFrame]) -> pd.Series:
+    def cos_theta(self, other: "Vector | pd.DataFrame") -> pd.Series:
         """Cosine of the angle between this vector and ``other``.
 
         Parameters

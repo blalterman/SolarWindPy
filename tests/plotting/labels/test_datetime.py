@@ -9,7 +9,10 @@ def test_timedelta_latex_and_path():
     """Verify ``Timedelta`` LaTeX and path string."""
     td = datetime_labels.Timedelta("2h")
     assert str(td.path) in ("dt-2h", "dt-2H")
-    assert str(td) in ("$\\Delta t \\; [2 \\; \\mathrm{h}]$", "$\\Delta t \\; [2 \\; \\mathrm{H}]$")
+    assert str(td) in (
+        "$\\Delta t \\; [2 \\; \\mathrm{h}]$",
+        "$\\Delta t \\; [2 \\; \\mathrm{H}]$",
+    )
 
 
 def test_datetime_label():
@@ -29,8 +32,14 @@ def test_epoch_label():
 def test_frequency_label():
     """Validate ``Frequency`` label output."""
     freq = datetime_labels.Frequency("1h")
-    assert str(freq.path) in ("frequency_of_(1 \\; \\mathrm{h})^-1", "frequency_of_(1 \\; \\mathrm{H})^-1")
-    assert str(freq) in ("$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{h})^-1]$", "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{H})^-1]$")
+    assert str(freq.path) in (
+        "frequency_of_(1 \\; \\mathrm{h})^-1",
+        "frequency_of_(1 \\; \\mathrm{H})^-1",
+    )
+    assert str(freq) in (
+        "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{h})^-1]$",
+        "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{H})^-1]$",
+    )
 
 
 def test_january1st_label():
@@ -51,11 +60,8 @@ class TestTimedelta:
 
     def test_timedelta_various_offsets(self):
         """Test Timedelta with various pandas offsets."""
-        test_cases = [
-            "1h", "2H", "30min", "1d", "5s", "10ms",
-            "1M", "1Y", "1W", "1Q"
-        ]
-        
+        test_cases = ["1h", "2H", "30min", "1d", "5s", "10ms", "1M", "1Y", "1W", "1Q"]
+
         for offset in test_cases:
             td = datetime_labels.Timedelta(offset)
             assert td.offset is not None
@@ -77,7 +83,7 @@ class TestTimedelta:
         """Test path generation for different offsets."""
         td_hour = datetime_labels.Timedelta("1h")
         td_day = datetime_labels.Timedelta("1d")
-        
+
         # Paths should be different
         assert td_hour.path != td_day.path
         assert "dt-" in str(td_hour.path)
@@ -110,7 +116,7 @@ class TestTimedelta:
         """Test set_offset method."""
         td = datetime_labels.Timedelta("1h")
         original_offset = td.offset
-        
+
         # Test setting new offset
         td.set_offset("2d")
         assert td.offset != original_offset
@@ -128,10 +134,17 @@ class TestDateTime:
     def test_datetime_various_kinds(self):
         """Test DateTime with various kinds."""
         test_cases = [
-            "Year", "Month", "Day", "Hour", "Minute", "Second",
-            "Day of Year", "Hour of Day", "Fractional Day"
+            "Year",
+            "Month",
+            "Day",
+            "Hour",
+            "Minute",
+            "Second",
+            "Day of Year",
+            "Hour of Day",
+            "Fractional Day",
         ]
-        
+
         for kind in test_cases:
             dt = datetime_labels.DateTime(kind)
             assert dt.kind == kind
@@ -148,7 +161,7 @@ class TestDateTime:
         """Test path generation."""
         dt = datetime_labels.DateTime("Day of Year")
         assert str(dt.path) == "day-of-year"
-        
+
         dt_simple = datetime_labels.DateTime("Year")
         assert str(dt_simple.path) == "year"
 
@@ -164,7 +177,7 @@ class TestDateTime:
         """Test set_kind method."""
         dt = datetime_labels.DateTime("Year")
         assert dt.kind == "Year"
-        
+
         dt.set_kind("Month")
         assert dt.kind == "Month"
 
@@ -208,14 +221,14 @@ class TestEpoch:
         """Test path generation."""
         epoch = datetime_labels.Epoch("Hour", "Day")
         assert str(epoch.path) == "Hour-of-Day"
-        
+
         epoch2 = datetime_labels.Epoch("Minute", "Hour")
         assert str(epoch2.path) == "Minute-of-Hour"
 
     def test_epoch_different_spacing(self):
         """Test different spacing options."""
         spaces = [" ", r"\,", r"\;", r"\:"]
-        
+
         for space in spaces:
             epoch = datetime_labels.Epoch("Hour", "Day", space=space)
             assert epoch.space == space
@@ -238,13 +251,13 @@ class TestEpoch:
     def test_epoch_setter_methods(self):
         """Test setter methods."""
         epoch = datetime_labels.Epoch("Hour", "Day")
-        
+
         epoch.set_smaller("minute")
         assert epoch.smaller == "Minute"
-        
+
         epoch.set_larger("year")
         assert epoch.larger == "Year"
-        
+
         epoch.set_space(r"\;")
         assert epoch.space == r"\;"
 
@@ -309,7 +322,7 @@ class TestFrequency:
         """Test set_other method."""
         freq = datetime_labels.Frequency("1h")
         original_other = freq.other
-        
+
         freq.set_other("2d")
         assert freq.other != original_other
 
@@ -356,10 +369,8 @@ class TestDateTimeModule:
 
     def test_module_classes(self):
         """Test that module has expected classes."""
-        expected_classes = [
-            "Timedelta", "DateTime", "Epoch", "Frequency", "January1st"
-        ]
-        
+        expected_classes = ["Timedelta", "DateTime", "Epoch", "Frequency", "January1st"]
+
         for class_name in expected_classes:
             assert hasattr(datetime_labels, class_name)
             cls = getattr(datetime_labels, class_name)
@@ -374,7 +385,7 @@ class TestDateTimeModule:
             datetime_labels.Frequency,
             datetime_labels.January1st,
         ]
-        
+
         for cls in classes:
             # All should inherit from ArbitraryLabel
             assert issubclass(cls, ArbitraryLabel)
@@ -399,7 +410,7 @@ class TestDateTimeIntegration:
             ("Day", "Month"),
             ("Month", "Year"),
         ]
-        
+
         for smaller, larger in epochs:
             epoch = datetime_labels.Epoch(smaller, larger)
             assert epoch.smaller == smaller
@@ -415,7 +426,7 @@ class TestDateTimeIntegration:
             datetime_labels.Frequency("1h"),
             datetime_labels.January1st(),
         ]
-        
+
         paths = [str(label.path) for label in labels]
         assert len(paths) == len(set(paths))  # All unique
 
@@ -424,11 +435,11 @@ class TestDateTimeIntegration:
         # Test time delta representation
         td = datetime_labels.Timedelta("1h")
         assert r"\Delta t" in td.tex
-        
+
         # Test frequency units
         freq = datetime_labels.Frequency("1h")
         assert "^-1" in freq.units
-        
+
         # Test epoch relationships
         epoch = datetime_labels.Epoch("Hour", "Day")
         assert "of" in epoch.tex

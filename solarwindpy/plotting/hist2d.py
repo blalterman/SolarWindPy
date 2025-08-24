@@ -410,10 +410,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             )
         elif axnorm in ("d", "cd", "rd"):
             default_norm = mpl.colors.LogNorm(clip=True)
-        norm = kwargs.pop(
-            "norm",
-            default_norm
-        )
+        norm = kwargs.pop("norm", default_norm)
 
         if limit_color_norm:
             self._limit_color_norm(norm)
@@ -973,7 +970,10 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return above_contour
 
     def take_data_in_yrange_across_x(
-        self, ranges_by_x, get_x_bounds, get_y_bounds,
+        self,
+        ranges_by_x,
+        get_x_bounds,
+        get_y_bounds,
     ):
         r"""
 

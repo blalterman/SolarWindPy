@@ -1,5 +1,4 @@
-r""":py:mod:`~solarwidpy.fitfunctions` classes.
-"""
+r""":py:mod:`~solarwidpy.fitfunctions` classes."""
 
 from . import core
 from . import lines
