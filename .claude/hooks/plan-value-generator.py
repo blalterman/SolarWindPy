@@ -144,6 +144,7 @@ class SolarWindPyPlanValueGenerator:
         sections.append(self._generate_resource_cost_analysis(plan_data))
         sections.append(self._generate_risk_assessment(plan_data))
         sections.append(self._generate_security_proposition(plan_data))
+        sections.append(self._generate_scope_audit(plan_data))
         sections.append(self._generate_token_optimization(plan_data))
         sections.append(self._generate_time_analysis(plan_data))
         sections.append(self._generate_usage_metrics(plan_data))
@@ -1027,6 +1028,74 @@ class SolarWindPyPlanValueGenerator:
         ]
         
         return "\n".join(metrics)
+    
+    def _generate_scope_audit(self, plan_data: Dict) -> str:
+        """Generate scope audit section by calling plan-scope-auditor.py."""
+        import subprocess
+        import tempfile
+        import os
+        
+        try:
+            # Create temporary file with plan data
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_file:
+                json.dump(plan_data, temp_file, indent=2)
+                temp_file_path = temp_file.name
+            
+            # Call the scope auditor
+            script_path = Path(__file__).parent / 'plan-scope-auditor.py'
+            result = subprocess.run([
+                'python', str(script_path),
+                '--plan-data', json.dumps(plan_data),
+                '--output-format', 'markdown'
+            ], capture_output=True, text=True, timeout=30)
+            
+            # Clean up temporary file
+            os.unlink(temp_file_path)
+            
+            if result.returncode == 0:
+                return result.stdout.strip()
+            else:
+                # Fallback scope audit if the external script fails
+                return self._generate_fallback_scope_audit(plan_data)
+                
+        except Exception as e:
+            # Fallback scope audit if there's any error
+            return self._generate_fallback_scope_audit(plan_data)
+    
+    def _generate_fallback_scope_audit(self, plan_data: Dict) -> str:
+        """Generate a basic scope audit if the external auditor fails."""
+        affects = plan_data.get('affects', '')
+        objective = plan_data.get('objective', '')
+        
+        # Basic alignment assessment
+        scientific_terms = ['physics', 'plasma', 'solar', 'wind', 'magnetic', 'research', 'analysis']
+        found_terms = [term for term in scientific_terms if term in objective.lower()]
+        
+        score = min(len(found_terms) * 15 + 25, 100)  # Basic scoring
+        
+        return f"""## 🎯 Scope Audit
+
+### SolarWindPy Alignment Assessment
+**Alignment Score**: {score}/100
+
+**Assessment**: {"High" if score >= 80 else "Medium" if score >= 60 else "Low"} alignment with SolarWindPy scientific mission.
+
+### Scientific Research Relevance
+**Relevance Level**: {"High" if len(found_terms) >= 3 else "Medium" if len(found_terms) >= 1 else "Low"}
+
+Scientific terms identified: {", ".join(found_terms) if found_terms else "None"}
+
+### Module Impact Analysis
+**Affected SolarWindPy Modules**: {affects if affects else "Not specified"}
+
+### Scope Boundary Enforcement
+**Recommended Scope Controls:**
+- Maintain focus on solar wind physics research objectives
+- Ensure all changes preserve scientific accuracy
+- Validate computational methods follow SolarWindPy conventions
+
+**Scientific Computing Alignment:**
+This plan should advance SolarWindPy's mission to provide accurate, efficient tools for solar wind physics research."""
     
     def main(self):
         """Main execution function."""

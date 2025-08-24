@@ -16,8 +16,15 @@ normal_parameters
 
 Examples
 --------
->>> df = pd.DataFrame(...)
+>>> import pandas as pd
+>>> import numpy as np
+>>> columns = pd.MultiIndex.from_tuples([
+...     ('n', '', 'p1'), ('n', '', 'p2')
+... ], names=['M', 'C', 'S'])
+>>> df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)
 >>> new_df, mask = swap_protons(df)
+>>> 'swapped_protons' in new_df.columns.get_level_values('M')
+True
 """
 
 import pdb  # noqa: F401
@@ -48,7 +55,15 @@ def swap_protons(data, logger=None):
 
     Examples
     --------
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> columns = pd.MultiIndex.from_tuples([
+    ...     ('n', '', 'p1'), ('n', '', 'p2')
+    ... ], names=['M', 'C', 'S'])
+    >>> df = pd.DataFrame([[2, 1], [1, 2]], columns=columns)  # p1 < p2 in first row
     >>> new_df, mask = swap_protons(df)
+    >>> mask.iloc[0]  # First row should be swapped
+    True
     """
     p1 = data.xs("p1", axis=1, level="S")
     p2 = data.xs("p2", axis=1, level="S")
@@ -127,7 +142,11 @@ def normal_parameters(m, s):
 
     Examples
     --------
-    >>> normal_parameters(m, s)
+    >>> import numpy as np
+    >>> m, s = 1.0, 0.5  # log-normal parameters
+    >>> mu, sigma = normal_parameters(m, s)
+    >>> mu > 1.0  # Normal mean should be > 1
+    True
     """
     mu = np.exp(m + ((s**2.0) / 2.0))
     sigma = np.exp(s**2.0 + 2.0 * m)
