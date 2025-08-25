@@ -10,13 +10,14 @@ black==25.1.0
 doc8==2.0.0
 flake8-docstrings==1.7.0
 flake8==7.3.0
+gh==0.0.4
 h5py==3.14.0
 matplotlib==3.10.5
 numba==0.61.2
 numexpr==2.11.0
 numpy==2.2.6
 numpydoc==1.9.0
-pandas==2.3.1
+pandas==2.3.2
 pydocstyle==6.3.0
 pytest-cov==6.2.1
 pytest==8.4.1
