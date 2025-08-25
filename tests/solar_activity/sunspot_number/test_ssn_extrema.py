@@ -44,8 +44,9 @@ class TestSSNExtrema:
     def test_initialization_no_args(self):
         """Test SSNExtrema initialization with no arguments."""
         # This should work without raising errors
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Mock the CSV data
@@ -68,8 +69,9 @@ class TestSSNExtrema:
         extrema = SSNExtrema.__new__(SSNExtrema)
 
         # Mock file reading
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Create mock DataFrame that simulates the CSV structure
@@ -111,9 +113,11 @@ class TestSSNExtrema:
 
             mock_read_csv.return_value = raw_data
 
-            with patch.object(pd.DataFrame, "stack", return_value=stacked), patch(
-                "pandas.to_datetime", return_value=stacked
-            ), patch.object(pd.Series, "unstack", return_value=unstacked):
+            with (
+                patch.object(pd.DataFrame, "stack", return_value=stacked),
+                patch("pandas.to_datetime", return_value=stacked),
+                patch.object(pd.Series, "unstack", return_value=unstacked),
+            ):
 
                 extrema.load_or_set_data()
 
@@ -162,8 +166,9 @@ class TestSSNExtrema:
         """Test that SSNExtrema inherits from IndicatorExtrema."""
         from solarwindpy.solar_activity.base import IndicatorExtrema
 
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Mock the CSV data
@@ -179,8 +184,9 @@ class TestSSNExtrema:
         """Test that the CSV file path is resolved correctly."""
         extrema = SSNExtrema.__new__(SSNExtrema)
 
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             mock_data = pd.DataFrame(
@@ -200,8 +206,9 @@ class TestSSNExtrema:
 
     def test_data_format_after_loading(self):
         """Test that data has correct format after loading."""
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Mock the CSV reading and processing
@@ -242,9 +249,10 @@ class TestSSNExtrema:
                 )
                 mock_to_datetime.return_value = datetime_series
 
-                with patch.object(
-                    pd.DataFrame, "stack", return_value=stacked_data
-                ), patch.object(pd.Series, "unstack", return_value=processed_data):
+                with (
+                    patch.object(pd.DataFrame, "stack", return_value=stacked_data),
+                    patch.object(pd.Series, "unstack", return_value=processed_data),
+                ):
 
                     extrema = SSNExtrema()
 
@@ -260,9 +268,10 @@ class TestSSNExtremaEdgeCases:
 
     def test_file_not_found_handling(self):
         """Test behavior when CSV file doesn't exist."""
-        with patch("pathlib.Path.exists", return_value=False), patch(
-            "pandas.read_csv"
-        ) as mock_read_csv:
+        with (
+            patch("pathlib.Path.exists", return_value=False),
+            patch("pandas.read_csv") as mock_read_csv,
+        ):
 
             # read_csv should still be called even if file check fails
             # (pandas will handle the FileNotFoundError)
@@ -273,8 +282,9 @@ class TestSSNExtremaEdgeCases:
 
     def test_malformed_csv_handling(self):
         """Test behavior with malformed CSV data."""
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Simulate malformed CSV that causes parsing error
@@ -285,8 +295,9 @@ class TestSSNExtremaEdgeCases:
 
     def test_empty_csv_handling(self):
         """Test behavior with empty CSV data."""
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Empty DataFrame
@@ -304,8 +315,9 @@ class TestSSNExtremaEdgeCases:
 
     def test_invalid_date_format_handling(self):
         """Test behavior with invalid date formats in CSV."""
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Data with invalid date formats
@@ -358,8 +370,9 @@ class TestSSNExtremaEdgeCases:
 
     def test_successful_initialization_creates_expected_attributes(self):
         """Test that successful initialization creates expected attributes."""
-        with patch("pandas.read_csv") as mock_read_csv, patch(
-            "pathlib.Path.exists", return_value=True
+        with (
+            patch("pandas.read_csv") as mock_read_csv,
+            patch("pathlib.Path.exists", return_value=True),
         ):
 
             # Mock successful CSV loading
@@ -378,9 +391,11 @@ class TestSSNExtremaEdgeCases:
 
             mock_read_csv.return_value = mock_data
 
-            with patch("pandas.to_datetime"), patch.object(
-                pd.DataFrame, "stack"
-            ), patch.object(pd.Series, "unstack", return_value=processed_data):
+            with (
+                patch("pandas.to_datetime"),
+                patch.object(pd.DataFrame, "stack"),
+                patch.object(pd.Series, "unstack", return_value=processed_data),
+            ):
 
                 extrema = SSNExtrema()
 

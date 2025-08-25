@@ -1,0 +1,62 @@
+{# Custom layout template for SolarWindPy documentation #}
+{% extends "!layout.html" %}
+
+{# Custom title with project branding #}
+{% set css_files = css_files + ["_static/custom.css"] %}
+
+{# Add custom favicon #}
+{% block htmltitle %}
+  {{ super() }}
+  <link rel="icon" type="image/x-icon" href="{{ pathto('_static/favicon.ico', 1) }}">
+{% endblock %}
+
+{# Enhanced navigation sidebar #}
+{% block sidebar1 %}
+  {{ super() }}
+  <div class="sidebar-custom-info">
+    <p class="sidebar-title">SolarWindPy</p>
+    <p class="sidebar-subtitle">Solar Wind Analysis Toolkit</p>
+    <hr style="margin: 10px 0; border-color: #bdc3c7;">
+  </div>
+{% endblock %}
+
+{# Custom footer with scientific context #}
+{% block footer %}
+  {{ super() }}
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+{% endblock %}
+
+{# Add scientific notation support #}
+{% block extrahead %}
+  {{ super() }}
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+{% endblock %}

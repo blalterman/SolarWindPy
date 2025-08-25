@@ -92,9 +92,11 @@ class TestSIDC:
         mock_ssn_extrema_class.return_value = mock_extrema
 
         # Mock methods that get called during initialization
-        with patch.object(SIDC, "_init_logger"), patch.object(
-            SIDC, "calculate_extrema_kind"
-        ), patch.object(SIDC, "calculate_edge"):
+        with (
+            patch.object(SIDC, "_init_logger"),
+            patch.object(SIDC, "calculate_extrema_kind"),
+            patch.object(SIDC, "calculate_edge"),
+        ):
 
             sidc = SIDC("m")
 
@@ -347,12 +349,12 @@ class TestSIDC:
         """Test that SIDC inherits from ActivityIndicator."""
         from solarwindpy.solar_activity.base import ActivityIndicator
 
-        with patch.object(SIDC, "_init_logger"), patch.object(
-            SIDC, "load_data"
-        ), patch.object(SIDC, "set_extrema"), patch.object(
-            SIDC, "calculate_extrema_kind"
-        ), patch.object(
-            SIDC, "calculate_edge"
+        with (
+            patch.object(SIDC, "_init_logger"),
+            patch.object(SIDC, "load_data"),
+            patch.object(SIDC, "set_extrema"),
+            patch.object(SIDC, "calculate_extrema_kind"),
+            patch.object(SIDC, "calculate_edge"),
         ):
 
             sidc = SIDC("m")
@@ -361,6 +363,27 @@ class TestSIDC:
 
 class TestSIDCEdgeCases:
     """Test edge cases and error conditions for SIDC."""
+
+    def test_normalized_property_without_nssn_column(self, mock_loader_data):
+        """Test normalized property when nssn column doesn't exist."""
+        with patch.object(SIDC, "_init_logger"):
+            sidc = SIDC.__new__(SIDC)
+            sidc._loader = Mock()
+            sidc._loader.data = mock_loader_data.copy()  # No 'nssn' column
+
+            # Mock normalize_ssn method
+            expected_normalized = pd.Series(
+                np.random.uniform(0, 1, len(mock_loader_data)),
+                index=mock_loader_data.index,
+                name="nssn",
+            )
+
+            with patch.object(sidc, "normalize_ssn", return_value=expected_normalized):
+                result = sidc.normalized
+
+                # Should call normalize_ssn when nssn column doesn't exist
+                sidc.normalize_ssn.assert_called_once()
+                assert isinstance(result, pd.Series)
 
     def test_normalized_property_with_existing_nssn(self, mock_loader_data):
         """Test normalized property when nssn column exists."""
@@ -420,12 +443,12 @@ class TestSIDCEdgeCases:
 
     def test_plot_on_colorbar_method_exists(self):
         """Test that plot_on_colorbar method exists and is callable."""
-        with patch.object(SIDC, "_init_logger"), patch.object(
-            SIDC, "load_data"
-        ), patch.object(SIDC, "set_extrema"), patch.object(
-            SIDC, "calculate_extrema_kind"
-        ), patch.object(
-            SIDC, "calculate_edge"
+        with (
+            patch.object(SIDC, "_init_logger"),
+            patch.object(SIDC, "load_data"),
+            patch.object(SIDC, "set_extrema"),
+            patch.object(SIDC, "calculate_extrema_kind"),
+            patch.object(SIDC, "calculate_edge"),
         ):
 
             sidc = SIDC("m")

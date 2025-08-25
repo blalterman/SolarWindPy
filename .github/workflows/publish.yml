@@ -87,8 +87,15 @@ jobs:
           unzip -l dist/*.whl | head -20
       
       # TestPyPI deployment (for testing)
+      # Release candidates go to test
       - name: Publish to TestPyPI
-        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi' && github.event.inputs.dry_run != 'true') || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'rc'))
+        if: |
+          (github.event_name == 'workflow_dispatch' && 
+           github.event.inputs.target == 'testpypi' && 
+           github.event.inputs.dry_run != 'true') ||
+          (github.event_name == 'push' && 
+           startsWith(github.ref, 'refs/tags/') && 
+           contains(github.ref, 'rc'))  
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/

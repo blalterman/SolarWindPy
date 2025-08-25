@@ -16,10 +16,10 @@ build:
 
 requirements:
   host:
-    - python
+    - python >=3.10
     - pip
   run:
-    - python
+    - python >=3.10
     - numpy
     - scipy
     - pandas
@@ -28,7 +28,6 @@ requirements:
     - h5py
     - pyyaml
     - matplotlib
-    - importlib_metadata; python_version < '3.8'
     - astropy
     - numba
     - tabulate

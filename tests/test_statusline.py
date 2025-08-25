@@ -38,16 +38,18 @@ class TestColors:
 
     def test_colorize_with_tty(self):
         """Test colors applied when TTY and NO_COLOR not set."""
-        with patch("sys.stdout.isatty", return_value=True), patch.dict(
-            os.environ, {}, clear=True
+        with (
+            patch("sys.stdout.isatty", return_value=True),
+            patch.dict(os.environ, {}, clear=True),
         ):
             result = statusline.Colors.colorize("test", statusline.Colors.RED)
             assert result == f"{statusline.Colors.RED}test{statusline.Colors.RESET}"
 
     def test_color_methods(self):
         """Test individual color methods."""
-        with patch("sys.stdout.isatty", return_value=True), patch.dict(
-            os.environ, {}, clear=True
+        with (
+            patch("sys.stdout.isatty", return_value=True),
+            patch.dict(os.environ, {}, clear=True),
         ):
             assert (
                 statusline.Colors.red("test")
@@ -188,10 +190,10 @@ class TestUsageIndicator:
 
     def test_usage_green_fresh(self):
         """Test green for fresh session."""
-        with patch("time.time", return_value=1000), patch(
-            "pathlib.Path.exists", return_value=True
-        ), patch(
-            "pathlib.Path.read_text", return_value="999.5"
+        with (
+            patch("time.time", return_value=1000),
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.read_text", return_value="999.5"),
         ):  # 0.5 hours ago
             with patch("sys.stdout.isatty", return_value=False):
                 result = statusline.get_usage_indicator()
@@ -218,12 +220,12 @@ class TestStatusLineIntegration:
             "transcript_path": "/dev/null",
         }
 
-        with patch("subprocess.run") as mock_run, patch(
-            "os.environ.get", return_value=""
-        ), patch("statusline.estimate_token_usage", return_value="25k"), patch(
-            "statusline.get_compaction_indicator", return_value="●●●"
-        ), patch(
-            "statusline.get_usage_indicator", return_value="█████"
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("os.environ.get", return_value=""),
+            patch("statusline.estimate_token_usage", return_value="25k"),
+            patch("statusline.get_compaction_indicator", return_value="●●●"),
+            patch("statusline.get_usage_indicator", return_value="█████"),
         ):
 
             mock_run.return_value.returncode = 0
@@ -272,17 +274,21 @@ if __name__ == "__main__":
             "transcript_path": "/dev/null",
         }
 
-        with patch("subprocess.run") as mock_run, patch(
-            "os.environ.get", return_value="solarwindpy-20250404"
-        ), patch(
-            "statusline.estimate_token_usage",
-            return_value=statusline.Colors.yellow("160k"),
-        ), patch(
-            "statusline.get_compaction_indicator",
-            return_value=statusline.Colors.yellow("●○○"),
-        ), patch(
-            "statusline.get_usage_indicator",
-            return_value=statusline.Colors.green("█████"),
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("os.environ.get", return_value="solarwindpy-20250404"),
+            patch(
+                "statusline.estimate_token_usage",
+                return_value=statusline.Colors.yellow("160k"),
+            ),
+            patch(
+                "statusline.get_compaction_indicator",
+                return_value=statusline.Colors.yellow("●○○"),
+            ),
+            patch(
+                "statusline.get_usage_indicator",
+                return_value=statusline.Colors.green("█████"),
+            ),
         ):
 
             mock_run.return_value.returncode = 0

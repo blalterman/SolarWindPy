@@ -9,6 +9,8 @@ Python data analysis tools for solar wind measurements.
 Installation
 ============
 
+SolarWindPy requires Python 3.10 or later.
+
 SolarWindPy will soon be installable from pip via
 ``pip install solarwindpy``. We plant to target conda quickly there
 after, most likely through the ``conda-forge`` channel.
@@ -16,17 +18,21 @@ after, most likely through the ``conda-forge`` channel.
 User
 ----
 
-TODO
+Install from pip (when available):
+
+.. code-block:: bash
+
+   pip install solarwindpy  # Requires Python 3.10+
 
 Development
 -----------
 
 1. Fork the repository and clone your fork.
-2. Create a Conda environment using the provided YAML file:
+2. Create a Conda environment using the provided YAML file (Python 3.10+):
 
    .. code-block:: bash
 
-      conda env create -f solarwindpy-20250403.yml
+      conda env create -f solarwindpy-20250403.yml  # Python 3.10+
       conda activate solarwindpy-20250403
       pip install -e .
 

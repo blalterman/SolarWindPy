@@ -1,0 +1,262 @@
+name: Doctest Validation
+
+on:
+  push:
+    branches: [ master, plan/* ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run weekly to catch environmental changes
+    - cron: '0 6 * * 0'
+
+jobs:
+  doctest-validation:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.10']  # Focus on primary version, spot-check others
+      fail-fast: false  # Allow other jobs to complete even if one fails
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Find latest conda environment file
+      id: find-conda-env
+      run: |
+        # Find the most recent solarwindpy-*.yml file
+        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
+        echo "Latest environment file: $LATEST_ENV"
+        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+    
+    - name: Cache conda environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env.outputs.conda_env_file) }}
+        restore-keys: |
+          ${{ runner.os }}-conda-
+    
+    - name: Set up conda environment
+      uses: conda-incubator/setup-miniconda@v3
+      timeout-minutes: 10
+      with:
+        environment-file: ${{ steps.find-conda-env.outputs.conda_env_file }}
+        activate-environment: ${{ steps.find-conda-env.outputs.env_name }}
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        use-only-tar-bz2: true
+        miniforge-version: latest  # For cache compatibility
+    
+    - name: Install package in development mode
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
+        pip install -e .
+    
+    - name: Verify installation
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
+        python -c "import solarwindpy; print(f'SolarWindPy version: {solarwindpy.__version__}')"
+        python -c "import numpy, pandas, matplotlib; print('All dependencies available')"
+    
+    - name: Run essential documentation validation
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
+        # Use simplified validation framework with targeted approach
+        python scripts/simple_doc_validation/doctest_runner.py \
+          solarwindpy/ \
+          --targeted \
+          --output-report doctest_validation_report_${{ matrix.python-version }}.json \
+          --text-report doctest_validation_summary_${{ matrix.python-version }}.txt \
+          --verbose
+      timeout-minutes: 5  # Ensure validation completes quickly
+    
+    - name: Generate essential validation summary
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
+        python scripts/simple_doc_validation/validation_utils.py --framework-status
+        
+        # Generate simplified summary
+        python -c "
+        import json
+        import os
+        
+        report_file = 'doctest_validation_report_${{ matrix.python-version }}.json'
+        if os.path.exists(report_file):
+            with open(report_file, 'r') as f:
+                results = json.load(f)
+            
+            summary_data = results.get('summary', results)
+            summary = {
+                'python_version': '${{ matrix.python-version }}',
+                'files_processed': summary_data.get('files_processed', 0),
+                'total_tests': summary_data.get('total_tests', 0),
+                'failed_tests': summary_data.get('failed_tests', 0),
+                'overall_success': summary_data.get('overall_success', False),
+                'success_rate': summary_data.get('success_rate', 0),
+                'validation_approach': 'targeted_essential'
+            }
+            
+            with open('doctest_summary_${{ matrix.python-version }}.json', 'w') as f:
+                json.dump(summary, f, indent=2)
+                
+            status = 'PASSED' if summary['overall_success'] else 'FAILED'
+            print(f'✅ Validation Summary: {status}')
+            print(f'📊 Files: {summary[\"files_processed\"]}, Tests: {summary[\"total_tests\"]}, Success: {summary[\"success_rate\"]:.1f}%')
+        else:
+            print('❌ No validation report found')
+        "
+    
+    - name: Upload essential validation results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: doctest-results-py${{ matrix.python-version }}
+        path: |
+          doctest_validation_report_${{ matrix.python-version }}.json
+          doctest_validation_summary_${{ matrix.python-version }}.txt
+          doctest_summary_${{ matrix.python-version }}.json
+        retention-days: 30  # Appropriate retention for research package
+    
+    - name: Comment PR with essential results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const pythonVersion = '${{ matrix.python-version }}';
+          
+          try {
+            const summaryFile = `doctest_summary_${pythonVersion}.json`;
+            let summary = {};
+            
+            if (fs.existsSync(summaryFile)) {
+              summary = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
+            }
+            
+            const successIcon = summary.overall_success ? '✅' : '❌';
+            const status = summary.overall_success ? 'PASSED' : 'FAILED';
+            
+            const comment = `## SolarWindPy Documentation Validation - Python ${pythonVersion}
+            
+            ${successIcon} **Status**: ${status}
+            
+            **Essential Metrics:**
+            - Files: ${summary.files_processed || 0}
+            - Tests: ${summary.total_tests || 0} 
+            - Failed: ${summary.failed_tests || 0}
+            - Success Rate: ${(summary.success_rate || 0).toFixed(1)}%
+            - Approach: Targeted validation (core physics modules)
+            
+            ${summary.overall_success ? '🎉 All essential documentation examples working!' : '⚠️ Issues found - check artifacts for details.'}
+            `;
+            
+            // Simple comment creation without complex logic
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+            
+          } catch (error) {
+            console.log(`Error processing results: ${error.message}`);
+            // Fail silently - don't spam with error comments
+          }
+
+  # Simplified result summary - no aggregation needed for single Python version
+  validation-summary:
+    runs-on: ubuntu-latest
+    needs: doctest-validation
+    if: always()
+    
+    steps:
+    - name: Download validation results
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+    
+    - name: Generate final validation summary
+      run: |
+        echo "📋 SolarWindPy Documentation Validation Complete"
+        echo "🎯 Approach: Sustainable targeted validation"
+        echo "📊 Focus: Essential physics modules (47 examples)"
+        
+        # Simple summary without complex aggregation
+        if find artifacts/ -name "doctest_summary_*.json" -type f | head -1 | xargs test -f; then
+          echo "✅ Validation artifacts found"
+          cat artifacts/*/doctest_summary_*.json | head -20
+        else
+          echo "⚠️ No validation results found"
+        fi
+
+  # Spot-check other Python versions (weekly and on master PRs only)
+  spot-check-validation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'pull_request' && github.base_ref == 'master')
+    
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Find latest conda environment file
+      id: find-conda-env-spot
+      run: |
+        # Find the most recent solarwindpy-*.yml file
+        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
+        echo "Latest environment file: $LATEST_ENV"
+        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+    
+    - name: Cache conda environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env-spot.outputs.conda_env_file) }}
+    
+    - name: Set up conda environment
+      uses: conda-incubator/setup-miniconda@v3
+      timeout-minutes: 10
+      with:
+        environment-file: ${{ steps.find-conda-env-spot.outputs.conda_env_file }}
+        activate-environment: ${{ steps.find-conda-env-spot.outputs.env_name }}
+        python-version: ${{ matrix.python-version }}
+        auto-activate-base: false
+        use-only-tar-bz2: true
+        miniforge-version: latest
+    
+    - name: Install package
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env-spot.outputs.env_name }}
+        pip install -e .
+    
+    - name: Quick validation check
+      shell: bash -l {0}
+      run: |
+        conda activate ${{ steps.find-conda-env-spot.outputs.env_name }}
+        # Quick targeted validation for spot-check
+        python scripts/simple_doc_validation/doctest_runner.py \
+          solarwindpy/core/ \
+          --targeted \
+          --verbose
+      timeout-minutes: 3

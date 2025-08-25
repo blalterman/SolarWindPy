@@ -1,0 +1,175 @@
+/* Custom CSS for SolarWindPy documentation */
+
+/* ===== Scientific Typography ===== */
+
+/* Mathematical expressions and scientific notation */
+.math {
+    color: #2c3e50;
+    font-family: 'Computer Modern', 'Latin Modern Math', 'STIX', serif;
+}
+
+/* Code blocks - enhanced for scientific readability */
+.highlight pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 12px;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+/* Inline code */
+.rst-content code.literal {
+    background-color: #f1f3f4;
+    color: #2c3e50;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* ===== Navigation Enhancements ===== */
+
+/* Improved sidebar scrolling for deep navigation */
+.wy-side-nav-search {
+    background-color: #2980b9;
+}
+
+/* API documentation sections */
+.rst-content .section h1,
+.rst-content .section h2,
+.rst-content .section h3 {
+    color: #2c3e50;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 6px;
+}
+
+/* Module and class headers */
+.rst-content dl.class > dt,
+.rst-content dl.function > dt,
+.rst-content dl.method > dt {
+    background-color: #ecf0f1;
+    border-left: 4px solid #3498db;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+/* ===== Tables and Scientific Data ===== */
+
+/* Parameter tables for scientific functions */
+.rst-content table.docutils {
+    border: 1px solid #bdc3c7;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.rst-content table.docutils th {
+    background-color: #34495e;
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.rst-content table.docutils td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+/* Units and scientific notation in tables */
+.rst-content .units {
+    font-style: italic;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+/* ===== Admonitions for Scientific Content ===== */
+
+/* Physics warnings and notes */
+.rst-content .admonition.physics-note {
+    background-color: #e8f4fd;
+    border-left: 4px solid #3498db;
+}
+
+.rst-content .admonition.warning {
+    background-color: #fdf2e9;
+    border-left: 4px solid #e67e22;
+}
+
+/* ===== Mobile Responsiveness ===== */
+
+@media screen and (max-width: 768px) {
+    .rst-content table.docutils {
+        font-size: 12px;
+    }
+    
+    .highlight pre {
+        font-size: 12px;
+        padding: 8px;
+    }
+    
+    .rst-content dl.class > dt,
+    .rst-content dl.function > dt,
+    .rst-content dl.method > dt {
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+}
+
+/* ===== Equation and Formula Styling ===== */
+
+/* LaTeX equations */
+.math.notranslate.nohighlight {
+    font-size: 1.1em;
+    margin: 8px 0;
+    text-align: center;
+}
+
+/* Inline math */
+span.math {
+    font-size: 1.05em;
+}
+
+/* ===== Citation and Bibliography ===== */
+
+/* Scientific citations */
+.rst-content .citation {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin: 4px 0;
+}
+
+/* Reference links */
+.rst-content a.reference {
+    color: #2980b9;
+    text-decoration: none;
+}
+
+.rst-content a.reference:hover {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+/* ===== Version and Build Info ===== */
+
+/* Footer customization */
+.rst-footer-buttons {
+    margin-top: 24px;
+    border-top: 1px solid #bdc3c7;
+    padding-top: 16px;
+}
+
+/* Print styles for scientific documentation */
+@media print {
+    .wy-nav-side,
+    .wy-nav-content-wrap .wy-nav-top,
+    .rst-footer-buttons {
+        display: none !important;
+    }
+    
+    .wy-nav-content {
+        margin-left: 0 !important;
+    }
+    
+    .math {
+        color: #000 !important;
+    }
+}
