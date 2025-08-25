@@ -7,26 +7,25 @@
 
 - **Pre-Compaction Context**: ~8,491 tokens (1,799 lines)
 - **Target Compression**: medium (35% reduction)
-- **Target Tokens**: ~5,519 tokens
+- **Target Tokens**: ~5,567 tokens
 - **Strategy**: medium compression with prose focus
 
 ## Content Analysis
 - **Files Analyzed**: 9
 - **Content Breakdown**: 
-  - Code: 426 lines
-  - Prose: 422 lines  
+  - Code: 429 lines
+  - Prose: 425 lines  
   - Tables: 0 lines
-  - Lists: 393 lines
+  - Lists: 395 lines
   - Headers: 222 lines
 - **Token Estimates**:
-  - Line-based: 5,397
-  - Character-based: 15,109
-  - Word-based: 9,359
-  - Content-weighted: 4,099
-  - **Final estimate**: 8,491 tokens
+  - Line-based: 5,424
+  - Character-based: 15,265
+  - Word-based: 9,449
+  - Content-weighted: 4,123
+  - **Final estimate**: 8,565 tokens
 
 ## Git State
-
 ### Current Branch: plan/pr-270-doc-validation-fixes
 ### Last Commit: dbe38f3 - refactor: right-size documentation validation framework (blalterman, 35 seconds ago)
 
@@ -134,7 +133,7 @@ conda info --envs  # Check active environment
 - [ ] **Changes**: Review uncommitted changes
 
 ### 📊 Efficiency Metrics
-- **Context Reduction**: 35.0% (8,491 → 5,519 tokens)
+- **Context Reduction**: 35.0% (8,565 → 5,567 tokens)
 - **Estimated Session Extension**: 21 additional minutes of productive work
 - **Compaction Strategy**: medium compression focused on prose optimization
 
