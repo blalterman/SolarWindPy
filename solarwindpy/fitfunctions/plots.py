@@ -249,7 +249,12 @@ class FFPlot(object):
             y1 = y - w
             y2 = y + w
             window = ax.fill_between(
-                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+                x,
+                y1,
+                y2,
+                color=window_color,
+                alpha=window_alpha,
+                **window_kwargs,
             )
 
             edges = None
@@ -264,7 +269,14 @@ class FFPlot(object):
 
         else:
             # Plot the raw data histograms.
-            plotted = ax.errorbar(x, y, yerr=w, label=label, color=color, **kwargs,)
+            plotted = ax.errorbar(
+                x,
+                y,
+                yerr=w,
+                label=label,
+                color=color,
+                **kwargs,
+            )
 
         self._format_hax(ax)
 
@@ -325,7 +337,12 @@ class FFPlot(object):
             y1 = y - w
             y2 = y + w
             window = ax.fill_between(
-                x, y1, y2, color=window_color, alpha=window_alpha, **window_kwargs,
+                x,
+                y1,
+                y2,
+                color=window_color,
+                alpha=window_alpha,
+                **window_kwargs,
             )
 
             edges = None
@@ -539,9 +556,7 @@ class FFPlot(object):
             marker = kwargs.pop("marker", "P")
             linestyle = kwargs.pop("linestyle", "-")
 
-            label = r" \; ".join([label, kind.title()]).lstrip(
-                r" \; "
-            )
+            label = r" \; ".join([label, kind.title()]).lstrip(r" \; ")
             label = r"$\mathrm{%s}$" % label
             #             label = (r"$\mathrm{%s \; %s}$" % (label, kind.title()).replace(" \; ", "")
 
@@ -564,9 +579,7 @@ class FFPlot(object):
             ax.plot(
                 self.observations.used.x,
                 self.residuals(pct=pct, robust=False),
-                label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(
-                    r" \; "
-                ),
+                label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(r" \; "),
                 drawstyle=drawstyle,
                 color="forestgreen",
                 marker="P",
@@ -582,9 +595,7 @@ class FFPlot(object):
                 ax.plot(
                     self.observations.used.x,
                     r,
-                    label=(r"$\mathrm{%s \; Robust}$" % label).lstrip(
-                        r" \; "
-                    ),
+                    label=(r"$\mathrm{%s \; Robust}$" % label).lstrip(r" \; "),
                     drawstyle=drawstyle,
                     color="darkorange",
                     marker="X",

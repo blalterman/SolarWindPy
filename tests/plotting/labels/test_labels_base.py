@@ -7,7 +7,13 @@ import logging
 @pytest.fixture(scope="module")
 def labels_base():
     """Load :mod:`solarwindpy.plotting.labels.base` without side effects."""
-    path = Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels" / "base.py"
+    path = (
+        Path(__file__).resolve().parents[3]
+        / "solarwindpy"
+        / "plotting"
+        / "labels"
+        / "base.py"
+    )
     spec = importlib.util.spec_from_file_location("swp_labels_base", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -94,7 +100,7 @@ def test_texlabel_comparison_operators(texlabel_basic, labels_base):
     """Test comparison operators for TeXlabel objects."""
     label_a = labels_base.TeXlabel(("a", "x", "p"))  # Alphabetically first
     label_z = labels_base.TeXlabel(("z", "x", "p"))  # Alphabetically last
-    
+
     assert label_a < label_z
     assert label_a <= label_z
     assert label_z > label_a
@@ -111,7 +117,7 @@ def test_texlabel_axnorm_types(labels_base):
         ("d", "Density"),
         (None, ""),
     ]
-    
+
     for axnorm, expected_prefix in test_cases:
         label = labels_base.TeXlabel(("n", "", "p"), axnorm=axnorm)
         if axnorm:
@@ -149,7 +155,7 @@ def test_species_substitution_comprehensive(labels_base):
         "p1+p2": ("p_1+p_2", 2),
         "a+Fe": ("\\alpha+\\mathrm{Fe}", 2),
     }
-    
+
     for pattern, expected in test_cases.items():
         result = labels_base._run_species_substitution(pattern)
         assert result == expected, f"Failed for pattern '{pattern}'"
@@ -164,7 +170,7 @@ def test_measurement_translation(labels_base):
         ("dv", "", "p"): "\\Delta v",
         ("qhat", "", "p"): "\\widehat{q}",
     }
-    
+
     for mcs, expected_tex_part in test_cases.items():
         label = labels_base.TeXlabel(mcs)
         assert expected_tex_part in label.tex
@@ -174,13 +180,13 @@ def test_component_translation(labels_base):
     """Test component translation."""
     test_cases = {
         ("v", "x", "p"): "X",
-        ("v", "y", "p"): "Y", 
+        ("v", "y", "p"): "Y",
         ("v", "z", "p"): "Z",
         ("v", "r", "p"): "R",
         ("v", "per", "p"): "\\perp",
         ("v", "par", "p"): "\\parallel",
     }
-    
+
     for mcs, expected_component in test_cases.items():
         label = labels_base.TeXlabel(mcs)
         assert expected_component in label.tex
@@ -195,7 +201,7 @@ def test_units_translation(labels_base):
         ("T", "", "p"): "10^5 \\, \\mathrm{K}",
         ("beta", "", "p"): "\\mathrm{\\#}",
     }
-    
+
     for mcs, expected_units in test_cases.items():
         label = labels_base.TeXlabel(mcs)
         assert label.units == expected_units
@@ -209,7 +215,7 @@ def test_path_generation(labels_base):
         ("b", "x", ""): "b_x",  # Fixed - empty strings are stripped
         ("beta", "", ""): "beta",
     }
-    
+
     for mcs, expected_path in test_cases.items():
         label = labels_base.TeXlabel(mcs)
         assert str(label.path) == expected_path
@@ -235,7 +241,7 @@ def test_template_substitution(labels_base):
     # Test specific template
     label = labels_base.TeXlabel(("cs", "", "p"))
     assert "C_{s;p}" in label.tex
-    
+
     # Test default template
     label = labels_base.TeXlabel(("unknown_measurement", "x", "p"))
     assert "{unknown_measurement}_{{X};{p}}" in label.tex
@@ -247,8 +253,8 @@ def test_tex_cleanup(labels_base):
     label = labels_base.TeXlabel(("v", "", "p"))
     assert "{}" not in label.tex
     assert "()" not in label.tex
-    
-    # Test empty species cleanup  
+
+    # Test empty species cleanup
     label = labels_base.TeXlabel(("v", "x", ""))
     assert "_;{}" not in label.tex
 
@@ -256,11 +262,11 @@ def test_tex_cleanup(labels_base):
 def test_base_class_properties(labels_base):
     """Test Base class properties and methods."""
     base_instance = labels_base.TeXlabel(("v", "x", "p"))
-    
+
     # Test logger
-    assert hasattr(base_instance, 'logger')
+    assert hasattr(base_instance, "logger")
     assert isinstance(base_instance.logger, logging.Logger)
-    
+
     # Test string representations
     assert str(base_instance) == base_instance.with_units
     assert repr(base_instance) == str(base_instance.tex)
@@ -270,28 +276,28 @@ def test_mcs_namedtuple(labels_base):
     """Test MCS namedtuple functionality."""
     mcs = labels_base.MCS("v", "x", "p")
     assert mcs.m == "v"
-    assert mcs.c == "x" 
+    assert mcs.c == "x"
     assert mcs.s == "p"
 
 
 def test_texlabel_set_methods(labels_base):
     """Test TeXlabel setter methods."""
     label = labels_base.TeXlabel(("v", "x", "p"))
-    
+
     # Test set_axnorm
     label.set_axnorm("r")
     assert label.axnorm == "r"
-    
+
     label.set_axnorm("C")  # Test case conversion
     assert label.axnorm == "c"
-    
+
     # Test set_new_line_for_units
     label.set_new_line_for_units(True)
     assert label.new_line_for_units is True
-    
+
     label.set_new_line_for_units(0)  # Test bool conversion
     assert label.new_line_for_units is False
-    
+
     # Test set_mcs
     label.set_mcs(("n", "", "p"), ("T", "", "p"))
     assert label.mcs0.m == "n"
@@ -301,11 +307,11 @@ def test_texlabel_set_methods(labels_base):
 def test_axnorm_validation(labels_base):
     """Test axis normalization validation."""
     valid_values = [None, "c", "r", "t", "d"]
-    
+
     for val in valid_values:
         label = labels_base.TeXlabel(("v", "x", "p"), axnorm=val)
         assert label.axnorm == val
-    
+
     # Test invalid axnorm
     with pytest.raises(AssertionError):
         labels_base.TeXlabel(("v", "x", "p"), axnorm="invalid")
@@ -316,7 +322,7 @@ def test_path_special_characters(labels_base):
     # Test forward slash replacement
     label = labels_base.TeXlabel(("test/measurement", "x", "p"))
     assert "-OV-" in str(label.path)
-    
+
     # Test comma and dot removal
     label = labels_base.TeXlabel(("test.measurement", "x", "p,ion"))
     path_str = str(label.path)
@@ -327,15 +333,15 @@ def test_path_special_characters(labels_base):
 def test_empty_string_handling(labels_base):
     """Test handling of empty strings in MCS components."""
     cases = [
-        ("", "x", "p"),      # Empty measurement
-        ("v", "", "p"),      # Empty component
-        ("v", "x", ""),      # Empty species
-        ("", "", ""),        # All empty
+        ("", "x", "p"),  # Empty measurement
+        ("v", "", "p"),  # Empty component
+        ("v", "x", ""),  # Empty species
+        ("", "", ""),  # All empty
     ]
-    
+
     for mcs in cases:
         # Should not raise exception
         label = labels_base.TeXlabel(mcs)
-        assert hasattr(label, 'tex')
-        assert hasattr(label, 'units')
-        assert hasattr(label, 'path')
+        assert hasattr(label, "tex")
+        assert hasattr(label, "units")
+        assert hasattr(label, "path")

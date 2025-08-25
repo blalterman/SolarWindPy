@@ -32,7 +32,7 @@ jobs:
           enforce_admins: ${{ github.event.inputs.enforce_admins }}
           required_status_checks: |
             CI (ubuntu-latest, 3.11)
-            CI (ubuntu-latest, 3.8)
+            CI (ubuntu-latest, 3.10)
             Documentation / build
             Security Scan / security
           required_approving_review_count: 1

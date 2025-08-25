@@ -92,7 +92,7 @@ class Spacecraft(base.Base):
     @property
     def position(self):
         """Position vector of the spacecraft.
-        
+
         Returns
         -------
         vector.Vector
@@ -104,7 +104,7 @@ class Spacecraft(base.Base):
     @property
     def pos(self):
         """Shortcut to position property.
-        
+
         Returns
         -------
         vector.Vector
@@ -121,12 +121,12 @@ class Spacecraft(base.Base):
     @property
     def velocity(self):
         """Velocity vector of the spacecraft.
-        
+
         Returns
         -------
         vector.Vector
             Velocity vector with x, y, z components.
-        
+
         Raises
         ------
         KeyError
@@ -190,14 +190,14 @@ class Spacecraft(base.Base):
 
     def set_frame_name(self, frame, name):
         """Set the coordinate frame and spacecraft name.
-        
+
         Parameters
         ----------
         frame : str
             Coordinate frame ('GSE' or 'HCI').
         name : str
             Spacecraft name.
-            
+
         Raises
         ------
         NotImplementedError
@@ -216,7 +216,7 @@ class Spacecraft(base.Base):
 
     def set_data(self, data):
         """Set the spacecraft data.
-        
+
         Parameters
         ----------
         data : pd.DataFrame

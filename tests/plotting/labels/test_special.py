@@ -146,13 +146,13 @@ class TestCount:
         """Test all normalization types."""
         norm_types = {
             "c": "Col.",
-            "r": "Row", 
+            "r": "Row",
             "t": "Total",
             "d": "Density",  # Fixed - actual string is "Density" not "Probability Density"
             "cd": "1D",  # Just check for "1D" since spaces are escaped as \,
             "rd": "1D",  # Just check for "1D" since spaces are escaped as \,
         }
-        
+
         for norm, expected in norm_types.items():
             label = labels_special.Count(norm=norm)
             assert expected in label.tex
@@ -219,13 +219,13 @@ class TestProbability:
         """Test conversion of comparison operators in path."""
         operators = {
             ">": "GT",
-            "<": "LT", 
+            "<": "LT",
             r"\geq": "GEQ",
             r"\leq": "LEQ",
             "==": "EQ",
             "!=": "NEQ",
         }
-        
+
         for op, expected in operators.items():
             prob = labels_special.Probability(basic_texlabel, f"x {op} 5")
             path_str = str(prob.path)
@@ -252,7 +252,9 @@ class TestCountOther:
 
     def test_newline_units(self, basic_texlabel):
         """Test newline for units option."""
-        count = labels_special.CountOther(basic_texlabel, "> 500", new_line_for_units=True)
+        count = labels_special.CountOther(
+            basic_texlabel, "> 500", new_line_for_units=True
+        )
         assert count.new_line_for_units is True
         result = str(count)
         assert "$\n$" in result
@@ -282,7 +284,9 @@ class TestMathFcn:
 
     def test_newline_units(self, basic_texlabel):
         """Test newline for units."""
-        math_fcn = labels_special.MathFcn("log", basic_texlabel, new_line_for_units=True)
+        math_fcn = labels_special.MathFcn(
+            "log", basic_texlabel, new_line_for_units=True
+        )
         assert math_fcn.new_line_for_units is True
 
     def test_path_generation(self, basic_texlabel):
@@ -315,7 +319,7 @@ class TestDistance2Sun:
             "re": r"R_{\oplus}",
             "au": r"\mathrm{AU}",
         }
-        
+
         for input_unit, expected in translations.items():
             dist = labels_special.Distance2Sun(input_unit)
             assert dist.units == expected
@@ -351,7 +355,7 @@ class TestSSN:
             "D": "Daily",
             "Y": "Annual",
         }
-        
+
         for kind, expected in translations.items():
             ssn = labels_special.SSN(kind)
             assert expected in ssn.pretty_kind
@@ -394,7 +398,7 @@ class TestComparisonLable:
         # Use same units to avoid ValueError
         label_b = labels_base.TeXlabel(("v", "y", "p"))  # Same units as basic_texlabel
         functions = ["subtract", "add", "multiply"]
-        
+
         for fcn in functions:
             comp = labels_special.ComparisonLable(basic_texlabel, label_b, fcn)
             assert comp.function_name == fcn
@@ -404,7 +408,9 @@ class TestComparisonLable:
         # Use same units to avoid ValueError
         label_b = labels_base.TeXlabel(("v", "y", "p"))  # Same units as basic_texlabel
         custom_fcn = r"{$labelA} / {$labelB}"
-        comp = labels_special.ComparisonLable(basic_texlabel, label_b, "divide", custom_fcn)
+        comp = labels_special.ComparisonLable(
+            basic_texlabel, label_b, "divide", custom_fcn
+        )
         assert "$labelA" in comp.function
         assert "$labelB" in comp.function
 
@@ -413,7 +419,9 @@ class TestComparisonLable:
         label_b = labels_base.TeXlabel(("n", "", "p"))
         invalid_fcn = r"{$invalid} + {$keys}"
         with pytest.raises(ValueError):
-            labels_special.ComparisonLable(basic_texlabel, label_b, "invalid", invalid_fcn)
+            labels_special.ComparisonLable(
+                basic_texlabel, label_b, "invalid", invalid_fcn
+            )
 
     def test_unit_validation(self, basic_texlabel):
         """Test unit validation for comparison labels."""
@@ -438,7 +446,7 @@ class TestComparisonLable:
         """Test type validation for labels."""
         with pytest.raises(TypeError):
             labels_special.ComparisonLable(123, "labelB", "add")
-        
+
         with pytest.raises(TypeError):
             labels_special.ComparisonLable("labelA", 456, "add")
 
@@ -464,7 +472,9 @@ class TestXcorr:
     def test_long_tex_format(self, basic_texlabel):
         """Test long TeX format."""
         label_b = labels_base.TeXlabel(("n", "", "p"))
-        xcorr = labels_special.Xcorr(basic_texlabel, label_b, "pearson", short_tex=False)
+        xcorr = labels_special.Xcorr(
+            basic_texlabel, label_b, "pearson", short_tex=False
+        )
         assert xcorr.short_tex is False
         assert r"\mathrm{" in xcorr.tex
 
@@ -497,7 +507,7 @@ class TestXcorr:
         """Test type validation for xcorr labels."""
         with pytest.raises(TypeError):
             labels_special.Xcorr(123, "labelB", "pearson")
-        
+
         with pytest.raises(TypeError):
             labels_special.Xcorr("labelA", 456, "pearson")
 
@@ -514,7 +524,7 @@ class TestArbitraryLabel:
         """Test inheritance from base.Base."""
         # ManualLabel inherits from ArbitraryLabel
         manual = labels_special.ManualLabel("test", "units")
-        assert hasattr(manual, 'logger')  # Inherited from base.Base
+        assert hasattr(manual, "logger")  # Inherited from base.Base
 
 
 # Test integration between different label types

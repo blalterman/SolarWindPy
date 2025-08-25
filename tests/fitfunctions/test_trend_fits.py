@@ -156,6 +156,7 @@ def test_plotting_methods_return_axes(monkeypatch, trend_fit):
     ax = trend_fit.plot_1d_popt_and_trend()
     assert isinstance(ax, DummyAx)
 
+
 def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     class StubAx:
         def __init__(self):
@@ -190,6 +191,7 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     assert kwargs["linestyle"] == ":"
     assert kwargs["label"] == "1D Fits"
     pd.testing.assert_frame_equal(kwargs["data"], tf.popt_1d)
+
 
 def test_plot_all_ffuncs(trend_fit_all_ffuncs):
     tf, calls, hax, rax = trend_fit_all_ffuncs

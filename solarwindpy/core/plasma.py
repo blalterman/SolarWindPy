@@ -112,7 +112,7 @@ class Plasma(base.Base):
     >>> type(beta).__name__
     'Tensor'
     
-    Access ion properties:
+    Idenfity ion species in plasma:
     
     >>> plasma.species
     ['p1', 'a']

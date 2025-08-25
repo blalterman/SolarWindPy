@@ -115,7 +115,10 @@ def save(
     if pdf:
 
         fig.savefig(
-            spath.with_suffix(".pdf"), bbox_inches=bbox_inches, format="pdf", **kwargs,
+            spath.with_suffix(".pdf"),
+            bbox_inches=bbox_inches,
+            format="pdf",
+            **kwargs,
         )
 
         if log:
@@ -127,7 +130,10 @@ def save(
             fig.text(info_x, info_y, info)
 
         fig.savefig(
-            spath.with_suffix(".png"), bbox_inches=bbox_inches, format="png", **kwargs,
+            spath.with_suffix(".png"),
+            bbox_inches=bbox_inches,
+            format="png",
+            **kwargs,
         )
 
         if log:

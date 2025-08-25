@@ -34,6 +34,20 @@
       "samples": 10,
       "complexity_factor": 1.2,
       "description": "End-to-end testing of deployment pipelines"
+    },
+    "python_migration": {
+      "estimated_avg": 20,
+      "actual_avg": 21,
+      "samples": 1,
+      "complexity_factor": 1.05,
+      "description": "Python version requirement migration with CI optimization"
+    },
+    "code_formatting": {
+      "estimated_avg": 45,
+      "actual_avg": 48,
+      "samples": 1,
+      "complexity_factor": 1.1,
+      "description": "Large-scale code formatting (48 files black formatting)"
     }
   },
   "deployment_complexity_factors": {
@@ -52,6 +66,25 @@
       "complexity_score": 8.2,
       "risk_level": "medium",
       "external_dependencies": ["PyPI tokens", "ReadTheDocs manual setup"]
+    },
+    "python_310_migration": {
+      "estimated_duration": "20 hours",
+      "actual_duration": "21 hours",
+      "variance": "+5%",
+      "accuracy_factor": 1.05,
+      "phase_count": 5,
+      "task_count": 24,
+      "complexity_score": 6.5,
+      "risk_level": "low",
+      "external_dependencies": [],
+      "key_learnings": [
+        "Code formatting scope larger than expected",
+        "Pre-1.0 software migration simpler than production",
+        "Physics validation hooks excellent for safety",
+        "CI optimization straightforward for Python versions"
+      ],
+      "success_rate": "100%",
+      "test_compatibility": "98%"
     }
   },
   "session_metadata": {
