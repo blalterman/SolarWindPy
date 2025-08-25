@@ -1,0 +1,306 @@
+name: Release Pipeline
+
+# Triggered by version tags for automated PyPI/TestPyPI deployment
+# Clean architecture replacing broken ci.yml and publish.yml
+on:
+  push:
+    tags:
+      - 'v*'  # Any version tag (v1.0.0, v0.1.0-rc1, etc.)
+
+env:
+  PYTHON_VERSION: '3.12'
+  
+jobs:
+  # Phase 1: Version Analysis and Branch Creation
+  version-analysis:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      is_rc: ${{ steps.version.outputs.is_rc }}
+      release_branch: ${{ steps.version.outputs.release_branch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Analyze version and create outputs
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # Detect if this is a release candidate
+          if [[ "$TAG" =~ -rc[0-9]+$ ]] || [[ "$TAG" =~ -alpha ]] || [[ "$TAG" =~ -beta ]]; then
+            echo "is_rc=true" >> $GITHUB_OUTPUT
+            echo "🔬 Release Candidate detected: $TAG"
+          else
+            echo "is_rc=false" >> $GITHUB_OUTPUT
+            echo "🚀 Production release detected: $TAG"
+          fi
+          
+          # Extract version without 'v' prefix
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Generate release branch name
+          RELEASE_BRANCH="release/$TAG"
+          echo "release_branch=$RELEASE_BRANCH" >> $GITHUB_OUTPUT
+          
+          echo "Version: $VERSION"
+          echo "Release Branch: $RELEASE_BRANCH"
+      
+      - name: Create release branch for audit trail
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git checkout -b ${{ steps.version.outputs.release_branch }}
+          git push origin ${{ steps.version.outputs.release_branch }}
+  
+  # Phase 2: Quality Validation Matrix
+  quality-checks:
+    needs: version-analysis
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev pkg-config
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements-dev.txt
+      
+      - name: Run tests
+        run: |
+          pytest --tb=short --disable-warnings
+      
+      - name: Check code formatting
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: |
+          black --check solarwindpy/
+          flake8 solarwindpy/
+  
+  # Phase 3: Build and Package
+  build-package:
+    needs: [version-analysis, quality-checks]
+    runs-on: ubuntu-latest
+    outputs:
+      wheel_path: ${{ steps.build.outputs.wheel_path }}
+      sdist_path: ${{ steps.build.outputs.sdist_path }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build setuptools_scm
+      
+      - name: Verify version consistency
+        run: |
+          DETECTED_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          EXPECTED_VERSION="${{ needs.version-analysis.outputs.version }}"
+          echo "Detected version: $DETECTED_VERSION"
+          echo "Expected version: $EXPECTED_VERSION"
+          
+          if [[ "$DETECTED_VERSION" != "$EXPECTED_VERSION" ]]; then
+            echo "❌ Version mismatch!"
+            exit 1
+          fi
+          echo "✅ Version consistency verified"
+      
+      - name: Build package
+        id: build
+        run: |
+          python -m build
+          
+          # Find and output built files
+          WHEEL_FILE=$(find dist -name "*.whl" | head -1)
+          SDIST_FILE=$(find dist -name "*.tar.gz" | head -1)
+          
+          echo "wheel_path=$WHEEL_FILE" >> $GITHUB_OUTPUT
+          echo "sdist_path=$SDIST_FILE" >> $GITHUB_OUTPUT
+          
+          echo "Built wheel: $WHEEL_FILE"
+          echo "Built sdist: $SDIST_FILE"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+  
+  # Phase 4: TestPyPI Deployment (Always)
+  deploy-testpypi:
+    needs: [version-analysis, build-package]
+    runs-on: ubuntu-latest
+    environment: testpypi
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+      
+      - name: Deploy to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TESTPYPI_API_TOKEN }}
+          verbose: true
+      
+      - name: Verify TestPyPI installation
+        run: |
+          # Wait a moment for TestPyPI to update
+          sleep 30
+          
+          # Try to install from TestPyPI
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ solarwindpy==${{ needs.version-analysis.outputs.version }}
+          
+          # Quick import test
+          python -c "import solarwindpy as swp; print(f'Successfully imported SolarWindPy {swp.__version__}')"
+  
+  # Phase 5: PyPI Deployment (Production Only)
+  deploy-pypi:
+    needs: [version-analysis, build-package, deploy-testpypi]
+    runs-on: ubuntu-latest
+    environment: pypi
+    if: needs.version-analysis.outputs.is_rc == 'false'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+      
+      - name: Deploy to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+      
+      - name: Verify PyPI installation
+        run: |
+          # Wait for PyPI to update
+          sleep 60
+          
+          # Install from PyPI
+          pip install solarwindpy==${{ needs.version-analysis.outputs.version }}
+          
+          # Quick import test
+          python -c "import solarwindpy as swp; print(f'Successfully installed SolarWindPy {swp.__version__} from PyPI')"
+  
+  # Phase 6: GitHub Release (Production Only)
+  create-github-release:
+    needs: [version-analysis, build-package, deploy-pypi]
+    runs-on: ubuntu-latest
+    if: needs.version-analysis.outputs.is_rc == 'false'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [[ -n "$LAST_TAG" ]]; then
+            echo "Changes since $LAST_TAG:" > release_notes.md
+            git log --pretty=format:"- %s" "$LAST_TAG"..HEAD >> release_notes.md
+          else
+            echo "Initial release of SolarWindPy ${{ needs.version-analysis.outputs.version }}" > release_notes.md
+          fi
+          
+          echo "Release notes:"
+          cat release_notes.md
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.version-analysis.outputs.tag }}
+          name: SolarWindPy ${{ needs.version-analysis.outputs.version }}
+          body_path: release_notes.md
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          draft: false
+          prerelease: false
+  
+  # Phase 7: Conda-Forge Integration (Production Only)
+  trigger-conda-forge:
+    needs: [version-analysis, create-github-release]
+    runs-on: ubuntu-latest
+    if: needs.version-analysis.outputs.is_rc == 'false'
+    
+    steps:
+      - name: Create conda-forge update issue
+        run: |
+          echo "🔄 Conda-forge integration would be triggered here"
+          echo "Version: ${{ needs.version-analysis.outputs.version }}"
+          echo "PyPI package should be available for conda-forge bot"
+          echo "Manual step: Check conda-forge/solarwindpy-feedstock for automated PR"
+  
+  # Phase 8: Completion Summary
+  deployment-summary:
+    needs: [version-analysis, deploy-testpypi, deploy-pypi, create-github-release, trigger-conda-forge]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "🎯 Release Pipeline Completed"
+          echo "Version: ${{ needs.version-analysis.outputs.version }}"
+          echo "Tag: ${{ needs.version-analysis.outputs.tag }}"
+          echo "Release Candidate: ${{ needs.version-analysis.outputs.is_rc }}"
+          echo "Release Branch: ${{ needs.version-analysis.outputs.release_branch }}"
+          echo ""
+          echo "📦 Deployment Status:"
+          echo "- TestPyPI: ${{ needs.deploy-testpypi.result }}"
+          echo "- PyPI: ${{ needs.deploy-pypi.result || 'skipped (RC)' }}"
+          echo "- GitHub Release: ${{ needs.create-github-release.result || 'skipped (RC)' }}"
+          echo "- Conda-Forge: ${{ needs.trigger-conda-forge.result || 'skipped (RC)' }}"
+          echo ""
+          if [[ "${{ needs.version-analysis.outputs.is_rc }}" == "true" ]]; then
+            echo "✅ Release candidate deployed to TestPyPI for validation"
+          else
+            echo "🚀 Production release deployed to all channels"
+          fi

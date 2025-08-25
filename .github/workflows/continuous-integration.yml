@@ -1,0 +1,127 @@
+name: Continuous Integration
+
+# Lightweight PR validation workflow
+# Clean architecture replacing broken ci.yml for branch/PR testing
+on:
+  pull_request:
+    branches:
+      - master
+      - 'plan/**'
+      - 'feature/**'
+  push:
+    branches:
+      - 'plan/**'
+      - 'feature/**'
+      # Exclude master to avoid duplicate runs with release-pipeline
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  # Quick validation for PRs and branch pushes
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev pkg-config
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements-dev.txt
+      
+      - name: Run core tests
+        run: |
+          pytest --tb=short --disable-warnings tests/
+      
+      - name: Check code formatting
+        run: |
+          black --check solarwindpy/
+          flake8 solarwindpy/
+      
+      - name: Verify imports
+        run: |
+          python -c "import solarwindpy as swp; print(f'SolarWindPy imported successfully')"
+  
+  # Extended validation for plan branches (more comprehensive)
+  extended-validation:
+    runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/heads/plan/')
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.12']
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev pkg-config
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements-dev.txt
+      
+      - name: Run comprehensive tests
+        run: |
+          pytest --tb=short --disable-warnings
+      
+      - name: Check imports and basic functionality
+        run: |
+          python -c "
+          import solarwindpy as swp
+          print(f'SolarWindPy version: {swp.__version__}')
+          
+          # Test core functionality
+          import numpy as np
+          from solarwindpy.core import Plasma, Ion
+          
+          print('Core classes imported successfully')
+          "
+  
+  # Summary job
+  ci-summary:
+    needs: [validate, extended-validation]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: CI Summary
+        run: |
+          echo "🏁 Continuous Integration Summary"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Event: ${{ github.event_name }}"
+          echo ""
+          echo "Job Results:"
+          echo "- Quick Validation: ${{ needs.validate.result }}"
+          echo "- Extended Validation: ${{ needs.extended-validation.result || 'skipped' }}"
+          echo ""
+          if [[ "${{ needs.validate.result }}" == "success" ]]; then
+            echo "✅ PR validation passed - ready for review"
+          else
+            echo "❌ PR validation failed - requires fixes"
+          fi
