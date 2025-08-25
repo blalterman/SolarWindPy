@@ -26,11 +26,20 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
+    - name: Find latest conda environment file
+      id: find-conda-env
+      run: |
+        # Find the most recent solarwindpy-*.yml file
+        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
+        echo "Latest environment file: $LATEST_ENV"
+        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+    
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-20250403.yml') }}
+        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env.outputs.conda_env_file) }}
         restore-keys: |
           ${{ runner.os }}-conda-
     
@@ -38,8 +47,8 @@ jobs:
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: solarwindpy-20250403.yml
-        activate-environment: solarwindpy-20250403
+        environment-file: ${{ steps.find-conda-env.outputs.conda_env_file }}
+        activate-environment: ${{ steps.find-conda-env.outputs.env_name }}
         python-version: ${{ matrix.python-version }}
         auto-activate-base: false
         use-only-tar-bz2: true
@@ -48,20 +57,20 @@ jobs:
     - name: Install package in development mode
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
         pip install -e .
     
     - name: Verify installation
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
         python -c "import solarwindpy; print(f'SolarWindPy version: {solarwindpy.__version__}')"
         python -c "import numpy, pandas, matplotlib; print('All dependencies available')"
     
     - name: Run essential documentation validation
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
         # Use simplified validation framework with targeted approach
         python scripts/simple_doc_validation/doctest_runner.py \
           solarwindpy/ \
@@ -74,7 +83,7 @@ jobs:
     - name: Generate essential validation summary
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env.outputs.env_name }}
         python scripts/simple_doc_validation/validation_utils.py --framework-status
         
         # Generate simplified summary
@@ -209,18 +218,27 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
+    - name: Find latest conda environment file
+      id: find-conda-env-spot
+      run: |
+        # Find the most recent solarwindpy-*.yml file
+        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
+        echo "Latest environment file: $LATEST_ENV"
+        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+    
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-20250403.yml') }}
+        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env-spot.outputs.conda_env_file) }}
     
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: solarwindpy-20250403.yml
-        activate-environment: solarwindpy-20250403
+        environment-file: ${{ steps.find-conda-env-spot.outputs.conda_env_file }}
+        activate-environment: ${{ steps.find-conda-env-spot.outputs.env_name }}
         python-version: ${{ matrix.python-version }}
         auto-activate-base: false
         use-only-tar-bz2: true
@@ -229,13 +247,13 @@ jobs:
     - name: Install package
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env-spot.outputs.env_name }}
         pip install -e .
     
     - name: Quick validation check
       shell: bash -l {0}
       run: |
-        conda activate solarwindpy-20250403
+        conda activate ${{ steps.find-conda-env-spot.outputs.env_name }}
         # Quick targeted validation for spot-check
         python scripts/simple_doc_validation/doctest_runner.py \
           solarwindpy/core/ \
