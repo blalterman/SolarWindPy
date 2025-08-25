@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -428,7 +428,10 @@
     <span class="k">if</span> <span class="n">pdf</span><span class="p">:</span>
 
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
-            <span class="n">spath</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.pdf&quot;</span><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="n">bbox_inches</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">spath</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.pdf&quot;</span><span class="p">),</span>
+            <span class="n">bbox_inches</span><span class="o">=</span><span class="n">bbox_inches</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
@@ -440,7 +443,10 @@
             <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">info_x</span><span class="p">,</span> <span class="n">info_y</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
 
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
-            <span class="n">spath</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="n">bbox_inches</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">spath</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">),</span>
+            <span class="n">bbox_inches</span><span class="o">=</span><span class="n">bbox_inches</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">log</span><span class="p">:</span>

@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1216,7 +1216,8 @@
 <span class="sd">            If not None and gaussian_filter_std &gt; 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Passed to :py:meth:`ax.pcolormesh`.</span>
-<span class="sd">            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.&quot;&quot;&quot;</span>
+<span class="sd">            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
@@ -1270,9 +1271,9 @@
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">x</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">y</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">y</span>
 
         <span class="n">tk_finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk_finite</span><span class="p">]</span>
@@ -1324,6 +1325,7 @@
 
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">lbls</span><span class="p">,</span> <span class="n">cbar_or_mappable</span><span class="p">,</span> <span class="n">qset</span></div>
 </div>
+
 
 
 <span class="c1">#    def plot_surface(self):</span>

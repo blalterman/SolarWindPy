@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -405,7 +405,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Position vector of the spacecraft.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        vector.Vector</span>
@@ -417,7 +417,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shortcut to position property.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        vector.Vector</span>
@@ -434,12 +434,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Velocity vector of the spacecraft.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        vector.Vector</span>
 <span class="sd">            Velocity vector with x, y, z components.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        KeyError</span>
@@ -505,14 +505,14 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.core.spacecraft.html#solarwindpy.core.Spacecraft.set_frame_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_frame_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the coordinate frame and spacecraft name.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        frame : str</span>
 <span class="sd">            Coordinate frame (&#39;GSE&#39; or &#39;HCI&#39;).</span>
 <span class="sd">        name : str</span>
 <span class="sd">            Spacecraft name.</span>
-<span class="sd">            </span>
+
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        NotImplementedError</span>
@@ -534,7 +534,7 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.core.spacecraft.html#solarwindpy.core.Spacecraft.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the spacecraft data.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        data : pd.DataFrame</span>

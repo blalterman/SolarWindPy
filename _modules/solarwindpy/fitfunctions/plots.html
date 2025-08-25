@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -573,7 +573,12 @@
             <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">w</span>
             <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">w</span>
             <span class="n">window</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
-                <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y1</span><span class="p">,</span>
+                <span class="n">y2</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">edges</span> <span class="o">=</span> <span class="kc">None</span>
@@ -588,7 +593,14 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Plot the raw data histograms.</span>
-            <span class="n">plotted</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,)</span>
+            <span class="n">plotted</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y</span><span class="p">,</span>
+                <span class="n">yerr</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_hax</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
@@ -652,7 +664,12 @@
             <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">w</span>
             <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">w</span>
             <span class="n">window</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
-                <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
+                <span class="n">x</span><span class="p">,</span>
+                <span class="n">y1</span><span class="p">,</span>
+                <span class="n">y2</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">edges</span> <span class="o">=</span> <span class="kc">None</span>
@@ -875,9 +892,7 @@
             <span class="n">marker</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span>
             <span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;linestyle&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
-            <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">title</span><span class="p">()])</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
-                <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
-            <span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">title</span><span class="p">()])</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">)</span>
             <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2">}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
             <span class="c1">#             label = (r&quot;$\mathrm{%s \; %s}$&quot; % (label, kind.title()).replace(&quot; \; &quot;, &quot;&quot;)</span>
 
@@ -900,9 +915,7 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="n">pct</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-                <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
-                    <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
-                <span class="p">),</span>
+                <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">),</span>
                 <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
                 <span class="n">color</span><span class="o">=</span><span class="s2">&quot;forestgreen&quot;</span><span class="p">,</span>
                 <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span>
@@ -918,9 +931,7 @@
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
                     <span class="n">r</span><span class="p">,</span>
-                    <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span>
-                        <span class="sa">r</span><span class="s2">&quot; \; &quot;</span>
-                    <span class="p">),</span>
+                    <span class="n">label</span><span class="o">=</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">),</span>
                     <span class="n">drawstyle</span><span class="o">=</span><span class="n">drawstyle</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkorange&quot;</span><span class="p">,</span>
                     <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>

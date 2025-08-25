@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.alfvenic_turbulence &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.core.alfvenic_turbulence &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -372,7 +372,7 @@
         <span class="n">species</span><span class="p">,</span>
         <span class="n">raffaella_version</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">sc_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize an :py:class:`AlfvenicTurbulence` object.</span>
 
@@ -396,7 +396,7 @@
             <span class="n">species</span><span class="p">,</span>
             <span class="n">raffaella_version</span><span class="o">=</span><span class="n">raffaella_version</span><span class="p">,</span>
             <span class="n">sc_vector</span><span class="o">=</span><span class="n">sc_vector</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -447,8 +447,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">polarity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field polarity.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field polarity.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polarity</span>
 
     <span class="nd">@property</span>
@@ -551,8 +550,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">eres_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">       </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for :py:attr:`normalized_residual_energy`.&quot;&quot;&quot;</span>
-       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_residual_energy</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Shortcut for :py:attr:`normalized_residual_energy`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_residual_energy</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sigma_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -612,7 +611,7 @@
         <span class="n">species</span><span class="p">,</span>
         <span class="n">raffaella_version</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">sc_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The `auto_reindex` kwarg can be set to False so that, if running a</span>
 <span class="sd">        large batch of analysis on the same data, one can reindex once outside</span>
@@ -762,7 +761,7 @@
 <span class="c1"># lass AlfvenicTurbulenceDAmicis(base.Core):</span>
 <span class="c1">#     r&quot;&quot;&quot;Handle and calculate Alfvenic turbulence quantities using the Elsasser</span>
 <span class="c1">#     variables following R D&#39;Amicis&#39; email (20240214).</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     Parameters</span>
 <span class="c1">#     ----------</span>
 <span class="c1">#     velocity : pd.DataFrame, pd.Series (?)</span>
@@ -780,7 +779,7 @@
 <span class="c1">#         `units_constants.Units`).</span>
 <span class="c1">#     species: str</span>
 <span class="c1">#         The species string. Can contain `+`. Can contain at most one `,`.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     Attributes</span>
 <span class="c1">#     ----------</span>
 <span class="c1">#     data, species, z_plus, zp, z_minus, zm, e_plus, ep,</span>
@@ -788,19 +787,19 @@
 <span class="c1">#     residual_energy, eres, normalized_residual_energy, eres_norm, sigma_r,</span>
 <span class="c1">#     cross_helicity, normalized_cross_helicity, sigma_c, alfven_ratio, rA,</span>
 <span class="c1">#     elsasser_ratio, rE</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     Methods</span>
 <span class="c1">#     -------</span>
 <span class="c1">#     set_data</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     Notes</span>
 <span class="c1">#     -----</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     def __init__(self, velocity, bfield, rho, species, sc_vector, **kwargs):</span>
 <span class="c1">#         r&quot;&quot;&quot;Initialize an :py:class:`AlfvenicTurbulence` object.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         Parameters</span>
 <span class="c1">#         ----------</span>
 <span class="c1">#         velocity: pd.DataFrame</span>
@@ -816,68 +815,68 @@
 <span class="c1">#         #               &quot;__init__&quot;,</span>
 <span class="c1">#         #               sep=&quot;\n&quot;,</span>
 <span class="c1">#         #               end=&quot;\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         super(AlfvenicTurbulenceDAmicis, self).__init__()</span>
 <span class="c1">#         self.set_data(velocity, bfield, rho, species, sc_vector, **kwargs)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def data(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Mean-subtracted quantities used to calculated Elsasser variables.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self._data</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def averaging_info(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Averaging window and minimum number of measurements / average used</span>
 <span class="c1">#         in calculating background component in :math:`\delta B` and :math:`\delta v`.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self._averaging_info</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def measurements(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Measurements used to calcualte mean-subtracted `data`.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self._measurements</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def polarity(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Magnetic field polarity.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self._polarity</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def species(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Species used to create `AlfvenicTurbulence`. Defines mass density in Alfven</span>
 <span class="c1">#         units.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self._species</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def z_plus(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Z+ Elsasser variable.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         zp = self.data.loc[:, &quot;zp&quot;]</span>
 <span class="c1">#         return zp</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def zp(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_plus`.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self.z_plus</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def z_minus(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Z- Elsasser variable.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         zm = self.data.loc[:, &quot;zm&quot;]</span>
 <span class="c1">#         return zm</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def zm(self):</span>
 <span class="c1">#         r&quot;&quot;&quot;Shortcut for `AlfvenicTurbulence.z_minus`.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self.z_minus</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def e_plus(self):</span>
 <span class="c1">#         # I took the averages before I created the +/-z quantities in my</span>
@@ -886,73 +885,73 @@
 <span class="c1">#         # I am adding v and b, the differene shouldn&#39;t matter.</span>
 <span class="c1">#         ep = 0.5 * self.zp.pow(2).sum(axis=1)</span>
 <span class="c1">#         return ep</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def ep(self):</span>
 <span class="c1">#         return self.e_plus</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def e_minus(self):</span>
 <span class="c1">#         em = 0.5 * self.zm.pow(2).sum(axis=1)</span>
 <span class="c1">#         return em</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def em(self):</span>
 <span class="c1">#         return self.e_minus</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def kinetic_energy(self):</span>
 <span class="c1">#     #         ev = 0.5 * self.v.pow(2).sum(axis=1)</span>
 <span class="c1">#     #         return ev</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def ev(self):</span>
 <span class="c1">#     #         return self.kinetic_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def magnetic_energy(self):</span>
 <span class="c1">#     #         eb = 0.5 * self.b.pow(2).sum(axis=1)</span>
 <span class="c1">#     #         return eb</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def eb(self):</span>
 <span class="c1">#     #         return self.magnetic_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def total_energy(self):</span>
 <span class="c1">#     #         return self.ev.add(self.eb, axis=0)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def etot(self):</span>
 <span class="c1">#     #         return self.total_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def residual_energy(self):</span>
 <span class="c1">#     #         return self.ev.subtract(self.eb, axis=0)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def eres(self):</span>
 <span class="c1">#     #         return self.residual_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def normalized_residual_energy(self):</span>
 <span class="c1">#     #         return self.eres.divide(self.etot, axis=0)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def eres_norm(self):</span>
 <span class="c1">#     #         return self.normalized_residual_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def sigma_r(self):</span>
 <span class="c1">#     #         return self.normalized_residual_energy</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def cross_helicity(self):</span>
 <span class="c1">#     #         v = self.v</span>
 <span class="c1">#     #         b = self.b</span>
 <span class="c1">#     #         c = 0.5 * v.multiply(b).sum(axis=1)</span>
 <span class="c1">#     #         return c</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def normalized_cross_helicity(self):</span>
 <span class="c1">#         ep = self.ep</span>
@@ -961,50 +960,50 @@
 <span class="c1">#         den = ep.add(em)</span>
 <span class="c1">#         out = num.divide(den)</span>
 <span class="c1">#         return out</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def sigma_c(self):</span>
 <span class="c1">#         &quot;&quot;&quot;Normalized cross helicity.</span>
-<span class="c1">#         </span>
+<span class="c1">#</span>
 <span class="c1">#         Returns</span>
 <span class="c1">#         -------</span>
 <span class="c1">#         pd.Series</span>
 <span class="c1">#             Sigma_c parameter.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self.normalized_cross_helicity</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def alfven_ratio(self):</span>
 <span class="c1">#     #         return self.ev.divide(self.eb, axis=0)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     #     @property</span>
 <span class="c1">#     #     def rA(self):</span>
 <span class="c1">#     #         return self.alfven_ratio</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def elsasser_ratio(self):</span>
 <span class="c1">#         return self.em.divide(self.ep, axis=0)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     @property</span>
 <span class="c1">#     def rE(self):</span>
 <span class="c1">#         &quot;&quot;&quot;Elsasser ratio.</span>
-<span class="c1">#         </span>
+<span class="c1">#</span>
 <span class="c1">#         Returns</span>
 <span class="c1">#         -------</span>
 <span class="c1">#         pd.Series</span>
 <span class="c1">#             Elsasser ratio parameter.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
 <span class="c1">#         return self.elsasser_ratio</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     def set_data(self, v_in, b_in, rho, species, sc_vector, **kwargs):</span>
 <span class="c1">#         r&quot;&quot;&quot;The `auto_reindex` kwarg can be set to False so that, if running a</span>
 <span class="c1">#         large batch of analysis on the same data, one can reindex once outside</span>
 <span class="c1">#         of this class and avoid many unnecessary reindexing cases within it.</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         Be sure to carefully check your reindexing so as to not introduce lots</span>
 <span class="c1">#         of NaNs. I ran into that bug when first writing this class.</span>
 <span class="c1">#         &quot;&quot;&quot;</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         species = self._clean_species_for_setting(species)</span>
 <span class="c1">#         if not isinstance(v_in.index, pd.DatetimeIndex):</span>
 <span class="c1">#             raise TypeError</span>
@@ -1012,7 +1011,7 @@
 <span class="c1">#             raise TypeError</span>
 <span class="c1">#         if not isinstance(rho.index, pd.DatetimeIndex):</span>
 <span class="c1">#             raise TypeError</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         if not v_in.index.equals(b_in.index):</span>
 <span class="c1">#             self.logger.warn(&quot;v and b have unequal indices. Results may be unexpected.&quot;)</span>
 <span class="c1">#         if not v_in.index.equals(rho.index):</span>
@@ -1021,20 +1020,20 @@
 <span class="c1"># unexpected.&quot;&quot;&quot;</span>
 <span class="c1">#             )</span>
 <span class="c1">#         # auto_reindex = bool(auto_reindex)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         data = (</span>
 <span class="c1">#             pd.concat({&quot;v&quot;: v_in, &quot;b&quot;: b_in}, axis=1, names=[&quot;M&quot;], sort=True)</span>
 <span class="c1">#             .sort_index(axis=1)</span>
 <span class="c1">#             .copy(deep=True)</span>
 <span class="c1">#         )</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;1&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         # Convert GSE -&gt; RTN</span>
 <span class="c1">#         data = data.multiply(pd.Series({&quot;x&quot;: -1, &quot;y&quot;: -1, &quot;z&quot;: 1}), axis=1, level=&quot;C&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;2&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         # Project along nominal Parker Spiral</span>
 <span class="c1">#         omega = 2.865e-6  # rad/s</span>
 <span class="c1">#         pos = sc_vector.data.pos.copy(deep=True)</span>
@@ -1043,17 +1042,17 @@
 <span class="c1">#         )</span>
 <span class="c1">#         rho_rtn = pos.loc[:, [&quot;x&quot;, &quot;y&quot;]].pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)</span>
 <span class="c1">#         cos_colat = rho_rtn.divide(r_rtn)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         r = sc_vector.distance2sun * sc_vector.units.distance2sun * 1e-3  # [km]</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         correction = r.multiply(cos_colat, axis=0).multiply(</span>
 <span class="c1">#             omega</span>
 <span class="c1">#         )  # [arc length speed] = [km/s]</span>
 <span class="c1">#         vt = data.loc[:, (&quot;v&quot;, &quot;y&quot;)].subtract(correction)</span>
 <span class="c1">#         data.loc[:, (&quot;v&quot;, &quot;y&quot;)] = vt</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         # #         print(&quot;3&quot;, data.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         polarity = (</span>
 <span class="c1">#             data.loc[:, &quot;v&quot;]</span>
 <span class="c1">#             .multiply(data.loc[:, &quot;b&quot;], axis=1)</span>
@@ -1062,46 +1061,46 @@
 <span class="c1">#             .sum(axis=1)</span>
 <span class="c1">#             .pipe(np.sign)</span>
 <span class="c1">#         )</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         coef = self.units.b / (  # Convert b -&gt; Alfven units.</span>
 <span class="c1">#             np.sqrt(self.units.rho * self.constants.misc.mu0) * self.units.v</span>
 <span class="c1">#         )</span>
 <span class="c1">#         coef = rho.pow(-0.5).multiply(coef)</span>
 <span class="c1">#         polarity_coef = polarity.multiply(coef)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;Coef&quot;, polarity_coef.head(), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         b_calc = data.loc[:, &quot;b&quot;].multiply(polarity_coef, axis=0)</span>
 <span class="c1">#         #         b_calc = data.loc[:, &quot;b&quot;].multiply(coef, axis=0)</span>
 <span class="c1">#         v_calc = data.loc[:, &quot;v&quot;]</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;4&quot;, v_calc.head().round(3), b_calc.head().round(3),sep=&quot;\n&quot;,  end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         zp = v_calc.add(b_calc)</span>
 <span class="c1">#         zm = v_calc.subtract(b_calc)</span>
 <span class="c1">#         z_raw = pd.concat({&quot;zp&quot;: zp, &quot;zm&quot;: zm}, axis=1).sort_index(axis=1)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;5&quot;, z_raw.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         window = kwargs.pop(&quot;window&quot;, &quot;15min&quot;)</span>
 <span class="c1">#         min_periods = kwargs.pop(&quot;min_periods&quot;, 5)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         rolled = z_raw.rolling(window, min_periods=min_periods, **kwargs)</span>
 <span class="c1">#         agged = rolled.agg(&quot;mean&quot;)</span>
 <span class="c1">#         deltas = z_raw.subtract(agged, axis=1)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         #         print(&quot;6&quot;, agged.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
 <span class="c1">#         #         print(&quot;y&quot;, deltas.head().round(3), sep=&quot;\n&quot;, end=&quot;\n\n&quot;)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         data.name = &quot;measurements&quot;</span>
 <span class="c1">#         deltas.name = &quot;deltas&quot;</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         self._measurements = data</span>
 <span class="c1">#         self._data = deltas</span>
 <span class="c1">#         self._polarity = polarity</span>
 <span class="c1">#         self._species = species</span>
 <span class="c1">#         self._averaging_info = AlvenicTurbAveraging(window, min_periods)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     def _clean_species_for_setting(self, species):</span>
 <span class="c1">#         if not isinstance(species, str):</span>
 <span class="c1">#             msg = &quot;%s.species must be a single species w/ an optional `+` or `,`&quot;</span>
@@ -1109,7 +1108,7 @@
 <span class="c1">#         if species.count(&quot;,&quot;) &gt; 1:</span>
 <span class="c1">#             msg = &quot;%s.species can contain at most one `,`\nspecies: %s&quot;</span>
 <span class="c1">#             raise ValueError(msg % (self.__class__.__name__, species))</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#         species = &quot;,&quot;.join(</span>
 <span class="c1">#             [&quot;+&quot;.join(tuple(sorted(s.split(&quot;+&quot;)))) for s in species.split(&quot;,&quot;)]</span>
 <span class="c1">#         )</span>

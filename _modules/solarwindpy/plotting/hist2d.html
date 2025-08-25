@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g3ec1b662e documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g6cff5d2a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5831a847"></script>
+      <script src="../../../_static/documentation_options.js?v=a4cd0fd3"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -737,10 +737,7 @@
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">,</span> <span class="s2">&quot;rd&quot;</span><span class="p">):</span>
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;norm&quot;</span><span class="p">,</span>
-            <span class="n">default_norm</span>
-        <span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
@@ -1321,7 +1318,10 @@
 <div class="viewcode-block" id="Hist2D.take_data_in_yrange_across_x">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">take_data_in_yrange_across_x</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">ranges_by_x</span><span class="p">,</span> <span class="n">get_x_bounds</span><span class="p">,</span> <span class="n">get_y_bounds</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ranges_by_x</span><span class="p">,</span>
+        <span class="n">get_x_bounds</span><span class="p">,</span>
+        <span class="n">get_y_bounds</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
