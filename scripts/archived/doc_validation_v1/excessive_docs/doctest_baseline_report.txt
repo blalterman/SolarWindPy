@@ -1,0 +1,67 @@
+SolarWindPy Doctest Physics Validation Report
+=============================================
+
+Directory: solarwindpy
+Files processed: 51
+Total tests: 0
+Failed tests: 0
+Examples run: 0
+Physics violations: 0
+Success rate: 0.0%
+Physics compliance: 0.0%
+
+File Results:
+--------------------
+❌ FAIL solarwindpy/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/moyal.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/exponentials.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/core.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/lines.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/plots.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/trend_fits.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/tex_info.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/power_laws.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/fitfunctions/gaussians.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/tools/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/vector.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/spacecraft.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/units_constants.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/ions.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/plasma.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/alfvenic_turbulence.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/tensor.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/core/base.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/plots.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/base.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/instabilities/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/instabilities/beta_ani.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/instabilities/verscharen2016.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/histograms.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/hist1d.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/select_data_from_figure.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/tools.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/hist2d.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/orbits.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/agg_plot.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/scatter.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/spiral.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/base.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/scripts/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/elemental_abundance.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/chemistry.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/composition.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/datetime.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/special.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/plotting/labels/base.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/lisird/lisird.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/lisird/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/lisird/extrema_calculator.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/sunspot_number/__init__.py (0 tests, 0 violations)
+❌ FAIL solarwindpy/solar_activity/sunspot_number/sidc.py (0 tests, 0 violations)
+
+✅ No physics violations found!

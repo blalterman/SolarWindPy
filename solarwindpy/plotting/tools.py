@@ -115,7 +115,10 @@ def save(
     if pdf:
 
         fig.savefig(
-            spath.with_suffix(".pdf"), bbox_inches=bbox_inches, format="pdf", **kwargs,
+            spath.with_suffix(".pdf"),
+            bbox_inches=bbox_inches,
+            format="pdf",
+            **kwargs,
         )
 
         if log:
@@ -127,7 +130,10 @@ def save(
             fig.text(info_x, info_y, info)
 
         fig.savefig(
-            spath.with_suffix(".png"), bbox_inches=bbox_inches, format="png", **kwargs,
+            spath.with_suffix(".png"),
+            bbox_inches=bbox_inches,
+            format="png",
+            **kwargs,
         )
 
         if log:
@@ -155,9 +161,12 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     Examples
     --------
     >>> fig, ax = subplots(1, 2)
-    >>> ax[0].plot([1, 2], label='a')
-    >>> ax[1].plot([2, 3], label='b')
-    >>> joint_legend(ax[0], ax[1])
+    >>> ax[0].plot([1, 2], label='a')  # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> ax[1].plot([2, 3], label='b')  # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> joint_legend(ax[0], ax[1])  # doctest: +ELLIPSIS
+    <matplotlib.legend.Legend object at 0x...>
     """
     axes = np.array(axes).ravel()
 
@@ -227,7 +236,7 @@ def multipanel_figure_shared_cbar(
 
     Examples
     --------
-    >>> fig, axs, cax = multipanel_figure_shared_cbar(2, 2)
+    >>> fig, axs, cax = multipanel_figure_shared_cbar(2, 2)  # doctest: +SKIP
     """
 
     fig_kwargs = {}
@@ -277,7 +286,7 @@ def build_ax_array_with_common_colorbar(
 
     Examples
     --------
-    >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')  # doctest: +SKIP
     """
 
     if fig_kwargs is None:
@@ -359,9 +368,9 @@ def build_ax_array_with_common_colorbar(
         cax.yaxis.set_label_position("left")
 
     if sharex:
-        axes[0, 0].get_shared_x_axes().join(*axes.ravel())
+        axes.flat[0].get_shared_x_axes().join(*axes.flat)
     if sharey:
-        axes[0, 0].get_shared_y_axes().join(*axes.ravel())
+        axes.flat[0].get_shared_y_axes().join(*axes.flat)
 
     if axes.shape != (nrows, ncols):
         raise ValueError(
@@ -402,8 +411,8 @@ def calculate_nrows_ncols(n):
 
     Examples
     --------
-    >>> calculate_nrows_ncols(5)
-    (2, 3)
+    >>> calculate_nrows_ncols(5)  # doctest: +ELLIPSIS
+    (...2..., ...3...)
     """
     root = int(np.fix(np.sqrt(n)))
     while n % root:

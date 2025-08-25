@@ -90,20 +90,32 @@ class Plasma(base.Base):
     --------
     Create a plasma object from multi-species data:
     
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> # Create sample MultiIndex data
+    >>> epoch = pd.date_range('2023-01-01', periods=3, freq='1min')
+    >>> columns = pd.MultiIndex.from_tuples([
+    ...     ('n', '', 'p1'), ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),
+    ...     ('n', '', 'a'), ('v', 'x', 'a'), ('v', 'y', 'a'), ('v', 'z', 'a'),
+    ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),
+    ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')
+    ... ], names=['M', 'C', 'S'])
+    >>> data = pd.DataFrame(np.random.rand(3, len(columns)), 
+    ...                     index=epoch, columns=columns)
     >>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas
-    >>> proton_density = plasma.p1.n      # Proton number density [cm^-3]
-    >>> alpha_velocity = plasma.a.v       # Alpha velocity vector [km/s]
+    >>> type(plasma.p1).__name__  # Proton ion object
+    'Ion'
     
     Calculate plasma physics parameters:
     
-    >>> beta = plasma.beta()              # Plasma beta parameter
-    >>> coulomb = plasma.nc()             # Coulomb collision frequency [s^-1]
-    >>> temp_ratio = plasma.a.T / plasma.p1.T  # Alpha-proton temp ratio
+    >>> beta = plasma.beta('p1')          # Plasma beta for protons
+    >>> type(beta).__name__
+    'Tensor'
     
-    Access magnetic field data:
+    Idenfity ion species in plasma:
     
-    >>> b_field = plasma.b                # Magnetic field vector [nT]
-    >>> b_mag = plasma.b.mag              # Magnetic field magnitude [nT]
+    >>> plasma.species
+    ['p1', 'a']
     """
 
     def __init__(

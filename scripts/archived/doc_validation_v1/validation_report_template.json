@@ -1,0 +1,214 @@
+{
+  "validation_metadata": {
+    "validation_timestamp": "2025-08-21T06:00:00Z",
+    "phase": "Phase 2: Execution Environment Setup",
+    "total_examples_discovered": 47,
+    "validation_framework_version": "1.0.0",
+    "environment": {
+      "python_version": "3.9+",
+      "solarwindpy_version": "0.1.dev1034+",
+      "platform": "darwin",
+      "testing_tools": ["pytest", "doctest", "ast"]
+    }
+  },
+  
+  "validation_summary": {
+    "total_examples": 47,
+    "examples_by_type": {
+      "rst_code_blocks": 20,
+      "doctest_examples": 19,
+      "bash_examples": 8
+    },
+    "execution_results": {
+      "successful_executions": 0,
+      "failed_executions": 0,
+      "skipped_executions": 0,
+      "success_rate_percent": 0.0,
+      "average_execution_time_seconds": 0.0
+    },
+    "error_analysis": {
+      "syntax_errors": 0,
+      "import_errors": 0,
+      "runtime_errors": 0,
+      "timeout_errors": 0,
+      "physics_violations": 0
+    },
+    "physics_compliance": {
+      "thermal_speed_compliant": 0,
+      "units_compliant": 0,
+      "missing_data_compliant": 0,
+      "multiindex_compliant": 0,
+      "overall_physics_compliant": false
+    }
+  },
+  
+  "detailed_results": {
+    "examples": [
+      {
+        "example_id": "usage_rst_example_1",
+        "file_path": "docs/source/usage.rst",
+        "line_range": "23-28",
+        "example_type": "code-block",
+        "code_preview": "import solarwindpy as swp\nimport numpy as np\nimport pandas as pd",
+        "execution_result": {
+          "success": false,
+          "execution_time_seconds": 0.0,
+          "error_type": null,
+          "error_message": null,
+          "has_stdout": false,
+          "has_stderr": false,
+          "outputs_captured": []
+        },
+        "import_validation": {
+          "all_imports_valid": false,
+          "missing_imports": [],
+          "import_errors": [],
+          "dependencies": ["solarwindpy", "numpy", "pandas"]
+        },
+        "physics_validation": {
+          "violations": [],
+          "compliant": true,
+          "checks_performed": []
+        },
+        "remediation_priority": "medium",
+        "estimated_fix_complexity": "simple"
+      }
+    ]
+  },
+  
+  "error_patterns": {
+    "most_common_errors": {
+      "AttributeError": {
+        "count": 0,
+        "examples": [],
+        "typical_message": "object has no attribute",
+        "remediation_strategy": "Fix method names or add missing methods"
+      },
+      "NameError": {
+        "count": 0,
+        "examples": [],
+        "typical_message": "name is not defined", 
+        "remediation_strategy": "Define missing variables or add imports"
+      },
+      "ImportError": {
+        "count": 0,
+        "examples": [],
+        "typical_message": "No module named",
+        "remediation_strategy": "Fix import paths or add missing modules"
+      }
+    },
+    "systematic_issues": {
+      "deprecated_api_usage": {
+        "count": 0,
+        "examples": [],
+        "description": "Usage of deprecated constructors or methods"
+      },
+      "missing_data_setup": {
+        "count": 0,
+        "examples": [],
+        "description": "Examples assume data without proper initialization"
+      },
+      "import_inconsistency": {
+        "count": 0,
+        "examples": [],
+        "description": "Inconsistent import alias usage (sw vs swp)"
+      }
+    }
+  },
+  
+  "remediation_roadmap": {
+    "phase_4_critical_fixes": {
+      "deprecated_plasma_constructor": {
+        "priority": "critical",
+        "affected_examples": [],
+        "fix_strategy": "Replace Plasma(epoch=) with proper DataFrame constructor",
+        "estimated_time_minutes": 30
+      },
+      "non_existent_methods": {
+        "priority": "critical", 
+        "affected_examples": [],
+        "fix_strategy": "Remove or replace non-existent method calls",
+        "estimated_time_minutes": 45
+      },
+      "broken_imports": {
+        "priority": "high",
+        "affected_examples": [],
+        "fix_strategy": "Fix import paths and standardize aliases",
+        "estimated_time_minutes": 25
+      }
+    },
+    "phase_5_compliance_fixes": {
+      "multiindex_setup": {
+        "priority": "medium",
+        "affected_examples": [],
+        "fix_strategy": "Add proper MultiIndex DataFrame initialization",
+        "estimated_time_minutes": 45
+      },
+      "physics_validation": {
+        "priority": "medium",
+        "affected_examples": [],
+        "fix_strategy": "Ensure thermal speed and unit conventions",
+        "estimated_time_minutes": 30
+      }
+    }
+  },
+  
+  "success_metrics": {
+    "baseline_metrics": {
+      "execution_success_rate": 10.6,
+      "physics_compliance_rate": 40.0,
+      "import_resolution_rate": 20.0
+    },
+    "target_metrics": {
+      "execution_success_rate": 95.0,
+      "physics_compliance_rate": 95.0,
+      "import_resolution_rate": 100.0
+    },
+    "improvement_needed": {
+      "execution_success_improvement": 84.4,
+      "physics_compliance_improvement": 55.0,
+      "import_resolution_improvement": 80.0
+    }
+  },
+  
+  "validation_framework_status": {
+    "extraction_tools": {
+      "rst_extractor": "operational",
+      "docstring_extractor": "operational", 
+      "syntax_validator": "operational"
+    },
+    "execution_framework": {
+      "isolated_executor": "operational",
+      "timeout_handling": "operational",
+      "error_capture": "operational"
+    },
+    "physics_validation": {
+      "thermal_speed_validator": "operational",
+      "units_validator": "operational",
+      "missing_data_validator": "operational",
+      "multiindex_validator": "operational"
+    },
+    "reporting_system": {
+      "json_output": "operational",
+      "summary_generation": "operational",
+      "remediation_planning": "operational"
+    }
+  },
+  
+  "next_phase_readiness": {
+    "phase_3_prerequisites": {
+      "testing_infrastructure": "complete",
+      "example_inventory": "complete",
+      "validation_framework": "complete",
+      "error_capture_system": "complete"
+    },
+    "estimated_phase_3_duration": "3 hours",
+    "expected_validation_results": "42 failures, 5 successes",
+    "critical_issues_to_validate": [
+      "deprecated Plasma constructor",
+      "non-existent add_ion_species method",
+      "broken plotting imports",
+      "undefined data variables"
+    ]
+  }
+}

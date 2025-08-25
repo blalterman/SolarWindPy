@@ -349,7 +349,10 @@ class Hist1D(AggPlot):
         return ax, out
 
     def take_data_in_yrange_across_x(
-        self, ranges_by_x, get_x_bounds, get_y_bounds,
+        self,
+        ranges_by_x,
+        get_x_bounds,
+        get_y_bounds,
     ):
         r"""
 

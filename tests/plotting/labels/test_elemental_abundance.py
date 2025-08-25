@@ -168,7 +168,7 @@ class TestElementalAbundanceSetMethods:
     def test_set_species_unknown_warning(self):
         """Test set_species warns for unknown species."""
         abundance = ElementalAbundance("He", "H")
-        with patch('logging.getLogger') as mock_logger:
+        with patch("logging.getLogger") as mock_logger:
             mock_log = mock_logger.return_value
             abundance.set_species("Unknown", "H")
             mock_log.warning.assert_called()
@@ -176,7 +176,7 @@ class TestElementalAbundanceSetMethods:
     def test_set_species_unknown_reference_warning(self):
         """Test set_species warns for unknown reference species."""
         abundance = ElementalAbundance("He", "H")
-        with patch('logging.getLogger') as mock_logger:
+        with patch("logging.getLogger") as mock_logger:
             mock_log = mock_logger.return_value
             abundance.set_species("He", "Unknown")
             mock_log.warning.assert_called()
@@ -188,6 +188,7 @@ class TestElementalAbundanceInheritance:
     def test_inheritance_from_base(self):
         """Test ElementalAbundance inherits from Base."""
         from solarwindpy.plotting.labels.base import Base
+
         abundance = ElementalAbundance("He", "H")
         assert isinstance(abundance, Base)
 
@@ -203,7 +204,7 @@ class TestElementalAbundanceInheritance:
         abundance1 = ElementalAbundance("He", "H")
         abundance2 = ElementalAbundance("He", "H")
         abundance3 = ElementalAbundance("Fe", "H")
-        
+
         assert abundance1 == abundance2
         assert abundance1 != abundance3
 
@@ -220,6 +221,7 @@ class TestElementalAbundanceKnownSpecies:
     def test_known_species_import(self):
         """Test known_species is properly imported."""
         from solarwindpy.plotting.labels.elemental_abundance import known_species
+
         assert isinstance(known_species, tuple)
         assert "H" in known_species
         assert "He" in known_species
@@ -232,14 +234,16 @@ class TestElementalAbundanceKnownSpecies:
             warnings.simplefilter("always")
             ElementalAbundance("He", "H")
             # Filter out unrelated warnings
-            relevant_warnings = [warning for warning in w 
-                               if "not recognized" in str(warning.message)]
+            relevant_warnings = [
+                warning for warning in w if "not recognized" in str(warning.message)
+            ]
             assert len(relevant_warnings) == 0
 
     def test_unknown_species_validation(self):
         """Test validation warns for unknown species."""
         import logging
-        with patch('logging.getLogger') as mock_logger:
+
+        with patch("logging.getLogger") as mock_logger:
             mock_log = mock_logger.return_value
             ElementalAbundance("Unknown", "H")
             # Should have warning for unknown species
@@ -255,7 +259,7 @@ class TestElementalAbundanceIntegration:
         he_h = ElementalAbundance("He", "H")
         assert "He" in he_h.tex
         assert "H" in he_h.tex
-        
+
         # Fe/O ratio
         fe_o = ElementalAbundance("Fe", "O")
         assert "Fe" in fe_o.tex
@@ -265,7 +269,7 @@ class TestElementalAbundanceIntegration:
         """Test photospheric vs solar wind abundance comparison."""
         photospheric = ElementalAbundance("He", "H", photospheric=True)
         solar_wind = ElementalAbundance("He", "H", photospheric=False)
-        
+
         assert r"\mathrm{photo}" in photospheric.tex
         assert r"\mathrm{photo}" not in solar_wind.tex
         assert "photospheric-ratio" in str(photospheric.path)
@@ -275,7 +279,7 @@ class TestElementalAbundanceIntegration:
         """Test percentage vs ratio unit formatting."""
         percentage = ElementalAbundance("He", "H", pct_unit=True)
         ratio = ElementalAbundance("He", "H", pct_unit=False)
-        
+
         assert percentage.units == r"\%"
         assert ratio.units == r"\#"
 
@@ -284,11 +288,11 @@ class TestElementalAbundanceIntegration:
         he_h = ElementalAbundance("He", "H")
         fe_h = ElementalAbundance("Fe", "H")
         c_o = ElementalAbundance("C", "O")
-        
+
         # All should have different paths
         paths = [str(ab.path) for ab in [he_h, fe_h, c_o]]
         assert len(set(paths)) == 3
-        
+
         # All should have different tex representations
         tex_reprs = [ab.tex for ab in [he_h, fe_h, c_o]]
         assert len(set(tex_reprs)) == 3
@@ -297,11 +301,11 @@ class TestElementalAbundanceIntegration:
         """Test scientific accuracy of abundance representations."""
         # Standard solar wind abundance ratio
         he_h = ElementalAbundance("He", "H", photospheric=True)
-        
+
         # Should show ratio format for abundance comparison
         assert ":" in he_h.tex  # Comparison format
         assert "/" in he_h.tex  # Ratio format
-        
+
         # Units should be dimensionless for abundance ratios
         ratio_abundance = ElementalAbundance("He", "H", pct_unit=False)
         assert ratio_abundance.units == r"\#"
@@ -315,7 +319,7 @@ class TestElementalAbundanceEdgeCases:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             abundance = ElementalAbundance("H", "H")
-        
+
         assert abundance.species == "H"
         assert abundance.reference_species == "H"
         # Should still generate valid TeX
@@ -326,7 +330,7 @@ class TestElementalAbundanceEdgeCases:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             abundance = ElementalAbundance("", "H")
-        
+
         assert abundance.species == ""
         assert abundance.reference_species == "H"
 
@@ -335,27 +339,28 @@ class TestElementalAbundanceEdgeCases:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             abundance = ElementalAbundance("3He", "4He")
-        
+
         assert abundance.species == "3He"
         assert abundance.reference_species == "4He"
         # Should handle isotope notation (3He becomes ^{3}\mathrm{He})
         tex = abundance.tex
         assert "He" in tex  # Base element should be present
-        assert "3" in tex   # Mass number should be present
-        assert "4" in tex   # Mass number should be present
+        assert "3" in tex  # Mass number should be present
+        assert "4" in tex  # Mass number should be present
 
 
 def test_module_all_attribute():
     """Test module __all__ attribute is correctly defined."""
     from solarwindpy.plotting.labels import elemental_abundance
-    assert hasattr(elemental_abundance, '__all__')
-    assert 'ElementalAbundance' in elemental_abundance.__all__
+
+    assert hasattr(elemental_abundance, "__all__")
+    assert "ElementalAbundance" in elemental_abundance.__all__
 
 
 def test_module_imports():
     """Test module can be imported correctly."""
     from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
     from solarwindpy.plotting.labels.elemental_abundance import known_species
-    
+
     assert ElementalAbundance is not None
     assert known_species is not None

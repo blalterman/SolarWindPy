@@ -2,7 +2,6 @@
 """Tensor class for storing quantities like thermal speed, pressure, and temperature."""
 
 import pandas as pd
-from typing import Union
 
 from . import base
 
@@ -28,7 +27,7 @@ class Tensor(base.Base):
         self._validate_data(data)
         self._data = data
 
-    def __call__(self, component: str) -> Union[pd.Series, pd.DataFrame]:
+    def __call__(self, component: str) -> pd.Series | pd.DataFrame:
         """Access a specific component of the tensor.
 
         Parameters
@@ -38,7 +37,7 @@ class Tensor(base.Base):
 
         Returns
         -------
-        Union[pd.Series, pandas.DataFrame]
+        pd.Series | pd.DataFrame
             The requested component data.
 
         Raises
@@ -84,7 +83,7 @@ class Tensor(base.Base):
             raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     @property
-    def magnitude(self) -> Union[pd.Series, pd.DataFrame]:
+    def magnitude(self) -> pd.Series | pd.DataFrame:
         """Calculate and return the magnitude of the tensor."""
         return self.data.multiply({"par": 1 / 3, "per": 2 / 3}, axis=1, level="C").sum(
             axis=1

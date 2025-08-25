@@ -491,8 +491,7 @@ It causes a KeyError in `pd.cut`."""
         return cut
 
     def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
-        r"""Plot SSN on the color bar.
-        """
+        r"""Plot SSN on the color bar."""
         # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
         ssn = self.data.loc[t0:t1, "ssn"]
 

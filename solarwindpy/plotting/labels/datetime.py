@@ -50,7 +50,10 @@ class Timedelta(special.ArbitraryLabel):
     @property
     def units(self):
         try:
-            return r"%s \; \mathrm{%s}" % (self.offset.n, self.offset.name)  # noqa: W605
+            return r"%s \; \mathrm{%s}" % (
+                self.offset.n,
+                self.offset.name,
+            )  # noqa: W605
         except AttributeError:
             return base._inU["unknown"]
 

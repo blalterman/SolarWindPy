@@ -44,9 +44,7 @@ class ManualLabel(ArbitraryLabel):
                 self.tex.replace(" ", r" \; "),
                 self.unit,
             )
-        ).replace(
-            r"\; []", ""
-        )
+        ).replace(r"\; []", "")
 
     @property
     def tex(self):
@@ -534,9 +532,7 @@ class SSN(ArbitraryLabel):
 
     @property
     def tex(self):
-        return (r"\mathrm{%s SSN}" % self.pretty_kind).replace(
-            " ", r" \; "
-        )
+        return (r"\mathrm{%s SSN}" % self.pretty_kind).replace(" ", r" \; ")
 
     @property
     def units(self):
