@@ -7,6 +7,7 @@ Automatically handles plan lifecycle completion workflow
 import os
 import json
 import shutil
+import re
 from pathlib import Path
 from datetime import datetime
 import subprocess
@@ -96,6 +97,81 @@ def move_plan_to_completed(plan_name: str, source_dir: Path, completed_dir: Path
         return False
 
 
+def generate_closeout_documentation(plan_name: str, plan_dir: Path) -> bool:
+    """
+    Generate closeout documentation for a completed plan.
+    
+    Args:
+        plan_name: Name of the plan
+        plan_dir: Path to the plan directory
+        
+    Returns:
+        True if closeout generation was successful
+    """
+    try:
+        # Read the overview file to extract metadata
+        overview_file = plan_dir / "0-Overview.md"
+        if not overview_file.exists():
+            print(f"⚠️  No overview file found for {plan_name}")
+            return False
+        
+        with open(overview_file, 'r') as f:
+            overview_content = f.read()
+        
+        # Extract key metadata
+        estimated_duration = extract_metadata(overview_content, "Estimated Duration")
+        total_phases = extract_metadata(overview_content, "Total Phases")
+        objective = extract_section(overview_content, "🎯 Objective")
+        
+        # Load template
+        template_file = Path('plans/closeout-template.md')
+        if not template_file.exists():
+            print(f"⚠️  Closeout template not found: {template_file}")
+            return False
+        
+        with open(template_file, 'r') as f:
+            template_content = f.read()
+        
+        # Replace template placeholders
+        closeout_content = template_content.replace('[Plan Name]', plan_name)
+        closeout_content = closeout_content.replace('[Plan Name from 0-Overview.md]', plan_name)
+        closeout_content = closeout_content.replace('[YYYY-MM-DD]', datetime.now().strftime('%Y-%m-%d'))
+        closeout_content = closeout_content.replace('[estimated hours]', estimated_duration or 'N/A')
+        closeout_content = closeout_content.replace('[N]/[N]', f"{total_phases}/{total_phases}" if total_phases else 'N/A')
+        closeout_content = closeout_content.replace('[feature/plan-name]', f'feature/{plan_name}')
+        closeout_content = closeout_content.replace('[plan/plan-name]', f'plan/{plan_name}')
+        closeout_content = closeout_content.replace('[plan-name]', plan_name)
+        
+        if objective:
+            closeout_content = closeout_content.replace('[Restate main objective from 0-Overview.md]', objective.strip())
+        
+        # Create closeout file
+        closeout_file = plan_dir / "9-Closeout.md"
+        with open(closeout_file, 'w') as f:
+            f.write(closeout_content)
+        
+        print(f"✅ Generated closeout documentation: {closeout_file}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error generating closeout for {plan_name}: {e}")
+        return False
+
+
+def extract_metadata(content: str, field: str) -> str:
+    """Extract metadata field from plan content."""
+    pattern = rf"- \*\*{field}\*\*: (.+)"
+    match = re.search(pattern, content)
+    return match.group(1).strip() if match else ""
+
+
+def extract_section(content: str, header: str) -> str:
+    """Extract section content from plan."""
+    pattern = rf"## {re.escape(header)}\n(.+?)(?=\n## |\n---|\Z)"
+    match = re.search(pattern, content, re.DOTALL)
+    return match.group(1).strip() if match else ""
+
+
 def preserve_plan_branches(plan_name: str) -> dict:
     """
     Ensure plan branches are preserved and not deleted.
@@ -172,6 +248,11 @@ def scan_and_archive_completed_plans():
             
             if is_plan_completed(item):
                 print(f"✅ Plan completed: {item.name}")
+                
+                # Generate closeout documentation
+                closeout_success = generate_closeout_documentation(item.name, item)
+                if not closeout_success:
+                    print(f"⚠️  Proceeding with archival despite closeout generation issues")
                 
                 # Preserve branches before moving
                 branch_status = preserve_plan_branches(item.name)
