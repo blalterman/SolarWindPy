@@ -14,6 +14,9 @@ jobs:
   # Phase 1: Version Analysis and Branch Creation
   version-analysis:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      workflows: write  # Required to push branches containing workflow files
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
