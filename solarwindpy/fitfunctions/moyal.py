@@ -27,7 +27,7 @@ class Moyal(FitFunction):
 
     @property
     def sigma(self):
-        r"""Initial guess for mean value"""
+        r"""Initial guess for mean value."""
         return self._sigma
 
     @property

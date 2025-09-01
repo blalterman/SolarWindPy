@@ -141,7 +141,9 @@ class FFPlot(object):
         return markevery
 
     def _format_hax(self, ax, with_rax=False):
-        r"""Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and
+        r"""Format the plot axes.
+
+        Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and
         :py:meth:`plot_fit` results.
         """
         ax.grid(True, which="major", axis="both")
@@ -192,7 +194,9 @@ class FFPlot(object):
         return ax
 
     def plot_raw(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
-        r"""Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,
+        r"""Plot the observations used in the fit from raw data.
+
+        Plot from :py:meth:`self.observations.raw.x`,
         :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.
 
         Parameters
@@ -283,7 +287,9 @@ class FFPlot(object):
         return ax, plotted
 
     def plot_used(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
-        r"""Plot the observations used in the fit from :py:meth:`self.observations.used.x`,
+        r"""Plot the observations used in the fit from used data.
+
+        Plot from :py:meth:`self.observations.used.x`,
         :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
         """
         if ax is None:
@@ -676,6 +682,7 @@ class FFPlot(object):
 
     def residuals(self, pct=False, robust=False):
         r"""Calculate the fit residuals.
+
         If pct, normalize by fit yvalues.
         """
 
@@ -704,8 +711,9 @@ class FFPlot(object):
     #         return r
 
     def set_labels(self, **kwargs):
-        r"""Set or update x, y, or z labels. Any label not specified in kwargs
-        is propagated from `self.labels.<x, y, or z>`.
+        r"""Set or update x, y, or z labels.
+
+        Any label not specified in kwargs is propagated from `self.labels.<x, y, or z>`.
         """
 
         x = kwargs.pop("x", self.labels.x)

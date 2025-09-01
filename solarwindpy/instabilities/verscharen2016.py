@@ -191,7 +191,8 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Used for building data containers and checking that all entries are visited."""
+        r"""Used for building data containers and checking that all entries are
+        visited."""
         return -9999.0
 
     @property
@@ -438,9 +439,7 @@ class StabilityContours(object):
 
     @property
     def beta(self):
-        r"""
-        Proton core parallel beta.
-        """
+        r"""Proton core parallel beta."""
         return self._beta
 
     def set_beta(self, new):
@@ -448,10 +447,10 @@ class StabilityContours(object):
         self._beta = new
 
     def _calc_instability_contours(self):
-        r"""
-        Because we can call the contours many times, but only
-        need to calculate them once, move the calculation to
-        a separate method.
+        r"""Calculate instability contours.
+
+        Because we can call the contours many times, but only need to calculate them
+        once, move the calculation to a separate method.
         """
         contours = {
             k: beta_ani_inst(self.beta, **v) for k, v in insta_params.iterrows()
@@ -468,8 +467,7 @@ class StabilityContours(object):
     def plot_contours(
         self, ax, fix_scale=True, plot_gamma=None, tk_kind=None, **kwargs
     ):
-        r"""
-        Add the instability contours to the plot.
+        r"""Add the instability contours to the plot.
 
         Parameters
         ----------
@@ -553,7 +551,9 @@ class StabilityContours(object):
 
     @staticmethod
     def _add_table_legend(ax, images):
-        r"""
+        r"""Create a legend in compact table format for identifying the instability
+        contours.
+
         Create a legend in compact table format for identifying the
         instability contours.
 

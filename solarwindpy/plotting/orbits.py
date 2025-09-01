@@ -42,7 +42,8 @@ class OrbitPlot(ABC):
 
     @property
     def _orbit_key(self):
-        r"""Central property for defining the name "Orbit"
+        r"""Central property for defining the name "Orbit".
+
         for use in various methods.
         """
         return "Orbit"
@@ -213,9 +214,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             self._prune_lower_yaxis_ticks(cbari.ax, cbaro.ax)
 
     def agg(self, **kwargs):
-        r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and Both
-        orbit legs.
-        """
+        r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and
+        Both orbit legs."""
         #         logging.getLogger("main").warning("Starting agg")
         #         log_mem_usage()
 
@@ -311,8 +311,10 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         return h1
 
     def _put_agg_on_ax(self, ax, agg, cbar, limit_color_norm, cbar_kwargs, **kwargs):
-        r"""Refactored actually putting `agg` onto `ax` because Python was crashing
-        due to the way too many `agg` runs. (20190731)
+        r"""Refactored actually putting `agg` onto `ax` because Python was crashing due
+        to the way too many `agg` runs.
+
+        (20190731)
         """
         #         logging.getLogger("main").warning("Putting agg on ax")
         #         log_mem_usage()

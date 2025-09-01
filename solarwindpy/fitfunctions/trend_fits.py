@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r""":py:mod:`~solarwindpy.fitfunctions.trend_fits`.
 
-Apply a fit along one dimention of a 2D aggregated data and then fit the
-results of those 1D fits along the 2nd dimension of the aggregated data.
+Apply a fit along one dimention of a 2D aggregated data and then fit the results of
+those 1D fits along the 2nd dimension of the aggregated data.
 """
 
 import pdb  # noqa: F401
@@ -31,8 +31,9 @@ class TrendFit(object):
         wkey1d="sigma",
         ffunc1d=None,
     ):
-        r"""Note that `TrendFit.make_1dfits` must be called by the user so that any
-        kwargs may be passed to the 1D `make_fit` method, which are passed to
+        r"""Note that `TrendFit.make_1dfits` must be called by the user.
+
+        So that any kwargs may be passed to the 1D `make_fit` method, which are passed to
         `curve_fit`, allowing the user to specify fit methods, bounds, etc.
 
         Similarly, `TrendFit.trend_fit.make_fit` must be called by the user so
@@ -76,19 +77,22 @@ class TrendFit(object):
 
     @property
     def ffunc1d_class(self):
-        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin."""
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each
+        x-bin."""
         return self._ffunc1d_class
 
     @property
     def trendfunc_class(self):
-        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt` of
-        the `ffunc1d` along the x-axis.
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt`.
+
+        Of the `ffunc1d` along the x-axis.
         """
         return self._trendfunc_class
 
     @property
     def ffuncs(self):
-        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin"""
+        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in
+        each x-bin."""
         return self._ffuncs
 
     @property
@@ -133,7 +137,7 @@ class TrendFit(object):
         return self._labels
 
     def make_ffunc1ds(self, **kwargs):
-        r"""kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""
+        r"""Kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""
         agg = self.agged
         x = agg.index
         try:
@@ -170,7 +174,8 @@ class TrendFit(object):
     #         self.make_popt_frame()
 
     def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
-        r"""
+        r"""Plot all fit functions.
+
         Parameters
         ----------
         legend_title_fmt: str
@@ -231,7 +236,8 @@ class TrendFit(object):
     #         self._popt_1d = popt
 
     def make_trend_func(self, **kwargs):
-        r"""
+        r"""Make trend function.
+
         Parameters
         ----------
         kwargs:
@@ -268,7 +274,9 @@ class TrendFit(object):
     def plot_all_popt_1d(
         self, ax=None, only_plot_data_in_trend_fit=False, plot_window=True, **kwargs
     ):
-        r"""Plot all the 1D popt appropriate for identifying the trend on
+        r"""Plot all the 1D popt appropriate for identifying the trend on `ax`.
+
+        Plot all the 1D popt appropriate for identifying the trend on
         `ax`.
 
         kwargs passed to `ax.errorbar`
@@ -458,7 +466,8 @@ class TrendFit(object):
         self._trendfunc_class = trendfunc
 
     def set_shared_labels(self, **kwargs):
-        r"""Axis labels are shared between the :py:meth:`trend_func` and entries in :py:meth:`ffuncs`.
+        r"""Axis labels are shared between the trend_func and ffuncs.
+
         Here, we update them according to placement in :py:meth:`trend_func`, but properly locating
         them for :py:meth:`ffuncs`.
 

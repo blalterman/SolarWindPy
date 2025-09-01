@@ -236,7 +236,8 @@ class GaussianLn(FitFunction):
 
     @property
     def TeX_popt(self):
-        r"""Create a dictionary with ``(k, v)`` pairs corresponding to
+        r"""Create a dictionary with ``(k, v)`` pairs corresponding to parameter values.
+
         ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
         appropriate uncertainty.
 

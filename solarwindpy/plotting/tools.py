@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Utility functions for common :mod:`matplotlib` tasks.
 
-These helpers provide shortcuts for creating figures, saving output, and
-building grids of axes with shared colorbars.
+These helpers provide shortcuts for creating figures, saving output, and building grids
+of axes with shared colorbars.
 """
 
 import pdb  # noqa: F401

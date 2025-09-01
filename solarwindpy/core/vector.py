@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """A Vector class and subclasses.
 
-This module provides a Vector class and its subclass BField for handling
-vector operations and magnetic field calculations.
+This module provides a Vector class and its subclass BField for handling vector
+operations and magnetic field calculations.
 """
 
 import numpy as np

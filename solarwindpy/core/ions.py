@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Contains Ion class.
 
-This module defines the Ion class, which inherits from the Base class and
-contains Vector and Tensor objects.
+This module defines the Ion class, which inherits from the Base class and contains
+Vector and Tensor objects.
 """
 
 from __future__ import annotations
@@ -95,8 +95,7 @@ class Ion(base.Base):
         return self.species == other.species and self.data.equals(other.data)
 
     def set_species(self, species: str) -> None:
-        """
-        Set the species of the ion.
+        """Set the species of the ion.
 
         Parameters
         ----------
@@ -113,8 +112,7 @@ class Ion(base.Base):
         self._species = species
 
     def set_data(self, data: pd.DataFrame) -> None:
-        """
-        Set the data for the ion.
+        """Set the data for the ion.
 
         Parameters
         ----------
@@ -196,8 +194,7 @@ class Ion(base.Base):
 
     @property
     def anisotropy(self) -> pd.Series:
-        """
-        Calculate temperature anisotropy R_T = p_⟂/p_∥.
+        """Calculate temperature anisotropy R_T = p_⟂/p_∥.
 
         Returns
         -------
@@ -212,8 +209,7 @@ class Ion(base.Base):
 
     @property
     def temperature(self) -> pd.DataFrame:
-        """
-        Calculate temperature T = (m / (2 * k_B)) * w^2.
+        """Calculate temperature T = (m / (2 * k_B)) * w^2.
 
         Returns
         -------
@@ -229,8 +225,7 @@ class Ion(base.Base):
 
     @property
     def pth(self) -> pd.DataFrame:
-        """
-        Calculate thermal pressure p_th = 0.5 * ρ * w^2.
+        """Calculate thermal pressure p_th = 0.5 * ρ * w^2.
 
         Returns
         -------
@@ -245,8 +240,7 @@ class Ion(base.Base):
 
     @property
     def cs(self) -> pd.DataFrame:
-        """
-        Calculate the species' sound speed.
+        """Calculate the species' sound speed.
 
         Returns
         -------
@@ -262,8 +256,7 @@ class Ion(base.Base):
 
     @property
     def specific_entropy(self) -> pd.Series:
-        """
-        Calculate the specific entropy S = p_th * ρ^(-γ).
+        """Calculate the specific entropy S = p_th * ρ^(-γ).
 
         Returns
         -------

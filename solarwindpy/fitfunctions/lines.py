@@ -26,8 +26,9 @@ class Line(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the line parameters. If this
-        fails, return :py:meth:`curve_fit`'s default value `None`.
+        r"""Calculate the initial guess for the line parameters.
+
+        If this fails, return :py:meth:`curve_fit`'s default value `None`.
 
         Return
         ------
@@ -76,8 +77,9 @@ class LineXintercept(FitFunction):
 
     @property
     def p0(self):
-        r"""Calculate the initial guess for the line parameters. If this
-        fails, return :py:meth:`curve_fit`'s default value `None`.
+        r"""Calculate the initial guess for the line parameters.
+
+        If this fails, return :py:meth:`curve_fit`'s default value `None`.
 
         Return
         ------

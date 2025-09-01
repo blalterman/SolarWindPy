@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 r"""Base classes for plotting utilities.
 
-This module defines abstract helpers that manage axis labels, log scaling,
-and file system paths for saving figures.  Concrete plot classes derive from
-these mixins to implement specific visualizations.
+This module defines abstract helpers that manage axis labels, log scaling, and file
+system paths for saving figures.  Concrete plot classes derive from these mixins to
+implement specific visualizations.
 """
 
 import pdb  # noqa: F401
@@ -27,7 +27,6 @@ class Base(ABC):
 
     Methods
     -------
-
     """
 
     @abstractmethod
@@ -122,7 +121,8 @@ class Base(ABC):
         self._log = log
 
     def set_labels(self, **kwargs):
-        r"""Set or update x, y, or z labels. Any label not specified in kwargs
+        r"""Set or update x, y, or z labels. Any label not specified in kwargs.
+
         is propagated from `self.labels.<x, y, or z>`.
         """
         auto_update_path = kwargs.pop("auto_update_path", True)

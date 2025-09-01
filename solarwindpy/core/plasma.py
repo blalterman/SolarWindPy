@@ -241,6 +241,7 @@ class Plasma(base.Base):
     @property
     def auxiliary_data(self):
         r"""Any data that does not fall into the following categories.
+
         Epoch is index.
 
             -magnetic field
@@ -306,8 +307,8 @@ class Plasma(base.Base):
         sc_modifier_fcn=None,
         aux_modifier_fcn=None,
     ):
-        r"""
-        Save the plasma's underlying data and aux DataFrame to an HDF5 file at `fname`.
+        r"""Save the plasma's underlying data and aux DataFrame to an HDF5 file at
+        `fname`.
 
         Parameters
         ----------
@@ -414,8 +415,7 @@ class Plasma(base.Base):
         stop=None,
         **kwargs,
     ):
-        r"""
-        Load data from an HDF5 file at `fname` and create a plasma.
+        r"""Load data from an HDF5 file at `fname` and create a plasma.
 
         Parameters
         ----------
@@ -498,7 +498,8 @@ class Plasma(base.Base):
         return plasma
 
     def _set_species(self, *species):
-        r"""
+        r"""Initialize `species` property to make overriding `set_data` easier.
+
         Initialize `species` property to make overriding `set_data`
         easier.
         """
@@ -507,9 +508,8 @@ class Plasma(base.Base):
         self.logger.debug("%s init with species %s", self.__class__.__name__, (species))
 
     def _chk_species(self, *species):
-        r"""
-        Check the species in each :py:class:`Plasma` method call and ensure they are available in the :py:attr:`ions`.
-        """
+        r"""Check the species in each :py:class:`Plasma` method call and ensure they are
+        available in the :py:attr:`ions`."""
         species = self._conform_species(*species)
         minimal_species = [s.split("+") for s in species]
         minimal_species = np.unique([*itertools.chain(minimal_species)])
@@ -825,14 +825,11 @@ class Plasma(base.Base):
 
     @property
     def b(self):
-        r"""
-        Shortcut for :py:attr:`bfield`.
-        """
+        r"""Shortcut for :py:attr:`bfield`."""
         return self.bfield
 
     def number_density(self, *species, skipna=True):
-        r"""
-        Get the plasma number densities.
+        r"""Get the plasma number densities.
 
         Parameters
         ----------
@@ -863,14 +860,11 @@ class Plasma(base.Base):
         return n
 
     def n(self, *species, skipna=True):
-        r"""
-        Shortcut to :py:meth:`number_density`.
-        """
+        r"""Shortcut to :py:meth:`number_density`."""
         return self.number_density(*species, skipna=skipna)
 
     def mass_density(self, *species):
-        r"""
-        Get the plasma mass densities.
+        r"""Get the plasma mass densities.
 
         Parameters
         ----------
@@ -934,8 +928,7 @@ class Plasma(base.Base):
         return self.thermal_speed(*species)
 
     def pth(self, *species):
-        r"""
-        Get the thermal pressure.
+        r"""Get the thermal pressure.
 
         Parameters
         ----------
@@ -967,8 +960,7 @@ class Plasma(base.Base):
         return pth
 
     def temperature(self, *species):
-        r"""
-        Get the thermal temperature.
+        r"""Get the thermal temperature.
 
         Parameters
         ----------
@@ -996,8 +988,7 @@ class Plasma(base.Base):
         return temp
 
     def beta(self, *species):
-        r"""
-        Get perpendicular, parallel, and scalar plasma beta.
+        r"""Get perpendicular, parallel, and scalar plasma beta.
 
         Parameters
         ----------
@@ -1049,8 +1040,7 @@ class Plasma(base.Base):
         return beta
 
     def anisotropy(self, *species):
-        r"""
-        Pressure anisotropy.
+        r"""Pressure anisotropy.
 
         Note that for a single species, the pressure anisotropy is just the
         temperature anisotropy.
@@ -1087,8 +1077,7 @@ class Plasma(base.Base):
         return ani
 
     def velocity(self, *species, project_m2q=False):
-        r"""
-        Get an ion velocity or calculate the center-of-mass velocity.
+        r"""Get an ion velocity or calculate the center-of-mass velocity.
 
         Parameters
         ----------
@@ -1149,13 +1138,12 @@ species: {}
         return v
 
     def v(self, *species, project_m2q=False):
-        r"""
-        Shortcut to `velocity`.
-        """
+        r"""Shortcut to `velocity`."""
         return self.velocity(*species, project_m2q=project_m2q)
 
     def dv(self, s0, s1, project_m2q=False):
-        r"""
+        r"""Calculate the differential flow between species `s0` and `s1`.
+
         Calculate the differential flow between species `s0` and
         species `s1`: :math:`v_{s0} - v_{s1}`.
 
@@ -1192,8 +1180,7 @@ species: {}
         return dv
 
     def pdynamic(self, *species, project_m2q=False):
-        r"""
-        Calculate the dynamic or drift pressure for the given species.
+        r"""Calculate the dynamic or drift pressure for the given species.
 
             :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
 
@@ -1316,8 +1303,7 @@ species: {}
         return self.sound_speed(*species)
 
     def ca(self, *species):
-        r"""
-        Calculate the isotropic MHD Alfven speed.
+        r"""Calculate the isotropic MHD Alfven speed.
 
         Parameters
         ----------
@@ -1475,8 +1461,7 @@ species: {}
         return caani
 
     def lnlambda(self, s0, s1):
-        r"""
-        Calculate the Coulomb logarithm between species s0 and s1.
+        r"""Calculate the Coulomb logarithm between species s0 and s1.
 
             :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
 
@@ -1556,8 +1541,7 @@ species: {}
         return lnlambda
 
     def nuc(self, sa, sb, both_species=True):
-        r"""
-        Calculate the momentum collision rate following [1].
+        r"""Calculate the momentum collision rate following [1].
 
         Parameters
         ----------
@@ -1683,8 +1667,7 @@ species: {}
         return nu
 
     def nc(self, sa, sb, both_species=True):
-        r"""
-        Calculate the Coulomb number between species `sa` and `sb`.
+        r"""Calculate the Coulomb number between species `sa` and `sb`.
 
         Parameters
         ----------
@@ -1748,7 +1731,9 @@ species: {}
         return nc
 
     def vdf_ratio(self, beam="p2", core="p1"):
-        r"""
+        r"""Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
+        core VDF.
+
         Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
         core VDF at the peak beam velocity.
 
@@ -1852,8 +1837,7 @@ species: {}
         return f2f1
 
     def estimate_electrons(self, inplace=False):
-        r"""
-        Estimate the electron parameters with a scalar temperature.
+        r"""Estimate the electron parameters with a scalar temperature.
 
         Assume temperature is the same as proton scalar temerature.
         """
@@ -1963,8 +1947,7 @@ species: {}
         return electrons
 
     def heat_flux(self, *species):
-        r"""
-        Calculate the parallel heat flux
+        r"""Calculate the parallel heat flux.
 
             :math:`Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)`
 
@@ -2019,9 +2002,7 @@ species: {}
         return q
 
     def qpar(self, *species):
-        r"""
-        Shortcut to :py:meth:`heat_flux`.
-        """
+        r"""Shortcut to :py:meth:`heat_flux`."""
         return self.heat_flux(*species)
 
     def build_alfvenic_turbulence(self, species, **kwargs):
@@ -2077,7 +2058,7 @@ species: {}
         return self.specific_entropy(*species)
 
     def specific_entropy(self, *species):
-        r"""Calculate the specific entropy following [1] as
+        r"""Calculate the specific entropy following [1] as.
 
             :math:`p_\mathrm{th} \rho^{-\gamma}`
 
@@ -2121,8 +2102,7 @@ species: {}
         return out
 
     def kinetic_energy_flux(self, *species):
-        r"""
-        Calculate the plasma kinetic energy flux.
+        r"""Calculate the plasma kinetic energy flux.
 
         Parameters
         ----------

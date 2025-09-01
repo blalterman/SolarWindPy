@@ -61,8 +61,10 @@ FitBounds = namedtuple("FitBounds", "lower,upper")
 
 
 class FitFunction(ABC):
-    r"""Assuming that you don't want any special formatting, the typical call
-    order is:
+    r"""Assuming that you don't want any special formatting, the typical call order is as
+    follows.
+
+    The typical call order is:
 
         fit_function = FitFunction(function, TeX_string)
         fit_function.make_fit()
@@ -183,9 +185,7 @@ class FitFunction(ABC):
 
     @abstractproperty
     def p0(self):
-        r"""
-        The initial guess for the FitFunction.
-        """
+        r"""The initial guess for the FitFunction."""
         pass
 
     @abstractproperty
@@ -195,9 +195,7 @@ class FitFunction(ABC):
 
     @property
     def argnames(self):
-        r"""
-        The names of the actual function arguments pulled by getfullargspec.
-        """
+        r"""The names of the actual function arguments pulled by getfullargspec."""
         return self._argnames
 
     @property
@@ -324,8 +322,9 @@ class FitFunction(ABC):
 
     @property
     def sufficient_data(self):
-        r"""A check to ensure that we can fit the data before doing any
-        computations.
+        r"""A check to ensure that we can fit the data before doing any computations.
+
+        A check to ensure that we can fit the data before doing any computations.
         """
         chk = self.nobs >= len(self.argnames)
         if not chk:
@@ -343,8 +342,7 @@ class FitFunction(ABC):
     #             return self.build_TeX_info()
 
     def _clean_raw_obs(self, xobs, yobs, weights):
-        r"""
-        Set the raw x- and y-values along with weights for the fit.
+        r"""Set the raw x- and y-values along with weights for the fit.
 
         Doesn't account for extrema, finite data, etc.
         """
@@ -399,9 +397,11 @@ xobs: {xobs.shape}"""
         return mask
 
     def _set_argnames(self):
-        r"""
-        Set the arguments of the function, assuming that the first
-        is dependent variable.
+        r"""Set the arguments of the function, assuming that the first is dependent
+        variable.
+
+        Set the arguments of the function, assuming that the first is dependent
+        variable.
 
         Should be called after function is set.
         """
@@ -461,6 +461,7 @@ xobs: {xobs.shape}"""
 
     def residuals(self, pct=False):
         r"""Calculate the fit residuals.
+
         If pct, normalize by fit yvalues.
         """
 
@@ -493,8 +494,9 @@ xobs: {xobs.shape}"""
         logx=False,
         logy=False,
     ):
-        r"""Set the observed values we'll actually use in the fit by applying
-        limits to xobs_raw and yobs_raw and checking for finite values.
+        r"""Set the observed values we'll actually use in the fit.
+
+        By applying limits to xobs_raw and yobs_raw and checking for finite values.
 
         All boundaries are inclusive <= or >=.
 
@@ -684,8 +686,10 @@ xobs: {xobs.shape}"""
         return popt, pcov, psigma, all_chisq
 
     def make_fit(self, return_exception=False, **kwargs):
-        """Fit the function with the independent values `xobs` and dependent
-        values `yobs` using `least_squares` and returning the `OptimizeResult`
+        """Fit the function with the independent values `xobs` and dependent values
+        `yobs`.
+
+        Using `least_squares` and returning the `OptimizeResult`
         object, but treating weights as in `curve_fit`.
 
         Parameters
@@ -708,7 +712,6 @@ xobs: {xobs.shape}"""
                  max_nfev      10000
                  f_scale       0.1
                 ============= ======================================
-
         """
         try:
             assert self.sufficient_data  # Check we have enough data to fit.

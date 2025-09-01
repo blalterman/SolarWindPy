@@ -102,8 +102,8 @@ class SpiralMesh(object):
 
     @property
     def cell_filter(self):
-        r"""Build a boolean :py:class:`Series` selecting mesh cells that meet
-        density and area criteria specified by `mesh_cell_filter_thresholds`.
+        r"""Build a boolean :py:class:`Series` selecting mesh cells that meet density and
+        area criteria specified by `mesh_cell_filter_thresholds`.
 
         Notes
         ----
@@ -461,11 +461,13 @@ They will be replaced by NaNs and excluded from the aggregation.
 
 
 class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
-    r"""
+    r"""2D spiral plotting with adaptive mesh refinement.
+
     Examples
     --------
     splot = SpiralPlot2D(...)
-    splot.initialize_mesh()"""
+    splot.initialize_mesh()
+    """
 
     def __init__(
         self, x, y, z=None, logx=False, logy=False, initial_bins=5, clip_data=False
@@ -620,9 +622,8 @@ data : {z.size}
         mesh.build_cat()
 
     def set_clim(self, lower=None, upper=None):
-        """Set the minimum (lower) and maximum (upper) allowed counts per bin
-        returned after calling :py:meth:`add`.
-        """
+        """Set the minimum (lower) and maximum (upper) allowed counts per bin returned
+        after calling :py:meth:`add`."""
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = base.RangeLimits(lower, upper)

@@ -19,11 +19,11 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
 
     Notes
     -----
-
     """
 
     def __init__(self, x, y, z=None, clip_data=False):
-        r"""
+        r"""Initialize scatter plot data.
+
         Parameters
         ----------
         x, y: pd.Series
@@ -56,8 +56,7 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         ax.autoscale_view()
 
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
-        r"""
-        Make a scatter plot on `ax` using `ax.scatter`.
+        r"""Make a scatter plot on `ax` using `ax.scatter`.
 
         Parameters
         ----------

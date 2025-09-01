@@ -94,8 +94,9 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def averaging_info(self):
-        r"""Averaging window and minimum number of measurements / average used
-        in calculating background component in :math:`\delta B` and :math:`\delta v`.
+        r"""Averaging window and minimum number of measurements / average used.
+
+        In calculating background component in :math:`\delta B` and :math:`\delta v`.
         """
         return self._averaging_info
 
@@ -116,7 +117,8 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def bfield(self):
-        r"""Magnetic field fluctuations (:math:`\delta b`) in Alfven or velocity units."""
+        r"""Magnetic field fluctuations (:math:`\delta b`) in Alfven or velocity
+        units."""
         #         return self.data.loc[:, "b"]
         b = self.data.loc[:, "b"]
         polarity = self.polarity
@@ -139,8 +141,9 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def species(self):
-        r"""Species used to create :class:`AlfvenicTurbulence`. Defines mass density in Alfven
-        units.
+        r"""Species used to create :class:`AlfvenicTurbulence`.
+
+        Defines mass density in Alfven units.
         """
         return self._species
 
@@ -201,7 +204,8 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def magnetic_energy(self):
-        r"""Energy contained in magnetic field fluctuations :math:`E_b = \frac{1}{2}b^2`."""
+        r"""Energy contained in magnetic field fluctuations :math:`E_b =
+        \frac{1}{2}b^2`."""
         eb = 0.5 * self.b.pow(2).sum(axis=1)
         return eb
 
@@ -298,12 +302,14 @@ class AlfvenicTurbulence(base.Core):
         sc_vector=None,
         **kwargs,
     ):
-        r"""The `auto_reindex` kwarg can be set to False so that, if running a
-        large batch of analysis on the same data, one can reindex once outside
-        of this class and avoid many unnecessary reindexing cases within it.
+        r"""The `auto_reindex` kwarg can be set to False for batch analysis.
 
-        Be sure to carefully check your reindexing so as to not introduce lots
-        of NaNs. I ran into that bug when first writing this class.
+        So that, if running a large batch of analysis on the same data, one can reindex
+        once outside of this class and avoid many unnecessary reindexing cases within
+        it.
+
+        Be sure to carefully check your reindexing so as to not introduce lots of NaNs.
+        I ran into that bug when first writing this class.
         """
 
         species = self._clean_species_for_setting(species)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Contains in situ data Base and Core classes.
 
-This module provides abstract base classes for handling in situ data
-in solar wind physics applications.
+This module provides abstract base classes for handling in situ data in solar wind
+physics applications.
 """
 
 from __future__ import annotations
@@ -131,8 +131,7 @@ class Core(ABC):
 
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:
-        """
-        Conform the species inputs to a standard form.
+        """Conform the species inputs to a standard form.
 
         Parameters
         ----------
@@ -205,8 +204,7 @@ class Base(Core):
 
     @staticmethod
     def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> MI:
-        """
-        Create a MultiIndex from tuples with appropriate names.
+        """Create a MultiIndex from tuples with appropriate names.
 
         Parameters
         ----------
@@ -223,8 +221,7 @@ class Base(Core):
 
     @abstractmethod
     def set_data(self, new: pd.DataFrame) -> None:
-        """
-        Set new data for the class.
+        """Set new data for the class.
 
         Parameters
         ----------

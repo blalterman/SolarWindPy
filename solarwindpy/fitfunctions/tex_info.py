@@ -1,6 +1,5 @@
 # !/usr/bin/env python
 __all__ = ["TeXinfo"]
-
 r"""Helpers for formatting fit results in LaTeX.
 
 The :class:`TeXinfo` class collects optimized parameters and statistics
@@ -131,7 +130,8 @@ class TeXinfo(object):
 
     @property
     def TeX_popt(self):
-        r"""Create a dictionary with ``(k, v)`` pairs corresponding to
+        r"""Create a dictionary with ``(k, v)`` pairs corresponding to parameter values.
+
         ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
         appropriate uncertainty.
 
@@ -150,7 +150,8 @@ class TeXinfo(object):
 
     @property
     def TeX_relative_error(self):
-        r"""Create a dictionary with (k, v) pairs corresponding to
+        r"""Create a dictionary with (k, v) pairs corresponding to relative errors.
+
         (self.argnames, psigma/popt).
         """
         psigma = self.psigma
@@ -197,8 +198,9 @@ class TeXinfo(object):
 
     @staticmethod
     def _calc_precision(value):
-        r"""Primarily for use with the `val_uncert_2_string` and other methods
-        that may require this.
+        r"""Primarily for use with the `val_uncert_2_string` and other methods.
+
+        That may require this.
         """
         # Convert the fractional part to an exponential string.
         # E.g. 0.0009865 -> 9.865000e-04
@@ -389,8 +391,7 @@ class TeXinfo(object):
         self,
         **kwargs,
     ):
-        r"""
-        Generate a TeX-formatted string with the desired info
+        r"""Generate a TeX-formatted string with the desired info.
 
         Parameters
         ----------
@@ -531,8 +532,9 @@ class TeXinfo(object):
         self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):
-        r"""Convert a value, uncertainty pair to a string where the value is
-        reported to the first non-zero digit of the uncertainty.
+        r"""Convert a value, uncertainty pair to a string.
+
+        Where the value is reported to the first non-zero digit of the uncertainty.
 
         Require that ``value > uncertainty``.
 

@@ -482,7 +482,8 @@ class TeXlabel(Base):
         self._axnorm = new
 
     def make_species(self, pattern):
-        r"""Basic substitution of any species within a species string if the
+        r"""Basic substitution of any species within a species string if the.
+
         species has a substitution in the ion_species dictionary.
 
         Notes

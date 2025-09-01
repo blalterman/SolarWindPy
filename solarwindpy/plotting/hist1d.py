@@ -354,7 +354,7 @@ class Hist1D(AggPlot):
         get_x_bounds,
         get_y_bounds,
     ):
-        r"""
+        r"""Take data within y-ranges across x-values.
 
         Parameters
         ----------

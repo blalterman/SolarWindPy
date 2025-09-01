@@ -1,8 +1,7 @@
 r"""Package for solar wind data analysis.
 
-Primary focus is in situ solar wind measurements and the additional tools
-necessary for context (e.g. solar activity indicies) and some simple plotting
-methods.
+Primary focus is in situ solar wind measurements and the additional tools necessary for
+context (e.g. solar activity indicies) and some simple plotting methods.
 """
 
 import pdb  # noqa: F401

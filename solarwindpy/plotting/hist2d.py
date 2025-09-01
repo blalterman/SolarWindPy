@@ -38,7 +38,8 @@ Hist1D = hist1d.Hist1D
 
 # class Hist2D(base.Plot2D, AggPlot):
 class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
-    r"""Create a 2D histogram with an optional z-value using an equal number
+    r"""Create a 2D histogram with an optional z-value using an equal number.
+
     of bins along the x and y axis.
 
     Parameters
@@ -347,8 +348,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         alpha_fcn=None,
         **kwargs,
     ):
-        r"""
-        Make a 2D plot on `ax` using `ax.pcolormesh`.
+        r"""Make a 2D plot on `ax` using `ax.pcolormesh`.
 
         Parameters
         ----------
@@ -975,7 +975,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         get_x_bounds,
         get_y_bounds,
     ):
-        r"""
+        r"""Take data within y-ranges across x-values.
 
         Parameters
         ----------

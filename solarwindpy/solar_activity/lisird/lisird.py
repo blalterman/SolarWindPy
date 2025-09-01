@@ -2,7 +2,8 @@
 """Interfaces for the LASP Interactive Solar Irradiance Data Center (LISIRD).
 
 The submodule provides classes for downloading and working with data hosted at
-`LASP <http://lasp.colorado.edu/lisird/>`_."""
+`LASP <http://lasp.colorado.edu/lisird/>`_.
+"""
 
 import pdb  # noqa: F401
 import urllib

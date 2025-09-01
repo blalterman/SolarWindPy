@@ -84,7 +84,8 @@ class AggPlot(base.Base):
 
     @property
     def joint(self):
-        r"""A combination of the categorical and continuous data for use in `Groupby`."""
+        r"""A combination of the categorical and continuous data for use in
+        `Groupby`."""
         #         cut = self.cut
         #         tko = self.agg_axes
 
@@ -185,7 +186,8 @@ class AggPlot(base.Base):
     #         return data
 
     def set_clim(self, lower=None, upper=None):
-        """Set the minimum (lower) and maximum (upper) allowed number of
+        """Set the minimum (lower) and maximum (upper) allowed number of.
+
         counts per bin to return after calling :py:meth:`agg`.
         """
         assert isinstance(lower, Number) or lower is None
@@ -193,7 +195,8 @@ class AggPlot(base.Base):
         self._clim = (lower, upper)
 
     def set_alim(self, lower=None, upper=None):
-        r"""Set the minimum (lower) and maximum (upper) allowed value when
+        r"""Set the minimum (lower) and maximum (upper) allowed value when.
+
         aggregating. This is different from `clim` because it uses the
         `agg_fcn`. So behavior will change based on `axnorm`, etc.
         """
@@ -202,8 +205,7 @@ class AggPlot(base.Base):
         self._alim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
-        r"""
-        Calculate histogram bins.
+        r"""Calculate histogram bins.
 
         nbins: int, str, array-like
             If int, use np.histogram to calculate the bin edges.
@@ -306,7 +308,9 @@ class AggPlot(base.Base):
         self._cut = cut
 
     def _agg_runner(self, cut, tko, gb, fcn, **kwargs):
-        r"""Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`
+        r"""Refactored out the actual doing of the aggregation so that
+        :py:class:`OrbitPlot`
+
         can aggregate (Inbound, Outbound, and Both).
         """
         self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
@@ -381,8 +385,8 @@ class AggPlot(base.Base):
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
 
-        The series shares the same index as the stored data. To align with a
-        different index you may need to adjust the returned series.
+        The series shares the same index as the stored data. To align with a different
+        index you may need to adjust the returned series.
         """
         agg = self.agg().dropna()
         cut = self.cut
@@ -410,7 +414,8 @@ class AggPlot(base.Base):
         return tk
 
     def get_subset_above_threshold(self, threshold, fcn="count"):
-        r"""Get the subset of data above a given threshold using `fcn` to
+        r"""Get the subset of data above a given threshold using `fcn` to.
+
         aggregate. If `axnorm` set, this is used.
         """
         agg = self.agg(fcn=fcn)

@@ -208,7 +208,9 @@ class SIDCLoader(DataLoader):
         data.replace(-1, np.nan, inplace=True)
 
     def download_data(self, new_data_path, old_data_path):
-        r"""Download and save the data to `new_data_path`. If `old_data_path` exists,
+        r"""Download and save the data to `new_data_path`.
+
+        If `old_data_path` exists,
         remove it.
         """
         url = self.url  # self._trans_url.get(key)
@@ -367,9 +369,7 @@ class SIDC(ActivityIndicator):
         self.data.loc[:, "extremum"] = kind
 
     def calculate_edge(self):
-        r"""Determine whether an SSN observation belongs to a rising or falling
-        edge.
-        """
+        r"""Determine whether an SSN observation belongs to a rising or falling edge."""
         extrema = self.extrema.data
         kind = pd.Series(np.nan, index=self.data.index, dtype=str)
 

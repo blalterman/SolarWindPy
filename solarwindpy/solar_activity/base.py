@@ -373,8 +373,8 @@ class IndicatorExtrema(Base):
 
     @property
     def cycle_intervals(self):
-        r""":class:`pd.Interval` objects corresponding to each rising and falling edge and
-        the full cycle."""
+        r""":class:`pd.Interval` objects corresponding to each rising and falling edge
+        and the full cycle."""
         return self._cycle_intervals
 
     @property
