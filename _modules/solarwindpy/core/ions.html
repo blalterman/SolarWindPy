@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+g15469a133 documentation</title>
+  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+g57c5e365d documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=64cb5077"></script>
+      <script src="../../../_static/documentation_options.js?v=aa87fae9"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -345,12 +345,12 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.core.ions.html#solarwindpy.core.Ion.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an Ion instance with plasma measurement data.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        data : pandas.DataFrame</span>
 <span class="sd">            Ion measurement data with MultiIndex columns formatted as</span>
-<span class="sd">            (&quot;M&quot;, &quot;C&quot;) where M is measurement type (n, v, w, T) and </span>
+<span class="sd">            (&quot;M&quot;, &quot;C&quot;) where M is measurement type (n, v, w, T) and</span>
 <span class="sd">            C is component (x, y, z, par, per, etc.).</span>
 <span class="sd">        species : str</span>
 <span class="sd">            Ion species identifier following standard conventions:</span>
@@ -358,19 +358,19 @@
 <span class="sd">            - &#39;a&#39; for alpha particles (He2+)</span>
 <span class="sd">            - &#39;o6&#39; for O6+ ions</span>
 <span class="sd">            - Other species as needed</span>
-<span class="sd">            </span>
+
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        The Ion class provides access to fundamental plasma measurements:</span>
-<span class="sd">        </span>
-<span class="sd">        - n: Number density [cm^-3] </span>
+
+<span class="sd">        - n: Number density [cm^-3]</span>
 <span class="sd">        - v: Velocity vector [km/s]</span>
 <span class="sd">        - w: Thermal speed [km/s] (assumes mw² = 2kT)</span>
 <span class="sd">        - T: Temperature [K] (derived from thermal speed)</span>
-<span class="sd">        </span>
+
 <span class="sd">        Physical constants and mass values are automatically assigned</span>
 <span class="sd">        based on the species identifier using standard atomic masses.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        Create a proton ion from measurement data:</span>
@@ -392,12 +392,12 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check equality between Ion objects.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        other : object</span>
 <span class="sd">            Object to compare with.</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
@@ -610,12 +610,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kinetic_energy_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the kinetic energy flux.</span>
-<span class="sd">        </span>
+
 <span class="sd">        The kinetic energy flux is calculated as:</span>
-<span class="sd">        </span>
+
 <span class="sd">        .. math::</span>
 <span class="sd">            W_k = \frac{1}{2} \rho v^3</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.Series</span>
