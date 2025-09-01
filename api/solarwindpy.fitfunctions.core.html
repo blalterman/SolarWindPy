@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.core module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.core module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -454,8 +454,7 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FitFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Assuming that you don’t want any special formatting, the typical call
-order is:</p>
+<p>Assuming that you don’t want special formatting, call order is:</p>
 <blockquote>
 <div><p>fit_function = FitFunction(function, TeX_string)
 fit_function.make_fit()</p>
@@ -589,8 +588,7 @@ kwarg.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.pcov">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pcov</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.pcov" title="Link to this definition"></a></dt>
-<dd><p>A copy of the covariance matrix.</p>
-<p>Returns a copy so that the matrix isn’t accidentally edited.</p>
+<dd><p>Returns a copy so that the matrix isn’t accidentally edited.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -603,8 +601,7 @@ kwarg.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.sufficient_data">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.sufficient_data" title="Link to this definition"></a></dt>
-<dd><p>A check to ensure that we can fit the data before doing any
-computations.</p>
+<dd><p>Ensure that we can fit the data before doing any computations.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -625,15 +622,15 @@ computations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.residuals">
 <span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunction.residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.residuals" title="Link to this definition"></a></dt>
-<dd><p>Calculate the fit residuals.
-If pct, normalize by fit yvalues.</p>
+<dd><p>Calculate the fit residuals.</p>
+<p>If pct, normalize by fit yvalues.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.set_fit_obs">
 <span class="sig-name descname"><span class="pre">set_fit_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunction.set_fit_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.set_fit_obs" title="Link to this definition"></a></dt>
-<dd><p>Set the observed values we’ll actually use in the fit by applying
-limits to xobs_raw and yobs_raw and checking for finite values.</p>
+<dd><p>Set the observed values we’ll actually use in the fit.</p>
+<p>By applying limits to xobs_raw and yobs_raw and checking for finite values.</p>
 <p>All boundaries are inclusive &lt;= or &gt;=.</p>
 <p>If logy, then make selection of <cite>wmin</cite> and <cite>wmax</cite> based on <span class="math notranslate nohighlight">\(w/(y \ln(10))\)</span>.</p>
 </dd></dl>
@@ -641,9 +638,9 @@ limits to xobs_raw and yobs_raw and checking for finite values.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.make_fit">
 <span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunction.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="Link to this definition"></a></dt>
-<dd><p>Fit the function with the independent values <cite>xobs</cite> and dependent
-values <cite>yobs</cite> using <cite>least_squares</cite> and returning the <cite>OptimizeResult</cite>
-object, but treating weights as in <cite>curve_fit</cite>.</p>
+<dd><p>Fit the function with the independent <cite>xobs</cite> and dependent <cite>yobs</cite>.</p>
+<p>Uses <cite>least_squares</cite> and returns the <cite>OptimizeResult</cite> object, but
+treats weights as in <cite>curve_fit</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

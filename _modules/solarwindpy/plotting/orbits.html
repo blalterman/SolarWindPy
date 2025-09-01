@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -355,7 +355,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_orbit_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Central property for defining the name &quot;Orbit&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Central property for defining the name &quot;Orbit&quot;.</span>
+
 <span class="sd">        for use in various methods.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Orbit&quot;</span>
@@ -555,9 +556,9 @@
 <div class="viewcode-block" id="OrbitHist2D.agg">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and Both</span>
-<span class="sd">        orbit legs.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.</span>
+
+<span class="sd">        Legs: Inbound, Outbound, and Both.&quot;&quot;&quot;</span>
         <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Starting agg&quot;)</span>
         <span class="c1">#         log_mem_usage()</span>
 
@@ -657,9 +658,9 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_put_agg_on_ax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">agg</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">limit_color_norm</span><span class="p">,</span> <span class="n">cbar_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored actually putting `agg` onto `ax` because Python was crashing</span>
-<span class="sd">        due to the way too many `agg` runs. (20190731)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored putting `agg` onto `ax`.</span>
+
+<span class="sd">        Python was crashing due to the way too many `agg` runs (20190731).&quot;&quot;&quot;</span>
         <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Putting agg on ax&quot;)</span>
         <span class="c1">#         log_mem_usage()</span>
 

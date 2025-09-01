@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,8 +309,8 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sd">&quot;&quot;&quot;Contains Ion class.</span>
 
-<span class="sd">This module defines the Ion class, which inherits from the Base class and</span>
-<span class="sd">contains Vector and Tensor objects.</span>
+<span class="sd">This module defines the Ion class, which inherits from the Base class and contains</span>
+<span class="sd">Vector and Tensor objects.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -410,8 +410,7 @@
 <div class="viewcode-block" id="Ion.set_species">
 <a class="viewcode-back" href="../../../api/solarwindpy.core.ions.html#solarwindpy.core.Ion.set_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the species of the ion.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the species of the ion.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -431,8 +430,7 @@
 <div class="viewcode-block" id="Ion.set_data">
 <a class="viewcode-back" href="../../../api/solarwindpy.core.ions.html#solarwindpy.core.Ion.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the data for the ion.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the data for the ion.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -515,8 +513,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">anisotropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate temperature anisotropy R_T = p_⟂/p_∥.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate temperature anisotropy R_T = p_⟂/p_∥.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -531,8 +528,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate temperature T = (m / (2 * k_B)) * w^2.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate temperature T = (m / (2 * k_B)) * w^2.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -548,8 +544,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate thermal pressure p_th = 0.5 * ρ * w^2.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate thermal pressure p_th = 0.5 * ρ * w^2.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -564,8 +559,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the species&#39; sound speed.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the species&#39; sound speed.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -581,8 +575,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">specific_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the specific entropy S = p_th * ρ^(-γ).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the specific entropy S = p_th * ρ^(-γ).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

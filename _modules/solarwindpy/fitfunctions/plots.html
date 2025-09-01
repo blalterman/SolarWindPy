@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -463,7 +463,9 @@
         <span class="k">return</span> <span class="n">markevery</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_hax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">with_rax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format the plot axes.</span>
+
+<span class="sd">        Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and</span>
 <span class="sd">        :py:meth:`plot_fit` results.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
@@ -516,7 +518,9 @@
 <div class="viewcode-block" id="FFPlot.plot_raw">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.raw.x`,</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from raw data.</span>
+
+<span class="sd">        Plot from :py:meth:`self.observations.raw.x`,</span>
 <span class="sd">        :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.</span>
 
 <span class="sd">        Parameters</span>
@@ -610,7 +614,9 @@
 <div class="viewcode-block" id="FFPlot.plot_used">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_used">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_used</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from :py:meth:`self.observations.used.x`,</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the observations used in the fit from used data.</span>
+
+<span class="sd">        Plot from :py:meth:`self.observations.used.x`,</span>
 <span class="sd">        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1018,6 +1024,7 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.residuals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
+
 <span class="sd">        If pct, normalize by fit yvalues.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1049,8 +1056,9 @@
 <div class="viewcode-block" id="FFPlot.set_labels">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
-<span class="sd">        is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels.</span>
+
+<span class="sd">        Any label not specified in kwargs is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>

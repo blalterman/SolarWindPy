@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,9 +309,9 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Base classes for plotting utilities.</span>
 
-<span class="sd">This module defines abstract helpers that manage axis labels, log scaling,</span>
-<span class="sd">and file system paths for saving figures.  Concrete plot classes derive from</span>
-<span class="sd">these mixins to implement specific visualizations.</span>
+<span class="sd">This module defines abstract helpers that manage axis labels, log scaling, and file</span>
+<span class="sd">system paths for saving figures.  Concrete plot classes derive from these mixins to</span>
+<span class="sd">implement specific visualizations.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
@@ -337,7 +337,6 @@
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Base.__init__">
@@ -440,7 +439,8 @@
 <div class="viewcode-block" id="Base.set_labels">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs.</span>
+
 <span class="sd">        is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">auto_update_path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;auto_update_path&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>

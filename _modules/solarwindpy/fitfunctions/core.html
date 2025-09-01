@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -371,8 +371,7 @@
 <div class="viewcode-block" id="FitFunction">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FitFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Assuming that you don&#39;t want any special formatting, the typical call</span>
-<span class="sd">    order is:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Assuming that you don&#39;t want special formatting, call order is:</span>
 
 <span class="sd">        fit_function = FitFunction(function, TeX_string)</span>
 <span class="sd">        fit_function.make_fit()</span>
@@ -496,9 +495,7 @@
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The initial guess for the FitFunction.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The initial guess for the FitFunction.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractproperty</span>
@@ -508,9 +505,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The names of the actual function arguments pulled by getfullargspec.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The names of the actual function arguments pulled by getfullargspec.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_argnames</span>
 
     <span class="nd">@property</span>
@@ -614,10 +609,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pcov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A copy of the covariance matrix.</span>
-
-<span class="sd">        Returns a copy so that the matrix isn&#39;t accidentally edited.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Returns a copy so that the matrix isn&#39;t accidentally edited.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcov</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
@@ -637,9 +629,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sufficient_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A check to ensure that we can fit the data before doing any</span>
-<span class="sd">        computations.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Ensure that we can fit the data before doing any computations.&quot;&quot;&quot;</span>
         <span class="n">chk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nobs</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">chk</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There is insufficient data to fit the model.&quot;</span>
@@ -656,8 +646,7 @@
     <span class="c1">#             return self.build_TeX_info()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clean_raw_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the raw x- and y-values along with weights for the fit.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the raw x- and y-values along with weights for the fit.</span>
 
 <span class="sd">        Doesn&#39;t account for extrema, finite data, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -712,10 +701,9 @@
         <span class="k">return</span> <span class="n">mask</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the arguments of the function, assuming that the first</span>
-<span class="sd">        is dependent variable.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the arguments of the function/</span>
 
+<span class="sd">        Assume that the first is dependent variable.</span>
 <span class="sd">        Should be called after function is set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">getfullargspec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
@@ -782,6 +770,7 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction.residuals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
+
 <span class="sd">        If pct, normalize by fit yvalues.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -817,8 +806,9 @@
         <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the observed values we&#39;ll actually use in the fit by applying</span>
-<span class="sd">        limits to xobs_raw and yobs_raw and checking for finite values.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the observed values we&#39;ll actually use in the fit.</span>
+
+<span class="sd">        By applying limits to xobs_raw and yobs_raw and checking for finite values.</span>
 
 <span class="sd">        All boundaries are inclusive &lt;= or &gt;=.</span>
 
@@ -1011,9 +1001,10 @@
 <div class="viewcode-block" id="FitFunction.make_fit">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction.make_fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_exception</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the function with the independent values `xobs` and dependent</span>
-<span class="sd">        values `yobs` using `least_squares` and returning the `OptimizeResult`</span>
-<span class="sd">        object, but treating weights as in `curve_fit`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the function with the independent `xobs` and dependent `yobs`.</span>
+
+<span class="sd">        Uses `least_squares` and returns the `OptimizeResult` object, but</span>
+<span class="sd">        treats weights as in `curve_fit`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1035,7 +1026,6 @@
 <span class="sd">                 max_nfev      10000</span>
 <span class="sd">                 f_scale       0.1</span>
 <span class="sd">                ============= ======================================</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>  <span class="c1"># Check we have enough data to fit.</span>

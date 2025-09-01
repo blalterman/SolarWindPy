@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.spiral module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.spiral module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -460,11 +460,13 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.plotting.spiral.SpiralMesh.cell_filter">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cell_filter</span></span><a class="headerlink" href="#solarwindpy.plotting.spiral.SpiralMesh.cell_filter" title="Link to this definition"></a></dt>
-<dd><p>Build a boolean <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code> selecting mesh cells that meet
-density and area criteria specified by <cite>mesh_cell_filter_thresholds</cite>.</p>
+<dd><p>Boolean <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code> identifying properly filled mesh cells.</p>
+<p>Series selects mesh cells that meet density and area criteria specified
+by <code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh_cell_filter_thresholds()</span></code>.</p>
 <p class="rubric">Notes</p>
 <p>Neither <cite>density</cite> nor <cite>size</cite> convert log-scale edges into linear scale.
-Doing so would overweight the area of mesh cells at larger values on a given axis.</p>
+Doing so would overweight the area of mesh cells at larger values on a
+given axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -536,6 +538,7 @@ that it will appear as an outlier.</p></li>
 <dt class="sig sig-object py" id="solarwindpy.plotting.spiral.SpiralPlot2D">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpiralPlot2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.spiral.SpiralPlot2D" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata" title="solarwindpy.plotting.base.PlotWithZdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlotWithZdata</span></code></a>, <a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.CbarMaker" title="solarwindpy.plotting.base.CbarMaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">CbarMaker</span></code></a></p>
+<p>2D spiral plotting with adaptive mesh refinement.</p>
 <p class="rubric">Examples</p>
 <p>splot = SpiralPlot2D(…)
 splot.initialize_mesh()</p>
@@ -588,8 +591,8 @@ splot.initialize_mesh()</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">
 <span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim" title="Link to this definition"></a></dt>
-<dd><p>Set the minimum (lower) and maximum (upper) allowed counts per bin
-returned after calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code>.</p>
+<dd><p>Set the min (lower) and max (upper) counts per bin.</p>
+<p>This limit is applied after the <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby.agg()</span></code> is run.</p>
 </dd></dl>
 
 <dl class="py method">

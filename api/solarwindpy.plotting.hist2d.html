@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.hist2d module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.hist2d module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -348,8 +348,8 @@
 <dt class="sig sig-object py" id="solarwindpy.plotting.hist2d.Hist2D">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hist2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist2d.html#Hist2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.hist2d.Hist2D" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata" title="solarwindpy.plotting.base.PlotWithZdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlotWithZdata</span></code></a>, <a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.CbarMaker" title="solarwindpy.plotting.base.CbarMaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">CbarMaker</span></code></a>, <a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot" title="solarwindpy.plotting.agg_plot.AggPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">AggPlot</span></code></a></p>
-<p>Create a 2D histogram with an optional z-value using an equal number
-of bins along the x and y axis.</p>
+<p>Create a 2D histogram with an optional z-value using an equal number.</p>
+<p>of bins along the x and y axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -452,8 +452,8 @@ If z-value is not None, calculate the mean for each bin.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.hist2d.Hist2D.set_labels">
 <span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist2d.html#Hist2D.set_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.hist2d.Hist2D.set_labels" title="Link to this definition"></a></dt>
-<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs
-is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
+<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -653,7 +653,8 @@ Hist2D and can be used in groupby operations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x">
 <span class="sig-name descname"><span class="pre">take_data_in_yrange_across_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranges_by_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_x_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_y_bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist2d.html#Hist2D.take_data_in_yrange_across_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Take data within y-ranges across x-values.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ranges_by_x</strong> (<em>iterable</em>) – An iterable with keys used to get the left and right bounds for the data

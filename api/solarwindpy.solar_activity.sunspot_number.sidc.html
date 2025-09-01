@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.sunspot_number.sidc module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -419,7 +419,8 @@ Hemispheric</p></td>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.download_data">
 <span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_data_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/sunspot_number/sidc.html#SIDCLoader.download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.download_data" title="Link to this definition"></a></dt>
-<dd><p>Download and save the data to <cite>new_data_path</cite>. If <cite>old_data_path</cite> exists,
+<dd><p>Download and save the data to <cite>new_data_path</cite>.</p>
+<p>If <cite>old_data_path</cite> exists,
 remove it.</p>
 </dd></dl>
 
@@ -435,15 +436,15 @@ remove it.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SIDC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/sunspot_number/sidc.html#SIDC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDC" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ActivityIndicator" title="solarwindpy.solar_activity.base.ActivityIndicator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivityIndicator</span></code></a></p>
 <p>Solar sunspot number data from the SIDC.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/sunspot_number/sidc.html#SIDC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Passed to <a class="reference internal" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID" title="solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID"><code class="xref py py-class docutils literal notranslate"><span class="pre">SIDC_ID</span></code></a> to select the data series.</p>
 </dd>
 </dl>
-</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/sunspot_number/sidc.html#SIDC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SIDC.spec_by_ssn_band">
@@ -501,8 +502,7 @@ difficult to calculate after the fact.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_edge">
 <span class="sig-name descname"><span class="pre">calculate_edge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/sunspot_number/sidc.html#SIDC.calculate_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_edge" title="Link to this definition"></a></dt>
-<dd><p>Determine whether an SSN observation belongs to a rising or falling
-edge.</p>
+<dd><p>Determine whether an SSN observation belongs to a rising or falling edge.</p>
 </dd></dl>
 
 <dl class="py property">

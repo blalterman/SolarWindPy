@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -507,7 +507,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Used for building data containers and checking that all entries are visited.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Used to build data containers and check all entries are visited.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="o">-</span><span class="mf">9999.0</span>
 
     <span class="nd">@property</span>
@@ -769,9 +769,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Proton core parallel beta.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Proton core parallel beta.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span>
 
 <div class="viewcode-block" id="StabilityContours.set_beta">
@@ -782,10 +780,10 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_instability_contours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Because we can call the contours many times, but only</span>
-<span class="sd">        need to calculate them once, move the calculation to</span>
-<span class="sd">        a separate method.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate instability contours.</span>
+
+<span class="sd">        Because we can call the contours many times, but only need to calculate them</span>
+<span class="sd">        once, move the calculation to a separate method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">contours</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">beta_ani_inst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="o">**</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">insta_params</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()</span>
@@ -804,8 +802,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fix_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_gamma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tk_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add the instability contours to the plot.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Add the instability contours to the plot.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -890,9 +887,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_table_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a legend in compact table format for identifying the</span>
-<span class="sd">        instability contours.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a compact legend in table format identifying the contours.</span>
 
 <span class="sd">        Modified from stackoverflow.</span>
 <span class="sd">        Source: https://stackoverflow.com/a/25995730/1200989</span>

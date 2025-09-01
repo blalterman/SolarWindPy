@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.plasma module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.core.plasma module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -585,8 +585,8 @@ quality flags. The column labelling scheme must match <code class="docutils lite
 <dl class="py property">
 <dt class="sig sig-object py" id="id1">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">auxiliary_data</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd><p>Any data that does not fall into the following categories.
-Epoch is index.</p>
+<dd><p>Any data that does not fall into the following categories.</p>
+<p>Epoch is index.</p>
 <blockquote>
 <div><p>-magnetic field
 -ion velocity
@@ -646,7 +646,7 @@ plasma initialization.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dkey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sckey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">akey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FC_AUX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_modifier_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.save" title="Link to this definition"></a></dt>
-<dd><p>Save the plasma’s underlying data and aux DataFrame to an HDF5 file at <cite>fname</cite>.</p>
+<dd><p>Save the plasma’s data and aux DataFrame to an HDF5 file at <cite>fname</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1014,7 +1014,8 @@ mass species.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.dv">
 <span class="sig-name descname"><span class="pre">dv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_m2q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.dv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.dv" title="Link to this definition"></a></dt>
-<dd><p>Calculate the differential flow between species <cite>s0</cite> and
+<dd><p>Calculate the differential flow between species <cite>s0</cite> and <cite>s1</cite>.</p>
+<p>Calculate the differential flow between species <cite>s0</cite> and
 species <cite>s1</cite>: <span class="math notranslate nohighlight">\(v_{s0} - v_{s1}\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1275,8 +1276,9 @@ combination of things like “s0+s1”, “s0,s1”, nor (“s0”, “s1”).</
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.vdf_ratio">
 <span class="sig-name descname"><span class="pre">vdf_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.vdf_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.vdf_ratio" title="Link to this definition"></a></dt>
-<dd><p>Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
-core VDF at the peak beam velocity.</p>
+<dd><p>Calculate the ratio of the VDFs at the beam velocity.</p>
+<p>Calculate the ratio of a bi-Maxwellian proton beam to a bi-Maxwellian
+proton core VDF at the peak beam velocity.</p>
 <p>To avoid overflow erros, we return ln(ratio).</p>
 <p>The VDF for species <span class="math notranslate nohighlight">\(i\)</span> at velocity <span class="math notranslate nohighlight">\(v_j\)</span> is:</p>
 <blockquote>
@@ -1286,8 +1288,8 @@ core VDF at the peak beam velocity.</p>
 <blockquote>
 <div><p><span class="math notranslate nohighlight">\(\frac{f_2}{f_1}|_{v_2} = \frac{n_2}{n_1} ( \frac{w_1}{w_2} )^3 \exp[ (\frac{v_2 - v_1}{w_1})^2 ]\)</span></p>
 </div></blockquote>
-<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number density, <span class="math notranslate nohighlight">\(w\)</span> gives the thermal speed, and
-<span class="math notranslate nohighlight">\(u\)</span> is the bulk velocity.</p>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number density, <span class="math notranslate nohighlight">\(w\)</span> gives the thermal
+speed, and <span class="math notranslate nohighlight">\(u\)</span> is the bulk velocity.</p>
 <p>In the case of a Bimaxwellian, we <span class="math notranslate nohighlight">\(w^3 = w_\parallel w_\perp^2\)</span>
 <span class="math notranslate nohighlight">\((\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_\perp^2\)</span>.</p>
 <dl class="field-list simple">
@@ -1322,7 +1324,7 @@ the velocity window in which they are measured.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.heat_flux">
 <span class="sig-name descname"><span class="pre">heat_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.heat_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.heat_flux" title="Link to this definition"></a></dt>
-<dd><p>Calculate the parallel heat flux</p>
+<dd><p>Calculate the parallel heat flux.</p>
 <blockquote>
 <div><p><span class="math notranslate nohighlight">\(Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)\)</span></p>
 </div></blockquote>
@@ -1378,7 +1380,7 @@ to specify window size.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.specific_entropy">
 <span class="sig-name descname"><span class="pre">specific_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.specific_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.specific_entropy" title="Link to this definition"></a></dt>
-<dd><p>Calculate the specific entropy following [1] as</p>
+<dd><p>Calculate the specific entropy following [1] as.</p>
 <blockquote>
 <div><p><span class="math notranslate nohighlight">\(p_\mathrm{th} \rho^{-\gamma}\)</span></p>
 </div></blockquote>

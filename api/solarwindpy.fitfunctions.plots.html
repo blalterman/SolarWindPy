@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.plots module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.plots module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -470,7 +470,8 @@ models, residuals and associated annotations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot.plot_raw">
 <span class="sig-name descname"><span class="pre">plot_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot.plot_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot.plot_raw" title="Link to this definition"></a></dt>
-<dd><p>Plot the observations used in the fit from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.raw.x()</span></code>,
+<dd><p>Plot the observations used in the fit from raw data.</p>
+<p>Plot from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.raw.x()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.raw.y()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.raw.w()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -482,7 +483,8 @@ models, residuals and associated annotations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot.plot_used">
 <span class="sig-name descname"><span class="pre">plot_used</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot.plot_used"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot.plot_used" title="Link to this definition"></a></dt>
-<dd><p>Plot the observations used in the fit from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.used.x()</span></code>,
+<dd><p>Plot the observations used in the fit from used data.</p>
+<p>Plot from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.used.x()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.used.y()</span></code>, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.observations.used.w()</span></code>.</p>
 </dd></dl>
 
@@ -578,15 +580,15 @@ So we persist it here.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot.residuals">
 <span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot.residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot.residuals" title="Link to this definition"></a></dt>
-<dd><p>Calculate the fit residuals.
-If pct, normalize by fit yvalues.</p>
+<dd><p>Calculate the fit residuals.</p>
+<p>If pct, normalize by fit yvalues.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot.set_labels">
 <span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot.set_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot.set_labels" title="Link to this definition"></a></dt>
-<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs
-is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+<dd><p>Set or update x, y, or z labels.</p>
+<p>Any label not specified in kwargs is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
 </dd></dl>
 
 <dl class="py method">

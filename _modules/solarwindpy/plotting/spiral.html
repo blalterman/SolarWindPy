@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -421,13 +421,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Build a boolean :py:class:`Series` selecting mesh cells that meet</span>
-<span class="sd">        density and area criteria specified by `mesh_cell_filter_thresholds`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean :py:class:`Series` identifying properly filled mesh cells.</span>
+
+<span class="sd">        Series selects mesh cells that meet density and area criteria specified</span>
+<span class="sd">        by :py:meth:`mesh_cell_filter_thresholds`.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        ----</span>
 <span class="sd">        Neither `density` nor `size` convert log-scale edges into linear scale.</span>
-<span class="sd">        Doing so would overweight the area of mesh cells at larger values on a given axis.</span>
+<span class="sd">        Doing so would overweight the area of mesh cells at larger values on a</span>
+<span class="sd">        given axis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_filter_thresholds</span><span class="o">.</span><span class="n">density</span>
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_filter_thresholds</span><span class="o">.</span><span class="n">size</span>
@@ -813,11 +816,13 @@
 <div class="viewcode-block" id="SpiralPlot2D">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpiralPlot2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;2D spiral plotting with adaptive mesh refinement.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    splot = SpiralPlot2D(...)</span>
-<span class="sd">    splot.initialize_mesh()&quot;&quot;&quot;</span>
+<span class="sd">    splot.initialize_mesh()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.__init__">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.__init__">[docs]</a>
@@ -989,9 +994,9 @@
 <div class="viewcode-block" id="SpiralPlot2D.set_clim">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed counts per bin</span>
-<span class="sd">        returned after calling :py:meth:`add`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the min (lower) and max (upper) counts per bin.</span>
+
+<span class="sd">        This limit is applied after the :py:meth:`groupby.agg` is run.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clim</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">RangeLimits</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span></div>

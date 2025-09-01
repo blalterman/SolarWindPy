@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.alfvenic_turbulence &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.core.alfvenic_turbulence &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -407,8 +407,9 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">averaging_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Averaging window and minimum number of measurements / average used</span>
-<span class="sd">        in calculating background component in :math:`\delta B` and :math:`\delta v`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Averaging window and minimum number of measurements / average used.</span>
+
+<span class="sd">        In calculating background component in :math:`\delta B` and :math:`\delta v`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_info</span>
 
@@ -429,7 +430,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bfield</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Magnetic field fluctuations (:math:`\delta b`) in Alfven or velocity units.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;B field fluctuations (:math:`\delta b`) in Alfven units.&quot;&quot;&quot;</span>
         <span class="c1">#         return self.data.loc[:, &quot;b&quot;]</span>
         <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;b&quot;</span><span class="p">]</span>
         <span class="n">polarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polarity</span>
@@ -452,8 +453,9 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Species used to create :class:`AlfvenicTurbulence`. Defines mass density in Alfven</span>
-<span class="sd">        units.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Species used to create :class:`AlfvenicTurbulence`.</span>
+
+<span class="sd">        Defines mass density in Alfven units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species</span>
 
@@ -514,7 +516,9 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">magnetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Energy contained in magnetic field fluctuations :math:`E_b = \frac{1}{2}b^2`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Energy contained in magnetic field fluctuations</span>
+
+<span class="sd">        :math:`E_b = \frac{1}{2}b^2`.&quot;&quot;&quot;</span>
         <span class="n">eb</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">eb</span>
 
@@ -613,12 +617,14 @@
         <span class="n">sc_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The `auto_reindex` kwarg can be set to False so that, if running a</span>
-<span class="sd">        large batch of analysis on the same data, one can reindex once outside</span>
-<span class="sd">        of this class and avoid many unnecessary reindexing cases within it.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set data for the class, performing routine formatting checks.</span>
 
-<span class="sd">        Be sure to carefully check your reindexing so as to not introduce lots</span>
-<span class="sd">        of NaNs. I ran into that bug when first writing this class.</span>
+<span class="sd">        The `auto_reindex` kwarg can be set to False for batch analysis. So</span>
+<span class="sd">        that, if running a large batch of analysis on the same data, one can</span>
+<span class="sd">        reindex once outside of this class and avoid many unnecessary reindexing</span>
+<span class="sd">        cases within it. Be sure to carefully check your reindexing so as to not</span>
+<span class="sd">        introduce lots of NaNs. I ran into that bug when first writing this</span>
+<span class="sd">        class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_species_for_setting</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.agg_plot module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.agg_plot module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -414,7 +414,7 @@ common functionality used by <a class="reference internal" href="solarwindpy.htm
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.joint">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.joint" title="Link to this definition"></a></dt>
-<dd><p>A combination of the categorical and continuous data for use in <cite>Groupby</cite>.</p>
+<dd><p>Combines the categorical and continuous data for <cite>Groupby</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -439,15 +439,15 @@ common functionality used by <a class="reference internal" href="solarwindpy.htm
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_clim">
 <span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_clim" title="Link to this definition"></a></dt>
-<dd><p>Set the minimum (lower) and maximum (upper) allowed number of
-counts per bin to return after calling <a class="reference internal" href="#solarwindpy.plotting.agg_plot.AggPlot.agg" title="solarwindpy.plotting.agg_plot.AggPlot.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p>
+<dd><p>Set the minimum (lower) and maximum (upper) allowed number of.</p>
+<p>counts per bin to return after calling <a class="reference internal" href="#solarwindpy.plotting.agg_plot.AggPlot.agg" title="solarwindpy.plotting.agg_plot.AggPlot.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_alim">
 <span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_alim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_alim" title="Link to this definition"></a></dt>
-<dd><p>Set the minimum (lower) and maximum (upper) allowed value when
-aggregating. This is different from <cite>clim</cite> because it uses the
+<dd><p>Set the minimum (lower) and maximum (upper) allowed value when.</p>
+<p>aggregating. This is different from <cite>clim</cite> because it uses the
 <cite>agg_fcn</cite>. So behavior will change based on <cite>axnorm</cite>, etc.</p>
 </dd></dl>
 
@@ -488,15 +488,15 @@ values.</p>
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series">
 <span class="sig-name descname"><span class="pre">get_plotted_data_boolean_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_plotted_data_boolean_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series" title="Link to this definition"></a></dt>
 <dd><p>Return a boolean <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> identifying each plotted measurement.</p>
-<p>The series shares the same index as the stored data. To align with a
-different index you may need to adjust the returned series.</p>
+<p>The series shares the same index as the stored data. To align with a different
+index you may need to adjust the returned series.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">
 <span class="sig-name descname"><span class="pre">get_subset_above_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_subset_above_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold" title="Link to this definition"></a></dt>
-<dd><p>Get the subset of data above a given threshold using <cite>fcn</cite> to
-aggregate. If <cite>axnorm</cite> set, this is used.</p>
+<dd><p>Get the subset of data above a given threshold using <cite>fcn</cite> to.</p>
+<p>aggregate. If <cite>axnorm</cite> set, this is used.</p>
 </dd></dl>
 
 <dl class="py method">

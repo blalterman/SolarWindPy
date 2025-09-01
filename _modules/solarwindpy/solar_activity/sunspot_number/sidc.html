@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -535,7 +535,9 @@
 <div class="viewcode-block" id="SIDCLoader.download_data">
 <a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader.download_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data_path</span><span class="p">,</span> <span class="n">old_data_path</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Download and save the data to `new_data_path`. If `old_data_path` exists,</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Download and save the data to `new_data_path`.</span>
+
+<span class="sd">        If `old_data_path` exists,</span>
 <span class="sd">        remove it.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>  <span class="c1"># self._trans_url.get(key)</span>
@@ -629,17 +631,17 @@
 <div class="viewcode-block" id="SIDC">
 <a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDC</span><span class="p">(</span><span class="n">ActivityIndicator</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solar sunspot number data from the SIDC.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solar sunspot number data from the SIDC.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    key : str</span>
+<span class="sd">        Passed to :class:`SIDC_ID` to select the data series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SIDC.__init__">
 <a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        key : str</span>
-<span class="sd">            Passed to :class:`SIDC_ID` to select the data series.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">SIDC_ID</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
@@ -718,9 +720,7 @@
 <div class="viewcode-block" id="SIDC.calculate_edge">
 <a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.sunspot_number.sidc.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.calculate_edge">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine whether an SSN observation belongs to a rising or falling</span>
-<span class="sd">        edge.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine whether an SSN observation belongs to a rising or falling edge.&quot;&quot;&quot;</span>
         <span class="n">extrema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">data</span>
         <span class="n">kind</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 

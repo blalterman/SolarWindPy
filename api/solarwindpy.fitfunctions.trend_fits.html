@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.trend_fits module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.trend_fits module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -344,8 +344,8 @@
   <section id="module-solarwindpy.fitfunctions.trend_fits">
 <span id="solarwindpy-fitfunctions-trend-fits-module"></span><h1>solarwindpy.fitfunctions.trend_fits module<a class="headerlink" href="#module-solarwindpy.fitfunctions.trend_fits" title="Link to this heading"></a></h1>
 <p><a class="reference internal" href="#module-solarwindpy.fitfunctions.trend_fits" title="solarwindpy.fitfunctions.trend_fits"><code class="xref py py-mod docutils literal notranslate"><span class="pre">trend_fits</span></code></a>.</p>
-<p>Apply a fit along one dimention of a 2D aggregated data and then fit the
-results of those 1D fits along the 2nd dimension of the aggregated data.</p>
+<p>Apply a fit along one dimention of a 2D aggregated data and then fit the results of
+those 1D fits along the 2nd dimension of the aggregated data.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.Popt1DKeys">
 <span class="sig-name descname"><span class="pre">Popt1DKeys</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.Popt1DKeys" title="Link to this definition"></a></dt>
@@ -359,8 +359,8 @@ results of those 1D fits along the 2nd dimension of the aggregated data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agged</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trendfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend_logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ykey1d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkey1d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sigma'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ffunc1d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.__init__" title="Link to this definition"></a></dt>
-<dd><p>Note that <cite>TrendFit.make_1dfits</cite> must be called by the user so that any
-kwargs may be passed to the 1D <cite>make_fit</cite> method, which are passed to
+<dd><p>Note that <cite>TrendFit.make_1dfits</cite> must be called by the user.</p>
+<p>So that any kwargs may be passed to the 1D <cite>make_fit</cite> method, which are passed to
 <cite>curve_fit</cite>, allowing the user to specify fit methods, bounds, etc.</p>
 <p>Similarly, <cite>TrendFit.trend_fit.make_fit</cite> must be called by the user so
 that kwargs can be appropriately passed to <cite>curve_fit</cite>.</p>
@@ -398,20 +398,20 @@ passing to the `FitFunction</cite> for fitting the trend.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.ffunc1d_class">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ffunc1d_class</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.ffunc1d_class" title="Link to this definition"></a></dt>
-<dd><p><a class="reference internal" href="solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> to apply in each x-bin.</p>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> to apply in each x-bin.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.trendfunc_class">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trendfunc_class</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.trendfunc_class" title="Link to this definition"></a></dt>
-<dd><p><a class="reference internal" href="solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> to apply each <cite>popt</cite> of
-the <cite>ffunc1d</cite> along the x-axis.</p>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> to apply each <cite>popt</cite>.</p>
+<p>Of the <cite>ffunc1d</cite> along the x-axis.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ffuncs</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs" title="Link to this definition"></a></dt>
-<dd><p>The 1D <a class="reference internal" href="solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> applied in each x-bin</p>
+<dd><p>The 1D <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> applied in each x-bin.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -458,7 +458,7 @@ the <cite>ffunc1d</cite> along the x-axis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.make_ffunc1ds">
 <span class="sig-name descname"><span class="pre">make_ffunc1ds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.make_ffunc1ds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.make_ffunc1ds" title="Link to this definition"></a></dt>
-<dd><p>kwargs passed to <cite>self.ffunc1d(x, y, **kwargs)</cite>.</p>
+<dd><p>Kwargs passed to <cite>self.ffunc1d(x, y, **kwargs)</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -470,7 +470,8 @@ the <cite>ffunc1d</cite> along the x-axis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_ffuncs">
 <span class="sig-name descname"><span class="pre">plot_all_ffuncs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legend_title_fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%.0f'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.plot_all_ffuncs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_ffuncs" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Plot all fit functions.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>legend_title_fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – A string template for formatting the legend titles. Use % formatting so we
@@ -484,7 +485,8 @@ can easily instert TeX into <cite>legend_title_fmt</cite> should we desire.</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.make_trend_func">
 <span class="sig-name descname"><span class="pre">make_trend_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.make_trend_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.make_trend_func" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Make trend function.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>kwargs</strong> – passed to <cite>trendfunc_class(x, y, **kwargs)</cite></p>
 </dd>
@@ -494,7 +496,8 @@ can easily instert TeX into <cite>legend_title_fmt</cite> should we desire.</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_popt_1d">
 <span class="sig-name descname"><span class="pre">plot_all_popt_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_plot_data_in_trend_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.plot_all_popt_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_popt_1d" title="Link to this definition"></a></dt>
-<dd><p>Plot all the 1D popt appropriate for identifying the trend on
+<dd><p>Plot all the 1D popt appropriate for identifying the trend on <cite>ax</cite>.</p>
+<p>Plot all the 1D popt appropriate for identifying the trend on
 <cite>ax</cite>.</p>
 <p>kwargs passed to <cite>ax.errorbar</cite></p>
 </dd></dl>
@@ -529,8 +532,8 @@ can easily instert TeX into <cite>legend_title_fmt</cite> should we desire.</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.trend_fits.TrendFit.set_shared_labels">
 <span class="sig-name descname"><span class="pre">set_shared_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.set_shared_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.set_shared_labels" title="Link to this definition"></a></dt>
-<dd><p>Axis labels are shared between the <a class="reference internal" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func" title="solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trend_func()</span></code></a> and entries in <a class="reference internal" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs" title="solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ffuncs()</span></code></a>.
-Here, we update them according to placement in <a class="reference internal" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func" title="solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trend_func()</span></code></a>, but properly locating
+<dd><p>Axis labels are shared between the trend_func and ffuncs.</p>
+<p>Here, we update them according to placement in <a class="reference internal" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func" title="solarwindpy.fitfunctions.trend_fits.TrendFit.trend_func"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trend_func()</span></code></a>, but properly locating
 them for <a class="reference internal" href="#solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs" title="solarwindpy.fitfunctions.trend_fits.TrendFit.ffuncs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ffuncs()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

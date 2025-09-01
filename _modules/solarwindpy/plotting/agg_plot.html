@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -394,7 +394,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">joint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A combination of the categorical and continuous data for use in `Groupby`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Combines the categorical and continuous data for `Groupby`.&quot;&quot;&quot;</span>
         <span class="c1">#         cut = self.cut</span>
         <span class="c1">#         tko = self.agg_axes</span>
 
@@ -500,7 +500,8 @@
 <div class="viewcode-block" id="AggPlot.set_clim">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed number of</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed number of.</span>
+
 <span class="sd">        counts per bin to return after calling :py:meth:`agg`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -511,7 +512,8 @@
 <div class="viewcode-block" id="AggPlot.set_alim">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_alim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_alim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed value when</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the minimum (lower) and maximum (upper) allowed value when.</span>
+
 <span class="sd">        aggregating. This is different from `clim` because it uses the</span>
 <span class="sd">        `agg_fcn`. So behavior will change based on `axnorm`, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -523,8 +525,7 @@
 <div class="viewcode-block" id="AggPlot.calc_bins_intervals">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.calc_bins_intervals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calc_bins_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate histogram bins.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate histogram bins.</span>
 
 <span class="sd">        nbins: int, str, array-like</span>
 <span class="sd">            If int, use np.histogram to calculate the bin edges.</span>
@@ -631,8 +632,10 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_agg_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored out the actual doing of the aggregation so that :py:class:`OrbitPlot`</span>
-<span class="sd">        can aggregate (Inbound, Outbound, and Both).</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored out the aggregation.</span>
+
+<span class="sd">        This enables compatibility with :py:class:`OrbitPlot` aggregation of</span>
+<span class="sd">        different orbit legs (Inbound, Outbound, and Both).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;aggregating </span><span class="si">{</span><span class="n">tko</span><span class="si">}</span><span class="s2"> data along </span><span class="si">{</span><span class="n">cut</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -711,8 +714,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_plotted_data_boolean_series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a boolean ``pd.Series`` identifying each plotted measurement.</span>
 
-<span class="sd">        The series shares the same index as the stored data. To align with a</span>
-<span class="sd">        different index you may need to adjust the returned series.</span>
+<span class="sd">        The series shares the same index as the stored data. To align with a different</span>
+<span class="sd">        index you may need to adjust the returned series.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut</span>
@@ -743,7 +746,8 @@
 <div class="viewcode-block" id="AggPlot.get_subset_above_threshold">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_subset_above_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the subset of data above a given threshold using `fcn` to</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the subset of data above a given threshold using `fcn` to.</span>
+
 <span class="sd">        aggregate. If `axnorm` set, this is used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span>

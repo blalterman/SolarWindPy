@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.gaussians module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -382,9 +382,9 @@ kwarg.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.Gaussian.make_fit">
 <span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#Gaussian.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.Gaussian.make_fit" title="Link to this definition"></a></dt>
-<dd><p>Fit the function with the independent values <cite>xobs</cite> and dependent
-values <cite>yobs</cite> using <cite>least_squares</cite> and returning the <cite>OptimizeResult</cite>
-object, but treating weights as in <cite>curve_fit</cite>.</p>
+<dd><p>Fit the function with the independent <cite>xobs</cite> and dependent <cite>yobs</cite>.</p>
+<p>Uses <cite>least_squares</cite> and returns the <cite>OptimizeResult</cite> object, but
+treats weights as in <cite>curve_fit</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -463,9 +463,9 @@ kwarg.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit">
 <span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/gaussians.html#GaussianNormalized.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit" title="Link to this definition"></a></dt>
-<dd><p>Fit the function with the independent values <cite>xobs</cite> and dependent
-values <cite>yobs</cite> using <cite>least_squares</cite> and returning the <cite>OptimizeResult</cite>
-object, but treating weights as in <cite>curve_fit</cite>.</p>
+<dd><p>Fit the function with the independent <cite>xobs</cite> and dependent <cite>yobs</cite>.</p>
+<p>Uses <cite>least_squares</cite> and returns the <cite>OptimizeResult</cite> object, but
+treats weights as in <cite>curve_fit</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -566,8 +566,8 @@ kwarg.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianLn.TeX_popt">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianLn.TeX_popt" title="Link to this definition"></a></dt>
-<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to
-<code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
+<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to parameter values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
 appropriate uncertainty.</p>
 <p>See <code class="docutils literal notranslate"><span class="pre">set_TeX_trans_argnames</span></code> to translate the argnames for TeX.</p>
 </dd></dl>

@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../../../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,8 +309,8 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:mod:`~solarwindpy.fitfunctions.trend_fits`.</span>
 
-<span class="sd">Apply a fit along one dimention of a 2D aggregated data and then fit the</span>
-<span class="sd">results of those 1D fits along the 2nd dimension of the aggregated data.</span>
+<span class="sd">Apply a fit along one dimention of a 2D aggregated data and then fit the results of</span>
+<span class="sd">those 1D fits along the 2nd dimension of the aggregated data.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
@@ -343,8 +343,9 @@
         <span class="n">wkey1d</span><span class="o">=</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span>
         <span class="n">ffunc1d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Note that `TrendFit.make_1dfits` must be called by the user so that any</span>
-<span class="sd">        kwargs may be passed to the 1D `make_fit` method, which are passed to</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Note that `TrendFit.make_1dfits` must be called by the user.</span>
+
+<span class="sd">        So that any kwargs may be passed to the 1D `make_fit` method, which are passed to</span>
 <span class="sd">        `curve_fit`, allowing the user to specify fit methods, bounds, etc.</span>
 
 <span class="sd">        Similarly, `TrendFit.trend_fit.make_fit` must be called by the user so</span>
@@ -389,19 +390,20 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ffunc1d_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`FitFunction` to apply in each x-bin.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ffunc1d_class</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">trendfunc_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt` of</span>
-<span class="sd">        the `ffunc1d` along the x-axis.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`FitFunction` to apply each `popt`.</span>
+
+<span class="sd">        Of the `ffunc1d` along the x-axis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trendfunc_class</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ffuncs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The 1D :py:class:`FitFunction` applied in each x-bin.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ffuncs</span>
 
     <span class="nd">@property</span>
@@ -448,7 +450,7 @@
 <div class="viewcode-block" id="TrendFit.make_ffunc1ds">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_ffunc1ds">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_ffunc1ds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;kwargs passed to `self.ffunc1d(x, y, **kwargs)`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Kwargs passed to `self.ffunc1d(x, y, **kwargs)`.&quot;&quot;&quot;</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agged</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">index</span>
         <span class="k">try</span><span class="p">:</span>
@@ -491,7 +493,8 @@
 <div class="viewcode-block" id="TrendFit.plot_all_ffuncs">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.plot_all_ffuncs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_all_ffuncs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legend_title_fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.0f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot all fit functions.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        legend_title_fmt: str</span>
@@ -555,7 +558,8 @@
 <div class="viewcode-block" id="TrendFit.make_trend_func">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_trend_func">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_trend_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make trend function.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        kwargs:</span>
@@ -595,7 +599,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_all_popt_1d</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_plot_data_in_trend_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot all the 1D popt appropriate for identifying the trend on</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot all the 1D popt appropriate for identifying the trend on `ax`.</span>
+
+<span class="sd">        Plot all the 1D popt appropriate for identifying the trend on</span>
 <span class="sd">        `ax`.</span>
 
 <span class="sd">        kwargs passed to `ax.errorbar`</span>
@@ -803,7 +809,8 @@
 <div class="viewcode-block" id="TrendFit.set_shared_labels">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.set_shared_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_shared_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Axis labels are shared between the :py:meth:`trend_func` and entries in :py:meth:`ffuncs`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Axis labels are shared between the trend_func and ffuncs.</span>
+
 <span class="sd">        Here, we update them according to placement in :py:meth:`trend_func`, but properly locating</span>
 <span class="sd">        them for :py:meth:`ffuncs`.</span>
 

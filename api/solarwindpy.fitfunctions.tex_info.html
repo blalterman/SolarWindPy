@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.tex_info module &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
+  <title>solarwindpy.fitfunctions.tex_info module &mdash; SolarWindPy 0.1.dev1+g4d938ec73 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=2b98d43e"></script>
+      <script src="../_static/documentation_options.js?v=2bcb1fd6"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -417,8 +417,8 @@ cast to int.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_popt">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_popt" title="Link to this definition"></a></dt>
-<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to
-<code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
+<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to parameter values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
 appropriate uncertainty.</p>
 <p>See <code class="docutils literal notranslate"><span class="pre">set_TeX_trans_argnames</span></code> to translate the argnames for TeX.</p>
 </dd></dl>
@@ -426,8 +426,8 @@ appropriate uncertainty.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_relative_error">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_relative_error</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_relative_error" title="Link to this definition"></a></dt>
-<dd><p>Create a dictionary with (k, v) pairs corresponding to
-(self.argnames, psigma/popt).</p>
+<dd><p>Create a dictionary with (k, v) pairs corresponding to relative errors.</p>
+<p>(self.argnames, psigma/popt).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -455,7 +455,7 @@ va - verticalalignment (default “right”)</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.build_info">
 <span class="sig-name descname"><span class="pre">build_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.build_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.build_info" title="Link to this definition"></a></dt>
-<dd><p>Generate a TeX-formatted string with the desired info</p>
+<dd><p>Generate a TeX-formatted string with the desired info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -524,8 +524,8 @@ This option overrides <cite>convert_pow_10</cite>.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string">
 <span class="sig-name descname"><span class="pre">val_uncert_2_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.val_uncert_2_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string" title="Link to this definition"></a></dt>
-<dd><p>Convert a value, uncertainty pair to a string where the value is
-reported to the first non-zero digit of the uncertainty.</p>
+<dd><p>Convert a value, uncertainty pair to a string.</p>
+<p>Where the value is reported to the first non-zero digit of the uncertainty.</p>
 <p>Require that <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">&gt;</span> <span class="pre">uncertainty</span></code>.</p>
 <p class="rubric">Examples</p>
 <p>The generated string uses <span class="math notranslate nohighlight">\(\pm\)</span> to denote the uncertainty.</p>
