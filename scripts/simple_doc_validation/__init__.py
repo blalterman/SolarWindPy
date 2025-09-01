@@ -25,16 +25,16 @@ from .validation_utils import (
     validate_example_syntax,
     generate_validation_summary,
     create_minimal_report_files,
-    get_framework_status
+    get_framework_status,
 )
 
 __version__ = "1.0.0"
 __all__ = [
-    'SimpleDocTestRunner',
-    'CIIntegration', 
-    'count_documentation_examples',
-    'validate_example_syntax',
-    'generate_validation_summary',
-    'create_minimal_report_files',
-    'get_framework_status'
+    "SimpleDocTestRunner",
+    "CIIntegration",
+    "count_documentation_examples",
+    "validate_example_syntax",
+    "generate_validation_summary",
+    "create_minimal_report_files",
+    "get_framework_status",
 ]

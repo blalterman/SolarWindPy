@@ -38,30 +38,32 @@ PIP_TO_CONDA_NAMES = {
 
 def translate_package_name(pip_name: str) -> str:
     """Translate pip package names to conda package names.
-    
+
     Parameters
     ----------
     pip_name : str
         Package name as used by pip (may include version specifiers)
-        
+
     Returns
     -------
     str
         Package name translated for conda, preserving version specifiers
-        
+
     Notes
     -----
     This function handles the package naming differences between pip and conda.
-    For example, PyTables is installed as 'pip install tables' but 
+    For example, PyTables is installed as 'pip install tables' but
     'conda install pytables'.
     """
     # Handle version specifiers (e.g., "package>=1.0.0")
     for operator in [">=", "<=", "==", "!=", ">", "<", "~="]:
         if operator in pip_name:
             package, version = pip_name.split(operator, 1)
-            translated_package = PIP_TO_CONDA_NAMES.get(package.strip(), package.strip())
+            translated_package = PIP_TO_CONDA_NAMES.get(
+                package.strip(), package.strip()
+            )
             return f"{translated_package}{operator}{version}"
-    
+
     # No version specifier, direct translation
     return PIP_TO_CONDA_NAMES.get(pip_name.strip(), pip_name.strip())
 
@@ -86,7 +88,7 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
             for line in req_file
             if line.strip() and not line.startswith("#")
         ]
-    
+
     # Translate pip package names to conda equivalents
     conda_packages = [translate_package_name(pkg) for pkg in pip_packages]
 
@@ -101,6 +103,7 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
     if target_name.exists() and not overwrite:
         # Generate unique name with timestamp
         from datetime import datetime
+
         timestamp = datetime.now().strftime("%Y%m%d-%H%M")
         new_name = f"{env_name}-{timestamp}"
         target_name = Path(f"{new_name}.yml")
