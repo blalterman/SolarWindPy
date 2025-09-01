@@ -702,8 +702,10 @@ xobs: {xobs.shape}"""
         """
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
-        except ValueError as e:
+        except (AssertionError, ValueError) as e:
             #             raise
+            if isinstance(e, AssertionError):
+                e = ValueError("Insufficient data to fit the model")
             return e
 
         absolute_sigma = kwargs.pop("absolute_sigma", False)

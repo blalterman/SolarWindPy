@@ -1808,7 +1808,7 @@ class PlasmaTestBase(ABC):
                 continue  # Skip this test case.
 
             elif len(combo) == 2:
-                dvsq = ot.dv(*combo).mag.pow(2)
+                dvsq = ot.dv(*combo, project_m2q=True).mag.pow(2)
                 rho_s = rho.loc[:, combo]
                 mu = rho_s.product(axis=1).divide(rho_s.sum(axis=1))
                 pdv = dvsq.multiply(mu, axis=0).multiply(const)

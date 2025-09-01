@@ -562,7 +562,11 @@ class FFPlot(object):
             marker = kwargs.pop("marker", "P")
             linestyle = kwargs.pop("linestyle", "-")
 
-            label = r" \; ".join([label, kind.title()]).lstrip(r" \; ")
+            # Handle empty label case to preserve spacing
+            if not label:
+                label = r" \; %s" % kind.title()
+            else:
+                label = r" \; ".join([label, kind.title()])
             label = r"$\mathrm{%s}$" % label
             #             label = (r"$\mathrm{%s \; %s}$" % (label, kind.title()).replace(" \; ", "")
 
@@ -581,11 +585,14 @@ class FFPlot(object):
             )
 
         elif kind == "both":
+            # Handle label formatting to preserve spacing correctly
+            simple_label = r"$\mathrm{ \; Simple}$" if not label else r"$\mathrm{%s \; Simple}$" % label
+            robust_label = r"$\mathrm{ \; Robust}$" if not label else r"$\mathrm{%s \; Robust}$" % label
 
             ax.plot(
                 self.observations.used.x,
                 self.residuals(pct=pct, robust=False),
-                label=(r"$\mathrm{%s \; Simple}$" % label).lstrip(r" \; "),
+                label=simple_label,
                 drawstyle=drawstyle,
                 color="forestgreen",
                 marker="P",
@@ -601,7 +608,7 @@ class FFPlot(object):
                 ax.plot(
                     self.observations.used.x,
                     r,
-                    label=(r"$\mathrm{%s \; Robust}$" % label).lstrip(r" \; "),
+                    label=robust_label,
                     drawstyle=drawstyle,
                     color="darkorange",
                     marker="X",
