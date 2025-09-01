@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for the :class:`Ion` object.
-"""
+"""Tests for the :class:`Ion` object."""
 import numpy as np
 import pandas as pd
 
@@ -209,10 +207,8 @@ class TestIonP2(base.P2Test, IonTestBase, base.SWEData):
 class TestIonSpecificsOptions(base.TestData):
     @classmethod
     def setUpClass(cls):
-        r"""
-        Override `setUpClass` because this set of tests
-        doesn't rely on `object_testing`.
-        """
+        r"""Override `setUpClass` because this set of tests doesn't rely on
+        `object_testing`."""
         # print("SWEData.setUpClass", flush=True)
         super(TestIonSpecificsOptions, cls).setUpClass()
         # print(cls.data.iloc[:, :7])

@@ -307,8 +307,7 @@ class Plasma(base.Base):
         sc_modifier_fcn=None,
         aux_modifier_fcn=None,
     ):
-        r"""Save the plasma's underlying data and aux DataFrame to an HDF5 file at
-        `fname`.
+        r"""Save the plasma's data and aux DataFrame to an HDF5 file at `fname`.
 
         Parameters
         ----------
@@ -508,8 +507,10 @@ class Plasma(base.Base):
         self.logger.debug("%s init with species %s", self.__class__.__name__, (species))
 
     def _chk_species(self, *species):
-        r"""Check the species in each :py:class:`Plasma` method call and ensure they are
-        available in the :py:attr:`ions`."""
+        r"""Internal tool to verify species string formats and availability.
+
+        Check the species in each :py:class:`Plasma` method call and ensure
+        they are available in the :py:attr:`ions`."""
         species = self._conform_species(*species)
         minimal_species = [s.split("+") for s in species]
         minimal_species = np.unique([*itertools.chain(minimal_species)])
@@ -1731,11 +1732,10 @@ species: {}
         return nc
 
     def vdf_ratio(self, beam="p2", core="p1"):
-        r"""Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
-        core VDF.
+        r"""Calculate the ratio of the VDFs at the beam velocity.
 
-        Calculate the ratio of a Bimaxwellian proton beam to a Bimaxwellian proton
-        core VDF at the peak beam velocity.
+        Calculate the ratio of a bi-Maxwellian proton beam to a bi-Maxwellian
+        proton core VDF at the peak beam velocity.
 
         To avoid overflow erros, we return ln(ratio).
 
@@ -1747,8 +1747,8 @@ species: {}
 
             :math:`\frac{f_2}{f_1}|_{v_2} = \frac{n_2}{n_1} ( \frac{w_1}{w_2} )^3 \exp[ (\frac{v_2 - v_1}{w_1})^2 ]`
 
-        where :math:`n` is the number density, :math:`w` gives the thermal speed, and
-        :math:`u` is the bulk velocity.
+        where :math:`n` is the number density, :math:`w` gives the thermal
+        speed, and :math:`u` is the bulk velocity.
 
         In the case of a Bimaxwellian, we :math:`w^3 = w_\parallel w_\perp^2`
         :math:`(\frac{v - v_i}{w_i})^2 = (\frac{v - v_i}{w_i})_\parallel^2 + (\frac{v - v_i}{w_i})_\perp^2`.

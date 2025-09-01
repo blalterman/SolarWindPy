@@ -214,8 +214,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             self._prune_lower_yaxis_ticks(cbari.ax, cbaro.ax)
 
     def agg(self, **kwargs):
-        r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate Inbound, Outbound, and
-        Both orbit legs."""
+        r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.
+
+        Legs: Inbound, Outbound, and Both."""
         #         logging.getLogger("main").warning("Starting agg")
         #         log_mem_usage()
 
@@ -311,11 +312,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         return h1
 
     def _put_agg_on_ax(self, ax, agg, cbar, limit_color_norm, cbar_kwargs, **kwargs):
-        r"""Refactored actually putting `agg` onto `ax` because Python was crashing due
-        to the way too many `agg` runs.
+        r"""Refactored putting `agg` onto `ax`.
 
-        (20190731)
-        """
+        Python was crashing due to the way too many `agg` runs (20190731)."""
         #         logging.getLogger("main").warning("Putting agg on ax")
         #         log_mem_usage()
 

@@ -64,7 +64,10 @@ class TestSIDCModuleImport:
     """Test SIDC module import and accessibility."""
 
     def test_sidc_module_import(self):
-        """Test that 'from . import sidc' executes successfully."""
+        """Test that 'from .
+
+        import sidc' executes successfully.
+        """
         # This test passes if the import in the setup doesn't raise an exception
         import solarwindpy.solar_activity.sunspot_number as ssn_package
 

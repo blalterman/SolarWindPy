@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for basic synthetic data setup.
-"""
+"""Tests for basic synthetic data setup."""
 import numpy as np
 import pandas as pd
 from pathlib import Path

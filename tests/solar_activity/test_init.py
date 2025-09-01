@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Test solar_activity package entry point (__init__.py).
 
-This module tests the `get_all_indices()` function which aggregates
-solar activity indices from multiple sources (LISIRD and SIDC).
+This module tests the `get_all_indices()` function which aggregates solar activity
+indices from multiple sources (LISIRD and SIDC).
 """
 
 import pytest

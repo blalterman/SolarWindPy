@@ -1,5 +1,4 @@
-"""
-Test suite for planning agents architecture functionality.
+"""Test suite for planning agents architecture functionality.
 
 This module validates the plan-per-branch architecture, cross-branch coordination,
 checksum management, and complete merge workflows used by the planning agents system.
@@ -17,7 +16,8 @@ class TestPlanningAgentsArchitecture:
     """Test suite for planning agents architecture validation."""
 
     def test_plan_branch_isolation(self):
-        """Test that plan branches maintain proper isolation from master and feature branches."""
+        """Test that plan branches maintain proper isolation from master and feature
+        branches."""
         # Test that plan files exist only on plan branches and not on master
         plan_file = "solarwindpy/plans/test-planning-agents-architecture.md"
 

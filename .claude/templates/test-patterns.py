@@ -1,7 +1,5 @@
-"""
-SolarWindPy Test Pattern Templates
-Domain-specific test templates for scientific computing and plasma physics.
-"""
+"""SolarWindPy Test Pattern Templates Domain-specific test templates for scientific
+computing and plasma physics."""
 
 import numpy as np
 import pandas as pd
@@ -124,7 +122,7 @@ def test_{function_name}_convergence():
         "Convergence rate not monotonic with tolerance"
 '''
 
-# DataFrame and Data Structure Templates  
+# DataFrame and Data Structure Templates
 DATAFRAME_STRUCTURE_TEST = '''
 def test_{function_name}_dataframe_structure():
     """Test {function_name} maintains proper MultiIndex structure."""

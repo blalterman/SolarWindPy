@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tests for solarwindpy.plotting.spiral module.
 
-This module provides comprehensive test coverage for the spiral mesh plotting
-and binning utilities, including numba-accelerated functions.
+This module provides comprehensive test coverage for the spiral mesh plotting and
+binning utilities, including numba-accelerated functions.
 """
 
 import pytest

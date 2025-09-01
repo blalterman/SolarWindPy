@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for Alfvenic turbulence calculations.
-"""
+"""Tests for Alfvenic turbulence calculations."""
 
 
 import numpy as np

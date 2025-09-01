@@ -163,7 +163,8 @@ class TestSelectFromPlot2DInitialization:
 
     @patch("solarwindpy.plotting.select_data_from_figure.mpl.widgets.RectangleSelector")
     def test_invalid_plotter_type(self, mock_rect_selector, mock_ax):
-        """Test that invalid plotter type raises AttributeError when accessing plotter attributes."""
+        """Test that invalid plotter type raises AttributeError when accessing plotter
+        attributes."""
         mock_selector = Mock()
         mock_rect_selector.return_value = mock_selector
 
@@ -1130,7 +1131,8 @@ class TestSelectFromPlot2DEdgeCases:
             )
 
     def test_sample_data_other_selector_no_sampled_indices(self, selector_setup):
-        """Test sample_data with other selector that has no sampled_indices attribute."""
+        """Test sample_data with other selector that has no sampled_indices
+        attribute."""
         selector, plotter, ax = selector_setup
 
         # Create other selector without sampled_indices

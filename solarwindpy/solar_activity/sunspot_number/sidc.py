@@ -297,15 +297,15 @@ class SIDCLoader(DataLoader):
 
 
 class SIDC(ActivityIndicator):
-    """Solar sunspot number data from the SIDC."""
+    """Solar sunspot number data from the SIDC.
+
+    Parameters
+    ----------
+    key : str
+        Passed to :class:`SIDC_ID` to select the data series.
+    """
 
     def __init__(self, key):
-        r"""Parameters
-        ----------
-        key : str
-            Passed to :class:`SIDC_ID` to select the data series.
-        """
-
         self._init_logger()
         self.set_id(SIDC_ID(key))
         self.load_data()

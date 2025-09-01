@@ -1,7 +1,7 @@
 """Performance benchmarks for plotting functionality.
 
-Tests performance characteristics and scalability of plotting operations
-with large datasets typical in space physics applications.
+Tests performance characteristics and scalability of plotting operations with large
+datasets typical in space physics applications.
 """
 
 import pytest

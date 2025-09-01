@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for Vector and Tensor objects.
-"""
+"""Tests for Vector and Tensor objects."""
 import numpy as np
 import pytest
 import pandas as pd
@@ -412,9 +410,7 @@ class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
 class TestQuantitySubclassEquality(TestCase):
     @classmethod
     def setUpClass(cls):
-        r"""
-        Override `setUpClass` so that it doesn't call `set_object_testing`.
-        """
+        r"""Override `setUpClass` so that it doesn't call `set_object_testing`."""
         # print("TestQuantitySubclassEquality.setUpClass", flush=True)
         #         super(TestQuantitySubclassEquality, cls).setUpClass()
         #         # print(cls.data.iloc[:, :7])

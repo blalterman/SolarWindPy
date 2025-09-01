@@ -102,13 +102,16 @@ class SpiralMesh(object):
 
     @property
     def cell_filter(self):
-        r"""Build a boolean :py:class:`Series` selecting mesh cells that meet density and
-        area criteria specified by `mesh_cell_filter_thresholds`.
+        r"""Boolean :py:class:`Series` identifying properly filled mesh cells.
+
+        Series selects mesh cells that meet density and area criteria specified
+        by :py:meth:`mesh_cell_filter_thresholds`.
 
         Notes
         ----
         Neither `density` nor `size` convert log-scale edges into linear scale.
-        Doing so would overweight the area of mesh cells at larger values on a given axis.
+        Doing so would overweight the area of mesh cells at larger values on a
+        given axis.
         """
         density = self.cell_filter_thresholds.density
         size = self.cell_filter_thresholds.size
@@ -622,8 +625,9 @@ data : {z.size}
         mesh.build_cat()
 
     def set_clim(self, lower=None, upper=None):
-        """Set the minimum (lower) and maximum (upper) allowed counts per bin returned
-        after calling :py:meth:`add`."""
+        """Set the min (lower) and max (upper) counts per bin.
+
+        This limit is applied after the :py:meth:`groupby.agg` is run."""
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = base.RangeLimits(lower, upper)

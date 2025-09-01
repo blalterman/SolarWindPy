@@ -191,8 +191,7 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Used for building data containers and checking that all entries are
-        visited."""
+        r"""Used to build data containers and check all entries are visited."""
         return -9999.0
 
     @property
@@ -551,11 +550,7 @@ class StabilityContours(object):
 
     @staticmethod
     def _add_table_legend(ax, images):
-        r"""Create a legend in compact table format for identifying the instability
-        contours.
-
-        Create a legend in compact table format for identifying the
-        instability contours.
+        r"""Create a compact legend in table format identifying the contours.
 
         Modified from stackoverflow.
         Source: https://stackoverflow.com/a/25995730/1200989

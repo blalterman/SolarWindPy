@@ -1,7 +1,7 @@
 """Test fixtures and utilities for plotting functionality.
 
-Comprehensive test infrastructure, fixtures, and utility functions
-for the plotting test suite.
+Comprehensive test infrastructure, fixtures, and utility functions for the plotting test
+suite.
 """
 
 import pytest

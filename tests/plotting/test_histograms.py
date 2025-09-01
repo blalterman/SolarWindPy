@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tests for solarwindpy.plotting.histograms module.
 
-This module provides comprehensive test coverage for the histograms convenience
-module that re-exports AggPlot, Hist1D, and Hist2D classes.
+This module provides comprehensive test coverage for the histograms convenience module
+that re-exports AggPlot, Hist1D, and Hist2D classes.
 """
 
 import pytest

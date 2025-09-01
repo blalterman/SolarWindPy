@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""
-Cleanup script for compaction tags in SolarWindPy repository.
+"""Cleanup script for compaction tags in SolarWindPy repository.
 
-This script removes all claude/compaction/* tags from both local and remote
-repositories as part of migrating from tag-based to file-based compaction.
+This script removes all claude/compaction/* tags from both local and remote repositories
+as part of migrating from tag-based to file-based compaction.
 """
 
 import subprocess
@@ -15,15 +14,15 @@ def run_command(cmd, check=True, capture_output=True):
     """Run a command and return the result."""
     try:
         result = subprocess.run(
-            cmd,
-            shell=True,
-            check=check,
-            capture_output=capture_output,
-            text=True
+            cmd, shell=True, check=check, capture_output=capture_output, text=True
         )
         return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
     except subprocess.CalledProcessError as e:
-        return False, e.stdout.strip() if e.stdout else "", e.stderr.strip() if e.stderr else ""
+        return (
+            False,
+            e.stdout.strip() if e.stdout else "",
+            e.stderr.strip() if e.stderr else "",
+        )
 
 
 def main():
@@ -32,7 +31,7 @@ def main():
     print("🧹 Cleaning up compaction tags from SolarWindPy repository...")
 
     # Check if we're in a git repository
-    if not Path('.git').exists():
+    if not Path(".git").exists():
         print("❌ Not in a git repository")
         sys.exit(1)
 
@@ -54,8 +53,10 @@ def main():
         print(f"   ... and {len(tags) - 10} more")
 
     # Confirm deletion
-    response = input(f"\nDelete all {len(tags)} compaction tags? [y/N]: ").strip().lower()
-    if response not in ('y', 'yes'):
+    response = (
+        input(f"\nDelete all {len(tags)} compaction tags? [y/N]: ").strip().lower()
+    )
+    if response not in ("y", "yes"):
         print("🚫 Cleanup cancelled")
         return
 
@@ -73,21 +74,27 @@ def main():
 
     # Delete remote tags (if they exist)
     print("\n🌐 Checking for remote compaction tags...")
-    success, remote_tags, error = run_command("git ls-remote --tags origin | grep 'claude/compaction/'")
+    success, remote_tags, error = run_command(
+        "git ls-remote --tags origin | grep 'claude/compaction/'"
+    )
 
     if success and remote_tags:
         remote_tag_list = []
         for line in remote_tags.splitlines():
-            if 'claude/compaction/' in line:
-                tag_ref = line.split('\t')[1]  # refs/tags/claude/compaction/...
-                tag_name = tag_ref.replace('refs/tags/', '')
+            if "claude/compaction/" in line:
+                tag_ref = line.split("\t")[1]  # refs/tags/claude/compaction/...
+                tag_name = tag_ref.replace("refs/tags/", "")
                 remote_tag_list.append(tag_name)
 
         if remote_tag_list:
             print(f"🌐 Found {len(remote_tag_list)} remote compaction tags")
-            response = input(f"Delete {len(remote_tag_list)} remote compaction tags? [y/N]: ").strip().lower()
+            response = (
+                input(f"Delete {len(remote_tag_list)} remote compaction tags? [y/N]: ")
+                .strip()
+                .lower()
+            )
 
-            if response in ('y', 'yes'):
+            if response in ("y", "yes"):
                 print("🗑️  Deleting remote compaction tags...")
                 deleted_remote = 0
                 for tag in remote_tag_list:
@@ -109,7 +116,9 @@ def main():
     # Final verification
     success, remaining_tags, _ = run_command("git tag -l 'claude/compaction/*'")
     if success and remaining_tags:
-        print(f"⚠️  Warning: {len(remaining_tags.splitlines())} compaction tags still remain")
+        print(
+            f"⚠️  Warning: {len(remaining_tags.splitlines())} compaction tags still remain"
+        )
     else:
         print("🎉 All compaction tags successfully removed!")
 

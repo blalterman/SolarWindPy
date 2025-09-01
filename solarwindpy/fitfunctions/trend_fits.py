@@ -77,13 +77,12 @@ class TrendFit(object):
 
     @property
     def ffunc1d_class(self):
-        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each
-        x-bin."""
+        r""":py:class:`FitFunction` to apply in each x-bin."""
         return self._ffunc1d_class
 
     @property
     def trendfunc_class(self):
-        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt`.
+        r""":py:class:`FitFunction` to apply each `popt`.
 
         Of the `ffunc1d` along the x-axis.
         """
@@ -91,8 +90,7 @@ class TrendFit(object):
 
     @property
     def ffuncs(self):
-        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in
-        each x-bin."""
+        r"""The 1D :py:class:`FitFunction` applied in each x-bin."""
         return self._ffuncs
 
     @property

@@ -15,18 +15,20 @@ from ..plotting import base, labels, subplots
 
 
 class IndicatorPlot(base.Base):
-    """Base class for plotting a solar activity indicator."""
+    """Base class for plotting a solar activity indicator.
+
+    Parameters
+    ----------
+    indicator : ActivityIndicator
+        Object providing the time series to plot.
+    ykey : str
+        Column in ``indicator.data`` to display.
+    plasma_index : pandas.DatetimeIndex, optional
+        Restrict plotted data to this index.
+    """
 
     def __init__(self, indicator, ykey, plasma_index=None):
-        """Parameters
-        ----------
-        indicator : ActivityIndicator
-            Object providing the time series to plot.
-        ykey : str
-            Column in ``indicator.data`` to display.
-        plasma_index : pandas.DatetimeIndex, optional
-            Restrict plotted data to this index.
-        """
+
         self.set_data(indicator, ykey, plasma_index)
         self.set_log(x=False, y=False)
         self._labels = base.AxesLabels(x=labels.special.DateTime("Year"), y="y")

@@ -61,10 +61,7 @@ FitBounds = namedtuple("FitBounds", "lower,upper")
 
 
 class FitFunction(ABC):
-    r"""Assuming that you don't want any special formatting, the typical call order is as
-    follows.
-
-    The typical call order is:
+    r"""Assuming that you don't want special formatting, call order is:
 
         fit_function = FitFunction(function, TeX_string)
         fit_function.make_fit()
@@ -299,10 +296,7 @@ class FitFunction(ABC):
 
     @property
     def pcov(self):
-        r"""A copy of the covariance matrix.
-
-        Returns a copy so that the matrix isn't accidentally edited.
-        """
+        r"""Returns a copy so that the matrix isn't accidentally edited."""
         return self._pcov.copy()
 
     @property
@@ -322,10 +316,7 @@ class FitFunction(ABC):
 
     @property
     def sufficient_data(self):
-        r"""A check to ensure that we can fit the data before doing any computations.
-
-        A check to ensure that we can fit the data before doing any computations.
-        """
+        r"""Ensure that we can fit the data before doing any computations."""
         chk = self.nobs >= len(self.argnames)
         if not chk:
             msg = "There is insufficient data to fit the model."
@@ -397,12 +388,9 @@ xobs: {xobs.shape}"""
         return mask
 
     def _set_argnames(self):
-        r"""Set the arguments of the function, assuming that the first is dependent
-        variable.
+        r"""Set the arguments of the function/
 
-        Set the arguments of the function, assuming that the first is dependent
-        variable.
-
+        Assume that the first is dependent variable.
         Should be called after function is set.
         """
         args = getfullargspec(self.function).args[1:]
@@ -686,11 +674,10 @@ xobs: {xobs.shape}"""
         return popt, pcov, psigma, all_chisq
 
     def make_fit(self, return_exception=False, **kwargs):
-        """Fit the function with the independent values `xobs` and dependent values
-        `yobs`.
+        """Fit the function with the independent `xobs` and dependent `yobs`.
 
-        Using `least_squares` and returning the `OptimizeResult`
-        object, but treating weights as in `curve_fit`.
+        Uses `least_squares` and returns the `OptimizeResult` object, but
+        treats weights as in `curve_fit`.
 
         Parameters
         ----------

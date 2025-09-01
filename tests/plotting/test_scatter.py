@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tests for solarwindpy.plotting.scatter module.
 
-This module provides comprehensive test coverage for the Scatter class used for
-creating scatter plots with optional color mapping functionality.
+This module provides comprehensive test coverage for the Scatter class used for creating
+scatter plots with optional color mapping functionality.
 """
 
 import pytest

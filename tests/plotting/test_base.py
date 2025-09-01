@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tests for solarwindpy.plotting.base module.
 
-This module provides comprehensive test coverage for the abstract base classes
-and helper classes used throughout the plotting package.
+This module provides comprehensive test coverage for the abstract base classes and
+helper classes used throughout the plotting package.
 """
 
 import pytest
@@ -103,7 +103,8 @@ class TestBaseAbstractClass:
     """Test the Base abstract class functionality."""
 
     def test_base_instantiation_via_subclass(self):
-        """Test that Base can be instantiated via subclass with proper initialization."""
+        """Test that Base can be instantiated via subclass with proper
+        initialization."""
         concrete = ConcreteBase()
 
         # Verify initialization occurred

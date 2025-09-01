@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-SolarWindPy Test Generator
-Interactive test scaffolding for domain-specific scientific testing.
-"""
+"""SolarWindPy Test Generator Interactive test scaffolding for domain-specific
+scientific testing."""
 
 import sys
 from pathlib import Path
@@ -32,14 +30,14 @@ def select_test_types():
     """Let user select which types of tests to generate."""
 
     test_types = {
-        '1': ('Physics Validation', 'physics'),
-        '2': ('Numerical Stability', 'numerical'),
-        '3': ('Unit Consistency', 'units'),
-        '4': ('DataFrame Structure', 'dataframe'),
-        '5': ('Performance', 'performance'),
-        '6': ('Integration', 'integration'),
-        '7': ('Conservation Laws', 'conservation'),
-        '8': ('Missing Data Handling', 'missing_data')
+        "1": ("Physics Validation", "physics"),
+        "2": ("Numerical Stability", "numerical"),
+        "3": ("Unit Consistency", "units"),
+        "4": ("DataFrame Structure", "dataframe"),
+        "5": ("Performance", "performance"),
+        "6": ("Integration", "integration"),
+        "7": ("Conservation Laws", "conservation"),
+        "8": ("Missing Data Handling", "missing_data"),
     }
 
     print("\nSelect test types (comma-separated numbers):")
@@ -49,15 +47,15 @@ def select_test_types():
     selection = input("\nYour selection (e.g., 1,2,4): ").strip()
 
     if not selection:
-        return ['physics', 'numerical']  # Default
+        return ["physics", "numerical"]  # Default
 
     selected = []
-    for num in selection.split(','):
+    for num in selection.split(","):
         num = num.strip()
         if num in test_types:
             selected.append(test_types[num][1])
 
-    return selected if selected else ['physics', 'numerical']
+    return selected if selected else ["physics", "numerical"]
 
 
 def get_physics_details(function_name):
@@ -67,29 +65,29 @@ def get_physics_details(function_name):
 
     # Detect common physics functions
     physics_type = None
-    if 'thermal' in function_name.lower() or 'temperature' in function_name.lower():
-        physics_type = 'thermal'
-    elif 'alfven' in function_name.lower() or 'magnetic' in function_name.lower():
-        physics_type = 'alfven'
-    elif 'coulomb' in function_name.lower():
-        physics_type = 'coulomb'
-    elif 'beta' in function_name.lower():
-        physics_type = 'beta'
+    if "thermal" in function_name.lower() or "temperature" in function_name.lower():
+        physics_type = "thermal"
+    elif "alfven" in function_name.lower() or "magnetic" in function_name.lower():
+        physics_type = "alfven"
+    elif "coulomb" in function_name.lower():
+        physics_type = "coulomb"
+    elif "beta" in function_name.lower():
+        physics_type = "beta"
 
     if physics_type:
         print(f"Detected physics type: {physics_type}")
         use_detection = input("Use detected physics type? (y/n): ").strip().lower()
-        if use_detection == 'y':
+        if use_detection == "y":
             return physics_type
 
     # Manual selection
     physics_options = {
-        '1': 'thermal',
-        '2': 'alfven',
-        '3': 'coulomb',
-        '4': 'beta',
-        '5': 'instability',
-        '6': 'general'
+        "1": "thermal",
+        "2": "alfven",
+        "3": "coulomb",
+        "4": "beta",
+        "5": "instability",
+        "6": "general",
     }
 
     print("\nPhysics type:")
@@ -97,14 +95,15 @@ def get_physics_details(function_name):
         print(f"  {key}. {value}")
 
     choice = input("Select physics type: ").strip()
-    return physics_options.get(choice, 'general')
+    return physics_options.get(choice, "general")
 
 
 def generate_physics_test(function_name, physics_type):
     """Generate physics-specific test."""
 
-    if physics_type == 'thermal':
-        return dedent(f'''
+    if physics_type == "thermal":
+        return dedent(
+            f'''
         def test_{function_name}_thermal_speed_convention():
             """Test {function_name} follows mw² = 2kT convention."""
             from solarwindpy.tools import units_constants as uc
@@ -122,10 +121,12 @@ def generate_physics_test(function_name, physics_type):
                 f"Thermal speed convention violated: expected={{expected}}, got={{result}}"
             assert result > 0, "Thermal speed must be positive"
             assert result < uc.c, "Thermal speed cannot exceed speed of light"
-        ''').strip()
+        '''
+        ).strip()
 
-    elif physics_type == 'alfven':
-        return dedent(f'''
+    elif physics_type == "alfven":
+        return dedent(
+            f'''
         def test_{function_name}_alfven_speed_formula():
             """Test {function_name} follows V_A = B/√(μ₀ρ) formula."""
             from solarwindpy.tools import units_constants as uc
@@ -145,10 +146,12 @@ def generate_physics_test(function_name, physics_type):
                 f"Alfvén speed formula violated: expected={{expected}}, got={{result}}"
             assert result > 0, "Alfvén speed must be positive"
             assert result < uc.c, "Alfvén speed cannot exceed speed of light"
-        ''').strip()
+        '''
+        ).strip()
 
-    elif physics_type == 'beta':
-        return dedent(f'''
+    elif physics_type == "beta":
+        return dedent(
+            f'''
         def test_{function_name}_plasma_beta_calculation():
             """Test {function_name} plasma beta calculation β = 2μ₀nkT/B²."""
             from solarwindpy.tools import units_constants as uc
@@ -166,10 +169,12 @@ def generate_physics_test(function_name, physics_type):
             assert np.isclose(result, expected, rtol=1e-6), \\
                 f"Plasma beta formula violated: expected={{expected}}, got={{result}}"
             assert result > 0, "Plasma beta must be positive"
-        ''').strip()
+        '''
+        ).strip()
 
     else:
-        return dedent(f'''
+        return dedent(
+            f'''
         def test_{function_name}_physics_constraints():
             """Test {function_name} respects physical constraints."""
             # TODO: Add physics-specific tests for {function_name}
@@ -185,13 +190,15 @@ def generate_physics_test(function_name, physics_type):
             assert result is not None, "Function must return a result"
             assert np.isfinite(result).all(), "Result must be finite"
             # Add physics-specific assertions
-        ''').strip()
+        '''
+        ).strip()
 
 
 def generate_numerical_test(function_name):
     """Generate numerical stability test."""
 
-    return dedent(f'''
+    return dedent(
+        f'''
     def test_{function_name}_numerical_stability():
         """Test {function_name} numerical stability at boundaries."""
         # Test very small values (approach zero)
@@ -211,13 +218,15 @@ def generate_numerical_test(function_name):
                 "Function should handle zero gracefully"
         except (ZeroDivisionError, ValueError):
             pass  # Expected for some functions
-    ''').strip()
+    '''
+    ).strip()
 
 
 def generate_dataframe_test(function_name):
     """Generate DataFrame structure test."""
 
-    return dedent(f'''
+    return dedent(
+        f'''
     def test_{function_name}_dataframe_structure():
         """Test {function_name} maintains proper MultiIndex DataFrame structure."""
         # Arrange
@@ -240,34 +249,36 @@ def generate_dataframe_test(function_name):
         # Assert no data corruption
         assert len(result) > 0, "Result cannot be empty"
         assert not result.isna().all().all(), "Result cannot be all NaN"
-    ''').strip()
+    '''
+    ).strip()
 
 
 def create_test_file(function_name, module_path, test_types, physics_type):
     """Create the complete test file."""
 
     # Extract module components
-    module_parts = module_path.split('.')
+    module_parts = module_path.split(".")
     if len(module_parts) >= 2:
         submodule = module_parts[-1]  # e.g., 'plasma' from 'solarwindpy.core.plasma'
     else:
-        submodule = 'module'
+        submodule = "module"
 
     # Create test file path
-    test_dir = Path('tests')
-    if 'core' in module_path:
-        test_dir = test_dir / 'core'
-    elif 'fitfunctions' in module_path:
-        test_dir = test_dir / 'fitfunctions'
-    elif 'plotting' in module_path:
-        test_dir = test_dir / 'plotting'
-    elif 'instabilities' in module_path:
-        test_dir = test_dir / 'instabilities'
+    test_dir = Path("tests")
+    if "core" in module_path:
+        test_dir = test_dir / "core"
+    elif "fitfunctions" in module_path:
+        test_dir = test_dir / "fitfunctions"
+    elif "plotting" in module_path:
+        test_dir = test_dir / "plotting"
+    elif "instabilities" in module_path:
+        test_dir = test_dir / "instabilities"
 
-    test_file = test_dir / f'test_{submodule}.py'
+    test_file = test_dir / f"test_{submodule}.py"
 
     # Generate imports
-    imports = dedent(f'''
+    imports = dedent(
+        f'''
     """
     Tests for {module_path}.{function_name}
     Generated by SolarWindPy Test Generator
@@ -279,10 +290,12 @@ def create_test_file(function_name, module_path, test_types, physics_type):
     from {module_path} import {function_name}
 
 
-    ''').strip()
+    '''
+    ).strip()
 
     # Generate helper functions
-    helpers = dedent('''
+    helpers = dedent(
+        '''
     def create_test_plasma_dataframe():
         """Create test DataFrame with proper MultiIndex structure."""
         n_points = 100
@@ -304,18 +317,19 @@ def create_test_file(function_name, module_path, test_types, physics_type):
         return df
 
 
-    ''').strip()
+    '''
+    ).strip()
 
     # Generate tests
     tests = []
 
-    if 'physics' in test_types:
+    if "physics" in test_types:
         tests.append(generate_physics_test(function_name, physics_type))
 
-    if 'numerical' in test_types:
+    if "numerical" in test_types:
         tests.append(generate_numerical_test(function_name))
 
-    if 'dataframe' in test_types:
+    if "dataframe" in test_types:
         tests.append(generate_dataframe_test(function_name))
 
     # Combine all parts
@@ -332,12 +346,14 @@ def main():
         function_name, module_path = get_function_info()
         test_types = select_test_types()
 
-        physics_type = 'general'
-        if 'physics' in test_types:
+        physics_type = "general"
+        if "physics" in test_types:
             physics_type = get_physics_details(function_name)
 
         # Generate test file
-        test_file, test_content = create_test_file(function_name, module_path, test_types, physics_type)
+        test_file, test_content = create_test_file(
+            function_name, module_path, test_types, physics_type
+        )
 
         # Create directory if needed
         test_file.parent.mkdir(parents=True, exist_ok=True)
@@ -346,15 +362,17 @@ def main():
         if test_file.exists():
             print(f"\n📝 Test file exists: {test_file}")
             append = input("Append to existing file? (y/n): ").strip().lower()
-            if append == 'y':
-                with open(test_file, 'a') as f:
+            if append == "y":
+                with open(test_file, "a") as f:
                     f.write(f"\n\n# Additional tests for {function_name}\n")
-                    f.write(test_content.split('\n\n', 2)[-1])  # Skip imports and helpers
+                    f.write(
+                        test_content.split("\n\n", 2)[-1]
+                    )  # Skip imports and helpers
             else:
                 print("❌ Operation cancelled")
                 sys.exit(1)
         else:
-            with open(test_file, 'w') as f:
+            with open(test_file, "w") as f:
                 f.write(test_content)
 
         print(f"\n✅ Test file generated: {test_file}")

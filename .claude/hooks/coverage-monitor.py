@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Coverage Monitor Hook for SolarWindPy.
+"""Coverage Monitor Hook for SolarWindPy.
 
 Provides detailed coverage analysis and suggestions for improvement.
 """
@@ -17,6 +16,7 @@ def run_coverage_analysis():
     # Check if pytest-cov is available
     try:
         import pytest_cov  # noqa: F401
+
         use_coverage = True
     except ImportError:
         print("⚠️  pytest-cov not installed. Running tests without coverage.")
@@ -25,18 +25,23 @@ def run_coverage_analysis():
     try:
         if use_coverage:
             # Run pytest with coverage
-            result = subprocess.run([
-                "pytest",
-                "--cov=solarwindpy",
-                "--cov-report=json",
-                "--cov-report=term-missing",
-                "-q"
-            ], capture_output=True, text=True, timeout=60)
+            result = subprocess.run(
+                [
+                    "pytest",
+                    "--cov=solarwindpy",
+                    "--cov-report=json",
+                    "--cov-report=term-missing",
+                    "-q",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
         else:
             # Run pytest without coverage
-            result = subprocess.run([
-                "pytest", "-q"
-            ], capture_output=True, text=True, timeout=60)
+            result = subprocess.run(
+                ["pytest", "-q"], capture_output=True, text=True, timeout=60
+            )
             print("ℹ️  Tests completed without coverage analysis")
             return True  # Don't fail if pytest-cov missing
         if result.returncode != 0:
@@ -68,12 +73,21 @@ def analyze_coverage_by_module():
 
     # Define module-specific requirements
     module_requirements = {
-        "solarwindpy/core": {"required": 95, "description": "Core physics calculations"},
-        "solarwindpy/instabilities": {"required": 95, "description": "Instability calculations"},
-        "solarwindpy/fitfunctions": {"required": 90, "description": "Curve fitting algorithms"},
+        "solarwindpy/core": {
+            "required": 95,
+            "description": "Core physics calculations",
+        },
+        "solarwindpy/instabilities": {
+            "required": 95,
+            "description": "Instability calculations",
+        },
+        "solarwindpy/fitfunctions": {
+            "required": 90,
+            "description": "Curve fitting algorithms",
+        },
         "solarwindpy/plotting": {"required": 85, "description": "Visualization tools"},
         "solarwindpy/tools": {"required": 90, "description": "Utility functions"},
-        "solarwindpy/solar_activity": {"required": 85, "description": "Solar indices"}
+        "solarwindpy/solar_activity": {"required": 85, "description": "Solar indices"},
     }
     files = coverage_data.get("files", {})
     for module_path, requirements in module_requirements.items():
@@ -99,7 +113,9 @@ def analyze_coverage_by_module():
         coverage_percent = (covered_lines / total_lines) * 100
         status = "✅" if coverage_percent >= required_coverage else "⚠️"
 
-        print(f"   {status} {module_path}: {coverage_percent:.1f}% (req: {required_coverage}%)")
+        print(
+            f"   {status} {module_path}: {coverage_percent:.1f}% (req: {required_coverage}%)"
+        )
         print(f"      {description}")
 
         # Suggest improvements for low coverage modules
@@ -148,27 +164,47 @@ def check_critical_coverage():
         "coulomb_number",
         "plasma_beta",
         "instability",
-        "fit_function"
+        "fit_function",
     ]
     try:
         # Use grep to find critical functions in source
         for pattern in critical_patterns:
-            result = subprocess.run([
-                "grep", "-r", "--include=*.py", "--max-count=100", f"def.*{pattern}", "solarwindpy/"
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [
+                    "grep",
+                    "-r",
+                    "--include=*.py",
+                    "--max-count=100",
+                    f"def.*{pattern}",
+                    "solarwindpy/",
+                ],
+                capture_output=True,
+                text=True,
+            )
 
             if result.stdout:
-                functions = result.stdout.strip().split('\n')
+                functions = result.stdout.strip().split("\n")
                 print(f"   🔍 Found {len(functions)} functions matching '{pattern}'")
 
                 # Suggest testing if not already covered
-                test_result = subprocess.run([
-                    "grep", "-r", "--include=*.py", "--max-count=50", f"test.*{pattern}", "tests/"
-                ], capture_output=True, text=True)
+                test_result = subprocess.run(
+                    [
+                        "grep",
+                        "-r",
+                        "--include=*.py",
+                        "--max-count=50",
+                        f"test.*{pattern}",
+                        "tests/",
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
 
                 if not test_result.stdout:
                     print(f"      ⚠️  No tests found for {pattern} functions")
-                    print(f"      💡 Consider adding tests for critical {pattern} calculations")
+                    print(
+                        f"      💡 Consider adding tests for critical {pattern} calculations"
+                    )
     except Exception as e:
         print(f"   ⚠️  Could not analyze critical functions: {e}")
 
@@ -193,6 +229,7 @@ def main():
         # Only run detailed analysis if we have coverage data
         try:
             import pytest_cov  # noqa: F401
+
             # Detailed analysis
             analyze_coverage_by_module()
             check_critical_coverage()
@@ -200,7 +237,9 @@ def main():
             print("ℹ️  Skipping detailed coverage analysis (pytest-cov not available)")
 
         print("\n✅ Coverage monitoring completed")
-        print("💡 Use 'pytest --cov=solarwindpy --cov-report=html' for interactive report")
+        print(
+            "💡 Use 'pytest --cov=solarwindpy --cov-report=html' for interactive report"
+        )
         sys.exit(0)  # Always exit 0 for non-blocking hook
     else:
         print("\n⚠️  Test execution failed")

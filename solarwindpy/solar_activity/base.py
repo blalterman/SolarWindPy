@@ -373,8 +373,7 @@ class IndicatorExtrema(Base):
 
     @property
     def cycle_intervals(self):
-        r""":class:`pd.Interval` objects corresponding to each rising and falling edge
-        and the full cycle."""
+        r""":class:`pd.Interval` for rising and falling edges and full cycle."""
         return self._cycle_intervals
 
     @property
@@ -562,8 +561,9 @@ class IndicatorExtrema(Base):
         return bands
 
     def cut_about_extrema_bands(self, epoch, tk_cycles=None, kind=None):
-        r"""Bin epochs relative to extrema bands computed with
-        :py:meth:`calculate_extrema_bands`.
+        r"""Bin epochs relative to extrema bands.
+
+        Computed with :py:meth:`calculate_extrema_bands`.
 
         Parameters
         ----------

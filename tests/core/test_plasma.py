@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for the :class:`Plasma` container.
-"""
+"""Tests for the :class:`Plasma` container."""
 import pandas as pd
 import numpy as np
 import itertools
@@ -53,10 +51,8 @@ class PlasmaTestBase(ABC):
 
     @property
     def species_combinations(self):
-        r"""
-        The various combinations of the species for use in testing
-        Plasma methods.
-        """
+        r"""The various combinations of the species for use in testing Plasma
+        methods."""
         from itertools import combinations, chain
 
         stuple = self.stuple
@@ -92,9 +88,7 @@ class PlasmaTestBase(ABC):
 
     @property
     def m_amu(self):
-        r"""
-        Masses in amu.
-        """
+        r"""Masses in amu."""
         a = physical_constants["alpha particle mass in u"][0]
         p = physical_constants["proton mass in u"][0]
         e = physical_constants["electron mass in u"][0]
@@ -128,9 +122,7 @@ class PlasmaTestBase(ABC):
             )
 
     def test_conform_species(self):
-        r"""
-        Just test that the species is a valid input.
-        """
+        r"""Just test that the species is a valid input."""
         slist = (
             "a",
             "e",
@@ -201,8 +193,7 @@ class PlasmaTestBase(ABC):
 
     @abstractmethod
     def test_chk_species_fail(self):
-        r"""
-        This method must be subclassed to test for species that fail the
+        r"""This method must be subclassed to test for species that fail the
         `_chk_species` tests.
 
         The code will look something like:
@@ -1207,10 +1198,10 @@ class PlasmaTestBase(ABC):
                     ot.lnlambda(combo[1], list(combo))
 
     def test_nuc(self):
-        r"""
-        We calculate the collision frequency for differential
-        flow following Hernandez & Marsch (JGR 1985,
-        doi:10.1029/JA090iA11p11062) Eq. (18).
+        r"""We calculate the collision frequency for differential flow following
+        Hernandez & Marsch (JGR 1985, doi:10.1029/JA090iA11p11062) Eq.
+
+        (18).
         """
         from scipy.special import erf
         from scipy import constants

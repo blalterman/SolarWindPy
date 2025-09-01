@@ -1,9 +1,8 @@
-"""
-Test module for circular import detection and validation.
+"""Test module for circular import detection and validation.
 
-This module contains comprehensive tests to validate that the SolarWindPy
-package has no circular import dependencies and that all modules can be
-imported successfully in various orders and scenarios.
+This module contains comprehensive tests to validate that the SolarWindPy package has no
+circular import dependencies and that all modules can be imported successfully in
+various orders and scenarios.
 """
 
 import sys
@@ -305,7 +304,8 @@ class TestCircularImports:
         ), f"Dynamic import testing found circular imports: {circular_imports}"
 
     def test_import_time_performance(self):
-        """Test that imports complete in reasonable time (may indicate circular issues)."""
+        """Test that imports complete in reasonable time (may indicate circular
+        issues)."""
         import_times = {}
         slow_imports = []
 
@@ -347,7 +347,8 @@ class TestImportStructure:
         cls.package_root = PROJECT_ROOT / "solarwindpy"
 
     def test_no_wildcard_imports_in_init(self):
-        """Test that __init__.py files don't use wildcard imports (which can hide circular imports)."""
+        """Test that __init__.py files don't use wildcard imports (which can hide
+        circular imports)."""
         init_files = list(self.package_root.rglob("__init__.py"))
         wildcard_imports = []
 

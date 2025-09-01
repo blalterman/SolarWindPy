@@ -1,7 +1,7 @@
 """Visual validation tests for plotting functionality.
 
-This module provides visual validation framework for matplotlib plots
-to ensure consistent rendering and detect visual regressions.
+This module provides visual validation framework for matplotlib plots to ensure
+consistent rendering and detect visual regressions.
 """
 
 import pytest

@@ -84,8 +84,7 @@ class AggPlot(base.Base):
 
     @property
     def joint(self):
-        r"""A combination of the categorical and continuous data for use in
-        `Groupby`."""
+        r"""Combines the categorical and continuous data for `Groupby`."""
         #         cut = self.cut
         #         tko = self.agg_axes
 
@@ -308,10 +307,10 @@ class AggPlot(base.Base):
         self._cut = cut
 
     def _agg_runner(self, cut, tko, gb, fcn, **kwargs):
-        r"""Refactored out the actual doing of the aggregation so that
-        :py:class:`OrbitPlot`
+        r"""Refactored out the aggregation.
 
-        can aggregate (Inbound, Outbound, and Both).
+        This enables compatibility with :py:class:`OrbitPlot` aggregation of
+        different orbit legs (Inbound, Outbound, and Both).
         """
         self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
 
