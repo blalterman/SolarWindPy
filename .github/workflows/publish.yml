@@ -63,6 +63,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
           pip install -r requirements-dev.txt
+          pip install -e .  # Install solarwindpy package for testing
       
       - name: Run full test suite
         run: |
