@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g68a7ae44c documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g239c0e18f documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e9042021"></script>
+      <script src="../../../_static/documentation_options.js?v=2b98d43e"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -399,7 +399,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    Create a plasma object from multi-species data:</span>
-<span class="sd">    </span>
+
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; # Create sample MultiIndex data</span>
@@ -410,20 +410,20 @@
 <span class="sd">    ...     (&#39;w&#39;, &#39;par&#39;, &#39;p1&#39;), (&#39;w&#39;, &#39;per&#39;, &#39;p1&#39;), (&#39;w&#39;, &#39;par&#39;, &#39;a&#39;), (&#39;w&#39;, &#39;per&#39;, &#39;a&#39;),</span>
 <span class="sd">    ...     (&#39;b&#39;, &#39;x&#39;, &#39;&#39;), (&#39;b&#39;, &#39;y&#39;, &#39;&#39;), (&#39;b&#39;, &#39;z&#39;, &#39;&#39;)</span>
 <span class="sd">    ... ], names=[&#39;M&#39;, &#39;C&#39;, &#39;S&#39;])</span>
-<span class="sd">    &gt;&gt;&gt; data = pd.DataFrame(np.random.rand(3, len(columns)), </span>
+<span class="sd">    &gt;&gt;&gt; data = pd.DataFrame(np.random.rand(3, len(columns)),</span>
 <span class="sd">    ...                     index=epoch, columns=columns)</span>
 <span class="sd">    &gt;&gt;&gt; plasma = Plasma(data, &#39;p1&#39;, &#39;a&#39;)  # Protons and alphas</span>
 <span class="sd">    &gt;&gt;&gt; type(plasma.p1).__name__  # Proton ion object</span>
 <span class="sd">    &#39;Ion&#39;</span>
-<span class="sd">    </span>
+
 <span class="sd">    Calculate plasma physics parameters:</span>
-<span class="sd">    </span>
+
 <span class="sd">    &gt;&gt;&gt; beta = plasma.beta(&#39;p1&#39;)          # Plasma beta for protons</span>
 <span class="sd">    &gt;&gt;&gt; type(beta).__name__</span>
 <span class="sd">    &#39;Tensor&#39;</span>
-<span class="sd">    </span>
+
 <span class="sd">    Idenfity ion species in plasma:</span>
-<span class="sd">    </span>
+
 <span class="sd">    &gt;&gt;&gt; plasma.species</span>
 <span class="sd">    [&#39;p1&#39;, &#39;a&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
