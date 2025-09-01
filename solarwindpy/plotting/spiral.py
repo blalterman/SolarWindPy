@@ -370,7 +370,7 @@ class SpiralMesh(object):
         logger.warning(f"Elasped time {stop - start}")
         logger.warning(f"Split bin threshold {min_per_bin}")
         logger.warning(
-            f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size/final_bins.shape[0]:.3f} spectra per bin)\n"
+            f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size / final_bins.shape[0]:.3f} spectra per bin)\n"
         )
 
         self._mesh = final_bins

@@ -62,7 +62,7 @@ class Ion(base.Base):
         Examples
         --------
         Create a proton ion from measurement data:
-        
+
         >>> import pandas as pd
         >>> import numpy as np
         >>> columns = pd.MultiIndex.from_tuples([

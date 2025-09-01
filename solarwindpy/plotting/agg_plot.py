@@ -404,7 +404,7 @@ class AggPlot(base.Base):
             tk = tk & tk_ax
 
         self.logger.info(
-            f"Taking {tk.sum()!s} ({100*tk.mean():.1f}%) {self.__class__.__name__} spectra"
+            f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
         )
 
         return tk

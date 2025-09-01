@@ -89,7 +89,7 @@ class Plasma(base.Base):
     Examples
     --------
     Create a plasma object from multi-species data:
-    
+
     >>> import pandas as pd
     >>> import numpy as np
     >>> # Create sample MultiIndex data
@@ -100,20 +100,20 @@ class Plasma(base.Base):
     ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),
     ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')
     ... ], names=['M', 'C', 'S'])
-    >>> data = pd.DataFrame(np.random.rand(3, len(columns)), 
+    >>> data = pd.DataFrame(np.random.rand(3, len(columns)),
     ...                     index=epoch, columns=columns)
     >>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas
     >>> type(plasma.p1).__name__  # Proton ion object
     'Ion'
-    
+
     Calculate plasma physics parameters:
-    
+
     >>> beta = plasma.beta('p1')          # Plasma beta for protons
     >>> type(beta).__name__
     'Tensor'
-    
+
     Idenfity ion species in plasma:
-    
+
     >>> plasma.species
     ['p1', 'a']
     """
