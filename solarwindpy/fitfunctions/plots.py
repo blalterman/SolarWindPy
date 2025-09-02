@@ -565,9 +565,10 @@ class FFPlot(object):
             # Handle empty label case to preserve spacing
             if not label:
                 label = r" \; %s" % kind.title()
+                label = r"$\mathrm{%s}$" % label
             else:
-                label = r" \; ".join([label, kind.title()])
-            label = r"$\mathrm{%s}$" % label
+                label = r" \; ".join([label, kind.title()]).lstrip(r" \; ")
+                label = r"$\mathrm{%s}$" % label
             #             label = (r"$\mathrm{%s \; %s}$" % (label, kind.title()).replace(" \; ", "")
 
             ax.plot(

@@ -241,7 +241,7 @@ def test_plot_residuals_robust():
     assert np.allclose(line.get_ydata(), expected)
     ax.legend()
     labels = {t.get_text() for t in ax.get_legend().get_texts()}
-    assert labels == {r"$\mathrm{Robust}$"}
+    assert labels == {r"$\mathrm{ \; Robust}$"}
     assert ax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
 
 
