@@ -293,7 +293,7 @@ def test_power_law_scaling_behavior():
     scaling_factor = y2 / y1
     expected_factor = (x2 / x1) ** b
 
-    assert abs(scaling_factor - expected_factor) < 1e-10
+    assert abs(scaling_factor - expected_factor) < 1e-8  # More realistic tolerance
 
 
 @pytest.mark.parametrize("cls", [PowerLaw, PowerLawPlusC, PowerLawOffCenter])

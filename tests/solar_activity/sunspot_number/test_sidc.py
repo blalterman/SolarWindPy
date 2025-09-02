@@ -77,8 +77,9 @@ class TestSIDC:
         mock_extrema_data,
     ):
         """Test SIDC initialization with dummy loader and SSNExtrema."""
-        # Setup mocks
-        mock_id = Mock()
+        # Setup mocks - use spec to make it pass isinstance check
+        from solarwindpy.solar_activity.base import ID
+        mock_id = Mock(spec=ID)
         mock_id.key = "m"
         mock_id.url = "http://example.com"
         mock_sidc_id_class.return_value = mock_id
@@ -194,9 +195,11 @@ class TestSIDC:
 
     def test_run_normalization_max(self, mock_loader_data, mock_extrema_data):
         """Test run_normalization with max normalization."""
+        from solarwindpy.solar_activity.base import ID
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
             sidc._logger = Mock()
+            sidc._id = Mock(spec=ID)  # Add missing _id attribute
             sidc._loader = Mock()
             sidc._loader.data = mock_loader_data.copy()
             sidc._extrema = Mock()
@@ -264,8 +267,10 @@ class TestSIDC:
 
     def test_cut_spec_by_ssn_band(self, mock_loader_data):
         """Test cut_spec_by_ssn_band method."""
+        from solarwindpy.solar_activity.base import ID
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
+            sidc._id = Mock(spec=ID)  # Add missing _id attribute
             sidc._loader = Mock()
             sidc._loader.data = mock_loader_data.copy()
 
@@ -283,8 +288,10 @@ class TestSIDC:
 
     def test_cut_spec_by_ssn_band_normalized_validation(self, mock_loader_data):
         """Test that cut_spec_by_ssn_band validates dssn for normalized data."""
+        from solarwindpy.solar_activity.base import ID
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
+            sidc._id = Mock(spec=ID)  # Add missing _id attribute
             sidc._loader = Mock()
             sidc._loader.data = mock_loader_data.copy()
             sidc._loader.data["nssn"] = sidc._loader.data["ssn"] / 100  # Normalized
@@ -366,8 +373,10 @@ class TestSIDCEdgeCases:
 
     def test_normalized_property_without_nssn_column(self, mock_loader_data):
         """Test normalized property when nssn column doesn't exist."""
+        from solarwindpy.solar_activity.base import ID
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
+            sidc._id = Mock(spec=ID)  # Add missing _id attribute
             sidc._loader = Mock()
             sidc._loader.data = mock_loader_data.copy()  # No 'nssn' column
 

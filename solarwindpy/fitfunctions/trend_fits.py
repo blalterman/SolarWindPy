@@ -66,8 +66,6 @@ class TrendFit(object):
         self._trend_logx = bool(trend_logx)
         self._popt1d_keys = Popt1DKeys(ykey1d, wkey1d)
 
-    #         self._labels = core.AxesLabels(x="x", y="y", z=swp.pp.labels.Count())
-
     def __str__(self):
         return self.__class__.__name__
 
@@ -129,10 +127,6 @@ class TrendFit(object):
         Should probably change this to pull from `trend_func` somehow, but unsure how to do so.
         """
         return self._trend_logx
-
-    @property
-    def labels(self):
-        return self._labels
 
     def make_ffunc1ds(self, **kwargs):
         r"""Kwargs passed to `self.ffunc1d(x, y, **kwargs)`."""

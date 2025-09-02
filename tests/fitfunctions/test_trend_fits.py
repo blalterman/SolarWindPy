@@ -7,6 +7,7 @@ import pytest
 from scipy.optimize import OptimizeWarning
 
 from solarwindpy.fitfunctions import core, gaussians, trend_fits, lines
+from solarwindpy.fitfunctions.plots import AxesLabels
 
 
 @pytest.fixture
@@ -133,6 +134,12 @@ def test_plotting_methods_return_axes(monkeypatch, trend_fit):
 
         def legend(self, *_, **__):
             pass
+        
+        def plot(self, *args, **kwargs):
+            return None
+        
+        def fill_between(self, *args, **kwargs):
+            return None
 
     ax1, ax2 = DummyAx(), DummyAx()
     monkeypatch.setattr(
@@ -151,7 +158,7 @@ def test_plotting_methods_return_axes(monkeypatch, trend_fit):
         trend_fit.trend_func.plotter, "plot_raw_used_fit", lambda *_, **__: None
     )
     monkeypatch.setattr(
-        trend_fits.swp.pp, "subplots", lambda *_, **__: (None, DummyAx())
+        trend_fits, "subplots", lambda *_, **__: (None, DummyAx())
     )
     ax = trend_fit.plot_1d_popt_and_trend()
     assert isinstance(ax, DummyAx)
@@ -170,6 +177,14 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
 
         def set_xscale(self, *args, **kwargs):  # pragma: no cover - not used here
             self.calls["set_xscale"] = {"args": args, "kwargs": kwargs}
+        
+        def plot(self, *args, **kwargs):
+            self.calls["plot"] = {"args": args, "kwargs": kwargs}
+            return None
+        
+        def fill_between(self, *args, **kwargs):
+            self.calls["fill_between"] = {"args": args, "kwargs": kwargs}
+            return None
 
     tf = trend_fits.TrendFit(agged, lines.Line)
     tf.make_ffunc1ds()
@@ -177,7 +192,7 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     tf.make_trend_func()
 
     ax = StubAx()
-    pl, cl, bl = tf.plot_all_popt_1d(ax, color="magenta", ls=":", label="1D Fits")
+    pl, cl, bl = tf.plot_all_popt_1d(ax, color="magenta", label="1D Fits", plot_window=False)
 
     assert (pl, cl, bl) == ax.ret
 
@@ -188,7 +203,7 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
     assert kwargs["y"] == ykey
     assert kwargs["yerr"] == wkey
     assert kwargs["color"] == "magenta"
-    assert kwargs["linestyle"] == ":"
+    assert kwargs["linestyle"] == "--"  # Default linestyle
     assert kwargs["label"] == "1D Fits"
     pd.testing.assert_frame_equal(kwargs["data"], tf.popt_1d)
 
@@ -223,6 +238,7 @@ def test_set_agged_rejects_non_dataframe(trend_fit):
 
 
 def test_labels_instance_and_update(trend_fit):
-    assert isinstance(trend_fit.labels, core.AxesLabels)
+    # Labels are stored in the trend_func's plotter, not in TrendFit itself
+    assert isinstance(trend_fit.trend_func.plotter.labels, AxesLabels)
     trend_fit.set_shared_labels(x="time", y="density", z="counts")
-    assert trend_fit.labels == core.AxesLabels("time", "density", "counts")
+    assert trend_fit.trend_func.plotter.labels == AxesLabels("time", "density", "counts")
