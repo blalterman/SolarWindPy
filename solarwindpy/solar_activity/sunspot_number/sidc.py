@@ -396,7 +396,7 @@ class SIDC(ActivityIndicator):
             #             return self._normalized_ssn
             return self.data.loc[:, "nssn"]
         except KeyError:  # AttributeError:
-            return self.normalize_ssn()
+            return self.run_normalization()
 
     def _run_normalization(self, indicator, norm_fcn):
         cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
@@ -459,7 +459,7 @@ class SIDC(ActivityIndicator):
             raise ValueError("Normalized SSN requires that dssn < 1")
 
         data = self.data.loc[:, key]
-        mids = np.arange(0, data, 2.0 * dssn)
+        mids = np.arange(0, data.max(), 2.0 * dssn)
 
         left = mids - dssn
         right = mids + dssn

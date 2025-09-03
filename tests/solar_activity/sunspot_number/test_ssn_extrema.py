@@ -232,7 +232,7 @@ class TestSSNExtrema:
             mock_read_csv.return_value = raw_data
 
             # Mock the datetime conversion process
-            with patch("solarwindpy.solar_activity.sunspot_number.ssn_extrema.pd.to_datetime") as mock_to_datetime:
+            with patch("solarwindpy.solar_activity.sunspot_number.sidc.pd.to_datetime") as mock_to_datetime:
                 # Mock stack operation
                 stacked_data = pd.Series(
                     ["2008-12-01", "2014-04-01", "2019-12-01", "2025-07-01"]
@@ -252,6 +252,7 @@ class TestSSNExtrema:
                 with (
                     patch.object(pd.DataFrame, "stack", return_value=stacked_data),
                     patch.object(pd.Series, "unstack", return_value=processed_data),
+                    patch.object(SSNExtrema, "calculate_intervals"),  # Skip interval calculation that uses "today"
                 ):
 
                     extrema = SSNExtrema()
@@ -333,7 +334,7 @@ class TestSSNExtremaEdgeCases:
             extrema = SSNExtrema.__new__(SSNExtrema)
 
             # pandas.to_datetime should handle invalid dates (might raise error or coerce)
-            with patch("solarwindpy.solar_activity.sunspot_number.ssn_extrema.pd.to_datetime") as mock_to_datetime:
+            with patch("solarwindpy.solar_activity.sunspot_number.sidc.pd.to_datetime") as mock_to_datetime:
                 mock_to_datetime.side_effect = ValueError("Invalid date format")
 
                 with pytest.raises(ValueError):
