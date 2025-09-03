@@ -587,8 +587,16 @@ class FFPlot(object):
 
         elif kind == "both":
             # Handle label formatting to preserve spacing correctly
-            simple_label = r"$\mathrm{ \; Simple}$" if not label else r"$\mathrm{%s \; Simple}$" % label
-            robust_label = r"$\mathrm{ \; Robust}$" if not label else r"$\mathrm{%s \; Robust}$" % label
+            simple_label = (
+                r"$\mathrm{ \; Simple}$"
+                if not label
+                else r"$\mathrm{%s \; Simple}$" % label
+            )
+            robust_label = (
+                r"$\mathrm{ \; Robust}$"
+                if not label
+                else r"$\mathrm{%s \; Robust}$" % label
+            )
 
             ax.plot(
                 self.observations.used.x,

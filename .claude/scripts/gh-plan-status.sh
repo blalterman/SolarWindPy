@@ -148,7 +148,7 @@ show_phase_issues() {
     print_subheader "Phase Issues for Plan #$overview_number"
     
     # Find phase issues that mention the overview issue
-    local phases=$(gh issue list --label "plan:phase" --json number,title,labels,body --jq --arg overview "#$overview_number" '.[] | select(.body | contains($overview)) | @base64')
+    local phases=$(gh issue list --label "plan:phase" --search "#$overview_number" --json number,title,labels | jq -r '.[] | @base64')
     
     if [ -z "$phases" ]; then
         log_info "No phase issues found for plan #$overview_number"
@@ -334,7 +334,7 @@ elif [ "$SHOW_DETAILED" = true ]; then
     show_overview_issues
     
     # Show phases for each overview
-    local overviews=$(gh issue list --label "plan:overview" --json number | jq -r '.[].number')
+    overviews=$(gh issue list --label "plan:overview" --json number | jq -r '.[].number')
     for overview in $overviews; do
         show_phase_issues "$overview"
     done
