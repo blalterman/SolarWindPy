@@ -37,9 +37,9 @@ This phase creates the GitHub-native infrastructure required to support the full
   - Notes: Scientific domain categorization for specialist routing
 
 ### 🔄 Context Management Point
-**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+**IMPORTANT**: After completing this Task Group, if approaching token limits, the user can naturally end the session and resume with fresh context. Claude Code handles token management automatically during implementation.
 
-To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+**Optional Session Break**: If needed, end session and resume with: "Continue GitHub Issues migration - Phase 1 Foundation & Label System. Read current progress from plans/github-issues-migration/1-Foundation-Label-System.md"
 
 ### Task Group 2: Issue Templates Creation
 - [ ] **Create overview template** (Est: 60 min) - .github/ISSUE_TEMPLATE/plan-overview.yml
@@ -56,9 +56,9 @@ To compact: Save current progress, start fresh session with compacted state, and
   - Notes: Implementation decisions capture (85% automation target)
 
 ### 🔄 Context Management Point
-**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+**IMPORTANT**: After completing this Task Group, if approaching token limits, the user can naturally end the session and resume with fresh context. Claude Code handles token management automatically during implementation.
 
-To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+**Optional Session Break**: If needed, end session and resume with: "Continue GitHub Issues migration - Phase 1 Foundation & Label System. Read current progress from plans/github-issues-migration/1-Foundation-Label-System.md"
 
 ### Task Group 3: Repository Configuration
 - [ ] **Configure issue settings** (Est: 15 min) - Enable discussions, configure default labels
@@ -75,9 +75,9 @@ To compact: Save current progress, start fresh session with compacted state, and
   - Notes: Ensure propositions framework renders correctly
 
 ### 🔄 Context Management Point
-**IMPORTANT**: After completing this Task Group, the user should manually compact the conversation context to ensure continued development efficiency. This prevents token limit issues during extended implementation sessions.
+**IMPORTANT**: After completing this Task Group, if approaching token limits, the user can naturally end the session and resume with fresh context. Claude Code handles token management automatically during implementation.
 
-To compact: Save current progress, start fresh session with compacted state, and continue with next Task Group.
+**Optional Session Break**: If needed, end session and resume with: "Continue GitHub Issues migration - Phase 1 Foundation & Label System. Read current progress from plans/github-issues-migration/1-Foundation-Label-System.md"
 
 ### Task Group 4: Initial Validation
 - [ ] **Test label hierarchy** (Est: 25 min) - Verify label combinations and filtering work correctly
@@ -93,6 +93,16 @@ To compact: Save current progress, start fresh session with compacted state, and
   - Status: Pending
   - Notes: Required for automation workflows in later phases
 
+### Task Group 5: Phase Completion
+- [ ] **Create phase completion git commit** (Est: 10 min) - Milestone commit capturing all Phase 1 deliverables
+  - Commit: `<checksum>`
+  - Status: Pending
+  - Notes: Commit message: "feat: complete Phase 1 - Foundation & Label System - GitHub Issues migration"
+- [ ] **Update overview progress tracking** (Est: 5 min) - Mark Phase 1 as completed with commit reference
+  - Commit: `<checksum>`
+  - Status: Pending
+  - Notes: Update 0-Overview.md with phase completion status and milestone commit hash
+
 ## ✅ Phase Acceptance Criteria
 - [ ] All 20-25 labels created and properly categorized across 5 essential groups
 - [ ] 3 issue templates (overview, phase, closeout) render correctly
@@ -102,6 +112,8 @@ To compact: Save current progress, start fresh session with compacted state, and
 - [ ] Repository configuration optimized for plan workflow
 - [ ] Team documentation complete for label usage
 - [ ] GitHub CLI setup validated and documented
+- [ ] Phase 1 milestone git commit created with all deliverables
+- [ ] Overview progress tracking updated with phase completion status
 
 ## 🧪 Phase Testing Strategy
 **Template Validation**:
@@ -143,10 +155,10 @@ To compact: Save current progress, start fresh session with compacted state, and
 ## 📊 Phase Progress Tracking
 
 ### Current Status
-- **Tasks Completed**: 0/12
-- **Time Invested**: 0h of 3.5h estimated
+- **Tasks Completed**: 0/14
+- **Time Invested**: 0h of 3.75h estimated
 - **Completion Percentage**: 0%
-- **Last Updated**: 2025-08-19
+- **Last Updated**: 2025-09-03
 
 ### Blockers & Issues
 - No current blockers - foundational phase with clear requirements
@@ -172,9 +184,29 @@ To compact: Save current progress, start fresh session with compacted state, and
 
 ### Phase Dependencies Resolution
 - No dependencies - foundational phase creates infrastructure for subsequent phases
-- Provides complete GitHub infrastructure for Phase 2 migration tool development
+- Provides complete GitHub infrastructure for Phase 2 plan creation system
 - Establishes template standards for Phase 3 CLI integration
 
+## 👤 User Instructions for Phase 1 Completion
+
+After Claude completes all Phase 1 tasks:
+
+### Step 1: Verify Phase 1 Deliverables
+- [ ] All 14 phase tasks marked as completed in this file
+- [ ] Phase 1 milestone git commit created with message: "feat: complete Phase 1 - Foundation & Label System - GitHub Issues migration"
+- [ ] 0-Overview.md updated with Phase 1 completion status
+
+### Step 2: Session Management
+- [ ] End this Claude Code session naturally when Phase 1 is complete
+- [ ] To continue with Phase 2: Start new session with prompt:
+  **"Continue GitHub Issues migration plan - begin Phase 2: Plan Creation System. Read current status from plans/github-issues-migration/ directory."**
+
+### Step 3: Context Preservation
+✅ **Automatic**: Git commit and plan file updates provide all context needed for Phase 2  
+❌ **Not needed**: No manual compaction or special preservation steps required
+
+Claude will read the plan files and git history to continue seamlessly with Phase 2.
+
 ---
-*Phase 1 of 5 - GitHub Issues Migration with Propositions Framework - Last Updated: 2025-08-19*
+*Phase 1 of 4 - GitHub Issues Plan Management System - Last Updated: 2025-09-03*
 *See [0-Overview.md](./0-Overview.md) for complete plan context and cross-phase coordination.*
