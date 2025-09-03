@@ -32,7 +32,7 @@ repos:
   - id: check-conventional-commits
     name: Check Conventional Commits
     entry: bash -c
-    args: ['[[ $(cat "$1") =~ ^(feat|fix|chore|docs|style|refactor|test|perf)(\\(.+\\))?: .+ ]] || { echo "❌ Commit message must follow Conventional Commits format."; exit 1; }']
+    args: ['[[ $(cat "$1") =~ ^(feat|fix|chore|docs|style|refactor|test|perf)(\(.+\))?: .+ ]] || { echo "❌ Commit message must follow Conventional Commits format."; exit 1; }']
     language: system
     stages: [commit-msg]
   - id: solarwindpy-physics
