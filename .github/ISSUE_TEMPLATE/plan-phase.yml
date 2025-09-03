@@ -1,0 +1,232 @@
+name: "Plan Phase"
+description: "Create a detailed phase implementation with task tracking"
+title: "[Phase]: "
+labels: ["plan:phase", "status:planning"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Plan Phase Template
+        
+        Create a detailed implementation phase with comprehensive task tracking and progress monitoring.
+
+  - type: input
+    id: phase_name
+    attributes:
+      label: "Phase Name"
+      description: "Descriptive name for this phase"
+      placeholder: "e.g., Foundation Setup, Core Implementation, Testing & Validation"
+    validations:
+      required: true
+
+  - type: input
+    id: parent_plan
+    attributes:
+      label: "Parent Plan Issue"
+      description: "Link to the overview issue this phase belongs to"
+      placeholder: "e.g., #123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase_number
+    attributes:
+      label: "Phase Number"
+      description: "Sequential phase number"
+      options:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "6"
+        - "7"
+        - "8"
+    validations:
+      required: true
+
+  - type: input
+    id: estimated_duration
+    attributes:
+      label: "Estimated Duration"
+      description: "Time estimate for this phase"
+      placeholder: "e.g., 2-3 hours, 4-6 hours"
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "Dependencies"
+      description: "Prerequisites and dependencies for this phase"
+      placeholder: "Phase 1 completion, external API setup, etc."
+
+  - type: textarea
+    id: phase_objective
+    attributes:
+      label: "🎯 Phase Objective"
+      description: "Specific goal and deliverables for this phase"
+      placeholder: "What will be accomplished in this phase?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: phase_context
+    attributes:
+      label: "🧠 Phase Context"
+      description: "Background and rationale for this phase"
+      placeholder: "Why is this phase necessary? How does it fit into the overall plan?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_tasks
+    attributes:
+      label: "📋 Implementation Tasks"
+      description: "Detailed task breakdown with estimates and tracking"
+      placeholder: |
+        ### Task Group 1: [Group Name]
+        - [ ] **[Task Name]** (Est: X min) - Description
+          - Commit: `<checksum>`
+          - Status: Pending
+          - Notes: Additional details
+        
+        ### Task Group 2: [Group Name]
+        - [ ] **[Task Name]** (Est: X min) - Description
+          - Commit: `<checksum>`
+          - Status: Pending
+          - Notes: Additional details
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "✅ Phase Acceptance Criteria"
+      description: "Specific criteria for phase completion"
+      placeholder: |
+        - [ ] All tasks completed successfully
+        - [ ] Code quality checks pass (tests, linting)
+        - [ ] Documentation updated
+        - [ ] Phase milestone commit created
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing_strategy
+    attributes:
+      label: "🧪 Phase Testing Strategy"
+      description: "Testing approach specific to this phase"
+      placeholder: |
+        **Unit Testing:**
+        - [Testing requirements]
+        
+        **Integration Testing:**
+        - [Integration points to validate]
+        
+        **Validation Testing:**
+        - [End-to-end validation steps]
+
+  - type: textarea
+    id: technical_requirements
+    attributes:
+      label: "🔧 Phase Technical Requirements"
+      description: "Tools, frameworks, and technical needs for this phase"
+      placeholder: |
+        **Required Tools:**
+        - [Tool 1]: [purpose]
+        - [Tool 2]: [purpose]
+        
+        **Framework Requirements:**
+        - [Framework/library requirements]
+        
+        **Integration Requirements:**
+        - [System integration needs]
+
+  - type: textarea
+    id: affected_areas
+    attributes:
+      label: "📂 Phase Affected Areas"
+      description: "Files and components modified in this phase"
+      placeholder: |
+        **Direct Modifications:**
+        - [file/directory] → [description of changes]
+        
+        **New Components:**
+        - [new file/component] → [purpose]
+        
+        **Updated Dependencies:**
+        - [dependency updates]
+
+  - type: textarea
+    id: progress_tracking
+    attributes:
+      label: "📊 Phase Progress Tracking"
+      description: "Current status and progress monitoring"
+      placeholder: |
+        **Current Status:**
+        - Tasks Completed: 0/X
+        - Time Invested: 0h of Xh estimated
+        - Completion Percentage: 0%
+        - Last Updated: [date]
+        
+        **Blockers & Issues:**
+        - [Current blockers or challenges]
+        
+        **Next Actions:**
+        - [Immediate next steps]
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: "💬 Phase Implementation Notes"
+      description: "Implementation decisions and lessons learned"
+      placeholder: |
+        **Implementation Decisions:**
+        - [Decision 1]: [rationale]
+        - [Decision 2]: [rationale]
+        
+        **Lessons Learned:**
+        *Will be updated during implementation*
+        
+        **Phase Dependencies Resolution:**
+        - [How dependencies were resolved]
+
+  - type: textarea
+    id: context_management
+    attributes:
+      label: "🔄 Context Management Points"
+      description: "Natural session break points and context preservation"
+      placeholder: |
+        **Context Management Point:**
+        After completing Task Group X, if approaching token limits, the user can naturally end the session and resume with fresh context.
+        
+        **Optional Session Break:** 
+        If needed, end session and resume with: "Continue [Plan Name] - Phase X [Phase Name]. Read current progress from this issue."
+        
+        **Context Preserved Automatically:**
+        - Task completion status in issue comments
+        - Commit history with implementation decisions
+        - Updated progress tracking in issue description
+
+  - type: textarea
+    id: completion_instructions
+    attributes:
+      label: "👤 Phase Completion Instructions"
+      description: "Steps for completing and transitioning from this phase"
+      placeholder: |
+        After Claude completes all Phase X tasks:
+        
+        ### Step 1: Verify Phase Deliverables
+        - [ ] All tasks marked as completed in this issue
+        - [ ] Phase milestone git commit created
+        - [ ] Parent overview issue updated with phase completion
+        - [ ] All acceptance criteria met
+        
+        ### Step 2: Session Management
+        - [ ] End session naturally when phase is complete
+        - [ ] Continue with next phase: [instructions]
+        
+        ### Step 3: Context Preservation
+        ✅ **Automatic**: Git commits and issue updates provide context
+        ❌ **Not needed**: No manual preservation required
