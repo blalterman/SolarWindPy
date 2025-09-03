@@ -79,19 +79,22 @@ Intelligently delegate to domain specialists when needed:
 
 ### GitHub CLI Integration Commands
 ```bash
-# Create new plan
-gh issue create --template plan-overview.yml
+# Create new plan with comprehensive content (automated)
+.claude/scripts/gh-plan-create.sh -p high -d infrastructure "Plan Name"
+
+# Create phases with detailed task breakdowns (automated)
+.claude/scripts/gh-plan-phases.sh -q "Phase1,Phase2,Phase3" <overview-issue>
 
 # Query active plans
 gh issue list --label "plan:overview,status:in-progress"
 
-# Link phase to overview
-gh issue comment <overview-issue> --body "Phase 1: #<phase-issue>"
+# Check plan status across all issues
+.claude/scripts/gh-plan-status.sh
 
-# Update status
+# Update issue status
 gh issue edit <issue> --add-label "status:completed" --remove-label "status:in-progress"
 
-# Cross-issue relationships
+# Cross-issue relationships (automatically created by scripts)
 gh issue list --search "is:open label:plan:phase mentions:#<overview-issue>"
 ```
 
@@ -104,30 +107,39 @@ gh issue list --search "is:open label:plan:phase mentions:#<overview-issue>"
 
 ## Primary Workflows
 
-### Plan Creation Workflow (Enhanced with Value Propositions)
+### Plan Creation Workflow (Enhanced with Automated Content Generation)
 ```
 User: "Create plan for implementing dark mode"
 Process:
-1. **Create Overview Issue**: Use plan-overview.yml template with complete propositions framework
-2. **Create Phase Issues**: Use plan-phase.yml template for each implementation phase
-3. **Link Issues**: Cross-reference overview → phases → closeout for coordination
-4. **Create Feature Branch**: git checkout -b feature/issue-123-dark-mode from overview issue
-5. **Track Implementation**: Update phase issues with task completion and commits
-6. **Progress Monitoring**: Use GitHub labels and milestones for status tracking
-7. **Cross-issue coordination**: Maintain issue relationships and dependencies
-8. **Record velocity metrics**: Capture time estimates vs actuals for learning
+1. **Create Overview Issue**: CLI script automatically generates comprehensive propositions framework content
+   - Calls plan-value-generator.py hook with plan metadata
+   - Injects complete 8-section propositions framework into GitHub Issue body
+   - Creates issue with all value analysis, risk assessment, and scope audit sections
+2. **Create Phase Issues**: CLI script generates detailed phase content with task breakdowns
+   - Creates comprehensive phase structure with acceptance criteria
+   - Includes task groups, progress tracking, and context management points
+   - Links phases to overview issue automatically
+3. **Create Feature Branch**: git checkout -b feature/issue-123-dark-mode from overview issue
+4. **Track Implementation**: Update phase issues with task completion and commits
+5. **Progress Monitoring**: Use GitHub labels and milestones for status tracking
+6. **Cross-issue coordination**: Maintain issue relationships and dependencies
+7. **Record velocity metrics**: Capture time estimates vs actuals for learning
 ```
 
-**Value Proposition Generation Steps:**
+**Automated Content Generation:**
 ```bash
-# Step 3: Generate comprehensive value propositions
-python .claude/hooks/plan-value-generator.py \
-  --plan-file plans/<plan-name>/0-Overview.md \
-  --exclude-fair  # Always exclude FAIR compliance
+# CLI script automatically calls value generator during issue creation
+# No manual value proposition generation required
 
-# Step 7: Optional validation for quality assurance
+# Create plan with comprehensive content (fully automated)
+.claude/scripts/gh-plan-create.sh -p high -d infrastructure "Dark Mode Implementation"
+
+# Create phases with detailed task breakdowns (fully automated)  
+.claude/scripts/gh-plan-phases.sh -q "Setup,Implementation,Testing" <issue-number>
+
+# Optional validation for quality assurance
 python .claude/hooks/plan-value-validator.py \
-  --plan-file plans/<plan-name>/0-Overview.md
+  --plan-data '{"plan_name":"Dark Mode Implementation","priority":"high"}'
 ```
 
 ### Plan Discovery & Continuation

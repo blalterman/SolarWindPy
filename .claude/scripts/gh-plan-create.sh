@@ -46,6 +46,91 @@ check_prerequisites() {
     log_success "Prerequisites check passed"
 }
 
+# Generate comprehensive content using value proposition hook
+generate_plan_content() {
+    local plan_name="$1"
+    local priority="$2"
+    local domain="$3"
+    
+    # Create JSON metadata for the hook
+    local plan_json=$(cat <<EOF
+{
+    "plan_name": "$plan_name",
+    "priority": "$priority",
+    "domain": "$domain",
+    "total_phases": 3,
+    "estimated_duration": "TBD - Will be refined during planning phase",
+    "affects": "$domain modules and related components",
+    "objective": "Implement $plan_name with comprehensive planning and execution",
+    "context": "SolarWindPy development initiative focusing on $domain domain improvements"
+}
+EOF
+)
+    
+    log_info "Generating comprehensive value propositions..." >&2
+    
+    # Call the value generator hook
+    if [[ -f ".claude/hooks/plan-value-generator.py" ]]; then
+        python .claude/hooks/plan-value-generator.py \
+            --plan-data "$plan_json" \
+            --output-format markdown \
+            --exclude-fair 2>/dev/null || {
+                log_warning "Value generator failed, using fallback content"
+                echo "# $plan_name
+
+## 🎯 Objective
+Implement $plan_name for SolarWindPy with focus on $domain domain improvements.
+
+## 🧠 Context  
+This plan addresses development needs in the $domain area of SolarWindPy, a scientific software package for solar wind plasma physics analysis.
+
+## 📊 Value Proposition Analysis
+**$domain Development Value:**
+- Enhanced capabilities in $domain domain
+- Improved scientific workflow efficiency  
+- Better integration with existing SolarWindPy ecosystem
+
+*Note: Complete value propositions will be generated during planning phase.*
+
+## 💰 Resource & Cost Analysis
+- **Priority Level**: $priority
+- **Development Investment**: TBD during detailed planning
+- **Expected ROI**: Enhanced $domain capabilities and workflow improvements
+
+## ⚠️ Risk Assessment & Mitigation
+- **Technical Risk**: Medium - Standard development practices will mitigate
+- **Timeline Risk**: Low - Phased approach allows for adjustment
+
+## 🎯 Scope Audit
+- **Domain Focus**: $domain
+- **SolarWindPy Alignment**: High - Core development initiative
+- **Scientific Research Value**: TBD during detailed analysis
+
+## ✅ Acceptance Criteria
+- [ ] All $domain functionality implemented and tested
+- [ ] Documentation updated and comprehensive
+- [ ] Integration tests passing
+- [ ] Code review completed
+
+## 🔗 Related Issues
+This is the overview issue for the $plan_name plan. Phase issues will be created separately."
+            }
+    else
+        log_warning "Value generator hook not found, using basic content"
+        echo "# $plan_name
+
+## 🎯 Objective
+$plan_name implementation for SolarWindPy $domain domain.
+
+## 📊 Basic Plan Information
+- **Priority**: $priority
+- **Domain**: $domain
+- **Status**: Planning phase
+
+Please use the plan-overview.yml template to complete this plan with comprehensive details."
+    fi
+}
+
 # Main plan creation function
 create_plan() {
     local plan_name="$1"
@@ -55,11 +140,15 @@ create_plan() {
     log_info "Creating new plan: $plan_name"
     log_info "Priority: $priority, Domain: $domain"
     
-    # Create overview issue
-    log_info "Creating overview issue..."
+    # Generate comprehensive content
+    local issue_body
+    issue_body=$(generate_plan_content "$plan_name" "$priority" "$domain")
+    
+    # Create overview issue with generated content
+    log_info "Creating overview issue with comprehensive content..."
     overview_url=$(gh issue create \
         --title "[Plan Overview]: $plan_name" \
-        --body "Plan created using GitHub Issues migration system. Priority: $priority, Domain: $domain. Please fill out the complete propositions framework using the plan-overview.yml template structure." \
+        --body "$issue_body" \
         --label "plan:overview" \
         --label "status:planning" \
         --label "priority:$(echo "$priority" | tr '[:upper:]' '[:lower:]')" \

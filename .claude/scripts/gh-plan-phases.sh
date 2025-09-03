@@ -68,6 +68,142 @@ validate_overview() {
     echo "$title"
 }
 
+# Generate comprehensive phase content
+generate_phase_content() {
+    local overview_issue="$1"
+    local phase_number="$2"
+    local phase_name="$3"
+    local estimated_duration="$4"
+    local dependencies="$5"
+    
+    # Get overview issue title for context
+    local plan_title=$(gh issue view "$overview_issue" --json title --jq '.title' 2>/dev/null | sed 's/\[Plan Overview\]: //g' || echo "Unknown Plan")
+    
+    cat <<EOF
+# Phase $phase_number: $phase_name
+
+## 🎯 Phase Objective
+Implement $phase_name as part of the overall plan: $plan_title
+
+## 🧠 Phase Context
+This is Phase $phase_number of the implementation plan. It focuses on $phase_name with an estimated duration of $estimated_duration.
+
+## 📋 Implementation Tasks
+
+### Task Group 1: Core Implementation
+- [ ] **Design and Architecture** (Est: 2 hours) - Define technical approach and design patterns
+  - Commit: \`<checksum>\`
+  - Status: Pending
+  - Notes: Create technical design document and validate approach
+
+- [ ] **Core Implementation** (Est: 4-6 hours) - Implement main functionality
+  - Commit: \`<checksum>\`
+  - Status: Pending  
+  - Notes: Follow SolarWindPy coding conventions and physics validation requirements
+
+- [ ] **Integration Testing** (Est: 2 hours) - Validate integration with existing system
+  - Commit: \`<checksum>\`
+  - Status: Pending
+  - Notes: Ensure compatibility with existing physics calculations and data structures
+
+### Task Group 2: Quality Assurance  
+- [ ] **Unit Tests** (Est: 2 hours) - Create comprehensive test coverage
+  - Commit: \`<checksum>\`
+  - Status: Pending
+  - Notes: Target ≥95% coverage following SolarWindPy testing standards
+
+- [ ] **Documentation** (Est: 1 hour) - Update documentation and examples
+  - Commit: \`<checksum>\`
+  - Status: Pending
+  - Notes: Include NumPy-style docstrings and usage examples
+
+## ✅ Phase Acceptance Criteria
+- [ ] All task group implementations completed and tested
+- [ ] Integration tests passing with existing SolarWindPy modules
+- [ ] Code coverage ≥95% for new functionality
+- [ ] Documentation updated with clear examples
+- [ ] Physics validation requirements satisfied (if applicable)
+- [ ] Pre-commit hooks passing (black, flake8, pytest)
+
+## 🧪 Phase Testing Strategy
+**Testing Approach:**
+- Unit tests for individual functions and classes
+- Integration tests with existing SolarWindPy components
+- Physics validation tests (if applicable)
+- Performance benchmarks for critical paths
+
+**Test Categories:**
+- Functional correctness
+- Edge case handling  
+- Error condition management
+- Scientific accuracy validation
+
+## 🔧 Phase Technical Requirements
+**Dependencies:** $dependencies
+**Duration:** $estimated_duration
+**Priority:** Phase $phase_number implementation
+
+**Technical Constraints:**
+- Follow SolarWindPy hierarchical DataFrame patterns
+- Maintain SI unit conventions internally
+- Preserve NaN handling for missing data
+- Ensure backward compatibility
+
+## 📂 Phase Affected Areas
+**Primary Impact:**
+- Implementation area specific to $phase_name
+
+**Secondary Impact:**
+- Related testing modules
+- Documentation and examples
+- Integration points with existing functionality
+
+## 📊 Phase Progress Tracking
+**Completion Status:** 0% (0/10 tasks completed)
+
+**Progress Metrics:**
+- [ ] Design complete
+- [ ] Implementation complete  
+- [ ] Testing complete
+- [ ] Documentation complete
+- [ ] Integration validated
+
+## 💬 Phase Implementation Notes
+**Implementation Priority:** Sequential execution recommended
+**Key Considerations:**
+- Maintain SolarWindPy coding standards throughout
+- Coordinate with physics validation if core modules affected
+- Update cross-references to overview issue #$overview_issue
+
+## 🔄 Context Management Points
+**Session Boundaries:**
+- Complete task groups as atomic units
+- Create compacted states after significant milestones
+- Preserve implementation decision rationale
+
+**Token Optimization:**
+- Use structured progress updates
+- Link commits to specific tasks for efficient context
+- Maintain clear success criteria for each task
+
+## 👤 Phase Completion Instructions
+**When Ready to Mark Complete:**
+1. Verify all acceptance criteria met
+2. Update progress tracking to 100%
+3. Link all commits to respective tasks
+4. Update overview issue #$overview_issue with completion status
+5. Create compacted state for session continuity
+
+## 🔗 Related Issues
+**Plan Overview:** #$overview_issue
+**Dependencies:** $dependencies
+**Next Phase:** Will be determined based on overall plan structure
+
+---
+*This phase is part of the comprehensive GitHub Issues Plan Management System. Use structured task tracking to maintain implementation quality and progress visibility.*
+EOF
+}
+
 # Create a single phase issue
 create_phase() {
     local overview_issue="$1"
@@ -78,10 +214,14 @@ create_phase() {
     
     log_info "Creating Phase $phase_number: $phase_name"
     
-    # Create phase issue
+    # Generate comprehensive phase content
+    local phase_body
+    phase_body=$(generate_phase_content "$overview_issue" "$phase_number" "$phase_name" "$estimated_duration" "$dependencies")
+    
+    # Create phase issue with comprehensive content
     local phase_url=$(gh issue create \
         --title "[Phase]: Phase $phase_number - $phase_name" \
-        --body "Phase implementation issue. Estimated duration: $estimated_duration. Dependencies: $dependencies. Please use the plan-phase.yml template structure to fill out complete details." \
+        --body "$phase_body" \
         --label "plan:phase" \
         --label "status:planning" \
         --assignee "@me")
