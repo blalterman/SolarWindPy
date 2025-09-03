@@ -87,8 +87,8 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
 .. _LICENSE.rst: ./LICENSE.rst
 .. _CITATION.rst: ./CITATION.rst
 
-.. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml/badge.svg?branch=master
-   :target: https://github.com/blalterman/SolarWindPy/actions/workflows/ci.yml
+.. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/continuous-integration.yml/badge.svg?branch=master
+   :target: https://github.com/blalterman/SolarWindPy/actions/workflows/continuous-integration.yml
 .. |Docs Status| image:: https://readthedocs.org/projects/solarwindpy/badge/?version=latest
    :target: https://solarwindpy.readthedocs.io/en/latest/?badge=latest
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
