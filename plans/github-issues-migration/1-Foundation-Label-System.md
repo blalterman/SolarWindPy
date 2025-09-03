@@ -30,7 +30,7 @@ This phase creates the GitHub-native infrastructure required to support the full
 - [ ] **Create plan structure labels** (Est: 15 min) - plan:overview, plan:phase, plan:closeout
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Single "plan:phase" label (not plan:phase-1, plan:phase-2)
+  - Notes: Issue type labels for GitHub Issues workflow (not branch-based)
 - [ ] **Create domain labels** (Est: 35 min) - domain:physics, domain:data, domain:plotting, domain:testing, domain:infrastructure, domain:docs
   - Commit: `<checksum>`
   - Status: Pending

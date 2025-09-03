@@ -18,7 +18,7 @@ This phase transforms the planning workflow from local files to GitHub Issues wi
 - [ ] **Extend agent capabilities** (Est: 60 min) - Add GitHub Issues integration section to agent
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: GitHub Issues plan creation, cross-issue linking, status synchronization
+  - Notes: Direct feature branch creation from GitHub Issues, remove plan branch coordination
 - [ ] **Add GitHub CLI integration** (Est: 30 min) - CLI command coordination for issue operations
   - Commit: `<checksum>`
   - Status: Pending

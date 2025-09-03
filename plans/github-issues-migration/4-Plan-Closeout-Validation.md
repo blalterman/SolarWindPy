@@ -73,7 +73,7 @@ This final phase ensures the GitHub Issues plan management system meets all acce
 - [ ] **Archive plan to completed directory** (Est: 5 min) - Move to plans/completed/github-issues-migration/
   - Commit: `<checksum>`
   - Status: Pending
-  - Notes: Preserve plan branch, update tracking systems
+  - Notes: Archive feature branch, GitHub Issues provide permanent record
 
 ## ✅ Phase Acceptance Criteria
 - [ ] Complete end-to-end GitHub Issues plan workflow validated
@@ -152,7 +152,7 @@ This final phase ensures the GitHub Issues plan management system meets all acce
 - Plan closeout phase added to ensure proper completion documentation
 - 85% implementation decision capture target maintained through structured documentation
 - Multi-computer validation prioritized as primary value driver
-- Archive process preserves all plan branches for audit trail
+- Archive process preserves GitHub Issues for audit trail
 
 ### Lessons Learned
 *Will be updated during implementation*
@@ -180,7 +180,7 @@ After Claude completes all Phase 4 tasks:
 
 ### Step 3: Plan Completion Actions
 - [ ] **Plan Status**: Mark entire plan as "Completed" in 0-Overview.md
-- [ ] **Branch Management**: Keep plan/github-issues-migration branch (do not delete)
+- [ ] **Branch Management**: Archive feature/github-issues-migration branch after completion
 - [ ] **Documentation**: Verify all acceptance criteria met
 - [ ] **System Ready**: New GitHub Issues plan management system is now operational
 
