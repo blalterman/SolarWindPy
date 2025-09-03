@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gea1b01d85 documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gfe6679873 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=753dbcb1"></script>
+      <script src="../../../../_static/documentation_options.js?v=757e38bd"></script>
       <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -748,7 +748,7 @@
             <span class="c1">#             return self._normalized_ssn</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;nssn&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># AttributeError:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_ssn</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_normalization</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_run_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">norm_fcn</span><span class="p">):</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">cut_spec_by_interval</span><span class="p">(</span><span class="n">indicator</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;Cycle&quot;</span><span class="p">)</span>
@@ -816,7 +816,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Normalized SSN requires that dssn &lt; 1&quot;</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">]</span>
-        <span class="n">mids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">dssn</span><span class="p">)</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">dssn</span><span class="p">)</span>
 
         <span class="n">left</span> <span class="o">=</span> <span class="n">mids</span> <span class="o">-</span> <span class="n">dssn</span>
         <span class="n">right</span> <span class="o">=</span> <span class="n">mids</span> <span class="o">+</span> <span class="n">dssn</span>
