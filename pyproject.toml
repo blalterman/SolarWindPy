@@ -32,17 +32,17 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "numpy",
-  "scipy",
-  "pandas",
-  "numexpr",
-  "bottleneck",
-  "h5py",
-  "pyyaml",
-  "matplotlib",
-  "astropy",
-  "numba",
-  "tabulate",
+  "numpy>=1.22,<2.0",  # Required by contourpy (matplotlib's contour engine)
+  "scipy>=1.10",
+  "pandas>=1.5",
+  "numexpr>=2.8",
+  "bottleneck>=1.3",
+  "h5py>=3.8",
+  "pyyaml>=6.0",
+  "matplotlib>=3.5",   # Uses contourpy for contour plots
+  "astropy>=5.0",
+  "numba>=0.57",       # Works with numpy <2.0
+  "tabulate>=0.9",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",

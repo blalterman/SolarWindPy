@@ -24,7 +24,8 @@ The field of heliophysics starts in the solar interior and extends out to the ve
 The solar wind is a stream of charged particles that continuously flows away from the Sun, carrying, mass, energy, and momentum along with an embedded magnetic field.
 In short, it mediates the interaction of the Sun with the heliosphere and this is a feature shared by stars and their astrospheres more broadly.
 Changes in the solar wind create space weather, which is a critical threat to our technological infrastructure on Earth and in space.
-This software provides a unified framework for analyzing the solar wind and space weather data, filling the gap between packages targeting astronomy, remote observations of the Sun, and general timeseries analysis of spacecraft based data.
+SolarWindPy provides a unified framework for analyzing the solar wind and space weather data, filling the gap between packages targeting astronomy, remote observations of the Sun, and general timeseries analysis of spacecraft based data.
+The package is now available via PyPI and can be installed using `pip install solarwindpy`.
 
 
 
