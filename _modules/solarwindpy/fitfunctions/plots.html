@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g3ec9d12f6 documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g72f22c955 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=213445aa"></script>
+      <script src="../../../_static/documentation_options.js?v=91ae1ddc"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -923,8 +923,16 @@
 
         <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
             <span class="c1"># Handle label formatting to preserve spacing correctly</span>
-            <span class="n">simple_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{ \; Simple}$&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
-            <span class="n">robust_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{ \; Robust}$&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
+            <span class="n">simple_label</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;$\mathrm{ \; Simple}$&quot;</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span>
+                <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Simple}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
+            <span class="p">)</span>
+            <span class="n">robust_label</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;$\mathrm{ \; Robust}$&quot;</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span>
+                <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm{</span><span class="si">%s</span><span class="s2"> \; Robust}$&quot;</span> <span class="o">%</span> <span class="n">label</span>
+            <span class="p">)</span>
 
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
