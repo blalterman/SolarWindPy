@@ -100,7 +100,7 @@ jobs:
            contains(github.ref, 'rc'))  
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository-url: https://test.pypi.org/legacy/
+          repository_url: https://test.pypi.org/legacy/
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           skip-existing: true
         continue-on-error: true  # Don't fail if token not configured yet
