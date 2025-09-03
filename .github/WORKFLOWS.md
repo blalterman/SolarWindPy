@@ -90,21 +90,19 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Success Criteria**: Tests pass, package validates, tag format correct
 
-### 5. Branch Protection (branch-protection.yml) 🛡️ GOVERNANCE
-**Purpose**: Configure branch protection rules  
-**Triggers**: Manual only (workflow_dispatch)  
-**Applies to**: master, main, develop branches  
+### 5. Doctest Validation (doctest_validation.yml) 📚 VALIDATION
+**Purpose**: Validate code examples in documentation  
+**Triggers**: Master/plan pushes, PRs, weekly schedule  
+**Environment**: Complex conda setup with caching  
 
-**Protection Rules**:
-- Requires CI success (Ubuntu 3.12 and 3.8)
-- Requires documentation build success
-- Requires security scan completion
-- Requires 1 approving review
-- Dismisses stale reviews automatically
-- No force pushes allowed
-- Optional admin enforcement
+**Features**:
+- Custom Python scripts for doctest discovery and validation
+- Multi-level caching for conda environment
+- Detailed coverage reports for documentation examples
+- Validates examples execute correctly
+- Prevents shipping docs with broken examples
 
-**Benefits**: Prevents untested code from reaching production
+**Success Criteria**: All documentation examples execute without errors
 
 ### 6. Sync Requirements (sync-requirements.yml) 🔄 MAINTENANCE
 **Purpose**: Synchronize requirements across multiple files  
@@ -121,7 +119,20 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Success Criteria**: Generated files validate successfully
 
-### 7. Dependabot (dependabot.yml) 🤖 AUTOMATION
+### 7. Claude Code Review (claude.yml & claude-code-review.yml) 🤖 AI-ASSISTANCE
+**Purpose**: AI-powered code analysis and review  
+**Triggers**: @claude mentions in issues/PRs, automatic PR reviews  
+**Integration**: Uses Claude AI for code analysis and suggestions  
+
+**Features**:
+- Responds to @claude mentions in issues and PR comments  
+- Automatic review of all PRs with AI analysis
+- Code quality suggestions and issue detection
+- Read-only repository access for security
+
+**Success Criteria**: AI provides helpful analysis without spam
+
+### 8. Dependabot (dependabot.yml) 🤖 AUTOMATION
 **Purpose**: Automated dependency updates  
 **Schedule**: Weekly (Python), Monthly (GitHub Actions)  
 **Limits**: 5 open PRs maximum  
@@ -134,7 +145,7 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Management**: Review and merge Dependabot PRs regularly
 
-### 8. Performance Benchmark (benchmark.yml) ⚡ MONITORING
+### 9. Performance Benchmark (benchmark.yml) ⚡ MONITORING
 **Purpose**: Performance regression detection  
 **Triggers**: master/main pushes, PRs, manual  
 **Alert Threshold**: 150% (50% slowdown)  
@@ -150,32 +161,6 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Success Criteria**: No significant performance regressions
 
-### 9. Release Management (release-management.yml) 🏷️ RELEASES
-**Purpose**: Automated release preparation  
-**Triggers**: Manual only (workflow_dispatch)  
-**Integration**: Triggers publish workflow via tags  
-
-**Features**:
-- Version type selection (major/minor/patch/prerelease)
-- Automatic changelog generation from git history
-- Release branch creation for staging
-- Version file updates (when applicable)
-- Git tag creation and pushing
-
-**Process**: Manual → Release Branch → Tag → Auto-Publish
-
-### 10. Update Workflow Documentation (update-workflow-doc.yml) 📝 UTILITY
-**Purpose**: Maintain workflow documentation  
-**Triggers**: PR events, workflow completions  
-**Safety**: Skip CI directive to prevent loops  
-
-**Features**:
-- PR reference tracking (when script exists)
-- Workflow status reporting
-- Enhanced error handling with continue-on-error
-- Automatic documentation updates
-
-**Success Criteria**: Documentation stays current
 
 ## Public Repository Benefits
 
@@ -313,7 +298,7 @@ git push origin v1.0.1
 ```
 
 #### Reset Branch Protection
-Use the branch-protection.yml workflow with manual trigger to reconfigure rules.
+Configure branch protection rules manually via GitHub repository Settings → Branches.
 
 #### Emergency Disable Workflow
 Rename workflow file (add .disabled extension) and commit to temporarily disable.
