@@ -16,7 +16,7 @@ from solarwindpy import spacecraft
 pd.set_option("mode.chained_assignment", "raise")
 
 
-class TestBase(ABC):
+class SpacecraftTestBase(ABC):
     @classmethod
     def setUpClass(cls):
         data = base.TestData()
@@ -47,7 +47,7 @@ class TestBase(ABC):
     #         cls.set_object_testing()
     #         print("Done with TestBase", flush=True)
 
-    #         super(TestBase, cls).setUpClass()
+    #         super(SpacecraftTestBase, cls).setUpClass()
     #         # print(cls.data.iloc[:, :7])
     #         # print(cls.data.columns.values)
     #         cls.data = cls.spacecraft_data
@@ -127,7 +127,7 @@ class TestBase(ABC):
         pdt.assert_series_equal(dist, ot.distance2sun)
 
 
-class TestWind(TestBase, TestCase):
+class TestWind(SpacecraftTestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
         data = cls.data.xs("gse", axis=1, level="M")
@@ -164,7 +164,7 @@ class TestWind(TestBase, TestCase):
             self.object_testing.carrington
 
 
-class TestPSP(TestBase, TestCase):
+class TestPSP(SpacecraftTestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
         p = cls.data.xs("pos_HCI", axis=1, level="M")
