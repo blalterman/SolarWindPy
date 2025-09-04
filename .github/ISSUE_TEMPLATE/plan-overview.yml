@@ -1,0 +1,290 @@
+name: "Plan Overview"
+description: "Create a comprehensive plan overview with value propositions framework"
+title: "[Plan Overview]: "
+labels: ["plan:overview", "status:planning"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Plan Overview Template
+        
+        Create a comprehensive plan with integrated value propositions framework for SolarWindPy development.
+
+  - type: input
+    id: plan_name
+    attributes:
+      label: "Plan Name"
+      description: "Descriptive name for this plan"
+      placeholder: "e.g., Dark Mode Implementation, API Refactoring, Performance Optimization"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "Plan priority level"
+      options:
+        - "Critical"
+        - "High" 
+        - "Medium"
+        - "Low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: "Primary Domain"
+      description: "Main technical domain for this plan"
+      options:
+        - "Physics"
+        - "Data"
+        - "Plotting"
+        - "Testing"
+        - "Infrastructure"
+        - "Documentation"
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: "🎯 Objective"
+      description: "Clear, concise statement of what this plan will accomplish"
+      placeholder: "Describe the main goal and expected outcomes..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "🧠 Context"
+      description: "Background information, motivation, and current state"
+      placeholder: "Why is this plan needed? What's the current situation?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_requirements
+    attributes:
+      label: "🔧 Technical Requirements"
+      description: "Dependencies, tools, frameworks, and technical constraints"
+      placeholder: "List required technologies, APIs, libraries, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_areas
+    attributes:
+      label: "📂 Affected Areas"
+      description: "Files, modules, and components that will be modified"
+      placeholder: "List specific files, directories, or system components..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "✅ Acceptance Criteria"
+      description: "Specific, measurable criteria for plan completion"
+      placeholder: "- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing_strategy
+    attributes:
+      label: "🧪 Testing Strategy"
+      description: "How will this plan be validated and tested?"
+      placeholder: "Unit tests, integration tests, manual validation steps..."
+
+  - type: textarea
+    id: value_proposition
+    attributes:
+      label: "📊 Value Proposition Analysis"
+      description: "Scientific software development and productivity value"
+      placeholder: |
+        **Research Efficiency Improvements:**
+        - General Development: [describe improvements]
+        
+        **Developer Productivity Value:**
+        - Planning Efficiency: [time savings]
+        - Workflow Optimization: [efficiency gains]
+        
+        **Scientific Computing Benefits:**
+        - [specific benefits to solar wind research]
+
+  - type: textarea
+    id: resource_cost_analysis
+    attributes:
+      label: "💰 Resource & Cost Analysis"
+      description: "Development investment and ROI calculations"
+      placeholder: |
+        **Development Investment:**
+        - Implementation Time: [hours estimate]
+        - Complexity multiplier: [factor]
+        - Final estimate: [adjusted hours]
+        
+        **Maintenance Considerations:**
+        - Ongoing maintenance: [hours per quarter]
+        - Testing updates: [hours per change]
+        
+        **Break-even Analysis:**
+        - Development investment: [hours]
+        - Time savings per use: [minutes/hours]
+        - Break-even point: [number of uses]
+
+  - type: textarea
+    id: risk_assessment
+    attributes:
+      label: "⚠️ Risk Assessment & Mitigation"
+      description: "Technical, project, and workflow risks"
+      placeholder: |
+        **Technical Implementation Risks:**
+        | Risk | Probability | Impact | Mitigation Strategy |
+        |------|------------|--------|-------------------|
+        | [Risk 1] | [Low/Med/High] | [Low/Med/High] | [Strategy] |
+        
+        **Project Management Risks:**
+        - Timeline slippage risk: [probability] - *Mitigation*: [strategy]
+        - Scope creep risk: [probability] - *Mitigation*: [strategy]
+        
+        **Scientific Workflow Risks:**
+        - User workflow disruption: [probability] - *Mitigation*: [strategy]
+
+  - type: textarea
+    id: security_proposition
+    attributes:
+      label: "🔒 Security Proposition"
+      description: "Code-level security assessment (NO FAIR compliance)"
+      placeholder: |
+        **Code-Level Security Assessment:**
+        - Dependency vulnerability assessment: [analysis]
+        - Authentication/access control impact: [impact analysis]
+        - Attack surface analysis: [changes to exposure]
+        
+        **Mitigation Strategies:**
+        - [Strategy 1]
+        - [Strategy 2]
+        
+        **Security Scope Clarification:**
+        - This assessment covers **code-level security only**
+        - **NO FAIR data principle compliance** (requires core changes)
+
+  - type: textarea
+    id: scope_audit
+    attributes:
+      label: "🎯 Scope Audit"
+      description: "SolarWindPy alignment and scientific research focus validation"
+      placeholder: |
+        **SolarWindPy Alignment Assessment:**
+        - Alignment Score: [score]/100
+        - Module Relevance: [score]/40 points
+        - Scientific Keywords: [score]/30 points
+        - Research Impact: [score]/20 points
+        - Scope Risk Control: [score]/10 points
+        
+        **Assessment**: [High/Medium/Low] alignment, [appropriate/needs refinement] scope
+        
+        **Scientific Research Relevance:** [High/Medium/Low]
+        [Explanation of relevance to solar wind physics research]
+
+  - type: textarea
+    id: token_optimization
+    attributes:
+      label: "💾 Token Usage Optimization"
+      description: "Claude session efficiency metrics"
+      placeholder: |
+        **Current Token Usage Patterns:**
+        - Manual planning: [tokens] per plan
+        - Context switching overhead: [tokens]
+        
+        **Optimized Token Usage Strategy:**
+        - Hook-based generation: [tokens] per plan
+        - Net savings: [tokens] ([percentage]% reduction)
+        
+        **Context Preservation Benefits:**
+        - Session continuity improvements: [description]
+        - Compaction efficiency: [benefits]
+
+  - type: textarea
+    id: time_investment
+    attributes:
+      label: "⏱️ Time Investment Analysis"
+      description: "Development time and savings breakdown"
+      placeholder: |
+        **Implementation Time Breakdown:**
+        - Phase estimates: [breakdown]
+        - Total estimated time: [hours]
+        - Confidence intervals: [range]
+        
+        **Time Savings Analysis:**
+        - Per-use time savings: [minutes/hours]
+        - Long-term efficiency gains: [annual hours saved]
+        
+        **Break-Even Calculation:**
+        - Investment vs Returns: [analysis]
+        - Payback timeline: [months]
+
+  - type: textarea
+    id: usage_adoption
+    attributes:
+      label: "🎯 Usage & Adoption Metrics"
+      description: "Use cases and success criteria"
+      placeholder: |
+        **Target Use Cases:**
+        - Primary applications: [list]
+        - Secondary applications: [list]
+        
+        **Success Metrics:**
+        - Short-term (1-3 months): [metrics]
+        - Medium-term (3-6 months): [metrics]
+        - Long-term (6-12 months): [metrics]
+        
+        **Qualitative Success Indicators:**
+        - [Indicator 1]
+        - [Indicator 2]
+
+  - type: input
+    id: estimated_duration
+    attributes:
+      label: "Estimated Duration"
+      description: "Total implementation time estimate"
+      placeholder: "e.g., 8-12 hours, 2-3 days, 1 week"
+    validations:
+      required: true
+
+  - type: textarea
+    id: related_issues
+    attributes:
+      label: "🔗 Related Issues"
+      description: "Link to related issues, dependencies, and coordination"
+      placeholder: |
+        **Phase Issues:**
+        - [ ] Phase 1: [link to phase issue]
+        - [ ] Phase 2: [link to phase issue]
+        
+        **Dependencies:**
+        - Depends on: [links to prerequisite issues]
+        
+        **Coordinates with:**
+        - [links to related issues]
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: "💬 Implementation Notes"
+      description: "Additional considerations, alternatives, and decision factors"
+      placeholder: |
+        **Alternative Approaches Considered:**
+        - [Alternative 1]: [reason for rejection]
+        - [Alternative 2]: [reason for rejection]
+        
+        **Key Decision Factors:**
+        - [Factor 1]
+        - [Factor 2]
+        
+        **Success Dependencies:**
+        - [Dependency 1]
+        - [Dependency 2]

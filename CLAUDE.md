@@ -80,13 +80,13 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
 
 ### Git Workflow (Automated via Hooks)
-- **Branches**: `plan/<name>` for planning, `feature/<name>` for implementation
-- **PR Workflow**: PRs MUST be created from plan/* branches to master
-  - Feature branches merge to plan branches
-  - Plan branches create PRs to master
-  - Workflow: feature → plan → PR → master
-- **Protection**: No direct master commits (enforced by hooks)
-- **Validation**: PR source branch validated (plan/* only)
+- **Planning**: GitHub Issues with comprehensive propositions framework
+- **Branches**: `feature/<name>` for implementation directly from GitHub Issues
+- **PR Workflow**: PRs created directly from feature/* branches to master
+  - GitHub Issues provide planning structure
+  - Workflow: GitHub Issues → feature → PR → master
+- **Protection**: No direct master commits, feature branch validation
+- **Multi-computer sync**: Instant plan access across all development machines
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
 
@@ -135,11 +135,39 @@ flake8                 # Check linting
 python scripts/update_conda_recipe.py
 ```
 
+## GitHub Issues Plan Management
+
+### Quick Start Workflow
+```bash
+# Create new plan with propositions framework
+.claude/scripts/gh-plan-create.sh "Dark Mode Implementation" -p high -d infrastructure
+
+# Create phase issues for implementation
+.claude/scripts/gh-plan-phases.sh 123  # where 123 is overview issue number
+
+# Monitor all active plans
+.claude/scripts/gh-plan-status.sh
+
+# View specific plan details
+gh issue view 123
+```
+
+### Plan Templates
+- **Overview**: Complete propositions framework (value, cost, risk, token, usage analysis)
+- **Phase**: Detailed task breakdown with progress tracking and commit integration
+- **Closeout**: 85% implementation decision capture with lessons learned
+
+### Multi-Computer Benefits
+- Instant plan access from all 3 development machines
+- Real-time synchronization via GitHub Issues
+- No branch management overhead or context switching
+- Comprehensive searchable plan history
+
 ## Agent Usage Examples
 
 ```python
-# Planning and implementation
-"Use UnifiedPlanCoordinator to create plan for dark mode implementation"
+# Planning and implementation with GitHub Issues
+"Use UnifiedPlanCoordinator to create GitHub Issues plan for dark mode implementation"
 
 # Domain-specific work  
 "Use PhysicsValidator to verify thermal speed calculations"

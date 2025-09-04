@@ -1,0 +1,313 @@
+name: "Plan Closeout"
+description: "Document plan completion and implementation decisions"
+title: "[Closeout]: "
+labels: ["plan:closeout", "status:review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Plan Closeout Template
+        
+        Capture implementation decisions, lessons learned, and validate plan completion with 85% implementation decision capture target.
+
+  - type: input
+    id: plan_name
+    attributes:
+      label: "Plan Name"
+      description: "Name of the completed plan"
+      placeholder: "e.g., Dark Mode Implementation, API Refactoring"
+    validations:
+      required: true
+
+  - type: input
+    id: parent_plan
+    attributes:
+      label: "Parent Plan Issue"
+      description: "Link to the overview issue"
+      placeholder: "e.g., #123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: phase_issues
+    attributes:
+      label: "Related Phase Issues"
+      description: "Links to all phase issues in this plan"
+      placeholder: |
+        - Phase 1: #124
+        - Phase 2: #125
+        - Phase 3: #126
+    validations:
+      required: true
+
+  - type: dropdown
+    id: completion_status
+    attributes:
+      label: "Completion Status"
+      description: "Overall plan completion status"
+      options:
+        - "Completed Successfully"
+        - "Completed with Modifications"
+        - "Partially Completed"
+        - "Cancelled"
+    validations:
+      required: true
+
+  - type: textarea
+    id: final_deliverables
+    attributes:
+      label: "📦 Final Deliverables"
+      description: "Complete list of what was delivered"
+      placeholder: |
+        **Code Changes:**
+        - [file/module]: [description of changes]
+        - [new feature]: [implementation details]
+        
+        **Documentation:**
+        - [documentation updates]
+        
+        **Tests:**
+        - [test coverage added]
+        
+        **Infrastructure:**
+        - [tooling/workflow changes]
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria_review
+    attributes:
+      label: "✅ Acceptance Criteria Review"
+      description: "Status of all original acceptance criteria"
+      placeholder: |
+        **Original Criteria Status:**
+        - [x] Criterion 1: Completed successfully
+        - [x] Criterion 2: Completed successfully  
+        - [ ] Criterion 3: Modified/Not applicable
+        
+        **Additional Criteria Added:**
+        - [x] New criterion discovered during implementation
+        
+        **Modifications/Exclusions:**
+        - [Criterion X]: Excluded because [reason]
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_decisions
+    attributes:
+      label: "🧠 Implementation Decisions (85% Capture Target)"
+      description: "Key architectural and technical decisions made during implementation"
+      placeholder: |
+        **Architecture Decisions:**
+        1. **Decision**: [What was decided]
+           - **Context**: [Why decision was needed]
+           - **Alternatives**: [Other options considered]
+           - **Rationale**: [Why this option was chosen]
+           - **Consequences**: [Trade-offs and implications]
+        
+        2. **Decision**: [What was decided]
+           - **Context**: [Why decision was needed]
+           - **Alternatives**: [Other options considered]
+           - **Rationale**: [Why this option was chosen]
+           - **Consequences**: [Trade-offs and implications]
+        
+        **Technical Implementation Decisions:**
+        1. **Library/Framework Choice**: [Decision and rationale]
+        2. **Data Structure Design**: [Decision and rationale]
+        3. **Integration Approach**: [Decision and rationale]
+        
+        **Process Decisions:**
+        1. **Testing Strategy**: [What was implemented and why]
+        2. **Documentation Approach**: [How documentation was handled]
+        3. **Code Organization**: [Structural decisions made]
+    validations:
+      required: true
+
+  - type: textarea
+    id: lessons_learned
+    attributes:
+      label: "📚 Lessons Learned"
+      description: "What went well, what could be improved, and insights gained"
+      placeholder: |
+        **What Went Well:**
+        - [Success 1]: [Why it worked well]
+        - [Success 2]: [Why it worked well]
+        - [Success 3]: [Why it worked well]
+        
+        **Challenges & Solutions:**
+        - **Challenge**: [Problem encountered]
+          - **Solution**: [How it was resolved]
+          - **Learning**: [What was learned]
+        
+        - **Challenge**: [Problem encountered]
+          - **Solution**: [How it was resolved]
+          - **Learning**: [What was learned]
+        
+        **Future Improvements:**
+        - [Improvement 1]: [For next similar project]
+        - [Improvement 2]: [Process enhancement]
+        - [Improvement 3]: [Technical approach refinement]
+        
+        **Unexpected Discoveries:**
+        - [Discovery 1]: [Impact and implications]
+        - [Discovery 2]: [Impact and implications]
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_vs_estimated
+    attributes:
+      label: "⏱️ Actual vs Estimated Analysis"
+      description: "Time and effort comparison with velocity learning insights"
+      placeholder: |
+        **Time Investment Actuals:**
+        - **Original Estimate**: [X hours]
+        - **Actual Time Spent**: [Y hours]
+        - **Variance**: [+/- Z hours] ([percentage]%)
+        - **Accuracy Assessment**: [Over/Under/Accurate estimation]
+        
+        **Phase Breakdown Accuracy:**
+        - Phase 1: Estimated [X]h, Actual [Y]h ([variance])
+        - Phase 2: Estimated [X]h, Actual [Y]h ([variance])
+        - Phase 3: Estimated [X]h, Actual [Y]h ([variance])
+        
+        **Complexity Factors Discovered:**
+        - [Factor 1]: [Impact on timeline]
+        - [Factor 2]: [Impact on timeline]
+        
+        **Velocity Learning Insights:**
+        - [Domain] projects tend to take [factor]x longer than estimated
+        - [Type] of work consistently runs [over/under] estimate
+        - Future estimation adjustment: [recommendation]
+    validations:
+      required: true
+
+  - type: textarea
+    id: value_realization
+    attributes:
+      label: "💰 Value Realization Assessment"
+      description: "Did the plan deliver the expected value and benefits?"
+      placeholder: |
+        **Value Propositions Delivered:**
+        - **Scientific Software Development Value**: [Realized/Partial/Not realized]
+          - [Specific benefits achieved]
+        - **Developer Productivity Value**: [Realized/Partial/Not realized]  
+          - [Measured improvements]
+        - **Resource & Cost Analysis**: [ROI assessment]
+          - [Break-even timeline vs actual]
+        
+        **Risk Mitigation Success:**
+        - **Technical Risks**: [How well risks were managed]
+        - **Project Risks**: [Timeline and scope management success]
+        - **Scientific Workflow Risks**: [Impact on research workflows]
+        
+        **Token Usage Optimization Results:**
+        - **Planned Savings**: [X tokens per use]
+        - **Actual Savings**: [Y tokens per use]
+        - **Session Efficiency**: [Improvement achieved]
+        
+        **Adoption Success:**
+        - **Usage Metrics**: [How widely adopted]
+        - **User Feedback**: [Reception by team/users]
+        - **Success Criteria Met**: [Which metrics achieved]
+
+  - type: textarea
+    id: quality_metrics
+    attributes:
+      label: "🔍 Quality Metrics"
+      description: "Code quality, test coverage, and technical debt assessment"
+      placeholder: |
+        **Code Quality:**
+        - **Test Coverage**: [X%] (Target: ≥95%)
+        - **Linting Issues**: [Clean/X issues remaining]
+        - **Type Safety**: [All types properly defined]
+        - **Documentation Coverage**: [X% of public APIs documented]
+        
+        **Performance Impact:**
+        - **Runtime Performance**: [Impact measurement]
+        - **Memory Usage**: [Impact measurement]
+        - **Build Time**: [Impact on CI/CD]
+        
+        **Technical Debt:**
+        - **Debt Added**: [Description of any shortcuts taken]
+        - **Debt Resolved**: [Technical debt cleaned up]
+        - **Future Maintenance**: [Ongoing maintenance requirements]
+        
+        **Security Assessment:**
+        - **Security Review**: [Completed/Not applicable]
+        - **Vulnerabilities**: [Any security issues identified]
+        - **Best Practices**: [Security practices followed]
+
+  - type: textarea
+    id: follow_up_actions
+    attributes:
+      label: "🎯 Follow-up Actions"
+      description: "Next steps, future enhancements, and related work"
+      placeholder: |
+        **Immediate Follow-ups:**
+        - [ ] [Action 1]: [Deadline and assignee]
+        - [ ] [Action 2]: [Deadline and assignee]
+        
+        **Future Enhancements:**
+        - [Enhancement 1]: [Timeline and priority]
+        - [Enhancement 2]: [Timeline and priority]
+        
+        **Related Work:**
+        - [Related project 1]: [Relationship and dependencies]
+        - [Related project 2]: [Relationship and dependencies]
+        
+        **Monitoring & Maintenance:**
+        - [Monitoring needs]: [Frequency and responsibility]
+        - [Maintenance schedule]: [Regular upkeep requirements]
+
+  - type: textarea
+    id: plan_archival
+    attributes:
+      label: "📁 Plan Archival Information"
+      description: "Archival and knowledge preservation details"
+      placeholder: |
+        **Plan Completion Summary:**
+        - **Start Date**: [Date plan began]
+        - **End Date**: [Date plan completed]
+        - **Total Duration**: [Actual calendar time]
+        - **Team Members**: [Contributors]
+        
+        **Knowledge Preservation:**
+        - **Documentation Location**: [Where docs are stored]
+        - **Code Repository**: [Branch/tag information]
+        - **Decision Records**: [Where decisions are documented]
+        - **Contact for Questions**: [Future reference person]
+        
+        **Archival Actions:**
+        - [ ] Move plan to completed directory
+        - [ ] Update project documentation
+        - [ ] Notify stakeholders of completion
+        - [ ] Archive related branches/tags
+        
+        **Searchable Keywords:**
+        [Keywords for future reference: domain, technology, approach, etc.]
+
+  - type: textarea
+    id: team_feedback
+    attributes:
+      label: "👥 Team Feedback & Recognition"
+      description: "Team input on the plan and recognition of contributions"
+      placeholder: |
+        **Team Retrospective:**
+        - **Process Feedback**: [How well did the plan process work?]
+        - **Communication**: [Was coordination effective?]
+        - **Tool Usage**: [How effective were the tools and templates?]
+        
+        **Contributor Recognition:**
+        - [Team Member 1]: [Contribution and impact]
+        - [Team Member 2]: [Contribution and impact]
+        
+        **Process Improvements:**
+        - [Improvement 1]: [For future plans]
+        - [Improvement 2]: [For team workflow]
+        
+        **Overall Plan Rating:**
+        - **Planning Quality**: [1-10 rating and comments]
+        - **Execution Quality**: [1-10 rating and comments]  
+        - **Outcome Satisfaction**: [1-10 rating and comments]
