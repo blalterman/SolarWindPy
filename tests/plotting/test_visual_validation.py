@@ -22,7 +22,7 @@ class TestVisualValidationFramework:
     def test_matplotlib_backend(self):
         """Test matplotlib backend is properly configured."""
         backend = matplotlib.get_backend()
-        assert backend == "Agg", f"Expected Agg backend, got {backend}"
+        assert backend.lower() == "agg", f"Expected Agg backend, got {backend}"
 
     def test_matplotlib_interactive_mode(self):
         """Test matplotlib interactive mode is disabled."""
