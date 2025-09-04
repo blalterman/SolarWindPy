@@ -2,6 +2,36 @@
 
 This directory contains CLI automation scripts for managing SolarWindPy plans using GitHub Issues with comprehensive propositions framework.
 
+## Prerequisites
+
+Before using the GitHub Issues plan scripts, ensure all required labels are set up:
+
+```bash
+# One-time setup: Create all required labels
+bash .claude/scripts/setup-labels.sh
+
+# Verify labels exist
+gh label list | grep -E "^(plan:|domain:|priority:|status:)"
+```
+
+### Required Labels
+
+All GitHub Issues plans require these labels:
+
+#### Plan Types (required)
+- `plan:overview` - Main plan overview issue
+- `plan:phase` - Phase implementation issue  
+- `plan:closeout` - Plan closeout issue
+
+#### Priority (required for overview)
+- `priority:critical`, `priority:high`, `priority:medium`, `priority:low`
+
+#### Status (required)
+- `status:planning`, `status:in-progress`, `status:blocked`, `status:review`, `status:completed`
+
+#### Domain (required for overview)
+- `domain:physics`, `domain:data`, `domain:plotting`, `domain:testing`, `domain:infrastructure`, `domain:docs`
+
 ## Quick Start
 
 ### 1. Create New Plan
@@ -231,10 +261,28 @@ The GitHub Issues system integrates seamlessly with the existing UnifiedPlanCoor
 ## Troubleshooting
 
 ### Common Issues
-1. **GitHub CLI not authenticated**: Run `gh auth login`
-2. **Template not found**: Ensure you're in repository root directory
-3. **Permission denied**: Check repository write access
-4. **Issue creation failed**: Verify network connection and GitHub status
+
+#### Label-Related Errors
+1. **"Missing required labels" error**:
+   ```bash
+   # Solution: Run the setup script
+   bash .claude/scripts/setup-labels.sh
+   ```
+
+2. **"No plan overview issues found"**: 
+   - Ensure your overview issue has `plan:overview` label
+   - Check with: `gh issue view YOUR_ISSUE --json labels`
+
+3. **gh-plan-status.sh shows empty results**:
+   - Labels are missing on existing issues
+   - Run: `gh issue edit ISSUE_NUMBER --add-label "plan:overview,domain:YOUR_DOMAIN"`
+
+#### General Issues
+4. **GitHub CLI not authenticated**: Run `gh auth login`
+5. **Template not found**: Ensure you're in repository root directory
+6. **Permission denied**: Check repository write access
+7. **Issue creation failed**: Verify network connection and GitHub status
+8. **Invalid priority/domain**: Use one of the supported values listed in Prerequisites
 
 ### Script Debugging
 - Add `-x` to bash scripts for verbose debugging: `bash -x gh-plan-create.sh`
