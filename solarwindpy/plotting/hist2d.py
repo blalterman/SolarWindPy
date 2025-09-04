@@ -240,9 +240,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         if axnorm is None:
             pass
         elif axnorm == "c":
-            agg = agg.divide(agg.max(level="x"), level="x")
+            agg = agg.divide(agg.groupby(level="x").max(), level="x")
         elif axnorm == "r":
-            agg = agg.divide(agg.max(level="y"), level="y")
+            agg = agg.divide(agg.groupby(level="y").max(), level="y")
         elif axnorm == "t":
             agg = agg.divide(agg.max())
         elif axnorm == "d":
@@ -265,7 +265,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         elif axnorm == "cd":
             #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
-            N = agg.sum(level="x")
+            N = agg.groupby(level="x").sum()
             dy = pd.IntervalIndex(
                 agg.index.get_level_values("y").unique()
             ).sort_values()
@@ -275,7 +275,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         elif axnorm == "rd":
             #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
-            N = agg.sum(level="y")
+            N = agg.groupby(level="y").sum()
             dx = pd.IntervalIndex(
                 agg.index.get_level_values("x").unique()
             ).sort_values()
@@ -286,9 +286,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         elif hasattr(axnorm, "__iter__"):
             kind, fcn = axnorm
             if kind == "c":
-                agg = agg.divide(agg.agg(fcn, level="x"), level="x")
+                agg = agg.divide(agg.groupby(level="x").agg(fcn), level="x")
             elif kind == "r":
-                agg = agg.divide(agg.agg(fcn, level="y"), level="y")
+                agg = agg.divide(agg.groupby(level="y").agg(fcn), level="y")
             else:
                 raise ValueError(f"Unrecognized axnorm with function ({kind}, {fcn})")
         else:
