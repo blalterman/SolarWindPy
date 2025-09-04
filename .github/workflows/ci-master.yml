@@ -1,0 +1,65 @@
+name: CI
+
+# Lightweight master branch validation for CI badge status
+# Focused on core functionality testing for repository health indicator
+on:
+  push:
+    branches:
+      - master
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev pkg-config
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements-dev.txt
+      
+      - name: Run core tests
+        run: |
+          pytest --tb=short --disable-warnings tests/
+      
+      - name: Check code formatting
+        run: |
+          black --check solarwindpy/
+          flake8 solarwindpy/
+      
+      - name: Verify imports and basic functionality
+        run: |
+          python -c "
+          import solarwindpy as swp
+          print(f'SolarWindPy version: {swp.__version__}')
+          
+          # Test core functionality
+          import numpy as np
+          from solarwindpy.core import Plasma, Ion
+          
+          print('✅ Core classes imported successfully')
+          print('✅ Master branch validation complete')
+          "
