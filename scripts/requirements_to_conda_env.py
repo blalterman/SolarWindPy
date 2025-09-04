@@ -14,7 +14,7 @@ Examples
 Run with the default requirements file::
 
     python scripts/requirements_to_conda_env.py
-    conda env create -f solarwindpy-dev.yml
+    conda env create -f solarwindpy.yml
 
 Specify a different requirements file and environment name::
 
@@ -124,7 +124,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--name",
-        default="solarwindpy-dev",
+        default="solarwindpy",
         help="Name of the Conda environment.",
     )
     parser.add_argument(

@@ -6,6 +6,23 @@ SolarWindPy
 
 Python data analysis tools for solar wind measurements.
 
+Quick Start
+-----------
+
+After installation, import the package and create a plasma object:
+
+.. code-block:: python
+
+   import solarwindpy as swp
+   
+   # Load plasma data (example with sample data)
+   plasma = swp.Plasma()
+   
+   # Access ion species and magnetic field data
+   print(plasma.data.columns)  # View available measurements
+
+See the documentation for detailed usage examples and API reference.
+
 Installation
 ============
 
@@ -32,17 +49,17 @@ Development
 
    .. code-block:: bash
 
-      conda env create -f solarwindpy-20250403.yml  # Python 3.10+
-      conda activate solarwindpy-20250403
+      conda env create -f solarwindpy.yml  # Python 3.10+
+      conda activate solarwindpy
       pip install -e .
 
    Alternatively generate the environment from ``requirements-dev.txt``:
 
    .. code-block:: bash
 
-      python scripts/requirements_to_conda_env.py --name solarwindpy-dev
-      conda env create -f solarwindpy-dev.yml
-      conda activate solarwindpy-dev
+      python scripts/requirements_to_conda_env.py --name solarwindpy
+      conda env create -f solarwindpy.yml
+      conda activate solarwindpy
       pip install -e .
 
 3. Run the test suite with ``pytest``:

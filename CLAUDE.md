@@ -27,8 +27,8 @@ Hook system provides automatic validation:
 
 ```bash
 # Create and activate conda environment:
-conda env create -f solarwindpy-20250403.yml
-conda activate solarwindpy-20250403
+conda env create -f solarwindpy.yml
+conda activate solarwindpy
 pip install -e .
 
 # Alternative: generate environment from requirements-dev.txt:

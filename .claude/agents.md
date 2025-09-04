@@ -12,7 +12,8 @@
   - List unmerged branches: `git branch -r --no-merged master`
   - Ask user to specify branch or request search/new branch creation
   - NEVER work directly on master branch
-  - Use branch pattern: `claude/YYYY-MM-DD-HH-MM-SS-module-feature-description`
+  - Use GitHub Issues workflow: feature/* branches created directly from GitHub Issues
+  - Follow GitHub Issues → feature/* → PR → master progression
 - Run `pytest -q` before ANY commit; all tests MUST pass
 - Format with `black solarwindpy/` and lint with `flake8`
 - Use NumPy-style docstrings for all public functions

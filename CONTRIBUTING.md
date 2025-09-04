@@ -4,7 +4,15 @@ Thank you for considering contributing to SolarWindPy.
 
 ## Development workflow
 
-1. Create a virtual environment and install dependencies:
+1. Create a conda environment and install dependencies:
+
+   ```bash
+   conda env create -f solarwindpy.yml
+   conda activate solarwindpy
+   pip install -e .
+   ```
+
+   Alternatively, create a virtual environment with pip:
 
    ```bash
    pip install -r requirements-dev.txt
