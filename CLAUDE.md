@@ -176,6 +176,11 @@ gh issue view 123
 "Use TestEngineer to design physics-specific test strategies"
 ```
 
+### Agent Execution Note
+Agents MUST execute CLI scripts when requested, not describe them.
+If an agent returns text instead of creating issues, the execution requirement has failed.
+Manual fallback: Run `.claude/scripts/gh-plan-create.sh` directly.
+
 ## Testing Workflow Integration
 
 The testing system combines automation with domain expertise:

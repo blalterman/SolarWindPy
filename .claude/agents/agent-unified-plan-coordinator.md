@@ -105,6 +105,16 @@ gh issue list --search "is:open label:plan:phase mentions:#<overview-issue>"
 - GitHub Issues provide real-time status updates across machines
 - Eliminates local-only plan branch management complexity
 
+## EXECUTION REQUIREMENT
+
+When asked to create plans, EXECUTE these scripts, don't describe them:
+- .claude/scripts/gh-plan-create.sh
+- .claude/scripts/gh-plan-phases.sh
+
+NEVER return only a description of what would happen.
+ALWAYS execute the actual commands using Bash tool.
+VERIFY execution by checking returned issue URLs.
+
 ## Primary Workflows
 
 ### Plan Creation Workflow (Enhanced with Automated Content Generation)
