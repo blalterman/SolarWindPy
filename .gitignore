@@ -119,3 +119,4 @@ solarwindpy/_version.py
 **/compacted_state.md
 
 .claude/settings.local.json
+# Version bump to v0.1.4
