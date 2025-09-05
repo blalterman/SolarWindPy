@@ -159,10 +159,15 @@ class AggPlot(base.Base):
             raise TypeError("Unexpected object %s" % type(data))
 
         if isinstance(clip, str) and clip.lower()[0] == "l":
+            # DEPRECATED: clip_lower() deprecated in pandas 2.1.0+ in favor of clip(lower=val)
+            # TODO: Replace with data.clip(lower=lo, axis=ax) in future pandas compatibility update
             data = data.clip_lower(lo, axis=ax)
         elif isinstance(clip, str) and clip.lower()[0] == "u":
+            # DEPRECATED: clip_upper() deprecated in pandas 2.1.0+ in favor of clip(upper=val)
+            # TODO: Replace with data.clip(upper=up, axis=ax) in future pandas compatibility update
             data = data.clip_upper(up, axis=ax)
         else:
+            # Modern pandas clip() method - preferred approach
             data = data.clip(lo, up, axis=ax)
         return data
 
@@ -185,37 +190,77 @@ class AggPlot(base.Base):
     #         return data
 
     def set_clim(self, lower=None, upper=None):
-        """Set the minimum (lower) and maximum (upper) allowed number of.
+        """Set count limits for filtering aggregated data.
 
-        counts per bin to return after calling :py:meth:`agg`.
+        Filters bins based on the number of counts (or aggregated values)
+        after calling the agg() method. Bins outside these limits will
+        be excluded from the final result.
+
+        Parameters
+        ----------
+        lower : Number or None, optional
+            Minimum allowed count per bin. Bins with fewer counts are excluded.
+        upper : Number or None, optional
+            Maximum allowed count per bin. Bins with more counts are excluded.
+
+        Raises
+        ------
+        AssertionError
+            If lower or upper are not numbers or None
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
 
     def set_alim(self, lower=None, upper=None):
-        r"""Set the minimum (lower) and maximum (upper) allowed value when.
+        """Set amplitude limits for aggregation filtering.
 
-        aggregating. This is different from `clim` because it uses the
-        `agg_fcn`. So behavior will change based on `axnorm`, etc.
+        Filters based on the aggregated values themselves (after applying
+        the aggregation function). This is different from clim because it
+        operates on the post-aggregation results. Behavior depends on the
+        aggregation function and normalization method (axnorm).
+
+        Parameters
+        ----------
+        lower : Number or None, optional
+            Minimum allowed aggregated value
+        upper : Number or None, optional
+            Maximum allowed aggregated value
+
+        Raises
+        ------
+        AssertionError
+            If lower or upper are not numbers or None
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._alim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
-        r"""Calculate histogram bins.
+        """Calculate histogram bins and interval representations.
 
-        nbins: int, str, array-like
-            If int, use np.histogram to calculate the bin edges.
-            If str and nbins == "knuth", use `astropy.stats.knuth_bin_width`
-            to calculate optimal bin widths.
-            If str and nbins != "knuth", use `np.histogram(data, bins=nbins)`
-            to calculate bins.
-            If array-like, treat as bins.
+        Handles various bin specification methods including automatic binning,
+        optimal binning, and custom bins.
 
-        precision: int or None
-            Precision at which to store intervals. If None, default to 3.
+        Parameters
+        ----------
+        nbins : int, str, array-like, or dict
+            Bin specification:
+            - int: Number of bins for all axes (uses np.histogram)
+            - str: 'knuth' for optimal bin width (requires astropy),
+                   otherwise passed to np.histogram
+            - array-like: Custom bin edges
+            - dict: Per-axis specifications {axis: bins}
+        precision : int, optional
+            Decimal precision for storing intervals. Default is 5.
+
+        Notes
+        -----
+        NaN and infinite values are automatically removed before bin calculation
+        to avoid issues with numpy and astropy binning algorithms.
+
+        The method stores results in self._categoricals for groupby operations
+        and makes intervals available via the intervals property.
         """
         data = self.data
         bins = {}

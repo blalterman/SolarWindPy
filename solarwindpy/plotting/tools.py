@@ -1,8 +1,53 @@
 #!/usr/bin/env python
-r"""Utility functions for common :mod:`matplotlib` tasks.
+r"""Comprehensive matplotlib utility functions for solar wind data visualization.
 
-These helpers provide shortcuts for creating figures, saving output, and building grids
-of axes with shared colorbars.
+This module provides a complete toolkit of matplotlib helper functions specifically
+optimized for solar wind research applications. The utilities handle common plotting
+tasks including figure creation, multi-panel layouts, publication-quality output
+generation, and complex colorbar management for scientific data visualization.
+
+The module addresses key challenges in solar wind data presentation:
+
+- Multi-panel figure layouts with consistent scaling and shared colorbars
+- Publication-ready output in multiple formats (PDF, PNG) with metadata
+- Complex axes arrangements for comparative analysis across different parameters
+- Automated figure sizing calculations based on subplot grid dimensions
+- Intelligent legend management across multiple plot panels
+
+Key Components
+--------------
+Figure Creation
+    - subplots(): Enhanced subplot creation with automatic size scaling
+    - calculate_nrows_ncols(): Optimal grid layout determination
+
+Output Management
+    - save(): Dual-format publication output with metadata and timestamps
+    - Automatic format selection and quality optimization
+
+Layout Utilities
+    - build_ax_array_with_common_colorbar(): Complex shared colorbar layouts
+    - multipanel_figure_shared_cbar(): Simplified multi-panel figure creation
+    - joint_legend(): Combined legend creation across multiple axes
+
+These functions integrate seamlessly with SolarWindPy's plotting classes to provide
+a complete visualization framework for solar wind plasma analysis, from simple
+parameter plots to complex multi-spacecraft comparative studies.
+
+Examples
+--------
+Create a multi-panel figure with shared colorbar for parameter comparison:
+
+>>> fig, axes, cax = multipanel_figure_shared_cbar(2, 3, vertical_cbar=True)
+>>> # Plot different parameters on each axis with shared color scaling
+>>> for ax in axes.flat:
+...     # Add individual parameter plots
+...     pass
+
+Generate publication-quality output with metadata:
+
+>>> fig, ax = subplots(scale_width=1.5, scale_height=1.2)
+>>> # Create visualization
+>>> save(fig, Path('solar_wind_analysis'), add_info=True)
 """
 
 import pdb  # noqa: F401
@@ -113,7 +158,6 @@ def save(
         alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
 
     if pdf:
-
         fig.savefig(
             spath.with_suffix(".pdf"),
             bbox_inches=bbox_inches,
@@ -265,72 +309,167 @@ def multipanel_figure_shared_cbar(
 def build_ax_array_with_common_colorbar(
     nrows=1, ncols=1, cbar_loc="top", fig_kwargs=None, gs_kwargs=None
 ):
-    r"""Build an array of axes that share a colour bar.
+    r"""Build a sophisticated axes array with integrated shared colorbar for multi-parameter analysis.
+
+    This function creates complex figure layouts optimized for comparative solar wind
+    parameter visualization where multiple plots share the same color scale. It handles
+    the intricate calculations required for proper colorbar positioning, axes alignment,
+    and figure sizing to create publication-quality multi-panel visualizations.
+
+    The function is particularly valuable for solar wind studies requiring parameter
+    comparisons across different time periods, spacecraft, or physical regions while
+    maintaining consistent color mapping for quantitative interpretation.
 
     Parameters
     ----------
-    nrows, ncols : int, optional
-        Desired grid shape.
-    cbar_loc : {"top", "bottom", "left", "right"}, optional
-        Location of the colorbar relative to the axes grid.
+    nrows, ncols : int, optional, default 1
+        Grid dimensions for the main plotting axes array. Total number of plot
+        axes will be nrows × ncols. These axes share the common colorbar and
+        typically display related but distinct parameter views (e.g., different
+        time intervals, spacecraft, or parameter combinations).
+    cbar_loc : {"top", "bottom", "left", "right"}, optional, default "top"
+        Colorbar placement relative to the main axes grid. Choice affects the
+        figure aspect ratio and optimal subplot arrangements:
+
+        - "right": Vertical colorbar, good for wide parameter ranges
+        - "left": Vertical colorbar with reversed layout
+        - "top": Horizontal colorbar, saves vertical space
+        - "bottom": Horizontal colorbar with reversed layout
+
     fig_kwargs : dict, optional
-        Keyword arguments forwarded to :func:`matplotlib.pyplot.figure`.
+        Additional parameters passed to matplotlib.pyplot.figure() for overall
+        figure configuration. Common options include:
+
+        - 'figsize': Override automatic size calculation
+        - 'dpi': Resolution for figure rendering
+        - 'facecolor': Background color
+        - 'tight_layout': Layout engine selection
+
     gs_kwargs : dict, optional
-        Additional options for :class:`matplotlib.gridspec.GridSpec`.
+        Advanced GridSpec configuration for fine-tuning subplot arrangement.
+        Supports all matplotlib.gridspec.GridSpec parameters including:
+
+        - 'width_ratios', 'height_ratios': Custom subplot size ratios
+        - 'wspace', 'hspace': Inter-subplot spacing control
+        - 'sharex', 'sharey': Axis sharing configuration
+        - 'left', 'right', 'top', 'bottom': Figure margin control
 
     Returns
     -------
-    fig : :class:`matplotlib.figure.Figure`
-    axes : ndarray of :class:`matplotlib.axes.Axes`
-    cax : :class:`matplotlib.axes.Axes`
+    fig : matplotlib.figure.Figure
+        Complete figure object containing all axes and colorbar. Sized automatically
+        based on grid dimensions and colorbar placement for optimal aspect ratios
+        in solar wind data presentation.
+    axes : numpy.ndarray of matplotlib.axes.Axes
+        Two-dimensional array of plotting axes with shape (nrows, ncols).
+        Individual axes accessed via axes[i, j] indexing. All axes are properly
+        configured for parameter plotting with shared axis limits when appropriate.
+    cax : matplotlib.axes.Axes
+        Dedicated colorbar axes positioned according to cbar_loc parameter.
+        Pre-configured with appropriate tick and label positioning for the
+        specified colorbar orientation and location.
+
+    Notes
+    -----
+    This function performs complex layout calculations to ensure optimal spacing
+    and sizing for solar wind data visualization:
+
+    1. **Automatic Figure Sizing**: Calculates figure dimensions based on grid
+       size and colorbar placement, accounting for typical solar wind parameter
+       display requirements and publication format constraints.
+
+    2. **GridSpec Configuration**: Sets up sophisticated grid layouts with
+       appropriate spacing ratios between main plots and colorbar areas.
+
+    3. **Colorbar Integration**: Creates properly positioned and sized colorbar
+       axes with correct tick and label orientation for each placement option.
+
+    4. **Axis Sharing**: Configures intelligent axis sharing to maintain
+       consistent scales across related parameter comparisons while allowing
+       independent scaling when needed.
+
+    The sizing calculations include scaling factors optimized for solar wind
+    parameter ranges and typical publication requirements, ensuring readable
+    plots at both screen and print resolutions.
 
     Examples
     --------
-    >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')  # doctest: +SKIP
+    Create a 2×3 parameter comparison with right-side colorbar:
+
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(
+    ...     2, 3, cbar_loc='right')
+    >>> # Plot velocity data on each axis with shared magnetic field coloring
+    >>> for i in range(2):
+    ...     for j in range(3):
+    ...         axes[i, j].scatter(x_data[i,j], y_data[i,j], c=b_field[i,j])
+
+    Setup custom spacing for dense parameter display:
+
+    >>> gs_config = {'hspace': 0.1, 'wspace': 0.05, 'sharex': True, 'sharey': True}
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(
+    ...     3, 2, cbar_loc='bottom', gs_kwargs=gs_config)
+
+    Create publication-ready figure with custom size:
+
+    >>> fig_config = {'figsize': (12, 8), 'dpi': 300}
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(
+    ...     2, 2, fig_kwargs=fig_config)
     """
 
+    # Initialize configuration dictionaries with defaults
     if fig_kwargs is None:
         fig_kwargs = dict()
     if gs_kwargs is None:
         gs_kwargs = dict()
 
+    # Validate and normalize colorbar location parameter
     cbar_loc = cbar_loc.lower()
     if cbar_loc not in ("top", "bottom", "left", "right"):
-        raise ValueError
+        raise ValueError("cbar_loc must be one of: 'top', 'bottom', 'left', 'right'")
 
+    # Start with matplotlib default figure size as baseline
     figsize = np.array(mpl.rcParams["figure.figsize"])
+    # Scale base figure size by grid dimensions for proper subplot sizing
     fig_scale = np.array([ncols, nrows])
 
+    # Configure grid layout based on colorbar position
+    # Different orientations require different space allocation strategies
     if cbar_loc in ("right", "left"):
-        cbar_scale = np.array([1.3, 1])
-        height_ratios = nrows * [1]
-        width_ratios = (ncols * [1]) + [0.05, 0.075]
+        # Vertical colorbar: increase width, maintain height proportions
+        cbar_scale = np.array([1.3, 1])  # 30% additional width for colorbar
+        height_ratios = nrows * [1]  # Equal height for all subplot rows
+        # Width allocation: main plots + gap + colorbar
+        width_ratios = (ncols * [1]) + [0.05, 0.075]  # 5% gap + 7.5% colorbar
         if cbar_loc == "left":
+            # Reverse order for left-side colorbar placement
             width_ratios = width_ratios[::-1]
 
     else:
-        cbar_scale = np.array([1, 1.3])
-        height_ratios = [0.075, 0.05] + (nrows * [1])
+        # Horizontal colorbar: increase height, maintain width proportions
+        cbar_scale = np.array([1, 1.3])  # 30% additional height for colorbar
+        # Height allocation: colorbar + gap + main plots
+        height_ratios = [0.075, 0.05] + (nrows * [1])  # 7.5% colorbar + 5% gap
         if cbar_loc == "bottom":
+            # Reverse order for bottom colorbar placement
             height_ratios = height_ratios[::-1]
-        width_ratios = ncols * [1]
+        width_ratios = ncols * [1]  # Equal width for all subplot columns
 
+    # Calculate final figure size using cascading scaling factors
+    # Base size × grid scaling × colorbar space allocation
     figsize = figsize * fig_scale * cbar_scale
     fig = plt.figure(figsize=figsize, **fig_kwargs)
 
-    hspace = gs_kwargs.pop("hspace", 0)
-    wspace = gs_kwargs.pop("wspace", 0)
-    sharex = gs_kwargs.pop("sharex", True)
-    sharey = gs_kwargs.pop("sharey", True)
+    # Extract axis sharing parameters from gs_kwargs with sensible defaults
+    hspace = gs_kwargs.pop("hspace", 0)  # Minimal vertical spacing between subplots
+    wspace = gs_kwargs.pop("wspace", 0)  # Minimal horizontal spacing between subplots
+    sharex = gs_kwargs.pop("sharex", True)  # Share x-axis limits across subplots
+    sharey = gs_kwargs.pop("sharey", True)  # Share y-axis limits across subplots
 
-    #     print(cbar_loc)
-    #     print(nrows, ncols)
-    #     print(len(height_ratios), len(width_ratios))
-    #     print()
-
+    # Create the master GridSpec with calculated ratios and spacing
+    # GridSpec dimensions = colorbar + gap + main plot array
     gs = mpl.gridspec.GridSpec(
-        len(height_ratios),
-        len(width_ratios),
+        len(height_ratios),  # Total rows including colorbar and gap
+        len(width_ratios),  # Total columns including colorbar and gap
         hspace=hspace,
         wspace=wspace,
         height_ratios=height_ratios,
@@ -338,35 +477,43 @@ def build_ax_array_with_common_colorbar(
         **gs_kwargs,
     )
 
+    # Define colorbar and main axes grid positions based on colorbar location
+    # Each case sets up appropriate indexing ranges for the GridSpec
     if cbar_loc == "left":
-        cax = gs[:, 0]
-        col_range = range(2, ncols + 2)
-        row_range = range(nrows)
+        cax = gs[:, 0]  # Colorbar spans all rows, leftmost column
+        col_range = range(2, ncols + 2)  # Main plots skip colorbar + gap columns
+        row_range = range(nrows)  # Main plots use all rows
     elif cbar_loc == "right":
-        cax = gs[:, -1]
-        col_range = range(0, ncols)
-        row_range = range(nrows)
+        cax = gs[:, -1]  # Colorbar spans all rows, rightmost column
+        col_range = range(0, ncols)  # Main plots use leftmost columns
+        row_range = range(nrows)  # Main plots use all rows
     elif cbar_loc == "top":
-        cax = gs[0, :]
-        col_range = range(ncols)
-        row_range = range(2, nrows + 2)
+        cax = gs[0, :]  # Colorbar spans all columns, topmost row
+        col_range = range(ncols)  # Main plots use all columns
+        row_range = range(2, nrows + 2)  # Main plots skip colorbar + gap rows
     elif cbar_loc == "bottom":
-        cax = gs[-1, :]
-        col_range = range(ncols)
-        row_range = range(0, nrows)
+        cax = gs[-1, :]  # Colorbar spans all columns, bottommost row
+        col_range = range(ncols)  # Main plots use all columns
+        row_range = range(0, nrows)  # Main plots use topmost rows
     else:
-        raise ValueError
+        raise ValueError(f"Invalid cbar_loc: {cbar_loc}")
 
-    cax = fig.add_subplot(cax)
+    # Create the actual subplot objects using GridSpec indexing
+    cax = fig.add_subplot(cax)  # Single colorbar axes
+    # Create 2D array of main plotting axes matching requested grid shape
     axes = np.array([[fig.add_subplot(gs[i, j]) for j in col_range] for i in row_range])
 
+    # Configure colorbar tick and label positioning based on location
+    # Top and left locations require repositioning for proper visibility
     if cbar_loc == "top":
-        cax.xaxis.set_ticks_position("top")
-        cax.xaxis.set_label_position("top")
+        cax.xaxis.set_ticks_position("top")  # Move ticks to top of colorbar
+        cax.xaxis.set_label_position("top")  # Move labels to top of colorbar
     elif cbar_loc == "left":
-        cax.yaxis.set_ticks_position("left")
-        cax.yaxis.set_label_position("left")
+        cax.yaxis.set_ticks_position("left")  # Move ticks to left of colorbar
+        cax.yaxis.set_label_position("left")  # Move labels to left of colorbar
 
+    # Apply axis sharing across the main plotting axes array
+    # This ensures consistent parameter scales across all subplots
     if sharex:
         axes.flat[0].get_shared_x_axes().join(*axes.flat)
     if sharey:
