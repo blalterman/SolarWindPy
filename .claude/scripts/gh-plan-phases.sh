@@ -48,8 +48,9 @@ validate_labels() {
     
     local missing_labels=()
     
-    # Get all labels once for efficiency
-    local all_labels=$(gh label list --json name | jq -r '.[].name')
+    # Get all labels once for efficiency (with pagination)
+    local all_labels=$(gh label list --limit 100 --json name | jq -r '.[].name')
+    log_info "Found $(echo "$all_labels" | wc -l) labels in repository" >&2
     
     # Check plan labels (phases.sh specifically needs plan:phase and plan:closeout)
     for label in "plan:phase" "plan:closeout"; do

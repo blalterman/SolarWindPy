@@ -52,8 +52,9 @@ validate_labels() {
     
     local missing_labels=()
     
-    # Get all labels once for efficiency
-    local all_labels=$(gh label list --json name | jq -r '.[].name')
+    # Get all labels once for efficiency (with pagination)
+    local all_labels=$(gh label list --limit 100 --json name | jq -r '.[].name')
+    log_info "Found $(echo "$all_labels" | wc -l) labels in repository" >&2
     
     # Check plan labels
     for label in "plan:overview" "plan:phase" "plan:closeout"; do
@@ -102,10 +103,14 @@ validate_inputs() {
     local priority="$1"
     local domain="$2"
     
+    # Convert to lowercase for validation
+    priority=$(echo "$priority" | tr '[:upper:]' '[:lower:]')
+    domain=$(echo "$domain" | tr '[:upper:]' '[:lower:]')
+    
     if [[ "$priority" != "critical" && "$priority" != "high" && 
           "$priority" != "medium" && "$priority" != "low" ]]; then
         log_error "Priority must be one of: critical, high, medium, low"
-        log_warning "You provided: $priority"
+        log_warning "You provided: $1 (converted to: $priority)"
         exit 1
     fi
     
@@ -113,7 +118,7 @@ validate_inputs() {
           "$domain" != "plotting" && "$domain" != "testing" && 
           "$domain" != "infrastructure" && "$domain" != "docs" ]]; then
         log_error "Domain must be one of: physics, data, plotting, testing, infrastructure, docs"  
-        log_warning "You provided: $domain"
+        log_warning "You provided: $2 (converted to: $domain)"
         exit 1
     fi
     
@@ -143,65 +148,19 @@ EOF
     
     log_info "Generating comprehensive value propositions..." >&2
     
-    # Call the value generator hook
+    # Call the value generator hook (required)
     if [[ -f ".claude/hooks/plan-value-generator.py" ]]; then
         python .claude/hooks/plan-value-generator.py \
             --plan-data "$plan_json" \
             --output-format markdown \
-            --exclude-fair 2>/dev/null || {
-                log_warning "Value generator failed, using fallback content"
-                echo "# $plan_name
-
-## 🎯 Objective
-Implement $plan_name for SolarWindPy with focus on $domain domain improvements.
-
-## 🧠 Context  
-This plan addresses development needs in the $domain area of SolarWindPy, a scientific software package for solar wind plasma physics analysis.
-
-## 📊 Value Proposition Analysis
-**$domain Development Value:**
-- Enhanced capabilities in $domain domain
-- Improved scientific workflow efficiency  
-- Better integration with existing SolarWindPy ecosystem
-
-*Note: Complete value propositions will be generated during planning phase.*
-
-## 💰 Resource & Cost Analysis
-- **Priority Level**: $priority
-- **Development Investment**: TBD during detailed planning
-- **Expected ROI**: Enhanced $domain capabilities and workflow improvements
-
-## ⚠️ Risk Assessment & Mitigation
-- **Technical Risk**: Medium - Standard development practices will mitigate
-- **Timeline Risk**: Low - Phased approach allows for adjustment
-
-## 🎯 Scope Audit
-- **Domain Focus**: $domain
-- **SolarWindPy Alignment**: High - Core development initiative
-- **Scientific Research Value**: TBD during detailed analysis
-
-## ✅ Acceptance Criteria
-- [ ] All $domain functionality implemented and tested
-- [ ] Documentation updated and comprehensive
-- [ ] Integration tests passing
-- [ ] Code review completed
-
-## 🔗 Related Issues
-This is the overview issue for the $plan_name plan. Phase issues will be created separately."
+            --exclude-fair || {
+                log_error "Value generator hook failed - this is required for comprehensive planning"
+                exit 1
             }
     else
-        log_warning "Value generator hook not found, using basic content"
-        echo "# $plan_name
-
-## 🎯 Objective
-$plan_name implementation for SolarWindPy $domain domain.
-
-## 📊 Basic Plan Information
-- **Priority**: $priority
-- **Domain**: $domain
-- **Status**: Planning phase
-
-Please use the plan-overview.yml template to complete this plan with comprehensive details."
+        log_error "Value generator hook not found at .claude/hooks/plan-value-generator.py"
+        log_error "This hook is required for comprehensive value proposition generation"
+        exit 1
     fi
 }
 
@@ -210,6 +169,10 @@ create_plan() {
     local plan_name="$1"
     local priority="$2"
     local domain="$3"
+    
+    # Convert to lowercase for consistent processing
+    priority=$(echo "$priority" | tr '[:upper:]' '[:lower:]')
+    domain=$(echo "$domain" | tr '[:upper:]' '[:lower:]')
     
     log_info "Creating new plan: $plan_name"
     log_info "Priority: $priority, Domain: $domain"
@@ -229,8 +192,8 @@ create_plan() {
         --body "$issue_body" \
         --label "plan:overview" \
         --label "status:planning" \
-        --label "priority:$(echo "$priority" | tr '[:upper:]' '[:lower:]')" \
-        --label "domain:$(echo "$domain" | tr '[:upper:]' '[:lower:]')" \
+        --label "priority:$priority" \
+        --label "domain:$domain" \
         --assignee "@me")
     
     if [ $? -eq 0 ]; then
