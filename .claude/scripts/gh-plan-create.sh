@@ -46,6 +46,80 @@ check_prerequisites() {
     log_success "Prerequisites check passed"
 }
 
+# Validate required labels exist
+validate_labels() {
+    log_info "Validating required labels exist..."
+    
+    local missing_labels=()
+    
+    # Get all labels once for efficiency
+    local all_labels=$(gh label list --json name | jq -r '.[].name')
+    
+    # Check plan labels
+    for label in "plan:overview" "plan:phase" "plan:closeout"; do
+        if ! echo "$all_labels" | grep -q "^${label}$"; then
+            missing_labels+=("$label")
+        fi
+    done
+    
+    # Check priority labels
+    for priority in critical high medium low; do
+        if ! echo "$all_labels" | grep -q "^priority:${priority}$"; then
+            missing_labels+=("priority:$priority")
+        fi
+    done
+    
+    # Check status labels
+    for status in planning in-progress blocked review completed; do
+        if ! echo "$all_labels" | grep -q "^status:${status}$"; then
+            missing_labels+=("status:$status")
+        fi
+    done
+    
+    # Check domain labels
+    for domain in physics data plotting testing infrastructure docs; do
+        if ! echo "$all_labels" | grep -q "^domain:${domain}$"; then
+            missing_labels+=("domain:$domain")
+        fi
+    done
+    
+    if [ ${#missing_labels[@]} -gt 0 ]; then
+        log_error "Missing required labels:"
+        for label in "${missing_labels[@]}"; do
+            echo "  - $label"
+        done
+        echo
+        log_warning "Run the following to create them:"
+        echo "  bash .claude/scripts/setup-labels.sh"
+        exit 1
+    fi
+    
+    log_success "All required labels are available"
+}
+
+# Validate input parameters
+validate_inputs() {
+    local priority="$1"
+    local domain="$2"
+    
+    if [[ "$priority" != "critical" && "$priority" != "high" && 
+          "$priority" != "medium" && "$priority" != "low" ]]; then
+        log_error "Priority must be one of: critical, high, medium, low"
+        log_warning "You provided: $priority"
+        exit 1
+    fi
+    
+    if [[ "$domain" != "physics" && "$domain" != "data" && 
+          "$domain" != "plotting" && "$domain" != "testing" && 
+          "$domain" != "infrastructure" && "$domain" != "docs" ]]; then
+        log_error "Domain must be one of: physics, data, plotting, testing, infrastructure, docs"  
+        log_warning "You provided: $domain"
+        exit 1
+    fi
+    
+    log_success "Input validation passed"
+}
+
 # Generate comprehensive content using value proposition hook
 generate_plan_content() {
     local plan_name="$1"
@@ -139,6 +213,10 @@ create_plan() {
     
     log_info "Creating new plan: $plan_name"
     log_info "Priority: $priority, Domain: $domain"
+    
+    # Validate inputs and labels first
+    validate_inputs "$priority" "$domain"
+    validate_labels
     
     # Generate comprehensive content
     local issue_body

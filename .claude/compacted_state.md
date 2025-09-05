@@ -1,58 +1,56 @@
-# Compacted Context State - 2025-09-01T03:39:01Z
+# Compacted Context State - 2025-09-04T20:32:50Z
 
 ## Compaction Metadata
-- **Timestamp**: 2025-09-01T03:39:01Z
+- **Timestamp**: 2025-09-04T20:32:50Z
 - **Branch**: master
 - **Plan**: tests-audit
-- **Pre-Compaction Context**: ~8,565 tokens (1,808 lines)
+- **Pre-Compaction Context**: ~9,082 tokens (1,896 lines)
 - **Target Compression**: medium (35% reduction)
-- **Target Tokens**: ~5,567 tokens
+- **Target Tokens**: ~5,903 tokens
 - **Strategy**: medium compression with prose focus
 
 ## Content Analysis
 - **Files Analyzed**: 9
 - **Content Breakdown**:
-  - Code: 429 lines
-  - Prose: 425 lines
+  - Code: 434 lines
+  - Prose: 438 lines
   - Tables: 0 lines
-  - Lists: 395 lines
-  - Headers: 222 lines
+  - Lists: 429 lines
+  - Headers: 238 lines
 - **Token Estimates**:
-  - Line-based: 5,424
-  - Character-based: 15,265
-  - Word-based: 9,449
-  - Content-weighted: 4,123
-  - **Final estimate**: 8,565 tokens
+  - Line-based: 5,688
+  - Character-based: 16,235
+  - Word-based: 10,114
+  - Content-weighted: 4,293
+  - **Final estimate**: 9,082 tokens
 
 ## Git State
 ### Current Branch: master
-### Last Commit: 0803954 - fix: resolve flake8 linting errors in hook files (blalterman, 4 minutes ago)
+### Last Commit: d9aeb4c - chore: bump version to v0.1.4 (blalterman, 3 hours ago)
 
 ### Recent Commits:
 ```
-0803954 (HEAD -> master, tag: v0.1.0rc7, origin/master, origin/HEAD) fix: resolve flake8 linting errors in hook files
-4997c30 (tag: v0.1.0rc6) fix: resolve flake8 linting errors in coverage-monitor.py
-414e220 test: add workflow_dispatch to debug release-pipeline.yml
-d542d57 (tag: v0.1.0rc5) fix: add workflows permission to allow release branch creation
-57c5e36 Merge branch 'master' of github.com:blalterman/SolarWindPy
+d9aeb4c (HEAD -> master, tag: v0.1.4, origin/master, origin/HEAD) chore: bump version to v0.1.4
+a33b0f9 (tag: v0.1.3rc1, tag: v0.1.3, tag: list) fix: make matplotlib backend test case-insensitive
+b5aa9c3 fix: replace deprecated pandas Series.max(level=) with groupby syntax
+d8a8bcc fix: update Claude Code settings.json wildcard syntax for v1.0+ compatibility
+454ab2b chore: merge remote CI workflow and README badge updates
 ```
 
 ### Working Directory Status:
 ```
 M .claude/compacted_state.md
- M .github/workflows/publish.yml
-?? .claude/compacted_state.md.orig
-?? temp
-?? tmp/fix-release-pipeline-workflow-permissions-v0.1.0-rc5.md
-?? tmp/github-actions-diagnosis-plan.md
-?? tmp/merge-conflict-resolution-plan.md
+?? conda-recipe/
+?? coverage.json
+?? solarwindpy-feedstock/
+?? staged-recipes-fork/
+?? tmp/
 ```
 
 ### Uncommitted Changes Summary:
 ```
-.claude/compacted_state.md    | 110 ++++++++++++++++++------------------------
- .github/workflows/publish.yml |   2 +-
- 2 files changed, 47 insertions(+), 65 deletions(-)
+.claude/compacted_state.md | 61 +++++++++++++++++++++-------------------------
+ 1 file changed, 28 insertions(+), 33 deletions(-)
 ```
 
 ## Critical Context Summary
@@ -93,7 +91,7 @@ M .claude/compacted_state.md
 
 ### Plan Progress Summary
 - Plan directory: plans/tests-audit
-- Last modified: 2025-08-23 18:53
+- Last modified: 2025-08-24 20:27
 
 ## Session Resumption Instructions
 
@@ -120,13 +118,13 @@ conda info --envs  # Check active environment
 - [ ] **Changes**: Review uncommitted changes
 
 ### 📊 Efficiency Metrics
-- **Context Reduction**: 35.0% (8,565 → 5,567 tokens)
+- **Context Reduction**: 35.0% (9,082 → 5,903 tokens)
 - **Estimated Session Extension**: 21 additional minutes of productive work
 - **Compaction Strategy**: medium compression focused on prose optimization
 
 ---
-*Automated intelligent compaction - 2025-09-01T03:39:01Z*
+*Automated intelligent compaction - 2025-09-04T20:32:50Z*
 
 ## Compaction File
-Filename: `compaction-2025-09-01-033901-35pct.md` - Unique timestamp-based compaction file
+Filename: `compaction-2025-09-04-203250-35pct.md` - Unique timestamp-based compaction file
 No git tags created - using file-based state preservation
