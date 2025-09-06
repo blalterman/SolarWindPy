@@ -159,13 +159,11 @@ class AggPlot(base.Base):
             raise TypeError("Unexpected object %s" % type(data))
 
         if isinstance(clip, str) and clip.lower()[0] == "l":
-            # DEPRECATED: clip_lower() deprecated in pandas 2.1.0+ in favor of clip(lower=val)
-            # TODO: Replace with data.clip(lower=lo, axis=ax) in future pandas compatibility update
-            data = data.clip_lower(lo, axis=ax)
+            # FIXED: Use modern pandas clip() API (clip_lower removed in pandas 2.2.2)
+            data = data.clip(lower=lo, axis=ax)
         elif isinstance(clip, str) and clip.lower()[0] == "u":
-            # DEPRECATED: clip_upper() deprecated in pandas 2.1.0+ in favor of clip(upper=val)
-            # TODO: Replace with data.clip(upper=up, axis=ax) in future pandas compatibility update
-            data = data.clip_upper(up, axis=ax)
+            # FIXED: Use modern pandas clip() API (clip_upper removed in pandas 2.2.2)
+            data = data.clip(upper=up, axis=ax)
         else:
             # Modern pandas clip() method - preferred approach
             data = data.clip(lo, up, axis=ax)
@@ -282,7 +280,7 @@ class AggPlot(base.Base):
             nbins = {k: v for k, v in zip(gb_axes, nbins)}
 
         else:
-            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins:{nbins}"
+            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins: {nbins}"
             raise ValueError(msg)
 
         for k in self._gb_axes:
@@ -452,7 +450,7 @@ class AggPlot(base.Base):
             tk = tk & tk_ax
 
         self.logger.info(
-            f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
+            f"Taking {tk.sum()!s} ({100 * tk.mean(): .1f}%) {self.__class__.__name__} spectra"
         )
 
         return tk
