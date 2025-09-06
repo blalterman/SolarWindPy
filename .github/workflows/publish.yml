@@ -179,3 +179,88 @@ jobs:
             *Auto-generated release from GitHub Actions*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Conda feedstock automation job (only for stable releases)
+  update-conda-feedstock:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    # Only run for stable releases (no RC, beta, alpha, dev)
+    if: |
+      github.event_name == 'push' && 
+      startsWith(github.ref, 'refs/tags/v') && 
+      !contains(github.ref, 'rc') && 
+      !contains(github.ref, 'beta') && 
+      !contains(github.ref, 'alpha') && 
+      !contains(github.ref, 'dev')
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install conda automation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests packaging pyyaml click
+      
+      - name: Set up GitHub CLI
+        run: |
+          # Verify gh CLI is available and authenticated
+          gh auth status || echo "GitHub CLI not authenticated - will continue with limited functionality"
+      
+      - name: Wait for PyPI availability
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Waiting for solarwindpy v$VERSION to be available on PyPI..."
+          python scripts/wait_for_pypi.py "$VERSION" --timeout 600 --interval 30
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update conda feedstock (create tracking issue)
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Starting conda feedstock update for version $VERSION"
+          python scripts/update_conda_feedstock.py "$VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+      
+      - name: Conda feedstock update summary
+        if: always()
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "## 📋 Conda Feedstock Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ **Automation completed successfully**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- PyPI availability confirmed" >> $GITHUB_STEP_SUMMARY
+            echo "- SHA256 hash calculated" >> $GITHUB_STEP_SUMMARY
+            echo "- Tracking issue created" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next Steps (Manual)**:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Check the created GitHub issue for details" >> $GITHUB_STEP_SUMMARY
+            echo "2. Follow manual steps to create conda-forge PR" >> $GITHUB_STEP_SUMMARY
+            echo "3. Monitor CI checks and merge when ready" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Automation encountered issues**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Manual Fallback**:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Verify PyPI release: https://pypi.org/project/solarwindpy/$VERSION/" >> $GITHUB_STEP_SUMMARY
+            echo "2. Run: \`python scripts/update_conda_feedstock.py $VERSION --dry-run\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. Follow the manual conda-forge update process" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Resources**:" >> $GITHUB_STEP_SUMMARY
+          echo "- [conda-forge feedstock](https://github.com/conda-forge/solarwindpy-feedstock)" >> $GITHUB_STEP_SUMMARY
+          echo "- [PyPI release](https://pypi.org/project/solarwindpy/$VERSION/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [conda-forge documentation](https://conda-forge.org/docs/maintainer/updating_pkgs.html)" >> $GITHUB_STEP_SUMMARY
