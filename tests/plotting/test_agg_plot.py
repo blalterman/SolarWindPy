@@ -8,7 +8,6 @@ used for aggregated plotting functionality including histograms and heatmaps.
 import pytest
 import numpy as np
 import pandas as pd
-from unittest.mock import patch, MagicMock
 
 from solarwindpy.plotting.agg_plot import AggPlot
 
@@ -211,29 +210,30 @@ class TestAggPlotProperties:
 class TestAggPlotClipData:
     """Test the clip_data static method.
 
-    Note: The current implementation uses deprecated pandas methods (clip_lower, clip_upper).
-    These tests verify the method signature but expect AttributeError for deprecated methods.
+    Tests verify the proper clipping functionality using modern pandas API.
     """
 
     def test_clip_data_series_lower(self):
         """Test clip_data with Series and 'l' (lower) clipping."""
         data = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
-        # The implementation uses deprecated clip_lower method
-        with pytest.raises(
-            AttributeError, match="'Series' object has no attribute 'clip_lower'"
-        ):
-            AggPlot.clip_data(data, "l")
+        # Should clip values below the lower quantile (0.0001)
+        result = AggPlot.clip_data(data, "l")
+        assert isinstance(result, pd.Series)
+        assert len(result) == len(data)
+        # Lower quantile clipping should preserve higher values
+        assert result.max() == data.max()
 
     def test_clip_data_series_upper(self):
         """Test clip_data with Series and 'u' (upper) clipping."""
         data = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
-        # The implementation uses deprecated clip_upper method
-        with pytest.raises(
-            AttributeError, match="'Series' object has no attribute 'clip_upper'"
-        ):
-            AggPlot.clip_data(data, "u")
+        # Should clip values above the upper quantile (0.9999)
+        result = AggPlot.clip_data(data, "u")
+        assert isinstance(result, pd.Series)
+        assert len(result) == len(data)
+        # Upper quantile clipping should preserve lower values
+        assert result.min() == data.min()
 
     def test_clip_data_series_both(self):
         """Test clip_data with Series and both upper/lower clipping."""
@@ -253,21 +253,25 @@ class TestAggPlotClipData:
         """Test clip_data with DataFrame and 'l' clipping."""
         data = pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [10, 20, 30, 40, 50]})
 
-        # The implementation uses deprecated clip_lower method
-        with pytest.raises(
-            AttributeError, match="'DataFrame' object has no attribute 'clip_lower'"
-        ):
-            AggPlot.clip_data(data, "l")
+        # Should clip values below the lower quantile for each column
+        result = AggPlot.clip_data(data, "l")
+        assert isinstance(result, pd.DataFrame)
+        assert result.shape == data.shape
+        # Lower quantile clipping should preserve higher values
+        for col in data.columns:
+            assert result[col].max() == data[col].max()
 
     def test_clip_data_dataframe_upper(self):
         """Test clip_data with DataFrame and 'u' clipping."""
         data = pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [10, 20, 30, 40, 50]})
 
-        # The implementation uses deprecated clip_upper method
-        with pytest.raises(
-            AttributeError, match="'DataFrame' object has no attribute 'clip_upper'"
-        ):
-            AggPlot.clip_data(data, "u")
+        # Should clip values above the upper quantile for each column
+        result = AggPlot.clip_data(data, "u")
+        assert isinstance(result, pd.DataFrame)
+        assert result.shape == data.shape
+        # Upper quantile clipping should preserve lower values
+        for col in data.columns:
+            assert result[col].min() == data[col].min()
 
     def test_clip_data_dataframe_both(self):
         """Test clip_data with DataFrame and both clipping."""
@@ -296,12 +300,14 @@ class TestAggPlotClipData:
         """Test that clip_data handles case-insensitive mode strings."""
         data = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
-        # Test uppercase - both should raise same error for deprecated methods
-        with pytest.raises(AttributeError):
-            AggPlot.clip_data(data, "L")
+        # Test uppercase - should work the same as lowercase
+        result_L = AggPlot.clip_data(data, "L")
+        result_l = AggPlot.clip_data(data, "l")
+        pd.testing.assert_series_equal(result_L, result_l)
 
-        with pytest.raises(AttributeError):
-            AggPlot.clip_data(data, "U")
+        result_U = AggPlot.clip_data(data, "U")
+        result_u = AggPlot.clip_data(data, "u")
+        pd.testing.assert_series_equal(result_U, result_u)
 
 
 class TestAggPlotSetMethods:
@@ -442,11 +448,14 @@ class TestAggPlotBinCalculation:
         agg_plot = ConcreteAggPlot()
         agg_plot._clip = "l"  # Enable lower clipping
 
-        # The current implementation uses deprecated pandas methods, so this will fail
-        with pytest.raises(
-            AttributeError, match="'Series' object has no attribute 'clip_lower'"
-        ):
-            agg_plot.make_cut()
+        # Should successfully create cut data with clipping
+        agg_plot.make_cut()
+
+        # Verify the cut was created successfully
+        assert hasattr(agg_plot, "_cut")
+        assert isinstance(agg_plot._cut, pd.DataFrame)
+        assert len(agg_plot._cut) == len(agg_plot.data)
+        assert list(agg_plot._cut.columns) == agg_plot._gb_axes
 
 
 class TestAggPlotAggregation:

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from numbers import Number
-from abc import abstractproperty, abstractmethod
+from abc import abstractmethod
 
 try:
     from astropy.stats import knuth_bin_width
@@ -59,8 +59,7 @@ class AggPlot(base.Base):
 
     @property
     def intervals(self):
-        #         return dict(self._intervals)
-        return {k: pd.IntervalIndex(v) for k, v in self.categoricals.items()}
+        return dict(self._intervals)
 
     @property
     def cut(self):
@@ -322,12 +321,11 @@ class AggPlot(base.Base):
             i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
 
             bins[k] = b
-            #             intervals[k] = pd.IntervalIndex(i)
-            intervals[k] = pd.CategoricalIndex(i)
+            intervals[k] = pd.IntervalIndex(i)
 
         bins = tuple(bins.items())
         intervals = tuple(intervals.items())
-        #         self._intervals = intervals
+        self._intervals = intervals
         self._categoricals = intervals
 
     def make_cut(self):
@@ -518,7 +516,8 @@ class AggPlot(base.Base):
     #                 data = data.clip(lo, up)
     #             return data
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _gb_axes(self):
         r"""The axes or columns over which the `groupby` aggregation takes place.
 

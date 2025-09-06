@@ -819,17 +819,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         #         assert x.size == agg.shape[1] + 1
         #         assert y.size == agg.shape[0] + 1
 
-        # WORKAROUND: pandas GH32381 - groupby.agg(observed=False) bug in categorical aggregation
-        # Issue: agg results may be missing some categories, causing shape mismatch
-        # Status: Fixed in pandas 2.1.0+ but kept for backward compatibility
-        # TODO: Remove after minimum pandas version >= 2.1.0
-        if x.size != agg.shape[1] + 1:
-            #             agg = agg.reindex(columns=self.intervals["x"])
-            agg = agg.reindex(columns=self.categoricals["x"])
-        if y.size != agg.shape[0] + 1:
-            #             agg = agg.reindex(index=self.intervals["y"])
-            agg = agg.reindex(index=self.categoricals["y"])
-
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -1371,17 +1360,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         #         assert x.size == agg.shape[1]
         #         assert y.size == agg.shape[0]
-
-        # WORKAROUND: pandas GH32381 - groupby.agg(observed=False) bug in categorical aggregation
-        # Issue: agg results may be missing some categories, causing shape mismatch
-        # Status: Fixed in pandas 2.1.0+ but kept for backward compatibility
-        # TODO: Remove after minimum pandas version >= 2.1.0
-        if x.size != agg.shape[1]:
-            #             agg = agg.reindex(columns=self.intervals["x"])
-            agg = agg.reindex(columns=self.categoricals["x"])
-        if y.size != agg.shape[0]:
-            #             agg = agg.reindex(index=self.intervals["y"])
-            agg = agg.reindex(index=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
