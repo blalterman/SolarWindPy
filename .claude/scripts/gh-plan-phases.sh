@@ -42,6 +42,44 @@ check_prerequisites() {
     fi
 }
 
+# Validate required labels exist
+validate_labels() {
+    log_info "Validating required labels exist..."
+    
+    local missing_labels=()
+    
+    # Get all labels once for efficiency (with pagination)
+    local all_labels=$(gh label list --limit 100 --json name | jq -r '.[].name')
+    log_info "Found $(echo "$all_labels" | wc -l) labels in repository" >&2
+    
+    # Check plan labels (phases.sh specifically needs plan:phase and plan:closeout)
+    for label in "plan:phase" "plan:closeout"; do
+        if ! echo "$all_labels" | grep -q "^${label}$"; then
+            missing_labels+=("$label")
+        fi
+    done
+    
+    # Check status labels
+    for status in planning in-progress blocked review completed; do
+        if ! echo "$all_labels" | grep -q "^status:${status}$"; then
+            missing_labels+=("status:$status")
+        fi
+    done
+    
+    if [ ${#missing_labels[@]} -gt 0 ]; then
+        log_error "Missing required labels:"
+        for label in "${missing_labels[@]}"; do
+            echo "  - $label"
+        done
+        echo
+        log_warning "Run the following to create them:"
+        echo "  bash .claude/scripts/setup-labels.sh"
+        exit 1
+    fi
+    
+    log_success "All required labels are available"
+}
+
 # Validate overview issue exists
 validate_overview() {
     local overview_issue="$1"
@@ -450,6 +488,7 @@ fi
 
 # Main execution
 check_prerequisites
+validate_labels
 
 plan_title=$(validate_overview "$OVERVIEW_ISSUE")
 

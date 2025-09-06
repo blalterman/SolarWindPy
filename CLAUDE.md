@@ -90,6 +90,23 @@ The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` c
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
 
+### GitHub Actions Design Decision: Skipped Runs
+**Issue**: Claude Code workflow creates "skipped" runs for every issue/comment without "@claude"
+**Root Cause**: GitHub Actions architectural limitation - all trigger events create runs, conditionally executed
+**Impact**: UI clutter (cosmetic only), no resource consumption, full audit trail preserved
+
+**Alternative Approaches Evaluated**:
+- Webhook filtering: HIGH complexity, infrastructure overhead, single point of failure
+- Manual dispatch: CRITICAL UX degradation, loses automation benefits  
+- Scheduled cleanup: Additional maintenance burden, potential permission issues
+
+**Decision**: Accept skipped runs as optimal trade-off
+**Rationale**: 
+- Preserves excellent @claude user experience (automatic responses)
+- Zero implementation risk or complexity
+- Simple mitigation via periodic cleanup commands
+- Cost-benefit analysis strongly favors status quo ($10/year vs $2,500+/year alternatives)
+
 ### Git Tag Conventions
 Only semantic versioning tags are used for releases:
 
@@ -133,6 +150,41 @@ flake8                 # Check linting
 
 # Recipe management:
 python scripts/update_conda_recipe.py
+
+# Conda feedstock automation:
+python scripts/update_conda_feedstock.py v0.1.5 --dry-run    # Test feedstock update
+python scripts/wait_for_pypi.py v0.1.5 --timeout 300        # Check PyPI availability
+
+# Maintenance commands:
+
+# Skipped Workflow Runs: Expected Behavior
+# The Claude Code workflow creates "skipped" runs for every issue/comment that doesn't contain "@claude"
+# This is a GitHub Actions architectural limitation - workflows trigger on all events, then conditionally skip
+# These skipped runs contain no data, consume no resources, but create UI clutter
+# Trade-off: Accept periodic cleanup vs. losing automatic @claude responses
+
+# Clean up skipped GitHub Actions workflow runs (use occasionally)
+gh run list -s skipped --limit 100 --json databaseId -q ".[].databaseId" | \
+  xargs -I {} gh run delete {} 2>/dev/null
+
+# With confirmation (recommended):
+count=$(gh run list -s skipped --limit 100 | wc -l)
+[[ $count -gt 0 ]] && echo "Delete $count skipped runs? (y/n)" && \
+  read -r response && [[ "$response" == "y" ]] && \
+  gh run list -s skipped --limit 100 --json databaseId -q ".[].databaseId" | \
+  xargs -I {} gh run delete {}
+
+# For large cleanups (300+ runs):
+count=$(gh run list -s skipped --limit 500 | wc -l)
+[[ $count -gt 0 ]] && echo "Delete $count skipped runs? (y/n)" && \
+  read -r response && [[ "$response" == "y" ]] && \
+  gh run list -s skipped --limit 500 --json databaseId -q ".[].databaseId" | \
+  xargs -I {} gh run delete {}
+
+# Optional: Scheduled cleanup workflow (not recommended for scientific projects)
+# If accumulation becomes problematic, consider weekly automated cleanup
+# Risk: Token permissions, accidental deletion, maintenance overhead
+# Better: Stick with manual cleanup to maintain simplicity
 ```
 
 ## GitHub Issues Plan Management
@@ -175,6 +227,11 @@ gh issue view 123
 "Use PlottingEngineer to create publication-quality figures"
 "Use TestEngineer to design physics-specific test strategies"
 ```
+
+### Agent Execution Note
+Agents MUST execute CLI scripts when requested, not describe them.
+If an agent returns text instead of creating issues, the execution requirement has failed.
+Manual fallback: Run `.claude/scripts/gh-plan-create.sh` directly.
 
 ## Testing Workflow Integration
 
