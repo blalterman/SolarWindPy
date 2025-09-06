@@ -1,335 +1,102 @@
-# CLAUDE.md
+# CLAUDE.md - Essential Claude AI Instructions
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides essential guidance to Claude Code when working with the SolarWindPy repository.
 
-## Development Workflow
+## Critical Rules (ALWAYS ENFORCE)
+1. **Branch Protection**: Never work on master - always request branch selection first
+2. **Script Execution**: Agents MUST execute CLI scripts, never just describe them
+3. **Test Before Commit**: All tests must pass before any commit
+4. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
+5. **Startup Briefing**: Provide project overview including agents, workflows, current state
 
-### Primary Workflow - Enhanced Hook System
-Use `Task` tool with specialized agents for domain work:
-- **UnifiedPlanCoordinator**: All planning, implementation, and status coordination
-- **PhysicsValidator**: Physics correctness and unit validation
-- **DataFrameArchitect**: MultiIndex data structure management
-- **NumericalStabilityGuard**: Numerical validation and edge cases
-- **PlottingEngineer**: Visualization and matplotlib operations
-- **FitFunctionSpecialist**: Curve fitting and statistical analysis
-- **TestEngineer**: Test coverage and quality assurance
+## Quick Reference
 
-### Automated Validation
-Hook system provides automatic validation:
-- **Session startup**: Branch validation and context loading
-- **Git operations**: Workflow enforcement and branch protection
-- **Physics edits**: Unit consistency and constraint checking
-- **Token limits**: Automatic file-based compaction and state preservation
-- **Plan value propositions**: Automated generation and validation
-- **Scope auditing**: Scientific research focus and SolarWindPy alignment validation
+### Agent Selection Matrix
+| Task Type | Agent | Critical Requirement |
+|-----------|-------|---------------------|
+| Planning | UnifiedPlanCoordinator | MUST execute gh-plan-*.sh scripts directly |
+| Physics | PhysicsValidator | Verify units, constraints, thermal speed |
+| Data | DataFrameArchitect | MultiIndex (M/C/S), use .xs() for views |
+| Numerical | NumericalStabilityGuard | Edge cases, precision |
+| Plotting | PlottingEngineer | Publication quality, matplotlib |
+| Fitting | FitFunctionSpecialist | Statistical analysis |
+| Testing | TestEngineer | ≥95% coverage requirement |
 
-## Environment Setup
-
-```bash
-# Create and activate conda environment:
-conda env create -f solarwindpy.yml
-conda activate solarwindpy
-pip install -e .
-
-# Alternative: generate environment from requirements-dev.txt:
-python scripts/requirements_to_conda_env.py --name solarwindpy-dev
-conda env create -f solarwindpy-dev.yml
-conda activate solarwindpy-dev
-pip install -e .
+### Critical Workflow Paths
+```
+GitHub Issues → feature/* → PR → master
+Plan Creation → gh-plan-create.sh → gh-plan-phases.sh → Value Props
+File Edit → Physics Hook → Test Runner Hook → Coverage Check
 ```
 
-## Core Architecture
+## Essential Commands (EXACT SYNTAX REQUIRED)
 
-### Data Model
-The package uses hierarchical `pandas.DataFrame` with three-level `MultiIndex` columns ("M", "C", "S"):
-- **M**: Measurement type (n, v, w, b, etc.)
-- **C**: Component (x, y, z for vectors, empty for scalars)  
-- **S**: Species (p1, p2, a, etc., empty for magnetic field)
-
-### Key Classes
-- **Plasma** (`core/plasma.py`): Central container for ions, magnetic field, spacecraft data
-- **Ion** (`core/ions.py`): Individual ion species with moments and properties
-- **Base** (`core/base.py`): Abstract base providing logging, units, constants
-
-### Module Organization
-- `core/`: Physics classes (plasma, ions, vectors, tensors, spacecraft)
-- `fitfunctions/`: Data fitting with abstract `FitFunction` base class
-- `plotting/`: Visualization tools and specialized labels
-- `instabilities/`: Plasma instability calculations
-- `tools/`: Utility functions including `units_constants`
-
-## Development Standards
-
-### Physics Rules (Automated via Hooks)
-- **Units**: SI internally, convert only for display
-- **Thermal speed**: mw² = 2kT convention
-- **Missing data**: NaN (never 0 or -999)
-- **Time series**: Maintain chronological order
-- **Alfvén speed**: V_A = B/√(μ₀ρ) with ion composition
-
-### Data Patterns (DataFrameArchitect Agent)
-- Use `.xs()` for DataFrame views, not copies
-- DateTime indices named "Epoch"
-- MultiIndex access via level names: `df.xs('v', level='M')`
-
-### Testing (Automated + TestEngineer Agent)
-- **Coverage**: ≥95% required (enforced by pre-commit hook)
-- **Structure**: `/tests/` mirrors source structure
-- **Automation**: Smart test execution via `.claude/hooks/test-runner.sh`
-- **Quality**: Physics constraints, numerical stability, scientific validation
-- **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
-
-### Git Workflow (Automated via Hooks)
-- **Planning**: GitHub Issues with comprehensive propositions framework
-- **Branches**: `feature/<name>` for implementation directly from GitHub Issues
-- **PR Workflow**: PRs created directly from feature/* branches to master
-  - GitHub Issues provide planning structure
-  - Workflow: GitHub Issues → feature → PR → master
-- **Protection**: No direct master commits, feature branch validation
-- **Multi-computer sync**: Instant plan access across all development machines
-- **Commits**: Conventional format with physics validation
-- **Quality**: Tests pass before commits (automated)
-
-### GitHub Actions Design Decision: Skipped Runs
-**Issue**: Claude Code workflow creates "skipped" runs for every issue/comment without "@claude"
-**Root Cause**: GitHub Actions architectural limitation - all trigger events create runs, conditionally executed
-**Impact**: UI clutter (cosmetic only), no resource consumption, full audit trail preserved
-
-**Alternative Approaches Evaluated**:
-- Webhook filtering: HIGH complexity, infrastructure overhead, single point of failure
-- Manual dispatch: CRITICAL UX degradation, loses automation benefits  
-- Scheduled cleanup: Additional maintenance burden, potential permission issues
-
-**Decision**: Accept skipped runs as optimal trade-off
-**Rationale**: 
-- Preserves excellent @claude user experience (automatic responses)
-- Zero implementation risk or complexity
-- Simple mitigation via periodic cleanup commands
-- Cost-benefit analysis strongly favors status quo ($10/year vs $2,500+/year alternatives)
-
-### Git Tag Conventions
-Only semantic versioning tags are used for releases:
-
-#### Release Tags (Semantic Versioning)
-- **Pattern**: `v{major}.{minor}.{patch}[-{prerelease}]`
-- **Examples**: `v1.0.0`, `v2.1.3-alpha`, `v1.5.0-beta.2`
-- **Purpose**: Official package releases, PyPI distribution
-- **Automation**: GitHub workflow creates these for releases
-- **Used by**: setuptools_scm for version detection
-
-### Session State Management (File-Based)
-- **Location**: `.claude/compacted_state.md` and timestamped backups
-- **Pattern**: `compaction-{date}-{time}-{compression}pct.md`
-- **Examples**: `compaction-2025-08-19-143022-20pct.md`
-- **Purpose**: Session state preservation at token boundaries
-- **Automation**: Created by `.claude/hooks/create-compaction.py`
-- **Storage**: File-based system, no git tags created
-
-**Important**: setuptools_scm is configured to only recognize `v*` tags for versioning, ensuring clean version detection.
-
-## Common Aliases
-
-- `swp.Plasma` → `solarwindpy.core.plasma.Plasma`
-- `swp.pp` → `solarwindpy.plotting`
-- `swp.sa` → `solarwindpy.solar_activity`
-- `swp.sc` → `solarwindpy.spacecraft`
-
-## Quick Commands
-
+### Plan Creation
 ```bash
-# Testing (enhanced automation):
-.claude/hooks/test-runner.sh --changed    # Test changed files
-.claude/hooks/test-runner.sh --physics    # Physics validation tests
-.claude/hooks/coverage-monitor.py         # Detailed coverage analysis
-.claude/scripts/generate-test.py          # Generate test scaffolding
+# Create overview with required flags
+.claude/scripts/gh-plan-create.sh -p <priority> -d <domain> "Plan Title"
+# priority: critical|high|medium|low  
+# domain: physics|data|plotting|testing|infrastructure|docs
 
-# Quality checks (automated via hooks):
-pytest -q              # Run tests  
-black solarwindpy/     # Format code
-flake8                 # Check linting
-
-# Recipe management:
-python scripts/update_conda_recipe.py
-
-# Conda feedstock automation:
-python scripts/update_conda_feedstock.py v0.1.5 --dry-run    # Test feedstock update
-python scripts/wait_for_pypi.py v0.1.5 --timeout 300        # Check PyPI availability
-
-# Maintenance commands:
-
-# Skipped Workflow Runs: Expected Behavior
-# The Claude Code workflow creates "skipped" runs for every issue/comment that doesn't contain "@claude"
-# This is a GitHub Actions architectural limitation - workflows trigger on all events, then conditionally skip
-# These skipped runs contain no data, consume no resources, but create UI clutter
-# Trade-off: Accept periodic cleanup vs. losing automatic @claude responses
-
-# Clean up skipped GitHub Actions workflow runs (use occasionally)
-gh run list -s skipped --limit 100 --json databaseId -q ".[].databaseId" | \
-  xargs -I {} gh run delete {} 2>/dev/null
-
-# With confirmation (recommended):
-count=$(gh run list -s skipped --limit 100 | wc -l)
-[[ $count -gt 0 ]] && echo "Delete $count skipped runs? (y/n)" && \
-  read -r response && [[ "$response" == "y" ]] && \
-  gh run list -s skipped --limit 100 --json databaseId -q ".[].databaseId" | \
-  xargs -I {} gh run delete {}
-
-# For large cleanups (300+ runs):
-count=$(gh run list -s skipped --limit 500 | wc -l)
-[[ $count -gt 0 ]] && echo "Delete $count skipped runs? (y/n)" && \
-  read -r response && [[ "$response" == "y" ]] && \
-  gh run list -s skipped --limit 500 --json databaseId -q ".[].databaseId" | \
-  xargs -I {} gh run delete {}
-
-# Optional: Scheduled cleanup workflow (not recommended for scientific projects)
-# If accumulation becomes problematic, consider weekly automated cleanup
-# Risk: Token permissions, accidental deletion, maintenance overhead
-# Better: Stick with manual cleanup to maintain simplicity
+# Example:
+.claude/scripts/gh-plan-create.sh -p high -d infrastructure "API Refactoring"
 ```
 
-## GitHub Issues Plan Management
-
-### Quick Start Workflow
+### Phase Creation (UnifiedPlanCoordinator MUST use batch mode)
 ```bash
-# Create new plan with propositions framework
-.claude/scripts/gh-plan-create.sh "Dark Mode Implementation" -p high -d infrastructure
-
-# Create phase issues for implementation
-.claude/scripts/gh-plan-phases.sh 123  # where 123 is overview issue number
-
-# Monitor all active plans
-.claude/scripts/gh-plan-status.sh
-
-# View specific plan details
-gh issue view 123
-```
-
-### Plan Templates
-- **Overview**: Complete propositions framework (value, cost, risk, token, usage analysis)
-- **Phase**: Detailed task breakdown with progress tracking and commit integration
-- **Closeout**: 85% implementation decision capture with lessons learned
-
-### Multi-Computer Benefits
-- Instant plan access from all 3 development machines
-- Real-time synchronization via GitHub Issues
-- No branch management overhead or context switching
-- Comprehensive searchable plan history
-
-## Agent Usage Examples
-
-```python
-# Planning and implementation with GitHub Issues
-"Use UnifiedPlanCoordinator to create GitHub Issues plan for dark mode implementation"
-
-# Domain-specific work  
-"Use PhysicsValidator to verify thermal speed calculations"
-"Use DataFrameArchitect to optimize MultiIndex operations"
-"Use PlottingEngineer to create publication-quality figures"
-"Use TestEngineer to design physics-specific test strategies"
-```
-
-### Agent Execution Note
-Agents MUST execute CLI scripts when requested, not describe them.
-If an agent returns text instead of creating issues, the execution requirement has failed.
-Manual fallback: Run `.claude/scripts/gh-plan-create.sh` directly.
-
-**For UnifiedPlanCoordinator**: Use batch mode with proper specifications:
-```bash
-# Create temporary configuration file with detailed specifications
-cat > /tmp/phases.conf <<EOF
-Documentation Inventory|2-3 hours|None
-Docstring Enhancement|4-6 hours|Phase 1
-Architecture Review|3-4 hours|Phase 1
-Performance Optimization|4-5 hours|Phase 3
+# Step 1: Create config in repo tmp/
+mkdir -p tmp
+cat > tmp/phases.conf <<'EOF'
+Phase Name|Estimated Duration|Dependencies
+Foundation Setup|2-3 hours|None
+Core Implementation|4-5 hours|Phase 1
+Testing & Validation|1-2 hours|Phase 2
 EOF
 
-# Use batch mode to create phases
-.claude/scripts/gh-plan-phases.sh -b /tmp/phases.conf $OVERVIEW_ISSUE
+# Step 2: Execute batch mode
+.claude/scripts/gh-plan-phases.sh -b tmp/phases.conf <issue_number>
 ```
 
-**Critical**: Never use quick mode (removed) - always provide specific durations and dependencies.
-
-## Testing Workflow Integration
-
-The testing system combines automation with domain expertise:
-- **Hooks**: Handle routine execution, coverage, and validation automatically
-- **TestEngineer Agent**: Provides scientific testing strategies and complex test design
-- **Templates**: Enable consistent test patterns across physics modules
-- **Smart Tools**: Context-aware test execution and coverage monitoring
-
-This ensures both efficiency and scientific rigor throughout the development process.
-
-## Plan Value Propositions
-
-All plans MUST include comprehensive value propositions automatically generated by hooks:
-
-### Required Sections (Auto-Generated)
-- 📊 **Value Proposition Analysis**: Scientific software development and productivity value
-- 💰 **Resource & Cost Analysis**: Development investment and ROI calculations  
-- ⚠️ **Risk Assessment & Mitigation**: Technical, project, and workflow risks
-- 🔒 **Security Proposition**: Code-level security assessment (NO FAIR compliance)
-- 🎯 **Scope Audit**: SolarWindPy alignment and scientific research focus validation
-- 💾 **Token Usage Optimization**: Claude session efficiency metrics
-- ⏱️ **Time Investment Analysis**: Development time and savings breakdown
-- 🎯 **Usage & Adoption Metrics**: Use cases and success criteria
-
-### Value Generation Workflow
-1. **UnifiedPlanCoordinator** creates basic plan structure from `plans/0-overview-template.md`
-2. Calls `.claude/hooks/plan-value-generator.py` for automated proposition generation
-3. **NEW**: Calls `.claude/hooks/plan-scope-auditor.py` for scientific focus validation
-4. Inserts generated content including scope audit into template placeholders
-5. Optional validation via `.claude/hooks/plan-value-validator.py` (includes scope validation)
-6. Plan ready with comprehensive value assessment and scope compliance
-
-### Hook Usage
+### Testing & Quality
 ```bash
-# Generate value propositions (called by UnifiedPlanCoordinator)
-python .claude/hooks/plan-value-generator.py \
-  --plan-file plans/new-plan/0-Overview.md \
-  --exclude-fair  # Default: no FAIR compliance
-
-# Generate scope audit (called by plan-value-generator.py)
-python .claude/hooks/plan-scope-auditor.py \
-  --plan-file plans/new-plan/0-Overview.md \
-  --output-format markdown
-
-# Validate plan completeness including scope audit (optional)
-python .claude/hooks/plan-value-validator.py \
-  --plan-file plans/new-plan/0-Overview.md \
-  --report-format text
+.claude/hooks/test-runner.sh --changed     # Test changed files only
+.claude/hooks/test-runner.sh --physics     # Physics validation
+pytest -q                                   # Quick test run
+black solarwindpy/ tests/                  # Format code
+flake8 solarwindpy/ tests/                 # Lint check
 ```
 
-### Plan Creation Standards
-- **Value Propositions**: Required for all new plans (auto-generated)
-- **Security Assessment**: Code-level only, NO FAIR data compliance  
-- **Scope Audit**: Validates alignment with SolarWindPy scientific mission (target score ≥80/100)
-- **Token Optimization**: Must demonstrate 60-80% savings through hooks
-- **Backward Compatibility**: Existing plans work unchanged
-- **Migration Path**: Optional enhancement for active plans
+## Project Architecture Summary
+- **Core Data Model**: MultiIndex DataFrame (M: measurement, C: component, S: species)
+- **Key Classes**: Plasma (container), Ion (species), Base (abstract)
+- **Hook System**: Automated validation at .claude/hooks/
+- **Plan System**: GitHub Issues with value propositions framework
+- **Coverage**: ≥95% required, enforced by pre-commit
 
-### Security Proposition Scope
-**Included (Code-Level)**:
-- Dependency vulnerability assessment
-- Authentication and access control impacts
-- Attack surface analysis
-- Development workflow security
-- CI/CD pipeline security considerations
+## UnifiedPlanCoordinator Execution Protocol
 
-**Explicitly Excluded**:
-- FAIR data principle compliance (requires core data structure changes)
-- Metadata security standards (not implemented)
-- Research data repository integration (outside scope)
-- Persistent identifier management (not applicable)
+CRITICAL: Agent MUST execute these commands, not describe them.
 
-### Token Optimization Benefits
-- **Current manual planning**: 1500-2500 tokens per plan
-- **Automated hook generation**: 300-500 tokens per plan
-- **Net savings**: 60-80% reduction in planning session token usage
-- **Break-even**: 10-15 plans for development ROI
-- **Annual benefit**: 25-50 hours of productive development time
+1. **Overview Issue Creation:**
+   ```bash
+   .claude/scripts/gh-plan-create.sh -p <priority> -d <domain> "Title"
+   ```
 
-### Integration with Existing Workflow
-- **UnifiedPlanCoordinator**: Enhanced with hook calling workflow
-- **Plan completion**: Requires value proposition validation
-- **Quality assurance**: Automated validation prevents incomplete plans
-- **Velocity learning**: Tracks actual vs estimated token usage improvements
+2. **Phase Issues Creation:**
+   ```bash
+   mkdir -p tmp
+   cat > tmp/phases.conf <<'EOF'
+   <phase_name>|<duration>|<dependencies>
+   EOF
+   .claude/scripts/gh-plan-phases.sh -b tmp/phases.conf $OVERVIEW_ISSUE
+   ```
+
+3. **Validation**: If text output instead of GitHub Issues → EXECUTION FAILED
+
+## Detailed Documentation
+For comprehensive information beyond these essentials:
+- Development standards → .claude/docs/DEVELOPMENT.md
+- Agent specifications → .claude/docs/AGENTS.md  
+- Hook reference → .claude/docs/HOOKS.md
+- Planning workflow → .claude/docs/PLANNING.md
+- Maintenance → .claude/docs/MAINTENANCE.md

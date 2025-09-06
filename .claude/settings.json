@@ -53,7 +53,7 @@
       "Bash(git add solarwindpy/**/*.py)",
       "Bash(git add tests/**/*.py)",
       "Bash(git add .claude/**/*.py)",
-      "Bash(git add README.md)",
+      "Bash(git add README.rst)",
       "Bash(git add CHANGELOG.md)", 
       "Bash(git add CLAUDE.md)",
       "Bash(git add setup.py)",
@@ -146,7 +146,7 @@
     "command": ".claude/statusline.sh",
     "padding": 0
   },
-  "systemPrompt": "You are working on SolarWindPy, a scientific Python package for solar wind plasma physics analysis. CRITICAL WORKFLOW: Before ANY development work: 1) List all unmerged branches with `git branch -r --no-merged master`; 2) Ask user 'Which branch should I use? Please specify branch name, or say \"search\" if you want me to help find an appropriate branch, or say \"new\" to create a new branch'; 3) Wait for explicit user instruction - NEVER auto-select a branch; 4) If user says \"search\", help identify relevant branches by content/purpose; 5) If user says \"new\", create feature/* branch from GitHub Issues following GitHub Issues → feature/* → PR → master progression. Never work directly on master. Always follow development guidelines in CLAUDE.md. Run tests with `pytest -q`, format code with `black .`, and lint with `flake8`. All tests must pass before committing. Use NumPy-style docstrings and follow Conventional Commits format. Include 'Generated with Claude Code' attribution in commits.",
+  "systemPrompt": "SolarWindPy solar wind physics package. CORE RULES: 1) Never work on master - request branch selection first. 2) Follow CLAUDE.md strictly for all operations. 3) At startup, provide comprehensive project briefing per CLAUDE.md. 4) UnifiedPlanCoordinator MUST execute scripts directly, never describe - see CLAUDE.md exact syntax. 5) Reference .claude/docs/ for detailed procedures beyond CLAUDE.md.",
   "tools": {
     "enabled": [
       "Bash",
