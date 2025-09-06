@@ -421,7 +421,6 @@ usage() {
     echo "  -i, --interactive   Interactive phase creation (default)"
     echo "  -b, --batch FILE    Batch create phases from configuration file"
     echo "  -c, --closeout      Also create a closeout issue"
-    echo "  -q, --quick PHASES  Quick create with phase names (comma-separated)"
     echo
     echo "Configuration file format (for batch mode):"
     echo "  phase_name|estimated_duration|dependencies"
@@ -434,14 +433,12 @@ usage() {
     echo "  $0 -i 123                           # Interactive mode (explicit)"
     echo "  $0 -b phases.conf 123               # Batch mode from file"
     echo "  $0 -c 123                           # Interactive + closeout"
-    echo "  $0 -q \"Setup,Implementation,Testing\" 123  # Quick mode"
 }
 
 # Parse command line arguments
 INTERACTIVE=true
 BATCH_FILE=""
 CREATE_CLOSEOUT=false
-QUICK_PHASES=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -461,11 +458,6 @@ while [[ $# -gt 0 ]]; do
         -c|--closeout)
             CREATE_CLOSEOUT=true
             shift
-            ;;
-        -q|--quick)
-            QUICK_PHASES="$2"
-            INTERACTIVE=false
-            shift 2
             ;;
         -*|--*)
             log_error "Unknown option $1"
@@ -496,17 +488,6 @@ if [ "$INTERACTIVE" = true ]; then
     interactive_phase_creation "$OVERVIEW_ISSUE" "$plan_title"
 elif [ -n "$BATCH_FILE" ]; then
     batch_phase_creation "$OVERVIEW_ISSUE" "$BATCH_FILE"
-elif [ -n "$QUICK_PHASES" ]; then
-    log_info "Quick phase creation mode"
-    IFS=',' read -ra phases <<< "$QUICK_PHASES"
-    
-    for i in "${!phases[@]}"; do
-        phase_num=$((i + 1))
-        phase_name="${phases[$i]}"
-        create_phase "$OVERVIEW_ISSUE" "$phase_num" "$phase_name" "TBD" "TBD"
-    done
-    
-    log_success "Quick phase creation completed!"
 fi
 
 # Create closeout issue if requested

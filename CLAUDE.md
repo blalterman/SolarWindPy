@@ -233,6 +233,22 @@ Agents MUST execute CLI scripts when requested, not describe them.
 If an agent returns text instead of creating issues, the execution requirement has failed.
 Manual fallback: Run `.claude/scripts/gh-plan-create.sh` directly.
 
+**For UnifiedPlanCoordinator**: Use batch mode with proper specifications:
+```bash
+# Create temporary configuration file with detailed specifications
+cat > /tmp/phases.conf <<EOF
+Documentation Inventory|2-3 hours|None
+Docstring Enhancement|4-6 hours|Phase 1
+Architecture Review|3-4 hours|Phase 1
+Performance Optimization|4-5 hours|Phase 3
+EOF
+
+# Use batch mode to create phases
+.claude/scripts/gh-plan-phases.sh -b /tmp/phases.conf $OVERVIEW_ISSUE
+```
+
+**Critical**: Never use quick mode (removed) - always provide specific durations and dependencies.
+
 ## Testing Workflow Integration
 
 The testing system combines automation with domain expertise:
