@@ -19,7 +19,7 @@ jobs:
       fail-fast: false  # Allow other jobs to complete even if one fails
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -211,7 +211,7 @@ jobs:
       fail-fast: false
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4

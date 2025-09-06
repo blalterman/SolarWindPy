@@ -24,7 +24,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Need full history for setuptools_scm
       
@@ -194,7 +194,7 @@ jobs:
       !contains(github.ref, 'dev')
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       
