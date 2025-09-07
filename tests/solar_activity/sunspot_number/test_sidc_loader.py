@@ -14,6 +14,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDCLoader, SIDC_ID
+from solarwindpy.solar_activity.base import DataLoader
 
 
 class TestSIDCLoaderCore:
@@ -22,7 +23,9 @@ class TestSIDCLoaderCore:
     def test_convert_nans_basic(self):
         """Test convert_nans replaces -1 with np.nan."""
         # Create a minimal loader instance for testing convert_nans method
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         # Create test DataFrame with -1 values
@@ -50,7 +53,9 @@ class TestSIDCLoaderCore:
 
     def test_convert_nans_no_minus_ones(self):
         """Test convert_nans when there are no -1 values."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         test_data = pd.DataFrame({"ssn": [10.5, 20.3, 25.3], "std": [2.1, 3.4, 4.2]})
@@ -63,7 +68,9 @@ class TestSIDCLoaderCore:
 
     def test_convert_nans_all_minus_ones(self):
         """Test convert_nans when all values are -1."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         test_data = pd.DataFrame({"ssn": [-1, -1, -1], "std": [-1, -1, -1]})
@@ -77,7 +84,9 @@ class TestSIDCLoaderCore:
         """Test that SIDCLoader inherits from DataLoader."""
         from solarwindpy.solar_activity.base import DataLoader
 
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         assert isinstance(loader, DataLoader)
@@ -91,7 +100,9 @@ class TestSIDCLoaderCore:
         with patch.object(
             SIDCLoader.__bases__[0], "data_path", new_callable=lambda: Path("/tmp/test")
         ):
-            with patch.object(SIDCLoader, "_init_logger"):
+            with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
                 loader = SIDCLoader("m", "http://example.com")
 
                 expected_path = Path("/tmp/test") / "sidc" / "m"
@@ -107,14 +118,18 @@ class TestSIDCLoaderCore:
                 "data_path",
                 new_callable=lambda: Path("/tmp/test"),
             ):
-                with patch.object(SIDCLoader, "_init_logger"):
+                with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
                     loader = SIDCLoader(key, "http://example.com")
                     expected_path = Path("/tmp/test") / "sidc" / key
                     assert loader.data_path == expected_path
 
     def test_method_existence(self):
         """Test that required methods exist."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         # Check that key methods exist
@@ -143,7 +158,9 @@ class TestSIDCLoaderCore:
         )
         mock_read_csv.return_value = mock_csv
 
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com/snmtotcsv.php")
             loader._logger = Mock()  # Mock the logger to avoid logging issues
 
@@ -161,7 +178,9 @@ class TestSIDCLoaderCore:
 
     def test_download_data_invalid_key_raises_error(self, tmp_path):
         """Test that invalid keys in download_data raise NotImplementedError."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("invalid_key", "http://example.com")
             loader._logger = Mock()
 
@@ -179,7 +198,9 @@ class TestSIDCLoaderCore:
         self, mock_ssn_extrema_class, mock_parent_load_data
     ):
         """Test that load_data calls parent load_data and uses SSNExtrema."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
             loader._logger = Mock()
 
@@ -223,7 +244,9 @@ class TestSIDCLoaderEdgeCases:
 
     def test_convert_nans_mixed_dtypes(self):
         """Test convert_nans with mixed data types."""
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader("m", "http://example.com")
 
         test_data = pd.DataFrame(
@@ -252,7 +275,9 @@ class TestSIDCLoaderEdgeCases:
         """Test initialization with a real SIDC_ID object."""
         sidc_id = SIDC_ID("m")
 
-        with patch.object(SIDCLoader, "_init_logger"):
+        with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
             loader = SIDCLoader(sidc_id.key, sidc_id.url)
 
         assert loader.key == "m"
@@ -266,7 +291,9 @@ class TestSIDCLoaderEdgeCases:
             "data_path",
             new_callable=lambda: Path("/nonexistent/test"),
         ):
-            with patch.object(SIDCLoader, "_init_logger"):
+            with patch.object(DataLoader, "_init_logger"), \
+             patch.object(DataLoader, "get_data_ctime"), \
+             patch.object(DataLoader, "get_data_age"):
                 loader = SIDCLoader("m", "http://example.com")
 
                 path = loader.data_path
