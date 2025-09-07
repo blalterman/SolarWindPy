@@ -14,10 +14,8 @@ After installation, import the package and create a plasma object:
 .. code-block:: python
 
    import solarwindpy as swp
-   
    # Load plasma data (example with sample data)
    plasma = swp.Plasma()
-   
    # Access ion species and magnetic field data
    print(plasma.data.columns)  # View available measurements
 

@@ -284,7 +284,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             agg = agg.divide(N, level="y").divide(dx, level="x")
 
         elif hasattr(axnorm, "__iter__"):
-            # TODO: This is an undocumented feature. I do not know if it is 
+            # TODO: This is an undocumented feature. I do not know if it is
             #       tested nor how it interacts with colorbar labels, etc.
             #       We need to investigate this issue (20250804).
             kind, fcn = axnorm
