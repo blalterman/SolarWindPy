@@ -2,7 +2,7 @@
 
 ## Compaction Metadata
 - **Timestamp**: 2025-09-06T21:42:23Z
-- **Branch**: feature/issue-297-plotting-module-audit-&-optimization---documentation-first
+- **Branch**: feature/issue-297-plotting-module-audit-and-optimization---documentation-first
 - **Plan**: tests-audit
 - **Pre-Compaction Context**: ~9,082 tokens (1,896 lines)
 - **Target Compression**: medium (35% reduction)
@@ -25,12 +25,12 @@
   - **Final estimate**: 9,082 tokens
 
 ## Git State
-### Current Branch: feature/issue-297-plotting-module-audit-&-optimization---documentation-first
+### Current Branch: feature/issue-297-plotting-module-audit-and-optimization---documentation-first
 ### Last Commit: bad308e - feat: Phase 3 plotting module optimization - remove deprecated code & improve performance (blalterman, 18 hours ago)
 
 ### Recent Commits:
 ```
-bad308e (HEAD -> feature/issue-297-plotting-module-audit-&-optimization---documentation-first) feat: Phase 3 plotting module optimization - remove deprecated code & improve performance
+bad308e (HEAD -> feature/issue-297-plotting-module-audit-and-optimization---documentation-first) feat: Phase 3 plotting module optimization - remove deprecated code & improve performance
 dee935f fix: emergency pandas 2.2.2 compatibility - replace removed clip methods
 f26c67d docs: complete Phase 1 comprehensive plotting module documentation
 d8a8bcc (origin/master, origin/HEAD, master, feature/issue-296-plotting-module-audit-&-optimization---documentation-first) fix: update Claude Code settings.json wildcard syntax for v1.0+ compatibility
@@ -96,7 +96,7 @@ M .claude/compacted_state.md
 ### 🚀 Quick Start Commands
 ```bash
 # Restore session environment
-git checkout feature/issue-297-plotting-module-audit-&-optimization---documentation-first
+git checkout feature/issue-297-plotting-module-audit-and-optimization---documentation-first
 cd plans/tests-audit && ls -la
 git status
 pwd  # Verify working directory
@@ -111,7 +111,7 @@ conda info --envs  # Check active environment
 
 ### 🔄 Session Continuity Checklist
 - [ ] **Environment**: Verify correct conda environment and working directory
-- [ ] **Branch**: Confirm on correct git branch (feature/issue-297-plotting-module-audit-&-optimization---documentation-first)
+- [ ] **Branch**: Confirm on correct git branch (feature/issue-297-plotting-module-audit-and-optimization---documentation-first)
 - [ ] **Context**: Review critical context summary above
 - [ ] **Plan**: Check plan status in plans/tests-audit
 - [ ] **Changes**: Review uncommitted changes
