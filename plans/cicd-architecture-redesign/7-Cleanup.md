@@ -115,8 +115,8 @@ echo "Legacy workflow cleanup committed to master"
 ```bash
 # Create test branch to trigger CI
 git checkout -b test/cleanup-validation
-echo "# Test commit to validate CI" >> README.md
-git add README.md
+echo "# Test commit to validate CI" >> README.rst
+git add README.rst
 git commit -m "test: validate CI after workflow cleanup"
 git push origin test/cleanup-validation
 
