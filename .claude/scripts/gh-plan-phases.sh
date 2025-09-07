@@ -42,6 +42,44 @@ check_prerequisites() {
     fi
 }
 
+# Validate required labels exist
+validate_labels() {
+    log_info "Validating required labels exist..."
+    
+    local missing_labels=()
+    
+    # Get all labels once for efficiency (with pagination)
+    local all_labels=$(gh label list --limit 100 --json name | jq -r '.[].name')
+    log_info "Found $(echo "$all_labels" | wc -l) labels in repository" >&2
+    
+    # Check plan labels (phases.sh specifically needs plan:phase and plan:closeout)
+    for label in "plan:phase" "plan:closeout"; do
+        if ! echo "$all_labels" | grep -q "^${label}$"; then
+            missing_labels+=("$label")
+        fi
+    done
+    
+    # Check status labels
+    for status in planning in-progress blocked review completed; do
+        if ! echo "$all_labels" | grep -q "^status:${status}$"; then
+            missing_labels+=("status:$status")
+        fi
+    done
+    
+    if [ ${#missing_labels[@]} -gt 0 ]; then
+        log_error "Missing required labels:"
+        for label in "${missing_labels[@]}"; do
+            echo "  - $label"
+        done
+        echo
+        log_warning "Run the following to create them:"
+        echo "  bash .claude/scripts/setup-labels.sh"
+        exit 1
+    fi
+    
+    log_success "All required labels are available"
+}
+
 # Validate overview issue exists
 validate_overview() {
     local overview_issue="$1"
@@ -383,7 +421,6 @@ usage() {
     echo "  -i, --interactive   Interactive phase creation (default)"
     echo "  -b, --batch FILE    Batch create phases from configuration file"
     echo "  -c, --closeout      Also create a closeout issue"
-    echo "  -q, --quick PHASES  Quick create with phase names (comma-separated)"
     echo
     echo "Configuration file format (for batch mode):"
     echo "  phase_name|estimated_duration|dependencies"
@@ -396,14 +433,12 @@ usage() {
     echo "  $0 -i 123                           # Interactive mode (explicit)"
     echo "  $0 -b phases.conf 123               # Batch mode from file"
     echo "  $0 -c 123                           # Interactive + closeout"
-    echo "  $0 -q \"Setup,Implementation,Testing\" 123  # Quick mode"
 }
 
 # Parse command line arguments
 INTERACTIVE=true
 BATCH_FILE=""
 CREATE_CLOSEOUT=false
-QUICK_PHASES=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -423,11 +458,6 @@ while [[ $# -gt 0 ]]; do
         -c|--closeout)
             CREATE_CLOSEOUT=true
             shift
-            ;;
-        -q|--quick)
-            QUICK_PHASES="$2"
-            INTERACTIVE=false
-            shift 2
             ;;
         -*|--*)
             log_error "Unknown option $1"
@@ -450,6 +480,7 @@ fi
 
 # Main execution
 check_prerequisites
+validate_labels
 
 plan_title=$(validate_overview "$OVERVIEW_ISSUE")
 
@@ -457,17 +488,6 @@ if [ "$INTERACTIVE" = true ]; then
     interactive_phase_creation "$OVERVIEW_ISSUE" "$plan_title"
 elif [ -n "$BATCH_FILE" ]; then
     batch_phase_creation "$OVERVIEW_ISSUE" "$BATCH_FILE"
-elif [ -n "$QUICK_PHASES" ]; then
-    log_info "Quick phase creation mode"
-    IFS=',' read -ra phases <<< "$QUICK_PHASES"
-    
-    for i in "${!phases[@]}"; do
-        phase_num=$((i + 1))
-        phase_name="${phases[$i]}"
-        create_phase "$OVERVIEW_ISSUE" "$phase_num" "$phase_name" "TBD" "TBD"
-    done
-    
-    log_success "Quick phase creation completed!"
 fi
 
 # Create closeout issue if requested

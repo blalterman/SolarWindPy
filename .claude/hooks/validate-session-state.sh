@@ -61,3 +61,14 @@ echo "📚 Recent commits:"
 git log --oneline -3 | sed 's/^/   /'
 
 echo "✅ Session state validation complete"
+
+# Trigger startup briefing based on CLAUDE.md
+echo ""
+echo "📋 === PROJECT BRIEFING REQUIRED ==="
+echo "Per CLAUDE.md requirements, provide:"
+echo "1. SolarWindPy architecture (MultiIndex DataFrame, physics classes)"
+echo "2. Agent system overview (7 specialized agents)"  
+echo "3. Current branch: $current_branch and plan status"
+echo "4. Critical rules (branch protection, script execution)"
+echo "5. Reference CLAUDE.md for essential commands"
+echo "=================================="
