@@ -27,6 +27,20 @@ repos:
     files: ^(solarwindpy|tests|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
+- repo: https://github.com/PyCQA/doc8
+  rev: v1.1.1
+  hooks:
+  - id: doc8
+    name: doc8 - Documentation linter
+    args: ['--max-line-length=100', '--quiet']
+    files: \.(py|rst|md)$
+    exclude: |
+      (?x)^(
+        docs/build/|
+        docs/_build/|
+        \.claude/templates/
+      )$
+
 - repo: local
   hooks:
   - id: check-conventional-commits

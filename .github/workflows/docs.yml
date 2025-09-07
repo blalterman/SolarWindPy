@@ -38,7 +38,7 @@ jobs:
           pip install -e .
       
       - name: Lint documentation with doc8
-        run: doc8 README.rst docs CITATION.rst --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
+        run: doc8 README.rst docs CITATION.rst --max-line-length=100 --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
       
       - name: Check documentation links
         run: |

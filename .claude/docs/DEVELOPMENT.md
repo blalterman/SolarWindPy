@@ -48,11 +48,61 @@ pip install -e .
 ```
 
 ## Code Quality Standards
-- **Formatting**: Black for code formatting
-- **Linting**: Flake8 for style checking
-- **Documentation**: NumPy-style docstrings
+- **Formatting**: Black for code formatting (88 characters)
+- **Linting**: Flake8 for style checking (88 characters)
+- **Documentation**: NumPy-style docstrings with doc8 validation (100 characters)
 - **Commits**: Conventional Commits format with 'Generated with Claude Code'
 - **Testing**: All tests must pass before committing
+
+### Documentation Standards (doc8)
+
+**Line Length Guidelines**:
+- **Code lines**: 88 characters (black/flake8)
+- **Documentation lines**: 100 characters (doc8)
+
+**Scientific Documentation Best Practices**:
+```python
+def plasma_beta(n, T, B):
+    r"""Calculate plasma beta for magnetized plasma.
+    
+    Uses the standard definition β = 8π n k_B T / B² where thermal
+    pressure dominates over magnetic pressure when β > 1.
+    
+    Parameters
+    ----------
+    n : float or array-like
+        Ion number density in cm⁻³
+    T : float or array-like  
+        Ion temperature in K
+    B : float or array-like
+        Magnetic field strength in nT
+        
+    Notes
+    -----
+    Long mathematical expressions should be broken naturally:
+    
+    .. math::
+        β = \\frac{8π n k_B T}{B²}
+    """
+```
+
+**Handling Long Lines**:
+- URLs and DOIs: Use `# noqa: D001` if necessary
+- Mathematical formulas: Break at logical operators
+- Parameter lists: Use line continuations
+- Example arrays: Format for readability
+
+**Common doc8 Commands**:
+```bash
+# Check all documentation
+doc8 solarwindpy/ --extension .py
+
+# Check specific files
+doc8 README.rst docs/
+
+# Skip line length check for specific files
+doc8 --ignore D001 file_with_long_formulas.py
+```
 
 ## Module Organization
 - `core/`: Physics classes (plasma, ions, vectors, tensors, spacecraft)
