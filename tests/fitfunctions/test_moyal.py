@@ -21,7 +21,7 @@ def test_function_signature_and_output(
     y = np.ones_like(x)
     # Note: Moyal constructor expects sigma parameter but implementation is broken
     # For testing, we'll initialize without it for now
-    obj = cls(1.0, x, y)  # sigma, xobs, yobs - broken constructor signature
+    obj = cls(x, y)  # xobs, yobs - correct FitFunction signature
 
     # Test function signature
     sig = inspect.signature(obj.function)
@@ -62,7 +62,7 @@ def test_p0_zero_size_input(cls):
     """Test p0 calculation with zero-size input."""
     x = np.array([])
     y = np.array([])
-    obj = cls(1.0, x, y)  # sigma, xobs, yobs
+    obj = cls(x, y)  # xobs, yobs
 
     # Should raise ValueError due to insufficient data (from sufficient_data property)
     with pytest.raises(ValueError, match="insufficient data"):
@@ -72,7 +72,7 @@ def test_p0_zero_size_input(cls):
 def test_moyal_p0_estimation(moyal_data):
     """Test p0 parameter estimation for Moyal."""
     x, y, w = moyal_data
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Test that p0 can be calculated
     p0 = obj.p0
@@ -89,14 +89,14 @@ def test_moyal_p0_estimation(moyal_data):
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (Moyal, "lala"),  # This is what the broken implementation returns
+        (Moyal, r"f(x) = A \cdot \exp\left[\frac{1}{2}\left(\left(\frac{x-\mu}{\sigma}\right)^2 - \exp\left(\left(\frac{x-\mu}{\sigma}\right)^2\right)\right)\right]"),  # Fixed LaTeX formula
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
     """Test TeX function string generation."""
     x = np.linspace(-1, 3, 10)
     y = np.ones_like(x)
-    obj = cls(1.0, x, y)  # sigma, xobs, yobs
+    obj = cls(x, y)  # xobs, yobs
 
     assert obj.TeX_function == expected_tex
 
@@ -104,7 +104,7 @@ def test_TeX_function_strings(cls, expected_tex):
 def test_make_fit_success_moyal(moyal_data):
     """Test successful fitting for Moyal class."""
     x, y, w = moyal_data
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Test fitting - may fail due to implementation issues
     try:
@@ -126,7 +126,7 @@ def test_make_fit_insufficient_data():
     x = np.array([1.0])  # Single point
     y = np.array([1.0])
 
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Should raise ValueError when accessing sufficient_data
     with pytest.raises(ValueError, match="insufficient data"):
@@ -137,7 +137,7 @@ def test_property_access_before_fit():
     """Test accessing properties before fitting."""
     x = np.linspace(-1, 3, 10)
     y = np.ones_like(x)
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # These should raise AttributeError before fitting (no _popt, _pcov, _psigma set)
     with pytest.raises(AttributeError):
@@ -160,7 +160,7 @@ def test_moyal_with_weights(moyal_data):
     w_varied = np.linspace(0.5, 2.0, len(x))
 
     # Use correct parameter name: weights, not wobs
-    obj = Moyal(1.0, x, y, weights=w_varied)
+    obj = Moyal(x, y, weights=w_varied)
 
     # Test that weights are properly stored
     assert obj.observations.raw.w is not None
@@ -170,7 +170,7 @@ def test_moyal_with_weights(moyal_data):
 def test_str_and_call_methods(moyal_data):
     """Test string representation and call functionality."""
     x, y, w = moyal_data
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Test string representation
     str_repr = str(obj)
@@ -194,14 +194,14 @@ def test_moyal_edge_cases():
     x = np.array([-2, -1, 0, 1, 2])
     y = np.array([0.1, 0.5, 1.0, 0.5, 0.1])
 
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Should be able to create object
     assert obj is not None
 
     # Test with zero/negative y values
     y_with_zeros = np.array([0.0, 0.5, 1.0, 0.5, 0.0])
-    obj2 = Moyal(1.0, x, y_with_zeros)
+    obj2 = Moyal(x, y_with_zeros)
 
     # Should handle this gracefully
     try:
@@ -221,7 +221,7 @@ def test_moyal_constructor_issues():
     # instead of the standard __init__(self, xobs, yobs, **kwargs)
 
     # This should work with the broken signature
-    obj = Moyal(1.0, x, y)  # sigma=1.0, xobs=x, yobs=y
+    obj = Moyal(x, y)  # xobs=x, yobs=y
     assert obj is not None
 
     # Test that the sigma parameter is not actually used properly
@@ -238,7 +238,7 @@ def test_moyal_function_mathematical_properties():
     """Test mathematical properties of the Moyal function implementation."""
     x = np.linspace(-2, 4, 50)
     y = np.ones_like(x)
-    obj = Moyal(1.0, x, y)  # sigma, xobs, yobs
+    obj = Moyal(x, y)  # xobs, yobs
 
     # Test the function directly
     try:
