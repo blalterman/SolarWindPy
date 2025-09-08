@@ -9,6 +9,7 @@ matplotlib
 astropy
 numba
 tabulate
+docstring-inheritance>=2.0
 pytest
 pytest-cov>=4.1.0
 black

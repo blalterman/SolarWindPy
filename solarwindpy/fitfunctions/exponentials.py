@@ -16,18 +16,7 @@ from .core import FitFunction
 
 class Exponential(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit ``A * exp(-c x)`` to the data.
-
-        Parameters
-        ----------
-        xobs : array-like
-            Independent variable values.
-        yobs : array-like
-            Observed dependent variable values.
-        **kwargs
-            Additional options forwarded to :class:`FitFunction`.
-        """
-
+        """Fit ``A * exp(-c x)`` to the data."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -70,18 +59,7 @@ class Exponential(FitFunction):
 
 class ExponentialPlusC(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit ``A * exp(-c x) + d`` to the data.
-
-        Parameters
-        ----------
-        xobs : array-like
-            Independent variable values.
-        yobs : array-like
-            Observed dependent variable values.
-        **kwargs
-            Additional options forwarded to :class:`FitFunction`.
-        """
-
+        """Fit ``A * exp(-c x) + d`` to the data."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -125,18 +103,7 @@ class ExponentialPlusC(FitFunction):
 
 class ExponentialCDF(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit an exponential cumulative distribution function.
-
-        Parameters
-        ----------
-        xobs : array-like
-            Independent variable values.
-        yobs : array-like
-            Observed cumulative counts.
-        **kwargs
-            Additional options forwarded to :class:`FitFunction`.
-        """
-
+        """Fit an exponential cumulative distribution function."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property

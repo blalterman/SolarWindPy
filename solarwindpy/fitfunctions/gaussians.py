@@ -13,9 +13,12 @@ from .core import FitFunction
 
 
 class Gaussian(FitFunction):
+    """Standard Gaussian distribution for symmetric peak fitting.
+    
+    Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)
+    """
+    
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit a standard Gaussian profile."""
-
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -67,9 +70,20 @@ class Gaussian(FitFunction):
 
 
 class GaussianNormalized(FitFunction):
+    """Normalized Gaussian distribution where integral equals n.
+    
+    Fits data to the form: (n / (sqrt(2*pi) * sigma)) * exp(-0.5 * ((x - mu) / sigma)^2)
+    """
+    
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit a normalized Gaussian where the integral equals ``n``."""
-
+        """Initialize normalized Gaussian fit.
+        
+        Notes
+        -----
+        The normalization parameter n represents the total area under
+        the Gaussian curve, useful for fitting probability distributions
+        or particle count distributions.
+        """
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -123,14 +137,26 @@ class GaussianNormalized(FitFunction):
 
 
 class GaussianLn(FitFunction):
-    r"""Gaussian where taking :math:`\ln(x)`.
+    r"""Log-normal distribution for skewed data fitting.
+    
+    Fits a Gaussian in logarithmic space where :math:`\ln(x)` follows
+    a normal distribution.
 
-    [1] https://mathworld.wolfram.com/LogNormalDistribution.html
+    References
+    ----------
+    .. [1] https://mathworld.wolfram.com/LogNormalDistribution.html
     """
 
     def __init__(self, xobs, yobs, **kwargs):
-        """Fit a Gaussian in logarithmic space."""
-
+        """Initialize log-normal Gaussian fit.
+        
+        Notes
+        -----
+        xobs must be positive for log transformation.
+        This distribution is commonly used for particle size distributions
+        and velocity distributions in solar wind where values are
+        positively skewed.
+        """
         super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
 

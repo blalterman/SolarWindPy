@@ -13,17 +13,7 @@ from .core import FitFunction
 
 class PowerLaw(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
-        """Initialize a simple power-law fit.
-
-        Parameters
-        ----------
-        xobs, yobs : array-like
-            Observed ``x`` and ``y`` values to fit.
-        **kwargs : dict
-            Additional arguments passed to
-            :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-        """
-
+        # Docstring inherited from FitFunction
         super().__init__(xobs, yobs, **kwargs)
 
     @property
