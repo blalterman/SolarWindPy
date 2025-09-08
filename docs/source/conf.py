@@ -37,6 +37,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "numpydoc",
     "sphinxcontrib.bibtex",
+    "docstring_inheritance",  # Enable docstring inheritance for fit functions
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
@@ -59,7 +60,9 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': '__init__',
     'undoc-members': True,
-    'exclude-members': '__weakref__'
+    'exclude-members': '__weakref__',
+    'inherited-members': True,  # Show inherited members in documentation
+    'show-inheritance': True,  # Display inheritance relationships
 }
 
 # Don't prepend module names in titles
@@ -77,7 +80,7 @@ napoleon_include_private_with_doc = False
 # Create toctree entries for class members (separate pages)
 numpydoc_class_members_toctree = True
 numpydoc_show_class_members = False  # Don't show on parent page
-numpydoc_show_inherited_class_members = False
+numpydoc_show_inherited_class_members = True  # Show inherited docstrings
 
 # -- MathJax configuration ---------------------------------------------------
 

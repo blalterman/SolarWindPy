@@ -15,6 +15,7 @@ import numpy as np
 from abc import ABC, abstractproperty
 from collections import namedtuple
 from inspect import getfullargspec
+from docstring_inheritance import NumpyDocstringInheritanceMeta
 
 # from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
@@ -43,6 +44,14 @@ InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
 FitBounds = namedtuple("FitBounds", "lower,upper")
 
+
+# Combine ABC and docstring inheritance metaclasses
+class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
+    """Metaclass combining ABC and docstring inheritance."""
+
+    pass
+
+
 # def __huber(z):
 #     cost = np.array(z)
 #     mask = z <= 1
@@ -60,7 +69,7 @@ FitBounds = namedtuple("FitBounds", "lower,upper")
 # "arctan": np.arctan}
 
 
-class FitFunction(ABC):
+class FitFunction(ABC, metaclass=FitFunctionMeta):
     r"""Assuming that you don't want special formatting, call order is:
 
         fit_function = FitFunction(function, TeX_string)
@@ -86,26 +95,68 @@ class FitFunction(ABC):
         logx=False,
         logy=False,
     ):
-        """Initialize a ``FitFunction`` with observed data.
+        """Initialize fit function with observed data.
 
         Parameters
         ----------
-        xobs, yobs : array-like
-            Observed ``x`` and ``y`` values.
+        xobs : array-like
+            Observed x values (independent variable).
+            Shape must match yobs.
+        yobs : array-like
+            Observed y values (dependent variable).
+            Shape must match xobs.
         xmin, xmax : float, optional
-            Range limits for ``x`` used in fitting.
+            Range limits for x used in fitting. Values outside
+            this range are excluded from the fit. All boundaries
+            are inclusive (>= or <=).
         xoutside : tuple(float, float), optional
-            Include data outside this range in the fit.
+            Include only data outside this range in the fit.
+            Useful for excluding a central region. Format: (lower, upper)
+            where lower < upper.
         ymin, ymax : float, optional
-            Range limits for ``y`` used in fitting.
+            Range limits for y used in fitting. Values outside
+            this range are excluded from the fit.
         youtside : tuple(float, float), optional
-            Include data outside this range.
+            Include only data outside this range.
+            Format: (lower, upper) where lower < upper.
         weights : array-like, optional
-            Uncertainties associated with ``y``.
+            Uncertainties (1-sigma) associated with y values.
+            Used for weighted least squares fitting. If 1-d array,
+            interpreted as diagonal covariance matrix. If 2-d,
+            must be positive definite covariance matrix.
         wmin, wmax : float, optional
-            Weight limits.
+            Weight limits. Observations with weights outside
+            this range are excluded from the fit.
         logx, logy : bool, default False
-            Whether to interpret ``x`` or ``y`` on a log10 scale.
+            Whether to interpret x or y on a log10 scale.
+            If logy=True, weight selection uses w/(y*ln(10))
+            for proper error propagation in log space.
+
+        Notes
+        -----
+        The fitting procedure uses scipy.optimize.least_squares
+        with robust loss functions (Huber by default) to handle
+        outliers. The initial parameter guess is provided by the
+        p0 property, which must be implemented by subclasses.
+
+        All subclasses inherit this documentation automatically
+        through the docstring-inheritance metaclass.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from solarwindpy.fitfunctions import Gaussian
+        >>> x = np.linspace(-5, 5, 100)
+        >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)
+        >>> fit = Gaussian(x, y, xmin=-3, xmax=3)
+        >>> fit.make_fit()
+        >>> print(f"Fitted mu: {fit.popt['mu']:.3f}")
+
+        See Also
+        --------
+        make_fit : Execute the fitting procedure
+        popt : Access optimized parameters
+        rsq : Calculate coefficient of determination
         """
 
         self._init_logger()

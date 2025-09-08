@@ -13,8 +13,13 @@ from .core import FitFunction
 
 
 class Line(FitFunction):
+    """Linear fit function for straight line relationships.
+
+    Fits data to the form: y = m*x + b
+    """
+
     def __init__(self, xobs, yobs, **kwargs):
-        """Create a line fit to ``(xobs, yobs)`` data."""
+        # Docstring inherited from FitFunction
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -61,11 +66,32 @@ class Line(FitFunction):
 
     @property
     def x_intercept(self):
+        """Calculate the x-intercept of the fitted line.
+
+        Returns
+        -------
+        float
+            The x value where the line crosses y=0.
+        """
         return -self.popt["b"] / self.popt["m"]
 
 
 class LineXintercept(FitFunction):
+    """Linear fit with explicit x-intercept parameterization.
+
+    Fits data to the form: y = m * (x - x0)
+    where x0 is the x-intercept.
+    """
+
     def __init__(self, xobs, yobs, **kwargs):
+        """Initialize linear fit with x-intercept parameterization.
+
+        Notes
+        -----
+        This parameterization is useful when fitting data where the
+        x-intercept has physical meaning, such as threshold energies
+        or cutoff velocities in solar wind measurements.
+        """
         super().__init__(xobs, yobs, **kwargs)
 
     @property
@@ -113,4 +139,11 @@ class LineXintercept(FitFunction):
 
     @property
     def y_intercept(self):
+        """Calculate the y-intercept of the fitted line.
+
+        Returns
+        -------
+        float
+            The y value where the line crosses x=0.
+        """
         return -self.popt["x0"] * self.popt["m"]
