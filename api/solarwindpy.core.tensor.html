@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.tensor module &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.core.tensor module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -381,6 +381,107 @@
 <dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.magnitude">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.2)"><span class="pre">Series</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.magnitude" title="Link to this definition"></a></dt>
 <dd><p>Calculate and return the magnitude of the tensor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.constants">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.constants" title="Link to this definition"></a></dt>
+<dd><p>Physical constants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Physical constants instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Constants</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.data" title="Link to this definition"></a></dt>
+<dd><p>Underlying DataFrame containing the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Data with MultiIndex columns.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.head" title="Link to this definition"></a></dt>
+<dd><p>Return the first few rows of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>First few rows of the data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)"><span class="pre">Logger</span></a></em><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger instance for this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Logger instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)">logging.Logger</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.mi_tuples">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mi_tuples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v2.3.2)"><span class="pre">MultiIndex</span></a></span></span><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.mi_tuples" title="Link to this definition"></a></dt>
+<dd><p>Create a MultiIndex from tuples with appropriate names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>Tuple</em><em>[</em><em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>...</em><em>]</em>) – Tuples to create MultiIndex from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>MultiIndex created from tuples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MI</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.tail">
+<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.tail" title="Link to this definition"></a></dt>
+<dd><p>Return the last few rows of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Last few rows of the data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.units" title="Link to this definition"></a></dt>
+<dd><p>Units conversion factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Units conversion instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Units</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

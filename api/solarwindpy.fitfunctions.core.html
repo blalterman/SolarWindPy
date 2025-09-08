@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.core module &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.fitfunctions.core module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -352,6 +352,19 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.Observations">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Observations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.Observations" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.Observations.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.Observations.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.Observations.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.Observations.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.Observations.w">
 <span class="sig-name descname"><span class="pre">w</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.Observations.w" title="Link to this definition"></a></dt>
@@ -376,6 +389,19 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.UsedRawObs">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UsedRawObs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">used</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tk_observed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.UsedRawObs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.UsedRawObs.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.UsedRawObs.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.UsedRawObs.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.UsedRawObs.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.UsedRawObs.raw">
 <span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.UsedRawObs.raw" title="Link to this definition"></a></dt>
@@ -406,6 +432,19 @@ the functional form and an initial parameter guess.</p>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.InitialGuessInfo.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.InitialGuessInfo.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.InitialGuessInfo.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.InitialGuessInfo.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.InitialGuessInfo.p0">
 <span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.InitialGuessInfo.p0" title="Link to this definition"></a></dt>
@@ -418,6 +457,19 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChisqPerDegreeOfFreedom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robust</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.linear">
 <span class="sig-name descname"><span class="pre">linear</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.linear" title="Link to this definition"></a></dt>
@@ -436,6 +488,19 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitBounds">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FitBounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitBounds" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitBounds.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitBounds.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitBounds.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitBounds.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitBounds.lower">
 <span class="sig-name descname"><span class="pre">lower</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitBounds.lower" title="Link to this definition"></a></dt>
@@ -446,6 +511,31 @@ the functional form and an initial parameter guess.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitBounds.upper">
 <span class="sig-name descname"><span class="pre">upper</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitBounds.upper" title="Link to this definition"></a></dt>
 <dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunctionMeta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FitFunctionMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunctionMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunctionMeta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NumpyDocstringInheritanceMeta</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
+<p>Metaclass combining ABC and docstring inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunctionMeta.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_bases</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunctionMeta.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunctionMeta.mro">
+<span class="sig-name descname"><span class="pre">mro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunctionMeta.mro" title="Link to this definition"></a></dt>
+<dd><p>Return a type’s method resolution order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunctionMeta.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subclass</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunctionMeta.register" title="Link to this definition"></a></dt>
+<dd><p>Register a virtual subclass of an ABC.</p>
+<p>Returns the subclass, to allow usage as a class decorator.</p>
 </dd></dl>
 
 </dd></dl>
@@ -464,26 +554,78 @@ an array of NaNs the same shape as the x-values.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFunction.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFunction.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFunction.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize a <code class="docutils literal notranslate"><span class="pre">FitFunction</span></code> with observed data.</p>
+<dd><p>Initialize fit function with observed data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xobs</strong> (<em>array-like</em>) – Observed <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> values.</p></li>
-<li><p><strong>yobs</strong> (<em>array-like</em>) – Observed <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> values.</p></li>
-<li><p><strong>xmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for <code class="docutils literal notranslate"><span class="pre">x</span></code> used in fitting.</p></li>
-<li><p><strong>xmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for <code class="docutils literal notranslate"><span class="pre">x</span></code> used in fitting.</p></li>
-<li><p><strong>xoutside</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Include data outside this range in the fit.</p></li>
-<li><p><strong>ymin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for <code class="docutils literal notranslate"><span class="pre">y</span></code> used in fitting.</p></li>
-<li><p><strong>ymax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for <code class="docutils literal notranslate"><span class="pre">y</span></code> used in fitting.</p></li>
-<li><p><strong>youtside</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Include data outside this range.</p></li>
-<li><p><strong>weights</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Uncertainties associated with <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
-<li><p><strong>wmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Weight limits.</p></li>
-<li><p><strong>wmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Weight limits.</p></li>
-<li><p><strong>logx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to interpret <code class="docutils literal notranslate"><span class="pre">x</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code> on a log10 scale.</p></li>
-<li><p><strong>logy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to interpret <code class="docutils literal notranslate"><span class="pre">x</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code> on a log10 scale.</p></li>
+<li><p><strong>xobs</strong> (<em>array-like</em>) – Observed x values (independent variable).
+Shape must match yobs.</p></li>
+<li><p><strong>yobs</strong> (<em>array-like</em>) – Observed y values (dependent variable).
+Shape must match xobs.</p></li>
+<li><p><strong>xmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for x used in fitting. Values outside
+this range are excluded from the fit. All boundaries
+are inclusive (&gt;= or &lt;=).</p></li>
+<li><p><strong>xmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for x used in fitting. Values outside
+this range are excluded from the fit. All boundaries
+are inclusive (&gt;= or &lt;=).</p></li>
+<li><p><strong>xmax</strong> – The description is missing.</p></li>
+<li><p><strong>xoutside</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Include only data outside this range in the fit.
+Useful for excluding a central region. Format: (lower, upper)
+where lower &lt; upper.</p></li>
+<li><p><strong>ymin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for y used in fitting. Values outside
+this range are excluded from the fit.</p></li>
+<li><p><strong>ymax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Range limits for y used in fitting. Values outside
+this range are excluded from the fit.</p></li>
+<li><p><strong>ymax</strong> – The description is missing.</p></li>
+<li><p><strong>youtside</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Include only data outside this range.
+Format: (lower, upper) where lower &lt; upper.</p></li>
+<li><p><strong>weights</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Uncertainties (1-sigma) associated with y values.
+Used for weighted least squares fitting. If 1-d array,
+interpreted as diagonal covariance matrix. If 2-d,
+must be positive definite covariance matrix.</p></li>
+<li><p><strong>wmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Weight limits. Observations with weights outside
+this range are excluded from the fit.</p></li>
+<li><p><strong>wmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Weight limits. Observations with weights outside
+this range are excluded from the fit.</p></li>
+<li><p><strong>wmax</strong> – The description is missing.</p></li>
+<li><p><strong>logx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to interpret x or y on a log10 scale.
+If logy=True, weight selection uses w/(y*ln(10))
+for proper error propagation in log space.</p></li>
+<li><p><strong>logy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to interpret x or y on a log10 scale.
+If logy=True, weight selection uses w/(y*ln(10))
+for proper error propagation in log space.</p></li>
+<li><p><strong>logy</strong> – The description is missing.</p></li>
 </ul>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.core.FitFunction.popt" title="solarwindpy.fitfunctions.core.FitFunction.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.core.FitFunction.rsq" title="solarwindpy.fitfunctions.core.FitFunction.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The fitting procedure uses scipy.optimize.least_squares
+with robust loss functions (Huber by default) to handle
+outliers. The initial parameter guess is provided by the
+p0 property, which must be implemented by subclasses.</p>
+<p>All subclasses inherit this documentation automatically
+through the docstring-inheritance metaclass.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitted mu: </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">

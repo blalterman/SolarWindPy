@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting package &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.plotting package &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -399,6 +399,7 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.TeXlabel.set_axnorm"><code class="docutils literal notranslate"><span class="pre">TeXlabel.set_axnorm()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.TeXlabel.make_species"><code class="docutils literal notranslate"><span class="pre">TeXlabel.make_species()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.TeXlabel.build_label"><code class="docutils literal notranslate"><span class="pre">TeXlabel.build_label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.TeXlabel.logger"><code class="docutils literal notranslate"><span class="pre">TeXlabel.logger</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw"><code class="docutils literal notranslate"><span class="pre">Vsw</span></code></a><ul>
@@ -406,6 +407,8 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw.tex"><code class="docutils literal notranslate"><span class="pre">Vsw.tex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw.units"><code class="docutils literal notranslate"><span class="pre">Vsw.units</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw.path"><code class="docutils literal notranslate"><span class="pre">Vsw.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw.logger"><code class="docutils literal notranslate"><span class="pre">Vsw.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Vsw.with_units"><code class="docutils literal notranslate"><span class="pre">Vsw.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count"><code class="docutils literal notranslate"><span class="pre">Count</span></code></a><ul>
@@ -416,6 +419,8 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count.axnorm"><code class="docutils literal notranslate"><span class="pre">Count.axnorm</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count.set_axnorm"><code class="docutils literal notranslate"><span class="pre">Count.set_axnorm()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count.build_label"><code class="docutils literal notranslate"><span class="pre">Count.build_label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count.logger"><code class="docutils literal notranslate"><span class="pre">Count.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.Count.with_units"><code class="docutils literal notranslate"><span class="pre">Count.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.html#solarwindpy.plotting.labels.species_translation"><code class="docutils literal notranslate"><span class="pre">species_translation()</span></code></a></li>
@@ -451,23 +456,41 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series"><code class="docutils literal notranslate"><span class="pre">AggPlot.get_plotted_data_boolean_series()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold"><code class="docutils literal notranslate"><span class="pre">AggPlot.get_subset_above_threshold()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_axnorm"><code class="docutils literal notranslate"><span class="pre">AggPlot.set_axnorm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.__init__"><code class="docutils literal notranslate"><span class="pre">AggPlot.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.clip"><code class="docutils literal notranslate"><span class="pre">AggPlot.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.data"><code class="docutils literal notranslate"><span class="pre">AggPlot.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.labels"><code class="docutils literal notranslate"><span class="pre">AggPlot.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.log"><code class="docutils literal notranslate"><span class="pre">AggPlot.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.logger"><code class="docutils literal notranslate"><span class="pre">AggPlot.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.make_plot"><code class="docutils literal notranslate"><span class="pre">AggPlot.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.path"><code class="docutils literal notranslate"><span class="pre">AggPlot.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_data"><code class="docutils literal notranslate"><span class="pre">AggPlot.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_labels"><code class="docutils literal notranslate"><span class="pre">AggPlot.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_log"><code class="docutils literal notranslate"><span class="pre">AggPlot.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html#solarwindpy.plotting.agg_plot.AggPlot.set_path"><code class="docutils literal notranslate"><span class="pre">AggPlot.set_path()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="solarwindpy.plotting.base.html">solarwindpy.plotting.base module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.LogAxes"><code class="docutils literal notranslate"><span class="pre">LogAxes</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.LogAxes.count"><code class="docutils literal notranslate"><span class="pre">LogAxes.count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.LogAxes.index"><code class="docutils literal notranslate"><span class="pre">LogAxes.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.LogAxes.x"><code class="docutils literal notranslate"><span class="pre">LogAxes.x</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.LogAxes.y"><code class="docutils literal notranslate"><span class="pre">LogAxes.y</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels"><code class="docutils literal notranslate"><span class="pre">AxesLabels</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels.count"><code class="docutils literal notranslate"><span class="pre">AxesLabels.count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels.index"><code class="docutils literal notranslate"><span class="pre">AxesLabels.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels.x"><code class="docutils literal notranslate"><span class="pre">AxesLabels.x</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels.y"><code class="docutils literal notranslate"><span class="pre">AxesLabels.y</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.AxesLabels.z"><code class="docutils literal notranslate"><span class="pre">AxesLabels.z</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.RangeLimits"><code class="docutils literal notranslate"><span class="pre">RangeLimits</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.RangeLimits.count"><code class="docutils literal notranslate"><span class="pre">RangeLimits.count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.RangeLimits.index"><code class="docutils literal notranslate"><span class="pre">RangeLimits.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.RangeLimits.lower"><code class="docutils literal notranslate"><span class="pre">RangeLimits.lower</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.RangeLimits.upper"><code class="docutils literal notranslate"><span class="pre">RangeLimits.upper</span></code></a></li>
 </ul>
@@ -493,6 +516,15 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_data"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.set_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_path"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.set_path()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_labels"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.__init__"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.clip"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.data"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.labels"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.log"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.logger"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.make_plot"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.path"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.PlotWithZdata.set_log"><code class="docutils literal notranslate"><span class="pre">PlotWithZdata.set_log()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -508,6 +540,30 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.set_labels"><code class="docutils literal notranslate"><span class="pre">Hist1D.set_labels()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.make_plot"><code class="docutils literal notranslate"><span class="pre">Hist1D.make_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.take_data_in_yrange_across_x"><code class="docutils literal notranslate"><span class="pre">Hist1D.take_data_in_yrange_across_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.agg_axes"><code class="docutils literal notranslate"><span class="pre">Hist1D.agg_axes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.alim"><code class="docutils literal notranslate"><span class="pre">Hist1D.alim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.axnorm"><code class="docutils literal notranslate"><span class="pre">Hist1D.axnorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.calc_bins_intervals"><code class="docutils literal notranslate"><span class="pre">Hist1D.calc_bins_intervals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.categoricals"><code class="docutils literal notranslate"><span class="pre">Hist1D.categoricals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.clim"><code class="docutils literal notranslate"><span class="pre">Hist1D.clim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.clip"><code class="docutils literal notranslate"><span class="pre">Hist1D.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.clip_data"><code class="docutils literal notranslate"><span class="pre">Hist1D.clip_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.cut"><code class="docutils literal notranslate"><span class="pre">Hist1D.cut</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.data"><code class="docutils literal notranslate"><span class="pre">Hist1D.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.edges"><code class="docutils literal notranslate"><span class="pre">Hist1D.edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.get_plotted_data_boolean_series"><code class="docutils literal notranslate"><span class="pre">Hist1D.get_plotted_data_boolean_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.get_subset_above_threshold"><code class="docutils literal notranslate"><span class="pre">Hist1D.get_subset_above_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.grouped"><code class="docutils literal notranslate"><span class="pre">Hist1D.grouped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.intervals"><code class="docutils literal notranslate"><span class="pre">Hist1D.intervals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.joint"><code class="docutils literal notranslate"><span class="pre">Hist1D.joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.labels"><code class="docutils literal notranslate"><span class="pre">Hist1D.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.log"><code class="docutils literal notranslate"><span class="pre">Hist1D.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.logger"><code class="docutils literal notranslate"><span class="pre">Hist1D.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.make_cut"><code class="docutils literal notranslate"><span class="pre">Hist1D.make_cut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.path"><code class="docutils literal notranslate"><span class="pre">Hist1D.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.set_alim"><code class="docutils literal notranslate"><span class="pre">Hist1D.set_alim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.set_clim"><code class="docutils literal notranslate"><span class="pre">Hist1D.set_clim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist1d.html#solarwindpy.plotting.hist1d.Hist1D.set_log"><code class="docutils literal notranslate"><span class="pre">Hist1D.set_log()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -532,6 +588,31 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot"><code class="docutils literal notranslate"><span class="pre">Hist2D.make_joint_h2_h1_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.id_data_above_contour"><code class="docutils literal notranslate"><span class="pre">Hist2D.id_data_above_contour()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x"><code class="docutils literal notranslate"><span class="pre">Hist2D.take_data_in_yrange_across_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.agg_axes"><code class="docutils literal notranslate"><span class="pre">Hist2D.agg_axes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.alim"><code class="docutils literal notranslate"><span class="pre">Hist2D.alim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#id0"><code class="docutils literal notranslate"><span class="pre">Hist2D.axnorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.calc_bins_intervals"><code class="docutils literal notranslate"><span class="pre">Hist2D.calc_bins_intervals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.categoricals"><code class="docutils literal notranslate"><span class="pre">Hist2D.categoricals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.clim"><code class="docutils literal notranslate"><span class="pre">Hist2D.clim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.clip"><code class="docutils literal notranslate"><span class="pre">Hist2D.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.clip_data"><code class="docutils literal notranslate"><span class="pre">Hist2D.clip_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#id1"><code class="docutils literal notranslate"><span class="pre">Hist2D.cut</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#id2"><code class="docutils literal notranslate"><span class="pre">Hist2D.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.edges"><code class="docutils literal notranslate"><span class="pre">Hist2D.edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.get_plotted_data_boolean_series"><code class="docutils literal notranslate"><span class="pre">Hist2D.get_plotted_data_boolean_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.get_subset_above_threshold"><code class="docutils literal notranslate"><span class="pre">Hist2D.get_subset_above_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.grouped"><code class="docutils literal notranslate"><span class="pre">Hist2D.grouped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.intervals"><code class="docutils literal notranslate"><span class="pre">Hist2D.intervals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.joint"><code class="docutils literal notranslate"><span class="pre">Hist2D.joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.labels"><code class="docutils literal notranslate"><span class="pre">Hist2D.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.log"><code class="docutils literal notranslate"><span class="pre">Hist2D.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.logger"><code class="docutils literal notranslate"><span class="pre">Hist2D.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.make_cut"><code class="docutils literal notranslate"><span class="pre">Hist2D.make_cut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#id3"><code class="docutils literal notranslate"><span class="pre">Hist2D.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_alim"><code class="docutils literal notranslate"><span class="pre">Hist2D.set_alim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_clim"><code class="docutils literal notranslate"><span class="pre">Hist2D.set_clim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_log"><code class="docutils literal notranslate"><span class="pre">Hist2D.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.hist2d.html#solarwindpy.plotting.hist2d.Hist2D.set_path"><code class="docutils literal notranslate"><span class="pre">Hist2D.set_path()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -551,6 +632,38 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.__init__"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.agg"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.agg()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.make_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.agg_axes"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.agg_axes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.alim"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.alim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.axnorm"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.axnorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.calc_bins_intervals"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.calc_bins_intervals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.categoricals"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.categoricals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.clim"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.clim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.clip"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.clip_data"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.clip_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.construct_cdf"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.construct_cdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.cut"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.cut</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.data"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.edges"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.get_plotted_data_boolean_series"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.get_plotted_data_boolean_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.get_subset_above_threshold"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.get_subset_above_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.grouped"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.grouped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.intervals"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.intervals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.joint"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.labels"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.log"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.logger"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.make_cut"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.make_cut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.orbit"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.orbit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.path"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_alim"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_alim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_axnorm"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_axnorm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_clim"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_clim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_data"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_labels"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_log"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_orbit"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_orbit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.set_path"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.set_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist1D.take_data_in_yrange_across_x"><code class="docutils literal notranslate"><span class="pre">OrbitHist1D.take_data_in_yrange_across_x()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D</span></code></a><ul>
@@ -560,6 +673,43 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_one_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_one_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_in_out_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_in_out_both_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_in_out_both_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.agg_axes"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.agg_axes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.alim"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.alim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.axnorm"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.axnorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.calc_bins_intervals"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.calc_bins_intervals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.categoricals"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.categoricals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.clim"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.clim</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.clip"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.clip_data"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.clip_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.cut"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.cut</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.data"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.edges"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.edges</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.get_border"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.get_border()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.get_plotted_data_boolean_series"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.get_plotted_data_boolean_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.get_subset_above_threshold"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.get_subset_above_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.grouped"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.grouped</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.id_data_above_contour"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.id_data_above_contour()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.intervals"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.intervals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.joint"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.joint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.labels"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.log"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.logger"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_cut"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_cut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_joint_h2_h1_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_joint_h2_h1_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.make_plot"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.orbit"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.orbit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.path"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.plot_contours"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.plot_contours()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.plot_edges"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.plot_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_alim"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_alim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_axnorm"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_axnorm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_clim"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_clim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_data"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_labels"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_log"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_orbit"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_orbit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.set_path"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.set_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html#solarwindpy.plotting.orbits.OrbitHist2D.take_data_in_yrange_across_x"><code class="docutils literal notranslate"><span class="pre">OrbitHist2D.take_data_in_yrange_across_x()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -568,6 +718,16 @@
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter"><code class="docutils literal notranslate"><span class="pre">Scatter</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.__init__"><code class="docutils literal notranslate"><span class="pre">Scatter.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.make_plot"><code class="docutils literal notranslate"><span class="pre">Scatter.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.clip"><code class="docutils literal notranslate"><span class="pre">Scatter.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.data"><code class="docutils literal notranslate"><span class="pre">Scatter.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.labels"><code class="docutils literal notranslate"><span class="pre">Scatter.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.log"><code class="docutils literal notranslate"><span class="pre">Scatter.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.logger"><code class="docutils literal notranslate"><span class="pre">Scatter.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.path"><code class="docutils literal notranslate"><span class="pre">Scatter.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.set_data"><code class="docutils literal notranslate"><span class="pre">Scatter.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.set_labels"><code class="docutils literal notranslate"><span class="pre">Scatter.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.set_log"><code class="docutils literal notranslate"><span class="pre">Scatter.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html#solarwindpy.plotting.scatter.Scatter.set_path"><code class="docutils literal notranslate"><span class="pre">Scatter.set_path()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -603,18 +763,24 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.InitialSpiralEdges"><code class="docutils literal notranslate"><span class="pre">InitialSpiralEdges</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.InitialSpiralEdges.count"><code class="docutils literal notranslate"><span class="pre">InitialSpiralEdges.count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.InitialSpiralEdges.index"><code class="docutils literal notranslate"><span class="pre">InitialSpiralEdges.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.InitialSpiralEdges.x"><code class="docutils literal notranslate"><span class="pre">InitialSpiralEdges.x</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.InitialSpiralEdges.y"><code class="docutils literal notranslate"><span class="pre">InitialSpiralEdges.y</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID.count"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID.count()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID.fill"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID.fill</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID.id"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID.index"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMeshBinID.visited"><code class="docutils literal notranslate"><span class="pre">SpiralMeshBinID.visited</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralFilterThresholds"><code class="docutils literal notranslate"><span class="pre">SpiralFilterThresholds</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralFilterThresholds.count"><code class="docutils literal notranslate"><span class="pre">SpiralFilterThresholds.count()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralFilterThresholds.density"><code class="docutils literal notranslate"><span class="pre">SpiralFilterThresholds.density</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralFilterThresholds.index"><code class="docutils literal notranslate"><span class="pre">SpiralFilterThresholds.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralFilterThresholds.size"><code class="docutils literal notranslate"><span class="pre">SpiralFilterThresholds.size</span></code></a></li>
 </ul>
 </li>
@@ -656,6 +822,15 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_data"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.set_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.make_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.plot_contours"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.plot_contours()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.clip"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.data"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.labels"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.log"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.logger"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.path"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_labels"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_log"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_path"><code class="docutils literal notranslate"><span class="pre">SpiralPlot2D.set_path()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity package &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.solar_activity package &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -388,6 +388,7 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ID.key"><code class="docutils literal notranslate"><span class="pre">ID.key</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ID.url"><code class="docutils literal notranslate"><span class="pre">ID.url</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ID.set_key"><code class="docutils literal notranslate"><span class="pre">ID.set_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ID.logger"><code class="docutils literal notranslate"><span class="pre">ID.logger</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.DataLoader"><code class="docutils literal notranslate"><span class="pre">DataLoader</span></code></a><ul>
@@ -421,6 +422,7 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ActivityIndicator.normalized"><code class="docutils literal notranslate"><span class="pre">ActivityIndicator.normalized</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ActivityIndicator.set_extrema"><code class="docutils literal notranslate"><span class="pre">ActivityIndicator.set_extrema()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ActivityIndicator.run_normalization"><code class="docutils literal notranslate"><span class="pre">ActivityIndicator.run_normalization()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.ActivityIndicator.logger"><code class="docutils literal notranslate"><span class="pre">ActivityIndicator.logger</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.IndicatorExtrema"><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema</span></code></a><ul>
@@ -433,6 +435,7 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.IndicatorExtrema.cut_spec_by_interval"><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.cut_spec_by_interval()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands"><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.calculate_extrema_bands()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.IndicatorExtrema.cut_about_extrema_bands"><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.cut_about_extrema_bands()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html#solarwindpy.solar_activity.base.IndicatorExtrema.logger"><code class="docutils literal notranslate"><span class="pre">IndicatorExtrema.logger</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -447,10 +450,33 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.set_path"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.set_path()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.set_data"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.set_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.make_plot"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.clip"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.data"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.labels"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.log"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.logger"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.path"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.set_labels"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.IndicatorPlot.set_log"><code class="docutils literal notranslate"><span class="pre">IndicatorPlot.set_log()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot"><code class="docutils literal notranslate"><span class="pre">SSNPlot</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.__init__"><code class="docutils literal notranslate"><span class="pre">SSNPlot.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.clip"><code class="docutils literal notranslate"><span class="pre">SSNPlot.clip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.data"><code class="docutils literal notranslate"><span class="pre">SSNPlot.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.indicator"><code class="docutils literal notranslate"><span class="pre">SSNPlot.indicator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.labels"><code class="docutils literal notranslate"><span class="pre">SSNPlot.labels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.log"><code class="docutils literal notranslate"><span class="pre">SSNPlot.log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.logger"><code class="docutils literal notranslate"><span class="pre">SSNPlot.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.make_plot"><code class="docutils literal notranslate"><span class="pre">SSNPlot.make_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.path"><code class="docutils literal notranslate"><span class="pre">SSNPlot.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.plasma_index"><code class="docutils literal notranslate"><span class="pre">SSNPlot.plasma_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.plot_data"><code class="docutils literal notranslate"><span class="pre">SSNPlot.plot_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.set_data"><code class="docutils literal notranslate"><span class="pre">SSNPlot.set_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.set_labels"><code class="docutils literal notranslate"><span class="pre">SSNPlot.set_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.set_log"><code class="docutils literal notranslate"><span class="pre">SSNPlot.set_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.set_path"><code class="docutils literal notranslate"><span class="pre">SSNPlot.set_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html#solarwindpy.solar_activity.plots.SSNPlot.ykey"><code class="docutils literal notranslate"><span class="pre">SSNPlot.ykey</span></code></a></li>
 </ul>
 </li>
 </ul>

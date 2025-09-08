@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../../../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -323,6 +323,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractproperty</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getfullargspec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docstring_inheritance</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumpyDocstringInheritanceMeta</span>
 
 <span class="c1"># from scipy.optimize import curve_fit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">least_squares</span><span class="p">,</span> <span class="n">OptimizeWarning</span>
@@ -351,6 +352,17 @@
 <span class="n">ChisqPerDegreeOfFreedom</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ChisqPerDegreeOfFreedom&quot;</span><span class="p">,</span> <span class="s2">&quot;linear,robust&quot;</span><span class="p">)</span>
 <span class="n">FitBounds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;FitBounds&quot;</span><span class="p">,</span> <span class="s2">&quot;lower,upper&quot;</span><span class="p">)</span>
 
+
+<span class="c1"># Combine ABC and docstring inheritance metaclasses</span>
+<div class="viewcode-block" id="FitFunctionMeta">
+<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunctionMeta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FitFunctionMeta</span><span class="p">(</span><span class="n">NumpyDocstringInheritanceMeta</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">ABC</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass combining ABC and docstring inheritance.&quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+
 <span class="c1"># def __huber(z):</span>
 <span class="c1">#     cost = np.array(z)</span>
 <span class="c1">#     mask = z &lt;= 1</span>
@@ -370,7 +382,7 @@
 
 <div class="viewcode-block" id="FitFunction">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">FitFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FitFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FitFunctionMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Assuming that you don&#39;t want special formatting, call order is:</span>
 
 <span class="sd">        fit_function = FitFunction(function, TeX_string)</span>
@@ -398,26 +410,68 @@
         <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a ``FitFunction`` with observed data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize fit function with observed data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        xobs, yobs : array-like</span>
-<span class="sd">            Observed ``x`` and ``y`` values.</span>
+<span class="sd">        xobs : array-like</span>
+<span class="sd">            Observed x values (independent variable).</span>
+<span class="sd">            Shape must match yobs.</span>
+<span class="sd">        yobs : array-like</span>
+<span class="sd">            Observed y values (dependent variable).</span>
+<span class="sd">            Shape must match xobs.</span>
 <span class="sd">        xmin, xmax : float, optional</span>
-<span class="sd">            Range limits for ``x`` used in fitting.</span>
+<span class="sd">            Range limits for x used in fitting. Values outside</span>
+<span class="sd">            this range are excluded from the fit. All boundaries</span>
+<span class="sd">            are inclusive (&gt;= or &lt;=).</span>
 <span class="sd">        xoutside : tuple(float, float), optional</span>
-<span class="sd">            Include data outside this range in the fit.</span>
+<span class="sd">            Include only data outside this range in the fit.</span>
+<span class="sd">            Useful for excluding a central region. Format: (lower, upper)</span>
+<span class="sd">            where lower &lt; upper.</span>
 <span class="sd">        ymin, ymax : float, optional</span>
-<span class="sd">            Range limits for ``y`` used in fitting.</span>
+<span class="sd">            Range limits for y used in fitting. Values outside</span>
+<span class="sd">            this range are excluded from the fit.</span>
 <span class="sd">        youtside : tuple(float, float), optional</span>
-<span class="sd">            Include data outside this range.</span>
+<span class="sd">            Include only data outside this range.</span>
+<span class="sd">            Format: (lower, upper) where lower &lt; upper.</span>
 <span class="sd">        weights : array-like, optional</span>
-<span class="sd">            Uncertainties associated with ``y``.</span>
+<span class="sd">            Uncertainties (1-sigma) associated with y values.</span>
+<span class="sd">            Used for weighted least squares fitting. If 1-d array,</span>
+<span class="sd">            interpreted as diagonal covariance matrix. If 2-d,</span>
+<span class="sd">            must be positive definite covariance matrix.</span>
 <span class="sd">        wmin, wmax : float, optional</span>
-<span class="sd">            Weight limits.</span>
+<span class="sd">            Weight limits. Observations with weights outside</span>
+<span class="sd">            this range are excluded from the fit.</span>
 <span class="sd">        logx, logy : bool, default False</span>
-<span class="sd">            Whether to interpret ``x`` or ``y`` on a log10 scale.</span>
+<span class="sd">            Whether to interpret x or y on a log10 scale.</span>
+<span class="sd">            If logy=True, weight selection uses w/(y*ln(10))</span>
+<span class="sd">            for proper error propagation in log space.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The fitting procedure uses scipy.optimize.least_squares</span>
+<span class="sd">        with robust loss functions (Huber by default) to handle</span>
+<span class="sd">        outliers. The initial parameter guess is provided by the</span>
+<span class="sd">        p0 property, which must be implemented by subclasses.</span>
+
+<span class="sd">        All subclasses inherit this documentation automatically</span>
+<span class="sd">        through the docstring-inheritance metaclass.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions import Gaussian</span>
+<span class="sd">        &gt;&gt;&gt; x = np.linspace(-5, 5, 100)</span>
+<span class="sd">        &gt;&gt;&gt; y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)</span>
+<span class="sd">        &gt;&gt;&gt; fit = Gaussian(x, y, xmin=-3, xmax=3)</span>
+<span class="sd">        &gt;&gt;&gt; fit.make_fit()</span>
+<span class="sd">        &gt;&gt;&gt; print(f&quot;Fitted mu: {fit.popt[&#39;mu&#39;]:.3f}&quot;)</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        make_fit : Execute the fitting procedure</span>
+<span class="sd">        popt : Access optimized parameters</span>
+<span class="sd">        rsq : Calculate coefficient of determination</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>

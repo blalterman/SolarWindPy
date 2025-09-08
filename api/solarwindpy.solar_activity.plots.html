@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.plots module &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.solar_activity.plots module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -406,6 +406,49 @@ assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p><
 <span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/plots.html#IndicatorPlot.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.make_plot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.clip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.clip" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.log">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.path" title="Link to this definition"></a></dt>
+<dd><p>Path for saving figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.set_labels">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.set_labels" title="Link to this definition"></a></dt>
+<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
+<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.IndicatorPlot.set_log">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.IndicatorPlot.set_log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -416,6 +459,94 @@ assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/plots.html#SSNPlot.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.clip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.clip" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.indicator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">indicator</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.indicator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.log">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.make_plot">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.make_plot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.path" title="Link to this definition"></a></dt>
+<dd><p>Path for saving figure.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.plasma_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plasma_index</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plasma_index" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.plot_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plot_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_data">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ykey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plasma_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_labels">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_labels" title="Link to this definition"></a></dt>
+<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
+<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_log">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_path">
+<span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_path" title="Link to this definition"></a></dt>
+<dd><p>Build the plot save path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Path</em>) – If str and == “auto”, then build path from <cite>self.labels</cite>. Otherwise,
+assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p></li>
+<li><p><strong>add_scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, add information about the axis scales to the end of the path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.ykey">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ykey</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.ykey" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.base module &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.plotting.base module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -349,6 +349,19 @@ implement specific visualizations.</p>
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.LogAxes">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LogAxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.LogAxes" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.LogAxes.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.LogAxes.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.LogAxes.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.LogAxes.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.LogAxes.x">
 <span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#solarwindpy.plotting.base.LogAxes.x" title="Link to this definition"></a></dt>
@@ -367,6 +380,19 @@ implement specific visualizations.</p>
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.AxesLabels">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AxesLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.AxesLabels" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.AxesLabels.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.AxesLabels.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.AxesLabels.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.AxesLabels.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.AxesLabels.x">
 <span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#solarwindpy.plotting.base.AxesLabels.x" title="Link to this definition"></a></dt>
@@ -391,6 +417,19 @@ implement specific visualizations.</p>
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.RangeLimits">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RangeLimits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.RangeLimits" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.RangeLimits.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.RangeLimits.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.RangeLimits.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.RangeLimits.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.plotting.base.RangeLimits.lower">
 <span class="sig-name descname"><span class="pre">lower</span></span><a class="headerlink" href="#solarwindpy.plotting.base.RangeLimits.lower" title="Link to this definition"></a></dt>
@@ -527,6 +566,52 @@ assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p><
 <dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
 <p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.__init__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.clip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.clip" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.log">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.make_plot">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.make_plot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.path" title="Link to this definition"></a></dt>
+<dd><p>Path for saving figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.base.PlotWithZdata.set_log">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.base.PlotWithZdata.set_log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.alfvenic_turbulence module &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.core.alfvenic_turbulence module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -362,6 +362,19 @@ if using this module.</p>
 <dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlvenicTurbAveraging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_periods</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.min_periods">
 <span class="sig-name descname"><span class="pre">min_periods</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.min_periods" title="Link to this definition"></a></dt>
@@ -632,6 +645,48 @@ reindex once outside of this class and avoid many unnecessary reindexing
 cases within it. Be sure to carefully check your reindexing so as to not
 introduce lots of NaNs. I ran into that bug when first writing this
 class.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.constants">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.constants" title="Link to this definition"></a></dt>
+<dd><p>Physical constants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Physical constants instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Constants</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)"><span class="pre">Logger</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger instance for this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Logger instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)">logging.Logger</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.units" title="Link to this definition"></a></dt>
+<dd><p>Units conversion factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Units conversion instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Units</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

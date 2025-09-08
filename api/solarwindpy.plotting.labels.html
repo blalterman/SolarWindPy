@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.labels package &mdash; SolarWindPy 0.1.dev1+gbbc74352f documentation</title>
+  <title>solarwindpy.plotting.labels package &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e30ed362"></script>
+      <script src="../_static/documentation_options.js?v=d2e84256"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -350,6 +350,8 @@
 <li class="toctree-l1"><a class="reference internal" href="solarwindpy.plotting.labels.base.html">solarwindpy.plotting.labels.base module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS"><code class="docutils literal notranslate"><span class="pre">MCS</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS.c"><code class="docutils literal notranslate"><span class="pre">MCS.c</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS.count"><code class="docutils literal notranslate"><span class="pre">MCS.count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS.index"><code class="docutils literal notranslate"><span class="pre">MCS.index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS.m"><code class="docutils literal notranslate"><span class="pre">MCS.m</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.MCS.s"><code class="docutils literal notranslate"><span class="pre">MCS.s</span></code></a></li>
 </ul>
@@ -378,6 +380,7 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.TeXlabel.set_axnorm"><code class="docutils literal notranslate"><span class="pre">TeXlabel.set_axnorm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.TeXlabel.make_species"><code class="docutils literal notranslate"><span class="pre">TeXlabel.make_species()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.TeXlabel.build_label"><code class="docutils literal notranslate"><span class="pre">TeXlabel.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.base.TeXlabel.logger"><code class="docutils literal notranslate"><span class="pre">TeXlabel.logger</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -392,6 +395,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.units"><code class="docutils literal notranslate"><span class="pre">Ion.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.path"><code class="docutils literal notranslate"><span class="pre">Ion.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.set_species_charge"><code class="docutils literal notranslate"><span class="pre">Ion.set_species_charge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.logger"><code class="docutils literal notranslate"><span class="pre">Ion.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.with_units"><code class="docutils literal notranslate"><span class="pre">Ion.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState"><code class="docutils literal notranslate"><span class="pre">ChargeState</span></code></a><ul>
@@ -402,6 +407,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.tex"><code class="docutils literal notranslate"><span class="pre">ChargeState.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.units"><code class="docutils literal notranslate"><span class="pre">ChargeState.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.set_ions"><code class="docutils literal notranslate"><span class="pre">ChargeState.set_ions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.logger"><code class="docutils literal notranslate"><span class="pre">ChargeState.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.with_units"><code class="docutils literal notranslate"><span class="pre">ChargeState.with_units</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -415,6 +422,7 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.path"><code class="docutils literal notranslate"><span class="pre">Timedelta.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.units"><code class="docutils literal notranslate"><span class="pre">Timedelta.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.set_offset"><code class="docutils literal notranslate"><span class="pre">Timedelta.set_offset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.logger"><code class="docutils literal notranslate"><span class="pre">Timedelta.logger</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime"><code class="docutils literal notranslate"><span class="pre">DateTime</span></code></a><ul>
@@ -424,6 +432,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.tex"><code class="docutils literal notranslate"><span class="pre">DateTime.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.path"><code class="docutils literal notranslate"><span class="pre">DateTime.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.set_kind"><code class="docutils literal notranslate"><span class="pre">DateTime.set_kind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.logger"><code class="docutils literal notranslate"><span class="pre">DateTime.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.units"><code class="docutils literal notranslate"><span class="pre">DateTime.units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch"><code class="docutils literal notranslate"><span class="pre">Epoch</span></code></a><ul>
@@ -437,6 +447,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_larger"><code class="docutils literal notranslate"><span class="pre">Epoch.set_larger()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_smaller"><code class="docutils literal notranslate"><span class="pre">Epoch.set_smaller()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_space"><code class="docutils literal notranslate"><span class="pre">Epoch.set_space()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.logger"><code class="docutils literal notranslate"><span class="pre">Epoch.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.units"><code class="docutils literal notranslate"><span class="pre">Epoch.units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency"><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></a><ul>
@@ -447,6 +459,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.path"><code class="docutils literal notranslate"><span class="pre">Frequency.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.set_other"><code class="docutils literal notranslate"><span class="pre">Frequency.set_other()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.build_label"><code class="docutils literal notranslate"><span class="pre">Frequency.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.logger"><code class="docutils literal notranslate"><span class="pre">Frequency.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.with_units"><code class="docutils literal notranslate"><span class="pre">Frequency.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st"><code class="docutils literal notranslate"><span class="pre">January1st</span></code></a><ul>
@@ -454,6 +468,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.with_units"><code class="docutils literal notranslate"><span class="pre">January1st.with_units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.tex"><code class="docutils literal notranslate"><span class="pre">January1st.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.path"><code class="docutils literal notranslate"><span class="pre">January1st.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.logger"><code class="docutils literal notranslate"><span class="pre">January1st.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.units"><code class="docutils literal notranslate"><span class="pre">January1st.units</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -469,6 +485,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.path"><code class="docutils literal notranslate"><span class="pre">ElementalAbundance.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.pct_unit"><code class="docutils literal notranslate"><span class="pre">ElementalAbundance.pct_unit</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.set_species"><code class="docutils literal notranslate"><span class="pre">ElementalAbundance.set_species()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.logger"><code class="docutils literal notranslate"><span class="pre">ElementalAbundance.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.with_units"><code class="docutils literal notranslate"><span class="pre">ElementalAbundance.with_units</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -476,6 +494,11 @@
 <li class="toctree-l1"><a class="reference internal" href="solarwindpy.plotting.labels.special.html">solarwindpy.plotting.labels.special module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.__init__"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.logger"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.path"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.tex"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.tex</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.units"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ArbitraryLabel.with_units"><code class="docutils literal notranslate"><span class="pre">ArbitraryLabel.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel"><code class="docutils literal notranslate"><span class="pre">ManualLabel</span></code></a><ul>
@@ -485,6 +508,9 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.path"><code class="docutils literal notranslate"><span class="pre">ManualLabel.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.set_tex"><code class="docutils literal notranslate"><span class="pre">ManualLabel.set_tex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.set_unit"><code class="docutils literal notranslate"><span class="pre">ManualLabel.set_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.logger"><code class="docutils literal notranslate"><span class="pre">ManualLabel.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.units"><code class="docutils literal notranslate"><span class="pre">ManualLabel.units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ManualLabel.with_units"><code class="docutils literal notranslate"><span class="pre">ManualLabel.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw"><code class="docutils literal notranslate"><span class="pre">Vsw</span></code></a><ul>
@@ -492,6 +518,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw.tex"><code class="docutils literal notranslate"><span class="pre">Vsw.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw.units"><code class="docutils literal notranslate"><span class="pre">Vsw.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw.path"><code class="docutils literal notranslate"><span class="pre">Vsw.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw.logger"><code class="docutils literal notranslate"><span class="pre">Vsw.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Vsw.with_units"><code class="docutils literal notranslate"><span class="pre">Vsw.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation</span></code></a><ul>
@@ -499,6 +527,9 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.short_label"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.short_label</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.tex"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.path"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.logger"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.units"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CarringtonRotation.with_units"><code class="docutils literal notranslate"><span class="pre">CarringtonRotation.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count"><code class="docutils literal notranslate"><span class="pre">Count</span></code></a><ul>
@@ -509,6 +540,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count.axnorm"><code class="docutils literal notranslate"><span class="pre">Count.axnorm</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count.set_axnorm"><code class="docutils literal notranslate"><span class="pre">Count.set_axnorm()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count.build_label"><code class="docutils literal notranslate"><span class="pre">Count.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count.logger"><code class="docutils literal notranslate"><span class="pre">Count.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Count.with_units"><code class="docutils literal notranslate"><span class="pre">Count.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power"><code class="docutils literal notranslate"><span class="pre">Power</span></code></a><ul>
@@ -516,6 +549,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power.tex"><code class="docutils literal notranslate"><span class="pre">Power.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power.units"><code class="docutils literal notranslate"><span class="pre">Power.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power.path"><code class="docutils literal notranslate"><span class="pre">Power.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power.logger"><code class="docutils literal notranslate"><span class="pre">Power.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Power.with_units"><code class="docutils literal notranslate"><span class="pre">Power.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability"><code class="docutils literal notranslate"><span class="pre">Probability</span></code></a><ul>
@@ -528,6 +563,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability.set_other_label"><code class="docutils literal notranslate"><span class="pre">Probability.set_other_label()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability.set_comparison"><code class="docutils literal notranslate"><span class="pre">Probability.set_comparison()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability.build_label"><code class="docutils literal notranslate"><span class="pre">Probability.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability.logger"><code class="docutils literal notranslate"><span class="pre">Probability.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Probability.with_units"><code class="docutils literal notranslate"><span class="pre">Probability.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther"><code class="docutils literal notranslate"><span class="pre">CountOther</span></code></a><ul>
@@ -542,6 +579,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther.set_other_label"><code class="docutils literal notranslate"><span class="pre">CountOther.set_other_label()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther.set_comparison"><code class="docutils literal notranslate"><span class="pre">CountOther.set_comparison()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther.build_label"><code class="docutils literal notranslate"><span class="pre">CountOther.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther.logger"><code class="docutils literal notranslate"><span class="pre">CountOther.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.CountOther.with_units"><code class="docutils literal notranslate"><span class="pre">CountOther.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn"><code class="docutils literal notranslate"><span class="pre">MathFcn</span></code></a><ul>
@@ -558,6 +597,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn.set_function"><code class="docutils literal notranslate"><span class="pre">MathFcn.set_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn.set_dimensionless"><code class="docutils literal notranslate"><span class="pre">MathFcn.set_dimensionless()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn.build_label"><code class="docutils literal notranslate"><span class="pre">MathFcn.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn.logger"><code class="docutils literal notranslate"><span class="pre">MathFcn.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.MathFcn.with_units"><code class="docutils literal notranslate"><span class="pre">MathFcn.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun"><code class="docutils literal notranslate"><span class="pre">Distance2Sun</span></code></a><ul>
@@ -566,6 +607,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun.path"><code class="docutils literal notranslate"><span class="pre">Distance2Sun.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun.tex"><code class="docutils literal notranslate"><span class="pre">Distance2Sun.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun.set_units"><code class="docutils literal notranslate"><span class="pre">Distance2Sun.set_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun.logger"><code class="docutils literal notranslate"><span class="pre">Distance2Sun.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Distance2Sun.with_units"><code class="docutils literal notranslate"><span class="pre">Distance2Sun.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN"><code class="docutils literal notranslate"><span class="pre">SSN</span></code></a><ul>
@@ -576,6 +619,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN.tex"><code class="docutils literal notranslate"><span class="pre">SSN.tex</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN.units"><code class="docutils literal notranslate"><span class="pre">SSN.units</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN.set_kind"><code class="docutils literal notranslate"><span class="pre">SSN.set_kind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN.logger"><code class="docutils literal notranslate"><span class="pre">SSN.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.SSN.with_units"><code class="docutils literal notranslate"><span class="pre">SSN.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable"><code class="docutils literal notranslate"><span class="pre">ComparisonLable</span></code></a><ul>
@@ -590,6 +635,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable.set_constituents"><code class="docutils literal notranslate"><span class="pre">ComparisonLable.set_constituents()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable.set_function"><code class="docutils literal notranslate"><span class="pre">ComparisonLable.set_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable.build_label"><code class="docutils literal notranslate"><span class="pre">ComparisonLable.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable.logger"><code class="docutils literal notranslate"><span class="pre">ComparisonLable.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.ComparisonLable.with_units"><code class="docutils literal notranslate"><span class="pre">ComparisonLable.with_units</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr"><code class="docutils literal notranslate"><span class="pre">Xcorr</span></code></a><ul>
@@ -605,6 +652,8 @@
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr.set_method"><code class="docutils literal notranslate"><span class="pre">Xcorr.set_method()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr.set_short_tex"><code class="docutils literal notranslate"><span class="pre">Xcorr.set_short_tex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr.build_label"><code class="docutils literal notranslate"><span class="pre">Xcorr.build_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr.logger"><code class="docutils literal notranslate"><span class="pre">Xcorr.logger</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.special.html#solarwindpy.plotting.labels.special.Xcorr.with_units"><code class="docutils literal notranslate"><span class="pre">Xcorr.with_units</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -718,6 +767,11 @@ patterns, e.g., if we translate something like
 <dd><p>Construct the complete label.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.TeXlabel.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.TeXlabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -744,6 +798,16 @@ patterns, e.g., if we translate something like
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.path">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Vsw.with_units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Vsw.with_units" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -787,6 +851,16 @@ patterns, e.g., if we translate something like
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.build_label">
 <span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Count.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.Count.build_label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.logger">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.Count.with_units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.Count.with_units" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
