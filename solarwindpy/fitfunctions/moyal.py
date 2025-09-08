@@ -13,12 +13,12 @@ from .core import FitFunction
 
 class Moyal(FitFunction):
     """Moyal distribution for fitting asymmetric peaks.
-    
+
     The Moyal distribution is the convolution of a Landau distribution
     with a Gaussian, commonly used in particle physics for energy loss
     distributions.
     """
-    
+
     def __init__(self, xobs, yobs, **kwargs):
         # Docstring inherited from FitFunction
         super().__init__(xobs, yobs, **kwargs)
@@ -77,7 +77,7 @@ class Moyal(FitFunction):
     @property
     def TeX_function(self):
         """LaTeX representation of the Moyal function.
-        
+
         Returns
         -------
         str

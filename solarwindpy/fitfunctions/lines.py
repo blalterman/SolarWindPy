@@ -14,10 +14,10 @@ from .core import FitFunction
 
 class Line(FitFunction):
     """Linear fit function for straight line relationships.
-    
+
     Fits data to the form: y = m*x + b
     """
-    
+
     def __init__(self, xobs, yobs, **kwargs):
         # Docstring inherited from FitFunction
         super().__init__(xobs, yobs, **kwargs)
@@ -67,7 +67,7 @@ class Line(FitFunction):
     @property
     def x_intercept(self):
         """Calculate the x-intercept of the fitted line.
-        
+
         Returns
         -------
         float
@@ -78,14 +78,14 @@ class Line(FitFunction):
 
 class LineXintercept(FitFunction):
     """Linear fit with explicit x-intercept parameterization.
-    
+
     Fits data to the form: y = m * (x - x0)
     where x0 is the x-intercept.
     """
-    
+
     def __init__(self, xobs, yobs, **kwargs):
         """Initialize linear fit with x-intercept parameterization.
-        
+
         Notes
         -----
         This parameterization is useful when fitting data where the
@@ -140,7 +140,7 @@ class LineXintercept(FitFunction):
     @property
     def y_intercept(self):
         """Calculate the y-intercept of the fitted line.
-        
+
         Returns
         -------
         float

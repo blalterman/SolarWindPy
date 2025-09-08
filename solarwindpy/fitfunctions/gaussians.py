@@ -14,10 +14,10 @@ from .core import FitFunction
 
 class Gaussian(FitFunction):
     """Standard Gaussian distribution for symmetric peak fitting.
-    
+
     Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)
     """
-    
+
     def __init__(self, xobs, yobs, **kwargs):
         super().__init__(xobs, yobs, **kwargs)
 
@@ -71,13 +71,13 @@ class Gaussian(FitFunction):
 
 class GaussianNormalized(FitFunction):
     """Normalized Gaussian distribution where integral equals n.
-    
+
     Fits data to the form: (n / (sqrt(2*pi) * sigma)) * exp(-0.5 * ((x - mu) / sigma)^2)
     """
-    
+
     def __init__(self, xobs, yobs, **kwargs):
         """Initialize normalized Gaussian fit.
-        
+
         Notes
         -----
         The normalization parameter n represents the total area under
@@ -138,7 +138,7 @@ class GaussianNormalized(FitFunction):
 
 class GaussianLn(FitFunction):
     r"""Log-normal distribution for skewed data fitting.
-    
+
     Fits a Gaussian in logarithmic space where :math:`\ln(x)` follows
     a normal distribution.
 
@@ -149,7 +149,7 @@ class GaussianLn(FitFunction):
 
     def __init__(self, xobs, yobs, **kwargs):
         """Initialize log-normal Gaussian fit.
-        
+
         Notes
         -----
         xobs must be positive for log transformation.

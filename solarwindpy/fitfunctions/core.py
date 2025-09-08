@@ -48,7 +48,9 @@ FitBounds = namedtuple("FitBounds", "lower,upper")
 # Combine ABC and docstring inheritance metaclasses
 class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
     """Metaclass combining ABC and docstring inheritance."""
+
     pass
+
 
 # def __huber(z):
 #     cost = np.array(z)
@@ -129,17 +131,17 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             Whether to interpret x or y on a log10 scale.
             If logy=True, weight selection uses w/(y*ln(10))
             for proper error propagation in log space.
-            
+
         Notes
         -----
         The fitting procedure uses scipy.optimize.least_squares
         with robust loss functions (Huber by default) to handle
         outliers. The initial parameter guess is provided by the
         p0 property, which must be implemented by subclasses.
-        
+
         All subclasses inherit this documentation automatically
         through the docstring-inheritance metaclass.
-        
+
         Examples
         --------
         >>> import numpy as np
@@ -149,7 +151,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         >>> fit = Gaussian(x, y, xmin=-3, xmax=3)
         >>> fit.make_fit()
         >>> print(f"Fitted mu: {fit.popt['mu']:.3f}")
-        
+
         See Also
         --------
         make_fit : Execute the fitting procedure
