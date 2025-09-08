@@ -2,7 +2,29 @@
 # DO NOT EDIT MANUALLY - regenerate with scripts/freeze_requirements.py
 # Generated from: requirements-dev.txt
 
+Bottleneck==1.6.0
+PyYAML==6.0.2
+Sphinx==8.2.3
+astropy==7.1.0
+black==25.1.0
 doc8==2.0.0
 docstring-inheritance==2.2.2
 flake8-docstrings==1.7.0
-pytest-cov==6.2.1
+flake8==7.3.0
+gh==0.0.4
+h5py==3.14.0
+matplotlib==3.10.6
+numba==0.61.2
+numexpr==2.11.0
+numpy==2.2.6
+numpydoc==1.9.0
+pandas==2.3.2
+psutil==7.0.0
+pydocstyle==6.3.0
+pytest-cov==6.3.0
+pytest==8.4.2
+scipy==1.16.1
+sphinxcontrib-bibtex==2.6.5
+sphinxcontrib-spelling==8.0.1
+tables==3.10.2
+tabulate==0.9.0
