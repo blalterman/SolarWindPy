@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from solarwindpy.fitfunctions.moyal import Moyal
+from solarwindpy.fitfunctions.core import InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -64,8 +65,8 @@ def test_p0_zero_size_input(cls):
     y = np.array([])
     obj = cls(x, y)  # xobs, yobs
 
-    # Should raise ValueError due to insufficient data (from sufficient_data property)
-    with pytest.raises(ValueError, match="insufficient data"):
+    # Should raise InsufficientDataError due to insufficient data (from sufficient_data property)
+    with pytest.raises(InsufficientDataError):
         _ = obj.p0
 
 
@@ -89,7 +90,10 @@ def test_moyal_p0_estimation(moyal_data):
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (Moyal, r"f(x) = A \cdot \exp\left[\frac{1}{2}\left(\left(\frac{x-\mu}{\sigma}\right)^2 - \exp\left(\left(\frac{x-\mu}{\sigma}\right)^2\right)\right)\right]"),  # Fixed LaTeX formula
+        (
+            Moyal,
+            r"f(x) = A \cdot \exp\left[\frac{1}{2}\left(\left(\frac{x-\mu}{\sigma}\right)^2 - \exp\left(\left(\frac{x-\mu}{\sigma}\right)^2\right)\right)\right]",
+        ),  # Fixed LaTeX formula
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -128,8 +132,8 @@ def test_make_fit_insufficient_data():
 
     obj = Moyal(x, y)  # xobs, yobs
 
-    # Should raise ValueError when accessing sufficient_data
-    with pytest.raises(ValueError, match="insufficient data"):
+    # Should raise InsufficientDataError when accessing sufficient_data
+    with pytest.raises(InsufficientDataError):
         _ = obj.sufficient_data
 
 
@@ -227,7 +231,7 @@ def test_moyal_constructor_issues():
     # Test that the sigma parameter is not actually used properly
     # (the implementation has commented out the sigma usage)
     try:
-        sigma_prop = obj.sigma
+        _ = obj.sigma  # Don't store unused variable
         # This will likely fail since _sigma is not set
     except AttributeError:
         # Expected due to broken implementation

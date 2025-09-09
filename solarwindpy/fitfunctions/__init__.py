@@ -18,3 +18,9 @@ PowerLaw = power_laws.PowerLaw
 Moyal = moyal.Moyal
 # Hinge = hinge.Hinge
 TrendFit = trend_fits.TrendFit
+
+# Exception classes for better error handling
+FitFunctionError = core.FitFunctionError
+InsufficientDataError = core.InsufficientDataError
+FitFailedError = core.FitFailedError
+InvalidParameterError = core.InvalidParameterError

@@ -256,7 +256,6 @@ def scan_and_archive_completed_plans():
     # Scan all plan directories (excluding completed, abandoned, and special files)
     for item in plans_dir.iterdir():
         if item.is_dir() and item.name not in ["completed", "abandoned"]:
-
             print(f"📋 Checking plan: {item.name}")
 
             if is_plan_completed(item):
@@ -266,7 +265,7 @@ def scan_and_archive_completed_plans():
                 closeout_success = generate_closeout_documentation(item.name, item)
                 if not closeout_success:
                     print(
-                        f"⚠️  Proceeding with archival despite closeout generation issues"
+                        "⚠️  Proceeding with archival despite closeout generation issues"
                     )
 
                 # Preserve branches before moving
@@ -282,12 +281,12 @@ def scan_and_archive_completed_plans():
 
     # Summary
     if moved_plans:
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"   Moved {len(moved_plans)} completed plans to plans/completed/")
         for plan in moved_plans:
             print(f"   - {plan}")
 
-        print(f"\n🔒 Branch Preservation:")
+        print("\n🔒 Branch Preservation:")
         for branch_info in preserved_branches:
             if "error" not in branch_info:
                 plan_name = branch_info["plan_name"]
