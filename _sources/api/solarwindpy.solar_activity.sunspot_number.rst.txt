@@ -14,5 +14,6 @@ Module contents
 
 .. automodule:: solarwindpy.solar_activity.sunspot_number
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

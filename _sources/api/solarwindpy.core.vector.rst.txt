@@ -3,5 +3,6 @@ solarwindpy.core.vector module
 
 .. automodule:: solarwindpy.core.vector
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

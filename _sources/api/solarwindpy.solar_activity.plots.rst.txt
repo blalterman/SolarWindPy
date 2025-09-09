@@ -3,5 +3,6 @@ solarwindpy.solar\_activity.plots module
 
 .. automodule:: solarwindpy.solar_activity.plots
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

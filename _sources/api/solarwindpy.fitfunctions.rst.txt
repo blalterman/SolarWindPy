@@ -22,5 +22,6 @@ Module contents
 
 .. automodule:: solarwindpy.fitfunctions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

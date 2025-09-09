@@ -6,5 +6,6 @@ Module contents
 
 .. automodule:: solarwindpy.tools
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

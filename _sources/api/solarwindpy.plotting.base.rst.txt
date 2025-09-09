@@ -3,5 +3,6 @@ solarwindpy.plotting.base module
 
 .. automodule:: solarwindpy.plotting.base
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.agg_plot module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
+  <title>solarwindpy.plotting.agg_plot module &mdash; SolarWindPy 0.1.dev1+g5295d467f documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,8 +20,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d2e84256"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/documentation_options.js?v=92dcc2ab"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -84,7 +84,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -339,15 +339,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-solarwindpy.plotting.agg_plot">
-<span id="solarwindpy-plotting-agg-plot-module"></span><h1>solarwindpy.plotting.agg_plot module<a class="headerlink" href="#module-solarwindpy.plotting.agg_plot" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-plotting-agg-plot-module">
+<h1>solarwindpy.plotting.agg_plot module<a class="headerlink" href="#solarwindpy-plotting-agg-plot-module" title="Link to this heading"></a></h1>
 <p>Abstract helpers for aggregated plotting.</p>
 <p>These classes calculate bin edges, perform data aggregation, and provide
-common functionality used by <a class="reference internal" href="solarwindpy.html#module-solarwindpy" title="solarwindpy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solarwindpy</span></code></a> histogram plots.</p>
+common functionality used by <code class="xref py py-mod docutils literal notranslate"><span class="pre">solarwindpy</span></code> histogram plots.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AggPlot</span></span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.base.html#solarwindpy.plotting.base.Base" title="solarwindpy.plotting.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AggPlot</span></span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
 <p>ABC for aggregating data in 1D and 2D.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
@@ -376,84 +376,84 @@ common functionality used by <a class="reference internal" href="solarwindpy.htm
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.edges">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.edges" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.categoricals">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">categoricals</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.categoricals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">categoricals</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.intervals">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intervals</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.intervals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intervals</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.cut">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cut</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.cut" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cut</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.clim">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.clim" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.alim">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.alim" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alim</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.agg_axes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">agg_axes</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.agg_axes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">agg_axes</span></span></dt>
 <dd><p>The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.joint">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.joint" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint</span></span></dt>
 <dd><p>Combines the categorical and continuous data for <cite>Groupby</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.grouped">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grouped</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.grouped" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grouped</span></span></dt>
 <dd><p><cite>joint.groupby</cite> with appropriate axes passes.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.axnorm">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.axnorm" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span></dt>
 <dd><p>Data normalization in plot.</p>
 <p>Not <cite>mpl.colors.Normalize</cite> instance. That is passed as a <cite>kwarg</cite> to
 <cite>make_plot</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.clip_data">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.clip_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.clip_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.clip_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_clim">
-<span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_clim" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Set the minimum (lower) and maximum (upper) allowed number of.</p>
-<p>counts per bin to return after calling <a class="reference internal" href="#solarwindpy.plotting.agg_plot.AggPlot.agg" title="solarwindpy.plotting.agg_plot.AggPlot.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p>
+<p>counts per bin to return after calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_alim">
-<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_alim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_alim" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_alim"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Set the minimum (lower) and maximum (upper) allowed value when.</p>
 <p>aggregating. This is different from <cite>clim</cite> because it uses the
 <cite>agg_fcn</cite>. So behavior will change based on <cite>axnorm</cite>, etc.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.calc_bins_intervals">
-<span class="sig-name descname"><span class="pre">calc_bins_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.calc_bins_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.calc_bins_intervals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calc_bins_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.calc_bins_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate histogram bins.</p>
 <dl class="simple">
 <dt>nbins: int, str, array-like</dt><dd><p>If int, use np.histogram to calculate the bin edges.
@@ -469,14 +469,14 @@ If array-like, treat as bins.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.make_cut">
-<span class="sig-name descname"><span class="pre">make_cut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.make_cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.make_cut" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_cut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.make_cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculate the <cite>Categorical</cite> quantities for the aggregation axes.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.agg">
-<span class="sig-name descname"><span class="pre">agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.agg" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Perform the aggregation along the agg axes.</p>
 <p>If either of the count limits specified in <cite>clim</cite> are not None, apply them.</p>
 <p><cite>fcn</cite> allows you to specify a specific function for aggregation. Otherwise,
@@ -485,87 +485,87 @@ values.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series">
-<span class="sig-name descname"><span class="pre">get_plotted_data_boolean_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_plotted_data_boolean_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_plotted_data_boolean_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_plotted_data_boolean_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Return a boolean <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> identifying each plotted measurement.</p>
 <p>The series shares the same index as the stored data. To align with a different
 index you may need to adjust the returned series.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">
-<span class="sig-name descname"><span class="pre">get_subset_above_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_subset_above_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_subset_above_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_subset_above_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Get the subset of data above a given threshold using <cite>fcn</cite> to.</p>
 <p>aggregate. If <cite>axnorm</cite> set, this is used.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_axnorm">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_axnorm" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>The method by which the gridded data is normalized.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.__init__">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.clip">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.clip" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.labels">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.labels" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.log">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.log" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.logger">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.logger" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.make_plot">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.make_plot" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.path">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.path" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
 <dd><p>Path for saving figure.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_data">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_labels">
-<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_labels" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
 <p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_log">
-<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_log" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_path">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_path" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Build the plot save path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

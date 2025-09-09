@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.alfvenic_turbulence module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
+  <title>solarwindpy.core.alfvenic_turbulence module &mdash; SolarWindPy 0.1.dev1+g5295d467f documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,8 +20,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d2e84256"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/documentation_options.js?v=92dcc2ab"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -86,7 +86,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -341,8 +341,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-solarwindpy.core.alfvenic_turbulence">
-<span id="solarwindpy-core-alfvenic-turbulence-module"></span><h1>solarwindpy.core.alfvenic_turbulence module<a class="headerlink" href="#module-solarwindpy.core.alfvenic_turbulence" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-core-alfvenic-turbulence-module">
+<h1>solarwindpy.core.alfvenic_turbulence module<a class="headerlink" href="#solarwindpy-core-alfvenic-turbulence-module" title="Link to this heading"></a></h1>
 <p>Alfvenic turbulence diagnostics using Elsasser variables.</p>
 <p class="rubric">Notes</p>
 <p>The implementation follows the formalism outlined in Bruno &amp; Carbone [1].
@@ -359,40 +359,40 @@ if using this module.</p>
 </dd>
 </dl>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlvenicTurbAveraging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_periods</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlvenicTurbAveraging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_periods</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.count" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Return number of occurrences of value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.index">
-<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.index" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Return first index of value.</p>
 <p>Raises ValueError if the value is not present.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.min_periods">
-<span class="sig-name descname"><span class="pre">min_periods</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.min_periods" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">min_periods</span></span></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.window">
-<span class="sig-name descname"><span class="pre">window</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.window" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">window</span></span></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlfvenicTurbulence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bfield</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="solarwindpy.core.base.html#solarwindpy.core.base.Core" title="solarwindpy.core.base.Core"><code class="xref py py-class docutils literal notranslate"><span class="pre">Core</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlfvenicTurbulence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bfield</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Core</span></code></p>
 <p>Alfv'enic turbulence diagnostics using Elsasser variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -407,9 +407,9 @@ if using this module.</p>
 <p class="rubric">Notes</p>
 <p>Implementation follows the formalism of Bruno &amp; Carbone (2013).</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bfield</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize an <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlfvenicTurbulence</span></code></a> object.</p>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bfield</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Initialize an <code class="xref py py-class docutils literal notranslate"><span class="pre">AlfvenicTurbulence</span></code> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -423,221 +423,221 @@ if using this module.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
 <dd><p>Mean-subtracted quantities used to calculated Elsasser variables.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.averaging_info">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">averaging_info</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.averaging_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">averaging_info</span></span></dt>
 <dd><p>Averaging window and minimum number of measurements / average used.</p>
 <p>In calculating background component in <span class="math notranslate nohighlight">\(\delta B\)</span> and <span class="math notranslate nohighlight">\(\delta v\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.measurements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurements</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.measurements" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurements</span></span></dt>
 <dd><p>Measurements used to calcualte mean-subtracted <cite>data</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.velocity">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.velocity" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span></dt>
 <dd><p>Velocity fluctuations (<span class="math notranslate nohighlight">\(\delta v\)</span>) in Plasma’s v-units.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.velocity" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.velocity"><code class="xref py py-attr docutils literal notranslate"><span class="pre">velocity</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">velocity</span></code></p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.bfield">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bfield</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.bfield" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bfield</span></span></dt>
 <dd><p>B field fluctuations (<span class="math notranslate nohighlight">\(\delta b\)</span>) in Alfven units.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.b">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.b" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.bfield" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.bfield"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bfield</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">bfield</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.polarity">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polarity</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.polarity" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polarity</span></span></dt>
 <dd><p>Magnetic field polarity.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.species">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.species" title="Link to this definition"></a></dt>
-<dd><p>Species used to create <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlfvenicTurbulence</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span></dt>
+<dd><p>Species used to create <code class="xref py py-class docutils literal notranslate"><span class="pre">AlfvenicTurbulence</span></code>.</p>
 <p>Defines mass density in Alfven units.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_plus">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_plus</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_plus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_plus</span></span></dt>
 <dd><p><span class="math notranslate nohighlight">\(z^+\)</span> Elsasser variable.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.zp">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zp</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.zp" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_plus" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_plus"><code class="xref py py-attr docutils literal notranslate"><span class="pre">z_plus</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zp</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">z_plus</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_minus">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_minus</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_minus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z_minus</span></span></dt>
 <dd><p><span class="math notranslate nohighlight">\(z^-\)</span> Elsasser variable.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.zm">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zm</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.zm" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_minus" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.z_minus"><code class="xref py py-attr docutils literal notranslate"><span class="pre">z_minus</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zm</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">z_minus</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_plus">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_plus</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_plus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_plus</span></span></dt>
 <dd><p>Energy contained in <span class="math notranslate nohighlight">\(z^+\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.ep">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ep</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.ep" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_plus" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_plus"><code class="xref py py-attr docutils literal notranslate"><span class="pre">e_plus</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ep</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">e_plus</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_minus">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_minus</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_minus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e_minus</span></span></dt>
 <dd><p>Energy contained in <span class="math notranslate nohighlight">\(z^-\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.em">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">em</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.em" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_minus" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.e_minus"><code class="xref py py-attr docutils literal notranslate"><span class="pre">e_minus</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">em</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">e_minus</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.kinetic_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kinetic_energy</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.kinetic_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kinetic_energy</span></span></dt>
 <dd><p>Energy contained in velocity fluctuations <span class="math notranslate nohighlight">\(\frac{1}{2}v^2\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.ev">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ev</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.ev" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ev</span></span></dt>
 <dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">E_v</span> <span class="pre">=</span> <span class="pre">kinetic_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.magnetic_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnetic_energy</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.magnetic_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnetic_energy</span></span></dt>
 <dd><p>Energy contained in magnetic field fluctuations</p>
 <p><span class="math notranslate nohighlight">\(E_b = \frac{1}{2}b^2\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eb">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eb</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eb" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.magnetic_energy" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.magnetic_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">magnetic_energy</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eb</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">magnetic_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.total_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_energy</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.total_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_energy</span></span></dt>
 <dd><p>Total energy <span class="math notranslate nohighlight">\(E_T = E_v + E_b\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.etot">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">etot</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.etot" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.total_energy" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.total_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">total_energy</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">etot</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">total_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.residual_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residual_energy</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.residual_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residual_energy</span></span></dt>
 <dd><p>Residual energy <span class="math notranslate nohighlight">\(E_R = E_v - E_b\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eres">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eres</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eres" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.residual_energy" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.residual_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">residual_energy</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eres</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">residual_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized_residual_energy</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized_residual_energy</span></span></dt>
 <dd><p>Normalized residual energy <code class="xref py py-attr docutils literal notranslate"><span class="pre">E_R/E_T</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eres_norm">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eres_norm</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.eres_norm" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_residual_energy</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eres_norm</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_residual_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.sigma_r">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sigma_r</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.sigma_r" title="Link to this definition"></a></dt>
-<dd><p>Shortcut for <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_residual_energy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_residual_energy</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sigma_r</span></span></dt>
+<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_residual_energy</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.cross_helicity">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cross_helicity</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.cross_helicity" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cross_helicity</span></span></dt>
 <dd><p>Cross helicity <span class="math notranslate nohighlight">\(\frac{1}{2} \delta v \cdot \delta b\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_cross_helicity">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized_cross_helicity</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_cross_helicity" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized_cross_helicity</span></span></dt>
 <dd><p>Normalized cross helicity <span class="math notranslate nohighlight">\(\frac{e^+ - e^-}{e^+ + e^-}\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.sigma_c">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sigma_c</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.sigma_c" title="Link to this definition"></a></dt>
-<dd><p>Shortcut to <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_cross_helicity" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.normalized_cross_helicity"><code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_cross_helicity</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sigma_c</span></span></dt>
+<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">normalized_cross_helicity</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.alfven_ratio">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alfven_ratio</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.alfven_ratio" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alfven_ratio</span></span></dt>
 <dd><p>Alfv'en ratio <span class="math notranslate nohighlight">\(E_v/E_b\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.rA">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rA</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.rA" title="Link to this definition"></a></dt>
-<dd><p>Shortcut to <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.alfven_ratio" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.alfven_ratio"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alfven_ratio</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rA</span></span></dt>
+<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">alfven_ratio</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.elsasser_ratio">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elsasser_ratio</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.elsasser_ratio" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elsasser_ratio</span></span></dt>
 <dd><p>Elsasser ratio <span class="math notranslate nohighlight">\(e^-/e^+\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.rE">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rE</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.rE" title="Link to this definition"></a></dt>
-<dd><p>Shortcut to <a class="reference internal" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.elsasser_ratio" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.elsasser_ratio"><code class="xref py py-attr docutils literal notranslate"><span class="pre">elsasser_ratio</span></code></a>.</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rE</span></span></dt>
+<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">elsasser_ratio</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.set_data">
-<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.set_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raffaella_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/alfvenic_turbulence.html#AlfvenicTurbulence.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Set data for the class, performing routine formatting checks.</p>
 <p>The <cite>auto_reindex</cite> kwarg can be set to False for batch analysis. So
 that, if running a large batch of analysis on the same data, one can
@@ -648,8 +648,8 @@ class.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.constants">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.constants" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Constants</span></em></dt>
 <dd><p>Physical constants.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -662,8 +662,8 @@ class.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.logger">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)"><span class="pre">Logger</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.logger" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)"><span class="pre">Logger</span></a></em></dt>
 <dd><p>Logger instance for this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -676,8 +676,8 @@ class.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.units">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.units" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Units</span></em></dt>
 <dd><p>Units conversion factors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

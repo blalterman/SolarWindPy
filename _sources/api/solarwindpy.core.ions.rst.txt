@@ -3,5 +3,6 @@ solarwindpy.core.ions module
 
 .. automodule:: solarwindpy.core.ions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

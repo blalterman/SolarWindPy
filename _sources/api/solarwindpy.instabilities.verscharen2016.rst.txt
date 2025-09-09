@@ -3,5 +3,6 @@ solarwindpy.instabilities.verscharen2016 module
 
 .. automodule:: solarwindpy.instabilities.verscharen2016
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

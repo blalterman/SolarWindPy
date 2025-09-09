@@ -15,5 +15,6 @@ Module contents
 
 .. automodule:: solarwindpy.solar_activity.lisird
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

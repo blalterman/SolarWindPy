@@ -3,5 +3,6 @@ solarwindpy.plotting.spiral module
 
 .. automodule:: solarwindpy.plotting.spiral
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

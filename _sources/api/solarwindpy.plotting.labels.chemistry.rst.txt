@@ -3,5 +3,6 @@ solarwindpy.plotting.labels.chemistry module
 
 .. automodule:: solarwindpy.plotting.labels.chemistry
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

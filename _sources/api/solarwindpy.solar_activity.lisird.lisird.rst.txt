@@ -3,5 +3,6 @@ solarwindpy.solar\_activity.lisird.lisird module
 
 .. automodule:: solarwindpy.solar_activity.lisird.lisird
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

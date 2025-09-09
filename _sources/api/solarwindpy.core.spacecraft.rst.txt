@@ -3,5 +3,6 @@ solarwindpy.core.spacecraft module
 
 .. automodule:: solarwindpy.core.spacecraft
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

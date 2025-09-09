@@ -19,5 +19,6 @@ Module contents
 
 .. automodule:: solarwindpy.plotting.labels
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

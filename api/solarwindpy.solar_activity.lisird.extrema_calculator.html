@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator module &mdash; SolarWindPy 0.1.dev1+g5295d467f documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,8 +20,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d2e84256"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/documentation_options.js?v=92dcc2ab"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -84,7 +84,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -347,19 +347,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-solarwindpy.solar_activity.lisird.extrema_calculator">
-<span id="solarwindpy-solar-activity-lisird-extrema-calculator-module"></span><h1>solarwindpy.solar_activity.lisird.extrema_calculator module<a class="headerlink" href="#module-solarwindpy.solar_activity.lisird.extrema_calculator" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-solar-activity-lisird-extrema-calculator-module">
+<h1>solarwindpy.solar_activity.lisird.extrema_calculator module<a class="headerlink" href="#solarwindpy-solar-activity-lisird-extrema-calculator-module" title="Link to this heading"></a></h1>
 <p>Tools for calculating extrema in LISIRD activity indices.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtremaCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtremaCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Determine extrema in an activity index time series.</p>
 <p>The calculator smooths the input series with a rolling mean and finds
 local minima and maxima based on a threshold value.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data">
-<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">data</span></span></dt>
 <dd><p>Smoothed version of the activity index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -369,8 +369,8 @@ local minima and maxima based on a threshold value.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">raw</span></span></dt>
 <dd><p>Unsmoothed input data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -380,8 +380,8 @@ local minima and maxima based on a threshold value.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold">
-<span class="sig-name descname"><span class="pre">threshold</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">threshold</span></span></dt>
 <dd><p>Threshold used to classify maxima and minima.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -391,8 +391,8 @@ local minima and maxima based on a threshold value.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema">
-<span class="sig-name descname"><span class="pre">extrema</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">extrema</span></span></dt>
 <dd><p>Series with <code class="docutils literal notranslate"><span class="pre">&quot;Max&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Min&quot;</span></code> labels at the extrema times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -402,8 +402,8 @@ local minima and maxima based on a threshold value.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema">
-<span class="sig-name descname"><span class="pre">formatted_extrema</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">formatted_extrema</span></span></dt>
 <dd><p>Data frame formatted as a solar cycle table with <code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code>
 columns:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==========</span> <span class="o">============</span> <span class="o">============</span>
@@ -425,8 +425,8 @@ columns:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Create the calculator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -444,54 +444,54 @@ table or computed with <a class="reference external" href="https://numpy.org/doc
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span></dt>
 <dd><p>Activity index name.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.window">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">window</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.window" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">window</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threshold</span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threshold</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema_finders">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema_finders</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema_finders" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema_finders</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema</span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threshold_crossings</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threshold_crossings</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_in_extrema_finding_intervals</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_in_extrema_finding_intervals</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id4">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">formatted_extrema</span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">formatted_extrema</span></span></dt>
 <dd><p>Extrema formatted as a solar-cycle table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -516,43 +516,43 @@ table or computed with <a class="reference external" href="https://numpy.org/doc
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">
-<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">
-<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">
-<span class="sig-name descname"><span class="pre">set_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">
-<span class="sig-name descname"><span class="pre">find_threshold_crossings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_threshold_crossings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">find_threshold_crossings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_threshold_crossings"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">
-<span class="sig-name descname"><span class="pre">cut_data_into_extrema_finding_intervals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.cut_data_into_extrema_finding_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cut_data_into_extrema_finding_intervals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.cut_data_into_extrema_finding_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format_extrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extrema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.format_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format_extrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extrema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.format_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">
-<span class="sig-name descname"><span class="pre">find_extrema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">find_extrema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">
-<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crossings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crossings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

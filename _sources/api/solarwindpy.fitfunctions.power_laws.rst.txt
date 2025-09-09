@@ -3,5 +3,6 @@ solarwindpy.fitfunctions.power\_laws module
 
 .. automodule:: solarwindpy.fitfunctions.power_laws
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

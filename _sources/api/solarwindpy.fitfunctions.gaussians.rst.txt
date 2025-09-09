@@ -3,5 +3,6 @@ solarwindpy.fitfunctions.gaussians module
 
 .. automodule:: solarwindpy.fitfunctions.gaussians
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:

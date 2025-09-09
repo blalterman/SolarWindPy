@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.tex_info module &mdash; SolarWindPy 0.1.dev1+g7d262209e documentation</title>
+  <title>solarwindpy.fitfunctions.tex_info module &mdash; SolarWindPy 0.1.dev1+g5295d467f documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,8 +20,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d2e84256"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/documentation_options.js?v=92dcc2ab"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
       <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -86,7 +86,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-solarwindpy">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -341,15 +341,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-solarwindpy.fitfunctions.tex_info">
-<span id="solarwindpy-fitfunctions-tex-info-module"></span><h1>solarwindpy.fitfunctions.tex_info module<a class="headerlink" href="#module-solarwindpy.fitfunctions.tex_info" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-fitfunctions-tex-info-module">
+<h1>solarwindpy.fitfunctions.tex_info module<a class="headerlink" href="#solarwindpy-fitfunctions-tex-info-module" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeXinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeXinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>A container for printing <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> info on a figure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -369,54 +369,54 @@ cast to int.</p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.info">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_guess_info</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.chisq_dof">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chisq_dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.chisq_dof" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chisq_dof</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.npts">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">npts</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.npts" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">npts</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.popt">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.popt" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">popt</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.psigma">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.psigma" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">psigma</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.rsq">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.rsq" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rsq</span></span></dt>
 <dd><p><span class="math notranslate nohighlight">\(R^2\)</span> coefficient of determination.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_argnames">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_argnames</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_argnames" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_argnames</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_function">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_function" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_popt">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_popt" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span></dt>
 <dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to parameter values.</p>
 <p><code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
 appropriate uncertainty.</p>
@@ -424,15 +424,15 @@ appropriate uncertainty.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_relative_error">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_relative_error</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.TeX_relative_error" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_relative_error</span></span></dt>
 <dd><p>Create a dictionary with (k, v) pairs corresponding to relative errors.</p>
 <p>(self.argnames, psigma/popt).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.annotate_info">
-<span class="sig-name descname"><span class="pre">annotate_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.annotate_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.annotate_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">annotate_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.annotate_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Add the <cite>TeX_info</cite> annotation to ax.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,8 +453,8 @@ va - verticalalignment (default “right”)</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.build_info">
-<span class="sig-name descname"><span class="pre">build_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.build_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.build_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">build_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.build_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Generate a TeX-formatted string with the desired info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -476,7 +476,7 @@ Note that <cite>simplify_info_for_paper</cite> must be disabled.</p></li>
 to their uncertainty in standard decimal (not expoential)
 notation.
 This option overrides <cite>convert_pow_10</cite>.</p></li>
-<li><p><strong>add_initial_guess</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True and <a class="reference internal" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info" title="solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">initial_guess_info()</span></code></a> is not None, add
+<li><p><strong>add_initial_guess</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True and <code class="xref py py-meth docutils literal notranslate"><span class="pre">initial_guess_info()</span></code> is not None, add
 <cite>(p0, fit_bounds)</cite> table to info.</p></li>
 <li><p><strong>additional_info</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>iterable</em><em> of </em><em>strings</em>) – Additional info added to the fit info annotation box.</p></li>
 <li><p><strong>annotate_fcn</strong> (<em>FunctionType</em>) – Function that manipulates the final TeX_info str before returning.</p></li>
@@ -486,44 +486,44 @@ This option overrides <cite>convert_pow_10</cite>.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_initial_guess_info">
-<span class="sig-name descname"><span class="pre">set_initial_guess_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_initial_guess_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_initial_guess_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_initial_guess_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_initial_guess_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_npts">
-<span class="sig-name descname"><span class="pre">set_npts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_npts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_npts" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_npts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_npts"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_popt_psigma">
-<span class="sig-name descname"><span class="pre">set_popt_psigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_popt_psigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_popt_psigma" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_popt_psigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_popt_psigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_argnames">
-<span class="sig-name descname"><span class="pre">set_TeX_argnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_argnames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_argnames" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_TeX_argnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_argnames"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Define the mapping to format LaTeX function argnames.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_function">
-<span class="sig-name descname"><span class="pre">set_TeX_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_TeX_function" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_TeX_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_chisq_dof">
-<span class="sig-name descname"><span class="pre">set_chisq_dof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_chisq_dof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_chisq_dof" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_chisq_dof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_chisq_dof"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.set_rsq">
-<span class="sig-name descname"><span class="pre">set_rsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_rsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.set_rsq" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_rsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_rsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string">
-<span class="sig-name descname"><span class="pre">val_uncert_2_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.val_uncert_2_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.tex_info.TeXinfo.val_uncert_2_string" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">val_uncert_2_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.val_uncert_2_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Convert a value, uncertainty pair to a string.</p>
 <p>Where the value is reported to the first non-zero digit of the uncertainty.</p>
 <p>Require that <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">&gt;</span> <span class="pre">uncertainty</span></code>.</p>

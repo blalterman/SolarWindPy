@@ -3,5 +3,6 @@ solarwindpy.plotting.agg\_plot module
 
 .. automodule:: solarwindpy.plotting.agg_plot
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+   :no-index:
