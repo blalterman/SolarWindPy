@@ -4,11 +4,9 @@ This module provides visual validation framework for matplotlib plots to ensure
 consistent rendering and detect visual regressions.
 """
 
-import pytest
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.testing.decorators import image_comparison
 import warnings
 
 # Configure matplotlib for testing
@@ -273,7 +271,11 @@ class TestSolarWindPyPlottingVisualValidation:
         # Validation
         for ax in axes.flat[:-1]:  # All except box plot
             assert len(ax.patches) > 0  # Histogram bars
-        assert len(axes[1, 1].lines) > 0  # Box plot lines
+
+        # Box plot validation using the returned dictionary
+        assert len(box_plot['boxes']) == 3  # Three data sets
+        assert len(box_plot['whiskers']) == 6  # Two whiskers per box
+        assert len(box_plot['medians']) == 3  # One median per box
 
 
 class TestPlotLayoutValidation:
@@ -347,8 +349,8 @@ class TestPlotLayoutValidation:
         plt.colorbar(im3, ax=axes[1, 0], fraction=0.046, pad=0.04)
         axes[1, 0].set_title("Pcolormesh with Colorbar")
 
-        # Shared colorbar
-        im4 = axes[1, 1].contour(X, Y, Z, levels=10, cmap="jet")
+        # Contour lines without colorbar
+        axes[1, 1].contour(X, Y, Z, levels=10, cmap="jet")
         axes[1, 1].set_title("Contour Lines")
 
         plt.tight_layout()
@@ -448,8 +450,8 @@ def test_reproducible_random_plots():
 # Example of how to implement actual image comparison test
 # (Commented out as it requires baseline images)
 """
-@image_comparison(baseline_images=['example_plot'], 
-                  extensions=['png'], 
+@image_comparison(baseline_images=['example_plot'],
+                  extensions=['png'],
                   tol=0.1)
 def test_example_image_comparison():
     '''Example of actual image comparison test.'''
