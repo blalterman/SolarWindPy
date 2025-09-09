@@ -26,14 +26,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Find latest conda environment file
+    - name: Set conda environment file
       id: find-conda-env
       run: |
-        # Find the most recent solarwindpy-*.yml file
-        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
-        echo "Latest environment file: $LATEST_ENV"
-        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
-        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+        # Use the standard solarwindpy.yml environment file
+        CONDA_ENV="solarwindpy.yml"
+        echo "Environment file: $CONDA_ENV"
+        echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
     
     - name: Cache conda environment
       uses: actions/cache@v3
@@ -218,14 +218,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Find latest conda environment file
+    - name: Set conda environment file
       id: find-conda-env-spot
       run: |
-        # Find the most recent solarwindpy-*.yml file
-        LATEST_ENV=$(ls -t solarwindpy-*.yml | head -n 1)
-        echo "Latest environment file: $LATEST_ENV"
-        echo "conda_env_file=$LATEST_ENV" >> $GITHUB_OUTPUT
-        echo "env_name=$(basename $LATEST_ENV .yml)" >> $GITHUB_OUTPUT
+        # Use the standard solarwindpy.yml environment file
+        CONDA_ENV="solarwindpy.yml"
+        echo "Environment file: $CONDA_ENV"
+        echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
+        echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
     
     - name: Cache conda environment
       uses: actions/cache@v3
