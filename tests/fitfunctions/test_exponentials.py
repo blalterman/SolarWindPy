@@ -9,6 +9,7 @@ from solarwindpy.fitfunctions.exponentials import (
     ExponentialPlusC,
     ExponentialCDF,
 )
+from solarwindpy.fitfunctions.core import InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -60,7 +61,7 @@ def test_p0_zero_size_input(cls):
     y = np.array([])
     obj = cls(x, y)
 
-    with pytest.raises((ValueError, AssertionError)):
+    with pytest.raises(InsufficientDataError):
         _ = obj.p0
 
 
@@ -171,9 +172,13 @@ def test_make_fit_insufficient_data():
         y = np.array([1.0])
         obj = cls(x, y)
 
-        # By default, make_fit returns exceptions rather than raising them
-        result = obj.make_fit()
-        assert isinstance(result, ValueError)
+        # With insufficient data, make_fit raises InsufficientDataError by default
+        with pytest.raises(InsufficientDataError):
+            obj.make_fit()
+
+        # With return_exception=True, make_fit returns the exception
+        result = obj.make_fit(return_exception=True)
+        assert isinstance(result, InsufficientDataError)
         assert "insufficient data" in str(result).lower()
 
     # Test ExponentialCDF (needs special setup)
@@ -185,10 +190,10 @@ def test_make_fit_insufficient_data():
     obj.set_y0(1.0)
 
     result = obj.make_fit()
-    # For ExponentialCDF with 1 point, the fit technically succeeds 
+    # For ExponentialCDF with 1 point, the fit technically succeeds
     # (1 point for 1 parameter), so it returns None
-    assert result is None or isinstance(result, ValueError)
-    if isinstance(result, ValueError):
+    assert result is None or isinstance(result, InsufficientDataError)
+    if isinstance(result, InsufficientDataError):
         assert "insufficient data" in str(result).lower()
 
 

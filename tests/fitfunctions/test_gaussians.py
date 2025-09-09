@@ -7,6 +7,7 @@ from solarwindpy.fitfunctions.gaussians import (
     GaussianNormalized,
     GaussianLn,
 )
+from solarwindpy.fitfunctions.core import InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -39,7 +40,7 @@ def test_p0_zero_size_input(cls):
     x = np.array([])
     y = np.array([])
     obj = cls(x, y)
-    with pytest.raises(ValueError, match="insufficient data"):
+    with pytest.raises(InsufficientDataError):
         _ = obj.p0
 
 

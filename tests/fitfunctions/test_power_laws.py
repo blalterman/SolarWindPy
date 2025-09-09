@@ -9,6 +9,7 @@ from solarwindpy.fitfunctions.power_laws import (
     PowerLawPlusC,
     PowerLawOffCenter,
 )
+from solarwindpy.fitfunctions.core import InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -56,7 +57,7 @@ def test_p0_zero_size_input(cls):
     y = np.array([])
     obj = cls(x, y)
 
-    with pytest.raises((ValueError, AssertionError)):
+    with pytest.raises(InsufficientDataError):
         _ = obj.p0
 
 
@@ -138,9 +139,13 @@ def test_make_fit_insufficient_data(cls):
     y = np.array([1.0])
     obj = cls(x, y)
 
-    # By default, make_fit returns exceptions rather than raising them
-    result = obj.make_fit()
-    assert isinstance(result, ValueError)
+    # With insufficient data, make_fit raises InsufficientDataError by default
+    with pytest.raises(InsufficientDataError):
+        obj.make_fit()
+
+    # With return_exception=True, make_fit returns the exception
+    result = obj.make_fit(return_exception=True)
+    assert isinstance(result, InsufficientDataError)
     assert "insufficient data" in str(result).lower()
 
 

@@ -6,6 +6,8 @@ from solarwindpy.fitfunctions.core import (
     FitFunction,
     ChisqPerDegreeOfFreedom,
     InitialGuessInfo,
+    InvalidParameterError,
+    InsufficientDataError,
 )
 
 
@@ -29,7 +31,7 @@ class LinearFit(FitFunction):
 
 def test_clean_raw_obs():
     lf = LinearFit([0, 1], [1, 2])
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidParameterError):
         lf._clean_raw_obs([0, 1], [1], None)
     x, y, w = lf._clean_raw_obs([0, 1], [1, 2], [1, 1])
     assert np.array_equal(x, np.array([0, 1]))
@@ -145,7 +147,7 @@ def test_make_fit_success_failure(monkeypatch, simple_linear_data, small_n):
     x, y, w = small_n
     lf_small = LinearFit(x, y, weights=w)
     err = lf_small.make_fit(return_exception=True)
-    assert isinstance(err, ValueError)
+    assert isinstance(err, InsufficientDataError)
 
     def fail_run(*_, **__):
         raise RuntimeError("fail")

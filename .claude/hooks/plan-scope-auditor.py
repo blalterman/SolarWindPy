@@ -316,8 +316,6 @@ class SolarWindPyPlanScopeAuditor:
 
     def _assess_scientific_keywords(self, plan_text: str) -> float:
         """Assess scientific relevance based on keywords."""
-        scores = []
-
         # High value keywords (physics/research terms)
         high_matches = sum(
             1
@@ -522,7 +520,9 @@ This plan should advance SolarWindPy's mission to provide accurate, efficient to
                 impact_level = (
                     "High"
                     if info["weight"] >= 0.8
-                    else "Medium" if info["weight"] >= 0.5 else "Low"
+                    else "Medium"
+                    if info["weight"] >= 0.5
+                    else "Low"
                 )
                 analysis.append(
                     f"- **{module}** ({impact_level} Impact): {info['description']}"

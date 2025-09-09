@@ -12,7 +12,7 @@ import logging  # noqa: F401
 import warnings
 import numpy as np
 
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from inspect import getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceMeta
@@ -43,6 +43,30 @@ UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
 InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
 ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
 FitBounds = namedtuple("FitBounds", "lower,upper")
+
+
+class FitFunctionError(Exception):
+    """Base exception for fit function errors."""
+
+    pass
+
+
+class InsufficientDataError(FitFunctionError):
+    """Raised when there is insufficient data to perform the fit."""
+
+    pass
+
+
+class FitFailedError(FitFunctionError):
+    """Raised when the fitting algorithm fails to converge."""
+
+    pass
+
+
+class InvalidParameterError(FitFunctionError):
+    """Raised when invalid parameters are provided to fit functions."""
+
+    pass
 
 
 # Combine ABC and docstring inheritance metaclasses
@@ -221,7 +245,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._logger = logger
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def function(self):
         r"""Get the function that`curve_fit` fits.
 
@@ -231,12 +256,14 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         """
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def p0(self):
         r"""The initial guess for the FitFunction."""
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def TeX_function(self):
         r"""Function written in LaTeX."""
         pass
@@ -282,7 +309,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def initial_guess_info(self):
-
         # If failed to make an initial guess, then don't build the info.
         try:
             p0 = self.p0
@@ -371,7 +397,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         chk = self.nobs >= len(self.argnames)
         if not chk:
             msg = "There is insufficient data to fit the model."
-            raise ValueError(msg)
+            raise InsufficientDataError(msg)
         else:
             return True
 
@@ -394,17 +420,15 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             weights = np.asarray(weights)
 
         if xobs.shape != yobs.shape:
-            raise ValueError(
-                f"""xobs and yobs must have the same shape.,
-xobs: {xobs.shape},
-yobs: {yobs.shape}"""
+            raise InvalidParameterError(
+                f"""xobs and yobs must have the same shape.
+xobs: {xobs.shape}, yobs: {yobs.shape}"""
             )
 
         if weights is not None and weights.shape != xobs.shape:
-            raise ValueError(
-                f"""weights and xobs must have the same shape.,
-weighs: {weights.shape}",
-xobs: {xobs.shape}"""
+            raise InvalidParameterError(
+                f"""weights and xobs must have the same shape.
+weights: {weights.shape}, xobs: {xobs.shape}"""
             )
 
         return xobs, yobs, weights
@@ -474,7 +498,6 @@ xobs: {xobs.shape}"""
         return plotter
 
     def build_TeX_info(self):
-
         # Allows annotating of TeX_info when fit fails in a manner
         # that is easily identifiable.
         try:
@@ -660,7 +683,7 @@ xobs: {xobs.shape}"""
         )
 
         if not res.success:
-            raise RuntimeError("Optimal parameters not found: " + res.message)
+            raise FitFailedError("Optimal parameters not found: " + res.message)
 
         fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
         fit_bounds = {k: FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
@@ -753,11 +776,14 @@ xobs: {xobs.shape}"""
         """
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
-        except (AssertionError, ValueError) as e:
+        except (AssertionError, ValueError, InsufficientDataError) as e:
             #             raise
             if isinstance(e, AssertionError):
-                e = ValueError("Insufficient data to fit the model")
-            return e
+                e = InsufficientDataError("Insufficient data to fit the model")
+            if return_exception:
+                return e
+            else:
+                raise
 
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
