@@ -9,11 +9,6 @@ on:
   schedule:
     - cron: '0 0 1 * *'  # Monthly on the 1st
   workflow_dispatch:
-    inputs:
-      conda_env_suffix:
-        description: 'Conda environment name suffix (e.g., 20250404)'
-        required: false
-        default: ''
 
 jobs:
   sync-requirements:
@@ -46,14 +41,8 @@ jobs:
         
       - name: Update conda environment
         run: |
-          # Use input suffix or generate timestamp
-          if [ -n "${{ github.event.inputs.conda_env_suffix }}" ]; then
-            SUFFIX="${{ github.event.inputs.conda_env_suffix }}"
-          else
-            SUFFIX=$(date +%Y%m%d)
-          fi
-          python scripts/requirements_to_conda_env.py --name solarwindpy-$SUFFIX
-          echo "CONDA_ENV_FILE=solarwindpy-$SUFFIX.yml" >> $GITHUB_ENV
+          python scripts/requirements_to_conda_env.py --name solarwindpy --overwrite
+          echo "CONDA_ENV_FILE=solarwindpy.yml" >> $GITHUB_ENV
       
       - name: Validate generated files
         run: |
@@ -65,7 +54,7 @@ jobs:
           
           echo "Validating conda environment..."
           if command -v conda &> /dev/null; then
-            conda env create -f ${{ env.CONDA_ENV_FILE }} --dry-run
+            conda env create -f solarwindpy.yml --dry-run
           fi
         continue-on-error: true
       
@@ -91,7 +80,7 @@ jobs:
             
             - Updated docs/requirements.txt with documentation dependencies
             - Updated requirements.txt with frozen versions
-            - Updated conda environment file: ${{ env.CONDA_ENV_FILE }}
+            - Updated conda environment file: solarwindpy.yml
             - Auto-generated from requirements-dev.txt changes
           title: "chore: Update requirements files"
           body: |
@@ -102,7 +91,7 @@ jobs:
             ### Changes:
             - Updated `docs/requirements.txt` with documentation dependencies
             - Updated `requirements.txt` with frozen versions
-            - Updated conda environment file: `${{ env.CONDA_ENV_FILE }}`
+            - Updated conda environment file: `solarwindpy.yml`
             
             ### Source:
             Generated from changes to `requirements-dev.txt`

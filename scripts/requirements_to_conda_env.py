@@ -101,14 +101,8 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
     target_name = Path(f"{env_name}.yml")
 
     if target_name.exists() and not overwrite:
-        # Generate unique name with timestamp
-        from datetime import datetime
-
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M")
-        new_name = f"{env_name}-{timestamp}"
-        target_name = Path(f"{new_name}.yml")
-        env["name"] = new_name
-        print(f"Warning: {env_name}.yml exists, creating {target_name}")
+        print(f"Error: {target_name} already exists. Use --overwrite to replace it.")
+        raise FileExistsError(f"{target_name} already exists")
 
     with open(target_name, "w") as out_file:
         yaml.safe_dump(env, out_file, sort_keys=False)
