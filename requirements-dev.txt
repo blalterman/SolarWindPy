@@ -25,3 +25,4 @@ sphinxcontrib-spelling
 sphinxcontrib-bibtex
 gh
 psutil>=5.9.0
+joblib>=1.3.0
