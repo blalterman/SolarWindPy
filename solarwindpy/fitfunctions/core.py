@@ -436,24 +436,24 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
         """Build observation mask with in-place operations for efficiency."""
         mask = np.isfinite(x)
-        
+
         if xmin is not None:
-            mask &= (x >= xmin)  # In-place AND instead of creating xmin_mask
-            
+            mask &= x >= xmin  # In-place AND instead of creating xmin_mask
+
         if xmax is not None:
-            mask &= (x <= xmax)  # In-place AND instead of creating xmax_mask
-            
+            mask &= x <= xmax  # In-place AND instead of creating xmax_mask
+
         return mask
 
     def _build_outside_mask(self, axis, x, outside):
         """Build outside mask with in-place operations for efficiency."""
         if outside is None:
             return np.full_like(x, True, dtype=bool)
-            
+
         lower, upper = outside
         assert lower < upper
-        mask = (x <= lower)
-        mask |= (x >= upper)  # In-place OR instead of creating separate u_mask
+        mask = x <= lower
+        mask |= x >= upper  # In-place OR instead of creating separate u_mask
         return mask
 
     def _set_argnames(self):
@@ -518,7 +518,7 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
     def residuals(self, pct=False, use_all=False):
         r"""
         Calculate fit residuals.
-        
+
         Parameters
         ----------
         pct : bool, default=False
@@ -528,27 +528,27 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
             points excluded by constraints (xmin, xmax, etc.) passed
             during initialization.
             If False (default), calculate only for points used in fit.
-            
+
         Returns
         -------
         numpy.ndarray
             Residuals as observed - fitted.
-            
+
         Examples
         --------
         >>> # Create FitFunction with constraints
         >>> ff = Gaussian(x, y, xmin=3, xmax=7)
         >>> ff.make_fit()
-        >>> 
+        >>>
         >>> # Residuals for fitted region only
         >>> r_fit = ff.residuals()
-        >>> 
+        >>>
         >>> # Residuals for all original data
         >>> r_all = ff.residuals(use_all=True)
-        >>> 
+        >>>
         >>> # Percentage residuals
         >>> r_pct = ff.residuals(pct=True)
-        
+
         Notes
         -----
         Addresses TODO: "calculate with all values...including those
@@ -563,17 +563,17 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
             # Use only observations included in fit (default)
             x = self.observations.used.x
             y = self.observations.used.y
-        
+
         # Calculate residuals (observed - fitted)
         fitted_values = self(x)
         r = y - fitted_values
-        
+
         if pct:
             # Avoid division by zero
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 r = 100.0 * (r / fitted_values)
                 r[fitted_values == 0] = np.nan
-        
+
         return r
 
     def set_fit_obs(
