@@ -193,6 +193,28 @@ class FFPlot(object):
 
         return ax
 
+    def _get_or_create_axes(self, ax=None):
+        """Get existing axes or create new figure/axes if None provided."""
+        if ax is None:
+            fig, ax = plt.subplots()
+        return ax
+
+    def _get_default_plot_style(self, plot_type):
+        """Get default style parameters for different plot types."""
+        styles = {
+            'raw': {'color': 'k', 'label': r'$\mathrm{Obs}$'},
+            'used': {
+                'color': 'forestgreen',
+                'marker': 'P',
+                'markerfacecolor': 'none',
+                'markersize': 8,
+                'label': r'$\mathrm{Used}$'
+            },
+            'fit': {'color': 'tab:red', 'linewidth': 3, 'label': r'$\mathrm{Fit}$'},
+            'residuals': {'color': 'k', 'marker': 'o', 'markerfacecolor': 'none'}
+        }
+        return styles.get(plot_type, {})
+
     def plot_raw(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
         r"""Plot the observations used in the fit from raw data.
 
@@ -204,14 +226,16 @@ class FFPlot(object):
         edge_kwargs: None, dict
             If not None, plot edges on the window using these kwargs.
         """
-        if ax is None:
-            fig, ax = plt.subplots()
+        ax = self._get_or_create_axes(ax)
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
-        color = kwargs.pop("color", "k")
-        label = kwargs.pop("label", r"$\mathrm{Obs}$")
+
+        # Apply default style for raw plots
+        defaults = self._get_default_plot_style('raw')
+        color = kwargs.pop("color", defaults.get("color", "k"))
+        label = kwargs.pop("label", defaults.get("label", r"$\mathrm{Obs}$"))
 
         x = self.observations.raw.x
         y = self.observations.raw.y
@@ -292,8 +316,7 @@ class FFPlot(object):
         Plot from :py:meth:`self.observations.used.x`,
         :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
         """
-        if ax is None:
-            fig, ax = plt.subplots()
+        ax = self._get_or_create_axes(ax)
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
@@ -403,8 +426,7 @@ class FFPlot(object):
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
         r"""Plot the fit."""
-        if ax is None:
-            fig, ax = plt.subplots()
+        ax = self._get_or_create_axes(ax)
 
         if annotate_kwargs is None:
             annotate_kwargs = {}
@@ -472,8 +494,7 @@ class FFPlot(object):
         ax: mpl.Axes.axis_subplot
         """
 
-        if ax is None:
-            fig, ax = plt.subplots()
+        ax = self._get_or_create_axes(ax)
 
         if raw_kwargs is None:
             raw_kwargs = (
@@ -714,17 +735,6 @@ class FFPlot(object):
 
         return r
 
-    #     def robust_residuals(self, pct=False):
-    #         r"""Return the fit residuals.
-    #         If pct, normalize by fit yvalues.
-    #         """
-    #         r = self._robust_residuals
-    #
-    #         if pct:
-    #             y_fit_used = self.y_fit[self.observations.tk_observed]
-    #             r = 100.0 * (r / y_fit_used)
-    #
-    #         return r
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels.

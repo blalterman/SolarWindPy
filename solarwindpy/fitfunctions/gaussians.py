@@ -162,11 +162,6 @@ class GaussianLn(FitFunction):
 
     @property
     def function(self):
-        #         def gaussian_ln(x, m, s, A):
-        #             x = np.log(x)
-        #             coeff = (np.sqrt(2.0 * np.pi) * s) ** (-1.0)
-        #             arg = -0.5 * (((x - m) / s) ** 2.0)
-        #             return A * coeff * np.exp(arg)
 
         def gaussian_ln(x, m, s, A):
             lnx = np.log(x)
@@ -178,9 +173,6 @@ class GaussianLn(FitFunction):
 
             return coeff * np.exp(arg)
 
-        #         def gaussian_ln(x, m, s, A):
-        #             arg = m + (s * x)
-        #             return A * np.exp(arg)
 
         return gaussian_ln
 

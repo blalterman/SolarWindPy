@@ -343,13 +343,6 @@ class TrendFit(object):
         axes = pd.DataFrame.from_dict(axes, orient="index")
         return axes
 
-    #     def make_popt_frame(self):
-    #         popt = {}
-    #         for k, v in self.ffuncs.items():
-    #             popt[k] = v.popt
-
-    #         popt = pd.DataFrame.from_dict(popt, orient="index")
-    #         self._popt_1d = popt
 
     def make_trend_func(self, **kwargs):
         r"""Make trend function.
@@ -536,38 +529,6 @@ class TrendFit(object):
         assert isinstance(new, pd.DataFrame)
         self._agged = new
 
-    #     def set_labels(self, **kwargs):
-    #         r"""Set or update x, y, or z labels. Any label not specified in kwargs
-    #         is propagated from `self.labels.<x, y, or z>`.
-    #         """
-
-    #         x = kwargs.pop("x", self.labels.x)
-    #         y = kwargs.pop("y", self.labels.y)
-    #         z = kwargs.pop("z", self.labels.z)
-
-    #         if len(kwargs.keys()):
-    #             extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
-    #             raise KeyError("Unexpected kwarg\n{}".format(extra))
-
-    #         self._labels = core.AxesLabels(x, y, z)
-
-    #         # log = logging.getLogger()
-    #         try:
-    #             # Update ffunc1d labels
-    #             self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))
-    #         #             log.warning("Set ffunc1d labels {}".format(self.ffuncs.iloc[0].labels))
-    #         except AttributeError:
-    #             #             log.warning("Skipping setting ffunc 1d labels")
-    #             pass
-
-    #         try:
-    #             # Update trendfunc labels
-    #             self.trend_func.set_labels(x=x, y=y, z=z)
-    #         #             log.warning("Set trend_func labels {}".format(self.trend_func.labels))
-
-    #         except AttributeError:
-    #             #             log.warning("Skipping setting trend_func labels")
-    #             pass
 
     def set_fitfunctions(self, ffunc1d, trendfunc):
         if ffunc1d is None:

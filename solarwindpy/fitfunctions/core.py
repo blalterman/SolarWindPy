@@ -76,21 +76,6 @@ class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
     pass
 
 
-# def __huber(z):
-#     cost = np.array(z)
-#     mask = z <= 1
-#     cost[~mask] = 2 * z[~mask]**0.5 - 1
-#     return cost
-#
-# def __soft_l1(z):
-#     t = 1 + z
-#     cost = 2 * (t**0.5 - 1)
-#     return cost
-#
-# _loss_fcns = {"huber": __huber,
-# "soft_l1": __soft_l1,
-# "cauchy": np.log1p,
-# "arctan": np.arctan}
 
 
 class FitFunction(ABC, metaclass=FitFunctionMeta):
@@ -212,9 +197,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     def __call__(self, x):
         """Evaluate the fitted model at ``x``."""
 
-        # TODO
-        # Do you want to have this function accept optional kwarg parameters?
-        # It adds a layer of complexity, but could be helfpul.
+        # Design decision: Keep interface simple - __call__ evaluates the fitted
+        # function using stored parameters. For parameter overrides, users should
+        # call self.function(x, param1, param2, ...) directly.
 
         # Sort the parameter keywords into the proper order to pass to the
         # numerical function.
