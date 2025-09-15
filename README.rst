@@ -2,7 +2,7 @@
 SolarWindPy
 ###########
 
-|Build Status| |Docs Status| |License| |Black Code|
+|Build Status| |Docs Status| |License| |Black Code| |Zenodo|
 
 Python data analysis tools for solar wind measurements.
 
@@ -110,3 +110,5 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
    :target: ./LICENSE.rst
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17057804.svg
+  :target: https://doi.org/10.5281/zenodo.17057804
