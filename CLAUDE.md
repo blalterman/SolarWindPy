@@ -8,6 +8,88 @@ This file provides essential guidance to Claude Code when working with the Solar
 3. **Test Before Commit**: All tests must pass before any commit
 4. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
 5. **Startup Briefing**: Provide project overview including agents, workflows, current state
+6. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
+
+## Prompt Improvement Protocol
+
+### When to Analyze Prompts
+Provide proactive improvement suggestions for **moderate and complex tasks**:
+
+**Moderate Complexity (2-4 steps):**
+- Multi-step workflows with some ambiguity
+- Tasks requiring sequential tool use
+- Requests that could benefit from more specificity
+
+**Complex Complexity (strategic/multi-domain):**
+- Planning, implementation, or architectural tasks
+- Multi-phase or multi-module work
+- Ambiguous scope requiring interpretation
+- Tasks needing agent coordination
+- Physics/scientific validation requirements
+- Debugging requiring root cause analysis
+
+**Exclude simple tasks:**
+- Single file reads or documentation lookups
+- Direct git/bash commands (status, log, etc.)
+- Single glob/grep operations
+- Clear, specific, single-step requests
+
+### Improvement Focus Areas
+Analyze prompts for opportunities in all areas:
+
+1. **Clarity & Specificity**
+   - Remove ambiguities and undefined scope
+   - Add missing requirements or success criteria
+   - Specify integration points and module targets
+
+2. **Context & Constraints**
+   - Add relevant domain context (physics, data structure)
+   - Specify constraints (backward compatibility, performance)
+   - Include data format expectations (MultiIndex structure)
+
+3. **SolarWindPy Integration**
+   - Suggest appropriate agent selection (PhysicsValidator, DataFrameArchitect, etc.)
+   - Reference hooks, workflows, and automation
+   - Link to project conventions (≥95% coverage, SI units, etc.)
+
+4. **Efficiency Optimization**
+   - Suggest parallel operations where applicable
+   - Recommend context-saving approaches
+   - Identify opportunities for batch operations
+
+### Improvement Presentation Format
+Use structured format for suggestions:
+
+```
+📝 Prompt Improvement Suggestion
+
+Original Intent: [Confirm understanding of request]
+
+Suggested Improvements:
+- [Specific addition/clarification 1]
+- [Specific addition/clarification 2]
+- [Agent or workflow suggestion]
+- [Missing constraint or context]
+
+Enhanced Prompt Example:
+"[Concrete example of improved version]"
+
+Expected Benefits:
+- [How improvement enhances execution quality]
+- [Reduced ambiguity or better agent selection]
+- [Efficiency or context preservation gains]
+
+Proceed with:
+[A] Original prompt as-is
+[B] Enhanced version
+[C] Custom modification (please specify)
+```
+
+### Integration with Workflow
+- Prompt analysis occurs **before** task execution
+- Works naturally with plan mode workflow
+- User approves original or enhanced version before proceeding
+- Builds better prompting patterns over time
 
 ## Quick Reference
 
