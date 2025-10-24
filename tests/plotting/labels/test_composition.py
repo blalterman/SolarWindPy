@@ -53,16 +53,16 @@ def test_set_species_charge_invalid_charge():
 
 
 def test_charge_state_units_equal():
-    """``ChargeState`` has ``#`` units when ion units match."""
-    cs = composition.ChargeState(("O", "2"), ("Fe", "3"))
+    """``ChargeStateRatio`` has ``#`` units when ion units match."""
+    cs = composition.ChargeStateRatio(("O", "2"), ("Fe", "3"))
     assert cs.units == r"\#"
 
 
 def test_charge_state_units_different():
-    """``ChargeState`` units combine when ion units differ."""
+    """``ChargeStateRatio`` units combine when ion units differ."""
     ion_a = IonWithUnits("O", "2", "cm-3")
     ion_b = IonWithUnits("Fe", "3", "km/s")
-    cs = composition.ChargeState(ion_a, ion_b)
+    cs = composition.ChargeStateRatio(ion_a, ion_b)
     assert cs.units == "cm-3/km/s"
 
 
@@ -186,11 +186,11 @@ class TestIon:
 
 
 class TestChargeState:
-    """Test ChargeState class functionality."""
+    """Test ChargeStateRatio class functionality."""
 
     def test_charge_state_initialization_with_tuples(self):
-        """Test ChargeState initialization with tuples."""
-        cs = composition.ChargeState(("O", "6"), ("O", "7"))
+        """Test ChargeStateRatio initialization with tuples."""
+        cs = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         assert cs.ionA.species == "O"
         assert cs.ionA.charge == "6"
         assert cs.ionB.species == "O"
@@ -200,24 +200,24 @@ class TestChargeState:
         """Test ChargeState initialization with Ion objects."""
         ion_a = composition.Ion("Fe", "10")
         ion_b = composition.Ion("Fe", "11")
-        cs = composition.ChargeState(ion_a, ion_b)
+        cs = composition.ChargeStateRatio(ion_a, ion_b)
         assert cs.ionA == ion_a
         assert cs.ionB == ion_b
 
     def test_charge_state_inheritance(self):
         """Test that ChargeState inherits from Base."""
-        cs = composition.ChargeState(("O", "6"), ("O", "7"))
+        cs = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         assert isinstance(cs, Base)
         assert hasattr(cs, "logger")
 
     def test_charge_state_tex(self):
         """Test TeX representation of charge state."""
-        cs = composition.ChargeState(("O", "6"), ("O", "7"))
+        cs = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         assert cs.tex == "{O}^{6}/{O}^{7}"
 
     def test_charge_state_path(self):
         """Test path generation for charge state."""
-        cs = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
+        cs = composition.ChargeStateRatio(("Fe", "10"), ("Fe", "11"))
         assert isinstance(cs.path, Path)
         expected_path = "Fe_10-OV-Fe_11"
         assert str(cs.path) == expected_path
@@ -225,29 +225,29 @@ class TestChargeState:
     def test_charge_state_same_units(self):
         """Test charge state units when both ions have same units."""
         # Default Ion units are "\#"
-        cs = composition.ChargeState(("O", "6"), ("O", "7"))
+        cs = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         assert cs.units == r"\#"
 
     def test_charge_state_different_units(self):
         """Test charge state units when ions have different units."""
         ion_a = IonWithUnits("O", "6", "cm^-3")
         ion_b = IonWithUnits("O", "7", "km/s")
-        cs = composition.ChargeState(ion_a, ion_b)
+        cs = composition.ChargeStateRatio(ion_a, ion_b)
         assert cs.units == "cm^-3/km/s"
 
     def test_charge_state_mixed_initialization(self):
         """Test ChargeState with mix of Ion and tuple."""
         ion_a = composition.Ion("Fe", "2")
-        cs = composition.ChargeState(ion_a, ("O", "6"))
+        cs = composition.ChargeStateRatio(ion_a, ("O", "6"))
         assert cs.ionA == ion_a
         assert cs.ionB.species == "O"
         assert cs.ionB.charge == "6"
 
     def test_charge_state_comparison(self):
         """Test charge state comparison functionality."""
-        cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
-        cs2 = composition.ChargeState(("O", "6"), ("O", "7"))
-        cs3 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
+        cs1 = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
+        cs2 = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
+        cs3 = composition.ChargeStateRatio(("Fe", "10"), ("Fe", "11"))
 
         # Same charge states should be equal
         assert cs1 == cs2
@@ -257,8 +257,8 @@ class TestChargeState:
 
     def test_charge_state_hashing(self):
         """Test that charge states can be hashed."""
-        cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
-        cs2 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
+        cs1 = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
+        cs2 = composition.ChargeStateRatio(("Fe", "10"), ("Fe", "11"))
 
         # Should be able to create a set
         cs_set = {cs1, cs2}
@@ -270,7 +270,7 @@ class TestChargeState:
 
     def test_charge_state_string_representation(self):
         """Test string representation of charge state."""
-        cs = composition.ChargeState(("O", "6"), ("O", "7"))
+        cs = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         str_repr = str(cs)
         assert isinstance(str_repr, str)
 
@@ -280,12 +280,12 @@ class TestCompositionModule:
 
     def test_module_all(self):
         """Test module __all__ exports."""
-        assert composition.__all__ == ["Ion", "ChargeState"]
+        assert composition.__all__ == ["Ion", "ChargeStateRatio"]
 
     def test_module_attributes(self):
         """Test module has expected attributes."""
         assert hasattr(composition, "Ion")
-        assert hasattr(composition, "ChargeState")
+        assert hasattr(composition, "ChargeStateRatio")
         assert hasattr(composition, "known_species")
 
     def test_known_species_completeness(self):
@@ -297,13 +297,13 @@ class TestCompositionModule:
     def test_scientific_accuracy(self):
         """Test that composition labels represent scientifically accurate concepts."""
         # Test common solar wind charge states
-        o6_o7 = composition.ChargeState(("O", "6"), ("O", "7"))
+        o6_o7 = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
         assert "O" in o6_o7.tex
         assert "6" in o6_o7.tex
         assert "7" in o6_o7.tex
 
         # Test iron charge states
-        fe10_fe11 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
+        fe10_fe11 = composition.ChargeStateRatio(("Fe", "10"), ("Fe", "11"))
         assert "Fe" in fe10_fe11.tex
         assert "10" in fe10_fe11.tex
         assert "11" in fe10_fe11.tex
@@ -319,7 +319,7 @@ class TestCompositionIntegration:
         o7 = composition.Ion("O", "7")
 
         # Use in charge state
-        cs = composition.ChargeState(o6, o7)
+        cs = composition.ChargeStateRatio(o6, o7)
 
         # Verify roundtrip
         assert cs.ionA.species == "O"
@@ -330,16 +330,16 @@ class TestCompositionIntegration:
     def test_complex_charge_state_ratios(self):
         """Test complex charge state ratios with different species."""
         # O6+ / Fe10+ ratio
-        cs = composition.ChargeState(("O", "6"), ("Fe", "10"))
+        cs = composition.ChargeStateRatio(("O", "6"), ("Fe", "10"))
         assert "O" in cs.tex
         assert "Fe" in cs.tex
         assert "{O}^{6}/{Fe}^{10}" == cs.tex
 
     def test_charge_state_path_uniqueness(self):
         """Test that different charge states have unique paths."""
-        cs1 = composition.ChargeState(("O", "6"), ("O", "7"))
-        cs2 = composition.ChargeState(("Fe", "10"), ("Fe", "11"))
-        cs3 = composition.ChargeState(("O", "7"), ("O", "6"))  # Reversed
+        cs1 = composition.ChargeStateRatio(("O", "6"), ("O", "7"))
+        cs2 = composition.ChargeStateRatio(("Fe", "10"), ("Fe", "11"))
+        cs3 = composition.ChargeStateRatio(("O", "7"), ("O", "6"))  # Reversed
 
         paths = [str(cs1.path), str(cs2.path), str(cs3.path)]
         assert len(paths) == len(set(paths))  # All unique
