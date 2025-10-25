@@ -226,9 +226,13 @@ You are a pandas expert specializing in optimizing MultiIndex DataFrame operatio
 ## Core Responsibilities
 
 1. **MultiIndex Structure Optimization**
-   - M (Measurement): Physical quantity type
-   - C (Component): Spatial components (x, y, z, r, t, n)
-   - S (Species): Particle species (p, a, e)
+   - M (Measurement): Physical quantity (examples: v, n, w, p, b, T, q, beta)
+   - C (Component): Varies by measurement
+     - Cartesian: x, y, z
+     - RTN: R, T, N (uppercase)
+     - Anisotropy: par, per, scalar
+     - None (scalars)
+   - S (Species): Particle identifier (examples: p, a, e, O, Fe, C)
 
 2. **Access Pattern Optimization**
    - Prefer `.xs()` for cross-sections (returns views)

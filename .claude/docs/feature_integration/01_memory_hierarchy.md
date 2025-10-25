@@ -13,17 +13,21 @@
 ### 1. Feature Overview
 
 **What It Is:**
-A 4-tier persistent context management system that retains project guidelines, user preferences, and organizational policies across sessions. Memory eliminates the need to repeat common instructions.
+A project-level persistent context management system that retains project guidelines, conventions, and knowledge across sessions. Memory eliminates the need to repeat common instructions.
 
 **Core Capabilities:**
-- **Four-tier hierarchy** with cascading priority:
-  1. **Enterprise** (`/Library/Application Support/ClaudeCode/CLAUDE.md`, etc.) - Org-wide
-  2. **Project** (`./CLAUDE.md` or `./.claude/CLAUDE.md`) - Team-shared
-  3. **User** (`~/.claude/CLAUDE.md`) - Personal cross-project
-  4. **Local** (`./CLAUDE.local.md`) - Project-specific personal (deprecated)
+- **Project-only memory** - Single-tier architecture for consistency:
+  - **Project** (`./CLAUDE.md` or `./.claude/CLAUDE.md`) - Team-shared, git-committed
 - **File imports** - Modular composition via `@path/to/file` syntax (5-level depth)
 - **Automatic discovery** - Recursive upward traversal from working directory
 - **Markdown-based** - Simple text files, git-friendly
+
+**Why Project Memory Only:**
+SolarWindPy uses **only** project-level memory to ensure:
+- **Consistency**: All team members work with identical configuration
+- **Version Control**: Memory evolves with codebase, tracked in git
+- **No Fragmentation**: No personal overrides creating inconsistent behavior across developers
+- **Simplicity**: Single source of truth for all SolarWindPy conventions
 
 **Maturity & Prerequisites:**
 - ✅ Production-ready, core Claude Code feature
@@ -34,8 +38,8 @@ A 4-tier persistent context management system that retains project guidelines, u
 **Technical Constraints:**
 - Import depth limited to 5 levels
 - Imports not evaluated inside code spans/blocks
-- Higher tiers load first (enterprise → project → user → local)
-- Files discovered via recursive directory traversal
+- Project memory is the only tier (no user/local/enterprise overrides)
+- Files discovered via recursive directory traversal from working directory
 
 ### 2. Value Proposition
 
@@ -450,33 +454,25 @@ This file provides essential guidance to Claude Code when working with the Solar
 - Feature integration → .claude/docs/FEATURE_INTEGRATION.md
 ```
 
-#### User-Level Personal Memory
+#### Project Memory Contents
 
-**File:** `~/.claude/CLAUDE.md` (example for personal preferences)
+**What Goes in Project Memory:**
+All SolarWindPy-specific conventions, rules, and knowledge that should be consistent across all team members:
 
-```markdown
-# Personal Development Preferences
+- **Physics constants and formulas** (thermal speed, Alfvén speed, etc.)
+- **MultiIndex structure** (M/C/S levels, capitalization rules)
+- **Testing requirements** (≥95% coverage, physics validation patterns)
+- **DataFrame patterns** (efficient access with .xs(), avoiding SettingWithCopyWarning)
+- **Git workflows** (branch naming, commit conventions, hook system)
+- **Agent and skill usage** (when to use specialized agents)
+- **Hook configurations** (validation scripts, test runners)
 
-## Code Style
-- Prefer explicit type hints over implicit
-- Max line length: 88 (Black default)
-- Sort imports with isort
+**What Does NOT Go in Project Memory:**
+- Personal preferences that vary by developer (editor settings, alias commands)
+- Experimental features not yet adopted by team
+- User-specific shortcuts or workflow customizations
 
-## Testing Preferences
-- Use pytest fixtures for common setup
-- Prefer parametrize over multiple test functions
-- Always include docstrings in test functions
-
-## Git Preferences
-- Commit message format: `<type>(<scope>): <description>`
-- Types: feat, fix, docs, test, refactor, chore
-- Always include "Generated with Claude Code" footer
-
-## Workflow Preferences
-- Run Black formatter before committing
-- Check flake8 before push
-- Prefer small, focused commits over large changesets
-```
+**Note:** SolarWindPy does NOT use `~/.claude/CLAUDE.md` (user-level) or `./CLAUDE.local.md` (local overrides). All configuration is project-level and version-controlled.
 
 #### Migration Path
 
@@ -494,9 +490,9 @@ This file provides essential guidance to Claude Code when working with the Solar
 
 **Phase 3: Full Migration (Week 3)**
 1. Convert all CLAUDE.md sections to imported memory files
-2. Create user-level personal memory (`~/.claude/CLAUDE.md`)
-3. Document memory structure in `.claude/docs/MEMORY.md`
-4. Measure token reduction and context quality
+2. Document memory structure in `.claude/docs/MEMORY.md`
+3. Measure token reduction and context quality
+4. Update team documentation with memory file locations
 
 **Phase 4: Optimization (Week 4+)**
 1. Add advanced memory features (conditional imports, context-specific memories)
@@ -580,14 +576,7 @@ Expected: dataframe-patterns.md loaded, physics-constants.md not needed
 Validation: Monitor which memory files Claude references
 ```
 
-#### Test 4: Cascading Priority
-```
-Setup: Create conflicting rules in project vs. user memory
-Expected: Project memory (higher tier) takes precedence
-Validation: Claude follows project rule, not user preference
-```
-
-#### Test 5: Backward Compatibility
+#### Test 4: Backward Compatibility
 ```
 Scenario: Temporarily remove .claude/memory/ directory
 Expected: Inline CLAUDE.md content provides full fallback

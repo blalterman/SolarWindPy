@@ -122,9 +122,9 @@ Example: Physics Validation
 ## Feature Navigation
 
 ### 1. [Memory Hierarchy](./01_memory_hierarchy.md)
-**4-tier persistent context management system**
+**Project-level persistent context management system**
 
-Eliminates repeated context-setting through cascading memory files (Enterprise → Project → User → Local). Supports modular imports and automatic discovery.
+Eliminates repeated context-setting through modular project memory files. Single-tier architecture ensures team-wide consistency. Supports modular imports and automatic discovery.
 
 *Key deliverables:* 9 memory files (physics-constants, dataframe-patterns, testing-templates, etc.), refactored CLAUDE.md with imports
 

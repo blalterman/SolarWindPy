@@ -172,9 +172,19 @@ Ensures efficient pandas MultiIndex operations maintaining SolarWindPy's three-l
 
 ## MultiIndex Structure
 ```python
-# Level M: Measurement (velocity, density, temperature)
-# Level C: Component (x, y, z, r, t, n)
-# Level S: Species (protons, alphas, electrons)
+# Level M: Measurement - Physical quantity type
+#   Examples: v, n, w, p, b, T, q, beta, cs, ca, rho, flux, ...
+#   (50+ measurements - use df.index.get_level_values('M').unique() to see all)
+#
+# Level C: Component (measurement-dependent)
+#   - Cartesian: x, y, z (lowercase)
+#   - RTN coordinates: R, T, N (uppercase) — "T" is tangential, not temperature
+#   - Anisotropy: par, per, scalar (lowercase)
+#   - None (for scalar measurements)
+#
+# Level S: Species - Particle type
+#   Examples: p, a, e, O, Fe, C, He, Ne, ...
+#   (use df.index.get_level_values('S').unique() to see all)
 ```
 
 ## Best Practices
