@@ -61,20 +61,20 @@ ______________________________________________________________________
 - [x] **Repository contains research software (not just data, models, or notebooks)**
 - [x] **OSI-approved open-source license file is present** (`LICENSE`)
 - [x] **Repository includes `paper.md` in Markdown format**
-- [ ] **`paper.md` includes a non-specialist summary**
-- [ ] **`paper.md` includes a clear statement of need**
+- [x] **`paper.md` includes a non-specialist summary** (lines 20-28, 161 words)
+- [x] **`paper.md` includes a clear statement of need** (lines 32-64, 505 words)
 - [x] **`paper.md` lists all author names and affiliations**
 - [x] **`paper.md` includes acknowledgments (if any)**
-- [ ] **`paper.md` includes references section**
-- [ ] **`paper.md` length is between 250 and 1000 words**
-- [ ] **All source code and documentation are present and installable**
+- [x] **`paper.md` includes references section** (lines 66-101 with citation keys; `paper.bib` verified complete)
+- [x] **`paper.md` length is between 250 and 1000 words** (747 words total)
+- [x] **All source code and documentation are present and installable** (available via PyPI)
 - [x] **Repository’s issue tracker is open to the public**
 - [x] **Repository demonstrates substantial scholarly effort (≥ 3 months work, non-trivial functionality)**
 - [x] **Development history (commits, issues, PRs) supports claim of scholarly effort**
 - [x] **Submitting author is a major contributor to the project**
 - [x] **All listed authors have contributed significantly (not just supervisors)**
 - [x] **All authors have GitHub accounts (for open peer review)**
-- [ ] **Can create a tagged software release**
+- [x] **Can create a tagged software release** (latest: v0.1.4)
 - [x] **Can archive software on Zenodo or Figshare to obtain a DOI**
 - [x] **Repository and paper do not focus on research *using* the software, but on the software itself**
 - [x] **No undisclosed conflicts of interest among authors**
