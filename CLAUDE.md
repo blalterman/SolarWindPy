@@ -10,6 +10,21 @@ This file provides essential guidance to Claude Code when working with the Solar
 5. **Startup Briefing**: Provide project overview including agents, workflows, current state
 6. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
 
+## Context Management Rules
+1. **Archive Exclusion**: NEVER search, read, or glob the following compressed archives:
+   - `plans/completed-plans-archive-2025.tar.gz` - Contains historical completed plans (190KB compressed from 976KB)
+   - `plans/abandoned-plans-archive-2025.tar.gz` - Contains historical abandoned plans (72KB compressed from 312KB)
+2. **Active Plans Only**: Focus all searches on:
+   - Root-level plan files in `plans/` directory (`*.md` files)
+   - Active plan subdirectories (not archived)
+   - Template and guide files for reference
+3. **Rationale**: These archives contain 40% of the plans/ directory's original disk usage (1.3MB) but provide minimal active value. They are compressed binary files that cannot be read directly. Compacted state summaries in active plans provide sufficient historical context when needed.
+4. **Archive Access**: To access archived plans if absolutely necessary:
+   ```bash
+   tar -xzf plans/completed-plans-archive-2025.tar.gz
+   tar -xzf plans/abandoned-plans-archive-2025.tar.gz
+   ```
+
 ## Prompt Improvement Protocol
 
 ### When to Analyze Prompts
