@@ -49,12 +49,12 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
-SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules along with the core tests) were written by the author and developed in support of multiple publications [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff,ACE:SWICS:SSN,ACE:SWICS:FStransition].
-It contains a well-developed test suite, which supports future development and provides quality assurance.
+SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed in support of multiple publications [@Alterman2018,@Wind:SWE:Wk, @Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
+The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure, enabling systematic completion of comprehensive test suites, documentation, and deployment workflows while maintaining scientific correctness.
 
-The package builds on well-established libraries including NumPy [@Harris2020; @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010; @McKinney2011; @Mckinney2013] to ensure that the dependencies are stable.
+The package builds on well-established libraries including NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure that the dependencies are stable.
 The plotting functionality retains the mapping between timeseries and aggregated observations to enable researchers to easily extract subsets of their observations for detailed analysis.
-It also contains a submodule to map the quantities plotted to their file names, improving the mapping from the user's analysis to the saved output.
+The plot labeling functionality maps the quantities plotted to their file names, improving the mapping from the user's analysis to the saved output.
 The non-linear fitting libraries (utilizing scipy optimize) are designed for multi-step fitting in which the user performs nested regression of one variable on parameters derived from fitting other quantities.
 Submodules for the analysis of magnetohydrodynamic turbulence parameters and kinetic instabilities are also provided.
 The `solar_activity` submodule provides the user with seamless access to solar activity indicators provided by the LASP Interactive Solar IRradiance Datacenter (LISIRD) [@LISIRD] and the Solar Information Data Center (SIDC) at the Royal Observatory of Belgium [@SIDC].
@@ -62,6 +62,17 @@ This tool enables easy comparison of solar wind parameters across different phas
 SolarWindPy currently stores data in pandas DataFrames and Timeseries objects.
 However, there is a clear separation between the two libraries such that future development could transition to using more nuanced and scientifically-targeted data structures, for example those provided by xarray [@xarray], SunPy, or AstroPy.
 
+## AI-Assisted Development Workflow
+
+SolarWindPy's evolution from thesis research code [@Alterman2018] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
+This was accomplished using Claude Code [@claude_code_2024] with custom AI development infrastructure designed for scientific computing quality assurance.
+
+The implementation includes specialized domain-specific agents and automated validation workflows using pre-commit hooks for physics validation, test execution, and coverage monitoring.
+This systematic approach enabled rapid development of test suites for modules outside the original `core` implementation, completion of documentation including missing docstrings, and creation of continuous integration and deployment pipelines for PyPI, conda-forge, and ReadTheDocs.
+
+The project maintains a ≥95% test coverage target with core physics and plasma functionality comprehensively tested, while tests for advanced features such as fitfunctions and plotting capabilities remain in active development.
+All code generated or modified by AI undergoes expert review to ensure scientific accuracy.
+The complete AI-assisted development infrastructure, including agent specifications, validation hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository.
 
 # References
 
@@ -102,8 +113,6 @@ However, there is a clear separation between the two libraries such that future 
 
 # Acknowledgements
 
-The author acknowledges NASA contrat NNX14AR78G and grants 80NSSC22K1011, 80NSSC22K0645, and 80NSSC20K1844.
+The author acknowledges NASA contract NNX14AR78G and grants 80NSSC22K1011, 80NSSC22K0645, and 80NSSC20K1844.
 The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-Claude-code [@claude_code_2024] was used to develop tests for submodules outside of `core`, write missing docstrings, and create the deployment workflow (including readthedocs).
-Code written by Claude-code was reviewed and verified by the author.
 
