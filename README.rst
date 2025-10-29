@@ -2,7 +2,11 @@
 SolarWindPy
 ###########
 
-|Build Status| |Docs Status| |License| |Black Code| |Zenodo|
+|Build Status| |Docs Status|
+
+|PyPI| |Conda| |Python| |Platforms| |Downloads|
+
+|License| |Black Code| |Zenodo|
 
 Python data analysis tools for solar wind measurements.
 
@@ -26,18 +30,22 @@ Installation
 
 SolarWindPy requires Python 3.10 or later.
 
-SolarWindPy will soon be installable from pip via
-``pip install solarwindpy``. We plant to target conda quickly there
-after, most likely through the ``conda-forge`` channel.
+SolarWindPy is available via PyPI and conda-forge:
 
 User
 ----
 
-Install from pip (when available):
+Install from PyPI:
 
 .. code-block:: bash
 
    pip install solarwindpy  # Requires Python 3.10+
+
+Or install from conda-forge:
+
+.. code-block:: bash
+
+   conda install -c conda-forge solarwindpy
 
 Development
 -----------
@@ -112,3 +120,13 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
    :target: https://github.com/psf/black
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17057804.svg
   :target: https://doi.org/10.5281/zenodo.17057804
+.. |PyPI| image:: https://img.shields.io/pypi/v/solarwindpy.svg
+   :target: https://pypi.org/project/solarwindpy/
+.. |Python| image:: https://img.shields.io/pypi/pyversions/solarwindpy.svg
+   :target: https://pypi.org/project/solarwindpy/
+.. |Conda| image:: https://img.shields.io/conda/vn/conda-forge/solarwindpy.svg
+   :target: https://anaconda.org/conda-forge/solarwindpy
+.. |Platforms| image:: https://img.shields.io/conda/pn/conda-forge/solarwindpy.svg
+   :target: https://anaconda.org/conda-forge/solarwindpy
+.. |Downloads| image:: https://img.shields.io/pypi/dm/solarwindpy.svg
+   :target: https://pypi.org/project/solarwindpy/
