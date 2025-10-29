@@ -4,9 +4,9 @@ SolarWindPy
 
 |Build Status| |Docs Status| |Black Code|
 
-|PyPI| |Conda| |Python|
+|PyPI| |Conda|
 
-|License| |Zenodo|
+|Python| |License| |Zenodo|
 
 Python data analysis tools for solar wind measurements.
 
