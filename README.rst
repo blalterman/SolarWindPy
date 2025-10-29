@@ -4,7 +4,7 @@ SolarWindPy
 
 |Build Status| |Docs Status|
 
-|PyPI| |Conda| |Python| |Platforms| |Downloads|
+|PyPI| |Conda| |Python|
 
 |License| |Black Code| |Zenodo|
 
@@ -126,7 +126,3 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
    :target: https://pypi.org/project/solarwindpy/
 .. |Conda| image:: https://img.shields.io/conda/vn/conda-forge/solarwindpy.svg
    :target: https://anaconda.org/conda-forge/solarwindpy
-.. |Platforms| image:: https://img.shields.io/conda/pn/conda-forge/solarwindpy.svg
-   :target: https://anaconda.org/conda-forge/solarwindpy
-.. |Downloads| image:: https://img.shields.io/pypi/dm/solarwindpy.svg
-   :target: https://pypi.org/project/solarwindpy/
