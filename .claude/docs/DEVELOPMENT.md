@@ -54,6 +54,52 @@ pip install -e .
 - **Commits**: Conventional Commits format with 'Generated with Claude Code'
 - **Testing**: All tests must pass before committing
 
+## Code Attribution
+
+All code incorporated into SolarWindPy must follow proper attribution practices.
+
+**See comprehensive guidelines:** [ATTRIBUTION.md](./ATTRIBUTION.md)
+
+### Quick Reference
+
+**AI-Generated Code:**
+```bash
+# Include in commit message:
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**External Code:**
+```python
+# Add in source file:
+# Source: [Description or author]
+# URL: [Link]
+# License: [License type]
+# Modifications: [What changed]
+```
+
+**Scientific Algorithms:**
+```python
+"""
+References
+----------
+.. [1] Author, A., & Author, B. (Year). "Title".
+       Journal, Volume(Issue), pages.
+       DOI: XX.XXXX/journal.year.article
+"""
+```
+
+**License Compatibility:**
+- ✅ Compatible (can copy code): MIT, BSD, Apache 2.0, Public Domain
+- ❌ Incompatible (cannot copy code): GPL, LGPL, proprietary, unknown
+- ⚠️ Dependencies: LGPL libraries OK as dependencies, GPL complex (avoid)
+
+**When Uncertain:**
+- External code → Ask maintainer or reimplement from scratch
+- Algorithms → Cite paper in docstring References section
+- Standard patterns → No attribution needed (NumPy/pandas idioms, common practices)
+
 ### Documentation Standards (doc8)
 
 **Line Length Guidelines**:

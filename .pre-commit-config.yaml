@@ -62,3 +62,12 @@ repos:
     language: system
     files: ^solarwindpy/.*\.py$
     pass_filenames: false
+  - id: attribution-reminder
+    name: Attribution Guidelines Reminder
+    entry: bash -c
+    args: ['echo "📝 Remember: External code needs attribution - see .claude/docs/ATTRIBUTION.md"; exit 0']
+    language: system
+    stages: [commit]
+    pass_filenames: false
+    always_run: true
+    verbose: true

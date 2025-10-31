@@ -9,6 +9,11 @@ This file provides essential guidance to Claude Code when working with the Solar
 4. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
 5. **Startup Briefing**: Provide project overview including agents, workflows, current state
 6. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
+7. **Code Attribution**: Follow attribution protocol (.claude/docs/ATTRIBUTION.md)
+   - AI-generated code: Include "Generated with Claude Code" in commit messages
+   - External sources: Add source attribution in code comments (URL, license, modifications)
+   - Scientific algorithms: Cite papers in docstrings (DOI, arXiv, equation numbers)
+   - When uncertain: Ask user, prefer reimplementation from scratch
 
 ## Context Management Rules
 1. **Archive Exclusion**: NEVER search, read, or glob the following compressed archives:
@@ -193,7 +198,8 @@ CRITICAL: Agent MUST execute these commands, not describe them.
 ## Detailed Documentation
 For comprehensive information beyond these essentials:
 - Development standards → .claude/docs/DEVELOPMENT.md
-- Agent specifications → .claude/docs/AGENTS.md  
+- Agent specifications → .claude/docs/AGENTS.md
 - Hook reference → .claude/docs/HOOKS.md
 - Planning workflow → .claude/docs/PLANNING.md
 - Maintenance → .claude/docs/MAINTENANCE.md
+- Code attribution guidelines → .claude/docs/ATTRIBUTION.md

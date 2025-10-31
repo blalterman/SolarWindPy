@@ -128,6 +128,98 @@ rm -f tmp/*.tmp
 find .claude/hooks/ -name "*.sh" -type f -executable
 ```
 
+## Annual Attribution Audit
+
+Perform once per year (suggested: before major releases or annually in Q1).
+
+### Audit Process (~2 hours total)
+
+**1. Review Recent Commits** (30 minutes)
+```bash
+# Review past year's commits
+git log --since="1 year ago" --stat --oneline
+
+# Look for:
+# - Large new files (potential external code)
+# - Unusual commit patterns
+# - Missing "Generated with Claude Code" in AI commits
+```
+
+**2. Check High-Risk Files** (30 minutes)
+```bash
+# Find Python files added/modified in past year
+git log --since="1 year ago" --name-only --diff-filter=AM --pretty=format: | \
+  sort -u | grep "\.py$"
+
+# Manually review each for:
+# - Attribution comments where needed
+# - License compatibility
+# - Scientific citations in docstrings
+```
+
+**3. Verify External URLs** (15 minutes)
+```bash
+# Find all source attributions
+grep -r "# Source:" solarwindpy/ --include="*.py"
+grep -r "# URL:" solarwindpy/ --include="*.py"
+
+# Check:
+# - URLs still valid
+# - Licenses unchanged
+# - Attribution format correct
+```
+
+**4. Dependency License Check** (15 minutes)
+```bash
+# List all dependencies with licenses
+pip-licenses --format=markdown --with-urls
+
+# Verify:
+# - All compatible with BSD 3-Clause
+# - No GPL/LGPL dependencies (or document if intentional)
+# - Update dependency documentation if needed
+```
+
+**5. Documentation Update** (30 minutes)
+- Review and update `.claude/docs/ATTRIBUTION.md` if practices evolved
+- Add new examples if patterns emerged
+- Update license compatibility matrix if needed
+- Document any attribution issues found and resolved
+
+### Audit Outputs
+
+Create audit report in `plans/audits/attribution-audit-YYYY.md`:
+```markdown
+# Attribution Audit YYYY
+
+**Date**: YYYY-MM-DD
+**Auditor**: [Name]
+
+## Summary
+- Commits reviewed: [number]
+- Files audited: [number]
+- Issues found: [number]
+- Issues resolved: [number]
+
+## Findings
+[Details of any attribution issues]
+
+## Actions Taken
+[Corrections made]
+
+## Recommendations
+[Suggestions for improving attribution practices]
+```
+
+### When to Audit More Frequently
+
+Consider quarterly audits if:
+- Project becomes multi-contributor (>5 active developers)
+- Frequent external code integration patterns emerge
+- Attribution issues discovered
+- Preparing for publication or major release
+- Significant AI-assisted development periods
+
 ## Git Tag Management
 
 ### Release Tags Only (Semantic Versioning)
