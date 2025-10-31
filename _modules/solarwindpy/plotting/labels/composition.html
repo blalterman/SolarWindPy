@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.labels.composition &mdash; SolarWindPy 0.1.dev1+g1709960ea documentation</title>
+  <title>solarwindpy.plotting.labels.composition &mdash; SolarWindPy 0.1.dev1+g12cdbfc51 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=3072f4a5"></script>
+      <script src="../../../../_static/documentation_options.js?v=58642d15"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -312,7 +312,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.plotting.labels.composition</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ion&quot;</span><span class="p">,</span> <span class="s2">&quot;ChargeState&quot;</span><span class="p">]</span>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ion&quot;</span><span class="p">,</span> <span class="s2">&quot;ChargeStateRatio&quot;</span><span class="p">]</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -378,13 +378,13 @@
 
 
 
-<div class="viewcode-block" id="ChargeState">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ChargeState</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="ChargeStateRatio">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChargeStateRatio</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ratio of two ion abundances.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ChargeState.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.__init__">[docs]</a>
+<div class="viewcode-block" id="ChargeStateRatio.__init__">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ionA</span><span class="p">,</span> <span class="n">ionB</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the charge-state ratio.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -418,8 +418,8 @@
 
         <span class="k">return</span> <span class="n">units</span>
 
-<div class="viewcode-block" id="ChargeState.set_ions">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeState.set_ions">[docs]</a>
+<div class="viewcode-block" id="ChargeStateRatio.set_ions">
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.set_ions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_ions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ionA</span><span class="p">,</span> <span class="n">ionB</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ionA</span><span class="p">,</span> <span class="n">Ion</span><span class="p">):</span>
             <span class="n">ionA</span> <span class="o">=</span> <span class="n">Ion</span><span class="p">(</span><span class="o">*</span><span class="n">ionA</span><span class="p">)</span>
