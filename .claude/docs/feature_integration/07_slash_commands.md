@@ -5,10 +5,16 @@
 **Effort:** 5.5-8 hours
 **ROI Break-even:** 3-4 weeks
 
-[← Back to Index](./INDEX.md) | [Previous: Output Styles ←](./06_output_styles.md)
+[← Back to Index](./INDEX.md) | [← Previous: Output Styles](./06_output_styles.md)
 
 ---
 
+**✅ OFFICIAL PLUGIN FEATURE - Native Support**
+
+Slash commands are officially supported as plugin components (plugin-name/commands/).
+See: [Plugin Packaging](./08_plugin_packaging.md#slash-commands)
+
+---
 
 ## Executive Summary
 
@@ -159,6 +165,104 @@ Decision Matrix:
 ✅ **Fully compatible** - Slash commands are additive
 ✅ **No migration needed** - Start with zero, add incrementally
 ✅ **Coexists with everything** - Skills, hooks, agents unchanged
+
+### Risk Assessment
+
+#### Technical Risks
+
+**Risk: Command Name Conflicts**
+- **Likelihood:** Low
+- **Impact:** Medium (command overwrites built-in or plugin command)
+- **Mitigation:**
+  - Check existing commands with `/help` before creating new
+  - Use descriptive, SolarWindPy-specific names
+  - Namespace with prefix if publishing: `swpy-coverage`, `swpy-physics`
+  - Document command inventory in CLAUDE.md
+  - Test for conflicts after adding new commands
+
+**Risk: Bash Execution Security**
+- **Likelihood:** Low
+- **Impact:** High (malicious commands if sharing plugins)
+- **Mitigation:**
+  - Review all `!` bash executions in commands
+  - Avoid user-controlled input in bash execution
+  - Test commands in safe environment first
+  - Document security guidelines for custom commands
+  - Trust chain: Only use project commands from trusted sources
+
+**Risk: Command Maintenance Drift**
+- **Likelihood:** Medium
+- **Impact:** Medium (outdated commands cause confusion/errors)
+- **Mitigation:**
+  - Include commands in code review process
+  - Test commands as part of CI/CD
+  - Version control in git
+  - Schedule quarterly command audit
+  - Document command dependencies clearly
+
+**Risk: Plugin Distribution of Local-Only Commands**
+- **Likelihood:** Low-Medium
+- **Impact:** Low (commands work locally but fail in plugins)
+- **Mitigation:**
+  - Use relative paths from project root
+  - Avoid absolute paths (`/Users/...`)
+  - Test commands in different project structures
+  - Document any local dependencies
+  - Provide installation instructions for plugin users
+
+#### Adoption Risks
+
+**Risk: Command Name Recall Difficulty**
+- **Likelihood:** Medium
+- **Impact:** Low (use regular prompts instead)
+- **Mitigation:**
+  - Use intuitive, descriptive names (`/coverage`, `/test`, `/physics`)
+  - Keep commands short (≤15 characters)
+  - Create quick reference card
+  - Document all commands in CLAUDE.md
+  - Use `/help` to list available commands
+
+**Risk: Over-Creation of Similar Commands**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (namespace pollution, confusion)
+- **Mitigation:**
+  - Limit to 10-15 high-value commands initially
+  - Consolidate similar functionality
+  - Use arguments instead of separate commands (`/test $1` vs `/test-physics`, `/test-all`)
+  - Review command library monthly
+  - Deprecate redundant commands
+
+**Risk: Team Unfamiliarity with Slash Commands**
+- **Likelihood:** Low
+- **Impact:** Low (miss productivity boost)
+- **Mitigation:**
+  - Include in onboarding documentation
+  - Demo commands in team sessions
+  - Create cheat sheet
+  - Encourage experimentation
+  - Celebrate command usage wins
+
+#### Performance Risks
+
+**Risk: Long-Running Bash Commands Block Workflow**
+- **Likelihood:** Low-Medium
+- **Impact:** Medium (user waits for command completion)
+- **Mitigation:**
+  - Keep bash commands under 5 seconds
+  - Use background processes for slow operations (test suites)
+  - Provide progress indicators where possible
+  - Timeout commands (set reasonable limits)
+  - Document expected execution times
+
+**Risk: Complex Commands Hard to Debug**
+- **Likelihood:** Low
+- **Impact:** Medium (command fails, unclear why)
+- **Mitigation:**
+  - Add error handling to bash scripts
+  - Log command execution details
+  - Provide clear error messages
+  - Test commands independently
+  - Document troubleshooting steps
 
 ---
 
@@ -819,6 +923,41 @@ Use the physics-validator subagent to perform deep analysis on $ARGUMENTS.
 | Documentation | 2/5 | Document in team guide |
 | Maintenance | 2/5 | Occasional refinement |
 
+**Dependencies:**
+
+*Technical Prerequisites:*
+- ✅ None - Slash commands are self-contained feature
+- ✅ Claude Code with slash command support (core feature)
+- ✅ No other features required
+
+*Infrastructure Requirements:*
+- ✅ `.claude/commands/` directory OR plugin installation capability
+- ✅ Git repository (if version controlling commands or distributing via plugin)
+- ✅ Bash shell access (for commands using `!` execution prefix)
+
+*Knowledge Prerequisites:*
+- ⚠️ Understanding of markdown with YAML frontmatter
+- ⚠️ Familiarity with argument passing syntax (`$1`, `$2`, `$ARGUMENTS`)
+- ⚠️ Basic bash scripting (for commands that execute shell commands)
+- ⚠️ Knowledge of file reference syntax (`@path/to/file`)
+
+*Recommended But Optional:*
+- 🔄 Memory Hierarchy - Commands can reference memory files via `@.claude/memory/...`
+- 🔄 Skills System - Commands complement skills (explicit vs. automatic invocation)
+- 🔄 Enhanced Hooks - Hooks can log command usage via Notification event
+- 🔄 Existing scripts - Understanding of `.claude/scripts/*.sh` and `.claude/hooks/*.sh` helps design commands
+
+*Implementation Considerations:*
+- ⚠️ Command names must be unique (no conflicts with built-in or plugin commands)
+- ⚠️ Bash execution (`!` prefix) requires security review
+- ⚠️ File references must use correct paths (relative from project root)
+- ⚠️ Testing requires manual invocation and verification
+
+*Plugin-Specific Dependencies:*
+- 🔌 Plugin Packaging feature (if distributing to team/community)
+- 🔌 GitHub repository for marketplace hosting
+- 🔌 `plugin.json` manifest file
+
 ### Estimated Effort
 
 **Initial Implementation:**
@@ -837,6 +976,56 @@ Use the physics-validator subagent to perform deep analysis on $ARGUMENTS.
 - Planning commands (3): 30-50 min/week
 - Review commands (2): 15-30 min/week
 - Git commands (2): 10-20 min/week
+
+**Measurement Methodology:**
+
+*How Time Savings Per Invocation (2-5 minutes) Are Measured:*
+1. **Baseline:** Time manual prompt typing for equivalent workflow
+2. **Example - Coverage check:** Type full prompt ("Run pytest with coverage, show me files below 95%, suggest which to prioritize") = ~45-60 seconds + cognitive load
+3. **Slash command:** `/coverage` = ~2-3 seconds typing
+4. **Savings per invocation:** 40-55 seconds typing + 60-120 seconds context recall = **2-3 minutes total**
+5. **Verification:** Screen recording time analysis of 20 manual vs. 20 slash command invocations
+
+*How Invocation Frequency (10-20 times/week) Is Estimated:*
+1. **Historical analysis:** Review past session logs for repetitive prompt patterns
+2. **Task categorization:** Identify how often testing, planning, review, git workflows occur
+3. **Team survey:** Ask developers how often they perform common tasks
+4. **Conservative estimate:**
+   - Testing/validation: 4-6 times/week
+   - Planning: 2-3 times/week
+   - Code review: 2-3 times/week
+   - Git operations: 2-4 times/week
+5. **Total:** 10-16 times/week (round to 10-20 for safety margin)
+
+*How Weekly Savings (80-140 minutes) Are Calculated:*
+1. **Formula:** (Savings per invocation) × (Invocation frequency) × (10 commands)
+2. **Conservative:** (2 min) × (10 invocations) = 20 min/week
+3. **Moderate:** (3 min) × (15 invocations) = 45 min/week × 10 commands / weighted average = 80-100 min/week
+4. **Aggressive:** (5 min) × (20 invocations) = 100 min/week
+5. **Reality check:** Not all commands used equally; weight by category frequency
+
+*How Category-Specific ROI Is Measured:*
+1. **Testing commands (25-40 min/week):**
+   - `/coverage`, `/physics`, `/test` used 4-6 times/week each = 12-18 total
+   - Average 2-3 min saved per invocation = 24-54 min/week (conservative: 25-40)
+
+2. **Planning commands (30-50 min/week):**
+   - `/plan-create`, `/plan-phases`, `/plan-status` used 2-3 times/week each = 6-9 total
+   - Average 5-8 min saved per invocation (longer prompts) = 30-72 min/week (conservative: 30-50)
+
+3. **Review commands (15-30 min/week):**
+   - `/review`, `/refactor` used 2-3 times/week each = 4-6 total
+   - Average 3-5 min saved per invocation = 12-30 min/week
+
+4. **Git commands (10-20 min/week):**
+   - `/commit`, `/branch` used 2-4 times/week each = 4-8 total
+   - Average 2-3 min saved per invocation = 8-24 min/week (conservative: 10-20)
+
+*Verification Methods:*
+- **Usage tracking:** Log slash command invocations via hooks
+- **Time studies:** Measure actual time from command invocation to result
+- **Team feedback:** Survey on perceived time savings after 4-week pilot
+- **Comparison analysis:** A/B test 10 sessions with vs. without slash commands
 
 ---
 
@@ -1042,9 +1231,6 @@ $1, $2, $3 - Positional arguments
 
 ---
 
-**End of Document**
-
-*Last Updated: 2025-10-23*
-*Version: 1.0*
-*Status: Planning & Design Phase*
-*Companion: FEATURE_INTEGRATION.md*
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

@@ -2,29 +2,39 @@
 
 **Feature Type:** Automatic
 **Priority:** HIGH
-**Effort:** 7-11 hours
+**Effort:** 5-8 hours (reduced from 7-11h via plugin infrastructure)
 **ROI Break-even:** 3-4 weeks
 
 [← Back to Index](./INDEX.md) | [Next: Subagents →](./03_subagents.md)
 
 ---
-## Feature 1: Skills System
+
+**✅ OFFICIAL PLUGIN FEATURE - Native Support**
+
+Skills are officially supported as plugin components and can be packaged for distribution.
+See: [Plugin Packaging](./08_plugin_packaging.md#skills)
+
+---
+
+## Feature 2: Skills System
 
 ### 1. Feature Overview
 
 **What It Is:**
-Skills are model-invoked capability packages that Claude autonomously activates based on context matching. Unlike slash commands (user-invoked) or Task agents (explicitly requested), Skills automatically deploy when task descriptions match their defined triggers.
+Skills are model-invoked capability packages that Claude autonomously activates based on context matching. Officially launched as "Agent Skills" in October 2025, they are a core plugin component that enables automatic, context-aware tool deployment.
 
 **Core Capabilities:**
-- **Automatic activation** - Claude evaluates and deploys based on relevance
+- **Automatic activation** - Claude evaluates and deploys based on relevance (progressive disclosure)
 - **Modular structure** - `SKILL.md` + optional supporting files (scripts, templates)
 - **Scoped tool access** - `allowed-tools` frontmatter restricts available tools
-- **Three storage tiers** - Personal (`~/.claude/skills/`), Project (`.claude/skills/`), Plugin-based
+- **Plugin-packageable** - Can distribute via plugin system for team/community sharing
+- **Three storage locations** - Personal (`~/.claude/skills/`), Project (`.claude/skills/`), Plugin (`plugin-name/skills/`)
 
 **Maturity & Prerequisites:**
-- ✅ Production-ready feature in Claude Code
+- ✅ Production-ready (official Anthropic feature, Oct 2025)
+- ✅ Native plugin support (package in `plugin-name/skills/`)
 - ✅ No external dependencies required
-- ✅ Git-friendly (project skills sync with version control)
+- ✅ Git-friendly (project skills OR plugin distribution)
 - ⚠️ Requires clear, specific descriptions for reliable activation
 
 **Technical Constraints:**
@@ -93,6 +103,96 @@ User Request → Skill Auto-Detection → [Skill OR Task Agent] → Result
 ✅ **Fully backward compatible** - Skills layer atop existing infrastructure
 ✅ **No migration required** - Can adopt incrementally
 ✅ **Task agents preserved** - For cases requiring explicit control or complex coordination
+
+### 3.5. Risk Assessment
+
+#### Technical Risks
+
+**Risk: Skill Activation False Positives/Negatives**
+- **Likelihood:** Medium
+- **Impact:** Medium (wrong tool activated or nothing activates)
+- **Mitigation:**
+  - Write highly specific activation descriptions (1024 char limit)
+  - Test activation patterns with diverse prompts
+  - Monitor skill activation logs
+  - Refine descriptions based on false trigger patterns
+  - Provide fallback to manual Task agent invocation
+
+**Risk: Description Character Limit Constraints**
+- **Likelihood:** Low
+- **Impact:** Low-Medium (activation accuracy reduced)
+- **Mitigation:**
+  - Prioritize key trigger phrases in first 500 characters
+  - Use concise, specific language
+  - Test truncated descriptions for activation quality
+  - Split complex skills if description exceeds optimal length
+
+**Risk: Tool Scope Limitations**
+- **Likelihood:** Low
+- **Impact:** Medium (skill can't complete intended task)
+- **Mitigation:**
+  - Carefully plan `allowed-tools` per skill
+  - Test edge cases requiring tools outside scope
+  - Document tool limitations in SKILL.md
+  - Provide clear handoff to Task agents for out-of-scope operations
+
+**Risk: Plugin Distribution Compatibility**
+- **Likelihood:** Low
+- **Impact:** Low (skills work locally but fail as plugin)
+- **Mitigation:**
+  - Test skills in both project and plugin contexts
+  - Avoid absolute paths in skill definitions
+  - Use relative references from project root
+  - Document plugin packaging requirements
+
+#### Adoption Risks
+
+**Risk: Over-Reliance on Automatic Activation**
+- **Likelihood:** Medium
+- **Impact:** Medium (tasks fail when skill doesn't activate)
+- **Mitigation:**
+  - Document explicit Task agent invocation patterns
+  - Train team to recognize when manual control needed
+  - Provide clear error messages when skills can't handle task
+  - Maintain Task agent workflows as primary fallback
+
+**Risk: Skill-Agent Role Confusion**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (inefficient tool selection)
+- **Mitigation:**
+  - Create decision matrix: "Use skill for X, agent for Y"
+  - Document in project memory (CLAUDE.md)
+  - Provide examples of skill vs. agent scenarios
+  - Include handoff logic in skill definitions
+
+**Risk: Team Learning Curve**
+- **Likelihood:** Low
+- **Impact:** Low (temporary productivity dip)
+- **Mitigation:**
+  - Pilot with 2 skills initially (physics-validator, multiindex-architect)
+  - Provide activation pattern examples
+  - Demo sessions showing automatic vs. manual workflows
+  - Document common pitfalls and solutions
+
+#### Performance Risks
+
+**Risk: Skill Activation Latency**
+- **Likelihood:** Low
+- **Impact:** Low (minor delay before execution)
+- **Mitigation:**
+  - Keep SKILL.md files under 1000 tokens
+  - Use progressive disclosure (load supporting files only when needed)
+  - Monitor activation timing
+  - Optimize skill structure if latency detected
+
+**Risk: Token Budget with Multiple Skills**
+- **Likelihood:** Low
+- **Impact:** Low-Medium (context window pressure)
+- **Mitigation:**
+  - Limit to 4 core skills initially
+  - Evaluate activation patterns before adding more
+  - Use skill-specific tool scoping to minimize context
+  - Monitor total token usage across skills
 
 ### 4. Implementation Specification
 
@@ -363,7 +463,39 @@ gh issue view $OVERVIEW_ISSUE
 4. Measure impact: coordination overhead, token usage, time savings
 
 **Rollback Strategy:**
-Skills can be disabled by removing/renaming `.claude/skills/` directory. All Task agents continue functioning unchanged.
+
+*Immediate Disable (Test If Skills Are The Problem):*
+1. Rename `.claude/skills/` to `.claude/skills.disabled/`
+2. Start new Claude Code session
+3. Skills won't activate, Task agents continue working
+4. Verify issue resolves (confirms skills were cause)
+
+*Full Rollback (Local Implementation):*
+1. Delete `.claude/skills/` directory entirely
+2. `git revert` commits that added skills
+3. Resume using explicit Task agent invocations
+4. No other changes needed (skills are fully independent)
+
+*Full Rollback (Plugin Installation):*
+1. `/plugin uninstall solarwindpy-devtools`
+2. Verify skills directory removed
+3. Resume using Task agents
+4. Local `.claude/skills/` (if any) takes precedence
+
+*Selective Rollback (Disable Specific Skill):*
+1. Rename problematic skill: `.claude/skills/physics-validator/` → `.claude/skills/physics-validator.disabled/`
+2. Other skills continue working
+3. Use Task agent for that specific workflow
+4. Investigate and fix skill description/logic
+
+*Rollback Verification Steps:*
+- ✅ Skills no longer auto-activate (test with trigger phrases)
+- ✅ Task agents work via explicit invocation
+- ✅ No activation logging in Notification hooks
+- ✅ Workflows function with manual agent selection
+- ✅ No performance degradation
+
+*Risk:** Very low - Skills are completely independent, disable anytime without side effects.
 
 #### Configuration Changes
 
@@ -386,6 +518,108 @@ Skills can be disabled by removing/renaming `.claude/skills/` directory. All Tas
   }
 }
 ```
+
+### 4.5. Alternatives Considered
+
+#### Alternative 1: Manual Task Agent Invocation Only (Status Quo)
+
+**Description:** Continue using explicit `Task` tool invocations for all agent-based workflows.
+
+**Pros:**
+- ✅ Zero implementation effort
+- ✅ Full control over agent selection
+- ✅ No false activation risk
+- ✅ Familiar workflow
+
+**Cons:**
+- ❌ High cognitive overhead (remember which agent for which task)
+- ❌ Manual invocation every time (repetitive)
+- ❌ Slower execution (explicit vs. automatic)
+- ❌ Misses progressive disclosure benefits
+
+**Decision:** **Rejected** - Automation benefits (40-60% reduction in coordination overhead) justify implementation effort.
+
+#### Alternative 2: Slash Commands Instead of Skills
+
+**Description:** Use slash commands (e.g., `/physics`, `/test`, `/optimize`) to trigger workflows.
+
+**Pros:**
+- ✅ Explicit, predictable invocation
+- ✅ User controls when tool activates
+- ✅ Simpler than skills (no activation matching)
+- ✅ Can package in plugins
+
+**Cons:**
+- ❌ Requires manual typing (not automatic)
+- ❌ Cognitive load to remember command names
+- ❌ Doesn't integrate seamlessly into natural language workflow
+- ❌ No progressive disclosure (always explicit)
+
+**Decision:** **Complementary** - Skills for automatic activation, slash commands for explicit control. Both implemented (see Feature 7).
+
+#### Alternative 3: Unified Agent with Multi-Domain Expertise
+
+**Description:** Replace 7 specialized agents with one agent that has all domain knowledge.
+
+**Pros:**
+- ✅ Single invocation pattern
+- ✅ No agent selection decisions
+- ✅ Simplified architecture
+
+**Cons:**
+- ❌ Massive context window (all domains loaded)
+- ❌ Token inefficiency (load physics expertise for testing tasks)
+- ❌ Reduced specialization depth
+- ❌ Difficult to maintain (monolithic prompt)
+
+**Decision:** **Rejected** - Specialized agents + skills provide better context efficiency and expertise depth.
+
+#### Alternative 4: MCP Server for Tool Integration
+
+**Description:** Use Model Context Protocol servers to provide capabilities instead of skills.
+
+**Pros:**
+- ✅ External process isolation
+- ✅ Can integrate third-party services
+- ✅ Reusable across projects
+
+**Cons:**
+- ❌ Overhead of server setup and maintenance
+- ❌ Not suitable for simple script execution
+- ❌ No automatic activation (requires explicit tool call)
+- ❌ Overkill for SolarWindPy's internal workflows
+
+**Decision:** **Future Enhancement** - MCP for external data sources (CDAWeb, SPDF), skills for internal workflows.
+
+#### Alternative 5: Hook-Triggered Automation
+
+**Description:** Use pre/post hooks to trigger validation and testing automatically.
+
+**Pros:**
+- ✅ Automatic execution on events
+- ✅ No manual invocation needed
+- ✅ Enforces quality gates
+
+**Cons:**
+- ❌ Only event-driven (not context-aware)
+- ❌ Can't respond to natural language requests
+- ❌ Fixed trigger patterns (no semantic matching)
+- ❌ Interrupt-driven (may slow workflow)
+
+**Decision:** **Complementary** - Hooks for event-driven automation (pre-commit), skills for context-aware assistance (during development).
+
+#### Selected Approach: Skills + Task Agents Hybrid
+
+**Rationale:**
+- Skills handle routine, repetitive tasks automatically (60-70%)
+- Task agents provide deep expertise for complex work (30-40%)
+- Slash commands offer explicit control when needed
+- Hooks enforce quality gates at checkpoints
+
+**Trade-offs Accepted:**
+- Slight complexity from multiple invocation patterns (mitigated by clear documentation)
+- Activation tuning required (mitigated by iterative refinement)
+- Learning curve for team (mitigated by gradual rollout)
 
 ### 5. Priority & Effort Estimation
 
@@ -410,21 +644,123 @@ Skills can be disabled by removing/renaming `.claude/skills/` directory. All Tas
 | Maintenance | 2/5 | Occasional description refinement |
 
 **Dependencies:**
-- ✅ None - Skills are self-contained
-- ✅ No tool changes required
-- ✅ No hook modifications needed
-- ⚠️ Quality depends on description clarity
+
+*Technical Prerequisites:*
+- ✅ None - Skills are self-contained feature
+- ✅ Claude Code with Agent Skills support (October 2025+)
+- ✅ No other features required
+
+*Infrastructure Requirements:*
+- ✅ `.claude/skills/` directory OR plugin installation capability
+- ✅ Git repository (if distributing via plugin)
+- ✅ Access to Claude Code plugin marketplace (for distribution)
+
+*Knowledge Prerequisites:*
+- ⚠️ Understanding of YAML frontmatter syntax
+- ⚠️ Familiarity with progressive disclosure concept
+- ⚠️ Clear understanding of when to use Skills vs. Task agents
+- ⚠️ Skill description writing (critical for auto-activation accuracy)
+
+*Recommended But Optional:*
+- 🔄 Memory Hierarchy - Skills reference memory files for context
+- 🔄 Enhanced Hooks - Notification hook can log skill activations
+- 🔄 Existing Task Agents - Understanding current agent workflows helps design skills
+
+*Implementation Considerations:*
+- ⚠️ Quality depends heavily on description clarity (1024 char limit)
+- ⚠️ Testing requires diverse prompts to validate activation patterns
+- ⚠️ `allowed-tools` must be carefully scoped per skill
+
+*Plugin-Specific Dependencies:*
+- 🔌 Plugin Packaging feature (if distributing to team/community)
+- 🔌 GitHub repository for marketplace hosting
+- 🔌 `plugin.json` manifest file
 
 **Estimated Effort:**
-- Skill creation: **4-6 hours** (1-1.5 hours per skill × 4 skills)
-- Testing & refinement: **2-3 hours**
-- Documentation: **1-2 hours**
-- **Total: 7-11 hours**
+- Skill creation: **3-5 hours** (0.75-1.25 hours per skill × 4 skills, faster with official spec)
+- Testing & refinement: **1-2 hours** (plugin installation simplifies testing)
+- Documentation: **1 hour** (plugin README)
+- **Total: 5-8 hours** (reduced from 7-11h via plugin infrastructure)
+
+**Plugin vs. Local:**
+- Local implementation: 7-11h (full setup + custom distribution)
+- Plugin packaging: 5-8h (official spec + built-in distribution)
+- Savings: 2-3 hours via official plugin system
+
+**Detailed Breakdown of Plugin Savings:**
+
+*Where 2-3 Hours Are Saved:*
+
+1. **Skill Structure Research (Saved: 1-1.5h)**
+   - *Local:* Research best practices, create custom structure = 1.5-2h
+   - *Plugin:* Official YAML frontmatter spec provided = 0.5h to read spec
+   - *Savings:* 1-1.5h
+
+2. **Distribution Infrastructure (Saved: 0.5-1h)**
+   - *Local:* Design how to share skills across team (git structure, docs) = 1-1.5h
+   - *Plugin:* Built-in marketplace distribution, just create plugin.json = 0.5h
+   - *Savings:* 0.5-1h
+
+3. **Testing Complexity (Saved: 0.5h)**
+   - *Local:* Test skills in multiple developer environments = 1h
+   - *Plugin:* Test plugin installation once, works everywhere = 0.5h
+   - *Savings:* 0.5h
+
+4. **Documentation Overhead (Saved: 0.5h)**
+   - *Local:* Write custom README for skill installation, usage = 1.5h
+   - *Plugin:* Standard plugin README format, auto-discovery via `/help` = 1h
+   - *Savings:* 0.5h
+
+**Total Savings: 2.5-3h**
+
+*Why Plugin Is Faster:*
+- Official spec eliminates research/experimentation
+- Built-in distribution removes custom infrastructure design
+- Standard formats reduce documentation needs
+- Single installation command vs. manual file copying
+- Marketplace provides discoverability (no custom sharing mechanism)
 
 **Break-even Analysis:**
 - Time saved per week: ~2-3 hours (coordination + repetitive tasks)
 - Break-even: **3-4 weeks**
 - Annual ROI: **90-140 hours** of productive development time
+- **Bonus:** Community distribution capability via marketplace
+
+**Measurement Methodology:**
+
+*How Coordination Overhead Reduction (40-60%) Is Measured:*
+1. **Baseline:** Count explicit Task agent invocations in 20 sessions pre-skills implementation
+2. **Track:** "Use PhysicsValidator to..." type prompts (manual agent selection)
+3. **Post-implementation:** Count same pattern after skills deployed
+4. **Calculation:** (Baseline invocations - Post invocations) / Baseline invocations × 100%
+5. **Example:** 25 manual invocations → 12 after skills = (25-12)/25 = 52% reduction
+
+*How Token Reduction (20-30%) Is Measured:*
+1. **Baseline:** Measure total tokens consumed by Task agent invocations (include agent prompts + context)
+2. **Skills alternative:** Measure tokens consumed by skill activations (scoped context only)
+3. **Sampling:** Compare 50 equivalent tasks (25 via Task agents, 25 via Skills)
+4. **Calculation:** (Agent tokens - Skill tokens) / Agent tokens × 100%
+5. **Verification:** API token usage logs over 2-week period
+
+*How Routine Task Coverage (60-70%) Is Measured:*
+1. **Task classification:** Categorize 100 development tasks as "routine" vs. "complex"
+2. **Routine criteria:** Single-domain, repetitive pattern, no multi-step coordination required
+3. **Skill coverage test:** Attempt each routine task with skills only (no manual agent selection)
+4. **Success rate:** Count tasks successfully completed via automatic skill activation
+5. **Calculation:** Successful skill activations / Total routine tasks × 100%
+
+*How Time Savings (2-3 hours/week) Are Measured:*
+1. **Time task execution:** Track time from task start to completion
+2. **Compare:** Manual agent selection (explicit prompt + Task invocation) vs. automatic skill activation
+3. **Average savings per task:** Estimated 3-5 minutes for coordination overhead
+4. **Frequency:** Estimate 40-60 routine tasks per week based on team velocity
+5. **Calculation:** (3-5 min/task) × (40-60 tasks/week) = 120-300 min/week = 2-5 hours/week (conservative: 2-3h)
+
+*Verification Methods:*
+- **Activity logging:** Enable skill activation logging (Notification hook)
+- **Before/after comparison:** Team survey on coordination effort pre/post skills
+- **Token usage:** Claude API usage reports comparing agent vs. skill token consumption
+- **Activation accuracy:** Monitor false positives/negatives in skill activation over 4 weeks
 
 ### 6. Testing Strategy
 
@@ -483,3 +819,6 @@ grep '\[SKILL ACTIVATED\]' .claude/logs/skill-activity.log | wc -l
 
 ---
 
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

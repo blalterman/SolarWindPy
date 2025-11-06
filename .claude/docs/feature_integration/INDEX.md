@@ -1,30 +1,40 @@
 # Claude Code Feature Integration - Navigation Index
 
-**Version:** 1.0
-**Date:** 2025-10-23
-**Status:** Planning & Design Phase
+**Version:** 1.1
+**Date:** 2025-10-31
+**Status:** Plugin-Aligned Implementation Phase
+
+---
+
+**🎉 UPDATE (October 2025):** Anthropic launched official plugin ecosystem for Claude Code.
+This documentation has been updated to reflect native plugin support for Skills, Commands,
+Agents, and Hooks. SolarWindPy features can now be packaged as distributable plugins.
+
+See: [Plugin Packaging](#8-plugin-packaging) | [Findings Report](../../tmp/plugin-ecosystem-integration-findings.md)
 
 ---
 
 ## Executive Summary
 
-This documentation covers **7 complementary features** for integrating Claude Code capabilities into SolarWindPy's workflow:
+This documentation covers **8 features** (7 original + plugin packaging) for integrating Claude Code capabilities into SolarWindPy's workflow:
 
-| Feature | Type | Impact | Effort | ROI Break-even |
-|---------|------|--------|--------|----------------|
-| [Memory Hierarchy](./01_memory_hierarchy.md) | Automatic | CRITICAL | 9-14h | 4-6 weeks |
-| [Slash Commands](./07_slash_commands.md) | Manual | HIGH | 5.5-8h | 3-4 weeks |
-| [Skills System](./02_skills_system.md) | Automatic | HIGH | 7-11h | 3-4 weeks |
-| [Subagents](./03_subagents.md) | Automatic | MED-HIGH | 12-17h | 6-9 weeks |
-| [Enhanced Hooks](./04_enhanced_hooks.md) | Automatic | LOW-MED | 4-6h | 4-6 weeks |
-| [Checkpointing](./05_checkpointing.md) | Automatic | LOW-MED | 2-3.5h | 3-5 weeks |
-| [Output Styles](./06_output_styles.md) | Manual | LOW | 2.5-3.5h | 8-12 weeks |
+| Feature | Type | Impact | Effort | ROI Break-even | Plugin-Ready |
+|---------|------|--------|--------|----------------|--------------|
+| [Memory Hierarchy](./01_memory_hierarchy.md) | Auto | CRITICAL | 9-14h | 4-6 weeks | ❌ Infrastructure |
+| [Slash Commands](./07_slash_commands.md) | Manual | HIGH | 5.5-8h | 3-4 weeks | ✅ Yes |
+| [Skills System](./02_skills_system.md) | Auto | HIGH | 5-8h | 3-4 weeks | ✅ Yes |
+| [Subagents](./03_subagents.md) | Auto | MED-HIGH | 12-17h | 6-9 weeks | ✅ Yes |
+| [Enhanced Hooks](./04_enhanced_hooks.md) | Auto | LOW-MED | 4-6h | 4-6 weeks | ⚠️ Partial |
+| [Checkpointing](./05_checkpointing.md) | Auto | LOW-MED | 2-3.5h | 3-5 weeks | ❌ Core Feature |
+| [Output Styles](./06_output_styles.md) | Manual | LOW | 2.5-3.5h | 8-12 weeks | ❌ Local Config |
+| **[Plugin Packaging](./08_plugin_packaging.md)** | **Infra** | **HIGH** | **6-10h** | **Immediate** | **N/A** |
 
 **Combined Impact:**
-- **Implementation:** 43-63 hours over 5-7 weeks
+- **Implementation:** 46-70 hours over 5-7 weeks (plugin infrastructure reduces complexity)
 - **Token Savings:** 50-70% overall reduction
 - **Time Savings:** 350-670 hours annually
-- **Break-even:** 4-8 weeks
+- **Break-even:** 2-5 weeks (faster via single-command plugin install)
+- **Bonus:** Community distribution capability via marketplace
 
 ---
 
@@ -39,6 +49,7 @@ Each feature addresses specific SolarWindPy workflow challenges:
 | **Repetitive task automation** | Skills, Slash Commands | Enhanced Hooks |
 | **Plan execution efficiency** | Slash Commands, Memory | Skills, Subagents |
 | **Token usage optimization** | Memory, Subagents | Skills, Checkpointing |
+| **Tool distribution & sharing** | Plugin Packaging | Marketplace ecosystem |
 
 ---
 
@@ -71,7 +82,42 @@ Example: Physics Validation
 
 ---
 
+## Plugin vs. Local Implementation
+
+### Decision Matrix: Which Features Are Plugin-Packageable?
+
+**Install via Plugin (Distributable):**
+- ✅ **Slash Commands** - Team-shared workflows, standardized shortcuts
+- ✅ **Skills** - Auto-activating validators and generators
+- ✅ **Agents/Subagents** - Specialized analysis tools
+- ⚠️ **Hooks (Partial)** - Configurations yes, executable scripts may need local install
+
+**Keep Local (Project-Specific):**
+- ❌ **Memory Hierarchy** - Unique to SolarWindPy codebase (physics rules, MultiIndex structure)
+- ❌ **Output Styles** - Personal/team preferences for response patterns
+- ❌ **Checkpointing** - Core Claude Code feature (not configurable)
+
+### Implementation Strategy
+
+**Phase 1:** Implement features locally in `.claude/` (validate functionality)
+**Phase 2:** Package validated features as plugin (enable distribution)
+**Phase 3:** Test plugin installation locally (ensure portability)
+**Phase 4:** Distribute via marketplace (team or public)
+
+**Key Insight:** Both approaches are valid. Plugins add distribution capability, but local implementation works identically.
+
+---
+
 ## Prioritized Implementation Roadmap
+
+### Phase 0: Plugin Infrastructure (Week 1)
+**Priority: CRITICAL - Foundation for Distribution**
+
+0. **[Plugin Packaging](./08_plugin_packaging.md)** (Week 1, concurrent with Memory)
+   - *Why first:* Enables distribution of all other features
+   - *Effort:* 6-10 hours (plugin scaffold + marketplace setup)
+   - *Deliverables:* Plugin directory structure, plugin.json manifest, local marketplace
+   - *Enables:* Single-command installation for team
 
 ### Phase 1: Foundation (Weeks 1-3)
 **Priority: CRITICAL**
@@ -80,42 +126,49 @@ Example: Physics Validation
    - *Why first:* Foundation for all other features; enables context preservation
    - *Impact:* 30-50% token savings, zero repeated context-setting
    - *Enables:* Skills and Slash Commands can reference memory files
+   - *Note:* NOT plugin-packageable (project-specific infrastructure)
 
-2. **[Slash Commands](./07_slash_commands.md)** (Week 2)
-   - *Why early:* High impact, low effort, fast ROI (3-4 weeks)
+2. **[Slash Commands](./07_slash_commands.md)** (Week 2) ✅ Plugin-Ready
+   - *Why early:* High impact, low effort, fast ROI (2-4 weeks with plugins)
    - *Impact:* 120-205 min/week saved on frequent manual workflows
    - *Start with:* `/coverage`, `/physics`, `/test` (3 commands, 30 min setup)
+   - *Plugin:* Package in `plugin-name/commands/`
 
-3. **[Skills System](./02_skills_system.md)** (Week 3)
+3. **[Skills System](./02_skills_system.md)** (Week 3) ✅ Plugin-Ready
    - *Why after Memory:* Skills reference memory for activation context
    - *Impact:* 40-60% reduction in manual agent coordination
    - *Complements:* Slash commands (automatic vs manual control)
+   - *Plugin:* Package in `plugin-name/skills/`
 
 ### Phase 2: Advanced Coordination (Weeks 4-7)
 **Priority: MEDIUM-HIGH**
 
-4. **[Enhanced Hooks](./04_enhanced_hooks.md)** (Week 5)
+4. **[Enhanced Hooks](./04_enhanced_hooks.md)** (Week 5) ⚠️ Partially Plugin-Ready
    - *Why mid-phase:* Builds on Skills (logs activations) and Subagents (captures reports)
    - *Impact:* 100% automated activity tracking
    - *New events:* Notification, SubagentStop, SessionEnd
+   - *Plugin:* Package `hooks.json` config, scripts may need local install
 
-5. **[Subagents](./03_subagents.md)** (Weeks 5-7)
+5. **[Subagents](./03_subagents.md)** (Weeks 5-7) ✅ Plugin-Ready
    - *Why later:* Complex implementation, benefits from Memory + Skills foundation
    - *Impact:* 40-60% token savings for complex isolated tasks
    - *Use cases:* Deep physics analysis, DataFrame refactoring
+   - *Plugin:* Package in `plugin-name/agents/`
 
-6. **[Checkpointing](./05_checkpointing.md)** (Week 6)
+6. **[Checkpointing](./05_checkpointing.md)** (Week 6) ❌ Not Plugin-Related
    - *Why low priority:* Already works automatically, just needs documentation
    - *Impact:* Safety net for experiments, minimal setup
    - *Benefit:* Fearless refactoring with Subagents
+   - *Note:* Core Claude Code feature, document usage only
 
 ### Phase 3: Optimization (Week 7+)
 **Priority: LOW**
 
-7. **[Output Styles](./06_output_styles.md)** (Week 7)
+7. **[Output Styles](./06_output_styles.md)** (Week 7) ❌ Not Plugin-Packageable
    - *Why last:* Refinement of existing Explanatory style, not critical
    - *Impact:* Domain-specific physics-focused behavior
    - *Optional:* Create custom style after other features proven
+   - *Note:* Local configuration (`.claude/output-styles/`), not distributable
 
 ---
 
@@ -195,6 +248,17 @@ Manual prompt shortcuts (e.g., `/coverage`, `/physics`, `/plan-create`) for freq
 *Key deliverables:* 10 commands across 5 categories (Testing, Review, Planning, Git Workflow)
 
 *See also:* [Skills](#2-skills-system) (complementary automatic activation), [Memory](#1-memory-hierarchy) (commands reference memory)
+
+---
+
+### 8. [Plugin Packaging](./08_plugin_packaging.md)
+**Official Anthropic plugin system for distribution and sharing**
+
+Packages slash commands, skills, agents, and hooks into distributable plugins with marketplace support. Enables single-command installation and team/community sharing.
+
+*Key deliverables:* solarwindpy-devtools plugin, plugin.json manifest, marketplace infrastructure
+
+*See also:* All plugin-ready features ([Slash Commands](#7-slash-commands), [Skills](#2-skills-system), [Subagents](#3-subagents), [Hooks](#4-enhanced-hooks))
 
 ---
 
@@ -320,5 +384,6 @@ Working on complex isolated tasks?
 
 ---
 
-**Last Updated:** 2025-10-23
-**Document Version:** 1.0
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

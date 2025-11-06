@@ -8,6 +8,26 @@
 [← Back to Index](./INDEX.md) | [Previous: Subagents ←](./03_subagents.md) | [Next: Checkpointing →](./05_checkpointing.md)
 
 ---
+
+**⚠️ OFFICIAL PLUGIN FEATURE - Partial Support**
+
+**What's Supported in Plugins:**
+- ✅ Hook configurations (`hooks.json`) - Event definitions, matchers, timeouts
+- ✅ Hook metadata and documentation
+
+**What Requires Local Installation:**
+- ⚠️ Executable shell scripts (`.sh` files) - Must be installed to `.claude/hooks/` manually for security
+
+**Rationale:** Plugin system can distribute configurations, but executable scripts need user trust verification.
+
+**Two-Tier Installation:**
+1. Plugin provides `hooks.json` (automatic via `/plugin install`)
+2. User installs scripts to `.claude/hooks/` (manual, documented in plugin README)
+
+See: [Plugin Packaging](./08_plugin_packaging.md#hooks) for complete details.
+
+---
+
 ## Feature 4: Enhanced Hooks System
 
 ### 1. Feature Overview
@@ -96,6 +116,104 @@ New Hooks (3/9):
 ✅ **Fully compatible** - New hooks are additive
 ✅ **Optional adoption** - Existing 6 hooks continue unchanged
 ✅ **No breaking changes**
+
+### 3.5. Risk Assessment
+
+#### Technical Risks
+
+**Risk: Hook Script Execution Failures**
+- **Likelihood:** Medium
+- **Impact:** Medium (monitoring gaps, workflow interruptions)
+- **Mitigation:**
+  - Add error handling to all hook scripts
+  - Log failures to `.claude/logs/hook-errors.log`
+  - Set reasonable timeouts (5-15 seconds max)
+  - Test scripts independently before hooking
+  - Provide graceful fallback (continue even if hook fails)
+
+**Risk: Hook Execution Latency**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (workflow slowdowns)
+- **Mitigation:**
+  - Keep hook scripts under 1 second execution time
+  - Use background processes for slow operations
+  - Profile hook execution times
+  - Disable non-critical hooks if latency detected
+  - Optimize script efficiency (avoid redundant operations)
+
+**Risk: Plugin Packaging Limitations**
+- **Likelihood:** High
+- **Impact:** Medium (hooks work locally but not in plugins)
+- **Mitigation:**
+  - Use two-tier approach: plugin provides `hooks.json`, local installs scripts
+  - Document manual script installation requirements
+  - Consider migrating to Skills with code execution instead
+  - Provide installation scripts in plugin documentation
+  - Test plugin distribution across different environments
+
+**Risk: Log File Management Overhead**
+- **Likelihood:** Low-Medium
+- **Impact:** Low (disk space, clutter)
+- **Mitigation:**
+  - Implement log rotation (daily/weekly)
+  - Set retention policies (30 days default)
+  - Add cleanup script: `.claude/scripts/cleanup-logs.sh`
+  - Monitor log directory size
+  - Compress old logs automatically
+
+#### Adoption Risks
+
+**Risk: Hook Configuration Complexity**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (adoption friction)
+- **Mitigation:**
+  - Provide complete `.claude/settings.json` examples
+  - Document common hook patterns
+  - Create hook generator script
+  - Offer minimal viable configuration (start with 1-2 hooks)
+  - Include troubleshooting guide
+
+**Risk: Hook Maintenance Burden**
+- **Likelihood:** Medium
+- **Impact:** Medium (outdated scripts, broken hooks)
+- **Mitigation:**
+  - Include hooks in pre-commit validation
+  - Test hooks as part of CI/CD
+  - Version control all hook scripts
+  - Document hook dependencies clearly
+  - Schedule quarterly hook audits
+
+**Risk: Over-Logging Creates Noise**
+- **Likelihood:** Medium
+- **Impact:** Low (hard to find useful information)
+- **Mitigation:**
+  - Use structured logging formats (JSON)
+  - Separate log files by hook type
+  - Implement log level filtering (INFO, WARN, ERROR)
+  - Create log analysis tools
+  - Document what each hook logs and why
+
+#### Performance Risks
+
+**Risk: SessionEnd Hook Timeout on Large Sessions**
+- **Likelihood:** Low
+- **Impact:** Medium (archival incomplete)
+- **Mitigation:**
+  - Increase timeout for SessionEnd hooks (30s+)
+  - Compress archives in background
+  - Split large sessions before archiving
+  - Test with realistic session sizes
+  - Provide progress indicators
+
+**Risk: Notification Hook Spam**
+- **Likelihood:** Medium
+- **Impact:** Low (frequent interruptions)
+- **Mitigation:**
+  - Use specific matchers, not wildcards
+  - Rate-limit notification frequency
+  - Batch related notifications
+  - Make notifications async/non-blocking
+  - Allow per-hook disable flags
 
 ### 4. Implementation Specification
 
@@ -319,7 +437,146 @@ exit 0
 4. Document hook system enhancements
 
 **Rollback Strategy:**
-Simply remove new hook configurations from `.claude/settings.json`. Existing 6 hooks continue unchanged.
+
+*Immediate Disable (Single Hook):*
+1. Edit `.claude/settings.json`
+2. Comment out or remove specific hook configuration (Notification, SubagentStop, or SessionEnd)
+3. Save file (changes take effect immediately in new sessions)
+4. Existing 6 hooks unaffected
+
+*Full Rollback (All Enhanced Hooks):*
+1. `git diff .claude/settings.json` to see what was added
+2. Remove all new hook entries (Notification, SubagentStop, SessionEnd)
+3. `git checkout .claude/settings.json` if needed (restore to pre-enhanced state)
+4. Delete new hook scripts: `rm .claude/hooks/activity-logger.sh .claude/hooks/subagent-report.sh .claude/hooks/session-archival.sh`
+5. Existing 6 hooks continue working unchanged
+
+*Rollback Hook Scripts Only (Keep Configurations):*
+1. Delete/rename hook scripts: `mv .claude/hooks/*.sh .claude/hooks/disabled/`
+2. Hooks configured but scripts won't execute (harmless failures)
+3. Review logs to confirm no adverse effects
+4. Re-enable selectively by moving scripts back
+
+*Clean Up Logs (Optional):*
+1. `rm -rf .claude/logs/activity.log`
+2. `rm -rf .claude/logs/subagent-metrics.txt`
+3. `rm -rf .claude/archives/session-*.tar.gz`
+4. Reclaim disk space if needed
+
+*Rollback Verification Steps:*
+- ✅ `.claude/settings.json` has only original 6 hooks
+- ✅ No new hook scripts in `.claude/hooks/`
+- ✅ No error messages in Claude Code output
+- ✅ Existing workflows unaffected
+- ✅ Original 6 hooks still functioning
+
+*Risk:** Very low - Enhanced hooks are additive configuration. Removal is trivial, no dependencies.
+
+### 4.5. Alternatives Considered
+
+#### Alternative 1: No Additional Hooks (Status Quo)
+
+**Description:** Continue using existing 6 hooks without adding Notification, SubagentStop, or SessionEnd.
+
+**Pros:**
+- ✅ Zero implementation effort
+- ✅ No risk of new hook failures
+- ✅ Simpler configuration
+- ✅ No log management overhead
+
+**Cons:**
+- ❌ Miss skill/subagent activity visibility
+- ❌ No automatic session archival
+- ❌ Manual tracking of workflow events
+- ❌ Harder to debug issues retrospectively
+
+**Decision:** **Rejected** - Observability benefits (especially for skills/subagents) justify modest effort.
+
+#### Alternative 2: Skills for Logging Instead of Hooks
+
+**Description:** Create logging skills that activate on relevant events instead of using hooks.
+
+**Pros:**
+- ✅ Plugin-packageable (no local script installation)
+- ✅ Context-aware (skills understand semantic events)
+- ✅ Progressive disclosure (load only when needed)
+
+**Cons:**
+- ❌ Not event-driven (relies on manual/automatic activation)
+- ❌ Can't guarantee execution at critical moments
+- ❌ Skills are for actions, not passive monitoring
+- ❌ Overhead of skill invocation vs. lightweight hook
+
+**Decision:** **Complementary** - Use skills for analysis, hooks for guaranteed event capture.
+
+#### Alternative 3: External Monitoring Tools
+
+**Description:** Integrate third-party observability platforms (Datadog, Sentry, etc.).
+
+**Pros:**
+- ✅ Enterprise-grade features
+- ✅ Advanced analytics and dashboards
+- ✅ Mature ecosystem
+- ✅ Cross-project visibility
+
+**Cons:**
+- ❌ Costly (licensing fees)
+- ❌ Overkill for single-project needs
+- ❌ External dependencies
+- ❌ Data privacy concerns (sending session data externally)
+- ❌ Complex integration
+
+**Decision:** **Rejected** - Lightweight local hooks sufficient for SolarWindPy's needs. Revisit if scaling to multi-project.
+
+#### Alternative 4: Manual Logging in Workflow
+
+**Description:** Manually add logging statements when needed instead of automatic hooks.
+
+**Pros:**
+- ✅ Full control over what gets logged
+- ✅ No hook configuration needed
+- ✅ Zero overhead when not needed
+
+**Cons:**
+- ❌ Easy to forget
+- ❌ Inconsistent coverage
+- ❌ High cognitive load
+- ❌ Doesn't capture unexpected events
+- ❌ Manual effort every session
+
+**Decision:** **Rejected** - Automation prevents human error and ensures comprehensive coverage.
+
+#### Alternative 5: Git-Based Session History Only
+
+**Description:** Rely solely on git commit history for session tracking.
+
+**Pros:**
+- ✅ Already using git
+- ✅ Zero additional infrastructure
+- ✅ Natural for code-focused work
+
+**Cons:**
+- ❌ Doesn't capture uncommitted work
+- ❌ No skill/subagent activity
+- ❌ Missing context (prompts, reasoning, decisions)
+- ❌ Can't track failed experiments
+- ❌ Coarse-grained (commit-level, not event-level)
+
+**Decision:** **Complementary** - Git provides code history, hooks provide workflow history.
+
+#### Selected Approach: Enhanced Hook System
+
+**Rationale:**
+- Lightweight, local-first observability
+- Event-driven automation (no manual overhead)
+- Complements existing 6 hooks naturally
+- Plugin-friendly (configurations distribute, scripts install locally)
+- Low complexity, high value (especially for skills/subagents)
+
+**Trade-offs Accepted:**
+- Manual script installation for plugin users (mitigated by clear docs)
+- Log management overhead (mitigated by rotation/retention policies)
+- Slight execution latency (mitigated by performance optimization)
 
 ### 5. Priority & Effort Estimation
 
@@ -420,3 +677,7 @@ ls -t .claude/logs/sessions/ | head -1 | xargs cat
 
 ---
 
+
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

@@ -32,6 +32,34 @@ claude
 # Location: .claude/agents/<agent-name>.md
 ```
 
+### Slash Commands
+```bash
+# Testing & Quality
+/coverage                    # Quick coverage check (highlight <95% files)
+/physics [file]              # Physics validation (SI units, thermal speed, NaN)
+/test [args]                 # Smart test runner (changed files or all)
+
+# Code Review
+/review [file]              # Code review checklist (physics, tests, MultiIndex)
+/refactor [file]            # Refactoring assistant (patterns, edge cases)
+
+# Planning
+/plan-create <title>        # Create GitHub Issues plan with value proposition
+/plan-phases <issue>        # Add phases to existing plan (batch mode)
+/plan-status                # Show current plan status and progress
+
+# Git Workflow
+/commit                      # Smart commit helper (conventional commits + Claude attribution)
+/branch <name>              # Smart branch creation (feature/fix/docs prefix)
+
+# Usage
+# Example: /coverage
+# Example: /physics solarwindpy/core/ion.py
+# Example: /plan-create "API Refactoring"
+
+# Location: .claude/commands/<command-name>.md OR via plugin
+```
+
 ### Hooks
 ```bash
 # Hook configuration in .claude/settings.json

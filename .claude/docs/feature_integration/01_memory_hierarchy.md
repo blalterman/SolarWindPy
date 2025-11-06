@@ -8,7 +8,15 @@
 [← Back to Index](./INDEX.md) | [Next: Skills System →](./02_skills_system.md)
 
 ---
-## Feature 2: Memory Hierarchy
+
+**❌ NOT A PLUGIN FEATURE - Core Infrastructure**
+
+Memory hierarchy is project-specific infrastructure (not distributable). Plugins reference memory via `@.claude/memory/...` syntax.
+See: [Plugin Packaging](./08_plugin_packaging.md#61-memory-integration)
+
+---
+
+## Feature 1: Memory Hierarchy
 
 ### 1. Feature Overview
 
@@ -106,6 +114,90 @@ Enhanced: CLAUDE.md (orchestrator with imports)
 ✅ **Fully compatible** - Claude Code reads CLAUDE.md with or without imports
 ✅ **Incremental migration** - Can add imports gradually
 ✅ **Fallback** - If imports fail, main CLAUDE.md content still loads
+
+### 3.5. Risk Assessment
+
+#### Technical Risks
+
+**Risk: Import Path Resolution Failures**
+- **Likelihood:** Low-Medium
+- **Impact:** High (context fails to load)
+- **Mitigation:**
+  - Test all import paths during Phase 1
+  - Use relative paths from project root for portability
+  - Keep inline fallback content in main CLAUDE.md
+  - Monitor Claude Code error logs during migration
+
+**Risk: Import Depth Limit Exceeded**
+- **Likelihood:** Low (5-level limit is generous)
+- **Impact:** Medium (nested imports fail silently)
+- **Mitigation:**
+  - Design flat structure (max 2 levels)
+  - Avoid cross-referencing between memory files
+  - Document import hierarchy explicitly
+
+**Risk: Circular Import Dependencies**
+- **Likelihood:** Low
+- **Impact:** Medium (import resolution fails)
+- **Mitigation:**
+  - Design acyclic memory graph
+  - Use testing-templates.md as leaf node (no imports)
+  - Document dependency order
+
+**Risk: Token Budget Overflow**
+- **Likelihood:** Low-Medium
+- **Impact:** Medium (selective loading ineffective)
+- **Mitigation:**
+  - Keep individual memory files under 500 tokens
+  - Monitor actual token usage post-migration
+  - Split large files if needed (e.g., physics-constants.md → thermal-formulas.md + alfven-formulas.md)
+
+#### Adoption Risks
+
+**Risk: Team Confusion About Memory Structure**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (slower adoption)
+- **Mitigation:**
+  - Create comprehensive `.claude/docs/MEMORY.md` guide
+  - Document memory file purposes in each file header
+  - Provide examples of when to update which memory file
+  - Team training session during Phase 1
+
+**Risk: Memory File Drift from Codebase**
+- **Likelihood:** Medium
+- **Impact:** Medium (outdated context harms quality)
+- **Mitigation:**
+  - Add pre-commit hook to validate memory consistency
+  - Include memory updates in PR review checklist
+  - Schedule quarterly memory audits
+  - Link memory files to corresponding source code in comments
+
+**Risk: Fragmented Context Across Too Many Files**
+- **Likelihood:** Low
+- **Impact:** Medium (harder to maintain coherent context)
+- **Mitigation:**
+  - Limit to 9 core memory files initially
+  - Group related concepts (don't create file-per-concept)
+  - Use clear naming conventions (`*-reference.md`, `*-patterns.md`, `*-templates.md`)
+
+#### Migration Risks
+
+**Risk: Context Regression During Migration**
+- **Likelihood:** Medium
+- **Impact:** High (temporary productivity loss)
+- **Mitigation:**
+  - Maintain full inline content during transition
+  - Migrate incrementally (2-3 sections at a time)
+  - A/B test context quality before/after each phase
+  - Keep rollback window open for 2 weeks per phase
+
+**Risk: Lost Context Due to Over-Modularization**
+- **Likelihood:** Low-Medium
+- **Impact:** Medium (critical rules missed)
+- **Mitigation:**
+  - Keep critical rules in both CLAUDE.md and critical-rules.md initially
+  - Monitor for missed context in session reviews
+  - Consolidate if fragmentation causes issues
 
 ### 4. Implementation Specification
 
@@ -500,7 +592,138 @@ All SolarWindPy-specific conventions, rules, and knowledge that should be consis
 3. Monitor memory effectiveness and iterate
 
 **Rollback Strategy:**
-Keep current CLAUDE.md content as fallback. If imports fail, inline content provides full context.
+
+*Immediate Rollback (Same Session):*
+1. Remove `@.claude/memory/...` imports from CLAUDE.md
+2. Inline content back into main CLAUDE.md
+3. Verify context loads correctly
+4. Continue working (no restart needed)
+
+*Full Rollback (If Issues Persist):*
+1. `git revert` commits that introduced memory hierarchy
+2. Restore monolithic CLAUDE.md from git history
+3. Delete `.claude/memory/` directory (or move to `.claude/memory.backup/`)
+4. Verify all workflows function as before
+5. Document issues encountered for future reference
+
+*Partial Rollback (Keep Some Memory Files):*
+1. Identify problematic memory file(s)
+2. Remove specific imports from CLAUDE.md
+3. Inline only problematic content
+4. Keep working memory files intact
+5. Iterate based on what works
+
+*Rollback Verification Steps:*
+- ✅ CLAUDE.md loads without errors
+- ✅ Physics rules are enforced in session
+- ✅ Agent selection works correctly
+- ✅ Testing patterns are available
+- ✅ No regressions in context quality
+
+*Risk:** Very low - Memory hierarchy is additive, rollback is simple removal/inlining.
+
+### 4.5. Alternatives Considered
+
+#### Alternative 1: Keep Monolithic CLAUDE.md (Status Quo)
+
+**Description:** Continue using single CLAUDE.md file with all context inline.
+
+**Pros:**
+- ✅ Zero implementation effort
+- ✅ No risk of import resolution failures
+- ✅ Simpler mental model (everything in one place)
+- ✅ No migration complexity
+
+**Cons:**
+- ❌ Full context loaded every session (token inefficiency)
+- ❌ Difficult to navigate and maintain (300+ lines)
+- ❌ No selective loading based on task context
+- ❌ Harder for team to coordinate updates (merge conflicts)
+- ❌ Agent-specific context not easily targeted
+
+**Decision:** **Rejected** - Token efficiency and maintainability gains justify migration effort.
+
+#### Alternative 2: User + Project Memory Hierarchy
+
+**Description:** Use both `~/.claude/CLAUDE.md` (user-level) and project-level memory for personalization.
+
+**Pros:**
+- ✅ Developers can customize personal workflows
+- ✅ Separation of team standards vs. personal preferences
+- ✅ Flexibility for different working styles
+
+**Cons:**
+- ❌ Inconsistent behavior across team members
+- ❌ Debugging difficulty (which memory tier caused behavior?)
+- ❌ Fragmentation of context (some in user, some in project)
+- ❌ Personal preferences can override critical project rules
+- ❌ Harder to reproduce issues across environments
+
+**Decision:** **Rejected** - Team consistency is critical for SolarWindPy. Single source of truth preferred.
+
+#### Alternative 3: External Documentation Links (No Memory System)
+
+**Description:** Store context in `.claude/docs/` and rely on manual references via `@file` syntax.
+
+**Pros:**
+- ✅ Clear separation of permanent docs vs. ephemeral memory
+- ✅ Documentation serves dual purpose (humans + AI)
+- ✅ No special memory infrastructure needed
+
+**Cons:**
+- ❌ Requires manual `@file` references in every relevant session
+- ❌ Not automatically loaded (Claude must be told to read)
+- ❌ Context not preserved across sessions (ephemeral)
+- ❌ Inefficient for frequently-needed context (physics rules)
+
+**Decision:** **Rejected** - Memory system provides automatic context loading, eliminating manual overhead.
+
+#### Alternative 4: Skill-Based Context Injection
+
+**Description:** Use Skills system to dynamically inject context when needed.
+
+**Pros:**
+- ✅ Progressive disclosure (only load when skill activated)
+- ✅ Context tied to specific task types
+- ✅ Can include executable validation logic
+
+**Cons:**
+- ❌ Skills are for actions, not passive context storage
+- ❌ Overhead of skill activation for every context need
+- ❌ Doesn't solve cross-session persistence
+- ❌ Not suitable for always-needed context (SI units)
+
+**Decision:** **Rejected** - Skills complement memory but don't replace it. Memory provides persistent baseline, skills add dynamic capabilities.
+
+#### Alternative 5: Hybrid: Minimal CLAUDE.md + Targeted Memory Files
+
+**Description:** Keep critical rules inline in CLAUDE.md, use memory only for reference materials.
+
+**Pros:**
+- ✅ Guaranteed critical context always loads
+- ✅ Reduces risk of import failures breaking essential rules
+- ✅ Balances simplicity and modularity
+
+**Cons:**
+- ❌ Unclear boundary between "critical" and "reference"
+- ❌ Still requires some token overhead for inline content
+- ❌ Doesn't fully leverage memory optimization potential
+
+**Decision:** **Partially Adopted** - Keep critical rules duplicated in CLAUDE.md during migration (Phase 1-2), but full migration to memory is goal (Phase 3).
+
+#### Selected Approach: Modular Project Memory with Fallback
+
+**Rationale:**
+- Maximizes token efficiency via selective loading
+- Maintains team consistency (no user-level overrides)
+- Provides fallback via inline content during migration
+- Enables targeted updates without touching monolithic file
+- Better separation of concerns (physics vs. testing vs. git)
+
+**Trade-offs Accepted:**
+- Migration complexity (mitigated by incremental approach)
+- Import resolution dependency (mitigated by fallback content)
+- Slightly more files to maintain (offset by better organization)
 
 ### 5. Priority & Effort Estimation
 
@@ -525,9 +748,31 @@ Keep current CLAUDE.md content as fallback. If imports fail, inline content prov
 | Maintenance | 3/5 | Keep memories synchronized with codebase evolution |
 
 **Dependencies:**
-- ✅ None - Memory is core Claude Code feature
+
+*Technical Prerequisites:*
+- ✅ None - Memory hierarchy is foundational feature
+- ✅ Claude Code (any version supporting file imports)
+- ✅ Existing CLAUDE.md file (to be refactored)
+
+*Infrastructure Requirements:*
+- ✅ Git repository (for version controlling memory files)
+- ✅ `.claude/` directory structure
+- ✅ Team agreement on project-only memory model
+
+*Knowledge Prerequisites:*
+- ⚠️ Understanding of current CLAUDE.md content structure
+- ⚠️ Familiarity with `@file` import syntax
+- ⚠️ Awareness of 5-level import depth limit
+
+*Implementation Considerations:*
 - ⚠️ Requires careful extraction to avoid breaking existing context
-- ⚠️ Import paths must be correct (relative or absolute)
+- ⚠️ Import paths must use correct format (relative from project root)
+- ⚠️ Testing needed to verify all imports resolve correctly
+
+*Optional Enhancements* (implement after memory):
+- 🔄 Skills System - Skills can reference memory files
+- 🔄 Output Styles - Styles can emphasize memory organization
+- 🔄 Enhanced Hooks - Hooks can validate memory consistency
 
 **Estimated Effort:**
 - Memory structure design: **2-3 hours**
@@ -548,6 +793,26 @@ Keep current CLAUDE.md content as fallback. If imports fail, inline content prov
 - Optimized selective imports: ~1,000-1,500 tokens
 - Savings: **40-60% token reduction** per session
 - Annual: **~500,000-750,000 tokens saved** (assuming 200 sessions/year)
+
+**Measurement Methodology:**
+
+*How Time Savings Are Calculated:*
+1. **Baseline measurement:** Track time spent repeating context ("remember to use SI units," "check thermal speed formula") in 20 representative sessions
+2. **Average repetition time:** 5-10 minutes per session for context-setting
+3. **Session frequency:** Estimate 10-15 development sessions per week based on team activity
+4. **Calculation:** (5-10 min/session) × (10-15 sessions/week) = 50-150 min/week saved
+
+*How Token Reduction Is Measured:*
+1. **Baseline:** Count tokens in current monolithic CLAUDE.md using Claude API tokenizer (~2,500 tokens)
+2. **Post-implementation:** Measure token count of selectively loaded memory imports (estimate 1,000-1,500 tokens for typical session)
+3. **Calculation:** ((2,500 - 1,500) / 2,500) × 100% = 40% reduction (conservative estimate)
+4. **Annual projection:** Token savings per session × 200 sessions/year = 200,000-300,000 tokens annually
+
+*Verification Methods:*
+- **Time tracking:** Log context-setting time in session notes for 4 weeks pre/post implementation
+- **Token counting:** Use Claude API's token counter on actual memory files loaded
+- **A/B testing:** Compare sessions with monolithic vs. modular memory (5 sessions each)
+- **Subjective assessment:** Team survey on context preservation quality
 
 ### 6. Testing Strategy
 
@@ -601,3 +866,6 @@ grep "Loading memory" .claude/logs/memory-access.log
 
 ---
 
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

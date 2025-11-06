@@ -5,9 +5,17 @@
 **Effort:** 12-17 hours
 **ROI Break-even:** 6-9 weeks
 
-[← Back to Index](./INDEX.md) | [Previous: Skills ←](./02_skills_system.md) | [Next: Enhanced Hooks →](./04_enhanced_hooks.md)
+[← Back to Index](./INDEX.md) | [← Previous: Skills](./02_skills_system.md) | [Next: Enhanced Hooks →](./04_enhanced_hooks.md)
 
 ---
+
+**✅ OFFICIAL PLUGIN FEATURE - Native Support**
+
+Subagents (called "agents" in plugin spec) are officially supported as plugin components (plugin-name/agents/).
+See: [Plugin Packaging](./08_plugin_packaging.md#subagents)
+
+---
+
 ## Feature 3: Subagents (Enhanced Agent System)
 
 ### 1. Feature Overview
@@ -114,6 +122,105 @@ Examples:
 ✅ **Fully compatible** - Task agents continue working unchanged
 ✅ **Incremental adoption** - Convert one agent at a time
 ✅ **Fallback** - Can always use Task agent if subagent unavailable
+
+### 3.5. Risk Assessment
+
+#### Technical Risks
+
+**Risk: Context Isolation Too Restrictive**
+- **Likelihood:** Medium
+- **Impact:** High (subagent can't access needed information)
+- **Mitigation:**
+  - Explicitly pass file paths and critical context in invocation
+  - Use Read tool within subagent to access codebase
+  - Document what context needs explicit passing
+  - Test common workflows for context availability
+  - Fallback to Task agent if isolation causes issues
+
+**Risk: Subagent Can't Modify Main Session State**
+- **Likelihood:** High (by design)
+- **Impact:** Medium (requires workflow adjustment)
+- **Mitigation:**
+  - Design subagents for analysis, not mutation
+  - Have subagent return recommendations, main session applies changes
+  - Document clear handoff patterns
+  - Use Task agents for workflows requiring stateful coordination
+
+**Risk: Plugin Packaging Complexity**
+- **Likelihood:** Low-Medium
+- **Impact:** Medium (distribution difficulties)
+- **Mitigation:**
+  - Test subagent markdown files in plugin context
+  - Use relative paths only (no absolute paths)
+  - Document plugin structure requirements
+  - Validate across different project structures
+
+**Risk: Subagent Name Conflicts**
+- **Likelihood:** Low
+- **Impact:** Medium (namespace collisions if using external plugins)
+- **Mitigation:**
+  - Use descriptive, SolarWindPy-specific names
+  - Namespace with prefix if publishing: `swpy-physics-validator`
+  - Check existing plugin marketplaces for name conflicts
+  - Document naming conventions
+
+#### Adoption Risks
+
+**Risk: Confusion Between Task Agents and Subagents**
+- **Likelihood:** High
+- **Impact:** Medium (workflow inefficiency)
+- **Mitigation:**
+  - Clear naming: Keep existing Task agents, add "subagent" suffix to new ones
+  - Document decision matrix in CLAUDE.md
+  - Provide examples of when to use each type
+  - Gradual migration (don't convert all at once)
+
+**Risk: Over-Engineering with Unnecessary Isolation**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (added complexity without benefit)
+- **Mitigation:**
+  - Only convert agents that genuinely benefit from isolation
+  - Measure actual performance improvements
+  - Keep Task agents if no clear benefit from subagent conversion
+  - Re-evaluate after 4-week pilot
+
+**Risk: Team Adoption Resistance**
+- **Likelihood:** Low
+- **Impact:** Low (Task agents still work)
+- **Mitigation:**
+  - Make subagents optional enhancement, not replacement
+  - Demonstrate clear benefits (faster, lower token usage)
+  - Pilot with 1-2 subagents initially
+  - Gather feedback before full rollout
+
+#### Performance Risks
+
+**Risk: Subagent Invocation Latency**
+- **Likelihood:** Low
+- **Impact:** Low (minor startup overhead)
+- **Mitigation:**
+  - Monitor invocation timing
+  - Keep subagent prompts under 2000 tokens
+  - Optimize YAML frontmatter and markdown structure
+  - Measure vs. Task agent performance
+
+**Risk: Multiple Subagent Coordination Overhead**
+- **Likelihood:** Medium
+- **Impact:** Medium (complex workflows slower)
+- **Mitigation:**
+  - Use subagents for independent analysis tasks
+  - Avoid chaining multiple subagents
+  - Use Task agents for workflows requiring tight coordination
+  - Document coordination patterns
+
+**Risk: Token Budget Exceeded with Isolated Contexts**
+- **Likelihood:** Low
+- **Impact:** Medium (can't complete analysis)
+- **Mitigation:**
+  - Design subagents for focused, scoped tasks
+  - Pass minimal necessary context
+  - Monitor token usage per subagent type
+  - Split large tasks across multiple invocations if needed
 
 ### 4. Implementation Specification
 
@@ -632,7 +739,39 @@ Claude: [Explicitly invokes physics-validator subagent]
 3. Measure impact on token usage and productivity
 
 **Rollback Strategy:**
-Subagents are additive. Can always fall back to Task agents by simply not creating subagent files.
+
+*Immediate Disable (Test If Subagents Are The Problem):*
+1. Rename `.claude/agents/` to `.claude/agents.disabled/`
+2. Restart Claude Code session
+3. Task agents (original 7) continue working unchanged
+4. Verify issue resolves (confirms subagents were cause)
+
+*Full Rollback (Local Implementation):*
+1. Delete `.claude/agents/` directory entirely
+2. `git revert` commits that added subagent definitions
+3. Resume using Task tool for PhysicsValidator, DataFrameArchitect, etc.
+4. No loss of functionality (Task agents provide same capabilities)
+
+*Full Rollback (Plugin Installation):*
+1. `/plugin uninstall solarwindpy-devtools`
+2. Verify agents directory removed
+3. Use Task tool for all agent invocations
+4. Local `.claude/agents/` (if any) takes precedence over plugin
+
+*Selective Rollback (Disable Specific Subagent):*
+1. Rename problematic subagent: `.claude/agents/physics-validator.md` → `.claude/agents/physics-validator.md.disabled`
+2. Other subagents continue working
+3. Use Task agent for that specific workflow
+4. Investigate and fix subagent prompt/scope
+
+*Rollback Verification Steps:*
+- ✅ Task agents invoke correctly via Task tool
+- ✅ No subagent invocation errors
+- ✅ Workflows function with explicit Task agent calls
+- ✅ No performance degradation
+- ✅ Context isolation not causing issues
+
+*Risk:** Very low - Subagents are optional layer over Task agents. Rollback is simple deletion, Task agents are always available.
 
 ### 5. Priority & Effort Estimation
 
@@ -732,3 +871,6 @@ grep '\[SUBAGENT COMPLETED\]' .claude/logs/subagent-activity.log
 
 ---
 
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)

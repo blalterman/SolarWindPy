@@ -8,6 +8,13 @@
 [← Back to Index](./INDEX.md) | [Previous: Enhanced Hooks ←](./04_enhanced_hooks.md) | [Next: Output Styles →](./06_output_styles.md)
 
 ---
+
+**ℹ️ NOT A PLUGIN FEATURE - Core Claude Code Capability**
+
+Checkpointing is a built-in Claude Code feature (automatic edit tracking). Not configurable or plugin-related.
+
+---
+
 ## Feature 5: Checkpointing
 
 ### 1. Feature Overview
@@ -97,6 +104,93 @@ Use Cases:
 ✅ **Fully compatible** - Checkpointing is automatic, non-invasive
 ✅ **No configuration needed**
 ✅ **Coexists with git** (orthogonal systems)
+
+### 3.5. Risk Assessment
+
+#### Technical Risks
+
+**Risk: Checkpoint Storage Accumulation**
+- **Likelihood:** Medium
+- **Impact:** Low (disk space consumption)
+- **Mitigation:**
+  - Claude Code manages checkpoint lifecycle automatically
+  - Checkpoints are ephemeral (not long-term storage)
+  - Monitor `.claude/checkpoints/` directory size if exposed
+  - Trust automatic cleanup mechanisms
+  - No action required from user
+
+**Risk: Checkpoint Restoration Failures**
+- **Likelihood:** Low
+- **Impact:** High (can't undo problematic changes)
+- **Mitigation:**
+  - Test checkpoint restoration in safe scenarios
+  - Maintain git commits as primary rollback mechanism
+  - Don't rely solely on checkpoints for critical changes
+  - Document checkpoint limitations
+  - Use git for permanent version control
+
+**Risk: Confusion Between Checkpoints and Git Commits**
+- **Likelihood:** Medium
+- **Impact:** Low-Medium (workflow inefficiency)
+- **Mitigation:**
+  - Document clear distinction: checkpoints = session-level, git = permanent
+  - Use checkpoints for iterative exploration
+  - Use git commits for validated changes
+  - Train team on dual-system model
+  - Emphasize checkpoints as safety net, not primary versioning
+
+**Risk: Checkpoint Overhead in Large Codebases**
+- **Likelihood:** Low
+- **Impact:** Low (minor latency)
+- **Mitigation:**
+  - Checkpointing is optimized by Anthropic
+  - Automatic, no user intervention
+  - Monitor for any performance degradation
+  - Trust native implementation efficiency
+
+#### Adoption Risks
+
+**Risk: Over-Reliance on Checkpoints**
+- **Likelihood:** Medium
+- **Impact:** Medium (skip proper git commits)
+- **Mitigation:**
+  - Emphasize checkpoints as ephemeral
+  - Enforce git commit discipline via hooks
+  - Document checkpoint expiration behavior
+  - Use pre-commit hooks to require commits
+  - Training: "Checkpoints for sessions, commits for history"
+
+**Risk: Unawareness of Checkpointing Feature**
+- **Likelihood:** High
+- **Impact:** Low (missed opportunity, not harmful)
+- **Mitigation:**
+  - Include in onboarding documentation
+  - Demonstrate checkpoint usage in training
+  - Provide `/checkpoint` command examples
+  - Document recovery scenarios
+  - Create quick reference guide
+
+#### Operational Risks
+
+**Risk: Checkpoint Restoration Without Context**
+- **Likelihood:** Low
+- **Impact:** Medium (restore to unexpected state)
+- **Mitigation:**
+  - Always review checkpoint details before restoring
+  - Use descriptive checkpoint names
+  - Check git status before and after restoration
+  - Test in isolated branch if uncertain
+  - Document common restoration scenarios
+
+**Risk: No Visibility Into Checkpoint Status**
+- **Likelihood:** Medium
+- **Impact:** Low (uncertainty about checkpoint coverage)
+- **Mitigation:**
+  - Use `/checkpoint list` to view available checkpoints
+  - Document checkpoint viewing commands
+  - Create mental model: Claude handles it automatically
+  - Trust automatic checkpoint creation at key moments
+  - Focus on git for explicit control
 
 ### 4. Implementation Specification
 
@@ -331,3 +425,7 @@ Validation: Confirms cleanup policy works
 
 ---
 
+
+**Last Updated:** 2025-10-31
+**Document Version:** 1.1
+**Plugin Ecosystem:** Integrated (Anthropic Oct 2025 release)
