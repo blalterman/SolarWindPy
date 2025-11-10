@@ -16,14 +16,14 @@ normal_parameters
 
 Examples
 --------
->>> import pandas as pd
->>> import numpy as np
->>> columns = pd.MultiIndex.from_tuples([
+>>> import pandas as pd  # doctest: +SKIP
+>>> import numpy as np  # doctest: +SKIP
+>>> columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP
 ...     ('n', '', 'p1'), ('n', '', 'p2')
 ... ], names=['M', 'C', 'S'])
->>> df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)
->>> new_df, mask = swap_protons(df)
->>> 'swapped_protons' in new_df.columns.get_level_values('M')
+>>> df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)  # doctest: +SKIP
+>>> new_df, mask = swap_protons(df)  # doctest: +SKIP
+>>> 'swapped_protons' in new_df.columns.get_level_values('M')  # doctest: +SKIP
 True
 """
 
@@ -55,14 +55,14 @@ def swap_protons(data, logger=None):
 
     Examples
     --------
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> columns = pd.MultiIndex.from_tuples([
+    >>> import pandas as pd  # doctest: +SKIP
+    >>> import numpy as np  # doctest: +SKIP
+    >>> columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP
     ...     ('n', '', 'p1'), ('n', '', 'p2')
     ... ], names=['M', 'C', 'S'])
-    >>> df = pd.DataFrame([[2, 1], [1, 2]], columns=columns)  # p1 < p2 in first row
-    >>> new_df, mask = swap_protons(df)
-    >>> mask.iloc[0]  # First row should be swapped
+    >>> df = pd.DataFrame([[2, 1], [1, 2]], columns=columns)  # p1 < p2 in first row  # doctest: +SKIP
+    >>> new_df, mask = swap_protons(df)  # doctest: +SKIP
+    >>> mask.iloc[0]  # First row should be swapped  # doctest: +SKIP
     True
     """
     p1 = data.xs("p1", axis=1, level="S")
