@@ -8,14 +8,14 @@ Installation
 Requirements
 ------------
 
-SolarWindPy requires Python 3.11 or later and has the following core
+SolarWindPy requires Python 3.10 or later and has the following core
 dependencies:
 
-- NumPy ≥ 1.20.0
-- Pandas ≥ 1.3.0
-- SciPy ≥ 1.7.0
-- Matplotlib ≥ 3.5.0
-- Astropy ≥ 5.0.0
+- NumPy ≥ 1.22
+- Pandas ≥ 1.5
+- SciPy ≥ 1.10
+- Matplotlib ≥ 3.5
+- Astropy ≥ 5.0
 
 Installation from PyPI
 ----------------------
@@ -28,6 +28,22 @@ The recommended way to install SolarWindPy is from PyPI using :command:`pip`:
 
 This will install the latest stable release along with all required
 dependencies.
+
+Installation from conda-forge
+------------------------------
+
+SolarWindPy is also available through conda-forge:
+
+.. code-block:: bash
+
+   conda install -c conda-forge solarwindpy
+
+.. note::
+
+   The conda-forge package for v0.1.5 is temporarily unavailable due to
+   CI infrastructure issues (see `issue #8 <https://github.com/conda-forge/solarwindpy-feedstock/issues/8>`_).
+   Install from PyPI to get the latest version. The conda-forge package will be
+   updated once the issue is resolved.
 
 Development Installation
 ------------------------
@@ -55,8 +71,8 @@ environment file:
 
 .. code-block:: bash
 
-   conda env create -f solarwindpy-20250403.yml
-   conda activate solarwindpy-20250403
+   conda env create -f solarwindpy.yml
+   conda activate solarwindpy
 
 Verification
 ------------
@@ -73,7 +89,7 @@ Troubleshooting
 
 If you encounter installation issues:
 
-1. Ensure you have Python 3.11 or later
+1. Ensure you have Python 3.10 or later
 2. Update pip: ``pip install --upgrade pip``
 3. Consider using a virtual environment
 4. Check the `GitHub Issues <https://github.com/blalterman/SolarWindPy/issues>`_ for known problems
