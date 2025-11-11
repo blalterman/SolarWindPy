@@ -1,6 +1,7 @@
 # Documentation requirements generated from requirements-dev.txt
 # DO NOT EDIT MANUALLY - regenerate with scripts/generate_docs_requirements.py
 
+docstring-inheritance>=2.0
 doc8
 numpydoc
 sphinx

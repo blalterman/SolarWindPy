@@ -42,6 +42,7 @@ def generate_docs_requirements(
         "sphinxcontrib-bibtex",
         "doc8",  # RST linting for documentation workflows
         "numpydoc",  # NumPy-style docstring extension for Sphinx
+        "docstring-inheritance",  # Docstring inheritance for class hierarchies
     }
 
     source_path = Path(source_file)
