@@ -10,9 +10,9 @@ tags:
   - data analysis
   - python
 authors:
-  - name: B. L. Alterman    
+  - name: B. L. Alterman
     orcid: 0000-0001-6673-3432
-    affiliation: NASA Goddard Space Flight Center
+    affiliation: Independent Scientist
 date: YYYY-MM-DD
 bibliography: paper.bib
 ---
@@ -23,8 +23,8 @@ The region of space within the Sun's envelope of influence is called the heliosp
 The field of heliophysics starts in the solar interior and extends out to the very local interstellar medium, just beyond the heliosphere.
 The solar wind is a stream of charged particles that continuously flows away from the Sun, carrying, mass, energy, and momentum along with an embedded magnetic field.
 In short, it mediates the interaction of the Sun with the heliosphere and this is a feature shared by stars and their astrospheres more broadly.
-Changes in the solar wind create space weather, which is a critical threat to our technological infrastructure on Earth and in space.
-SolarWindPy provides a unified framework for analyzing the solar wind and space weather data, filling the gap between packages targeting astronomy, remote observations of the Sun, and general timeseries analysis of spacecraft based data.
+Changes in the solar wind are one source of space weather, which is a critical threat to our technological infrastructure on Earth and in space.
+SolarWindPy provides a unified framework for analyzing the solar wind and related space weather data, filling the gap between packages targeting astronomy, remote observations of the Sun, and general timeseries analysis of spacecraft based data.
 The package is available via PyPI and conda-forge and can be installed using `pip install solarwindpy` or `conda install -c conda-forge solarwindpy`.
 
 
@@ -49,7 +49,7 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
-SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed in support of multiple publications [@Alterman2018,@Wind:SWE:Wk, @Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
+SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed or utilized in support of multiple publications [@Alterman2018,@Wind:SWE:Wk, @Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
 The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure, enabling systematic completion of comprehensive test suites, documentation, and deployment workflows while maintaining scientific correctness.
 
 The package builds on well-established libraries including NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure that the dependencies are stable.
@@ -64,11 +64,13 @@ However, there is a clear separation between the two libraries such that future 
 
 ## AI-Assisted Development Workflow
 
-SolarWindPy's evolution from thesis research code [@Alterman2018] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
+SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
 This was accomplished using Claude Code [@claude_code_2024] with custom AI development infrastructure designed for scientific computing quality assurance.
 
 The implementation includes specialized domain-specific agents and automated validation workflows using pre-commit hooks for physics validation, test execution, and coverage monitoring.
 This systematic approach enabled rapid development of test suites for modules outside the original `core` implementation, completion of documentation including missing docstrings, and creation of continuous integration and deployment pipelines for PyPI, conda-forge, and ReadTheDocs.
+The current agent system contains 13 specialized agents with an extensible architecture designed for integration with Claude Code's skills system.
+The infrastructure incorporates git commit integration, GitHub Issues planning workflows, and comprehensive audit trails to ensure traceability of all AI-generated modifications, establishing an infrastructure for trustworthy AI-assisted scientific software.
 
 The project maintains a ≥95% test coverage target with core physics and plasma functionality comprehensively tested, while tests for advanced features such as fitfunctions and plotting capabilities remain in active development.
 All code generated or modified by AI undergoes expert review to ensure scientific accuracy.
@@ -113,6 +115,5 @@ The complete AI-assisted development infrastructure, including agent specificati
 
 # Acknowledgements
 
-The author acknowledges NASA contract NNX14AR78G and grants 80NSSC22K1011, 80NSSC22K0645, and 80NSSC20K1844.
 The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-
+In line with the transition to AI-augmented software development, this paper was written using Claude code [@claude_code_2024].

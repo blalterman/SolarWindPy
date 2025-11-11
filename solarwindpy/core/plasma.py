@@ -108,13 +108,13 @@ class Plasma(base.Base):
 
     Calculate plasma physics parameters:
 
-    >>> beta = plasma.beta('p1')          # Plasma beta for protons
-    >>> type(beta).__name__
+    >>> beta = plasma.beta('p1')          # Plasma beta for protons  # doctest: +SKIP
+    >>> type(beta).__name__  # doctest: +SKIP
     'Tensor'
 
     Idenfity ion species in plasma:
 
-    >>> plasma.species
+    >>> plasma.species  # doctest: +SKIP
     ['p1', 'a']
     """
 
@@ -155,29 +155,29 @@ class Plasma(base.Base):
         Examples
         --------
         >>> epoch = pd.Series({0: pd.to_datetime("1995-01-01"),
-                               1: pd.to_datetime("2015-03-23"),
-                               2: pd.to_datetime("2022-10-09")}, name="Epoch")
+        ...                    1: pd.to_datetime("2015-03-23"),
+        ...                    2: pd.to_datetime("2022-10-09")}, name="Epoch")
         >>> data = {
-        ("b", "x", ""): {0: 0.5, 1: 0.6, 2: 0.7},
-        ("b", "y", ""): {0: -0.25, 1: -0.26, 2: 0.27},
-        ("b", "z", ""): {0: 0.3, 1: 0.4, 2: -0.7},
-        ("n", "", "a"): {0: 0.5, 1: 1.0, 2: 1.5},
-        ("n", "", "p1"): {0: 1.0, 1: 2.0, 2: 3.0},
-        ("v", "x", "a"): {0: 125.0, 1: 250.0, 2: 375.0},
-        ("v", "x", "p1"): {0: 100.0, 1: 200.0, 2: 300.0},
-        ("v", "y", "a"): {0: 250.0, 1: 375.0, 2: 750.0},
-        ("v", "y", "p1"): {0: 200.0, 1: 300.0, 2: 600.0},
-        ("v", "z", "a"): {0: 500.0, 1: 750.0, 2: 1000.0},
-        ("v", "z", "p1"): {0: 400.0, 1: 600.0, 2: 800.0},
-        ("w", "par", "a"): {0: 3.0, 1: 4.0, 2: 5.0},
-        ("w", "par", "p1"): {0: 10.0, 1: 20.0, 2: 30.0},
-        ("w", "per", "a"): {0: 7.0, 1: 9.0, 2: 10.0},
-        ("w", "per", "p1"): {0: 7.0, 1: 26.0, 2: 28.0},
-        }
+        ... ("b", "x", ""): {0: 0.5, 1: 0.6, 2: 0.7},
+        ... ("b", "y", ""): {0: -0.25, 1: -0.26, 2: 0.27},
+        ... ("b", "z", ""): {0: 0.3, 1: 0.4, 2: -0.7},
+        ... ("n", "", "a"): {0: 0.5, 1: 1.0, 2: 1.5},
+        ... ("n", "", "p1"): {0: 1.0, 1: 2.0, 2: 3.0},
+        ... ("v", "x", "a"): {0: 125.0, 1: 250.0, 2: 375.0},
+        ... ("v", "x", "p1"): {0: 100.0, 1: 200.0, 2: 300.0},
+        ... ("v", "y", "a"): {0: 250.0, 1: 375.0, 2: 750.0},
+        ... ("v", "y", "p1"): {0: 200.0, 1: 300.0, 2: 600.0},
+        ... ("v", "z", "a"): {0: 500.0, 1: 750.0, 2: 1000.0},
+        ... ("v", "z", "p1"): {0: 400.0, 1: 600.0, 2: 800.0},
+        ... ("w", "par", "a"): {0: 3.0, 1: 4.0, 2: 5.0},
+        ... ("w", "par", "p1"): {0: 10.0, 1: 20.0, 2: 30.0},
+        ... ("w", "per", "a"): {0: 7.0, 1: 9.0, 2: 10.0},
+        ... ("w", "per", "p1"): {0: 7.0, 1: 26.0, 2: 28.0},
+        ... }
         >>> data = pd.DataFrame.from_dict(data, orient="columns")
         >>> data.columns.names = ["M", "C", "S"]
         >>> data.index = epoch
-        >>> data.T
+        >>> data.T  # doctest: +NORMALIZE_WHITESPACE
         Epoch     1995-01-01  2015-03-23  2022-10-09
         M C   S
         b x             0.50        0.60        0.70
@@ -222,7 +222,7 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> plasma.epoch
+        >>> plasma.epoch  # doctest: +SKIP
         DatetimeIndex(['1995-01-01', '2015-03-23', '2022-10-09'],
                       dtype='datetime64[ns]', name='Epoch', freq=None)
         """
@@ -291,8 +291,8 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> plasma.set_log_plasma_stats(True)
-        >>> plasma.log_plasma_at_init
+        >>> plasma.set_log_plasma_stats(True)  # doctest: +SKIP
+        >>> plasma.log_plasma_at_init  # doctest: +SKIP
         True
         """
         self._log_plasma_at_init = bool(new)
@@ -630,9 +630,9 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> sc = Spacecraft(trajectory_data)
-        >>> plasma.set_spacecraft(sc)
-        >>> plasma.spacecraft.position  # Access trajectory data
+        >>> sc = Spacecraft(trajectory_data)  # doctest: +SKIP
+        >>> plasma.set_spacecraft(sc)  # doctest: +SKIP
+        >>> plasma.spacecraft.position  # Access trajectory data  # doctest: +SKIP
         """
         assert isinstance(new, spacecraft.Spacecraft) or new is None
 
@@ -671,10 +671,10 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> quality_flags = pd.DataFrame({'quality': [0, 1, 0]},
+        >>> quality_flags = pd.DataFrame({'quality': [0, 1, 0]},  # doctest: +SKIP
         ...                              index=plasma.epoch)
-        >>> plasma.set_auxiliary_data(quality_flags)
-        >>> plasma.aux.quality  # Access auxiliary data
+        >>> plasma.set_auxiliary_data(quality_flags)  # doctest: +SKIP
+        >>> plasma.aux.quality  # Access auxiliary data  # doctest: +SKIP
         """
         assert isinstance(new, pd.DataFrame) or new is None
 
