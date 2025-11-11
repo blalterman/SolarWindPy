@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+g85bd59c6f documentation</title>
+  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+gc26f19739 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f58b6a3f"></script>
+      <script src="../../../_static/documentation_options.js?v=7f54b923"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -361,23 +361,23 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; epoch = pd.Series({0: pd.to_datetime(&quot;1995-01-01&quot;),</span>
-<span class="sd">                               1: pd.to_datetime(&quot;2015-03-23&quot;),</span>
-<span class="sd">                               2: pd.to_datetime(&quot;2022-10-09&quot;)}, name=&quot;Epoch&quot;)</span>
+<span class="sd">        ...                    1: pd.to_datetime(&quot;2015-03-23&quot;),</span>
+<span class="sd">        ...                    2: pd.to_datetime(&quot;2022-10-09&quot;)}, name=&quot;Epoch&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; data = {(&quot;pos&quot;, &quot;x&quot;, &quot;&quot;): {0: -42, 1: -22, 2: -34},</span>
-<span class="sd">                    (&quot;pos&quot;, &quot;y&quot;, &quot;&quot;): {0: 23, 1: 31, 2: 11},</span>
-<span class="sd">                    (&quot;pos&quot;, &quot;z&quot;, &quot;&quot;): {0: 35, 1: 27, 2: 49},</span>
-<span class="sd">                    (&quot;v&quot;, &quot;x&quot;, &quot;&quot;): {0: 9.0, 1: 10.0, 2: 8.0},</span>
-<span class="sd">                    (&quot;v&quot;, &quot;y&quot;, &quot;&quot;): {0: -80.0, 1: -70.0, 2: -90.0},</span>
-<span class="sd">                    (&quot;v&quot;, &quot;z&quot;, &quot;&quot;): {0: -0.5, 1: 0.5, 2: 1.5},</span>
-<span class="sd">                    (&quot;carr&quot;, &quot;lat&quot;, &quot;&quot;): {0: -2.0, 1: -1.0, 2: 3.0},</span>
-<span class="sd">                    (&quot;carr&quot;, &quot;lon&quot;, &quot;&quot;): {0: -26.0, 1: -36.0, 2: -16.0}}</span>
+<span class="sd">        ...         (&quot;pos&quot;, &quot;y&quot;, &quot;&quot;): {0: 23, 1: 31, 2: 11},</span>
+<span class="sd">        ...         (&quot;pos&quot;, &quot;z&quot;, &quot;&quot;): {0: 35, 1: 27, 2: 49},</span>
+<span class="sd">        ...         (&quot;v&quot;, &quot;x&quot;, &quot;&quot;): {0: 9.0, 1: 10.0, 2: 8.0},</span>
+<span class="sd">        ...         (&quot;v&quot;, &quot;y&quot;, &quot;&quot;): {0: -80.0, 1: -70.0, 2: -90.0},</span>
+<span class="sd">        ...         (&quot;v&quot;, &quot;z&quot;, &quot;&quot;): {0: -0.5, 1: 0.5, 2: 1.5},</span>
+<span class="sd">        ...         (&quot;carr&quot;, &quot;lat&quot;, &quot;&quot;): {0: -2.0, 1: -1.0, 2: 3.0},</span>
+<span class="sd">        ...         (&quot;carr&quot;, &quot;lon&quot;, &quot;&quot;): {0: -26.0, 1: -36.0, 2: -16.0}}</span>
 <span class="sd">        &gt;&gt;&gt; spacecraft = pd.DataFrame.from_dict(data,</span>
-<span class="sd">                                                orient=&quot;columns&quot;,</span>
-<span class="sd">                                                dtype=np.float64)</span>
+<span class="sd">        ...                                     orient=&quot;columns&quot;,</span>
+<span class="sd">        ...                                     dtype=np.float64)</span>
 <span class="sd">        &gt;&gt;&gt; spacecraft.index = epoch</span>
 <span class="sd">        &gt;&gt;&gt; spacecraft.columns.names = [&quot;M&quot;, &quot;C&quot;, &quot;S&quot;]</span>
 <span class="sd">        &gt;&gt;&gt; spacecraft = spacecraft.xs(&quot;&quot;, axis=1, level=&quot;S&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft</span>
+<span class="sd">        &gt;&gt;&gt; spacecraft  # doctest: +NORMALIZE_WHITESPACE</span>
 <span class="sd">        M            pos                 v            carr</span>
 <span class="sd">        C              x     y     z     x     y    z  lat   lon</span>
 <span class="sd">        Epoch</span>

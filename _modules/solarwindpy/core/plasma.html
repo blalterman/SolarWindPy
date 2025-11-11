@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g85bd59c6f documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gc26f19739 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f58b6a3f"></script>
+      <script src="../../../_static/documentation_options.js?v=7f54b923"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -418,13 +418,13 @@
 
 <span class="sd">    Calculate plasma physics parameters:</span>
 
-<span class="sd">    &gt;&gt;&gt; beta = plasma.beta(&#39;p1&#39;)          # Plasma beta for protons</span>
-<span class="sd">    &gt;&gt;&gt; type(beta).__name__</span>
+<span class="sd">    &gt;&gt;&gt; beta = plasma.beta(&#39;p1&#39;)          # Plasma beta for protons  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; type(beta).__name__  # doctest: +SKIP</span>
 <span class="sd">    &#39;Tensor&#39;</span>
 
 <span class="sd">    Idenfity ion species in plasma:</span>
 
-<span class="sd">    &gt;&gt;&gt; plasma.species</span>
+<span class="sd">    &gt;&gt;&gt; plasma.species  # doctest: +SKIP</span>
 <span class="sd">    [&#39;p1&#39;, &#39;a&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -467,29 +467,29 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; epoch = pd.Series({0: pd.to_datetime(&quot;1995-01-01&quot;),</span>
-<span class="sd">                               1: pd.to_datetime(&quot;2015-03-23&quot;),</span>
-<span class="sd">                               2: pd.to_datetime(&quot;2022-10-09&quot;)}, name=&quot;Epoch&quot;)</span>
+<span class="sd">        ...                    1: pd.to_datetime(&quot;2015-03-23&quot;),</span>
+<span class="sd">        ...                    2: pd.to_datetime(&quot;2022-10-09&quot;)}, name=&quot;Epoch&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; data = {</span>
-<span class="sd">        (&quot;b&quot;, &quot;x&quot;, &quot;&quot;): {0: 0.5, 1: 0.6, 2: 0.7},</span>
-<span class="sd">        (&quot;b&quot;, &quot;y&quot;, &quot;&quot;): {0: -0.25, 1: -0.26, 2: 0.27},</span>
-<span class="sd">        (&quot;b&quot;, &quot;z&quot;, &quot;&quot;): {0: 0.3, 1: 0.4, 2: -0.7},</span>
-<span class="sd">        (&quot;n&quot;, &quot;&quot;, &quot;a&quot;): {0: 0.5, 1: 1.0, 2: 1.5},</span>
-<span class="sd">        (&quot;n&quot;, &quot;&quot;, &quot;p1&quot;): {0: 1.0, 1: 2.0, 2: 3.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;x&quot;, &quot;a&quot;): {0: 125.0, 1: 250.0, 2: 375.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;x&quot;, &quot;p1&quot;): {0: 100.0, 1: 200.0, 2: 300.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;y&quot;, &quot;a&quot;): {0: 250.0, 1: 375.0, 2: 750.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;y&quot;, &quot;p1&quot;): {0: 200.0, 1: 300.0, 2: 600.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;z&quot;, &quot;a&quot;): {0: 500.0, 1: 750.0, 2: 1000.0},</span>
-<span class="sd">        (&quot;v&quot;, &quot;z&quot;, &quot;p1&quot;): {0: 400.0, 1: 600.0, 2: 800.0},</span>
-<span class="sd">        (&quot;w&quot;, &quot;par&quot;, &quot;a&quot;): {0: 3.0, 1: 4.0, 2: 5.0},</span>
-<span class="sd">        (&quot;w&quot;, &quot;par&quot;, &quot;p1&quot;): {0: 10.0, 1: 20.0, 2: 30.0},</span>
-<span class="sd">        (&quot;w&quot;, &quot;per&quot;, &quot;a&quot;): {0: 7.0, 1: 9.0, 2: 10.0},</span>
-<span class="sd">        (&quot;w&quot;, &quot;per&quot;, &quot;p1&quot;): {0: 7.0, 1: 26.0, 2: 28.0},</span>
-<span class="sd">        }</span>
+<span class="sd">        ... (&quot;b&quot;, &quot;x&quot;, &quot;&quot;): {0: 0.5, 1: 0.6, 2: 0.7},</span>
+<span class="sd">        ... (&quot;b&quot;, &quot;y&quot;, &quot;&quot;): {0: -0.25, 1: -0.26, 2: 0.27},</span>
+<span class="sd">        ... (&quot;b&quot;, &quot;z&quot;, &quot;&quot;): {0: 0.3, 1: 0.4, 2: -0.7},</span>
+<span class="sd">        ... (&quot;n&quot;, &quot;&quot;, &quot;a&quot;): {0: 0.5, 1: 1.0, 2: 1.5},</span>
+<span class="sd">        ... (&quot;n&quot;, &quot;&quot;, &quot;p1&quot;): {0: 1.0, 1: 2.0, 2: 3.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;x&quot;, &quot;a&quot;): {0: 125.0, 1: 250.0, 2: 375.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;x&quot;, &quot;p1&quot;): {0: 100.0, 1: 200.0, 2: 300.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;y&quot;, &quot;a&quot;): {0: 250.0, 1: 375.0, 2: 750.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;y&quot;, &quot;p1&quot;): {0: 200.0, 1: 300.0, 2: 600.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;z&quot;, &quot;a&quot;): {0: 500.0, 1: 750.0, 2: 1000.0},</span>
+<span class="sd">        ... (&quot;v&quot;, &quot;z&quot;, &quot;p1&quot;): {0: 400.0, 1: 600.0, 2: 800.0},</span>
+<span class="sd">        ... (&quot;w&quot;, &quot;par&quot;, &quot;a&quot;): {0: 3.0, 1: 4.0, 2: 5.0},</span>
+<span class="sd">        ... (&quot;w&quot;, &quot;par&quot;, &quot;p1&quot;): {0: 10.0, 1: 20.0, 2: 30.0},</span>
+<span class="sd">        ... (&quot;w&quot;, &quot;per&quot;, &quot;a&quot;): {0: 7.0, 1: 9.0, 2: 10.0},</span>
+<span class="sd">        ... (&quot;w&quot;, &quot;per&quot;, &quot;p1&quot;): {0: 7.0, 1: 26.0, 2: 28.0},</span>
+<span class="sd">        ... }</span>
 <span class="sd">        &gt;&gt;&gt; data = pd.DataFrame.from_dict(data, orient=&quot;columns&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; data.columns.names = [&quot;M&quot;, &quot;C&quot;, &quot;S&quot;]</span>
 <span class="sd">        &gt;&gt;&gt; data.index = epoch</span>
-<span class="sd">        &gt;&gt;&gt; data.T</span>
+<span class="sd">        &gt;&gt;&gt; data.T  # doctest: +NORMALIZE_WHITESPACE</span>
 <span class="sd">        Epoch     1995-01-01  2015-03-23  2022-10-09</span>
 <span class="sd">        M C   S</span>
 <span class="sd">        b x             0.50        0.60        0.70</span>
@@ -535,7 +535,7 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; plasma.epoch</span>
+<span class="sd">        &gt;&gt;&gt; plasma.epoch  # doctest: +SKIP</span>
 <span class="sd">        DatetimeIndex([&#39;1995-01-01&#39;, &#39;2015-03-23&#39;, &#39;2022-10-09&#39;],</span>
 <span class="sd">                      dtype=&#39;datetime64[ns]&#39;, name=&#39;Epoch&#39;, freq=None)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -606,8 +606,8 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init  # doctest: +SKIP</span>
 <span class="sd">        True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_plasma_at_init</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
@@ -957,9 +957,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory_data)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.position  # Access trajectory data</span>
+<span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory_data)  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.position  # Access trajectory data  # doctest: +SKIP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">spacecraft</span><span class="o">.</span><span class="n">Spacecraft</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
@@ -1001,10 +1001,10 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({&#39;quality&#39;: [0, 1, 0]},</span>
+<span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({&#39;quality&#39;: [0, 1, 0]},  # doctest: +SKIP</span>
 <span class="sd">        ...                              index=plasma.epoch)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_auxiliary_data(quality_flags)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.aux.quality  # Access auxiliary data</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_auxiliary_data(quality_flags)  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; plasma.aux.quality  # Access auxiliary data  # doctest: +SKIP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
