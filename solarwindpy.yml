@@ -1,7 +1,6 @@
 name: solarwindpy
 channels:
 - conda-forge
-- defaults
 dependencies:
 - numpy
 - scipy

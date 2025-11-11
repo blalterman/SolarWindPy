@@ -94,7 +94,7 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
 
     env = {
         "name": env_name,
-        "channels": ["conda-forge", "defaults"],
+        "channels": ["conda-forge"],
         "dependencies": conda_packages,
     }
 

@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Documentation examples** - Maintain instructional value while ensuring reliable validation
 - **JOSS paper** - Updated acknowledgements to reflect AI-assisted development workflow
+- **Conda channels** - Switched to conda-forge only (removed Anaconda `defaults` channel)
+  - Eliminates commercial channel licensing warnings in CI
+  - All dependencies available on open-source conda-forge channel
+  - Users with existing environments should recreate: `conda env remove -n solarwindpy && conda env create -f solarwindpy.yml`
+  - Aligns with JOSS open-source infrastructure requirements
 
 ## [0.1.0] - 2025-08-23
 
