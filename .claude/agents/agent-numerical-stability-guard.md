@@ -322,7 +322,7 @@ def stable_log_sum_exp(x):
 
 - Validates calculations from **PhysicsValidator**
 - Ensures stability in **FitFunctionSpecialist** optimizations
-- Protects **PerformanceOptimizer** implementations
+- Protects numerical algorithms in all domain agents
 - Provides test cases for **TestEngineer**
 
 ## Common Numerical Issues

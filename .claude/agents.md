@@ -1,5 +1,8 @@
 # AGENTS-claude.md for SolarWindPy
 
+**Last Synchronized:** November 12, 2025
+**Status:** Aligned with `.claude/agents/` implementation (7 active agents)
+
 ## Core Development Agents
 
 ### General
@@ -77,75 +80,9 @@
 - Handle log-scale plotting correctly
 - Test plot generation without displaying (for CI/CD)
 
-### SolarActivityTracker
-**Applies to:** solarwindpy/solar_activity/**/*.py  
-**Priority:** Medium  
-**Instructions:**
-- Maintain LISIRD interface compatibility
-- Update sunspot number data (ssn_extrema.csv) when needed
-- Verify extrema calculations for solar cycles
-- Handle missing data gracefully in time series
-- Ensure proper datetime handling for solar indices
-- Document data sources and update frequencies
-
-### PerformanceOptimizer
-**Applies to:** solarwindpy/core/**/*.py, solarwindpy/tools/**/*.py  
-**Priority:** Medium  
-**Instructions:**
-- Profile numba-decorated functions for performance
-- Optimize vectorized operations over loops
-- Monitor memory usage in large DataFrame operations
-- Cache expensive calculations where appropriate
-- Use parallel processing for independent calculations
-- Document performance considerations in comments
-
-### DocumentationMaintainer
-**Applies to:** docs/**/*.rst, **/*.py, README.rst  
-**Priority:** Medium  
-**Instructions:**
-- Maintain NumPy-style docstrings for all public APIs
-- Update Sphinx documentation when adding features
-- Include usage examples in docstrings
-- Keep README.rst current with installation instructions
-- Document physical assumptions and limitations
-- Generate API docs with proper cross-references
-
-### DependencyManager
-**Applies to:** requirements*.txt, pyproject.toml, setup.cfg, conda recipe/meta.yaml  
-**Priority:** Low  
-**Instructions:**
-- Keep dependencies pinned for reproducibility
-- Update conda recipe with `python scripts/update_conda_recipe.py`
-- Test compatibility with minimum supported versions
-- Document any version-specific workarounds
-- Avoid adding unnecessary dependencies
-- Maintain Python 3.7+ compatibility
-
-### CodeRefactorer
-**Applies to:** solarwindpy/**/*.py  
-**Priority:** Low  
-**Instructions:**
-- Break functions >50 lines into smaller components
-- Extract common patterns into utility functions
-- Remove dead code and unused imports
-- Preserve all public APIs (check __all__ exports)
-- Improve variable naming for clarity
-- Reduce cognitive complexity in nested conditions
-
-### IonSpeciesValidator
-**Applies to:** solarwindpy/core/ions.py, solarwindpy/core/plasma.py  
-**Priority:** Medium  
-**Instructions:**
-- Validate species strings match expected patterns (p1, p2, a, etc.)
-- Ensure mass/charge ratios are physically correct
-- Check thermal/bulk velocity relationships
-- Verify anisotropy calculations (parallel/perpendicular)
-- Validate inter-species drift velocities
-- Handle missing species data appropriately
-
 ### NumericalStabilityGuard
-**Applies to:** solarwindpy/fitfunctions/**/*.py, solarwindpy/instabilities/**/*.py  
-**Priority:** High  
+**Applies to:** solarwindpy/fitfunctions/**/*.py, solarwindpy/instabilities/**/*.py
+**Priority:** High
 **Instructions:**
 - Check for numerical overflow/underflow conditions
 - Validate matrix operations for conditioning
@@ -154,24 +91,24 @@
 - Verify statistical measures with small sample sizes
 - Test stability with extreme parameter values
 
-### CIAgent
-**Applies to:** .github/workflows/*.yml, tox.ini  
-**Priority:** Low  
+### UnifiedPlanCoordinator
+**Applies to:** All planning and implementation
+**Priority:** High
 **Instructions:**
-- Ensure GitHub Actions workflows are valid
-- Test against multiple Python versions (3.8, 3.9+)
-- Run full test suite in CI pipeline
-- Check code coverage reports
-- Validate documentation builds
-- Monitor for deprecation warnings
+- Execute CLI scripts directly (.claude/scripts/gh-plan-*.sh)
+- Use batch mode for phase creation (tmp/phases.conf)
+- Integrate with hooks (plan-value-generator.py, plan-scope-auditor.py)
+- Create GitHub Issues for plans, not text descriptions
+- Track velocity and provide time estimates
+- Follow value propositions framework
 
 ## Agent Interaction Patterns
 
 ### Priority Cascade
 1. **Always Active:** General → PhysicsValidator → DataFrameArchitect
-2. **Feature Development:** TestEngineer → Domain Specialist → DocumentationMaintainer
-3. **Code Quality:** CodeRefactorer → PerformanceOptimizer → NumericalStabilityGuard
-4. **Release Prep:** DependencyManager → CIAgent → DocumentationMaintainer
+2. **Feature Development:** TestEngineer → Domain Specialist
+3. **Code Quality:** NumericalStabilityGuard
+4. **Planning:** UnifiedPlanCoordinator
 
 ### Collaboration Rules
 - PhysicsValidator must approve all core physics changes
@@ -183,7 +120,7 @@
 ### Validation Checkpoints
 - Pre-commit: Format (black) → Lint (flake8) → Test (pytest)
 - Pre-merge: Coverage check → Documentation build → CI pass
-- Post-merge: Performance regression → Numerical accuracy → API compatibility
+- Post-merge: Numerical accuracy → API compatibility
 
 ## Domain-Specific Guidelines
 
@@ -214,14 +151,12 @@
 4. Run isolated test with `pytest path/to/test::specific_test`
 5. If physics-related, consult PhysicsValidator agent
 
-### Performance Degradation
-1. Profile with `python -m cProfile`
-2. Check DataFrame memory usage with `.memory_usage(deep=True)`
-3. Review recent numba compilation
-4. Consider algorithmic improvements before optimization
-
 ### Data Corruption
 1. Validate against known test data in `tests/data/`
 2. Check MultiIndex integrity
 3. Verify datetime index continuity
 4. Restore from version control if necessary
+
+## Historical Note
+
+For information on removed agents (PerformanceOptimizer, DocumentationMaintainer, DependencyManager) and never-implemented agents (SolarActivityTracker, CodeRefactorer, IonSpeciesValidator, CIAgent), see `.claude/docs/AGENTS.md`.
