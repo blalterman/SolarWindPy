@@ -217,4 +217,5 @@ For comprehensive information beyond these essentials:
 - Hook reference → .claude/docs/HOOKS.md
 - Planning workflow → .claude/docs/PLANNING.md
 - Maintenance → .claude/docs/MAINTENANCE.md
+- Release process → .claude/docs/RELEASING.md
 - Code attribution guidelines → .claude/docs/ATTRIBUTION.md

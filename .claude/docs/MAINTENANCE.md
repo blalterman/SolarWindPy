@@ -69,6 +69,28 @@ python scripts/wait_for_pypi.py v0.1.5 --timeout 300
 python scripts/update_conda_feedstock.py v0.1.5
 ```
 
+### Release Monitoring
+
+Monitor conda-forge bot PR creation and CI status during releases:
+
+```bash
+# Monitor release progress with tracking issue number
+.claude/scripts/monitor-conda-release.sh 403
+
+# Provides real-time status:
+# - Time elapsed since release
+# - Bot PR creation status
+# - CI check results
+# - Contextual next steps
+
+# Exit codes:
+# 0 - PR merged successfully
+# 1 - Normal waiting state
+# 2 - Action needed (>12h or CI failures)
+```
+
+**Note**: These scripts support the automated release process. For the complete release workflow including conda-forge bot automation, see [RELEASING.md](./RELEASING.md).
+
 ## Testing and Coverage Maintenance
 
 ```bash
@@ -227,6 +249,7 @@ Consider quarterly audits if:
 - **Examples**: `v1.0.0`, `v2.1.3-alpha`, `v1.5.0-beta.2`
 - **Purpose**: Official package releases, PyPI distribution
 - **Automation**: GitHub workflow creates these for releases
+- **Full Process**: See [RELEASING.md](./RELEASING.md) for comprehensive release procedures
 
 ### Session State: File-Based (No Git Tags)
 - **Location**: `.claude/compacted_state.md` and timestamped backups

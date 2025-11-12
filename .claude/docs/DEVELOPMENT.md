@@ -31,6 +31,7 @@ Development guidelines and standards for SolarWindPy scientific software.
 - **Multi-computer sync**: Instant plan access across all development machines
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
+- **Releases**: Automated via GitHub Actions, see [RELEASING.md](./RELEASING.md)
 
 ## Environment Setup
 
