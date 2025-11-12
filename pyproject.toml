@@ -26,7 +26,7 @@ name = "solarwindpy"
 description = "Python package for solar wind data analysis."
 readme = "README.rst"
 requires-python = ">=3.11,<4"
-license = {file = "LICENSE.rst"}
+license = {file = "LICENSE"}
 authors = [
   {name = "B. L. Alterman", email = "blaltermanphd@gmail.com"}
 ]

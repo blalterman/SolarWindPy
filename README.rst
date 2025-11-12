@@ -105,14 +105,14 @@ License
 =======
 
 SolarWindPy is licensed under a standard 3-clause BSD license. See
-`LICENSE.rst`_.
+`LICENSE`_.
 
 Acknowledging and Citing SolarWindPy
 ====================================
 
 See `CITATION.rst`_ for instructions on citing SolarWindPy.
 
-.. _LICENSE.rst: ./LICENSE.rst
+.. _LICENSE: ./LICENSE
 .. _CITATION.rst: ./CITATION.rst
 
 .. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci-master.yml/badge.svg?branch=master
@@ -120,7 +120,7 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
 .. |Docs Status| image:: https://readthedocs.org/projects/solarwindpy/badge/?version=latest
    :target: https://solarwindpy.readthedocs.io/en/latest/?badge=latest
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-   :target: ./LICENSE.rst
+   :target: ./LICENSE
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17057804.svg
