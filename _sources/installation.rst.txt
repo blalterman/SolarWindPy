@@ -8,7 +8,7 @@ Installation
 Requirements
 ------------
 
-SolarWindPy requires Python 3.10 or later and has the following core
+SolarWindPy requires Python 3.11 or later and has the following core
 dependencies:
 
 - NumPy ≥ 1.22
@@ -89,7 +89,7 @@ Troubleshooting
 
 If you encounter installation issues:
 
-1. Ensure you have Python 3.10 or later
+1. Ensure you have Python 3.11 or later
 2. Update pip: ``pip install --upgrade pip``
 3. Consider using a virtual environment
 4. Check the `GitHub Issues <https://github.com/blalterman/SolarWindPy/issues>`_ for known problems
