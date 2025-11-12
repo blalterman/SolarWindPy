@@ -273,9 +273,9 @@ class TestSolarWindPyPlottingVisualValidation:
             assert len(ax.patches) > 0  # Histogram bars
 
         # Box plot validation using the returned dictionary
-        assert len(box_plot['boxes']) == 3  # Three data sets
-        assert len(box_plot['whiskers']) == 6  # Two whiskers per box
-        assert len(box_plot['medians']) == 3  # One median per box
+        assert len(box_plot["boxes"]) == 3  # Three data sets
+        assert len(box_plot["whiskers"]) == 6  # Two whiskers per box
+        assert len(box_plot["medians"]) == 3  # One median per box
 
 
 class TestPlotLayoutValidation:
