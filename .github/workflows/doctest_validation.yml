@@ -36,7 +36,7 @@ jobs:
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
     
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env.outputs.conda_env_file) }}
@@ -228,7 +228,7 @@ jobs:
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
     
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env-spot.outputs.conda_env_file) }}
