@@ -13,15 +13,38 @@ Python data analysis tools for solar wind measurements.
 Quick Start
 -----------
 
-After installation, import the package and create a plasma object:
+After installation, import the package and create a plasma object with sample data:
 
 .. code-block:: python
 
    import solarwindpy as swp
-   # Load plasma data (example with sample data)
-   plasma = swp.Plasma()
-   # Access ion species and magnetic field data
-   print(plasma.data.columns)  # View available measurements
+   import pandas as pd
+
+   # Create sample solar wind data (3 time points)
+   epoch = pd.date_range('2023-01-01', periods=3, freq='1h')
+   columns = pd.MultiIndex.from_tuples([
+       ('n', '', 'p1'), ('n', '', 'a'),           # Number density
+       ('v', 'x', 'p1'), ('v', 'x', 'a'),         # Velocity components
+       ('v', 'y', 'p1'), ('v', 'y', 'a'),
+       ('v', 'z', 'p1'), ('v', 'z', 'a'),
+       ('w', 'par', 'p1'), ('w', 'par', 'a'),     # Thermal speeds
+       ('w', 'per', 'p1'), ('w', 'per', 'a'),
+       ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')  # Magnetic field
+   ], names=['M', 'C', 'S'])
+
+   # Realistic solar wind values
+   data = pd.DataFrame([
+       [5.0, 0.25, 400, 380, 10, 5, -20, -15, 30, 15, 25, 12, 3.5, -1.2, 0.8],
+       [8.0, 0.40, 450, 420, 15, 8, -25, -18, 35, 18, 28, 14, 4.1, -1.5, 1.2],
+       [6.5, 0.30, 420, 400, 12, 6, -22, -16, 32, 16, 26, 13, 3.8, -1.3, 0.9],
+   ], index=epoch, columns=columns)
+
+   # Create plasma object with protons and alphas
+   plasma = swp.Plasma(data, 'p1', 'a')
+
+   # Access ion species
+   print(plasma.species)  # ['p1', 'a']
+   print(f"Proton density: {plasma.p1.n.mean():.1f} cm⁻³")
 
 See the documentation for detailed usage examples and API reference.
 
