@@ -58,7 +58,7 @@ PACKAGE_CONFIG = {
         'license_file': 'LICENSE.rst',
         'summary': 'Python package for solar wind data analysis.',
         'maintainers': ['blalterman'],
-        'min_python': '3.10',
+        'min_python': '3.11',
     }
 }
 

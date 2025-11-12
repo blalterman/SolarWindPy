@@ -15,7 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ['3.10']  # Focus on primary version, spot-check others
+        python-version: ['3.11']  # Focus on primary version, spot-check others
       fail-fast: false  # Allow other jobs to complete even if one fails
     
     steps:
