@@ -19,7 +19,7 @@ doc8
 flake8-docstrings
 pydocstyle
 numpydoc
-sphinx>=7.3,<8.2
+sphinx
 sphinx_rtd_theme
 sphinxcontrib-spelling
 sphinxcontrib-bibtex

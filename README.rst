@@ -28,7 +28,7 @@ See the documentation for detailed usage examples and API reference.
 Installation
 ============
 
-SolarWindPy requires Python 3.10 or later.
+SolarWindPy requires Python 3.11 or later.
 
 SolarWindPy is available via PyPI and conda-forge:
 
@@ -39,7 +39,7 @@ Install from PyPI:
 
 .. code-block:: bash
 
-   pip install solarwindpy  # Requires Python 3.10+
+   pip install solarwindpy  # Requires Python 3.11+
 
 Or install from conda-forge:
 
@@ -56,11 +56,11 @@ Development
 -----------
 
 1. Fork the repository and clone your fork.
-2. Create a Conda environment using the provided YAML file (Python 3.10+):
+2. Create a Conda environment using the provided YAML file (Python 3.11+):
 
    .. code-block:: bash
 
-      conda env create -f solarwindpy.yml  # Python 3.10+
+      conda env create -f solarwindpy.yml  # Python 3.11+
       conda activate solarwindpy
       pip install -e .
 
