@@ -17,15 +17,30 @@ This file provides essential guidance to Claude Code when working with the Solar
 
 ## Context Management Rules
 1. **Archive Exclusion**: NEVER search, read, or glob the following compressed archives:
-   - `plans/completed-plans-archive-2025.tar.gz` - Contains historical completed plans (190KB compressed from 976KB)
-   - `plans/abandoned-plans-archive-2025.tar.gz` - Contains historical abandoned plans (72KB compressed from 312KB)
+   - `plans/completed-plans-archive-2025.tar.gz` - Historical completed plans (190KB from 976KB)
+   - `plans/abandoned-plans-archive-2025.tar.gz` - Historical abandoned plans (72KB from 312KB)
+   - `plans/root-stale-docs-archive-2025.tar.gz` - Superseded root documentation (8.7KB from 24KB)
+   - `plans/agents-architecture-archive-2025.tar.gz` - Legacy agent architecture (39KB from 156KB)
+   - `plans/custom-gpt-archive-2025.tar.gz` - Pre-Claude Code ChatGPT artifacts (6.1KB from 20KB)
+   - `plans/completed-plans-minimal-archive-2025.tar.gz` - Additional completed plans (30KB from 120KB)
+   - `plans/completed-plans-documentation-archive-2025.tar.gz` - Completed 2025 Q3 documentation/infrastructure plans (190KB from 992KB)
 2. **Active Plans Only**: Focus all searches on:
    - Root-level plan files in `plans/` directory (`*.md` files)
    - Active plan subdirectories (not archived)
    - Template and guide files for reference
-3. **Rationale**: These archives contain 40% of the plans/ directory's original disk usage (1.3MB) but provide minimal active value. They are compressed binary files that cannot be read directly. Compacted state summaries in active plans provide sufficient historical context when needed.
-4. **Archive Access**: To access archived plans if absolutely necessary:
+3. **Active Documentation Preserved**: The following are intentionally NOT archived:
+   - `.claude/docs/feature_integration/` - Active implementation phase (256KB)
+   - `.claude/ecosystem-documentation.md` - Documents 45KB of active config files
+   - `plans/tests-audit/` - Active reference for ongoing test improvements (90KB)
+   - `plans/github-issues-migration/` - Active planning system infrastructure documentation (124KB)
+4. **Rationale**: Archives contain 536KB compressed from 2,600KB original (79% compression), reducing context noise by ~320,000 tokens while preserving all historical information. Archives are binary files that cannot be read directly; extract only when historical review is necessary.
+5. **Archive Access**: To extract archived content if needed:
    ```bash
+   tar -xzf plans/root-stale-docs-archive-2025.tar.gz
+   tar -xzf plans/agents-architecture-archive-2025.tar.gz
+   tar -xzf plans/custom-gpt-archive-2025.tar.gz
+   tar -xzf plans/completed-plans-minimal-archive-2025.tar.gz
+   tar -xzf plans/completed-plans-documentation-archive-2025.tar.gz
    tar -xzf plans/completed-plans-archive-2025.tar.gz
    tar -xzf plans/abandoned-plans-archive-2025.tar.gz
    ```
