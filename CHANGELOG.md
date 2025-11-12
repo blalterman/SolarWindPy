@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-11-12
+
+### Changed
+- **BREAKING**: Minimum Python version raised from 3.10 to 3.11
+  - Aligns with scientific Python ecosystem (NumPy 2.x, Astropy 7.x require Python 3.11+)
+  - Python 3.10 reaches end-of-life in October 2026
+  - Enables Python 3.11+ performance improvements (10-60% faster in many workloads)
+  - Added Python 3.13 to CI testing matrix for forward compatibility
+
+### Fixed
+- Resolved conda-forge feedstock Issue #8 (Python version compatibility)
+- Removed all Python 3.10 references from CI and packaging configuration
+- Updated ReadTheDocs configuration to use Python 3.11
+
+### Added
+- Python 3.13 CI testing for forward compatibility validation
+- Runnable Quick Start example in README with realistic solar wind data
+  - Demonstrates complete Plasma object creation workflow
+  - Includes physically accurate parameter values
+  - Users can copy-paste and execute immediately
+
+### Documentation
+- Updated installation requirements in README.rst and docs/source/installation.rst
+- Fixed LICENSE file detection for GitHub (converted from .rst to plain text)
+- Archived completed documentation to reduce AI context overhead
+
 ## [0.1.5] - 2025-11-10
 
 ### Fixed
