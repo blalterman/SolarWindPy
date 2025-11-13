@@ -13,7 +13,7 @@ authors:
   - name: B. L. Alterman
     orcid: 0000-0001-6673-3432
     affiliation: Independent Scientist
-date: YYYY-MM-DD
+date: 2025-11-13
 bibliography: paper.bib
 ---
 
@@ -42,7 +42,7 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
  AstroPy  |  Astronomical observations.                                                                                  | [@astropy:2013, @astropy:2018, @astropy:2022]    
  SunPy    |  Remote sensing observations of the Sun.                                                                     | [@sunpy_community2020, @MFC+20, @Barnes2020]    
  PlasmaPy |  Theoretical plasma physics.                                                                                 | [@plasmapy_community_2025_16747747]    
- SpacePy  |  Analysis of timeseries data and integration with numerical modeling with a focus on mangetospheric physics. | [@niehof2022spacepy, @spacepy_code]    
+ SpacePy  |  Analysis of timeseries data and integration with numerical modeling with a focus on magnetospheric physics. | [@niehof2022spacepy, @spacepy_code]    
  Pysat    |  Analysis of data from magnetospheric missions.                                                              | [@pysatcode, @Stoneback2018, @Stoneback2023]    
  pySpedas |  Retrieval and plotting of heliophysics timeseries data.                                                     | [@Grimes2022]    
  PyTplot  |  Focus on timeseries and spectrograph spacecraft data.                                                       | [@pytplot2019]    
@@ -69,10 +69,10 @@ This was accomplished using Claude Code [@claude_code_2024] with custom AI devel
 
 The implementation includes specialized domain-specific agents and automated validation workflows using pre-commit hooks for physics validation, test execution, and coverage monitoring.
 This systematic approach enabled rapid development of test suites for modules outside the original `core` implementation, completion of documentation including missing docstrings, and creation of continuous integration and deployment pipelines for PyPI, conda-forge, and ReadTheDocs.
-The current agent system contains 13 specialized agents with an extensible architecture designed for integration with Claude Code's skills system.
+The current agent system contains 7 specialized agents with an extensible architecture designed for integration with Claude Code's skills system.
 The infrastructure incorporates git commit integration, GitHub Issues planning workflows, and comprehensive audit trails to ensure traceability of all AI-generated modifications, establishing an infrastructure for trustworthy AI-assisted scientific software.
 
-The project maintains a ≥95% test coverage target with core physics and plasma functionality comprehensively tested, while tests for advanced features such as fitfunctions and plotting capabilities remain in active development.
+The project targets ≥95% test coverage, with core physics and plasma functionality currently achieving comprehensive coverage (≥95%), while tests for advanced features such as fitfunctions and plotting capabilities remain in active development, bringing overall coverage to 78%.
 All code generated or modified by AI undergoes expert review to ensure scientific accuracy.
 The complete AI-assisted development infrastructure, including agent specifications, validation hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository.
 
