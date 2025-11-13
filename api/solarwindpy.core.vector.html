@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.vector module &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>solarwindpy.core.vector module &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -28,8 +28,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.fitfunctions package" href="solarwindpy.fitfunctions.html" />
-    <link rel="prev" title="solarwindpy.core.units_constants module" href="solarwindpy.core.units_constants.html" />
    
   <style>
     .sidebar-custom-info {
@@ -81,18 +79,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -349,7 +337,7 @@ operations and magnetic field calculations.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.core.base.Base.html#solarwindpy.core.base.Base" title="solarwindpy.core.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
 <p>Three-dimensional vector container.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -359,7 +347,7 @@ operations and magnetic field calculations.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> instance.</p>
+<dd><p>Initialize a <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – The vector data with <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> components.</p>
@@ -398,7 +386,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Alias for <code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code>.</p>
+<dd><p>Alias for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector.mag" title="solarwindpy.core.vector.Vector.mag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Vector magnitude.</p>
@@ -496,7 +484,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">longitude</span></code>.</p>
+<dd><p>Shortcut for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector.longitude" title="solarwindpy.core.vector.Vector.longitude"><code class="xref py py-attr docutils literal notranslate"><span class="pre">longitude</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Longitude in degrees.</p>
@@ -510,7 +498,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code> when using spherical coordinates.</p>
+<dd><p>Shortcut to <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector.mag" title="solarwindpy.core.vector.Vector.mag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code></a> when using spherical coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Vector magnitude.</p>
@@ -537,39 +525,39 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unit_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unit_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
 <dd><p>Cartesian unit vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Normalised vector.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Vector</p>
+<dd class="field-even"><p><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector">Vector</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
-<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">unit_vector</span></code>.</p>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
+<dd><p>Shortcut for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector.unit_vector" title="solarwindpy.core.vector.Vector.unit_vector"><code class="xref py py-attr docutils literal notranslate"><span class="pre">unit_vector</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Normalised vector.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Vector</p>
+<dd class="field-even"><p><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector">Vector</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vector</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Project self onto <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to project onto.</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to project onto.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parallel and perpendicular components of the projection.</p>
@@ -585,11 +573,11 @@ operations and magnetic field calculations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">cos_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vector</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector.cos_theta"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">cos_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#Vector.cos_theta"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Cosine of the angle between this vector and <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to calculate the angle with.</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to calculate the angle with.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Cosine of the angle.</p>
@@ -605,7 +593,7 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Constants</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em></dt>
 <dd><p>Physical constants.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -692,7 +680,7 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Units</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Units.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em></dt>
 <dd><p>Units conversion factors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -709,7 +697,7 @@ operations and magnetic field calculations.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/vector.html#BField"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a></p>
 <p>A class representing a magnetic field, inheriting from Vector.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
@@ -732,7 +720,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pb</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">pressure</span></code>.</p>
+<dd><p>Shortcut for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.BField.html#solarwindpy.core.vector.BField.pressure" title="solarwindpy.core.vector.BField.pressure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pressure</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Magnetic pressure.</p>
@@ -746,7 +734,7 @@ operations and magnetic field calculations.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> instance.</p>
+<dd><p>Initialize a <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – The vector data with <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> components.</p>
@@ -798,7 +786,7 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Constants</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em></dt>
 <dd><p>Physical constants.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -812,11 +800,11 @@ operations and magnetic field calculations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">cos_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vector</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span></dt>
+<span class="sig-name descname"><span class="pre">cos_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span></dt>
 <dd><p>Cosine of the angle between this vector and <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to calculate the angle with.</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to calculate the angle with.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Cosine of the angle.</p>
@@ -903,7 +891,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">longitude</span></code>.</p>
+<dd><p>Shortcut for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.BField.html#solarwindpy.core.vector.BField.longitude" title="solarwindpy.core.vector.BField.longitude"><code class="xref py py-attr docutils literal notranslate"><span class="pre">longitude</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Longitude in degrees.</p>
@@ -945,7 +933,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Alias for <code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code>.</p>
+<dd><p>Alias for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.BField.html#solarwindpy.core.vector.BField.mag" title="solarwindpy.core.vector.BField.mag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Vector magnitude.</p>
@@ -975,11 +963,11 @@ operations and magnetic field calculations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Vector</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span></dt>
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span></dt>
 <dd><p>Project self onto <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to project onto.</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Vector to project onto.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parallel and perpendicular components of the projection.</p>
@@ -996,7 +984,7 @@ operations and magnetic field calculations.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em></dt>
-<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code> when using spherical coordinates.</p>
+<dd><p>Shortcut to <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.BField.html#solarwindpy.core.vector.BField.mag" title="solarwindpy.core.vector.BField.mag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mag</span></code></a> when using spherical coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Vector magnitude.</p>
@@ -1051,21 +1039,21 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unit_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unit_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
 <dd><p>Cartesian unit vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Normalised vector.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Vector</p>
+<dd class="field-even"><p><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector">Vector</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Units</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Units.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em></dt>
 <dd><p>Units conversion factors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1079,14 +1067,14 @@ operations and magnetic field calculations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
-<dd><p>Shortcut for <code class="xref py py-attr docutils literal notranslate"><span class="pre">unit_vector</span></code>.</p>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
+<dd><p>Shortcut for <a class="reference internal" href="../_autosummary/solarwindpy.core.vector.BField.html#solarwindpy.core.vector.BField.unit_vector" title="solarwindpy.core.vector.BField.unit_vector"><code class="xref py py-attr docutils literal notranslate"><span class="pre">unit_vector</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Normalised vector.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Vector</p>
+<dd class="field-even"><p><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector">Vector</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1098,10 +1086,7 @@ operations and magnetic field calculations.</p>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.core.units_constants.html" class="btn btn-neutral float-left" title="solarwindpy.core.units_constants module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.fitfunctions.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

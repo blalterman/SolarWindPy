@@ -1,0 +1,24 @@
+﻿solarwindpy.solar\_activity.lisird
+==================================
+
+.. automodule:: solarwindpy.solar_activity.lisird
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

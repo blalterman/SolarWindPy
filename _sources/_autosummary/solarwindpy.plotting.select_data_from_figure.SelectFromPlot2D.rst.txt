@@ -1,0 +1,6 @@
+solarwindpy.plotting.select\_data\_from\_figure.SelectFromPlot2D
+================================================================
+
+.. currentmodule:: solarwindpy.plotting.select_data_from_figure
+
+.. autoclass:: SelectFromPlot2D

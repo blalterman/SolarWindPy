@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.multipanel\_figure\_shared\_cbar
+===========================================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: multipanel_figure_shared_cbar

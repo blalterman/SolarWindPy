@@ -1,0 +1,34 @@
+﻿solarwindpy.fitfunctions.exponentials
+=====================================
+
+.. automodule:: solarwindpy.fitfunctions.exponentials
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Exponential
+      ExponentialCDF
+      ExponentialPlusC
+   
+   
+
+   
+   
+   
+
+
+

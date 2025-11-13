@@ -1,0 +1,6 @@
+solarwindpy.plotting.select\_data\_from\_figure.DateAxes
+========================================================
+
+.. currentmodule:: solarwindpy.plotting.select_data_from_figure
+
+.. autoclass:: DateAxes

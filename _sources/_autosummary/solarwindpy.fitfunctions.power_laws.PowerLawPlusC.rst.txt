@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.power\_laws.PowerLawPlusC
+==================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.power_laws
+
+.. autoclass:: PowerLawPlusC

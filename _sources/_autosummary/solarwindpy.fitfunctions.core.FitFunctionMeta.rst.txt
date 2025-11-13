@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.FitFunctionMeta
+=============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoclass:: FitFunctionMeta

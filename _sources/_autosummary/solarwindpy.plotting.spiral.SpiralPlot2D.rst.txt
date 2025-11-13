@@ -1,0 +1,6 @@
+solarwindpy.plotting.spiral.SpiralPlot2D
+========================================
+
+.. currentmodule:: solarwindpy.plotting.spiral
+
+.. autoclass:: SpiralPlot2D

@@ -1,0 +1,6 @@
+solarwindpy.tools.normal\_parameters
+====================================
+
+.. currentmodule:: solarwindpy.tools
+
+.. autofunction:: normal_parameters

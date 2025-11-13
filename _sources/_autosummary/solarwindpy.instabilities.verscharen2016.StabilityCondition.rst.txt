@@ -1,0 +1,6 @@
+solarwindpy.instabilities.verscharen2016.StabilityCondition
+===========================================================
+
+.. currentmodule:: solarwindpy.instabilities.verscharen2016
+
+.. autoclass:: StabilityCondition

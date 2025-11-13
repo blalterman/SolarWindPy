@@ -1,0 +1,6 @@
+solarwindpy.plotting.spiral.calculate\_bin\_number\_with\_numba
+===============================================================
+
+.. currentmodule:: solarwindpy.plotting.spiral
+
+.. autofunction:: calculate_bin_number_with_numba

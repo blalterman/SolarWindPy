@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.plots.SSNPlot
+=========================================
+
+.. currentmodule:: solarwindpy.solar_activity.plots
+
+.. autoclass:: SSNPlot

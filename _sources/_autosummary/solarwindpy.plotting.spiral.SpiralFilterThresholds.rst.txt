@@ -1,0 +1,6 @@
+solarwindpy.plotting.spiral.SpiralFilterThresholds
+==================================================
+
+.. currentmodule:: solarwindpy.plotting.spiral
+
+.. autoclass:: SpiralFilterThresholds

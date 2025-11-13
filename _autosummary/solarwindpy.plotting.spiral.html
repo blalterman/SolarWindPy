@@ -1,0 +1,799 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba" href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html" />
+    <link rel="prev" title="solarwindpy.plotting.scatter.Scatter" href="solarwindpy.plotting.scatter.Scatter.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.plotting.spiral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html">solarwindpy.plotting.spiral.calculate_bin_number_with_numba</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.get_counts_per_bin.html">solarwindpy.plotting.spiral.get_counts_per_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.InitialSpiralEdges.html">solarwindpy.plotting.spiral.InitialSpiralEdges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralFilterThresholds.html">solarwindpy.plotting.spiral.SpiralFilterThresholds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMesh.html">solarwindpy.plotting.spiral.SpiralMesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMeshBinID.html">solarwindpy.plotting.spiral.SpiralMeshBinID</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html">solarwindpy.plotting.spiral.SpiralPlot2D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.plotting.spiral</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-plotting-spiral">
+<h1>solarwindpy.plotting.spiral<a class="headerlink" href="#solarwindpy-plotting-spiral" title="Link to this heading"></a></h1>
+<p>Spiral mesh plots and associated binning utilities.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_bin_number_with_numba</span></code></a>(mesh, x, y)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.get_counts_per_bin.html#solarwindpy.plotting.spiral.get_counts_per_bin" title="solarwindpy.plotting.spiral.get_counts_per_bin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_per_bin</span></code></a>(bins, x, y)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.InitialSpiralEdges.html#solarwindpy.plotting.spiral.InitialSpiralEdges" title="solarwindpy.plotting.spiral.InitialSpiralEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InitialSpiralEdges</span></code></a>(x, y)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralFilterThresholds.html#solarwindpy.plotting.spiral.SpiralFilterThresholds" title="solarwindpy.plotting.spiral.SpiralFilterThresholds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralFilterThresholds</span></code></a>(density, size)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh" title="solarwindpy.plotting.spiral.SpiralMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralMesh</span></code></a>(x, y, initial_xedges, initial_yedges)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMeshBinID.html#solarwindpy.plotting.spiral.SpiralMeshBinID" title="solarwindpy.plotting.spiral.SpiralMeshBinID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralMeshBinID</span></code></a>(id, fill, visited)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D" title="solarwindpy.plotting.spiral.SpiralPlot2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralPlot2D</span></code></a>(x, y[, z, logx, logy, ...])</p></td>
+<td><p>2D spiral plotting with adaptive mesh refinement.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InitialSpiralEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">x</span></span></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">y</span></span></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpiralMeshBinID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visited</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">fill</span></span></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">id</span></span></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">visited</span></span></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpiralFilterThresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">density</span></span></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">size</span></span></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_counts_per_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#get_counts_per_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calculate_bin_number_with_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#calculate_bin_number_with_numba"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpiralMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_xedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_yedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_per_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_xedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_yedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_per_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bin_id</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cat</span></span></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.Categorical</span></code> version of <cite>bin_id</cite>, with fill bin removed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_edges</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_per_bin</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cell_filter_thresholds</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cell_filter</span></span></dt>
+<dd><p>Boolean <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code> identifying properly filled mesh cells.</p>
+<p>Series selects mesh cells that meet density and area criteria specified
+by <code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh_cell_filter_thresholds()</span></code>.</p>
+<p class="rubric">Notes</p>
+<p>Neither <cite>density</cite> nor <cite>size</cite> convert log-scale edges into linear scale.
+Doing so would overweight the area of mesh cells at larger values on a
+given axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_cell_filter_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.set_cell_filter_thresholds"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set or update the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mesh_cell_filter_thresholds()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density</strong> (<em>scalar</em>) – The density quantile above which we want to select bins, e.g.
+above the 0.01 quantile. This ensures that each bin meets some
+sufficient fill factor.</p></li>
+<li><p><strong>size</strong> (<em>scalar</em>) – The size quantile below which we want to select bins, e.g.
+below the 0.99 quantile. This ensures that the bin isn’t so large
+that it will appear as an outlier.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_initial_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xedges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.set_initial_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_min_per_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.set_min_per_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">initialize_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.initialize_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_one_spiral_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_per_bin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.process_one_spiral_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">generate_mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.generate_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calculate_bin_number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.calculate_bin_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">place_spectra_in_mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.place_spectra_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">build_cat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralMesh.build_cat"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpiralPlot2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PlotWithZdata</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CbarMaker</span></code></p>
+<p>2D spiral plotting with adaptive mesh refinement.</p>
+<p class="rubric">Examples</p>
+<p>splot = SpiralPlot2D(…)
+splot.initialize_mesh()</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_bins</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grouped</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Aggregate the z-values into their bins.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">build_grouped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.build_grouped"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calc_initial_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.calc_initial_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">initialize_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.initialize_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set the min (lower) and max (upper) counts per bin.</p>
+<p>This limit is applied after the <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby.agg()</span></code> is run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.plot_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Make a contour plot on <cite>ax</cite> using <cite>ax.contour</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>mpl.axes.Axes</em><em>, </em><em>None</em>) – If None, create an <cite>Axes</cite> instance from <cite>plt.subplots</cite>.</p></li>
+<li><p><strong>label_levels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add labels to contours with <cite>ax.clabel</cite>.</p></li>
+<li><p><strong>cbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, create color bar with <cite>labels.z</cite>.</p></li>
+<li><p><strong>limit_color_norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, limit the color range to 0.001 and 0.999 percentile range
+of the z-value, count or otherwise.</p></li>
+<li><p><strong>cbar_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>None</em>) – If not None, kwargs passed to <cite>self._make_cbar</cite>.</p></li>
+<li><p><strong>fcn</strong> (<em>FunctionType</em><em>, </em><em>None</em>) – Aggregation function. If None, automatically select in <a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg" title="solarwindpy.plotting.spiral.SpiralPlot2D.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p></li>
+<li><p><strong>plot_edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, plot the smoothed, extreme edges of the 2D histogram.</p></li>
+<li><p><strong>clabel_kwargs</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – If not None, dictionary of kwargs passed to <cite>ax.clabel</cite>.</p></li>
+<li><p><strong>skip_max_clbl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, don’t label the maximum contour. Primarily used when the maximum
+contour is, effectively, a point.</p></li>
+<li><p><strong>maximum_color</strong> – The color for the maximum of the PDF.</p></li>
+<li><p><strong>use_contourf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, use <cite>ax.contourf</cite>. Else use <cite>ax.contour</cite>.</p></li>
+<li><p><strong>gaussian_filter_std</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – If &gt; 0, apply <cite>scipy.ndimage.gaussian_filter</cite> to the z-values using the
+standard deviation specified by <cite>gaussian_filter_std</cite>.</p></li>
+<li><p><strong>gaussian_filter_kwargs</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – If not None and gaussian_filter_std &gt; 0, passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code></p></li>
+<li><p><strong>kwargs</strong> – Passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">ax.pcolormesh()</span></code>.
+If row or column normalized data, <cite>norm</cite> defaults to <cite>mpl.colors.Normalize(0, 1)</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
+<dd><p>Path for saving figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
+<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Build the plot save path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – If str and == “auto”, then build path from <cite>self.labels</cite>. Otherwise,
+assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p></li>
+<li><p><strong>add_scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add information about the axis scales to the end of the path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.plotting.scatter.Scatter.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.scatter.Scatter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

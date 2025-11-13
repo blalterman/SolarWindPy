@@ -1,0 +1,6 @@
+solarwindpy.core.ions.Ion
+=========================
+
+.. currentmodule:: solarwindpy.core.ions
+
+.. autoclass:: Ion

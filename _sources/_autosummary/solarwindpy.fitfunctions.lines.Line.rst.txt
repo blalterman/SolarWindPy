@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.lines.Line
+===================================
+
+.. currentmodule:: solarwindpy.fitfunctions.lines
+
+.. autoclass:: Line

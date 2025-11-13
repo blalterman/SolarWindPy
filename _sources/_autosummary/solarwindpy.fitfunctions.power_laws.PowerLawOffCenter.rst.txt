@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.power\_laws.PowerLawOffCenter
+======================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.power_laws
+
+.. autoclass:: PowerLawOffCenter

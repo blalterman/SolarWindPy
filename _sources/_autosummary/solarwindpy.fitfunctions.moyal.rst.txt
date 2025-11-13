@@ -1,0 +1,32 @@
+﻿solarwindpy.fitfunctions.moyal
+==============================
+
+.. automodule:: solarwindpy.fitfunctions.moyal
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Moyal
+   
+   
+
+   
+   
+   
+
+
+

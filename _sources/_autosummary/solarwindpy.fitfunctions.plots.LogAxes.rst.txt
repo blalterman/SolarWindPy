@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.plots.LogAxes
+======================================
+
+.. currentmodule:: solarwindpy.fitfunctions.plots
+
+.. autoclass:: LogAxes

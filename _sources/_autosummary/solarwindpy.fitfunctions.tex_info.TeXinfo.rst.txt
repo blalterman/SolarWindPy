@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.tex\_info.TeXinfo
+==========================================
+
+.. currentmodule:: solarwindpy.fitfunctions.tex_info
+
+.. autoclass:: TeXinfo

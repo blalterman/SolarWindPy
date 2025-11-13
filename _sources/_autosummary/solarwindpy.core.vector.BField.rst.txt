@@ -1,0 +1,6 @@
+solarwindpy.core.vector.BField
+==============================
+
+.. currentmodule:: solarwindpy.core.vector
+
+.. autoclass:: BField

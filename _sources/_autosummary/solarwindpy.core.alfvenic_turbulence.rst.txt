@@ -1,0 +1,33 @@
+﻿solarwindpy.core.alfvenic\_turbulence
+=====================================
+
+.. automodule:: solarwindpy.core.alfvenic_turbulence
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      AlfvenicTurbulence
+      AlvenicTurbAveraging
+   
+   
+
+   
+   
+   
+
+
+

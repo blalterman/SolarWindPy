@@ -1,0 +1,671 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.plotting.orbits.OrbitHist1D &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.plotting.orbits.OrbitHist2D" href="solarwindpy.plotting.orbits.OrbitHist2D.html" />
+    <link rel="prev" title="solarwindpy.plotting.orbits" href="solarwindpy.plotting.orbits.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.plotting.orbits.OrbitHist1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.OrbitHist2D.html">solarwindpy.plotting.orbits.OrbitHist2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.OrbitPlot.html">solarwindpy.plotting.orbits.OrbitPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.plotting.orbits.OrbitHist1D</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-plotting-orbits-orbithist1d">
+<h1>solarwindpy.plotting.orbits.OrbitHist1D<a class="headerlink" href="#solarwindpy-plotting-orbits-orbithist1d" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrbitHist1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orbit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/orbits.html#OrbitHist1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.orbits.OrbitPlot.html#solarwindpy.plotting.orbits.OrbitPlot" title="solarwindpy.plotting.orbits.OrbitPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitPlot</span></code></a>, <a class="reference internal" href="solarwindpy.Hist1D.html#solarwindpy.Hist1D" title="solarwindpy.plotting.hist1d.Hist1D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hist1D</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orbit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/orbits.html#OrbitHist1D.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a one-dimensional histogram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a>) – Data from which to create bins.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Values to aggregate in bins of <code class="docutils literal notranslate"><span class="pre">x</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, counts of
+<code class="docutils literal notranslate"><span class="pre">x</span></code> are used.</p></li>
+<li><p><strong>logx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, compute bins in logarithmic space.</p></li>
+<li><p><strong>axnorm</strong> (<em>{&quot;t&quot;</em><em>, </em><em>&quot;d&quot;</em><em>, </em><em>None}</em><em>, </em><em>optional</em>) – Normalisation applied to the histogram. <code class="docutils literal notranslate"><span class="pre">&quot;t&quot;</span></code> uses total
+counts and <code class="docutils literal notranslate"><span class="pre">&quot;d&quot;</span></code> yields a density.</p></li>
+<li><p><strong>clip_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Remove extreme values at the 0.001 and 0.999 percentiles before
+binning or aggregation.</p></li>
+<li><p><strong>nbins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – Binning strategy passed to <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges" title="(in NumPy v2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.histogram_bin_edges()</span></code></a> or
+<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html#pandas.cut" title="(in pandas v2.3.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.cut()</span></code></a> depending on the input type.</p></li>
+<li><p><strong>bin_precision</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Precision for decimal bin edges.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.agg">
+<span class="sig-name descname"><span class="pre">agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/orbits.html#OrbitHist1D.agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.agg" title="Link to this definition"></a></dt>
+<dd><p>Perform the aggregation along the agg axes.</p>
+<p>If either of the count limits specified in <cite>clim</cite> are not None, apply them.</p>
+<p><cite>fcn</cite> allows you to specify a specific function for aggregation. Otherwise,
+automatically choose “count” or “mean” based on the uniqueness of the aggregated
+values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.make_plot">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/orbits.html#OrbitHist1D.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.make_plot" title="Link to this definition"></a></dt>
+<dd><p>Make a plot on <cite>ax</cite>.</p>
+<p>If <cite>ax</cite> is None, create a <cite>mpl.subplots</cite> axis.</p>
+<p><cite>**kwargs</cite> passed directly to <cite>ax.plot</cite>.</p>
+<p><cite>drawstyle</cite> defaults to <cite>steps-mid</cite></p>
+<p><cite>fcn</cite> passed to <cite>self.agg</cite>. Only one function is allow b/c we
+don’t yet handle uncertainties.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.agg_axes">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">agg_axes</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.agg_axes" title="Link to this definition"></a></dt>
+<dd><p>The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.alim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.alim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.axnorm" title="Link to this definition"></a></dt>
+<dd><p>Data normalization in plot.</p>
+<p>Not <cite>mpl.colors.Normalize</cite> instance. That is passed as a <cite>kwarg</cite> to
+<cite>make_plot</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.calc_bins_intervals">
+<span class="sig-name descname"><span class="pre">calc_bins_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.calc_bins_intervals" title="Link to this definition"></a></dt>
+<dd><p>Calculate histogram bins.</p>
+<dl class="simple">
+<dt>nbins: int, str, array-like</dt><dd><p>If int, use np.histogram to calculate the bin edges.
+If str and nbins == “knuth”, use <cite>astropy.stats.knuth_bin_width</cite>
+to calculate optimal bin widths.
+If str and nbins != “knuth”, use <cite>np.histogram(data, bins=nbins)</cite>
+to calculate bins.
+If array-like, treat as bins.</p>
+</dd>
+<dt>precision: int or None</dt><dd><p>Precision at which to store intervals. If None, default to 3.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.categoricals">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">categoricals</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.categoricals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.clim">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.clim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.clip">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.clip" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.clip_data">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.clip_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.construct_cdf">
+<span class="sig-name descname"><span class="pre">construct_cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_plotted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.construct_cdf" title="Link to this definition"></a></dt>
+<dd><p>Convert the obsered measuremets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p><strong>cdf</strong> – “x” column is the value of the measuremnt.
+“position” column is the normalized position in the cdf.
+To plot the cdf:</p>
+<blockquote>
+<div><p>cdf.plot(x=”x”, y=”cdf”)</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.cut">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cut</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.cut" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.data">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.edges">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.edges" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.get_plotted_data_boolean_series">
+<span class="sig-name descname"><span class="pre">get_plotted_data_boolean_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.get_plotted_data_boolean_series" title="Link to this definition"></a></dt>
+<dd><p>Return a boolean <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> identifying each plotted measurement.</p>
+<p>The series shares the same index as the stored data. To align with a different
+index you may need to adjust the returned series.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.get_subset_above_threshold">
+<span class="sig-name descname"><span class="pre">get_subset_above_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.get_subset_above_threshold" title="Link to this definition"></a></dt>
+<dd><p>Get the subset of data above a given threshold using <cite>fcn</cite> to.</p>
+<p>aggregate. If <cite>axnorm</cite> set, this is used.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.grouped">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grouped</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.grouped" title="Link to this definition"></a></dt>
+<dd><p><cite>joint.groupby</cite> with appropriate axes passes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.intervals">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intervals</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.intervals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.joint" title="Link to this definition"></a></dt>
+<dd><p>Combines the categorical and continuous data for <cite>Groupby</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.labels">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.labels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.log">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.make_cut">
+<span class="sig-name descname"><span class="pre">make_cut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.make_cut" title="Link to this definition"></a></dt>
+<dd><p>Calculate the <cite>Categorical</cite> quantities for the aggregation axes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.orbit">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orbit</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.orbit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.path" title="Link to this definition"></a></dt>
+<dd><p>Path for saving figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_alim">
+<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_alim" title="Link to this definition"></a></dt>
+<dd><p>Set the minimum (lower) and maximum (upper) allowed value when.</p>
+<p>aggregating. This is different from <cite>clim</cite> because it uses the
+<cite>agg_fcn</cite>. So behavior will change based on <cite>axnorm</cite>, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_axnorm" title="Link to this definition"></a></dt>
+<dd><p>The method by which the gridded data is normalized.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d</p></td>
+<td><p>Density normalize</p></td>
+</tr>
+<tr class="row-odd"><td><p>t</p></td>
+<td><p>Total normalize</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_clim">
+<span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_clim" title="Link to this definition"></a></dt>
+<dd><p>Set the minimum (lower) and maximum (upper) allowed number of.</p>
+<p>counts per bin to return after calling <a class="reference internal" href="#solarwindpy.plotting.orbits.OrbitHist1D.agg" title="solarwindpy.plotting.orbits.OrbitHist1D.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_data">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_labels">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_labels" title="Link to this definition"></a></dt>
+<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
+<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_log">
+<span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_orbit">
+<span class="sig-name descname"><span class="pre">set_orbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_orbit" title="Link to this definition"></a></dt>
+<dd><p><cite>IntervalIndex</cite> corresponding to the times we want to subset the orbit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.set_path">
+<span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.set_path" title="Link to this definition"></a></dt>
+<dd><p>Set path information, accounting for orbit info.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.plotting.orbits.OrbitHist1D.take_data_in_yrange_across_x">
+<span class="sig-name descname"><span class="pre">take_data_in_yrange_across_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranges_by_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_x_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_y_bounds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.orbits.OrbitHist1D.take_data_in_yrange_across_x" title="Link to this definition"></a></dt>
+<dd><p>Take data within y-ranges across x-values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ranges_by_x</strong> (<em>iterable</em>) – An iterable with keys used to get the left and right bounds for the data
+and values used to get the top and bottom bounds for the data.</p></li>
+<li><p><strong>get_x_bounds</strong> (<em>function</em>) – First argument is one key of <cite>ranges_by_x</cite> and returns <cite>left, right</cite>.
+Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
+to whether or not the keys are <span class="math notranslate nohighlight">\(log(x)\)</span> or <span class="math notranslate nohighlight">\(x\)</span> in a manner
+that matches data stored in Hist2D.</p></li>
+<li><p><strong>get_y_bounds</strong> (<em>functions</em>) – Takes on value of <cite>ranges_by_x</cite> and returns <cite>top, bottom</cite>. Second argument
+Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
+to whether or not the keys are <span class="math notranslate nohighlight">\(log(y)\)</span> or <span class="math notranslate nohighlight">\(y\)</span> in a manner
+that matches data stored in Hist2D.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>taken</strong> – Array of indices for selecting data in interval.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray 1D</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.plotting.orbits.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.orbits" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.plotting.orbits.OrbitHist2D.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.orbits.OrbitHist2D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+solarwindpy.core.plasma.Plasma
+==============================
+
+.. currentmodule:: solarwindpy.core.plasma
+
+.. autoclass:: Plasma

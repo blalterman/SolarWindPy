@@ -1,0 +1,6 @@
+solarwindpy.core.base.Core
+==========================
+
+.. currentmodule:: solarwindpy.core.base
+
+.. autoclass:: Core

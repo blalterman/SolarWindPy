@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.base.Base
+=====================================
+
+.. currentmodule:: solarwindpy.solar_activity.base
+
+.. autoclass:: Base

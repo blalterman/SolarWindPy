@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.gaussians.GaussianLn
+=============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.gaussians
+
+.. autoclass:: GaussianLn

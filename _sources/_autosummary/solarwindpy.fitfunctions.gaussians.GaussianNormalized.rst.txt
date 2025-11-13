@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.gaussians.GaussianNormalized
+=====================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.gaussians
+
+.. autoclass:: GaussianNormalized

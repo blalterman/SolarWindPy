@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.InsufficientDataError
+===================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoexception:: InsufficientDataError

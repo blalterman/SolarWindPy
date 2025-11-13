@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.lines.LineXintercept
+=============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.lines
+
+.. autoclass:: LineXintercept

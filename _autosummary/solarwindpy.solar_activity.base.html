@@ -1,0 +1,797 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.solar_activity.base &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.solar_activity.base.ActivityIndicator" href="solarwindpy.solar_activity.base.ActivityIndicator.html" />
+    <link rel="prev" title="solarwindpy.fitfunctions.tex_info.TeXinfo" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.solar_activity.base</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.ActivityIndicator.html">solarwindpy.solar_activity.base.ActivityIndicator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.Base.html">solarwindpy.solar_activity.base.Base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.DataLoader.html">solarwindpy.solar_activity.base.DataLoader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.ID.html">solarwindpy.solar_activity.base.ID</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.IndicatorExtrema.html">solarwindpy.solar_activity.base.IndicatorExtrema</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.solar_activity.base</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-solar-activity-base">
+<h1>solarwindpy.solar_activity.base<a class="headerlink" href="#solarwindpy-solar-activity-base" title="Link to this heading"></a></h1>
+<p>Base classes for solar activity indicators.</p>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.base.ActivityIndicator.html#solarwindpy.solar_activity.base.ActivityIndicator" title="solarwindpy.solar_activity.base.ActivityIndicator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ActivityIndicator</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Base</span></code></a>()</p></td>
+<td><p>Abstract base class providing a logger interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.base.DataLoader.html#solarwindpy.solar_activity.base.DataLoader" title="solarwindpy.solar_activity.base.DataLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataLoader</span></code></a>(key, url)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.solar_activity.base.ID.html#solarwindpy.solar_activity.base.ID" title="solarwindpy.solar_activity.base.ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ID</span></code></a>(key)</p></td>
+<td><p>Container for identifying a particular data product.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.base.IndicatorExtrema.html#solarwindpy.solar_activity.base.IndicatorExtrema" title="solarwindpy.solar_activity.base.IndicatorExtrema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IndicatorExtrema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Base class for objects describing indicator extrema.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Base</span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class providing a logger interface.</p>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Container for identifying a particular data product.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ID.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Instantiate the identifier and set the corresponding URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Key that maps to a URL fragment in <code class="xref py py-attr docutils literal notranslate"><span class="pre">_trans_url</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">url</span></span></dt>
+<dd><p>URL specifying location from which data was downloaded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ID.set_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Set the identifier key and construct the download URL.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Initialize a data loader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Unique data identifier, typically from something like
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SIDC_ID</span></code>.</p></li>
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Full download URL for the data source.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_path</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.convert_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">url</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ctime</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">age</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.set_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.set_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_data_ctime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.get_data_ctime"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Determine when the current data set was created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Creation time inferred from the file name, or <code class="docutils literal notranslate"><span class="pre">1970-01-01</span></code> if no
+prior data are found.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v2.3.3)">pandas.Timestamp</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_data_age</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.get_data_age"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">maybe_update_stale_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.maybe_update_stale_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Download new data if the existing cache is stale.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActivityIndicator</span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ActivityIndicator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loader</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd><p>Shortcut to <cite>self.loader.data</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norm_by</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interpolated</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ActivityIndicator.set_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interpolate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ActivityIndicator.interpolate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Interpolate <code class="docutils literal notranslate"><span class="pre">source_data</span></code> onto <code class="docutils literal notranslate"><span class="pre">target_index</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a><em> or </em><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><em>pandas.DataFrame</em></a>) – Data with a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatetimeIndex</span></code></a> to interpolate.</p></li>
+<li><p><strong>target_index</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.3)"><em>pandas.DatetimeIndex</em></a>) – Target time axis for the interpolation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data interpolated onto <code class="docutils literal notranslate"><span class="pre">target_index</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_extrema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ActivityIndicator.set_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_normalization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#ActivityIndicator.run_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Normalize the indicator within each solar cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>norm_by</strong> (<em>{{&quot;max&quot;</em><em>, </em><em>&quot;zscore&quot;</em><em>, </em><em>&quot;feature-scale&quot;}}</em>) – Normalization algorithm to apply.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized values indexed by time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndicatorExtrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Base class for objects describing indicator extrema.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cycle_intervals</span></span></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.Interval</span></code> for rising and falling edges and full cycle.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extrema_bands</span></span></dt>
+<dd><p>Bands of time (<span class="math notranslate nohighlight">\(\Delta t\)</span>) about indicator extrema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.3.3)"><em>pandas.Timedelta</em></a>) – Window half-width used in <a class="reference internal" href="solarwindpy.solar_activity.base.IndicatorExtrema.html#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands" title="solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands"><code class="xref py py-meth docutils literal notranslate"><span class="pre">calculate_extrema_bands()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_or_set_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.load_or_set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calculate_intervals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.calculate_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Compute rising, falling, and full-cycle time intervals.</p>
+<p class="rubric">Notes</p>
+<p>The rising edge comes before the falling edge in time, i.e. it’s
+Min <code class="docutils literal notranslate"><span class="pre">N</span></code> followed by Max <code class="docutils literal notranslate"><span class="pre">N</span></code>. Also calculate intervals for a full
+SSN cycle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cut_spec_by_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tk_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.cut_spec_by_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Assign epochs to solar-cycle intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epoch</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a><em> or </em><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.3)"><em>pandas.DatetimeIndex</em></a>) – Data to cut.</p></li>
+<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <p>If provided, restricts the cut to a subset of interval types.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>None</p></td>
+<td><p>Cut by all available options.</p></td>
+</tr>
+<tr class="row-odd"><td><p>”Cycle”</p></td>
+<td><p>Cut by solar cycle</p></td>
+</tr>
+<tr class="row-even"><td><p>”Rise”</p></td>
+<td><p>Cut by rising edge</p></td>
+</tr>
+<tr class="row-odd"><td><p>”Fall”</p></td>
+<td><p>Cut by falling edge</p></td>
+</tr>
+<tr class="row-even"><td><p>”Edges”</p></td>
+<td><p>Cut by <cite>[“Fall”, “Rise”]</cite>.
+Exclusive option.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">&quot;Edges&quot;</span></code> is exclusive and will specify
+<code class="docutils literal notranslate"><span class="pre">[&quot;Fall&quot;,</span> <span class="pre">&quot;Rise&quot;]</span></code> alone.</p>
+</p></li>
+<li><p><strong>tk_cycles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.14)"><em>slice</em></a><em>, </em><em>optional</em>) – If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, a selector used to choose target solar cycles.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series of <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Interval.html#pandas.Interval" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Interval</span></code></a> objects labeling each epoch.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calculate_extrema_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'365d'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.calculate_extrema_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Return time windows around indicator extrema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>dt</strong><span class="classifier">str or pandas.Timedelta, optional</span></dt><dd><p>Half-width of the window around each extremum. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;365d&quot;</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>pandas.DataFrame</dt><dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> intervals for each cycle.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cut_about_extrema_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tk_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#IndicatorExtrema.cut_about_extrema_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bin epochs relative to extrema bands.</p>
+<p>Computed with <a class="reference internal" href="solarwindpy.solar_activity.base.IndicatorExtrema.html#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands" title="solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands"><code class="xref py py-meth docutils literal notranslate"><span class="pre">calculate_extrema_bands()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epoch</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.3.3)"><em>pandas.DatetimeIndex</em></a>) – Times to classify.</p></li>
+<li><p><strong>tk_cycles</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.14)"><em>slice</em></a><em>, </em><em>optional</em>) – Subset of cycles to use when cutting.</p></li>
+<li><p><strong>kind</strong> (<em>{{&quot;Min&quot;</em><em>, </em><em>&quot;Max&quot;}}</em><em>, </em><em>optional</em>) – Restrict the classification to minima or maxima.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A series of intervals and a mapped series of the form <code class="docutils literal notranslate"><span class="pre">&quot;N-Min&quot;</span></code> or
+<code class="docutils literal notranslate"><span class="pre">&quot;N-Max&quot;</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.fitfunctions.tex_info.TeXinfo.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.tex_info.TeXinfo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.solar_activity.base.ActivityIndicator.html" class="btn btn-neutral float-right" title="solarwindpy.solar_activity.base.ActivityIndicator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

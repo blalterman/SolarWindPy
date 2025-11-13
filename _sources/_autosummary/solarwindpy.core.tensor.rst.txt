@@ -1,0 +1,32 @@
+﻿solarwindpy.core.tensor
+=======================
+
+.. automodule:: solarwindpy.core.tensor
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Tensor
+   
+   
+
+   
+   
+   
+
+
+

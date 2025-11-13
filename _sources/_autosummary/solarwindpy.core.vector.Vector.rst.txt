@@ -1,0 +1,6 @@
+solarwindpy.core.vector.Vector
+==============================
+
+.. currentmodule:: solarwindpy.core.vector
+
+.. autoclass:: Vector

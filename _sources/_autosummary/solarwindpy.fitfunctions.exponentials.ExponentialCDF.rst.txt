@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.exponentials.ExponentialCDF
+====================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.exponentials
+
+.. autoclass:: ExponentialCDF

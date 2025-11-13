@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.base.IndicatorExtrema
+=================================================
+
+.. currentmodule:: solarwindpy.solar_activity.base
+
+.. autoclass:: IndicatorExtrema

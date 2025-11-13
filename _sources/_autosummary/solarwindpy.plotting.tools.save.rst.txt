@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.save
+===============================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: save

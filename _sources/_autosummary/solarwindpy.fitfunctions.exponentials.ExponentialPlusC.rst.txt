@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.exponentials.ExponentialPlusC
+======================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.exponentials
+
+.. autoclass:: ExponentialPlusC

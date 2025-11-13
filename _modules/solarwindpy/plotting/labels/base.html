@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.labels.base &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>solarwindpy.plotting.labels.base &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="../../../../_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -651,12 +651,12 @@
 
 
 <div class="viewcode-block" id="Base">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.Base">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.Base">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all label objects.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Base.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.Base.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.Base.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the logger.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span></div>
@@ -715,7 +715,7 @@
 
 
 <div class="viewcode-block" id="TeXlabel">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TeXlabel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a LaTeX label from measurement, component and species information.</span>
 
@@ -729,7 +729,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TeXlabel.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcs0</span><span class="p">,</span> <span class="n">mcs1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axnorm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_line_for_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
 
@@ -787,7 +787,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axnorm</span>
 
 <div class="viewcode-block" id="TeXlabel.set_mcs">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.set_mcs">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.set_mcs">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_mcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcs0</span><span class="p">,</span> <span class="n">mcs1</span><span class="p">):</span>
         <span class="n">mcs0_</span> <span class="o">=</span> <span class="n">MCS</span><span class="p">(</span><span class="o">*</span><span class="n">mcs0</span><span class="p">)</span>
 
@@ -800,13 +800,13 @@
 
 
 <div class="viewcode-block" id="TeXlabel.set_new_line_for_units">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.set_new_line_for_units">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.set_new_line_for_units">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_new_line_for_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_new_line_for_units</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TeXlabel.set_axnorm">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.set_axnorm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -816,7 +816,7 @@
 
 
 <div class="viewcode-block" id="TeXlabel.make_species">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.make_species">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.make_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Basic substitution of any species within a species string if the.</span>
 
@@ -957,7 +957,7 @@
         <span class="k">return</span> <span class="n">tex</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">with_units</span>
 
 <div class="viewcode-block" id="TeXlabel.build_label">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.plotting.labels.TeXlabel.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.base.html#solarwindpy.TeXlabel.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct the complete label.&quot;&quot;&quot;</span>
         <span class="n">mcs0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcs0</span>

@@ -1,0 +1,34 @@
+﻿solarwindpy.fitfunctions.plots
+==============================
+
+.. automodule:: solarwindpy.fitfunctions.plots
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      AxesLabels
+      FFPlot
+      LogAxes
+   
+   
+
+   
+   
+   
+
+
+

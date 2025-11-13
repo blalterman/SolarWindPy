@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.calculate\_nrows\_ncols
+==================================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: calculate_nrows_ncols

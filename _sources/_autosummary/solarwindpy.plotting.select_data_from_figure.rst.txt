@@ -1,0 +1,33 @@
+﻿solarwindpy.plotting.select\_data\_from\_figure
+===============================================
+
+.. automodule:: solarwindpy.plotting.select_data_from_figure
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      DateAxes
+      SelectFromPlot2D
+   
+   
+
+   
+   
+   
+
+
+

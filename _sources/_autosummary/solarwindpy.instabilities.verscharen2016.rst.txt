@@ -1,0 +1,40 @@
+﻿solarwindpy.instabilities.verscharen2016
+========================================
+
+.. automodule:: solarwindpy.instabilities.verscharen2016
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      beta_ani_inst
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      StabilityCondition
+      StabilityContours
+   
+   
+
+   
+   
+   
+
+
+

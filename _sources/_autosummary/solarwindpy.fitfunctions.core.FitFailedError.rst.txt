@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.FitFailedError
+============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoexception:: FitFailedError

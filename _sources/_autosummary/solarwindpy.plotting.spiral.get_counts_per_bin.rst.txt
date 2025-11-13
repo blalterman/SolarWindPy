@@ -1,0 +1,6 @@
+solarwindpy.plotting.spiral.get\_counts\_per\_bin
+=================================================
+
+.. currentmodule:: solarwindpy.plotting.spiral
+
+.. autofunction:: get_counts_per_bin

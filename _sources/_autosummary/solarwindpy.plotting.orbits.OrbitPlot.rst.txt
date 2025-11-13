@@ -1,0 +1,6 @@
+solarwindpy.plotting.orbits.OrbitPlot
+=====================================
+
+.. currentmodule:: solarwindpy.plotting.orbits
+
+.. autoclass:: OrbitPlot

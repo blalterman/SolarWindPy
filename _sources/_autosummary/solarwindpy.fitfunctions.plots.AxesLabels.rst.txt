@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.plots.AxesLabels
+=========================================
+
+.. currentmodule:: solarwindpy.fitfunctions.plots
+
+.. autoclass:: AxesLabels

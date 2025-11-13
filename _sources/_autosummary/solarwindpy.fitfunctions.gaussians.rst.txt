@@ -1,0 +1,34 @@
+﻿solarwindpy.fitfunctions.gaussians
+==================================
+
+.. automodule:: solarwindpy.fitfunctions.gaussians
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Gaussian
+      GaussianLn
+      GaussianNormalized
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+solarwindpy.core.units\_constants.Units
+=======================================
+
+.. currentmodule:: solarwindpy.core.units_constants
+
+.. autoclass:: Units

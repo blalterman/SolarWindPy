@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.ions module &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>solarwindpy.core.ions module &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -28,8 +28,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.core.plasma module" href="solarwindpy.core.plasma.html" />
-    <link rel="prev" title="solarwindpy.core.base module" href="solarwindpy.core.base.html" />
    
   <style>
     .sidebar-custom-info {
@@ -81,18 +79,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -349,7 +337,7 @@ Vector and Tensor objects.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/ions.html#Ion"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.core.base.Base.html#solarwindpy.core.base.Base" title="solarwindpy.core.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
 <p>Container for a single ion species.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -454,25 +442,25 @@ based on the species identifier using standard atomic masses.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
 <dd><p>Get the ion’s velocity as a Vector.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Vector</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em></dt>
 <dd><p>Alias for velocity property.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermal_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermal_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.tensor.Tensor.html#solarwindpy.core.tensor.Tensor" title="solarwindpy.core.tensor.Tensor"><span class="pre">Tensor</span></a></em></dt>
 <dd><p>Get the ion’s thermal speed as a Tensor.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">w</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">w</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.tensor.Tensor.html#solarwindpy.core.tensor.Tensor" title="solarwindpy.core.tensor.Tensor"><span class="pre">Tensor</span></a></em></dt>
 <dd><p>Alias for thermal_speed property.</p>
 </dd></dl>
 
@@ -599,12 +587,12 @@ based on the species identifier using standard atomic masses.</p>
 <dl class="py property">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Wk</span></span></dt>
-<dd><p>Shortcut to <code class="xref py py-attr docutils literal notranslate"><span class="pre">kinetic_energy_flux</span></code>.</p>
+<dd><p>Shortcut to <a class="reference internal" href="../_autosummary/solarwindpy.core.ions.Ion.html#solarwindpy.core.ions.Ion.kinetic_energy_flux" title="solarwindpy.core.ions.Ion.kinetic_energy_flux"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kinetic_energy_flux</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Constants</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em></dt>
 <dd><p>Physical constants.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -691,7 +679,7 @@ based on the species identifier using standard atomic masses.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Units</span></em></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_autosummary/solarwindpy.core.units_constants.Units.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em></dt>
 <dd><p>Units conversion factors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -710,10 +698,7 @@ based on the species identifier using standard atomic masses.</p>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.core.base.html" class="btn btn-neutral float-left" title="solarwindpy.core.base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.core.plasma.html" class="btn btn-neutral float-right" title="solarwindpy.core.plasma module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

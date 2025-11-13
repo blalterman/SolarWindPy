@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.exponentials module &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>solarwindpy.fitfunctions.exponentials module &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -28,8 +28,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.fitfunctions.gaussians module" href="solarwindpy.fitfunctions.gaussians.html" />
-    <link rel="prev" title="solarwindpy.fitfunctions.core module" href="solarwindpy.fitfunctions.core.html" />
    
   <style>
     .sidebar-custom-info {
@@ -81,18 +79,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="modules.html">solarwindpy</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.html">solarwindpy package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -345,13 +333,13 @@
 <h1>solarwindpy.fitfunctions.exponentials module<a class="headerlink" href="#solarwindpy-fitfunctions-exponentials-module" title="Link to this heading"></a></h1>
 <p>Fit functions for exponential models.</p>
 <p>Classes in this module implement exponential decay and related forms
-using the <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> API.
+using the <a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> API.
 They provide reasonable starting parameters and formatted LaTeX output
 for visualization.</p>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Exponential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/exponentials.html#Exponential"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
 <p>Assuming that you don’t want special formatting, call order is:</p>
 <blockquote>
 <div><p>fit_function = FitFunction(function, TeX_string)
@@ -377,11 +365,11 @@ Shape must match xobs.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></dt><dd><p>Execute the fitting procedure</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential.make_fit" title="solarwindpy.fitfunctions.exponentials.Exponential.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></dt><dd><p>Access optimized parameters</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential.popt" title="solarwindpy.fitfunctions.exponentials.Exponential.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></dt><dd><p>Calculate coefficient of determination</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential.rsq" title="solarwindpy.fitfunctions.exponentials.Exponential.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
 </dd>
 </dl>
 </div>
@@ -606,7 +594,7 @@ identify failed fits after the fact.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExponentialPlusC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/exponentials.html#ExponentialPlusC"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
 <p>Assuming that you don’t want special formatting, call order is:</p>
 <blockquote>
 <div><p>fit_function = FitFunction(function, TeX_string)
@@ -632,11 +620,11 @@ Shape must match xobs.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></dt><dd><p>Execute the fitting procedure</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.make_fit" title="solarwindpy.fitfunctions.exponentials.ExponentialPlusC.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></dt><dd><p>Access optimized parameters</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.popt" title="solarwindpy.fitfunctions.exponentials.ExponentialPlusC.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></dt><dd><p>Calculate coefficient of determination</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.rsq" title="solarwindpy.fitfunctions.exponentials.ExponentialPlusC.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
 </dd>
 </dl>
 </div>
@@ -861,7 +849,7 @@ identify failed fits after the fact.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExponentialCDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/exponentials.html#ExponentialCDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
 <p>Assuming that you don’t want special formatting, call order is:</p>
 <blockquote>
 <div><p>fit_function = FitFunction(function, TeX_string)
@@ -887,11 +875,11 @@ Shape must match xobs.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></dt><dd><p>Execute the fitting procedure</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.make_fit" title="solarwindpy.fitfunctions.exponentials.ExponentialCDF.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></dt><dd><p>Access optimized parameters</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.popt" title="solarwindpy.fitfunctions.exponentials.ExponentialCDF.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></dt><dd><p>Calculate coefficient of determination</p>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.rsq" title="solarwindpy.fitfunctions.exponentials.ExponentialCDF.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
 </dd>
 </dl>
 </div>
@@ -1135,10 +1123,7 @@ identify failed fits after the fact.</p></li>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.fitfunctions.core.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.core module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.fitfunctions.gaussians.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.gaussians module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

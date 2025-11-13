@@ -1,0 +1,478 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.TeXlabel &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.core.plasma" href="solarwindpy.core.plasma.html" />
+    <link rel="prev" title="solarwindpy.Hist2D" href="solarwindpy.Hist2D.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.Plasma.html">solarwindpy.Plasma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.Hist1D.html">solarwindpy.Hist1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.Hist2D.html">solarwindpy.Hist2D</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.TeXlabel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#solarwindpy.TeXlabel"><code class="docutils literal notranslate"><span class="pre">TeXlabel</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.TeXlabel</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-texlabel">
+<h1>solarwindpy.TeXlabel<a class="headerlink" href="#solarwindpy-texlabel" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeXlabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Create a LaTeX label from measurement, component and species information.</p>
+<p>The object can be used directly in plotting routines. String
+representation returns the formatted label with units.</p>
+<p class="rubric">Notes</p>
+<p>Comparison operators and hashing use <code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> of the object so two
+labels representing the same quantity compare equal.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.__init__" title="Link to this definition"></a></dt>
+<dd><p>Instantiate the label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mcs0</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">m</span></code> is the measurement, <code class="docutils literal notranslate"><span class="pre">c</span></code> the
+component and <code class="docutils literal notranslate"><span class="pre">s</span></code> the species. Empty strings are allowed for
+components or species.</p></li>
+<li><p><strong>mcs1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Denominator for fraction style labels. Units are compared and set
+to dimensionless when equal.</p></li>
+<li><p><strong>axnorm</strong> (<em>{&quot;c&quot;</em><em>, </em><em>&quot;r&quot;</em><em>, </em><em>&quot;t&quot;</em><em>, </em><em>&quot;d&quot;}</em><em>, </em><em>optional</em>) – Axis normalization used when building colorbar labels.</p></li>
+<li><p><strong>new_line_for_units</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> a newline separates label and units.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.mcs0">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs0</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.mcs0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.mcs1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs1</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.mcs1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.new_line_for_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.tex">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.tex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.with_units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.with_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.path">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.axnorm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.set_mcs">
+<span class="sig-name descname"><span class="pre">set_mcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_mcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.set_mcs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.set_new_line_for_units">
+<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.set_new_line_for_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.set_axnorm">
+<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.set_axnorm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.make_species">
+<span class="sig-name descname"><span class="pre">make_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.make_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.make_species" title="Link to this definition"></a></dt>
+<dd><p>Basic substitution of any species within a species string if the.</p>
+<p>species has a substitution in the ion_species dictionary.</p>
+<p class="rubric">Notes</p>
+<p>This equation might only work because <span class="math notranslate nohighlight">\(a\rightarrow\alpha\)</span> is
+the only actual translation made and, based on lexsort order, would be
+the first group. This function may need to be updated for more complex
+patterns, e.g., if we translate something like
+<span class="math notranslate nohighlight">\(\mathrm{He}^{2+}\rightarrow\text{He}^{2+}\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.TeXlabel.build_label" title="Link to this definition"></a></dt>
+<dd><p>Construct the complete label.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.TeXlabel.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.TeXlabel.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.Hist2D.html" class="btn btn-neutral float-left" title="solarwindpy.Hist2D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.core.plasma.html" class="btn btn-neutral float-right" title="solarwindpy.core.plasma" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

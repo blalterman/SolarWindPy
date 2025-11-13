@@ -1,0 +1,6 @@
+solarwindpy.plotting.spiral.SpiralMesh
+======================================
+
+.. currentmodule:: solarwindpy.plotting.spiral
+
+.. autoclass:: SpiralMesh

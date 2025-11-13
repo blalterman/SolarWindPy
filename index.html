@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>SolarWindPy Documentation &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>SolarWindPy Documentation &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -315,10 +315,11 @@ scientific accuracy.</p>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#quick-start">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#basic-plasma-analysis">Basic Plasma Analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#working-with-multiindex-dataframes">Working with MultiIndex DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#accessing-data">Accessing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#physics-calculations">Physics Calculations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#data-visualization">Data Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#error-handling-and-missing-data">Error Handling and Missing Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#non-linear-fitting">Non-Linear Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#next-steps">Next Steps</a></li>
 </ul>
@@ -337,10 +338,202 @@ scientific accuracy.</p>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/modules.html">solarwindpy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/solarwindpy.html">solarwindpy package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#top-level-api">Top-Level API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Plasma.html">solarwindpy.Plasma</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.Plasma.html#solarwindpy.Plasma"><code class="docutils literal notranslate"><span class="pre">Plasma</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Hist1D.html">solarwindpy.Hist1D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.Hist1D.html#solarwindpy.Hist1D"><code class="docutils literal notranslate"><span class="pre">Hist1D</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Hist2D.html">solarwindpy.Hist2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.Hist2D.html#solarwindpy.Hist2D"><code class="docutils literal notranslate"><span class="pre">Hist2D</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.TeXlabel.html">solarwindpy.TeXlabel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.TeXlabel.html#solarwindpy.TeXlabel"><code class="docutils literal notranslate"><span class="pre">TeXlabel</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#core-module">Core Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.plasma.html">solarwindpy.core.plasma</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.plasma.html#propoded-updates">Propoded Updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html">solarwindpy.core.plasma.Plasma</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.ions.html">solarwindpy.core.ions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.ions.Ion.html">solarwindpy.core.ions.Ion</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.base.html">solarwindpy.core.base</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.base.Base.html">solarwindpy.core.base.Base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.base.Core.html">solarwindpy.core.base.Core</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.vector.html">solarwindpy.core.vector</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.vector.BField.html">solarwindpy.core.vector.BField</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.vector.Vector.html">solarwindpy.core.vector.Vector</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.tensor.html">solarwindpy.core.tensor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.tensor.Tensor.html">solarwindpy.core.tensor.Tensor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.spacecraft.html">solarwindpy.core.spacecraft</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.spacecraft.Spacecraft.html">solarwindpy.core.spacecraft.Spacecraft</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.alfvenic_turbulence.html">solarwindpy.core.alfvenic_turbulence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.html">solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging.html">solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.units_constants.html">solarwindpy.core.units_constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.units_constants.Constants.html">solarwindpy.core.units_constants.Constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.core.units_constants.Units.html">solarwindpy.core.units_constants.Units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#plotting-module">Plotting Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.labels.available_labels.html">solarwindpy.plotting.labels.available_labels</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.scatter.Scatter.html">solarwindpy.plotting.scatter.Scatter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html">solarwindpy.plotting.spiral.calculate_bin_number_with_numba</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.get_counts_per_bin.html">solarwindpy.plotting.spiral.get_counts_per_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.InitialSpiralEdges.html">solarwindpy.plotting.spiral.InitialSpiralEdges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.SpiralFilterThresholds.html">solarwindpy.plotting.spiral.SpiralFilterThresholds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html">solarwindpy.plotting.spiral.SpiralMesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.SpiralMeshBinID.html">solarwindpy.plotting.spiral.SpiralMeshBinID</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html">solarwindpy.plotting.spiral.SpiralPlot2D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.orbits.OrbitHist1D.html">solarwindpy.plotting.orbits.OrbitHist1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.orbits.OrbitHist2D.html">solarwindpy.plotting.orbits.OrbitHist2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.orbits.OrbitPlot.html">solarwindpy.plotting.orbits.OrbitPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.build_ax_array_with_common_colorbar.html">solarwindpy.plotting.tools.build_ax_array_with_common_colorbar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.calculate_nrows_ncols.html">solarwindpy.plotting.tools.calculate_nrows_ncols</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.joint_legend.html">solarwindpy.plotting.tools.joint_legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.multipanel_figure_shared_cbar.html">solarwindpy.plotting.tools.multipanel_figure_shared_cbar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.save.html">solarwindpy.plotting.tools.save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.subplots.html">solarwindpy.plotting.tools.subplots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.select_data_from_figure.DateAxes.html">solarwindpy.plotting.select_data_from_figure.DateAxes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D.html">solarwindpy.plotting.select_data_from_figure.SelectFromPlot2D</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#fit-functions-module">Fit Functions Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.html">solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.FitBounds.html">solarwindpy.fitfunctions.core.FitBounds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.FitFunction.html">solarwindpy.fitfunctions.core.FitFunction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.FitFunctionMeta.html">solarwindpy.fitfunctions.core.FitFunctionMeta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.InitialGuessInfo.html">solarwindpy.fitfunctions.core.InitialGuessInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.Observations.html">solarwindpy.fitfunctions.core.Observations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.UsedRawObs.html">solarwindpy.fitfunctions.core.UsedRawObs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.FitFailedError.html">solarwindpy.fitfunctions.core.FitFailedError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.FitFunctionError.html">solarwindpy.fitfunctions.core.FitFunctionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.InsufficientDataError.html">solarwindpy.fitfunctions.core.InsufficientDataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.InvalidParameterError.html">solarwindpy.fitfunctions.core.InvalidParameterError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.gaussians.Gaussian.html">solarwindpy.fitfunctions.gaussians.Gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.gaussians.GaussianLn.html">solarwindpy.fitfunctions.gaussians.GaussianLn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.gaussians.GaussianNormalized.html">solarwindpy.fitfunctions.gaussians.GaussianNormalized</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html">solarwindpy.fitfunctions.exponentials.Exponential</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html">solarwindpy.fitfunctions.exponentials.ExponentialCDF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html">solarwindpy.fitfunctions.exponentials.ExponentialPlusC</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.power_laws.PowerLaw.html">solarwindpy.fitfunctions.power_laws.PowerLaw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.html">solarwindpy.fitfunctions.power_laws.PowerLawOffCenter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.power_laws.PowerLawPlusC.html">solarwindpy.fitfunctions.power_laws.PowerLawPlusC</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.moyal.Moyal.html">solarwindpy.fitfunctions.moyal.Moyal</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.lines.Line.html">solarwindpy.fitfunctions.lines.Line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html">solarwindpy.fitfunctions.lines.LineXintercept</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.trend_fits.Popt1DKeys.html">solarwindpy.fitfunctions.trend_fits.Popt1DKeys</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.trend_fits.TrendFit.html">solarwindpy.fitfunctions.trend_fits.TrendFit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.plots.AxesLabels.html">solarwindpy.fitfunctions.plots.AxesLabels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.plots.FFPlot.html">solarwindpy.fitfunctions.plots.FFPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.plots.LogAxes.html">solarwindpy.fitfunctions.plots.LogAxes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.tex_info.TeXinfo.html">solarwindpy.fitfunctions.tex_info.TeXinfo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#solar-activity-module">Solar Activity Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.ActivityIndicator.html">solarwindpy.solar_activity.base.ActivityIndicator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.Base.html">solarwindpy.solar_activity.base.Base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.DataLoader.html">solarwindpy.solar_activity.base.DataLoader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.ID.html">solarwindpy.solar_activity.base.ID</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.IndicatorExtrema.html">solarwindpy.solar_activity.base.IndicatorExtrema</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.plots.IndicatorPlot.html">solarwindpy.solar_activity.plots.IndicatorPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.plots.SSNPlot.html">solarwindpy.solar_activity.plots.SSNPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#instabilities-module">Instabilities Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.verscharen2016.html">solarwindpy.instabilities.verscharen2016</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.verscharen2016.beta_ani_inst.html">solarwindpy.instabilities.verscharen2016.beta_ani_inst</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.verscharen2016.StabilityCondition.html">solarwindpy.instabilities.verscharen2016.StabilityCondition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.verscharen2016.StabilityContours.html">solarwindpy.instabilities.verscharen2016.StabilityContours</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.beta_ani.html">solarwindpy.instabilities.beta_ani</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.beta_ani.BetaRPlot.html">solarwindpy.instabilities.beta_ani.BetaRPlot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#tools-module">Tools Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.tools.html">solarwindpy.tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.tools.html#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.tools.normal_parameters.html">solarwindpy.tools.normal_parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/solarwindpy.tools.swap_protons.html">solarwindpy.tools.swap_protons</a></li>
 </ul>
 </li>
 </ul>

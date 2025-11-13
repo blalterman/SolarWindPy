@@ -1,0 +1,6 @@
+solarwindpy.instabilities.verscharen2016.beta\_ani\_inst
+========================================================
+
+.. currentmodule:: solarwindpy.instabilities.verscharen2016
+
+.. autofunction:: beta_ani_inst

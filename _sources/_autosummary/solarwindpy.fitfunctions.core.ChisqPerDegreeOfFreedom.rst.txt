@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom
+=====================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoclass:: ChisqPerDegreeOfFreedom

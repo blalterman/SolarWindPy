@@ -1,0 +1,6 @@
+solarwindpy.core.spacecraft.Spacecraft
+======================================
+
+.. currentmodule:: solarwindpy.core.spacecraft
+
+.. autoclass:: Spacecraft

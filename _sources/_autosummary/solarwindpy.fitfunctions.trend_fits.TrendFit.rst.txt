@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.trend\_fits.TrendFit
+=============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.trend_fits
+
+.. autoclass:: TrendFit

@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.subplots
+===================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: subplots

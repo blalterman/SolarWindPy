@@ -1,0 +1,6 @@
+solarwindpy.core.tensor.Tensor
+==============================
+
+.. currentmodule:: solarwindpy.core.tensor
+
+.. autoclass:: Tensor

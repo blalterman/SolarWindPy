@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.build\_ax\_array\_with\_common\_colorbar
+===================================================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: build_ax_array_with_common_colorbar

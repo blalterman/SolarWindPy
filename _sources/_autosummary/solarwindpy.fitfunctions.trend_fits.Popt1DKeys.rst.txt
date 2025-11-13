@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.trend\_fits.Popt1DKeys
+===============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.trend_fits
+
+.. autoclass:: Popt1DKeys

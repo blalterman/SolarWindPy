@@ -1,0 +1,6 @@
+solarwindpy.tools.swap\_protons
+===============================
+
+.. currentmodule:: solarwindpy.tools
+
+.. autofunction:: swap_protons

@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.joint\_legend
+========================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: joint_legend

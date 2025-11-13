@@ -1,0 +1,34 @@
+﻿solarwindpy.fitfunctions.power\_laws
+====================================
+
+.. automodule:: solarwindpy.fitfunctions.power_laws
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      PowerLaw
+      PowerLawOffCenter
+      PowerLawPlusC
+   
+   
+
+   
+   
+   
+
+
+

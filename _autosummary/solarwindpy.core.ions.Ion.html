@@ -1,0 +1,731 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.core.ions.Ion &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.core.base" href="solarwindpy.core.base.html" />
+    <link rel="prev" title="solarwindpy.core.ions" href="solarwindpy.core.ions.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.plasma.html">solarwindpy.core.plasma</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.core.ions.html">solarwindpy.core.ions</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.core.ions.Ion</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.base.html">solarwindpy.core.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.vector.html">solarwindpy.core.vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.tensor.html">solarwindpy.core.tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.spacecraft.html">solarwindpy.core.spacecraft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.alfvenic_turbulence.html">solarwindpy.core.alfvenic_turbulence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.core.units_constants.html">solarwindpy.core.units_constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.core.ions.Ion</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-core-ions-ion">
+<h1>solarwindpy.core.ions.Ion<a class="headerlink" href="#solarwindpy-core-ions-ion" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/ions.html#Ion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.ions.Ion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.core.base.Base.html#solarwindpy.core.base.Base" title="solarwindpy.core.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Container for a single ion species.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – Data for the ion in the form <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">M</span></code> is the
+measurement type (<code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">w</span></code>) and <code class="docutils literal notranslate"><span class="pre">C</span></code> is the component.</p></li>
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Species identifier, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;p&quot;</span></code> for protons or <code class="docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code> for alpha
+particles.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.species">
+<span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#solarwindpy.core.ions.Ion.species" title="Link to this definition"></a></dt>
+<dd><p>The ion’s species name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/ions.html#Ion.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.ions.Ion.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize an Ion instance with plasma measurement data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><em>pandas.DataFrame</em></a>) – Ion measurement data with MultiIndex columns formatted as
+(“M”, “C”) where M is measurement type (n, v, w, T) and
+C is component (x, y, z, par, per, etc.).</p></li>
+<li><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Ion species identifier following standard conventions:
+- ‘p1’ or ‘p’ for protons
+- ‘a’ for alpha particles (He2+)
+- ‘o6’ for O6+ ions
+- Other species as needed</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Ion class provides access to fundamental plasma measurements:</p>
+<ul class="simple">
+<li><p>n: Number density [cm^-3]</p></li>
+<li><p>v: Velocity vector [km/s]</p></li>
+<li><p>w: Thermal speed [km/s] (assumes mw² = 2kT)</p></li>
+<li><p>T: Temperature [K] (derived from thermal speed)</p></li>
+</ul>
+<p>Physical constants and mass values are automatically assigned
+based on the species identifier using standard atomic masses.</p>
+<p class="rubric">Examples</p>
+<p>Create a proton ion from measurement data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proton_data</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proton</span> <span class="o">=</span> <span class="n">Ion</span><span class="p">(</span><span class="n">proton_data</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proton</span><span class="o">.</span><span class="n">species</span>
+<span class="go">&#39;p1&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.set_species">
+<span class="sig-name descname"><span class="pre">set_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/ions.html#Ion.set_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.ions.Ion.set_species" title="Link to this definition"></a></dt>
+<dd><p>Set the species of the ion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The species of the ion.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the species contains a ‘+’ character.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.set_data">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/core/ions.html#Ion.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.ions.Ion.set_data" title="Link to this definition"></a></dt>
+<dd><p>Set the data for the ion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>pd.DataFrame</em>) – The data to set for the ion.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the data column names are unrecognized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">species</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Get the ion species.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.velocity">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.velocity" title="Link to this definition"></a></dt>
+<dd><p>Get the ion’s velocity as a Vector.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.v">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><span class="pre">Vector</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.v" title="Link to this definition"></a></dt>
+<dd><p>Alias for velocity property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.thermal_speed">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thermal_speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.tensor.Tensor.html#solarwindpy.core.tensor.Tensor" title="solarwindpy.core.tensor.Tensor"><span class="pre">Tensor</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.thermal_speed" title="Link to this definition"></a></dt>
+<dd><p>Get the ion’s thermal speed as a Tensor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.w">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">w</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.tensor.Tensor.html#solarwindpy.core.tensor.Tensor" title="solarwindpy.core.tensor.Tensor"><span class="pre">Tensor</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.w" title="Link to this definition"></a></dt>
+<dd><p>Alias for thermal_speed property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.number_density">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.number_density" title="Link to this definition"></a></dt>
+<dd><p>Get the number density of the ion.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.n">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.n" title="Link to this definition"></a></dt>
+<dd><p>Alias for number_density property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.mass_density">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mass_density</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.mass_density" title="Link to this definition"></a></dt>
+<dd><p>Calculate the ion’s mass density.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.rho">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rho</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.rho" title="Link to this definition"></a></dt>
+<dd><p>Alias for mass_density property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.anisotropy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">anisotropy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.anisotropy" title="Link to this definition"></a></dt>
+<dd><p>Calculate temperature anisotropy R_T = p_⟂/p_∥.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temperature anisotropy.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.temperature">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">temperature</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.temperature" title="Link to this definition"></a></dt>
+<dd><p>Calculate temperature T = (m / (2 * k_B)) * w^2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temperature of the ion.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.pth">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.pth" title="Link to this definition"></a></dt>
+<dd><p>Calculate thermal pressure p_th = 0.5 * ρ * w^2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Thermal pressure.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.cs">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.cs" title="Link to this definition"></a></dt>
+<dd><p>Calculate the species’ sound speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sound speed of the ion species.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.specific_entropy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">specific_entropy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.specific_entropy" title="Link to this definition"></a></dt>
+<dd><p>Calculate the specific entropy S = p_th * ρ^(-γ).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Specific entropy of the ion.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.Series</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp. 11-100).
+<a class="reference external" href="https://doi.org/10.1007/978-94-009-7194-3_2">https://doi.org/10.1007/978-94-009-7194-3_2</a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.S">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">S</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.S" title="Link to this definition"></a></dt>
+<dd><p>Alias for specific_entropy property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.kinetic_energy_flux">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kinetic_energy_flux</span></span><a class="headerlink" href="#solarwindpy.core.ions.Ion.kinetic_energy_flux" title="Link to this definition"></a></dt>
+<dd><p>Calculate the kinetic energy flux.</p>
+<p>The kinetic energy flux is calculated as:</p>
+<div class="math notranslate nohighlight">
+\[W_k = \frac{1}{2} \rho v^3\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Kinetic energy flux.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.Wk">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Wk</span></span><a class="headerlink" href="#solarwindpy.core.ions.Ion.Wk" title="Link to this definition"></a></dt>
+<dd><p>Shortcut to <a class="reference internal" href="#solarwindpy.core.ions.Ion.kinetic_energy_flux" title="solarwindpy.core.ions.Ion.kinetic_energy_flux"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kinetic_energy_flux</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.constants">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.Constants.html#solarwindpy.core.units_constants.Constants" title="solarwindpy.core.units_constants.Constants"><span class="pre">Constants</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.constants" title="Link to this definition"></a></dt>
+<dd><p>Physical constants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Physical constants instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Constants</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.data">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.data" title="Link to this definition"></a></dt>
+<dd><p>Underlying DataFrame containing the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Data with MultiIndex columns.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.ions.Ion.head" title="Link to this definition"></a></dt>
+<dd><p>Return the first few rows of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>First few rows of the data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.logger">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><span class="pre">Logger</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger instance for this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Logger instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)">logging.Logger</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.mi_tuples">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mi_tuples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v2.3.3)"><span class="pre">MultiIndex</span></a></span></span><a class="headerlink" href="#solarwindpy.core.ions.Ion.mi_tuples" title="Link to this definition"></a></dt>
+<dd><p>Create a MultiIndex from tuples with appropriate names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>Tuple</em><em>[</em><em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>...</em><em>]</em>) – Tuples to create MultiIndex from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>MultiIndex created from tuples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MI</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.tail">
+<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.ions.Ion.tail" title="Link to this definition"></a></dt>
+<dd><p>Return the last few rows of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Last few rows of the data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.core.ions.Ion.units">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="solarwindpy.core.units_constants.Units.html#solarwindpy.core.units_constants.Units" title="solarwindpy.core.units_constants.Units"><span class="pre">Units</span></a></em><a class="headerlink" href="#solarwindpy.core.ions.Ion.units" title="Link to this definition"></a></dt>
+<dd><p>Units conversion factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Units conversion instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>uc.Units</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.core.ions.html" class="btn btn-neutral float-left" title="solarwindpy.core.ions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.core.base.html" class="btn btn-neutral float-right" title="solarwindpy.core.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

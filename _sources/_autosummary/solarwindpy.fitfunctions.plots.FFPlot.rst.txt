@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.plots.FFPlot
+=====================================
+
+.. currentmodule:: solarwindpy.fitfunctions.plots
+
+.. autoclass:: FFPlot

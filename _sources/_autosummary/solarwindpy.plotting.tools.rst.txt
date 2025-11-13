@@ -1,0 +1,36 @@
+﻿solarwindpy.plotting.tools
+==========================
+
+.. automodule:: solarwindpy.plotting.tools
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_ax_array_with_common_colorbar
+      calculate_nrows_ncols
+      joint_legend
+      multipanel_figure_shared_cbar
+      save
+      subplots
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

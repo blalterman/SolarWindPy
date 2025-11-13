@@ -1,0 +1,24 @@
+﻿solarwindpy.plotting.histograms
+===============================
+
+.. automodule:: solarwindpy.plotting.histograms
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

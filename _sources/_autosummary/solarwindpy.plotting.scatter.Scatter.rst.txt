@@ -1,0 +1,6 @@
+solarwindpy.plotting.scatter.Scatter
+====================================
+
+.. currentmodule:: solarwindpy.plotting.scatter
+
+.. autoclass:: Scatter

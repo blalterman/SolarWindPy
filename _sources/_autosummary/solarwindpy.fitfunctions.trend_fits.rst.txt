@@ -1,0 +1,33 @@
+﻿solarwindpy.fitfunctions.trend\_fits
+====================================
+
+.. automodule:: solarwindpy.fitfunctions.trend_fits
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Popt1DKeys
+      TrendFit
+   
+   
+
+   
+   
+   
+
+
+

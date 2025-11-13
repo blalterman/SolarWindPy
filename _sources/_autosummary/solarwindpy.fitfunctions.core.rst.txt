@@ -1,0 +1,48 @@
+﻿solarwindpy.fitfunctions.core
+=============================
+
+.. automodule:: solarwindpy.fitfunctions.core
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      ChisqPerDegreeOfFreedom
+      FitBounds
+      FitFunction
+      FitFunctionMeta
+      InitialGuessInfo
+      Observations
+      UsedRawObs
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      FitFailedError
+      FitFunctionError
+      InsufficientDataError
+      InvalidParameterError
+   
+   
+
+
+

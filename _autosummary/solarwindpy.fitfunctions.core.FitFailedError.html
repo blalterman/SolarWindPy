@@ -1,0 +1,412 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>solarwindpy.fitfunctions.core.FitFailedError &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
+  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
+
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9d75a5cc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.fitfunctions.core.FitFunctionError" href="solarwindpy.fitfunctions.core.FitFunctionError.html" />
+    <link rel="prev" title="solarwindpy.fitfunctions.core.UsedRawObs" href="solarwindpy.fitfunctions.core.UsedRawObs.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.html">solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitBounds.html">solarwindpy.fitfunctions.core.FitBounds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html">solarwindpy.fitfunctions.core.FitFunction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionMeta.html">solarwindpy.fitfunctions.core.FitFunctionMeta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InitialGuessInfo.html">solarwindpy.fitfunctions.core.InitialGuessInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.Observations.html">solarwindpy.fitfunctions.core.Observations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.UsedRawObs.html">solarwindpy.fitfunctions.core.UsedRawObs</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions.core.FitFailedError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionError.html">solarwindpy.fitfunctions.core.FitFunctionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html">solarwindpy.fitfunctions.core.InsufficientDataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InvalidParameterError.html">solarwindpy.fitfunctions.core.InvalidParameterError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.fitfunctions.core.FitFailedError</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-fitfunctions-core-fitfailederror">
+<h1>solarwindpy.fitfunctions.core.FitFailedError<a class="headerlink" href="#solarwindpy-fitfunctions-core-fitfailederror" title="Link to this heading"></a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFailedError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FitFailedError</span></span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/core.html#FitFailedError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFailedError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionError.html#solarwindpy.fitfunctions.core.FitFunctionError" title="solarwindpy.fitfunctions.core.FitFunctionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunctionError</span></code></a></p>
+<p>Raised when the fitting algorithm fails to converge.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFailedError.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFailedError.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFailedError.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFailedError.add_note" title="Link to this definition"></a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFailedError.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFailedError.args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.FitFailedError.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.FitFailedError.with_traceback" title="Link to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.fitfunctions.core.UsedRawObs.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.core.UsedRawObs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.fitfunctions.core.FitFunctionError.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.core.FitFunctionError" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

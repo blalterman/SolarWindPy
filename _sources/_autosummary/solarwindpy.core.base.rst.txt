@@ -1,0 +1,33 @@
+﻿solarwindpy.core.base
+=====================
+
+.. automodule:: solarwindpy.core.base
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Base
+      Core
+   
+   
+
+   
+   
+   
+
+
+

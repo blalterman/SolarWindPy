@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.plots.IndicatorPlot
+===============================================
+
+.. currentmodule:: solarwindpy.solar_activity.plots
+
+.. autoclass:: IndicatorPlot

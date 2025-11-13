@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Usage Guide &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>Usage Guide &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -80,10 +80,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#basic-plasma-analysis">Basic Plasma Analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#working-with-multiindex-dataframes">Working with MultiIndex DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-data">Accessing Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#physics-calculations">Physics Calculations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data-visualization">Data Visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-handling-and-missing-data">Error Handling and Missing Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-features">Advanced Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#non-linear-fitting">Non-Linear Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
 </ul>
@@ -310,12 +311,13 @@
 <li><p><a class="reference internal" href="#quick-start" id="id2">Quick Start</a></p></li>
 <li><p><a class="reference internal" href="#basic-plasma-analysis" id="id3">Basic Plasma Analysis</a></p></li>
 <li><p><a class="reference internal" href="#working-with-multiindex-dataframes" id="id4">Working with MultiIndex DataFrames</a></p></li>
-<li><p><a class="reference internal" href="#physics-calculations" id="id5">Physics Calculations</a></p></li>
-<li><p><a class="reference internal" href="#data-visualization" id="id6">Data Visualization</a></p></li>
-<li><p><a class="reference internal" href="#error-handling-and-missing-data" id="id7">Error Handling and Missing Data</a></p></li>
-<li><p><a class="reference internal" href="#advanced-features" id="id8">Advanced Features</a></p></li>
-<li><p><a class="reference internal" href="#best-practices" id="id9">Best Practices</a></p></li>
-<li><p><a class="reference internal" href="#next-steps" id="id10">Next Steps</a></p></li>
+<li><p><a class="reference internal" href="#accessing-data" id="id5">Accessing Data</a></p></li>
+<li><p><a class="reference internal" href="#physics-calculations" id="id6">Physics Calculations</a></p></li>
+<li><p><a class="reference internal" href="#data-visualization" id="id7">Data Visualization</a></p></li>
+<li><p><a class="reference internal" href="#error-handling-and-missing-data" id="id8">Error Handling and Missing Data</a></p></li>
+<li><p><a class="reference internal" href="#non-linear-fitting" id="id9">Non-Linear Fitting</a></p></li>
+<li><p><a class="reference internal" href="#best-practices" id="id10">Best Practices</a></p></li>
+<li><p><a class="reference internal" href="#next-steps" id="id11">Next Steps</a></p></li>
 </ul>
 </nav>
 <section id="overview">
@@ -394,113 +396,205 @@ measurements</p></li>
 </section>
 <section id="working-with-multiindex-dataframes">
 <h2><a class="toc-backref" href="#id4" role="doc-backlink">Working with MultiIndex DataFrames</a><a class="headerlink" href="#working-with-multiindex-dataframes" title="Link to this heading"></a></h2>
-<p>SolarWindPy uses a three-level MultiIndex structure:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access specific measurements</span>
-<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
-<span class="n">proton_velocity_x</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<p>SolarWindPy uses a three-level MultiIndex structure. The MultiIndex levels are:</p>
+<blockquote>
+<div><p>M: Measurement (n, v, w, b, etc.)
+C: Component (x, y, z for vectors, empty for scalars)
+S: Species (p1, p2, a, etc.)</p>
+</div></blockquote>
+</section>
+<section id="accessing-data">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Accessing Data</a><a class="headerlink" href="#accessing-data" title="Link to this heading"></a></h2>
+<p>Data can be accessed from specialized methods or from underlying containers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access measurements from plasma methods - RECOMMENDED</span>
+<span class="n">ndens</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span>
 
-<span class="c1"># The MultiIndex levels are:</span>
-<span class="c1"># M: Measurement (n, v, w, b, etc.)</span>
-<span class="c1"># C: Component (x, y, z for vectors, empty for scalars)</span>
-<span class="c1"># S: Species (p1, p2, a, etc.)</span>
+<span class="c1"># Access specific measurements from underlying data</span>
+<span class="n">ndens</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+
+<span class="c1"># Access measurements from ions</span>
+<span class="n">ndens</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Access measurements from ion data</span>
+<span class="n">ndens</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span>
+<span class="n">vpx</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="physics-calculations">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Physics Calculations</a><a class="headerlink" href="#physics-calculations" title="Link to this heading"></a></h2>
-<p>Calculate derived quantities:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Thermal speed (mw² = 2kT convention)</span>
-<span class="n">thermal_speed</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">thermal_speed</span><span class="p">()</span>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Physics Calculations</a><a class="headerlink" href="#physics-calculations" title="Link to this heading"></a></h2>
+<p>The Plasma class is structured to intelligently combine observations from across ions</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access the density for protons and alphas</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">number_density</span><span class="p">(</span><span class="s1">&#39;p1,a&#39;</span><span class="p">)</span>
+<span class="c1"># Caclculate the total proton + alpha density, using the shortcut method</span>
+<span class="n">n</span>  <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="s1">&#39;a+p1&#39;</span><span class="p">)</span>
 
-<span class="c1"># Plasma beta for protons</span>
+<span class="c1"># Access the proton and alpha velocities</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">velocity</span><span class="p">(</span><span class="s1">&#39;a,p1&#39;</span><span class="p">)</span>
+<span class="c1"># Calculate the center of mass velocity with the shortcut method</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="s1">&#39;a+p1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Access the magnetic field data</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">bfield</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">b</span> <span class="c1"># shortcut</span>
+
+<span class="c1"># Access the proton and alpha thermal speeds</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">thermal_speed</span><span class="p">(</span><span class="s1">&#39;a,p1&#39;</span><span class="p">)</span>
+<span class="c1"># The total thermal speed is physically ambiguous</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">&#39;a+p1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Thermal pressures</span>
+<span class="n">pth</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">pth</span><span class="p">(</span><span class="s1">&#39;a,p1&#39;</span><span class="p">)</span>
+<span class="c1"># Access the total pressure</span>
+<span class="n">pth</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">pth</span><span class="p">(</span><span class="s1">&#39;a+p1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Proton plasma beta</span>
 <span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span>
-
-<span class="c1"># Access ion properties directly</span>
-<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span>      <span class="c1"># Number density [cm^-3]</span>
-<span class="n">proton_velocity</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">v</span>     <span class="c1"># Velocity vector [km/s]</span>
-<span class="n">proton_temp</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">T</span>         <span class="c1"># Temperature [K]</span>
+<span class="c1"># Total beta</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1+a&#39;</span><span class="p">)</span>
+<span class="c1"># Both betas</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;a,p1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="data-visualization">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Data Visualization</a><a class="headerlink" href="#data-visualization" title="Link to this heading"></a></h2>
-<p>Use the plotting module for scientific visualizations:</p>
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Data Visualization</a><a class="headerlink" href="#data-visualization" title="Link to this heading"></a></h2>
+<p>Use the plotting module for scientific visualizations. The MultiIndex structure maps
+directly to plot labels and paths.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.plotting.labels</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">labels</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.plotting.labels</span><span class="w"> </span><span class="kn">import</span> <span class="n">TeXlabels</span>
 
 <span class="c1"># Create time series plot of proton density</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">proton_density</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">proton_density</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">proton_density</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">density</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Proton Density Time Series&#39;</span><span class="p">)</span>
+<span class="n">ndens</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="s1">&#39;a+p1&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ndens</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ndens</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p1+a&#39;</span><span class="p">)))</span> <span class="c1"># Density is a scalar</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Total Proton + Alpha Density Time Series&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="c1"># Scientific scatter plot with proper labels</span>
+<span class="c1"># Scatter plot with proper labels</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">vx</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
-<span class="n">temp</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">velocity_x</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">thermal_speed_par</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">vx</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="n">wpar</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span> <span class="n">wpar</span><span class="p">)</span>
+
+<span class="c1"># Create labels - note how MultiIndex maps directly to plot labels</span>
+<span class="n">xlbl</span> <span class="o">=</span> <span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">ylbl</span> <span class="o">=</span> <span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlbl</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylbl</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The labels include units automatically:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlbl</span> <span class="o">=</span> <span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">xlbl</span><span class="p">)</span>
+<span class="go">r&#39;v_{x;p_1} \; \left[\mathrm{km \, s^{-1}}\right]&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ylbl</span> <span class="o">=</span> <span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ylbl</span><span class="p">)</span>
+<span class="go">r&#39;w_{\parallel;p_1} \; \left[\mathrm{km \, s^{-1}}\right]&#39;</span>
+</pre></div>
+</div>
+<p>TeXlabels have built-in path methods for defining figure paths:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xlbl</span><span class="o">.</span><span class="n">path</span>
+<span class="go">Path(&#39;v_x_p1&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ylbl</span><span class="o">.</span><span class="n">path</span>
+<span class="go">Path(&#39;w_par_p1&#39;)</span>
+</pre></div>
+</div>
+<p>TeXlabels can generate normalized quantities and are unit-aware:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ratio_label</span> <span class="o">=</span> <span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ratio_label</span><span class="p">)</span>
+<span class="go">r&#39;v_{x;p_1} / w_{\parallel;p_1} \; \left[\#\right]&#39;</span>
+</pre></div>
+</div>
+<p>Create a 2D histogram using SolarWindPy aggregation tools:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a 2D histogram of the data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hist2D</span>
+
+<span class="n">beta</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
+<span class="n">h2d</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">logy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># calculate log-scaled y-bins</span>
+<span class="n">h2d</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xlbl</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">TeXlabel</span><span class="p">(</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">))</span>
+<span class="n">h2d</span><span class="o">.</span><span class="n">make_plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>SolarWindPy plotting tools have built-in path management that includes axis
+scales and plot normalizations:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h2d</span><span class="o">.</span><span class="n">path</span>
+<span class="go">Path(&#39;Hist2D/v_x_p1/beta_par_p1/linX-logY/count&#39;)</span>
+</pre></div>
+</div>
+<p>The path updates when you change normalization:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h2d</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>  <span class="c1"># Make the plot column-normalized</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h2d</span><span class="o">.</span><span class="n">path</span>
+<span class="go">Path(&#39;Hist2D/v_x_p1/beta_par_p1/linX-logY/Cnorm&#39;)</span>
+</pre></div>
+</div>
+<p>Show all available labels:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.plotting.labels</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">labels</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span><span class="o">.</span><span class="n">available_labels</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="error-handling-and-missing-data">
-<h2><a class="toc-backref" href="#id7" role="doc-backlink">Error Handling and Missing Data</a><a class="headerlink" href="#error-handling-and-missing-data" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Error Handling and Missing Data</a><a class="headerlink" href="#error-handling-and-missing-data" title="Link to this heading"></a></h2>
 <p>SolarWindPy follows scientific best practices:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Missing data represented as NaN (never 0 or -999)</span>
-<span class="n">data_with_gaps</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Missing data represented as NaN</span>
+<span class="n">data_without_gaps</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
 <span class="c1"># Check for physical constraints manually</span>
 <span class="c1"># Density should be positive</span>
-<span class="k">assert</span> <span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Density must be positive&quot;</span>
+<span class="k">assert</span> <span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s1">&#39;Density must be positive&#39;</span>
 
-<span class="c1"># Temperature should be positive</span>
+<span class="c1"># Thermal speeds should be positive</span>
 <span class="n">thermal_data</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span>
-<span class="k">assert</span> <span class="p">(</span><span class="n">thermal_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Thermal speeds must be positive&quot;</span>
+<span class="k">assert</span> <span class="p">(</span><span class="n">thermal_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s1">&#39;Thermal speeds must be positive&#39;</span>
 </pre></div>
 </div>
 </section>
-<section id="advanced-features">
-<h2><a class="toc-backref" href="#id8" role="doc-backlink">Advanced Features</a><a class="headerlink" href="#advanced-features" title="Link to this heading"></a></h2>
+<section id="non-linear-fitting">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Non-Linear Fitting</a><a class="headerlink" href="#non-linear-fitting" title="Link to this heading"></a></h2>
 <p>For more complex analyses:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit functions for statistical analysis</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
 
-<span class="c1"># Get thermal speed data for fitting</span>
-<span class="n">w_par</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">)</span>
-<span class="n">x_data</span> <span class="o">=</span> <span class="n">w_par</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># Convert to seconds</span>
-<span class="n">y_data</span> <span class="o">=</span> <span class="n">w_par</span><span class="o">.</span><span class="n">values</span>
+<span class="c1"># Get thermal speed data</span>
+<span class="n">w_par</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+
+<span class="c1"># Histogram data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hist1D</span>
+<span class="n">h1d</span> <span class="o">=</span> <span class="n">Hist1D</span><span class="p">(</span><span class="n">w_par</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">h1d</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">)))</span>
+
+<span class="c1"># Get aggregated data</span>
+<span class="n">agg</span> <span class="o">=</span> <span class="n">h1d</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span>
+
+<span class="c1"># Aggregated index is an IntervalIndex, but was previously monkey patched to address</span>
+<span class="c1"># a pandas pretty printing bug.</span>
+<span class="n">x_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
+<span class="n">y_data</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">values</span>
 
 <span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">)</span>
-<span class="n">fit</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
 
-<span class="c1"># Instability analysis</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.instabilities.verscharen2016</span><span class="w"> </span><span class="kn">import</span> <span class="n">beta_ani_inst</span>
-
-<span class="c1"># Calculate plasma betas</span>
-<span class="n">beta_par</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">par</span>
-<span class="n">beta_per</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="s1">&#39;p1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">per</span>
-
-<span class="c1"># Check instability threshold</span>
-<span class="n">instability_threshold</span> <span class="o">=</span> <span class="n">beta_ani_inst</span><span class="p">(</span><span class="n">beta_par</span><span class="p">)</span>
+<span class="c1"># Plot the resulting fit</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">TeXlabel</span><span class="p">((</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;par&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">)))</span>
+<span class="n">fit</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_raw_used_fit_resid</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="best-practices">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Best Practices</a><a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Best Practices</a><a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p><strong>Units</strong>: All internal calculations use SI units</p></li>
 <li><p><strong>Time</strong>: Use pandas DatetimeIndex for temporal data</p></li>
 <li><p><strong>Missing Data</strong>: Represent gaps as NaN, not fill values</p></li>
-<li><p><strong>Physics</strong>: Validate results against known constraints</p></li>
-<li><p><strong>Performance</strong>: Use vectorized operations with NumPy/Pandas</p></li>
+<li><p><strong>Built-In Aggregation</strong>: Use plasma methods to aggregate quantities where applicable</p></li>
 </ol>
 </section>
 <section id="next-steps">
-<h2><a class="toc-backref" href="#id10" role="doc-backlink">Next Steps</a><a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Next Steps</a><a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>See the <a class="reference internal" href="tutorial.html"><span class="doc">Tutorial</span></a> for detailed examples</p></li>
 <li><p>Browse the <a class="reference internal" href="api_reference.html"><span class="doc">API Reference</span></a> for complete function documentation</p></li>

@@ -1,0 +1,32 @@
+﻿solarwindpy.instabilities.beta\_ani
+===================================
+
+.. automodule:: solarwindpy.instabilities.beta_ani
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      BetaRPlot
+   
+   
+
+   
+   
+   
+
+
+

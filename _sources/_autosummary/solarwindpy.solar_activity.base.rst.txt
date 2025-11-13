@@ -1,0 +1,36 @@
+﻿solarwindpy.solar\_activity.base
+================================
+
+.. automodule:: solarwindpy.solar_activity.base
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      ActivityIndicator
+      Base
+      DataLoader
+      ID
+      IndicatorExtrema
+   
+   
+
+   
+   
+   
+
+
+

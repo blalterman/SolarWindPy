@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>API Reference &mdash; SolarWindPy 0.1.dev1+g34c5aa785 documentation</title>
+  <title>API Reference &mdash; SolarWindPy 0.1.dev1+gaea1983a0 documentation</title>
   <link rel="icon" type="image/x-icon" href="_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
@@ -20,13 +20,13 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e9d39dfa"></script>
+      <script src="_static/documentation_options.js?v=9d75a5cc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="solarwindpy" href="api/modules.html" />
+    <link rel="next" title="solarwindpy.Plasma" href="_autosummary/solarwindpy.Plasma.html" />
     <link rel="prev" title="Quickstart" href="tutorial/quickstart.html" />
    
   <style>
@@ -81,7 +81,62 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/modules.html">solarwindpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#top-level-api">Top-Level API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Plasma.html">solarwindpy.Plasma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Hist1D.html">solarwindpy.Hist1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.Hist2D.html">solarwindpy.Hist2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.TeXlabel.html">solarwindpy.TeXlabel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#core-module">Core Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.plasma.html">solarwindpy.core.plasma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.ions.html">solarwindpy.core.ions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.base.html">solarwindpy.core.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.vector.html">solarwindpy.core.vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.tensor.html">solarwindpy.core.tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.spacecraft.html">solarwindpy.core.spacecraft</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.alfvenic_turbulence.html">solarwindpy.core.alfvenic_turbulence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.core.units_constants.html">solarwindpy.core.units_constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#plotting-module">Plotting Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fit-functions-module">Fit Functions Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#solar-activity-module">Solar Activity Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#instabilities-module">Instabilities Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.verscharen2016.html">solarwindpy.instabilities.verscharen2016</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.instabilities.beta_ani.html">solarwindpy.instabilities.beta_ani</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tools-module">Tools Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/solarwindpy.tools.html">solarwindpy.tools</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -295,28 +350,177 @@
              
   <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
-<p>Complete API documentation for all modules, classes, and functions.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">solarwindpy</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/solarwindpy.html">solarwindpy package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/solarwindpy.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.core.html">solarwindpy.core package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.fitfunctions.html">solarwindpy.fitfunctions package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.instabilities.html">solarwindpy.instabilities package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.plotting.html">solarwindpy.plotting package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.scripts.html">solarwindpy.scripts package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.solar_activity.html">solarwindpy.solar_activity package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/solarwindpy.tools.html">solarwindpy.tools package</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="api/solarwindpy.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
+<p>Complete API documentation for all modules, classes, and functions in SolarWindPy.</p>
+<section id="top-level-api">
+<h2>Top-Level API<a class="headerlink" href="#top-level-api" title="Link to this heading"></a></h2>
+<p>Core classes and functions available at the package level.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/solarwindpy.Plasma.html#solarwindpy.Plasma" title="solarwindpy.Plasma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plasma</span></code></a>(data, *species[, spacecraft, ...])</p></td>
+<td><p>Container for multi-species plasma physics data and analysis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/solarwindpy.Hist1D.html#solarwindpy.Hist1D" title="solarwindpy.Hist1D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hist1D</span></code></a>(x[, y, logx, axnorm, clip_data, ...])</p></td>
+<td><p>Create 1D plot of <cite>x</cite>, optionally aggregating <cite>y</cite> in bins of <cite>x</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/solarwindpy.Hist2D.html#solarwindpy.Hist2D" title="solarwindpy.Hist2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hist2D</span></code></a>(x, y[, z, axnorm, logx, logy, ...])</p></td>
+<td><p>Create a 2D histogram with an optional z-value using an equal number.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/solarwindpy.TeXlabel.html#solarwindpy.TeXlabel" title="solarwindpy.TeXlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TeXlabel</span></code></a>(mcs0[, mcs1, axnorm, ...])</p></td>
+<td><p>Create a LaTeX label from measurement, component and species information.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="core-module">
+<h2>Core Module<a class="headerlink" href="#core-module" title="Link to this heading"></a></h2>
+<p>Main data structures, physics calculations, and fundamental classes for solar wind analysis.
+The core module provides the <a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a> container class and
+<a class="reference internal" href="_autosummary/solarwindpy.core.ions.Ion.html#solarwindpy.core.ions.Ion" title="solarwindpy.core.ions.Ion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ion</span></code></a> species class, along with vector/tensor operations
+and physical constants.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.plasma</span></code></p></td>
+<td><p>The Plasma class that contains all Ions, magnetic field, and spacecraft information.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.ions</span></code></p></td>
+<td><p>Contains Ion class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.base</span></code></p></td>
+<td><p>Contains in situ data Base and Core classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.vector</span></code></p></td>
+<td><p>A Vector class and subclasses.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.tensor</span></code></p></td>
+<td><p>Tensor class for storing quantities like thermal speed, pressure, and temperature.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.spacecraft</span></code></p></td>
+<td><p>Contais <a class="reference internal" href="_autosummary/solarwindpy.core.spacecraft.Spacecraft.html#solarwindpy.core.spacecraft.Spacecraft" title="solarwindpy.core.spacecraft.Spacecraft"><code class="xref py py-class docutils literal notranslate"><span class="pre">Spacecraft</span></code></a> class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.alfvenic_turbulence</span></code></p></td>
+<td><p>Alfvenic turbulence diagnostics using Elsasser variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.core.units_constants</span></code></p></td>
+<td><p>Definitions of common units and physical constants.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="plotting-module">
+<h2>Plotting Module<a class="headerlink" href="#plotting-module" title="Link to this heading"></a></h2>
+<p>Visualization tools for creating publication-quality scientific figures. Includes histogram
+classes with aggregation, scatter plots, scientific labels with automatic units, and helper
+functions for figure management.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.histograms</span></code></p></td>
+<td><p>Convenience accessors for histogram style plotters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.labels</span></code></p></td>
+<td><p>Tools for creating physical quantity plot labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.scatter</span></code></p></td>
+<td><p>Scatter plot utilities with optional color mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.spiral</span></code></p></td>
+<td><p>Spiral mesh plots and associated binning utilities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.orbits</span></code></p></td>
+<td><p>Plotting helpers specialized for solar wind orbits.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.tools</span></code></p></td>
+<td><p>Utility functions for common <a class="reference external" href="https://matplotlib.org/stable/index.html#module-matplotlib" title="(in Matplotlib v3.10.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">matplotlib</span></code></a> tasks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.select_data_from_figure</span></code></p></td>
+<td><p>Interactive selection utilities for plotted data.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="fit-functions-module">
+<h2>Fit Functions Module<a class="headerlink" href="#fit-functions-module" title="Link to this heading"></a></h2>
+<p>Statistical analysis and curve fitting tools for solar wind data. Provides parametric
+fit functions (Gaussian, exponential, power law, Moyal) with automatic parameter
+estimation, plotting utilities, and trend analysis.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.core</span></code></p></td>
+<td><p>Base classes used to implement specific fit functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.gaussians</span></code></p></td>
+<td><p>Gaussian-based fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.exponentials</span></code></p></td>
+<td><p>Fit functions for exponential models.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.power_laws</span></code></p></td>
+<td><p>Utilities for fitting power-law models.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.moyal</span></code></p></td>
+<td><p>Moyal distribution fit function for asymmetric peak fitting.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.lines</span></code></p></td>
+<td><p>Simple linear fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.trend_fits</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">trend_fits</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.plots</span></code></p></td>
+<td><p>Plotting utilities for <code class="xref py py-mod docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.tex_info</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="solar-activity-module">
+<h2>Solar Activity Module<a class="headerlink" href="#solar-activity-module" title="Link to this heading"></a></h2>
+<p>Tools for accessing and analyzing solar activity indices. Includes sunspot number data,
+LISIRD (LASP Interactive Solar Irradiance Data Center) access, and solar cycle analysis.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.base</span></code></p></td>
+<td><p>Base classes for solar activity indicators.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.plots</span></code></p></td>
+<td><p>Plotting helpers for solar activity indicators.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.sunspot_number</span></code></p></td>
+<td><p>Sunspot number data utilities.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.lisird</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="instabilities-module">
+<h2>Instabilities Module<a class="headerlink" href="#instabilities-module" title="Link to this heading"></a></h2>
+<p>Plasma instability analysis and threshold calculations. Includes temperature anisotropy
+instability thresholds based on Verscharen et al. (2016) and related analyses.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.instabilities.verscharen2016</span></code></p></td>
+<td><p>Instability thresholds from Verscharen et al. (2016).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.instabilities.beta_ani</span></code></p></td>
+<td><p>Convenience plotting helpers for anisotropy versus beta.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="tools-module">
+<h2>Tools Module<a class="headerlink" href="#tools-module" title="Link to this heading"></a></h2>
+<p>General utility functions and helper tools for data manipulation and analysis.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.tools</span></code></p></td>
+<td><p>Utility functions for manipulating solar wind data.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 
@@ -324,7 +528,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tutorial/quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="api/modules.html" class="btn btn-neutral float-right" title="solarwindpy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="_autosummary/solarwindpy.Plasma.html" class="btn btn-neutral float-right" title="solarwindpy.Plasma" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

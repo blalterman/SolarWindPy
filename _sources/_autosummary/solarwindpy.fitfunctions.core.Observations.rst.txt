@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.Observations
+==========================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoclass:: Observations

@@ -1,0 +1,33 @@
+﻿solarwindpy.solar\_activity.plots
+=================================
+
+.. automodule:: solarwindpy.solar_activity.plots
+   :no-index:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      IndicatorPlot
+      SSNPlot
+   
+   
+
+   
+   
+   
+
+
+

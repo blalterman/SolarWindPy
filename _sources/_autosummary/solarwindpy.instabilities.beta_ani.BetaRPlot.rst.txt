@@ -1,0 +1,6 @@
+solarwindpy.instabilities.beta\_ani.BetaRPlot
+=============================================
+
+.. currentmodule:: solarwindpy.instabilities.beta_ani
+
+.. autoclass:: BetaRPlot

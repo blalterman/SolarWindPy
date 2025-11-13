@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.core.InvalidParameterError
+===================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.core
+
+.. autoexception:: InvalidParameterError
