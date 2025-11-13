@@ -12,15 +12,18 @@ tags:
 authors:
   - name: B. L. Alterman
     orcid: 0000-0001-6673-3432
-    affiliation: Independent Scientist
-date: 2025-11-13
+    affiliation: 1
+affiliations:
+  - name: Independent Scientist
+    index: 1
+date: 13 November 2025
 bibliography: paper.bib
 ---
 
 # Summary
 
-The region of space within the Sun's envelope of influence is called the heliosphere.
-The field of heliophysics starts in the solar interior and extends out to the very local interstellar medium, just beyond the heliosphere.
+The region of space within the Sun's envelope of influence is called the heliosphere (the bubble of solar influence extending beyond the planets).
+The field of heliophysics (the study of the Sun and its influence throughout the solar system) starts in the solar interior and extends out to the very local interstellar medium, just beyond the heliosphere.
 The solar wind is a stream of charged particles that continuously flows away from the Sun, carrying, mass, energy, and momentum along with an embedded magnetic field.
 In short, it mediates the interaction of the Sun with the heliosphere and this is a feature shared by stars and their astrospheres more broadly.
 Changes in the solar wind are one source of space weather, which is a critical threat to our technological infrastructure on Earth and in space.
@@ -36,6 +39,7 @@ The table below cites key examples.
 Notably, there are several packages that support different elements of space physics, including magnetospheric data analysis (Pysat), integration of magnetospheric observations (SpacePy), and the retrieval and analysis of heliophysics timeseries data (pySpedas and PyTplot).
 Tools for the dedicated analysis of solar wind observations are noticeably absent.
 SolarWindPy fills this gap by providing a unified framework for analyzing solar wind observations in combination with relevant information about the spacecraft from which the observations were made.
+The package targets heliophysics researchers analyzing spacecraft observations, from graduate students learning plasma analysis to experienced scientists conducting multi-mission data studies.
 
 +----------+--------------------------------+---------------------------------------+
 | Library  | Purpose                        | Citation                              |
