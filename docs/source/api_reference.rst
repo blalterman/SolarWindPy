@@ -29,8 +29,7 @@ and physical constants.
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.core.plasma
    solarwindpy.core.ions
@@ -50,8 +49,7 @@ functions for figure management.
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.plotting.histograms
    solarwindpy.plotting.labels
@@ -70,8 +68,7 @@ estimation, plotting utilities, and trend analysis.
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.fitfunctions.core
    solarwindpy.fitfunctions.gaussians
@@ -91,8 +88,7 @@ LISIRD (LASP Interactive Solar Irradiance Data Center) access, and solar cycle a
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.solar_activity.base
    solarwindpy.solar_activity.plots
@@ -107,8 +103,7 @@ instability thresholds based on Verscharen et al. (2016) and related analyses.
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.instabilities.verscharen2016
    solarwindpy.instabilities.beta_ani
@@ -120,7 +115,6 @@ General utility functions and helper tools for data manipulation and analysis.
 
 .. autosummary::
    :toctree: _autosummary
-   :template: module.rst
-   :recursive:
+   :template: module
 
    solarwindpy.tools

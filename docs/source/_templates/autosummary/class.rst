@@ -3,14 +3,18 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __init__
 
    {% block methods %}
-   .. automethod:: __init__
-
    {% if methods %}
    .. rubric:: {{ _('Methods') }}
 
    .. autosummary::
+      :nosignatures:
    {% for item in methods %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
