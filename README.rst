@@ -70,11 +70,6 @@ Or install from conda-forge:
 
    conda install -c conda-forge solarwindpy
 
-**Note**: The conda-forge package for v0.1.5 is temporarily unavailable due to
-CI infrastructure issues (see `issue #8 <https://github.com/conda-forge/solarwindpy-feedstock/issues/8>`_).
-Install from PyPI to get the latest version. The conda-forge package will be
-updated once the issue is resolved.
-
 Development
 -----------
 
