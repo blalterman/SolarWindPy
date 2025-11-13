@@ -119,4 +119,4 @@ The complete AI-assisted development infrastructure, including agent specificati
 # Acknowledgements
 
 The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-In line with the transition to AI-augmented software development, this paper was written using Claude code [@claude_code_2024].
+In line with the transition to AI-augmented software development, Claude code [@claude_code_2024] was used in writing this paper.
