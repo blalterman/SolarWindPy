@@ -65,7 +65,7 @@ However, there is a clear separation between the two libraries such that future 
 ## AI-Assisted Development Workflow
 
 SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
-To be explicit about the scope of AI assistance: **the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance** and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018,@Wind:SWE:Wk,@Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
+To be explicit about the scope of AI assistance: the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018,@Wind:SWE:Wk,@Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
 AI-assisted development was used exclusively for supporting infrastructure: test suites, continuous integration pipelines, package deployment workflows, and completion of docstring documentation.
 
 This was accomplished using Claude Code [@claude_code_2024] with custom AI development infrastructure designed for scientific computing quality assurance.
