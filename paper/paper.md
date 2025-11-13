@@ -44,18 +44,18 @@ The package targets heliophysics researchers analyzing spacecraft observations, 
 +----------+--------------------------------+---------------------------------------+
 | Library  | Purpose                        | Citation                              |
 +==========+================================+=======================================+
-| AstroPy  | Astronomical observations.     | [@astropy:2013, @astropy:2018,        |
+| AstroPy  | Astronomical observations.     | [@astropy:2013; @astropy:2018;        |
 |          |                                | @astropy:2022]                        |
 +----------+--------------------------------+---------------------------------------+
-| SunPy    | Remote sensing observations    | [@sunpy_community2020, @MFC+20,       |
+| SunPy    | Remote sensing observations    | [@sunpy_community2020; @MFC+20;       |
 |          | of the Sun.                    | @Barnes2020]                          |
 +----------+--------------------------------+---------------------------------------+
 | PlasmaPy | Theoretical plasma physics.    | [@plasmapy_community_2025_16747747]   |
 +----------+--------------------------------+---------------------------------------+
-| SpacePy  | Timeseries analysis and        | [@niehof2022spacepy,                  |
+| SpacePy  | Timeseries analysis and        | [@niehof2022spacepy;                  |
 |          | magnetospheric modeling.       | @spacepy_code]                        |
 +----------+--------------------------------+---------------------------------------+
-| Pysat    | Magnetospheric mission data    | [@pysatcode, @Stoneback2018,          |
+| Pysat    | Magnetospheric mission data    | [@pysatcode; @Stoneback2018;          |
 |          | analysis.                      | @Stoneback2023]                       |
 +----------+--------------------------------+---------------------------------------+
 | pySpedas | Retrieval and plotting of      | [@Grimes2022]                         |
@@ -67,10 +67,10 @@ The package targets heliophysics researchers analyzing spacecraft observations, 
 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
-SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed or utilized in support of multiple publications [@Alterman2018, @Wind:SWE:Wk, @Wind:SWE:ahe:xhel, @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase, @Wind:SWE:ahe:shutoff, @ACE:SWICS:SSN, @ACE:SWICS:FStransition].
+SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed or utilized in support of multiple publications [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn; @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff; @ACE:SWICS:SSN; @ACE:SWICS:FStransition].
 The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure for the supporting infrastructure (test suites, documentation, and deployment workflows), while the core scientific functionality remains human-authored.
 
-The package builds on NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure stable dependencies.
+The package builds on NumPy [@Harris2020; @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010; @McKinney2011; @Mckinney2013] to ensure stable dependencies.
 The plotting module maintains timeseries-to-observation mappings for interactive data extraction and automatically maps plotted quantities to descriptive filenames for analysis traceability.
 Non-linear fitting libraries support multi-step nested regression workflows for parameter estimation.
 Submodules provide magnetohydrodynamic turbulence analysis and kinetic instability calculations.
@@ -79,8 +79,8 @@ Data storage currently uses pandas DataFrames and Timeseries, with architecture 
 
 ## Quality Assurance and AI-Assisted Development
 
-SolarWindPy's evolution from thesis research code [@AltermanThesis, @Alterman2018, @Wind:SWE:ahe:phase] to a production software package required systematic quality assurance for comprehensive testing, documentation, and deployment infrastructure.
-To be explicit about the scope of AI assistance: the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018, @Wind:SWE:Wk, @Wind:SWE:ahe:xhel, @Wind:SWE:ahe:dnn, @Wind:SWE:ahe:phase, @Wind:SWE:ahe:shutoff, @ACE:SWICS:SSN, @ACE:SWICS:FStransition].
+SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required systematic quality assurance for comprehensive testing, documentation, and deployment infrastructure.
+To be explicit about the scope of AI assistance: the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018; @Wind:SWE:Wk; @Wind:SWE:ahe:xhel; @Wind:SWE:ahe:dnn; @Wind:SWE:ahe:phase; @Wind:SWE:ahe:shutoff; @ACE:SWICS:SSN; @ACE:SWICS:FStransition].
 AI-assisted development was used exclusively for supporting infrastructure: test suites, continuous integration pipelines, package deployment workflows, and completion of docstring documentation.
 
 The quality assurance methodology utilizes Claude Code [@claude_code_2024] with domain-specific validation infrastructure designed for scientific computing correctness.
