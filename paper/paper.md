@@ -25,7 +25,7 @@ The solar wind is a stream of charged particles that continuously flows away fro
 In short, it mediates the interaction of the Sun with the heliosphere and this is a feature shared by stars and their astrospheres more broadly.
 Changes in the solar wind are one source of space weather, which is a critical threat to our technological infrastructure on Earth and in space.
 SolarWindPy provides a unified framework for analyzing the solar wind and related space weather data, filling the gap between packages targeting astronomy, remote observations of the Sun, and general timeseries analysis of spacecraft based data.
-The package is available via PyPI^[https://pypi.org/project/solarwindpy/] and conda-forge^[conda-forge distribution for v0.1.5 pending resolution of CI infrastructure issue; see https://github.com/conda-forge/solarwindpy-feedstock/issues/8] and can be installed using `pip install solarwindpy` or `conda install -c conda-forge solarwindpy`.
+The package is available via PyPI^[https://pypi.org/project/solarwindpy/] and conda-forge^[https://anaconda.org/conda-forge/solarwindpy] and can be installed using `pip install solarwindpy` or `conda install -c conda-forge solarwindpy`.
 
 
 
