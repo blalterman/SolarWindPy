@@ -151,7 +151,7 @@ The Plasma class is structured to intelligently combine observations from across
    beta = plasma.beta('p1+a')
    # Both betas
    beta = plasma.beta('a,p1')
-   
+
 
 Data Visualization
 ------------------
@@ -220,13 +220,14 @@ Create a 2D histogram using SolarWindPy aggregation tools:
 
    # Create a 2D histogram of the data
    from solarwindpy.plotting import Hist2D
-   
+
    beta = plasma.beta('p1').xs('par', axis=1, level='S')
    h2d = Hist2D(vx, beta, nbins=(50, 50), logy=True) # calculate log-scaled y-bins
    h2d.set_labels(x=xlbl, y=TeXlabel('beta', 'par', 'p1'))
    h2d.make_plot()
 
-SolarWindPy plotting tools have built-in path management that includes axis scales and plot normalizations:
+SolarWindPy plotting tools have built-in path management that includes axis
+scales and plot normalizations:
 
 .. code-block:: pycon
 
@@ -240,7 +241,7 @@ The path updates when you change normalization:
    >>> h2d.set_axnorm('c')  # Make the plot column-normalized
    >>> h2d.path
    Path('Hist2D/v_x_p1/beta_par_p1/linX-logY/Cnorm')
-   
+
 Show all available labels:
 
 .. code-block:: pycon
@@ -280,15 +281,15 @@ For more complex analyses:
 
    # Get thermal speed data
    w_par = plasma.w('p1').xs('par', level='C')
-   
+
    # Histogram data
    from solarwindpy.plotting import Hist1D
    h1d = Hist1D(w_par, nbins=50)
    h1d.set_labels(x=TeXlabel(('w', 'par', 'p1')))
-   
+
    # Get aggregated data
    agg = h1d.agg()
-   
+
    # Aggregated index is an IntervalIndex, but was previously monkey patched to address
    # a pandas pretty printing bug.
    x_data = pd.IntervalIndex(agg.index).mid
@@ -296,7 +297,7 @@ For more complex analyses:
 
    fit = Gaussian(x_data, y_data)
    fit.make_fit()
-   
+
    # Plot the resulting fit
    fit.plotter.set_labels(x=TeXlabel(('w', 'par', 'p1')))
    fit.plotter.plot_raw_used_fit_resid()
