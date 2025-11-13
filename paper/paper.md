@@ -70,32 +70,24 @@ It is designed for both experienced researchers and to provide an intuitive scaf
 SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed or utilized in support of multiple publications [@Alterman2018,@Wind:SWE:Wk, @Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
 The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure for the supporting infrastructure (test suites, documentation, and deployment workflows), while the core scientific functionality remains human-authored.
 
-The package builds on well-established libraries including NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure that the dependencies are stable.
-The plotting functionality retains the mapping between timeseries and aggregated observations to enable researchers to easily extract subsets of their observations for detailed analysis.
-The plot labeling functionality maps the quantities plotted to their file names, improving the mapping from the user's analysis to the saved output.
-The non-linear fitting libraries (utilizing scipy optimize) are designed for multi-step fitting in which the user performs nested regression of one variable on parameters derived from fitting other quantities.
-Submodules for the analysis of magnetohydrodynamic turbulence parameters and kinetic instabilities are also provided.
-The `solar_activity` submodule provides the user with seamless access to solar activity indicators provided by the LASP Interactive Solar IRradiance Datacenter (LISIRD) [@LISIRD] and the Solar Information Data Center (SIDC) at the Royal Observatory of Belgium [@SIDC].
-This tool enables easy comparison of solar wind parameters across different phases of the solar cycle and different solar cycles, which is an essential component of solar wind data analysis.
-SolarWindPy currently stores data in pandas DataFrames and Timeseries objects.
-However, there is a clear separation between the two libraries such that future development could transition to using more nuanced and scientifically-targeted data structures, for example those provided by xarray [@xarray], SunPy, or AstroPy.
+The package builds on NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure stable dependencies.
+The plotting module maintains timeseries-to-observation mappings for interactive data extraction and automatically maps plotted quantities to descriptive filenames for analysis traceability.
+Non-linear fitting libraries support multi-step nested regression workflows for parameter estimation.
+Submodules provide magnetohydrodynamic turbulence analysis and kinetic instability calculations.
+The `solar_activity` submodule provides seamless access to solar activity indicators from LISIRD [@LISIRD] and SIDC [@SIDC], enabling solar wind analysis across solar cycle phases.
+Data storage currently uses pandas DataFrames and Timeseries, with architecture supporting transitions to xarray [@xarray], SunPy, or AstroPy data structures.
 
-## AI-Assisted Development Workflow
+## Quality Assurance and AI-Assisted Development
 
-SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
+SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required systematic quality assurance for comprehensive testing, documentation, and deployment infrastructure.
 To be explicit about the scope of AI assistance: the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018,@Wind:SWE:Wk,@Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
 AI-assisted development was used exclusively for supporting infrastructure: test suites, continuous integration pipelines, package deployment workflows, and completion of docstring documentation.
 
-This was accomplished using Claude Code [@claude_code_2024] with custom AI development infrastructure designed for scientific computing quality assurance.
+The quality assurance methodology utilizes Claude Code [@claude_code_2024] with domain-specific validation infrastructure designed for scientific computing correctness.
+This approach maintains clear boundaries between deterministic and agentic tasks by combining specialized agents and pre-commit hooks to ensure correctness, while the scientific algorithms remain entirely human-authored as evidenced by their multi-year publication history.
+This systematic validation enabled development of comprehensive test suites (targeting ≥95% coverage, with core physics modules achieving ≥95% and overall coverage at 78%), completion of documentation including missing docstrings, and creation of continuous integration and deployment pipelines for PyPI, conda-forge, and ReadTheDocs.
 
-The implementation includes specialized domain-specific agents and automated validation workflows using pre-commit hooks for physics validation, test execution, and coverage monitoring.
-This systematic approach enabled rapid development of test suites for modules outside the original `core` implementation, completion of documentation including missing docstrings, and creation of continuous integration and deployment pipelines for PyPI, conda-forge, and ReadTheDocs.
-The current agent system contains 7 specialized agents with an extensible architecture designed for integration with Claude Code's skills system.
-The infrastructure incorporates git commit integration, GitHub Issues planning workflows, and comprehensive audit trails to ensure traceability of all AI-generated modifications, establishing an infrastructure for trustworthy AI-assisted scientific software.
-
-The project targets ≥95% test coverage, with core physics and plasma functionality currently achieving comprehensive coverage (≥95%), while tests for advanced features such as fitfunctions and plotting capabilities remain in active development, bringing overall coverage to 78%.
-All code generated or modified by AI in the supporting infrastructure (representing the test suites, CI/CD pipelines, and packaging tooling) undergoes expert review to ensure correctness, while the scientific algorithms themselves remain entirely human-authored as evidenced by their multi-year publication history.
-The complete AI-assisted development infrastructure, including agent specifications, validation hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository.
+The complete infrastructure, including agent specifications, pre-commit hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository, establishing a reproducible framework for quality assurance in AI-assisted scientific software development.
 
 # Acknowledgements
 
