@@ -1,0 +1,42 @@
+name: JOSS Paper PDF
+
+on:
+  push:
+    paths:
+      - paper/paper.md
+      - paper/paper.bib
+      - .github/workflows/draft-joss-paper.yml
+  pull_request:
+    paths:
+      - paper/paper.md
+      - paper/paper.bib
+  workflow_dispatch:
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    name: Generate JOSS Paper PDF
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build draft PDF
+        uses: openjournals/openjournals-draft-action@master
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: joss-paper-${{ github.sha }}
+          path: paper/paper.pdf
+          retention-days: 90
+
+      - name: Commit PDF to repository
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'docs(paper): auto-generate JOSS PDF preview [skip ci]'
+          add: 'paper/paper.pdf'
+          default_author: github_actions
