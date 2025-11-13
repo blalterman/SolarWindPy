@@ -93,6 +93,11 @@ The project targets ≥95% test coverage, with core physics and plasma functiona
 All code generated or modified by AI in the supporting infrastructure (representing the test suites, CI/CD pipelines, and packaging tooling) undergoes expert review to ensure correctness, while the scientific algorithms themselves remain entirely human-authored as evidenced by their multi-year publication history.
 The complete AI-assisted development infrastructure, including agent specifications, validation hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository.
 
+# Acknowledgements
+
+The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
+In line with the transition to AI-augmented software development, Claude code [@claude_code_2024] was used in writing this paper.
+
 # References
 
 [@astropy:2013]
@@ -129,8 +134,3 @@ The complete AI-assisted development infrastructure, including agent specificati
 [@Vanlommel2005]
 [@claude_code_2024]
 [@xarray]
-
-# Acknowledgements
-
-The author thanks L. Woodham and R. D'Amicis for discussions about Alfvénic turbulence and calculating the Elsasser variables.
-In line with the transition to AI-augmented software development, Claude code [@claude_code_2024] was used in writing this paper.
