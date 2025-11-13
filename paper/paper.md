@@ -1,5 +1,5 @@
 ---
-title: 'SolarWindPy'
+title: 'SolarWindPy: A Heliophysics Data Analysis Tool Set'
 tags:
   - heliophysics
   - solar wind
