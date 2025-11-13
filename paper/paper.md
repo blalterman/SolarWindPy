@@ -50,7 +50,7 @@ SolarWindPy fills this gap by providing a unified framework for analyzing solar 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
 SolarWindPy's primary functionality (core, fitfunctions, plotting, instabilities, and solar_activity submodules) was written by the author and developed or utilized in support of multiple publications [@Alterman2018,@Wind:SWE:Wk, @Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
-The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure, enabling systematic completion of comprehensive test suites, documentation, and deployment workflows while maintaining scientific correctness.
+The transformation from thesis research code to a production package deployable via PyPI and conda-forge was accomplished using AI-assisted development with specialized quality assurance infrastructure for the supporting infrastructure (test suites, documentation, and deployment workflows), while the core scientific functionality remains human-authored.
 
 The package builds on well-established libraries including NumPy [@Harris2020, @VanderWalt2011], SciPy [@scipy], Matplotlib [@Hunter2007], and Pandas [@Mckinney2010, @McKinney2011, @Mckinney2013] to ensure that the dependencies are stable.
 The plotting functionality retains the mapping between timeseries and aggregated observations to enable researchers to easily extract subsets of their observations for detailed analysis.
@@ -65,6 +65,9 @@ However, there is a clear separation between the two libraries such that future 
 ## AI-Assisted Development Workflow
 
 SolarWindPy's evolution from thesis research code [@AltermanThesis; @Alterman2018; @Wind:SWE:ahe:phase] to a production software package required comprehensive testing, documentation, and deployment infrastructure.
+To be explicit about the scope of AI assistance: **the core scientific modules (`core/`, `fitfunctions/`, `plotting/`, `instabilities/`, `solar_activity/`) containing the physics algorithms and analysis methods were developed by the author without AI assistance** and represent the scholarly contribution of this work, validated through eight peer-reviewed publications [@Alterman2018,@Wind:SWE:Wk,@Wind:SWE:ahe:xhel,@Wind:SWE:ahe:dnn,@Wind:SWE:ahe:phase,@Wind:SWE:ahe:shutoff,@ACE:SWICS:SSN,@ACE:SWICS:FStransition].
+AI-assisted development was used exclusively for supporting infrastructure: test suites, continuous integration pipelines, package deployment workflows, and completion of docstring documentation.
+
 This was accomplished using Claude Code [@claude_code_2024] with custom AI development infrastructure designed for scientific computing quality assurance.
 
 The implementation includes specialized domain-specific agents and automated validation workflows using pre-commit hooks for physics validation, test execution, and coverage monitoring.
@@ -73,7 +76,7 @@ The current agent system contains 7 specialized agents with an extensible archit
 The infrastructure incorporates git commit integration, GitHub Issues planning workflows, and comprehensive audit trails to ensure traceability of all AI-generated modifications, establishing an infrastructure for trustworthy AI-assisted scientific software.
 
 The project targets ≥95% test coverage, with core physics and plasma functionality currently achieving comprehensive coverage (≥95%), while tests for advanced features such as fitfunctions and plotting capabilities remain in active development, bringing overall coverage to 78%.
-All code generated or modified by AI undergoes expert review to ensure scientific accuracy.
+All code generated or modified by AI in the supporting infrastructure (representing the test suites, CI/CD pipelines, and packaging tooling) undergoes expert review to ensure correctness, while the scientific algorithms themselves remain entirely human-authored as evidenced by their multi-year publication history.
 The complete AI-assisted development infrastructure, including agent specifications, validation hooks, and workflow automation, is publicly available in the `.claude/` directory of the repository.
 
 # References
