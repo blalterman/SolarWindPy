@@ -37,15 +37,15 @@ Notably, there are several packages that support different elements of space phy
 Tools for the dedicated analysis of solar wind observations are noticeably absent.
 SolarWindPy fills this gap by providing a unified framework for analyzing solar wind observations in combination with relevant information about the spacecraft from which the observations were made.
 
- Library  | Purpose                                                                                                      | Citation 
-:--------:|:------------------------------------------------------------------------------------------------------------:|:--------:
- AstroPy  |  Astronomical observations.                                                                                  | [@astropy:2013, @astropy:2018, @astropy:2022]    
- SunPy    |  Remote sensing observations of the Sun.                                                                     | [@sunpy_community2020, @MFC+20, @Barnes2020]    
- PlasmaPy |  Theoretical plasma physics.                                                                                 | [@plasmapy_community_2025_16747747]    
- SpacePy  |  Analysis of timeseries data and integration with numerical modeling with a focus on magnetospheric physics. | [@niehof2022spacepy, @spacepy_code]    
- Pysat    |  Analysis of data from magnetospheric missions.                                                              | [@pysatcode, @Stoneback2018, @Stoneback2023]    
- pySpedas |  Retrieval and plotting of heliophysics timeseries data.                                                     | [@Grimes2022]    
- PyTplot  |  Focus on timeseries and spectrograph spacecraft data.                                                       | [@pytplot2019]    
+ Library  | Purpose                                                | Citation
+:--------:|:------------------------------------------------------:|:--------:
+ AstroPy  |  Astronomical observations.                            | [@astropy:2013, @astropy:2018, @astropy:2022]
+ SunPy    |  Remote sensing observations of the Sun.               | [@sunpy_community2020, @MFC+20, @Barnes2020]
+ PlasmaPy |  Theoretical plasma physics.                           | [@plasmapy_community_2025_16747747]
+ SpacePy  |  Timeseries analysis and magnetospheric modeling.      | [@niehof2022spacepy, @spacepy_code]
+ Pysat    |  Magnetospheric mission data analysis.                 | [@pysatcode, @Stoneback2018, @Stoneback2023]
+ pySpedas |  Retrieval and plotting of heliophysics timeseries.    | [@Grimes2022]
+ PyTplot  |  Timeseries and spectrograph data visualization.       | [@pytplot2019]    
 
 The SolarWindPy framework utilizes a pythonic, class-based architecture that combines ion and magnetic field objects into a single, unified plasma.
 It is designed for both experienced researchers and to provide an intuitive scaffold for students learning to analyze spacecraft data.
