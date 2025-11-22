@@ -223,37 +223,50 @@ Enhanced: CLAUDE.md (orchestrator with imports)
 **File:** `.claude/memory/physics-constants.md`
 
 ```markdown
-# Solar Wind Physics Constants & Formulas
+# Solar Wind Physics: Units Architecture
 
-## Critical Formulas
+## Units System
 
-### Thermal Speed
-**CORRECT:** `mw² = 2kT`
-**INCORRECT:** `mw² = 3kT` ❌
+### Storage Units (Instrument Measurements)
+SolarWindPy stores only directly measured quantities:
+- **n:** Number density [cm⁻³]
+- **v:** Velocity [km/s]
+- **w:** Thermal speed [km/s]
 
-Where:
-- `m` = particle mass (kg)
-- `w` = thermal speed (m/s)
-- `k` = Boltzmann constant (1.380649 × 10⁻²³ J/K)
-- `T` = temperature (K)
+### Display Units (All Quantities)
+All quantities displayed in units defined by `solarwindpy.core.units_constants.Units`:
+- Density: cm⁻³ (`self.units.n = 1e6`)
+- Velocity/speeds: km/s (`self.units.v = 1e3`)
+- Temperature: 10⁵ K (`self.units.temperature = 1e5`)
+- Magnetic field: nT (`self.units.bfield = 1e-9`)
+- Thermal pressure: pPa (`self.units.pth = 1e-12`)
+- See `Units` class for complete list
 
-### Alfvén Speed
+### Calculation Units (SI)
+All physics calculations performed in SI units via conversion factors.
+
+## Units Conversion Pattern (Display → SI → Display)
+
+**CRITICAL:** All calculations must convert units bidirectionally.
+
+```python
+# Example from ions.py temperature property (line 222-224)
+def temperature(self):
+    # Input conversion: display → SI
+    w = self.w.data * self.units.w              # km/s → m/s
+
+    # Calculate in SI
+    coeff = 0.5 * m / (self.constants.kb.J * self.units.temperature)
+    temp = coeff * w.pow(2)
+
+    # Output: Result automatically in display units (10⁵ K) via coeff
+    return temp
 ```
-v_A = B / √(μ₀ρ)
-```
-- `B` = magnetic field strength (T)
-- `μ₀` = permeability of free space (4π × 10⁻⁷ H/m)
-- `ρ` = mass density (kg/m³)
 
-## SI Units (MANDATORY)
-
-| Quantity | Unit | Symbol |
-|----------|------|--------|
-| Velocity | meters/second | m/s |
-| Density | per cubic meter | m⁻³ |
-| Temperature | Kelvin | K |
-| Magnetic Field | Tesla | T |
-| Energy | Joules | J |
+**Pattern to validate:**
+1. Input: `quantity * self.units.<name>` (display → SI)
+2. Calculate: Perform physics calculation in SI
+3. Output: `result / self.units.<name>` (SI → display)
 
 ## Missing Data Convention
 **ALWAYS use NaN** for missing/invalid data.
@@ -272,10 +285,11 @@ velocity_missing = 0     # NO!
 
 ## Physical Constraints
 
-- ✅ Density > 0 (particles/m³)
-- ✅ Temperature > 0 (K)
-- ✅ Speed ≥ 0 (m/s)
-- ✅ Thermal speed uses factor of 2, not 3
+- ✅ Density > 0 (n > 0 in cm⁻³)
+- ✅ Temperature > 0 (T > 0 in 10⁵ K)
+- ✅ Thermal speed ≥ 0 (w ≥ 0 in km/s, always positive scalar)
+- ✅ Vector magnitudes ≥ 0 (e.g., |v|, |B|), though components may be negative
+- ✅ Physical constants from `solarwindpy.core.units_constants.Constants`
 ```
 
 ##### Memory File 2: DataFrame Patterns
@@ -419,16 +433,14 @@ class TestClassName:
         result_large = function(np.random.rand(10000))
         assert len(result_large) == 10000
 
-    def test_function_physics_validation(self):
-        """Validate physics correctness (REQUIRED for scientific functions)."""
-        # Thermal speed formula check
-        ion = Ion(temperature=1e5, mass=1.67e-27)
-        thermal_speed = ion.thermal_speed()
+    def test_function_units_conversion(self):
+        """Validate units conversion pattern (REQUIRED for calculation methods)."""
+        # Check that calculations use units conversion
+        import inspect
+        source = inspect.getsource(ion.temperature.fget)
 
-        # Verify mw² = 2kT
-        k_B = 1.380649e-23
-        expected = np.sqrt(2 * k_B * 1e5 / 1.67e-27)
-        np.testing.assert_allclose(thermal_speed, expected, rtol=1e-6)
+        # Should contain self.units.w for input conversion (display → SI)
+        assert 'self.units.w' in source, "Missing units conversion in calculation"
 
     def test_function_error_handling(self):
         """Test invalid inputs raise appropriate errors (REQUIRED)."""
@@ -551,7 +563,7 @@ This file provides essential guidance to Claude Code when working with the Solar
 **What Goes in Project Memory:**
 All SolarWindPy-specific conventions, rules, and knowledge that should be consistent across all team members:
 
-- **Physics constants and formulas** (thermal speed, Alfvén speed, etc.)
+- **Units architecture** (storage vs display units, conversion patterns)
 - **MultiIndex structure** (M/C/S levels, capitalization rules)
 - **Testing requirements** (≥95% coverage, physics validation patterns)
 - **DataFrame patterns** (efficient access with .xs(), avoiding SettingWithCopyWarning)
@@ -797,7 +809,7 @@ All SolarWindPy-specific conventions, rules, and knowledge that should be consis
 **Measurement Methodology:**
 
 *How Time Savings Are Calculated:*
-1. **Baseline measurement:** Track time spent repeating context ("remember to use SI units," "check thermal speed formula") in 20 representative sessions
+1. **Baseline measurement:** Track time spent repeating context ("remember units conversion pattern," "check display→SI→display") in 20 representative sessions
 2. **Average repetition time:** 5-10 minutes per session for context-setting
 3. **Session frequency:** Estimate 10-15 development sessions per week based on team activity
 4. **Calculation:** (5-10 min/session) × (10-15 sessions/week) = 50-150 min/week saved
@@ -828,10 +840,10 @@ grep "@.claude/memory" /tmp/memory_check.txt
 
 #### Test 2: Context Preservation
 ```
-Session 1: Ask about thermal speed formula
+Session 1: Ask about units conversion pattern
 Session 2 (new): Ask same question without repeating context
-Expected: Claude knows thermal speed is mw²=2kT from memory
-Validation: No need to re-explain physics rules
+Expected: Claude knows display→SI→display pattern from memory
+Validation: No need to re-explain units architecture
 ```
 
 #### Test 3: Selective Loading

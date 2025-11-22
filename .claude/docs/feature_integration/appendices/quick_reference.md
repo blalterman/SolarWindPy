@@ -36,7 +36,7 @@ claude
 ```bash
 # Testing & Quality
 /coverage                    # Quick coverage check (highlight <95% files)
-/physics [file]              # Physics validation (SI units, thermal speed, NaN)
+/physics [file]              # Physics validation (units conversion, NaN)
 /test [args]                 # Smart test runner (changed files or all)
 
 # Code Review

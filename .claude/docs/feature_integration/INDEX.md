@@ -267,7 +267,7 @@ Packages slash commands, skills, agents, and hooks into distributable plugins wi
 ### Pattern 1: Physics Validation Workflow
 ```
 Development Phase:
-├── Edit ion.py thermal speed calculation
+├── Edit ion.py physics calculation method
 ├── PreToolUse hook validates physics (automatic)
 ├── PostToolUse hook runs tests (automatic)
 └── /physics command for explicit check (manual)

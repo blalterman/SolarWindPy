@@ -79,37 +79,31 @@ EOF
 cat > solarwindpy-devtools/skills/physics-validator/SKILL.md <<'EOF'
 ---
 name: physics-validator
-description: Automatically validates solar wind physics correctness (thermal speed mw²=2kT, SI units m/s m⁻³ K T, NaN for missing data, positive densities/temperatures) in Python code when user requests physics validation, unit checking, or mentions thermal speed calculations.
+description: Automatically validates solar wind physics correctness focusing on units conversion patterns (display→SI→display), NaN for missing data, and physical constraints in Python code when user requests physics validation or unit checking.
 allowed-tools: [Bash, Read, Grep]
 ---
 
 # Physics Validator Skill
 
 ## Activation Triggers
-- User mentions "validate physics", "check units", "thermal speed"
+- User mentions "validate physics", "check units", "units conversion"
 - User requests physics correctness review
-- User asks about SI unit compliance
+- User asks about units pattern compliance
 - Code changes involve physics calculations
 
 ## Validation Checklist
 
-### 1. Thermal Speed Formula
-**Critical:** Verify `mw² = 2kT` (NOT 3kT)
-- Search for thermal_speed functions
-- Check for incorrect factor (1.5, 3)
-- Ensure correct formula: `sqrt(2 * k_B * T / m)`
+### 1. Units Conversion Pattern
+**Critical:** Verify display→SI→display pattern
+- Check for `* self.units.<name>` (input conversion)
+- Check for `/ self.units.<name>` (output conversion)
+- Storage: cm⁻³, km/s | Display: per Units class | Calculations: SI
 
-### 2. SI Units
-- Velocities: m/s (not km/s unless explicitly converted)
-- Densities: m⁻³ (not cm⁻³)
-- Temperatures: K (Kelvin)
-- Magnetic field: T (Tesla)
-
-### 3. Missing Data Handling
+### 2. Missing Data Handling
 - Use `np.nan` for missing data
 - Never use sentinel values (0, -999, -1)
 
-### 4. Physical Constraints
+### 3. Physical Constraints
 - Densities: Must be ≥ 0
 - Temperatures: Must be > 0
 - Speeds: Must be ≥ 0

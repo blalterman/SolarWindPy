@@ -48,8 +48,8 @@ Skills are model-invoked capability packages that Claude autonomously activates 
 **Pain Points Addressed:**
 
 ✅ **Agent Coordination Overhead (HIGH IMPACT)**
-*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use PhysicsValidator to verify thermal speed calculations"
-*With Skills:* Automatic activation when user requests physics validation, thermal speed checks, or unit verification
+*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use PhysicsValidator to verify units conversion patterns"
+*With Skills:* Automatic activation when user requests physics validation, units pattern checks, or unit verification
 *Reduction:* 40-60% decrease in explicit agent invocation overhead
 
 ✅ **Repetitive Task Automation (HIGH IMPACT)**
@@ -205,7 +205,7 @@ User Request → Skill Auto-Detection → [Skill OR Task Agent] → Result
 ```yaml
 ---
 name: physics-validator
-description: Automatically validates solar wind physics calculations including thermal speed (mw²=2kT), SI unit consistency, proper NaN handling for missing data, and physical constraint verification. Activates when user mentions physics validation, unit checking, thermal speed, or scientific correctness.
+description: Automatically validates solar wind physics calculations focusing on units conversion patterns, proper NaN handling for missing data, and physical constraint verification. Verifies calculations use self.units.* for SI conversion (display units → SI → display units). Activates when user mentions physics validation, unit checking, or scientific correctness.
 allowed-tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*)]
 ---
 
@@ -216,17 +216,21 @@ Ensures all physics calculations in SolarWindPy maintain scientific correctness.
 
 ## Automatic Activation Triggers
 - "validate physics"
-- "check thermal speed"
-- "verify units"
+- "verify units conversion"
+- "check units pattern"
 - "ensure SI units"
 - "physics correctness"
 - Code changes to `solarwindpy/core/ion.py` or `solarwindpy/core/plasma.py`
 
 ## Validation Checklist
-1. **Thermal Speed Formula:** mw² = 2kT (not 3kT)
-2. **SI Units:** velocity (m/s), density (m⁻³), temperature (K)
-3. **NaN Handling:** Missing data as NaN, never 0 or -999
-4. **Physical Constraints:** Positive densities, temperatures, speeds
+1. **Units Conversion Pattern:** Calculations must use `quantity * self.units.<name>` for SI conversion
+   - Storage units: cm⁻³ (density), km/s (velocity, thermal speed)
+   - Display units: All quantities per `Units` class (see `solarwindpy.core.units_constants`)
+   - Calculation units: m⁻³, m/s, K (SI)
+   - Example: `w = self.w.data * self.units.w` before `w.pow(2)` (ions.py:222)
+   - Check BOTH input conversion (display→SI) AND output conversion (SI→display)
+2. **NaN Handling:** Missing data as NaN, never 0 or -999
+3. **Physical Constraints:** Positive densities, temperatures, thermal speeds (scalars ≥ 0; velocity components may be negative)
 
 ## Execution Pattern
 ```bash
@@ -369,7 +373,7 @@ def test_function_name_happy_path():
 def test_function_name_physics():
     """Validate physics correctness."""
     # Physics-specific assertions
-    assert thermal_speed_formula_check(result)
+    assert units_conversion_pattern_check(result)
 ```
 
 ## Integration with TestEngineer Agent
@@ -789,7 +793,7 @@ Validation: Complex multi-step tasks should still use agents
 
 #### Test 4: Auto-activation on File Changes
 ```
-Scenario: Edit solarwindpy/core/ion.py (thermal speed calculation)
+Scenario: Edit solarwindpy/core/ion.py (physics calculation method)
 Expected: physics-validator skill triggers post-edit
 Validation: Verify physics validation report generated
 ```

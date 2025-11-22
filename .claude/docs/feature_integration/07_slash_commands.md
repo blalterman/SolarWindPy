@@ -321,10 +321,14 @@ Arguments:
 
 Validation checklist:
 1. Run: `python .claude/hooks/physics-validation.py $ARGUMENTS`
-2. Check thermal speed formula: mw² = 2kT (NOT 3kT)
-3. Verify SI units: m/s, m⁻³, K, T
-4. Ensure NaN for missing data (not 0, -999)
-5. Validate physical constraints (positive densities, temperatures)
+2. Verify units conversion pattern:
+   - Check for `* self.units.<quantity>` before calculations (display → SI)
+   - Check for `/ self.units.<result>` after calculations (SI → display)
+   - Storage: cm⁻³, km/s | Display: per Units class | Calculations: SI
+3. Ensure NaN for missing data (not 0, -999)
+4. Validate physical constraints:
+   - Density > 0, Temperature > 0, Thermal speed ≥ 0
+   - Vector magnitudes ≥ 0 (components may be negative)
 
 Report format:
 - ✅ Physics correctness verified
@@ -398,10 +402,10 @@ If empty: Review files in current git diff
 Review Checklist:
 
 **1. Physics Correctness (CRITICAL)**
-- [ ] Thermal speed: mw² = 2kT ✓
-- [ ] SI units: m/s, m⁻³, K, T ✓
+- [ ] Units conversion: `* self.units.<name>` (display→SI), `/ self.units.<name>` (SI→display) ✓
+- [ ] Storage units: cm⁻³, km/s | Display: per Units class | Calculations: SI ✓
 - [ ] NaN for missing data ✓
-- [ ] Physical constraints valid ✓
+- [ ] Physical constraints valid (density/temp > 0, vector magnitudes ≥ 0) ✓
 
 **2. Test Coverage (REQUIRED)**
 - [ ] Test coverage ≥95% ✓

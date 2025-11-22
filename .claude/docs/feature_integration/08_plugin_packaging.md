@@ -311,7 +311,7 @@ solarwindpy-devtools/
 │
 ├── skills/                      # 4 Skills
 │   ├── physics-validator/
-│   │   └── SKILL.md            # Auto-validates thermal speed, SI units
+│   │   └── SKILL.md            # Auto-validates units conversion patterns
 │   ├── multiindex-architect/
 │   │   └── SKILL.md            # Optimizes DataFrame operations
 │   ├── test-generator/

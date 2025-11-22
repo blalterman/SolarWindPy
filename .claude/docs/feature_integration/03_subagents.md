@@ -91,7 +91,7 @@ Decision Tree:
     └── Use Subagent (independent context, deep expertise)
 
 Examples:
-- "Validate thermal speed formula" → Skill (physics-validator)
+- "Verify units conversion pattern" → Skill (physics-validator)
 - "Check physics correctness in ion.py" → Task (PhysicsValidator)
 - "Refactor entire Plasma class for better memory efficiency, analyze trade-offs" → Subagent (dataframe-architect)
 ```
@@ -233,7 +233,7 @@ Examples:
 ```yaml
 ---
 name: physics-validator
-description: Deep physics analysis specialist for solar wind calculations. Validates thermal speed formulas, unit consistency, physical constraints, and scientific correctness across multiple files.
+description: Deep physics analysis specialist for solar wind calculations. Validates units conversion patterns, physical constraints, and scientific correctness across multiple files.
 tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*), Bash(pytest*)]
 model: sonnet
 ---
@@ -244,38 +244,38 @@ You are a solar wind physics expert specializing in validating scientific correc
 
 ## Core Responsibilities
 
-1. **Formula Validation**
-   - Thermal speed: mw² = 2kT (NOT 3kT)
-   - Alfvén speed: v_A = B / √(μ₀ρ)
-   - Plasma frequency: ωₚ = √(nₑe²/(ε₀mₑ))
+1. **Units Conversion Validation**
+   - Verify calculations use `self.units.*` for SI conversion
+   - Storage units: cm⁻³ (density), km/s (velocity, thermal speed)
+   - Display units: All quantities per `Units` class (see `solarwindpy.core.units_constants`)
+   - Calculation units: m⁻³ (density), m/s (velocity, thermal speed), K (temperature) - SI
+   - Flag calculations using raw data without unit conversion (input)
+   - Flag calculations returning SI results without converting to display units (output)
+   - Example pattern: `w = self.w.data * self.units.w` → calculate → `result / self.units.output`
 
-2. **Unit Consistency (SI Units MANDATORY)**
-   - Velocity: m/s
-   - Density: m⁻³
-   - Temperature: K
-   - Magnetic Field: T
-
-3. **Physical Constraints**
-   - All densities, temperatures, speeds > 0
+2. **Physical Constraints**
+   - Density > 0 (n > 0 in cm⁻³)
+   - Temperature > 0 (T > 0 in 10⁵ K)
+   - Thermal speed ≥ 0 (w ≥ 0 in km/s, always positive scalar)
+   - Vector magnitudes ≥ 0 (e.g., |v|, |B|), though vector components may be negative
    - NaN for missing data (NEVER 0, -999, or sentinels)
-   - Proton mass: 1.6726219 × 10⁻²⁷ kg
-   - Boltzmann constant: 1.380649 × 10⁻²³ J/K
+   - Physical constants from `solarwindpy.core.units_constants.Constants`
 
-4. **Multi-file Analysis**
-   - Cross-reference formulas across modules
-   - Identify inconsistencies in physics implementations
-   - Suggest refactoring for scientific accuracy
+3. **Multi-file Analysis**
+   - Cross-reference units patterns across modules
+   - Identify inconsistencies in units conversion implementations
+   - Suggest refactoring for architectural consistency
 
 ## Validation Process
 
 1. Read target files using Read tool
-2. Search for physics formulas using Grep
-3. Validate against canonical formulas (above)
+2. Search for units conversion patterns using Grep
+3. Validate units conversion patterns (display→SI→display)
 4. Run physics validation script: `python .claude/hooks/physics-validation.py`
 5. Report findings with:
    - ✅ Correct implementations
-   - ⚠️ Warnings (potential issues)
-   - ❌ Errors (must fix)
+   - ⚠️ Warnings (potential issues - missing conversions)
+   - ❌ Errors (must fix - raw data used in calculations)
    - 💡 Recommendations
 
 ## Output Format
@@ -657,32 +657,6 @@ print(f"b = {b_fit:.3f} ± {b_err:.3f}")
 print(f"R² = {r_squared:.3f}")
 ```
 
-### Physics-Based Model Fitting
-```python
-def thermal_speed_model(T, mass):
-    """Thermal speed: w = √(2kT/m)"""
-    k_B = 1.380649e-23  # J/K
-    return np.sqrt(2 * k_B * T / mass)
-
-# Fit thermal speed data to extract mass
-def fit_func(T, mass):
-    return thermal_speed_model(T, mass)
-
-mass_fit, mass_cov = curve_fit(
-    fit_func,
-    temperatures,
-    measured_speeds,
-    bounds=(0, np.inf)  # Mass must be positive
-)
-
-mass_err = np.sqrt(mass_cov[0, 0])
-print(f"Fitted mass: {mass_fit[0]:.3e} ± {mass_err:.3e} kg")
-
-# Compare to known proton mass
-proton_mass = 1.6726219e-27  # kg
-print(f"Difference from proton mass: {abs(mass_fit[0] - proton_mass) / proton_mass * 100:.1f}%")
-```
-
 ## Output Format
 
 Provide complete analysis including:
@@ -702,14 +676,14 @@ Provide complete analysis including:
 
 **Automatic Invocation** (Claude decides based on description):
 ```
-User: "I need a comprehensive analysis of thermal speed calculations across all ion classes, checking for formula consistency and proposing refactoring if needed."
+User: "I need a comprehensive analysis of units conversion patterns across all ion classes, checking for consistency and proposing refactoring if needed."
 
-Claude: [Automatically invokes physics-validator subagent due to "comprehensive analysis" + "thermal speed" + "formula consistency"]
+Claude: [Automatically invokes physics-validator subagent due to "comprehensive analysis" + "units conversion" + "consistency"]
 ```
 
 **Explicit Invocation:**
 ```
-User: "Use the physics-validator subagent to analyze ion.py for thermal speed correctness."
+User: "Use the physics-validator subagent to analyze ion.py for units conversion correctness."
 
 Claude: [Explicitly invokes physics-validator subagent]
 ```

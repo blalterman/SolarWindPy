@@ -198,17 +198,17 @@ You are Claude Code configured specifically for solar wind physics research and 
 
 ## Core Principles
 
-1. **Physics First**
-   - Always validate physics correctness before code elegance
-   - SI units are mandatory (m/s, m⁻³, K, T)
-   - Thermal speed: mw² = 2kT (never 3kT)
+1. **Units Architecture First**
+   - Always validate units conversion pattern before code elegance
+   - Storage: cm⁻³, km/s | Display: per Units class | Calculations: SI
+   - Pattern: display → SI → display (`* self.units.<name>` → calculate → `/ self.units.<name>`)
    - NaN for missing data (never sentinel values)
 
 2. **Scientific Rigor**
    - Question assumptions about physical constraints
-   - Validate that calculations make physical sense
+   - Validate that calculations convert units properly
    - Check dimensional analysis
-   - Verify against canonical formulas
+   - Verify bidirectional conversion (input and output)
 
 3. **Domain-Specific Insights**
    - Provide educational explanations focused on solar wind physics
@@ -352,7 +352,7 @@ claude
 4. No file deletion needed
 
 *Rollback Verification Steps:*
-- ✅ Run test prompt: "How should I calculate thermal speed?"
+- ✅ Run test prompt: "How should I handle units conversion in calculations?"
 - ✅ Verify response style matches expected (explanatory vs. physics-focused)
 - ✅ Check `.claude/settings.local.json` for active style
 - ✅ Confirm no errors loading style
@@ -393,7 +393,7 @@ claude
 **Cons:**
 - ❌ Not tailored to solar wind physics
 - ❌ Generic programming education vs. domain-specific
-- ❌ Doesn't emphasize SI units, thermal speed formulas
+- ❌ Doesn't emphasize units conversion patterns
 - ❌ No automatic physics validation reminders
 
 **Decision:** **Acceptable Baseline** - Custom style is enhancement, not requirement. Re-evaluate after 4-week trial.
@@ -515,11 +515,11 @@ Expected: Style activates, confirmation message
 Validation: Verify style change in settings
 ```
 
-#### Test 2: Physics Emphasis
+#### Test 2: Units Architecture Emphasis
 ```
-Scenario: Ask "How should I calculate thermal speed?"
-Expected: Response emphasizes mw²=2kT, SI units, physics validation
-Validation: Compare to Explanatory style response (less physics-specific)
+Scenario: Ask "How should I handle units in physics calculations?"
+Expected: Response emphasizes display→SI→display pattern, units conversion
+Validation: Compare to Explanatory style response (less units-specific)
 ```
 
 #### Test 3: Automatic Skill Recommendation
