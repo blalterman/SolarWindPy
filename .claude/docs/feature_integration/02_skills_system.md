@@ -2,7 +2,7 @@
 
 **Feature Type:** Automatic
 **Priority:** HIGH
-**Effort:** 5-8 hours (reduced from 7-11h via plugin infrastructure)
+**Effort:** 7-11 hours
 **ROI Break-even:** 3-4 weeks
 
 [← Back to Index](./INDEX.md) | [Next: Subagents →](./03_subagents.md)
@@ -207,6 +207,8 @@ User Request → Skill Auto-Detection → [Skill OR Task Agent] → Result
 name: physics-validator
 description: Automatically validates solar wind physics calculations focusing on units conversion patterns, proper NaN handling for missing data, and physical constraint verification. Verifies calculations use self.units.* for SI conversion (display units → SI → display units). Activates when user mentions physics validation, unit checking, or scientific correctness.
 allowed-tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*)]
+max_activations_per_hour: 10
+rate_limit_message: "Physics validator activated 10 times this hour. Limit prevents excessive validation overhead. Override: explicitly request 'validate physics in all files' to bypass."
 ---
 
 # Physics Validation Skill
@@ -259,6 +261,8 @@ python .claude/hooks/physics-validation.py --report
 name: multiindex-architect
 description: Optimizes pandas MultiIndex DataFrame operations for SolarWindPy's (M/C/S) structure. Recommends .xs() for views, prevents unnecessary copying, manages memory efficiently. Activates for DataFrame operations, MultiIndex queries, performance optimization, or memory management tasks.
 allowed-tools: [Read, Grep, Edit, Write]
+max_activations_per_hour: 8
+rate_limit_message: "MultiIndex architect activated 8 times this hour. Limit prevents repetitive DataFrame suggestions. Override: explicitly request 'optimize all DataFrame operations' to bypass."
 ---
 
 # MultiIndex Architect Skill
@@ -324,6 +328,8 @@ df_subset = df.xs((measurement, component), level=(0, 1))
 name: test-generator
 description: Automatically generates pytest test cases for SolarWindPy functions ensuring ≥95% coverage. Creates physics-specific tests, edge cases, and validates scientific correctness. Activates when coverage gaps identified or new functions added.
 allowed-tools: [Read, Write, Bash(python .claude/scripts/generate-test.py*), Bash(pytest*)]
+max_activations_per_hour: 12
+rate_limit_message: "Test generator activated 12 times this hour. Limit prevents excessive test creation. Override: explicitly request 'generate tests for all uncovered functions' to bypass."
 ---
 
 # Test Generator Skill
@@ -394,6 +400,8 @@ def test_function_name_physics():
 name: plan-executor
 description: Automates GitHub Issues plan creation using gh-plan-create.sh and gh-plan-phases.sh. Handles batch mode phase creation, value proposition generation, and scope auditing. Activates when planning new features or creating implementation roadmaps.
 allowed-tools: [Bash(.claude/scripts/gh-plan-*.sh*), Bash(mkdir*), Bash(cat*), Read, Write]
+max_activations_per_hour: 5
+rate_limit_message: "Plan executor activated 5 times this hour. Limit prevents excessive planning overhead. Override: explicitly request 'create all pending plans' to bypass."
 ---
 
 # Plan Executor Skill
@@ -445,6 +453,71 @@ gh issue view $OVERVIEW_ISSUE
 **Supporting Files:**
 - `.claude/skills/plan-executor/templates/phase_config_template.conf`
 - `.claude/skills/plan-executor/examples/sample_plans.md`
+
+#### Error Recovery and Fallback Chains
+
+**Anthropic Best Practice:** "Build fallback chains to handle failures gracefully. Skills should degrade to manual alternatives rather than block workflow."
+
+Skills provide automatic activation, but failures must not block user progress. Implement 4-level fallback pattern:
+
+##### Fallback Chain Pattern
+
+```
+Primary: Skill Auto-Activation
+    ↓ (if skill fails or rate-limited)
+Fallback 1: Manual Slash Command
+    ↓ (if command unavailable or fails)
+Fallback 2: Subagent Invocation
+    ↓ (if subagent unavailable)
+Manual Override: Direct user action
+```
+
+##### Example: Physics Validation Fallback Chain
+
+**Scenario:** Physics validator skill fails during ion.py calculation review
+
+**Step 1: Primary (Skill Auto-Activation)**
+- User: "Check if thermal speed calculation uses correct units"
+- System: Attempts physics-validator skill activation
+- **Failure modes:** Rate limit hit (10/hour exceeded), skill not found, allowed-tools restriction
+
+**Step 2: Fallback 1 (Manual Slash Command)**
+- System: "Physics validator skill unavailable. Using manual command..."
+- Executes: `/physics` slash command
+- **Fallback trigger:** If `/physics` command not defined
+
+**Step 3: Fallback 2 (Subagent Invocation)**
+- System: "Manual command unavailable. Invoking PhysicsValidator subagent..."
+- Launches: physics-validator subagent with isolated context
+- **Fallback trigger:** If subagent system not configured
+
+**Step 4: Manual Override (Direct Action)**
+- System: "All automatic validation unavailable. Manual review required:"
+- Provides: Validation checklist, reference links, manual verification steps
+
+##### Error Rate Thresholds
+
+**Monitoring:** Track skill activation success/failure rates per session
+
+| Success Rate | Status | Action Required |
+|--------------|--------|-----------------|
+| ≥90% | ✅ **Good** | No action needed, skill descriptions are accurate |
+| 80-90% | ⚠️ **Review** | Check skill descriptions for clarity, adjust triggers |
+| <80% | 🔴 **Too Aggressive** | Skill activating incorrectly, revise description or disable |
+
+**Example Metrics:**
+```bash
+# Session summary
+physics-validator: 8 activations, 7 success, 1 fallback → 87.5% (⚠️ Review)
+multiindex-architect: 5 activations, 5 success, 0 fallback → 100% (✅ Good)
+test-generator: 3 activations, 1 success, 2 fallback → 33% (🔴 Too Aggressive)
+plan-executor: 2 activations, 2 success, 0 fallback → 100% (✅ Good)
+```
+
+**Corrective Actions:**
+- **<80% success:** Revise skill description to be more specific, reduce false activations
+- **0 activations in 5 sessions:** Description too narrow, broaden activation triggers
+- **>15 activations/session:** Too aggressive, increase rate limits or narrow scope
 
 #### Migration Path from Current System
 
@@ -682,14 +755,13 @@ gh issue view $OVERVIEW_ISSUE
 
 **Estimated Effort:**
 - Skill creation: **3-5 hours** (0.75-1.25 hours per skill × 4 skills, faster with official spec)
+- Rate limiting implementation: **1-2 hours** (add max_activations_per_hour to each skill)
+- Error recovery documentation: **1-1.5 hours** (fallback chains, monitoring thresholds)
 - Testing & refinement: **1-2 hours** (plugin installation simplifies testing)
-- Documentation: **1 hour** (plugin README)
-- **Total: 5-8 hours** (reduced from 7-11h via plugin infrastructure)
+- Documentation: **0.5-1 hour** (plugin README)
+- **Total: 7-11 hours**
 
-**Plugin vs. Local:**
-- Local implementation: 7-11h (full setup + custom distribution)
-- Plugin packaging: 5-8h (official spec + built-in distribution)
-- Savings: 2-3 hours via official plugin system
+**Note:** Increased from 5-8h to account for rate limiting and error recovery patterns required for safe automatic activation. These additions prevent skill over-activation and ensure graceful degradation when skills fail.
 
 **Detailed Breakdown of Plugin Savings:**
 
