@@ -18,23 +18,24 @@ See: [Plugin Packaging](#8-plugin-packaging) | [Findings Report](../../tmp/plugi
 
 This documentation covers **8 features** (7 original + plugin packaging) for integrating Claude Code capabilities into SolarWindPy's workflow:
 
-| Feature | Type | Impact | Effort | ROI Break-even | Plugin-Ready |
-|---------|------|--------|--------|----------------|--------------|
-| [Memory Hierarchy](./01_memory_hierarchy.md) | Auto | CRITICAL | 9-14h | 4-6 weeks | ❌ Infrastructure |
-| [Slash Commands](./07_slash_commands.md) | Manual | HIGH | 5.5-8h | 3-4 weeks | ✅ Yes |
-| [Skills System](./02_skills_system.md) | Auto | HIGH | 5-8h | 3-4 weeks | ✅ Yes |
-| [Subagents](./03_subagents.md) | Auto | MED-HIGH | 12-17h | 6-9 weeks | ✅ Yes |
-| [Enhanced Hooks](./04_enhanced_hooks.md) | Auto | LOW-MED | 4-6h | 4-6 weeks | ⚠️ Partial |
-| [Checkpointing](./05_checkpointing.md) | Auto | LOW-MED | 2-3.5h | 3-5 weeks | ❌ Core Feature |
-| [Output Styles](./06_output_styles.md) | Manual | LOW | 2.5-3.5h | 8-12 weeks | ❌ Local Config |
-| **[Plugin Packaging](./08_plugin_packaging.md)** | **Infra** | **HIGH** | **6-10h** | **Immediate** | **N/A** |
+| Feature | Type | Impact | Effort | Decision Gate | ROI Break-even | Plugin-Ready |
+|---------|------|--------|--------|---------------|----------------|--------------|
+| [Memory Hierarchy](./01_memory_hierarchy.md) | Auto | CRITICAL | 19-28h | ≥30% token reduction | 4-6 weeks | ❌ Infrastructure |
+| [Slash Commands](./07_slash_commands.md) | Manual | HIGH | 8.5-12h | ≥60 min/week saved | 3-4 weeks | ✅ Yes |
+| [Skills System](./02_skills_system.md) | Auto | HIGH | 7-11h | ≥40% automation rate | 3-4 weeks | ✅ Yes |
+| [Subagents](./03_subagents.md) | Auto | MED-HIGH | 14.5-21h | ≥40% token savings | 6-9 weeks | ✅ Yes |
+| [Enhanced Hooks](./04_enhanced_hooks.md) | Auto | LOW-MED | 5.5-8.5h | 100% activity tracking | 4-6 weeks | ⚠️ Partial |
+| [Checkpointing](./05_checkpointing.md) | Auto | LOW-MED | 3-4.5h | Zero rollback friction | 3-5 weeks | ❌ Core Feature |
+| [Output Styles](./06_output_styles.md) | Manual | LOW | 2.5-3.5h | User satisfaction | 8-12 weeks | ❌ Local Config |
+| **[Plugin Packaging](./08_plugin_packaging.md)** | **Infra** | **HIGH** | **8-12h** | **Install success** | **Immediate** | **N/A** |
 
 **Combined Impact:**
-- **Implementation:** 46-70 hours over 5-7 weeks (plugin infrastructure reduces complexity)
+- **Implementation:** 69-106 hours over 8-9 weeks (includes stopping conditions & error recovery)
 - **Token Savings:** 50-70% overall reduction
 - **Time Savings:** 350-670 hours annually
-- **Break-even:** 2-5 weeks (faster via single-command plugin install)
+- **Break-even:** 3-6 weeks (faster via single-command plugin install)
 - **Bonus:** Community distribution capability via marketplace
+- **Safety:** Comprehensive stopping conditions prevent over-investment
 
 ---
 
@@ -110,65 +111,112 @@ Example: Physics Validation
 
 ## Prioritized Implementation Roadmap
 
-### Phase 0: Plugin Infrastructure (Week 1)
-**Priority: CRITICAL - Foundation for Distribution**
+**Anthropic Best Practice:** Start simple, add complexity only when demonstrably beneficial. This roadmap implements progressive phases with decision gates to prevent over-investment.
 
-0. **[Plugin Packaging](./08_plugin_packaging.md)** (Week 1, concurrent with Memory)
-   - *Why first:* Enables distribution of all other features
-   - *Effort:* 6-10 hours (plugin scaffold + marketplace setup)
-   - *Deliverables:* Plugin directory structure, plugin.json manifest, local marketplace
-   - *Enables:* Single-command installation for team
+### Phase 0: Foundation (REQUIRED)
+**Priority: CRITICAL - Must complete before any other phases**
 
-### Phase 1: Foundation (Weeks 1-3)
-**Priority: CRITICAL**
+**Goal:** Establish core context management and manual workflow shortcuts that all other features depend on.
 
-1. **[Memory Hierarchy](./01_memory_hierarchy.md)** (Week 1-2)
+1. **[Memory Hierarchy](./01_memory_hierarchy.md)** (Weeks 1-2, 19-28 hours)
    - *Why first:* Foundation for all other features; enables context preservation
    - *Impact:* 30-50% token savings, zero repeated context-setting
    - *Enables:* Skills and Slash Commands can reference memory files
+   - *Stopping Conditions:* Max 20 memory imports/session, ≤10% context budget allocation
    - *Note:* NOT plugin-packageable (project-specific infrastructure)
 
-2. **[Slash Commands](./07_slash_commands.md)** (Week 2) ✅ Plugin-Ready
-   - *Why early:* High impact, low effort, fast ROI (2-4 weeks with plugins)
-   - *Impact:* 120-205 min/week saved on frequent manual workflows
+2. **[Slash Commands](./07_slash_commands.md)** (Week 2, parallel, 8.5-12 hours) ✅ Plugin-Ready
+   - *Why parallel:* Independent of Memory, high impact, low effort
+   - *Impact:* 60+ min/week saved on frequent manual workflows
    - *Start with:* `/coverage`, `/physics`, `/test` (3 commands, 30 min setup)
+   - *Error Recovery:* Timeout handling, fallback chains for all 10 commands
    - *Plugin:* Package in `plugin-name/commands/`
 
-3. **[Skills System](./02_skills_system.md)** (Week 3) ✅ Plugin-Ready
+**Decision Gate 1: Proceed to Phase 1?**
+- ✅ **PROCEED if:** ≥30% token reduction sustained AND ≥60 min/week saved
+- ⚠️ **PAUSE if:** <30% token reduction (refine memory files, add missing context)
+- ❌ **STOP if:** No measurable improvement (investigate root cause before continuing)
+
+---
+
+### Phase 1: Automation (CONDITIONAL)
+**Priority: HIGH - Only if Phase 0 proves effective**
+
+**Goal:** Layer automatic detection and delegation on top of manual foundation.
+
+3. **[Skills System](./02_skills_system.md)** (Weeks 3-4, 7-11 hours) ✅ Plugin-Ready
    - *Why after Memory:* Skills reference memory for activation context
    - *Impact:* 40-60% reduction in manual agent coordination
    - *Complements:* Slash commands (automatic vs manual control)
+   - *Stopping Conditions:* Rate limiting (5-12 activations/hour per skill)
+   - *Error Recovery:* Fallback chains (Primary → Manual → Subagent → Override)
    - *Plugin:* Package in `plugin-name/skills/`
 
-### Phase 2: Advanced Coordination (Weeks 4-7)
-**Priority: MEDIUM-HIGH**
-
-4. **[Enhanced Hooks](./04_enhanced_hooks.md)** (Week 5) ⚠️ Partially Plugin-Ready
-   - *Why mid-phase:* Builds on Skills (logs activations) and Subagents (captures reports)
-   - *Impact:* 100% automated activity tracking
-   - *New events:* Notification, SubagentStop, SessionEnd
-   - *Plugin:* Package `hooks.json` config, scripts may need local install
-
-5. **[Subagents](./03_subagents.md)** (Weeks 5-7) ✅ Plugin-Ready
-   - *Why later:* Complex implementation, benefits from Memory + Skills foundation
+4. **[Subagents](./03_subagents.md)** (Weeks 4-6, parallel, 14.5-21 hours) ✅ Plugin-Ready
+   - *Why parallel:* Independent of Skills, builds on Memory foundation
    - *Impact:* 40-60% token savings for complex isolated tasks
    - *Use cases:* Deep physics analysis, DataFrame refactoring
+   - *Stopping Conditions:* Approval gates (>500 token operations), 50K token budget per subagent
+   - *Timeout Handling:* 10-25 min per subagent, warning at 75%/90%
    - *Plugin:* Package in `plugin-name/agents/`
 
-6. **[Checkpointing](./05_checkpointing.md)** (Week 6) ❌ Not Plugin-Related
-   - *Why low priority:* Already works automatically, just needs documentation
+**Decision Gate 2: Proceed to Phase 2?**
+- ✅ **PROCEED if:** ≥40% automation rate AND team satisfaction with workflow
+- ⚠️ **PAUSE if:** 20-40% automation (adjust skill triggers, refine prompts)
+- ❌ **STOP if:** <20% automation OR skills triggering incorrectly (revert to Phase 0 only)
+
+---
+
+### Phase 2: Safety & Distribution (CONDITIONAL)
+**Priority: MEDIUM - Only if Phase 1 automation proves stable**
+
+**Goal:** Add workflow guardrails and enable team distribution.
+
+5. **[Enhanced Hooks](./04_enhanced_hooks.md)** (Week 7, 5.5-8.5 hours) ⚠️ Partially Plugin-Ready
+   - *Why now:* Builds on Skills (logs activations) and Subagents (captures reports)
+   - *Impact:* 100% automated activity tracking
+   - *New events:* Notification, SubagentStop, SessionEnd
+   - *Graceful Degradation:* Hook failures NEVER block main workflow
+   - *Error Rate Monitoring:* Target <5% hook failure rate
+   - *Plugin:* Package `hooks.json` config, scripts may need local install
+
+6. **[Checkpointing](./05_checkpointing.md)** (Week 7, parallel, 3-4.5 hours) ❌ Not Plugin-Related
+   - *Why parallel:* Already works automatically, just needs documentation
    - *Impact:* Safety net for experiments, minimal setup
-   - *Benefit:* Fearless refactoring with Subagents
+   - *Benefit:* Fearless refactoring with Subagents, zero rollback friction
+   - *Approval Gate Integration:* Automatic checkpoint before expensive operations
    - *Note:* Core Claude Code feature, document usage only
 
-### Phase 3: Optimization (Week 7+)
-**Priority: LOW**
+7. **[Plugin Packaging](./08_plugin_packaging.md)** (Week 8, 8-12 hours) 🎁 Enables Distribution
+   - *Why last in phase:* Package validated features for team distribution
+   - *Effort:* Plugin scaffold + marketplace setup
+   - *Deliverables:* Plugin directory structure, plugin.json manifest, local marketplace
+   - *Enables:* Single-command installation for team
+   - *Version Control:* Semantic versioning, rollback strategy, dependency management
 
-7. **[Output Styles](./06_output_styles.md)** (Week 7) ❌ Not Plugin-Packageable
-   - *Why last:* Refinement of existing Explanatory style, not critical
+**Decision Gate 3: Proceed to Phase 3?**
+- ✅ **PROCEED if:** User feedback indicates Explanatory style insufficient
+- ⚠️ **SKIP (RECOMMENDED):** Current Explanatory style is likely satisfactory
+- ❌ **STOP if:** Team satisfied with current output style (most likely outcome)
+
+---
+
+### Phase 3: Optimization (OPTIONAL)
+**Priority: LOW - Only if demonstrably beneficial**
+
+**Goal:** Custom behavior refinement (rarely needed).
+
+8. **[Output Styles](./06_output_styles.md)** (Week 9+, 2.5-3.5 hours) ❌ Not Plugin-Packageable
+   - *Why optional:* Refinement of existing Explanatory style, not critical
    - *Impact:* Domain-specific physics-focused behavior
-   - *Optional:* Create custom style after other features proven
+   - *Trigger Condition:* Only if user feedback shows need for more physics emphasis
+   - *Anthropic Principle:* Start with simple prompt customization, add custom styles only when needed
    - *Note:* Local configuration (`.claude/output-styles/`), not distributable
+
+**Decision Gate 4: Was it worth it?**
+- ✅ **SUCCESS if:** Measurable improvement in physics-specific interactions
+- ⚠️ **NEUTRAL if:** No noticeable difference (revert, use standard Explanatory style)
+- ❌ **FAILURE if:** Degraded experience (immediate revert)
 
 ---
 
@@ -305,31 +353,56 @@ Context Preservation:
 └── Hooks log planning activity
 ```
 
+### Pattern 4: Stopping Conditions Workflow
+```
+Budget Management:
+├── Session starts with 200K token budget
+├── Memory allocation: ≤10% (20K tokens)
+├── Subagent allocation: 25% per subagent (50K tokens)
+└── Warning thresholds: 75% (150K), 90% (180K), 100% (200K)
+
+Rate Limiting:
+├── Memory imports: Max 20/session
+├── Skills: 5-12 activations/hour per skill
+├── Override: Explicit user request bypasses limits
+└── Monitoring: Log activation counts, warn at thresholds
+
+Approval Gates:
+├── Subagent operations >500 tokens → Request confirmation
+├── Display: Estimated context cost + task description
+├── User choice: [Proceed] [Skip] [Modify Scope]
+└── Integration: Automatic checkpoint before approved operation
+
+Timeout Handling:
+├── Slash commands: 5-10 min default (configurable)
+├── Subagents: 10-25 min based on complexity
+├── Warnings: 75% (continue), 90% (finish soon), 100% (terminate)
+└── Override: TIMEOUT=600 /command or SUBAGENT_TIMEOUT=30m
+```
+
 ---
 
 ## Quick Start: Maximum Impact in Minimum Time
 
-**Week 1-2: Implement These 3 Features**
+**Week 1-2: Implement Phase 0 (Foundation)**
 
-1. **Memory Hierarchy** (9-14h)
+1. **Memory Hierarchy** (19-28h)
    - Create `.claude/memory/` with 9 core files
    - Refactor CLAUDE.md with imports
+   - Implement stopping conditions (rate limiting, budget guards)
    - *Immediate impact:* 30-50% token savings
 
-2. **Slash Commands - Top 3** (30 min)
+2. **Slash Commands - Top 3** (2-3h of 8.5-12h total)
    - `/coverage` - Most frequent
    - `/physics` - Highest time savings
    - `/test` - Quick test runner
+   - Add timeout handling and error recovery
    - *Immediate impact:* 30-60 min/week saved
 
-3. **Skills System - Top 2** (3-4h)
-   - `physics-validator` skill
-   - `test-generator` skill
-   - *Immediate impact:* 20-30% automation increase
-
-**Total effort:** 12.5-18.5 hours
+**Total effort (Phase 0):** 21-31 hours
 **Break-even:** 4-6 weeks
 **First month savings:** 40-60 hours
+**Decision Gate:** Measure ≥30% token reduction before proceeding to Phase 1
 
 ---
 
