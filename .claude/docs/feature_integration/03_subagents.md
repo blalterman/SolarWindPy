@@ -2,7 +2,7 @@
 
 **Feature Type:** Automatic
 **Priority:** MEDIUM-HIGH
-**Effort:** 12-17 hours
+**Effort:** 14.5-21 hours
 **ROI Break-even:** 6-9 weeks
 
 [← Back to Index](./INDEX.md) | [← Previous: Skills](./02_skills_system.md) | [Next: Enhanced Hooks →](./04_enhanced_hooks.md)
@@ -236,6 +236,31 @@ name: physics-validator
 description: Deep physics analysis specialist for solar wind calculations. Validates units conversion patterns, physical constraints, and scientific correctness across multiple files.
 tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*), Bash(pytest*)]
 model: sonnet
+approval_gate_threshold: 800  # tokens - deep multi-file analysis
+context_budget: 50000  # 25% of 200K main session budget
+---
+
+## Approval Gate Configuration
+
+**Trigger:** Estimated context consumption >800 tokens (deep multi-file physics analysis)
+
+**Pre-activation Flow:**
+1. **Estimate context cost:** Calculate based on files to analyze + validation script output
+2. **Display warning:** "PhysicsValidator will consume ~5,000 tokens (10% of session budget). Proceed?"
+3. **User choice:** [Proceed] [Skip] [Reduce Scope - analyze fewer files]
+4. **If proceed:** Create automatic checkpoint, launch subagent
+5. **If skip:** Suggest manual validation or `/physics` command fallback
+
+**Context Budget Allocation:**
+- **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
+- **Typical usage:** 3,000-8,000 tokens per invocation (multi-file analysis)
+- **Warning thresholds:**
+  - 75% (37,500 tokens): "PhysicsValidator approaching budget limit..."
+  - 90% (45,000 tokens): "PhysicsValidator budget critical, reduce scope..."
+  - 100% (50,000 tokens): Block activation, suggest manual validation
+
+**Override:** User can bypass approval gate with explicit confirmation: "Yes, validate all physics files"
+
 ---
 
 # Physics Validator Subagent
@@ -324,7 +349,30 @@ name: dataframe-architect
 description: Pandas MultiIndex optimization specialist. Refactors DataFrame operations for efficiency, manages memory, and ensures proper use of SolarWindPy's (M/C/S) structure.
 tools: [Read, Grep, Edit, Write, Bash(pytest*)]
 model: sonnet
+approval_gate_threshold: 600  # tokens - multi-file DataFrame refactoring
+context_budget: 50000  # 25% of 200K main session budget
 ---
+
+## Approval Gate Configuration
+
+**Trigger:** Estimated context consumption >600 tokens (multi-file DataFrame refactoring tasks)
+
+**Pre-activation Flow:**
+1. **Estimate context cost:** Calculate based on files to refactor + test suite execution
+2. **Display warning:** "DataFrameArchitect will consume ~4,000 tokens (8% of session budget). Proceed?"
+3. **User choice:** [Proceed] [Skip] [Reduce Scope - refactor fewer files]
+4. **If proceed:** Create automatic checkpoint, launch subagent
+5. **If skip:** Suggest manual refactoring or targeted optimization
+
+**Context Budget Allocation:**
+- **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
+- **Typical usage:** 2,500-6,000 tokens per invocation (DataFrame optimization tasks)
+- **Warning thresholds:**
+  - 75% (37,500 tokens): "DataFrameArchitect approaching budget limit..."
+  - 90% (45,000 tokens): "DataFrameArchitect budget critical, reduce scope..."
+  - 100% (50,000 tokens): Block activation, suggest manual optimization
+
+**Override:** User can bypass approval gate with explicit confirmation: "Yes, optimize all DataFrame operations"
 
 # DataFrame Architect Subagent
 
@@ -462,7 +510,30 @@ name: plotting-engineer
 description: Scientific visualization specialist for publication-quality matplotlib figures. Creates plots for solar wind data with proper labels, units, and styling.
 tools: [Read, Write, Edit, Bash(pytest*), Bash(python*)]
 model: sonnet
+approval_gate_threshold: 400  # tokens - publication-quality figure generation
+context_budget: 50000  # 25% of 200K main session budget
 ---
+
+## Approval Gate Configuration
+
+**Trigger:** Estimated context consumption >400 tokens (multi-figure generation or complex visualizations)
+
+**Pre-activation Flow:**
+1. **Estimate context cost:** Calculate based on number of figures + data files to read
+2. **Display warning:** "PlottingEngineer will consume ~3,000 tokens (6% of session budget). Proceed?"
+3. **User choice:** [Proceed] [Skip] [Reduce Scope - generate fewer figures]
+4. **If proceed:** Create automatic checkpoint, launch subagent
+5. **If skip:** Suggest manual plotting or simpler visualization approach
+
+**Context Budget Allocation:**
+- **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
+- **Typical usage:** 2,000-5,000 tokens per invocation (multi-figure generation)
+- **Warning thresholds:**
+  - 75% (37,500 tokens): "PlottingEngineer approaching budget limit..."
+  - 90% (45,000 tokens): "PlottingEngineer budget critical, reduce scope..."
+  - 100% (50,000 tokens): Block activation, suggest manual plotting
+
+**Override:** User can bypass approval gate with explicit confirmation: "Yes, generate all publication figures"
 
 # Plotting Engineer Subagent
 
@@ -578,7 +649,30 @@ name: fit-function-specialist
 description: Statistical analysis and curve fitting expert. Performs optimization, regression analysis, and statistical modeling for solar wind data.
 tools: [Read, Write, Edit, Bash(python*), Bash(pytest*)]
 model: sonnet
+approval_gate_threshold: 700  # tokens - complex multi-parameter fitting and optimization
+context_budget: 50000  # 25% of 200K main session budget
 ---
+
+## Approval Gate Configuration
+
+**Trigger:** Estimated context consumption >700 tokens (complex multi-parameter fitting or optimization tasks)
+
+**Pre-activation Flow:**
+1. **Estimate context cost:** Calculate based on data files to analyze + fitting iterations
+2. **Display warning:** "FitFunctionSpecialist will consume ~4,500 tokens (9% of session budget). Proceed?"
+3. **User choice:** [Proceed] [Skip] [Reduce Scope - fit fewer parameters or datasets]
+4. **If proceed:** Create automatic checkpoint, launch subagent
+5. **If skip:** Suggest manual fitting or simpler statistical approach
+
+**Context Budget Allocation:**
+- **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
+- **Typical usage:** 3,000-7,000 tokens per invocation (multi-parameter optimization)
+- **Warning thresholds:**
+  - 75% (37,500 tokens): "FitFunctionSpecialist approaching budget limit..."
+  - 90% (45,000 tokens): "FitFunctionSpecialist budget critical, reduce scope..."
+  - 100% (50,000 tokens): Block activation, suggest manual fitting
+
+**Override:** User can bypass approval gate with explicit confirmation: "Yes, perform full statistical analysis"
 
 # Fit Function Specialist Subagent
 
@@ -670,6 +764,82 @@ Provide complete analysis including:
 ## Context Access
 @.claude/memory/physics-constants.md
 @.claude/memory/testing-templates.md
+```
+
+#### Timeout Handling
+
+**Rationale:** Subagents perform complex analysis tasks that can consume significant time. Timeouts prevent runaway operations and preserve main session responsiveness.
+
+**Timeout Values by Subagent:**
+
+| Subagent | Default Timeout | Justification |
+|----------|----------------|---------------|
+| PhysicsValidator | 15 minutes | Deep multi-file physics analysis with validation script execution |
+| DataFrameArchitect | 20 minutes | Complex DataFrame refactoring across multiple modules with testing |
+| PlottingEngineer | 10 minutes | Figure generation typically faster, multiple plots per invocation |
+| FitFunctionSpecialist | 25 minutes | Iterative optimization can require extended computation time |
+
+**Warning Thresholds:**
+
+Proactive warnings prevent timeout surprises and allow graceful completion:
+
+**75% Threshold (Continue):**
+```
+⏱️ PhysicsValidator: 11 minutes elapsed (75% of 15 min timeout)
+   Analysis in progress: ion.py validation...
+   Action: Continue normally
+```
+
+**90% Threshold (Finish Soon):**
+```
+⚠️ PhysicsValidator: 13.5 minutes elapsed (90% of 15 min timeout)
+   Warning: 1.5 minutes remaining
+   Suggestion: Prioritize critical findings, defer detailed recommendations
+```
+
+**100% Threshold (Terminate):**
+```
+❌ PhysicsValidator: 15 minutes elapsed (timeout reached)
+   Operation terminated: Analysis incomplete
+   Partial results: Saved to .claude/logs/subagent-physics-validator-partial.md
+   Next steps:
+   1. Review partial results
+   2. Reduce scope (analyze fewer files)
+   3. Increase timeout (override below)
+   4. Manual fallback (/physics command or direct analysis)
+```
+
+**Timeout Override:**
+
+Override default timeouts for known long-running operations:
+
+```bash
+# Set custom timeout for specific subagent
+SUBAGENT_TIMEOUT=30m invoke_subagent physics-validator
+
+# Example: Deep analysis of entire codebase
+User: "TIMEOUT=30m - Validate all physics calculations across the entire codebase"
+Claude: [Sets 30-minute timeout, invokes PhysicsValidator]
+```
+
+**Timeout Handling Best Practices:**
+
+1. **Scope Appropriately:** Break large analysis tasks into smaller chunks (e.g., validate per-file instead of entire codebase)
+2. **Monitor Progress:** Check warning messages at 75% and 90% thresholds
+3. **Preserve Partial Results:** All subagents save partial output before timeout termination
+4. **Fallback Strategy:** If timeout occurs, use manual tools (/physics, /coverage) or reduce scope
+
+**Integration with Approval Gates:**
+
+Timeout warnings are displayed alongside approval gate confirmations:
+
+```
+⚠️ PhysicsValidator Activation Request
+   Estimated tokens: 5,000 (10% of session budget)
+   Estimated time: 8-12 minutes (timeout: 15 min)
+   Files to analyze: 5 ion class files
+
+   [Proceed] [Skip] [Reduce Scope]
 ```
 
 #### Invoking Subagents
@@ -777,9 +947,11 @@ Claude: [Explicitly invokes physics-validator subagent]
 **Estimated Effort:**
 - Subagent definition creation: **6-8 hours** (4 subagents × 1.5-2 hours each)
 - System prompt refinement: **3-4 hours**
+- Approval gate documentation: **2-3 hours** (4 subagents × 30-45 min each)
+- Timeout handling implementation: **1-2 hours**
 - Testing & validation: **2-3 hours**
 - Documentation (selection criteria): **1-2 hours**
-- **Total: 12-17 hours**
+- **Total: 14.5-21 hours**
 
 **Break-even Analysis:**
 - Time saved per week: ~1-2 hours (cleaner context, less token management)
