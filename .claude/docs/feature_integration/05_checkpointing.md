@@ -2,7 +2,7 @@
 
 **Feature Type:** Automatic
 **Priority:** LOW-MEDIUM
-**Effort:** 2-3.5 hours
+**Effort:** 3-4.5 hours
 **ROI Break-even:** 3-5 weeks
 
 [← Back to Index](./INDEX.md) | [Previous: Enhanced Hooks ←](./04_enhanced_hooks.md) | [Next: Output Styles →](./06_output_styles.md)
@@ -104,6 +104,67 @@ Use Cases:
 ✅ **Fully compatible** - Checkpointing is automatic, non-invasive
 ✅ **No configuration needed**
 ✅ **Coexists with git** (orthogonal systems)
+
+#### Approval Gate Integration
+
+**Purpose:** Checkpointing reduces risk of expensive subagent operations, making approval gates less of a barrier to experimentation.
+
+**Checkpoint-Before-Expensive-Operation Pattern:**
+
+When a subagent operation triggers an approval gate (e.g., PhysicsValidator with >800 token threshold), Claude Code automatically creates a checkpoint before proceeding. This provides:
+
+1. **Safety net:** If subagent edits break functionality, revert to pre-operation state instantly
+2. **Confidence boost:** Approval becomes lower-stakes decision ("I can always undo this")
+3. **Exploration enablement:** Try expensive analysis without fear of irreversible changes
+
+**Workflow Example:**
+
+```
+User: "Validate all physics calculations across the entire codebase"
+    ↓
+Approval Gate Triggers:
+⚠️ PhysicsValidator Activation Request
+   Estimated tokens: 12,000 (24% of session budget)
+   Estimated time: 18-22 minutes (timeout: 25 min)
+   Files to analyze: 15 physics modules
+
+   💾 Automatic checkpoint will be created before operation
+
+   [Proceed] [Skip] [Reduce Scope]
+    ↓
+User: [Proceed]
+    ↓
+Claude creates checkpoint → Invokes PhysicsValidator subagent
+    ↓
+Subagent completes, suggests refactoring in 8 files
+    ↓
+User reviews changes:
+  Option A: Accept → Commit changes to git
+  Option B: Reject → Revert to checkpoint (immediate undo)
+```
+
+**Modified Approval Gate Display:**
+
+```
+⚠️ SubagentActivation Request
+   Subagent: FitFunctionSpecialist
+   Estimated context: 7,500 tokens (15% of budget)
+   Estimated time: 12-15 minutes
+
+   💾 Checkpoint: Automatic before operation
+   🔄 Rollback: Available via "Revert to checkpoint" if needed
+
+   Risk: Low (checkpointed, reversible, budget < 20%)
+
+   [Proceed] [Skip] [Reduce Scope]
+```
+
+**Integration Benefits:**
+
+- **Psychological safety:** "Can always revert" mindset encourages experimentation
+- **Reduced friction:** Approval gates feel less consequential with automatic rollback
+- **Exploratory analysis:** Try expensive subagent operations without permanent code changes
+- **Learning opportunity:** Safe to test subagent behavior without breaking existing code
 
 ### 3.5. Risk Assessment
 
@@ -361,9 +422,10 @@ Every Edit/Write operation creates a checkpoint. No manual action required.
 
 **Estimated Effort:**
 - Documentation: **1-2 hours**
+- Approval gate integration documentation: **1 hour**
 - Optional checkpoint-validator hook: **1 hour**
 - Testing & validation: **30 minutes**
-- **Total: 2-3.5 hours**
+- **Total: 3-4.5 hours**
 
 **Break-even Analysis:**
 - Time saved per week: ~20-40 minutes (vs manual git stash/unstash)
