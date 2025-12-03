@@ -2,7 +2,7 @@
 
 **Feature Type:** Infrastructure
 **Priority:** HIGH
-**Effort:** 6-10 hours
+**Effort:** 8-12 hours
 **ROI Break-even:** Immediate (enables distribution)
 
 [← Back to Index](./INDEX.md) | [Previous: Slash Commands ←](./07_slash_commands.md)
@@ -797,6 +797,139 @@ Review checklist:
 
 **Timeline:** If community demand arises
 
+#### 7.3 Version Control and Rollback
+
+**Purpose:** Manage plugin lifecycle with semantic versioning, enable safe updates, and provide rollback capability when updates cause issues.
+
+**Semantic Versioning (MAJOR.MINOR.PATCH):**
+
+```
+MAJOR: Breaking changes (backward-incompatible API changes, removed features)
+MINOR: New features (backward-compatible additions, new commands/skills)
+PATCH: Bug fixes (backward-compatible fixes, documentation updates)
+
+Examples:
+- 1.0.0 → 1.0.1: Fixed bug in /coverage command (PATCH)
+- 1.0.1 → 1.1.0: Added /refactor command (MINOR - new feature)
+- 1.1.0 → 2.0.0: Renamed all commands, removed /old-command (MAJOR - breaking)
+```
+
+**Plugin.json Versioning Structure:**
+
+```json
+{
+  "name": "solarwindpy-devtools",
+  "version": "1.2.3",
+  "compatibility": {
+    "claude-code": ">=1.5.0",
+    "min-version": "1.0.0"
+  },
+  "changelog": [
+    {
+      "version": "1.2.3",
+      "date": "2025-12-03",
+      "changes": [
+        "Added error recovery to /physics command",
+        "Fixed timeout handling in subagents"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2025-11-15",
+      "changes": [
+        "Added /refactor slash command",
+        "New plotting-engineer subagent"
+      ]
+    }
+  ],
+  "breaking-changes": {
+    "2.0.0": "Renamed /test → /run-tests, removed deprecated /old-physics"
+  }
+}
+```
+
+**Rollback Strategy:**
+
+**Pre-Update Backup:**
+```bash
+# Automatic backup before plugin update
+.claude/plugins/solarwindpy-devtools-1.2.3/  # Current version (backed up)
+.claude/plugins/solarwindpy-devtools-1.3.0/  # New version (installing)
+```
+
+**Rollback Command:**
+```bash
+/plugin rollback solarwindpy-devtools 1.2.3
+
+# Or automatic if current version broken
+claude-code --rollback-plugin solarwindpy-devtools
+```
+
+**Scope of Rollback:**
+- ✅ **Restored:** Commands, skills, agents, hooks from previous version
+- ✅ **Preserved:** User data, logs, session history
+- ❌ **Not restored:** External dependencies (must reinstall manually if changed)
+
+**Dependency Management:**
+
+**Required Dependencies (Installation Validation):**
+
+```json
+{
+  "dependencies": {
+    "pytest": {
+      "version": ">=7.0.0",
+      "required": true,
+      "install-command": "pip install pytest>=7.0.0",
+      "validation": "pytest --version"
+    },
+    "black": {
+      "version": ">=23.0.0",
+      "required": false,
+      "install-command": "pip install black>=23.0.0",
+      "validation": "black --version"
+    }
+  }
+}
+```
+
+**Installation Validation Flow:**
+
+```
+Plugin Install → Check required dependencies → Missing? → Show installation commands → User installs → Validate → Success
+                                             ↓
+                                         All present → Install plugin → Success
+```
+
+**Graceful Degradation (Missing Optional Dependencies):**
+
+```bash
+# Example: black formatter not installed
+/coverage command runs successfully
+/physics validation runs successfully
+/format-code → Warning: "black not found, skipping formatting. Install: pip install black>=23.0.0"
+```
+
+**Dependency Fallback Chain:**
+
+```
+Primary Tool (pytest) → Not found → Alternative Tool (unittest) → Not found → Manual fallback
+```
+
+**Version Compatibility Checks:**
+
+```bash
+# Before installation
+if claude_code_version < min_claude_code_version:
+    error("Plugin requires Claude Code >=1.5.0, current version: 1.4.2")
+    exit(1)
+
+# After installation
+if plugin_version incompatible with existing_plugins:
+    warn("solarwindpy-advanced requires solarwindpy-devtools ^1.0.0")
+    prompt("Update solarwindpy-devtools? [Y/n]")
+```
+
 ### 8. Priority & Effort Estimation
 
 **Impact Level:** 🔴 **HIGH**
@@ -863,10 +996,11 @@ Review checklist:
 **Initial Setup:**
 - Plugin structure creation: **1-2 hours**
 - Feature packaging: **2-3 hours** (copy from local implementations)
+- Version control and rollback documentation: **2 hours**
 - Local marketplace setup: **1 hour**
 - Testing & validation: **1-2 hours**
 - Documentation (README): **1-2 hours**
-- **Total: 6-10 hours**
+- **Total: 8-12 hours**
 
 **Ongoing Maintenance:**
 - Version bumps: **15-30 min** per release
