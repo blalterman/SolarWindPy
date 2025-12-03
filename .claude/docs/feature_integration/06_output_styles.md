@@ -16,6 +16,20 @@ See: [Plugin Packaging](./08_plugin_packaging.md#62-output-styles)
 
 ---
 
+**⚠️ PHASE 3 OPTIONAL ENHANCEMENT**
+
+**Trigger Condition:** Only implement if Explanatory style proves insufficient
+
+**Decision Criteria:**
+- ✅ **Implement if:** User feedback indicates need for more domain-specific physics emphasis
+- ❌ **Skip if:** Current Explanatory style is satisfactory (likely outcome)
+
+**Anthropic Best Practice:** "Start with simple prompt customization. Add complexity like custom styles only when demonstrably beneficial."
+
+**Status:** NOT REQUIRED for Phases 0-2. Defer decision until Phase 2 completion.
+
+---
+
 ## Feature 6: Output Styles
 
 ### 1. Feature Overview
