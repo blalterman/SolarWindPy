@@ -9,6 +9,17 @@
 
 ---
 
+**⚠️ PREREQUISITES: PHASE 1 (CONDITIONAL)**
+
+**Complete Phase 0 before implementing this feature:**
+- ✅ Memory Hierarchy (01_memory_hierarchy.md) implemented
+- ✅ Slash Commands (07_slash_commands.md) implemented
+- ✅ Decision Gate 1 PASSED (≥30% token reduction, ≥60 min/week saved)
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
+
+---
+
 **✅ OFFICIAL PLUGIN FEATURE - Native Support**
 
 Subagents (called "agents" in plugin spec) are officially supported as plugin components (plugin-name/agents/).

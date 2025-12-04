@@ -743,6 +743,92 @@ Review checklist:
 
 **No Integration Needed:** Checkpointing works automatically regardless of plugin.
 
+#### Skills
+
+**Packaging:**
+- Skills are officially supported in plugins
+- Include skill YAML files in `plugin-name/skills/` directory
+- Skills auto-register when plugin installs
+
+**Integration:**
+```yaml
+# Example: plugin-name/skills/physics-validator.yaml
+name: physics-validator
+version: 1.0.0
+triggers:
+  - "thermal speed"
+  - "plasma beta"
+  - "SI units"
+```
+
+**See:** [Skills System](./02_skills_system.md) for implementation details.
+
+#### Subagents
+
+**Packaging:**
+- Subagents are officially supported in plugins (called "agents" in plugin spec)
+- Include agent definitions in `plugin-name/agents/` directory
+- Agents register when plugin installs
+
+**Integration:**
+```json
+// Example: plugin-name/agents/physics-validator.json
+{
+  "name": "PhysicsValidator",
+  "description": "Deep physics analysis with constraint validation",
+  "model": "sonnet",
+  "tools": ["Read", "Bash", "Grep"]
+}
+```
+
+**See:** [Subagents](./03_subagents.md) for implementation details.
+
+#### Hooks
+
+**Packaging:**
+- Hook configurations officially supported in plugins
+- Include `hooks.json` in `plugin-name/hooks/` directory
+- Executable scripts (`.sh` files) may need local installation for security
+
+**Integration:**
+```json
+// Example: plugin-name/hooks/hooks.json
+{
+  "hooks": [
+    {
+      "event": "file-edit",
+      "pattern": "*.py",
+      "script": "physics-validation.sh"
+    }
+  ]
+}
+```
+
+**Note:** Users install executable scripts separately to `.claude/hooks/` for security.
+
+**See:** [Enhanced Hooks](./04_enhanced_hooks.md) for implementation details.
+
+#### Slash Commands
+
+**Packaging:**
+- Slash commands are officially supported in plugins
+- Include command markdown files in `plugin-name/commands/` directory
+- Commands register when plugin installs
+
+**Integration:**
+```markdown
+<!-- Example: plugin-name/commands/coverage.md -->
+# /coverage
+
+Display test coverage report for SolarWindPy.
+
+\`\`\`bash
+pytest --cov=solarwindpy --cov-report=term -q
+\`\`\`
+```
+
+**See:** [Slash Commands](./07_slash_commands.md) for implementation details.
+
 ### 7. Advanced Features
 
 #### 7.1 MCP Server Integration

@@ -9,6 +9,19 @@
 
 ---
 
+**⚠️ PREREQUISITES: PHASE 2 (CONDITIONAL)**
+
+**Note:** Checkpointing has no technical dependencies but is part of Phase 2 organizational structure.
+
+**Recommended to complete Phase 1 first:**
+- ✅ Memory Hierarchy (01) + Slash Commands (07) implemented (Phase 0)
+- ✅ Skills System (02) + Subagents (03) implemented (Phase 1)
+- ✅ Decision Gate 2 PASSED (≥40% automation, positive team feedback)
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
+
+---
+
 **ℹ️ NOT A PLUGIN FEATURE - Core Claude Code Capability**
 
 Checkpointing is a built-in Claude Code feature (automatic edit tracking). Not configurable or plugin-related.

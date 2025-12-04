@@ -9,6 +9,21 @@
 
 ---
 
+**⚠️ PREREQUISITES: PHASE 3 (OPTIONAL)**
+
+**This feature is OPTIONAL. Only implement if Decision Gate 3 indicates user need.**
+
+**Complete Phase 2 before implementing (if needed):**
+- ✅ All Phase 0-1 features implemented
+- ✅ Enhanced Hooks (04) + Checkpointing (05) + Plugin Packaging (08) implemented (Phase 2)
+- ✅ Decision Gate 3: User feedback indicates Explanatory style insufficient for physics work
+
+**⚠️ RECOMMENDED: SKIP Phase 3 unless explicitly requested by team.**
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
+
+---
+
 **❌ NOT A PLUGIN FEATURE - Local Configuration**
 
 Output styles are personal/team preferences (not distributable). Stored in `.claude/output-styles/` locally.

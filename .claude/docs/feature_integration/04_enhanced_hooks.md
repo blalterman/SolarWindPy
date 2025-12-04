@@ -9,6 +9,17 @@
 
 ---
 
+**⚠️ PREREQUISITES: PHASE 2 (CONDITIONAL)**
+
+**Complete Phase 1 before implementing this feature:**
+- ✅ Memory Hierarchy (01) + Slash Commands (07) implemented (Phase 0)
+- ✅ Skills System (02) + Subagents (03) implemented (Phase 1)
+- ✅ Decision Gate 2 PASSED (≥40% automation, positive team feedback)
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
+
+---
+
 **⚠️ OFFICIAL PLUGIN FEATURE - Partial Support**
 
 **What's Supported in Plugins:**
