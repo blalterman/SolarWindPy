@@ -1077,6 +1077,77 @@ Expected: Installation from remote repository succeeds
 - ✅ Team auto-install works from settings.json
 - ✅ GitHub marketplace installation succeeds
 
+#### Installation Testing Procedure (Objective Pass/Fail Validation)
+
+**Purpose:** Formal validation checklist for Critique Point 8 in integration_checklist.md
+
+**Test Environment:** Clean `.claude/` directory (backup and remove existing config before testing)
+
+**Procedure:**
+1. **Fresh Installation Test** (Pass/Fail)
+   - [ ] Install plugin in clean `.claude/` directory: `/plugin install solarwindpy-devtools`
+   - [ ] Verify plugin.json loaded: `/plugin info solarwindpy-devtools`
+   - [ ] Check no errors in `.claude/logs/plugin-*.log`
+   - **Pass Criteria:** Plugin shows as "installed" with correct version
+
+2. **Command Validation Test** (Pass/Fail)
+   - [ ] Test all 10 slash commands execute without errors:
+     - `/coverage` - displays coverage report
+     - `/physics` - runs physics validation
+     - `/test-changed` - tests modified files
+     - `/test-physics` - runs physics tests
+     - `/clean` - runs cleanup
+     - `/breakdown` - shows capability breakdown
+     - `/physics-validate` - validates physics constraints
+     - `/memory` - displays memory hierarchy
+     - `/checkpoint` - shows checkpoint status
+     - `/propositions` - analyzes with value propositions
+   - **Pass Criteria:** All 10 commands execute, no "command not found" errors
+
+3. **Skill Validation Test** (Pass/Fail)
+   - [ ] Trigger each skill with appropriate phrase:
+     - PhysicsValidator: Mention "thermal speed calculation"
+     - DataFrameArchitect: Mention "MultiIndex operation"
+     - TestEngineer: Mention "need test coverage analysis"
+     - NumericalStabilityGuard: Mention "numerical precision concern"
+   - [ ] Verify skills auto-activate (check for skill activation messages)
+   - **Pass Criteria:** ≥3 of 4 skills auto-activate correctly
+
+4. **Agent Validation Test** (Pass/Fail)
+   - [ ] Manually invoke each agent type
+   - [ ] Verify agent creates isolated context window
+   - [ ] Check agent reports returned successfully
+   - **Pass Criteria:** All 4 agents invocable, context isolation confirmed
+
+5. **Hook Validation Test** (Pass/Fail)
+   - [ ] Perform actions that trigger hooks (file edits, git operations)
+   - [ ] Check `.claude/logs/` for hook execution logs
+   - [ ] Verify hooks execute without blocking operations
+   - **Pass Criteria:** Hooks trigger, logs generated, no blocking errors
+
+6. **Dependency Test** (Pass/Fail)
+   - [ ] Simulate missing dependency (e.g., rename pytest temporarily)
+   - [ ] Verify graceful degradation (warning message, not crash)
+   - [ ] Restore dependency, verify functionality returns
+   - **Pass Criteria:** Missing dependencies show warnings, don't crash plugin
+
+7. **Error Recovery Test** (Pass/Fail)
+   - [ ] Introduce deliberate errors (malformed command syntax)
+   - [ ] Verify error messages are clear and actionable
+   - [ ] Confirm plugin remains stable after errors
+   - **Pass Criteria:** Errors handled gracefully, plugin doesn't become unusable
+
+8. **Final Validation** (Pass/Fail)
+   - [ ] Check `.claude/logs/` for any ERROR-level entries
+   - [ ] Verify all features operational after complete test suite
+   - [ ] Confirm plugin can be cleanly uninstalled: `/plugin uninstall solarwindpy-devtools`
+   - **Pass Criteria:** No ERROR logs, clean uninstall successful
+
+**Overall Test Result:**
+- **PASS:** All 8 tests pass (≥7 individual pass criteria met)
+- **FAIL:** Any critical test fails (commands non-functional, installation broken)
+- **PARTIAL PASS:** Minor issues (e.g., 1 skill doesn't auto-activate) - acceptable with documentation
+
 **Monitoring:**
 ```bash
 # Check installed plugins

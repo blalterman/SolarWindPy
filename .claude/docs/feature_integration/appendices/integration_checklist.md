@@ -410,6 +410,8 @@
 
 **Evidence to Collect:**
 - [ ] Installation success: Did local install work smoothly?
+  - **Methodology:** Follow formal testing procedure in [08_plugin_packaging.md](../08_plugin_packaging.md#installation-testing-procedure-objective-passfail-validation)
+  - Use 8-step checklist for objective pass/fail validation
 - [ ] Feature completeness: All commands/skills/agents/hooks functional?
 - [ ] Documentation quality: README clear and complete?
 - [ ] Dependency handling: Missing dependencies handled gracefully?
@@ -541,6 +543,8 @@
 - [ ] Create troubleshooting guide for common issues
 - [ ] Update CLAUDE.md with feature usage best practices
 - [ ] Create integration project retrospective document
+  - **Template:** Use [retrospective-template.md](../templates/retrospective-template.md) for comprehensive assessment
+  - Covers: Quantitative metrics, qualitative assessment, technical debt, success/failure patterns, recommendations
 
 ### Merge to Master
 - [ ] Ensure all tests passing on feature branch

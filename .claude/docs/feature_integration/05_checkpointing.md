@@ -425,7 +425,7 @@ Every Edit/Write operation creates a checkpoint. No manual action required.
 - Approval gate integration documentation: **1 hour**
 - Optional checkpoint-validator hook: **1 hour**
 - Testing & validation: **30 minutes**
-- **Total: 3-4.5 hours**
+- **Total: 3.5-4.5 hours**
 
 **Break-even Analysis:**
 - Time saved per week: ~20-40 minutes (vs manual git stash/unstash)

@@ -20,18 +20,25 @@ This documentation covers **8 features** (7 original + plugin packaging) for int
 
 | Feature | Type | Impact | Effort | Decision Gate | ROI Break-even | Plugin-Ready |
 |---------|------|--------|--------|---------------|----------------|--------------|
-| [Memory Hierarchy](./01_memory_hierarchy.md) | Auto | CRITICAL | 19-28h | ≥30% token reduction | 4-6 weeks | ❌ Infrastructure |
+| [Memory Hierarchy](./01_memory_hierarchy.md) | Auto | CRITICAL | 19-30h | ≥30% token reduction | 4-6 weeks | ❌ Infrastructure |
 | [Slash Commands](./07_slash_commands.md) | Manual | HIGH | 8.5-12h | ≥60 min/week saved | 3-4 weeks | ✅ Yes |
 | [Skills System](./02_skills_system.md) | Auto | HIGH | 7-11h | ≥40% automation rate | 3-4 weeks | ✅ Yes |
 | [Subagents](./03_subagents.md) | Auto | MED-HIGH | 14.5-21h | ≥40% token savings | 6-9 weeks | ✅ Yes |
 | [Enhanced Hooks](./04_enhanced_hooks.md) | Auto | LOW-MED | 5.5-8.5h | 100% activity tracking | 4-6 weeks | ⚠️ Partial |
-| [Checkpointing](./05_checkpointing.md) | Auto | LOW-MED | 3-4.5h | Zero rollback friction | 3-5 weeks | ❌ Core Feature |
+| [Checkpointing](./05_checkpointing.md) | Auto | LOW-MED | 3.5-4.5h | Zero rollback friction | 3-5 weeks | ❌ Core Feature |
 | [Output Styles](./06_output_styles.md) | Manual | LOW | 2.5-3.5h | User satisfaction | 8-12 weeks | ❌ Local Config |
 | **[Plugin Packaging](./08_plugin_packaging.md)** | **Infra** | **HIGH** | **8-12h** | **Install success** | **Immediate** | **N/A** |
 
 **Combined Impact:**
-- **Implementation:** 69-106 hours over 8-9 weeks (includes stopping conditions & error recovery)
+- **Implementation:** 69-106 hours over 8-9 weeks
+  - Individual features: 68.5-102.5h (Memory 19-30h + Commands 8.5-12h + Skills 7-11h + Subagents 14.5-21h + Hooks 5.5-8.5h + Checkpointing 3.5-4.5h + Styles 2.5-3.5h + Plugin 8-12h)
+  - Integration & testing overhead: 0.5-3.5h (cross-feature testing, decision gate validation, documentation review)
+  - **Total: 69-106h** (rounded, includes comprehensive stopping conditions & error recovery)
 - **Token Savings:** 50-70% overall reduction
+  - **Methodology:** Memory (30-50% savings across all sessions) + Subagents (40-60% savings for complex tasks, ~20-30% of work)
+  - **Calculation:** Base savings from Memory: 30-50% (applies universally) + Additional savings from Subagents: 20-30% of sessions × 40-60% savings = 8-18% additional
+  - **Combined:** 38-68% realistic baseline, 50-70% achievable with heavy subagent usage for complex analyses
+  - **Non-overlapping contexts:** Memory reduces repeated context-setting across all sessions; Subagents isolate complex analysis tasks to prevent context pollution
 - **Time Savings:** 350-670 hours annually
 - **Break-even:** 3-6 weeks (faster via single-command plugin install)
 - **Bonus:** Community distribution capability via marketplace

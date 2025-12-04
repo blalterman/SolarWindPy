@@ -799,9 +799,9 @@ grep "@.claude/memory/" .claude/logs/session-*.log | wc -l
 | Category | Budget | Percentage | Justification |
 |----------|--------|------------|---------------|
 | Memory files | 20K tokens | 10% | Persistent project context |
-| Conversation | 80K tokens | 40% | User messages + assistant responses |
+| Conversation | 70K tokens | 35% | User messages + assistant responses |
 | Tool outputs | 60K tokens | 30% | File reads, grep results, bash output |
-| Subagents | 40K tokens | 20% | Delegated task reports |
+| Subagents | 50K tokens | 25% | Delegated task reports |
 | **Total** | **200K tokens** | **100%** | Full context window |
 
 **Enforcement:**
@@ -887,7 +887,7 @@ python .claude/scripts/count-memory-tokens.py
 - Add metrics infrastructure: **4-6 hours** (token counting, budget tracking, CI/CD enforcement)
 - Testing & validation: **2-3 hours**
 - Documentation: **1-2 hours**
-- **Total: 19-28 hours**
+- **Total: 19-30 hours**
 
 **Note:** Increased from 9-14h to account for stopping conditions and metrics infrastructure required for safe deployment. These additions prevent memory system from consuming excessive context budget and enable measurement of ≥30% token reduction goal.
 
