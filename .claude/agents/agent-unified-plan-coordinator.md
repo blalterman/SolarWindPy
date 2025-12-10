@@ -52,7 +52,7 @@ Automatically manage session continuity:
 
 ### Proactive Task Routing
 Intelligently delegate to domain specialists when needed:
-- **Physics calculations** → PhysicsValidator sub-agent
+- **Physics calculations** → NumericalStabilityGuard sub-agent (for numerical validation)
 - **DataFrame operations** → DataFrameArchitect sub-agent  
 - **Numerical computations** → NumericalStabilityGuard sub-agent
 - **Plotting tasks** → PlottingEngineer sub-agent

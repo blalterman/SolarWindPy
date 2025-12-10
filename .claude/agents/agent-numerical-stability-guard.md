@@ -320,7 +320,7 @@ def stable_log_sum_exp(x):
 
 ## Integration Points
 
-- Validates calculations from **PhysicsValidator**
+- Validates numerical stability of physics calculations
 - Ensures stability in **FitFunctionSpecialist** optimizations
 - Protects numerical algorithms in all domain agents
 - Provides test cases for **TestEngineer**

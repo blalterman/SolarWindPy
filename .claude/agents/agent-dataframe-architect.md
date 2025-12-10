@@ -129,7 +129,7 @@ del temp_df
 
 ## Integration Points
 
-- Coordinates with **PhysicsValidator** for data consistency
+- Ensures data consistency with code-style.md unit conventions
 - Provides structure for **TestEngineer** test cases
 - Implements memory-efficient DataFrame patterns
 - Ensures compatibility with **PlottingEngineer**

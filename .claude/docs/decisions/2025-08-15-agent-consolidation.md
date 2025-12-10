@@ -43,9 +43,9 @@ The feature integration planning documents (`.claude/docs/feature_integration/03
 ### Agents Retained (7)
 
 **Domain Expertise Agents:**
-1. **PhysicsValidator** - Solar wind physics validation (HIGH priority)
+1. **PhysicsValidator** - Solar wind physics validation (HIGH priority) *[Removed Dec 2025 - see update below]*
 2. **DataFrameArchitect** - MultiIndex data structure management (HIGH priority)
-3. **NumericalStabilityGuard** - Numerical precision and edge cases (HIGH priority)
+3. **NumericalStabilityGuard** - Numerical precision and edge cases (HIGH priority) *[Removed Dec 2025 - see update below]*
 4. **PlottingEngineer** - Publication-quality visualization (MEDIUM priority)
 5. **FitFunctionSpecialist** - Statistical analysis and curve fitting (MEDIUM priority)
 6. **TestEngineer** - Domain-specific testing strategies (MEDIUM priority)
@@ -86,9 +86,9 @@ Original 3-agent planning system (PlanManager, PlanImplementer, PlanStatusAggreg
 
 Domain agents leverage AI reasoning for specialized expertise:
 
-- **PhysicsValidator**: Validates complex solar wind physics constraints
+- **PhysicsValidator**: Validates complex solar wind physics constraints *[Removed Dec 2025]*
 - **DataFrameArchitect**: Optimizes MultiIndex patterns requiring pandas knowledge
-- **NumericalStabilityGuard**: Identifies numerical edge cases and precision issues
+- **NumericalStabilityGuard**: Identifies numerical edge cases and precision issues *[Removed Dec 2025]*
 - **PlottingEngineer**: Creates publication-quality scientific visualizations
 - **FitFunctionSpecialist**: Designs statistical analysis and fitting strategies
 - **TestEngineer**: Develops physics-specific test strategies
@@ -229,3 +229,64 @@ Consider resurrecting agents if:
 - Agent count: -50% (14 → 7)
 - Context size: -54.4% (3,895 → 1,776 lines)
 - Token overhead: Significant reduction in agent loading time
+
+---
+
+## Update: December 10, 2025
+
+**Status:** Further consolidation - 7 → 5 agents (-28% additional reduction)
+
+### Additional Agents Removed
+
+**PhysicsValidator removal rationale:**
+- **Descoped to unit patterns**: Responsibilities moved to code-style.md (lines 248-271)
+- **SI units convention**: Already documented in code-style.md
+- **mw² = 2kT thermal speed**: Already documented in calculation-patterns.md
+- **Physics validation**: Handled by test suite (pytest), not proactive agent
+- **Zero implementation**: Grep confirmed no usage in solarwindpy/ codebase
+
+**NumericalStabilityGuard removal rationale:**
+- **Zero implementation**: 346 lines of patterns with 0% adoption in solarwindpy/
+- **Documentation debt**: Maintaining unused patterns creates AI confusion
+- **Edge case discovery**: Handled by TestEngineer agent through comprehensive test coverage
+- **Numerical operations**: Delegated to FitFunctionSpecialist for curve fitting/optimization
+- **Test suite coverage**: Pytest catches overflow/NaN/inf - no proactive agent needed
+
+### Final Agent Ecosystem (5 agents)
+
+**Priority 1: Coordination**
+1. **UnifiedPlanCoordinator** - Planning, implementation, project management
+
+**Priority 2: Domain Specialists**
+2. **DataFrameArchitect** - MultiIndex operations, pandas optimization
+3. **FitFunctionSpecialist** - Curve fitting, statistical analysis, numerical operations
+4. **PlottingEngineer** - Visualization, matplotlib expertise
+
+**Priority 3: Quality Assurance**
+5. **TestEngineer** - Test coverage (≥95%), edge case validation
+
+### Impact Metrics (Aug 2025 → Dec 2025)
+
+**Agent reduction:**
+- Original: 14 agents (July 2025)
+- August consolidation: 7 agents (-50%)
+- December consolidation: 5 agents (-64% total, -28% from August)
+
+**Token savings:**
+- August baseline: 7 agents ≈ 5,000 tokens
+- December: 5 agents ≈ 3,500 tokens
+- **Additional savings: ~1,500 tokens (30% agent overhead reduction)**
+
+**Evidence for removal:**
+```bash
+# PhysicsValidator: 90+ references removed
+grep -r "PhysicsValidator" .claude/ --exclude-dir=.git  # 0 results
+
+# NumericalStabilityGuard: 9 references removed
+grep -r "NumericalStabilityGuard" .claude/ --exclude-dir=.git  # 0 results
+
+# Zero implementation confirmed
+grep -r "safe_exp|safe_log|safe_divide|kahan_sum" solarwindpy/  # 0 results
+```
+
+This consolidation maintains all essential functionality while eliminating aspirational guidance that created documentation debt and AI confusion.

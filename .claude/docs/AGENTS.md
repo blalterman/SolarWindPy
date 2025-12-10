@@ -10,12 +10,6 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 - **Critical**: MUST execute CLI scripts, not describe them
 - **Usage**: `"Use UnifiedPlanCoordinator to create GitHub Issues plan for <feature>"`
 
-### PhysicsValidator  
-- **Purpose**: Physics correctness and unit validation
-- **Capabilities**: Solar wind physics constraints, scientific validation
-- **Critical**: Thermal speed mw² = 2kT, SI units, NaN for missing data
-- **Usage**: `"Use PhysicsValidator to verify thermal speed calculations"`
-
 ### DataFrameArchitect
 - **Purpose**: MultiIndex data structure management  
 - **Capabilities**: Pandas performance optimization, memory management
@@ -67,16 +61,14 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 "Use UnifiedPlanCoordinator to create GitHub Issues plan for dark mode implementation"
 
 # Domain-specific work
-"Use PhysicsValidator to verify thermal speed calculations"
-"Use DataFrameArchitect to optimize MultiIndex operations"  
+"Use DataFrameArchitect to optimize MultiIndex operations"
 "Use PlottingEngineer to create publication-quality figures"
 "Use TestEngineer to design physics-specific test strategies"
 ```
 
 ## Agent Selection Guidelines
 - **Planning tasks** → UnifiedPlanCoordinator
-- **Physics calculations** → PhysicsValidator
-- **Data structure optimization** → DataFrameArchitect  
+- **Data structure optimization** → DataFrameArchitect
 - **Numerical precision** → NumericalStabilityGuard
 - **Visualization** → PlottingEngineer
 - **Statistical analysis** → FitFunctionSpecialist
@@ -130,9 +122,9 @@ The following agents were documented as "Planned Agents" in `.claude/agents.back
 
 ### IonSpeciesValidator
 - **Planned purpose**: Ion-specific physics validation (thermal speeds, mass/charge ratios, anisotropies)
-- **Decision rationale**: Functionality fully covered by existing PhysicsValidator agent
-- **Current status**: PhysicsValidator handles all ion validation requirements
-- **Implementation**: No separate agent needed - PhysicsValidator is comprehensive
+- **Decision rationale**: Functionality covered by test suite and code-style.md conventions
+- **Current status**: Physics validation handled by TestEngineer and pytest
+- **Implementation**: No separate agent needed - test-driven validation is sufficient
 
 ### CIAgent
 - **Planned purpose**: Continuous integration management for GitHub Actions workflows

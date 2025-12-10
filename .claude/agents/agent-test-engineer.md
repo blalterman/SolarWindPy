@@ -78,7 +78,6 @@ Focus expertise on testing:
 ## Integration with Domain Agents
 
 Coordinate testing efforts with:
-- **PhysicsValidator**: Get constraint identification and validation rules
 - **NumericalStabilityGuard**: Discover edge cases and stability requirements
 - **DataFrameArchitect**: Ensure proper MultiIndex structure testing
 - **FitFunctionSpecialist**: Define convergence criteria and fitting validation
