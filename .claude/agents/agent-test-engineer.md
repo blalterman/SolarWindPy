@@ -78,9 +78,10 @@ Focus expertise on testing:
 ## Integration with Domain Agents
 
 Coordinate testing efforts with:
-- **NumericalStabilityGuard**: Discover edge cases and stability requirements
 - **DataFrameArchitect**: Ensure proper MultiIndex structure testing
 - **FitFunctionSpecialist**: Define convergence criteria and fitting validation
+
+Discovers edge cases and numerical stability requirements through comprehensive test coverage (≥95%)
 
 ## Test Infrastructure (Automated via Hooks)
 

@@ -46,7 +46,7 @@ Subagents are specialized AI assistants with independent context windows and cus
 | Aspect | Task Tool (Current) | Subagents |
 |--------|---------------------|-----------|
 | Context | Shares main conversation context | Independent context window |
-| Invocation | Named agent types (PhysicsValidator, etc.) | Custom agent files |
+| Invocation | Named agent types (DataFrameArchitect, etc.) | Custom agent files |
 | Memory | Accumulates in main conversation | Isolated, doesn't pollute main |
 | Tool Access | Inherits all tools | Configurable per subagent |
 | Complexity | Simpler, for straightforward delegation | Better for complex isolated tasks |
@@ -63,7 +63,7 @@ Subagents are specialized AI assistants with independent context windows and cus
 
 ✅ **Agent Coordination Overhead (MEDIUM-HIGH IMPACT)**
 *Current state:* All agent interactions accumulate in main conversation context
-*With Subagents:* Complex physics analysis or DataFrame refactoring runs in isolated context
+*With Subagents:* Complex DataFrame refactoring or multi-file analysis runs in isolated context
 *Improvement:* 30-40% reduction in main conversation token bloat from multi-step agent tasks
 
 ✅ **Token Usage Optimization (HIGH IMPACT)**
@@ -82,9 +82,9 @@ Subagents are specialized AI assistants with independent context windows and cus
 - Specialized expertise without polluting general context
 
 **Research Workflow Enhancements:**
-- Deep physics analysis without cluttering main session
 - Complex DataFrame transformations in isolation
-- Multi-step test generation without context bloat
+- Multi-file refactoring without cluttering main session
+- Memory profiling and optimization without context bloat
 
 ### 3. Integration Strategy
 
@@ -102,8 +102,8 @@ Decision Tree:
     └── Use Subagent (independent context, deep expertise)
 
 Examples:
-- "Verify units conversion pattern" → Skill (physics-validator)
-- "Check physics correctness in ion.py" → Task (PhysicsValidator)
+- "Optimize DataFrame access pattern" → Skill (multiindex-architect)
+- "Check DataFrame memory usage in plasma.py" → Task (DataFrameArchitect)
 - "Refactor entire Plasma class for better memory efficiency, analyze trade-offs" → Subagent (dataframe-architect)
 ```
 
@@ -119,10 +119,10 @@ Examples:
 **Which Agents to Convert:**
 
 ✅ **Good Subagent Candidates:**
-- **PhysicsValidator** - Deep analysis, formula derivation (context-heavy)
 - **DataFrameArchitect** - Complex refactoring, memory profiling (multi-step)
 - **PlottingEngineer** - Iterative plot refinement (exploratory)
 - **FitFunctionSpecialist** - Statistical analysis, optimization (isolated work)
+- **NumericalStabilityGuard** - Precision analysis, error propagation (context-heavy)
 
 ⚠️ **Keep as Task Agents:**
 - **UnifiedPlanCoordinator** - Needs to execute CLI scripts in main context
@@ -237,40 +237,40 @@ Examples:
 
 #### Proposed Subagent Definitions
 
-##### Subagent 1: PhysicsValidator
+##### Subagent 1: DataFrameArchitect
 
-**File:** `.claude/agents/physics-validator.md`
+**File:** `.claude/agents/dataframe-architect.md`
 
 ```yaml
 ---
-name: physics-validator
-description: Deep physics analysis specialist for solar wind calculations. Validates units conversion patterns, physical constraints, and scientific correctness across multiple files.
-tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*), Bash(pytest*)]
+name: dataframe-architect
+description: Deep DataFrame analysis specialist for solar wind data structures. Optimizes MultiIndex operations, memory efficiency, and pandas patterns across multiple files.
+tools: [Read, Grep, Bash(pytest*)]
 model: sonnet
 approval_gate_threshold: 800  # tokens - deep multi-file analysis
-context_budget: 50000  # 25% of 200K main session budget
+context_budget: 40000  # 20% of 200K main session budget
 ---
 
 ## Approval Gate Configuration
 
-**Trigger:** Estimated context consumption >800 tokens (deep multi-file physics analysis)
+**Trigger:** Estimated context consumption >800 tokens (deep multi-file DataFrame analysis)
 
 **Pre-activation Flow:**
-1. **Estimate context cost:** Calculate based on files to analyze + validation script output
-2. **Display warning:** "PhysicsValidator will consume ~5,000 tokens (10% of session budget). Proceed?"
+1. **Estimate context cost:** Calculate based on files to analyze + memory profiling output
+2. **Display warning:** "DataFrameArchitect will consume ~4,000 tokens (8% of session budget). Proceed?"
 3. **User choice:** [Proceed] [Skip] [Reduce Scope - analyze fewer files]
 4. **If proceed:** Create automatic checkpoint, launch subagent
-5. **If skip:** Suggest manual validation or `/physics` command fallback
+5. **If skip:** Suggest manual optimization or direct Task tool usage
 
 **Context Budget Allocation:**
 - **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
 - **Typical usage:** 3,000-8,000 tokens per invocation (multi-file analysis)
 - **Warning thresholds:**
-  - 75% (37,500 tokens): "PhysicsValidator approaching budget limit..."
-  - 90% (45,000 tokens): "PhysicsValidator budget critical, reduce scope..."
-  - 100% (50,000 tokens): Block activation, suggest manual validation
+  - 75% (30,000 tokens): "DataFrameArchitect approaching budget limit..."
+  - 90% (36,000 tokens): "DataFrameArchitect budget critical, reduce scope..."
+  - 100% (40,000 tokens): Block activation, suggest manual optimization
 
-**Override:** User can bypass approval gate with explicit confirmation: "Yes, validate all physics files"
+**Override:** User can bypass approval gate with explicit confirmation: "Yes, optimize all DataFrame files"
 
 ---
 

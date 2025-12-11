@@ -11,28 +11,22 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 - **Usage**: `"Use UnifiedPlanCoordinator to create GitHub Issues plan for <feature>"`
 
 ### DataFrameArchitect
-- **Purpose**: MultiIndex data structure management  
+- **Purpose**: MultiIndex data structure management
 - **Capabilities**: Pandas performance optimization, memory management
 - **Critical**: Use .xs() for views, (M/C/S) level structure
 - **Usage**: `"Use DataFrameArchitect to optimize MultiIndex operations"`
 
-### NumericalStabilityGuard
-- **Purpose**: Numerical validation and edge cases
-- **Capabilities**: Prevents numerical errors, ensures stable computations
-- **Critical**: Handles edge cases, precision issues
-- **Usage**: `"Use NumericalStabilityGuard for computational stability"`
+### FitFunctionSpecialist
+- **Purpose**: Curve fitting, statistical analysis, and numerical operations
+- **Capabilities**: Statistical analysis, optimization algorithms, numerical stability patterns
+- **Critical**: Data fitting patterns, abstract base classes, edge case handling
+- **Usage**: `"Use FitFunctionSpecialist for curve fitting and numerical computations"`
 
 ### PlottingEngineer
-- **Purpose**: Visualization and plotting functionality  
+- **Purpose**: Visualization and plotting functionality
 - **Capabilities**: Matplotlib expertise, publication-quality figures
 - **Critical**: Scientific visualization standards
 - **Usage**: `"Use PlottingEngineer to create publication-quality figures"`
-
-### FitFunctionSpecialist
-- **Purpose**: Curve fitting and statistical analysis
-- **Capabilities**: Statistical analysis, optimization algorithms
-- **Critical**: Data fitting patterns, abstract base classes
-- **Usage**: `"Use FitFunctionSpecialist for statistical analysis"`
 
 ### TestEngineer
 - **Purpose**: Test coverage and quality assurance
@@ -69,7 +63,7 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 ## Agent Selection Guidelines
 - **Planning tasks** → UnifiedPlanCoordinator
 - **Data structure optimization** → DataFrameArchitect
-- **Numerical precision** → NumericalStabilityGuard
+- **Numerical precision & curve fitting** → FitFunctionSpecialist
 - **Visualization** → PlottingEngineer
 - **Statistical analysis** → FitFunctionSpecialist
 - **Test design** → TestEngineer

@@ -1,11 +1,11 @@
 # SolarWindPy Agent Coordination Guide
 
-**Scope:** Agent selection, coordination patterns, and routing for SolarWindPy's 6 specialized agents
+**Scope:** Agent selection, coordination patterns, and routing for SolarWindPy's 5 specialized agents
 **See also:** CLAUDE.md for agent selection matrix, .claude/agents.md for detailed agent instructions
 
 ## Agent Overview
 
-**SolarWindPy uses 6 domain-specific agents** organized by priority:
+**SolarWindPy uses 5 domain-specific agents** organized by priority:
 
 **Priority 1: Coordination**
 - **UnifiedPlanCoordinator** - Planning, implementation, project management
@@ -17,17 +17,13 @@
   - **Use for:** DataFrame structure, `.xs()` views, memory optimization
   - **Files:** `core/plasma.py`, `core/ions.py`, `core/spacecraft.py`
 
-- **NumericalStabilityGuard** - Numerical validation, edge cases, stability analysis
-  - **Use for:** Overflow/underflow, matrix conditioning, iterative convergence
-  - **Files:** `instabilities/*.py`, `fitfunctions/*.py`
+- **FitFunctionSpecialist** - Curve fitting, statistical analysis, numerical operations
+  - **Use for:** Regression analysis, parameter optimization, numerical stability patterns
+  - **Files:** `fitfunctions/*.py`, `instabilities/*.py`
 
 - **PlottingEngineer** - Visualization, matplotlib expertise, publication-quality figures
   - **Use for:** Scientific visualizations, colorblind-friendly plots
   - **Files:** `plotting/*.py`
-
-- **FitFunctionSpecialist** - Curve fitting, statistical analysis, data modeling
-  - **Use for:** Regression analysis, parameter optimization, inherit from FitFunction base
-  - **Files:** `fitfunctions/*.py`
 
 **Priority 3: Quality Assurance**
 - **TestEngineer** - Test coverage, quality assurance (≥95% requirement)
@@ -58,7 +54,7 @@ User: "Implement robust fitting for power law distribution"
 ```
 User: "Implement plasma instability analysis with visualization and testing"
 → UnifiedPlanCoordinator orchestrates:
-  1. NumericalStabilityGuard - Validates numerical stability
+  1. FitFunctionSpecialist - Numerical analysis and optimization
   2. PlottingEngineer - Creates visualizations
   3. TestEngineer - Implements tests
 ```
@@ -81,9 +77,9 @@ User: "Implement plasma instability analysis with visualization and testing"
 | File Pattern | Routed Agents |
 |--------------|---------------|
 | `solarwindpy/core/plasma.py` | DataFrameArchitect |
-| `solarwindpy/instabilities/*.py` | NumericalStabilityGuard |
+| `solarwindpy/instabilities/*.py` | FitFunctionSpecialist |
 | `solarwindpy/plotting/*.py` | PlottingEngineer |
-| `solarwindpy/fitfunctions/*.py` | FitFunctionSpecialist, NumericalStabilityGuard |
+| `solarwindpy/fitfunctions/*.py` | FitFunctionSpecialist |
 | `tests/*.py` | TestEngineer |
 
 ### Keyword Triggers
@@ -92,9 +88,9 @@ User: "Implement plasma instability analysis with visualization and testing"
 |----------|--------------|
 | plan, planning, implement | UnifiedPlanCoordinator |
 | dataframe, multiindex, pandas | DataFrameArchitect |
-| numerical, stability, precision | NumericalStabilityGuard |
+| numerical, stability, precision, optimization | FitFunctionSpecialist |
 | plot, visualization, figure | PlottingEngineer |
-| fit, curve, regression, optimization | FitFunctionSpecialist |
+| fit, curve, regression | FitFunctionSpecialist |
 | test, coverage, pytest | TestEngineer |
 
 ### Context Triggers
@@ -102,7 +98,7 @@ User: "Implement plasma instability analysis with visualization and testing"
 **Route based on task complexity:**
 - Multi-step task → UnifiedPlanCoordinator
 - Data analysis → DataFrameArchitect
-- Numerical tasks → NumericalStabilityGuard
+- Numerical tasks → FitFunctionSpecialist
 - Visualization tasks → PlottingEngineer
 
 ## Common Anti-Patterns
@@ -112,14 +108,14 @@ User: "Implement plasma instability analysis with visualization and testing"
 **Problem:**
 ```
 User: "Implement instability analysis with plots and tests"
-→ NumericalStabilityGuard only
+→ FitFunctionSpecialist only
 Result: Missing visualization and testing expertise
 ```
 
 **Solution:**
 ```
 User: "Implement instability analysis with plots and tests"
-→ UnifiedPlanCoordinator orchestrates NumericalStabilityGuard, PlottingEngineer, TestEngineer
+→ UnifiedPlanCoordinator orchestrates FitFunctionSpecialist, PlottingEngineer, TestEngineer
 ```
 
 ### ❌ Don't: Skip TestEngineer for New Features
@@ -149,7 +145,7 @@ Result: DataFrame optimization without numerical stability analysis
 **Solution:**
 ```
 User: "Fix numerical overflow in instability calculation"
-→ NumericalStabilityGuard (numerical issue) + DataFrameArchitect (if DataFrame structure changes)
+→ FitFunctionSpecialist (numerical issue) + DataFrameArchitect (if DataFrame structure changes)
 ```
 
 ## Agent Interaction Rules
@@ -169,7 +165,7 @@ User: "Fix numerical overflow in instability calculation"
 ### Parallel Execution
 
 **Agents can work in parallel on independent modules:**
-- NumericalStabilityGuard on numerical algorithms
+- FitFunctionSpecialist on numerical algorithms and curve fitting
 - PlottingEngineer on visualization
 - TestEngineer on test suite
 - Coordinated by UnifiedPlanCoordinator
@@ -181,12 +177,12 @@ User: "Fix numerical overflow in instability calculation"
 **Input:** "Fix overflow in instability growth rate calculation"
 
 **Routing:**
-- Primary: NumericalStabilityGuard
+- Primary: FitFunctionSpecialist
 - File pattern match: `solarwindpy/instabilities/*.py`
-- Keyword match: "overflow" → NumericalStabilityGuard
+- Keyword match: "overflow" → FitFunctionSpecialist
 
 **Execution:**
-1. NumericalStabilityGuard identifies overflow conditions
+1. FitFunctionSpecialist identifies overflow conditions
 2. Implements numerical safeguards (log-space calculations, clamping)
 3. Validates edge cases (extreme parameter values)
 4. Coordinates with TestEngineer for edge case tests
@@ -197,11 +193,11 @@ User: "Fix numerical overflow in instability calculation"
 
 **Routing:**
 - Primary: UnifiedPlanCoordinator
-- Supporting: NumericalStabilityGuard, PlottingEngineer, TestEngineer
+- Supporting: FitFunctionSpecialist, PlottingEngineer, TestEngineer
 
 **Execution:**
 1. UnifiedPlanCoordinator creates plan
-2. NumericalStabilityGuard ensures numerical stability
+2. FitFunctionSpecialist ensures numerical stability
 3. PlottingEngineer creates publication-quality figures
 4. TestEngineer implements comprehensive tests
 5. UnifiedPlanCoordinator coordinates handoffs
@@ -225,8 +221,8 @@ User: "Fix numerical overflow in instability calculation"
 
 1. **DataFrame operations** → DataFrameArchitect
 2. **Multi-domain tasks** → UnifiedPlanCoordinator orchestrates
-3. **Instability analysis** → NumericalStabilityGuard
-4. **Curve fitting** → FitFunctionSpecialist + NumericalStabilityGuard
+3. **Instability analysis** → FitFunctionSpecialist
+4. **Curve fitting and numerical operations** → FitFunctionSpecialist
 5. **Visualization** → PlottingEngineer
 6. **Testing** → TestEngineer (for all new features)
 7. **Planning** → UnifiedPlanCoordinator
