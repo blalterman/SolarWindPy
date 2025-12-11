@@ -1,7 +1,7 @@
 # AGENTS-claude.md for SolarWindPy
 
-**Last Synchronized:** November 12, 2025
-**Status:** Aligned with `.claude/agents/` implementation (7 active agents)
+**Last Synchronized:** December 11, 2025
+**Status:** Aligned with `.claude/agents/` implementation (5 active agents)
 
 ## Core Development Agents
 
@@ -24,20 +24,9 @@
 - Include "Generated with Claude Code" in commit messages
 - Reference GitHub issues when applicable
 
-### PhysicsValidator
-**Applies to:** solarwindpy/core/**/*.py, solarwindpy/instabilities/**/*.py  
-**Priority:** High  
-**Instructions:**
-- Verify physical units consistency using units_constants module
-- Check thermal speed calculations (mw² = 2kT convention)
-- Validate ion mass/charge ratios match physical constants
-- Ensure magnetic field components maintain proper vector relationships
-- Flag any calculations that violate conservation laws
-- Verify Coulomb number calculations when spacecraft data present
-
 ### DataFrameArchitect
-**Applies to:** solarwindpy/core/**/*.py  
-**Priority:** High  
+**Applies to:** solarwindpy/core/**/*.py
+**Priority:** High
 **Instructions:**
 - Maintain MultiIndex structure: ("M", "C", "S") for measurement/component/species
 - Use DataFrame.xs() for views to minimize memory usage
@@ -45,6 +34,10 @@
 - Validate data alignment when combining plasma/spacecraft data
 - Optimize memory usage through views rather than copies
 - Check for pandas SettingWithCopyWarning issues
+- Verify physical units consistency using units_constants module
+- Check thermal speed calculations (mw² = 2kT convention)
+- Validate ion mass/charge ratios match physical constants
+- Ensure magnetic field components maintain proper vector relationships
 
 ### TestEngineer
 **Applies to:** solarwindpy/tests/**/*.py  
@@ -70,8 +63,8 @@
 - Document mathematical forms in docstrings with LaTeX
 
 ### PlottingEngineer
-**Applies to:** solarwindpy/plotting/**/*.py  
-**Priority:** Medium  
+**Applies to:** solarwindpy/plotting/**/*.py
+**Priority:** Medium
 **Instructions:**
 - Maintain consistency with matplotlib conventions
 - Ensure all plot classes inherit from appropriate base classes
@@ -79,17 +72,6 @@
 - Support both 1D and 2D histograms with consistent APIs
 - Handle log-scale plotting correctly
 - Test plot generation without displaying (for CI/CD)
-
-### NumericalStabilityGuard
-**Applies to:** solarwindpy/fitfunctions/**/*.py, solarwindpy/instabilities/**/*.py
-**Priority:** High
-**Instructions:**
-- Check for numerical overflow/underflow conditions
-- Validate matrix operations for conditioning
-- Ensure iterative solvers converge properly
-- Handle edge cases in logarithmic calculations
-- Verify statistical measures with small sample sizes
-- Test stability with extreme parameter values
 
 ### UnifiedPlanCoordinator
 **Applies to:** All planning and implementation
@@ -105,13 +87,11 @@
 ## Agent Interaction Patterns
 
 ### Priority Cascade
-1. **Always Active:** General → PhysicsValidator → DataFrameArchitect
+1. **Always Active:** General → DataFrameArchitect
 2. **Feature Development:** TestEngineer → Domain Specialist
-3. **Code Quality:** NumericalStabilityGuard
-4. **Planning:** UnifiedPlanCoordinator
+3. **Planning:** UnifiedPlanCoordinator
 
 ### Collaboration Rules
-- PhysicsValidator must approve all core physics changes
 - TestEngineer validates all new code before merge
 - DataFrameArchitect reviews all data structure modifications
 - Multiple agents can work in parallel on independent modules
@@ -149,7 +129,7 @@
 2. Check recent changes with `git diff`
 3. Verify environment with `conda list`
 4. Run isolated test with `pytest path/to/test::specific_test`
-5. If physics-related, consult PhysicsValidator agent
+5. If physics-related, verify against test suite expectations and code-style.md unit conventions
 
 ### Data Corruption
 1. Validate against known test data in `tests/data/`

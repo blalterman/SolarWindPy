@@ -189,20 +189,19 @@ Before beginning implementation:
 
 **Actions:**
 1. Read 03_subagents.md completely
-2. Create 4 subagent definitions (register with Claude Code):
-   - PhysicsValidator - Deep physics analysis
-   - DataFrameArchitect - Complex MultiIndex operations
-   - TestEngineer - Comprehensive test design
-   - NumericalStabilityGuard - Precision analysis
+2. Create 3 subagent definitions (register with Claude Code):
+   - DataFrameArchitect - Complex MultiIndex operations and DataFrame optimization
+   - PlottingEngineer - Iterative visualization refinement
+   - FitFunctionSpecialist - Statistical analysis and precision analysis in curve fitting
 3. Implement stopping conditions:
    - Token budget: ≤50K tokens per subagent (25% of 200K session budget)
    - Approval gates: Request approval for operations >500-800 tokens
    - Display: Show estimated cost before executing subagent
    - Timeout: 10-25 minutes depending on complexity (with progress warnings)
-4. Validate: Invoke PhysicsValidator subagent → Should create isolated context window
+4. Validate: Invoke DataFrameArchitect subagent → Should create isolated context window
 
 **Success Criteria:**
-- ✅ All 4 subagents registered and invocable
+- ✅ All 3 subagents registered and invocable
 - ✅ Subagents create isolated context (don't pollute main conversation)
 - ✅ Approval gates request confirmation for expensive operations
 - ✅ Token budget respected (max 50K per subagent)

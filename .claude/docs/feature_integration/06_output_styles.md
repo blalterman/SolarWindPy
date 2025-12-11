@@ -277,7 +277,7 @@ Emphasize MultiIndex structure:
 
 Automatically recommend:
 - **physics-validator skill** when formulas are involved
-- **PhysicsValidator agent** for complex multi-file physics analysis
+- **DataFrameArchitect agent** for complex DataFrame refactoring
 - **dataframe-architect skill** for DataFrame operations
 - **DataFrameArchitect agent** for comprehensive refactoring
 - **test-generator skill** when coverage gaps exist

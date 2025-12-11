@@ -59,8 +59,8 @@ Skills are model-invoked capability packages that Claude autonomously activates 
 **Pain Points Addressed:**
 
 ✅ **Agent Coordination Overhead (HIGH IMPACT)**
-*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use PhysicsValidator to verify units conversion patterns"
-*With Skills:* Automatic activation when user requests physics validation, units pattern checks, or unit verification
+*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use DataFrameArchitect to optimize MultiIndex operations"
+*With Skills:* Automatic activation when user requests DataFrame optimization, MultiIndex pattern checks, or performance improvements
 *Reduction:* 40-60% decrease in explicit agent invocation overhead
 
 ✅ **Repetitive Task Automation (HIGH IMPACT)**
@@ -209,61 +209,7 @@ User Request → Skill Auto-Detection → [Skill OR Task Agent] → Result
 
 #### Proposed Skills Library
 
-##### Skill 1: Physics Validator (`physics-validator`)
-
-**File:** `.claude/skills/physics-validator/SKILL.md`
-
-```yaml
----
-name: physics-validator
-description: Automatically validates solar wind physics calculations focusing on units conversion patterns, proper NaN handling for missing data, and physical constraint verification. Verifies calculations use self.units.* for SI conversion (display units → SI → display units). Activates when user mentions physics validation, unit checking, or scientific correctness.
-allowed-tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*)]
-max_activations_per_hour: 10
-rate_limit_message: "Physics validator activated 10 times this hour. Limit prevents excessive validation overhead. Override: explicitly request 'validate physics in all files' to bypass."
----
-
-# Physics Validation Skill
-
-## Purpose
-Ensures all physics calculations in SolarWindPy maintain scientific correctness.
-
-## Automatic Activation Triggers
-- "validate physics"
-- "verify units conversion"
-- "check units pattern"
-- "ensure SI units"
-- "physics correctness"
-- Code changes to `solarwindpy/core/ion.py` or `solarwindpy/core/plasma.py`
-
-## Validation Checklist
-1. **Units Conversion Pattern:** Calculations must use `quantity * self.units.<name>` for SI conversion
-   - Storage units: cm⁻³ (density), km/s (velocity, thermal speed)
-   - Display units: All quantities per `Units` class (see `solarwindpy.core.units_constants`)
-   - Calculation units: m⁻³, m/s, K (SI)
-   - Example: `w = self.w.data * self.units.w` before `w.pow(2)` (ions.py:222)
-   - Check BOTH input conversion (display→SI) AND output conversion (SI→display)
-2. **NaN Handling:** Missing data as NaN, never 0 or -999
-3. **Physical Constraints:** Positive densities, temperatures, thermal speeds (scalars ≥ 0; velocity components may be negative)
-
-## Execution Pattern
-```bash
-# Run physics validation on changed files
-python .claude/hooks/physics-validation.py ${modified_files}
-
-# Generate validation report
-python .claude/hooks/physics-validation.py --report
-```
-
-## Integration with PhysicsValidator Agent
-- **Skill:** Quick validation checks, pre-commit verification
-- **Agent:** Deep analysis, formula derivation, multi-file refactoring
-```
-
-**Supporting Files:**
-- `.claude/skills/physics-validator/examples/thermal_speed_correct.py`
-- `.claude/skills/physics-validator/examples/thermal_speed_incorrect.py`
-
-##### Skill 2: MultiIndex Architect (`multiindex-architect`)
+##### Skill 1: MultiIndex Architect (`multiindex-architect`)
 
 **File:** `.claude/skills/multiindex-architect/SKILL.md`
 
@@ -330,7 +276,7 @@ df_subset = df.xs((measurement, component), level=(0, 1))
 - `.claude/skills/multiindex-architect/templates/efficient_access_patterns.py`
 - `.claude/skills/multiindex-architect/templates/memory_optimization_checklist.md`
 
-##### Skill 3: Test Generator (`test-generator`)
+##### Skill 2: Test Generator (`test-generator`)
 
 **File:** `.claude/skills/test-generator/SKILL.md`
 
@@ -402,7 +348,79 @@ def test_function_name_physics():
 - `.claude/skills/test-generator/templates/pytest_template.py`
 - `.claude/skills/test-generator/examples/physics_test_examples.py`
 
-##### Skill 4: Plan Executor (`plan-executor`)
+##### Skill 3: Plan Executor (`plan-executor`)
+
+**File:** `.claude/skills/plan-executor/SKILL.md`
+
+```yaml
+---
+name: test-generator
+description: Automatically generates pytest test cases for SolarWindPy functions ensuring ≥95% coverage. Creates physics-specific tests, edge cases, and validates scientific correctness. Activates when coverage gaps identified or new functions added.
+allowed-tools: [Read, Write, Bash(python .claude/scripts/generate-test.py*), Bash(pytest*)]
+max_activations_per_hour: 12
+rate_limit_message: "Test generator activated 12 times this hour. Limit prevents excessive test creation. Override: explicitly request 'generate tests for all uncovered functions' to bypass."
+---
+
+# Test Generator Skill
+
+## Purpose
+Maintains ≥95% test coverage through intelligent test generation.
+
+## Automatic Activation Triggers
+- "generate tests"
+- "improve coverage"
+- "test this function"
+- "add test cases"
+- Coverage drops below 95%
+- New functions detected without tests
+
+## Test Generation Strategy
+1. **Happy path** - Standard valid inputs
+2. **Edge cases** - Boundaries, empty arrays, single elements
+3. **Physics validation** - Scientific correctness checks
+4. **Error conditions** - Invalid inputs, type errors
+
+## Execution Pattern
+```bash
+# Generate tests for specific file
+python .claude/scripts/generate-test.py solarwindpy/core/ion.py
+
+# Check coverage
+pytest --cov=solarwindpy --cov-report=term -q
+
+# Run only new tests
+pytest tests/test_ion_generated.py -v
+```
+
+## Test Template
+```python
+def test_function_name_happy_path():
+    """Test standard valid inputs."""
+    # Arrange
+    expected = ...
+
+    # Act
+    result = function_name(valid_input)
+
+    # Assert
+    assert result == expected
+
+def test_function_name_physics():
+    """Validate physics correctness."""
+    # Physics-specific assertions
+    assert units_conversion_pattern_check(result)
+```
+
+## Integration with TestEngineer Agent
+- **Skill:** Generate individual test cases, quick coverage fixes
+- **Agent:** Design comprehensive test strategies, framework architecture
+```
+
+**Supporting Files:**
+- `.claude/skills/test-generator/templates/pytest_template.py`
+- `.claude/skills/test-generator/examples/physics_test_examples.py`
+
+*Note: Skill numbering reflects current 3-skill implementation after agent consolidation*
 
 **File:** `.claude/skills/plan-executor/SKILL.md`
 
@@ -498,7 +516,7 @@ Manual Override: Direct user action
 - **Fallback trigger:** If `/physics` command not defined
 
 **Step 3: Fallback 2 (Subagent Invocation)**
-- System: "Manual command unavailable. Invoking PhysicsValidator subagent..."
+- System: "Manual command unavailable. Invoking DataFrameArchitect subagent..."
 - Launches: physics-validator subagent with isolated context
 - **Fallback trigger:** If subagent system not configured
 
@@ -817,7 +835,7 @@ plan-executor: 2 activations, 2 success, 0 fallback → 100% (✅ Good)
 
 *How Coordination Overhead Reduction (40-60%) Is Measured:*
 1. **Baseline:** Count explicit Task agent invocations in 20 sessions pre-skills implementation
-2. **Track:** "Use PhysicsValidator to..." type prompts (manual agent selection)
+2. **Track:** "Use DataFrameArchitect to..." type prompts (manual agent selection)
 3. **Post-implementation:** Count same pattern after skills deployed
 4. **Calculation:** (Baseline invocations - Post invocations) / Baseline invocations × 100%
 5. **Example:** 25 manual invocations → 12 after skills = (25-12)/25 = 52% reduction
@@ -870,7 +888,7 @@ Validation: Attempt Edit operation, should be restricted
 #### Test 3: Skill vs. Agent Boundary
 ```
 Scenario: User requests "comprehensive physics refactoring across 10 files"
-Expected: PhysicsValidator agent (Task) activates, not skill
+Expected: DataFrameArchitect agent (Task) activates, not skill
 Validation: Complex multi-step tasks should still use agents
 ```
 

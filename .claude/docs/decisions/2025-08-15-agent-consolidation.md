@@ -239,11 +239,10 @@ Consider resurrecting agents if:
 ### Additional Agents Removed
 
 **PhysicsValidator removal rationale:**
-- **Descoped to unit patterns**: Responsibilities moved to code-style.md (lines 248-271)
-- **SI units convention**: Already documented in code-style.md
-- **mw² = 2kT thermal speed**: Already documented in calculation-patterns.md
-- **Physics validation**: Handled by test suite (pytest), not proactive agent
-- **Zero implementation**: Grep confirmed no usage in solarwindpy/ codebase
+- **Unit conventions documented**: code-style.md (lines 248-271) documents SI units and conversion patterns
+- **Physics correctness tested**: Test suite (pytest) validates physics, not proactive agent
+- **Zero enforcement**: Agent provided aspirational guidance without validation capability
+- **Grep confirms**: No PhysicsValidator patterns or implementation in solarwindpy/ codebase
 
 **NumericalStabilityGuard removal rationale:**
 - **Zero implementation**: 346 lines of patterns with 0% adoption in solarwindpy/

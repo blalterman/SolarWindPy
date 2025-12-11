@@ -774,7 +774,7 @@ triggers:
 ```json
 // Example: plugin-name/agents/physics-validator.json
 {
-  "name": "PhysicsValidator",
+  "name": "DataFrameArchitect",
   "description": "Deep physics analysis with constraint validation",
   "model": "sonnet",
   "tools": ["Read", "Bash", "Grep"]
@@ -1192,10 +1192,10 @@ Expected: Installation from remote repository succeeds
 
 3. **Skill Validation Test** (Pass/Fail)
    - [ ] Trigger each skill with appropriate phrase:
-     - PhysicsValidator: Mention "thermal speed calculation"
+     - DataFrameArchitect: Mention "MultiIndex optimization"
      - DataFrameArchitect: Mention "MultiIndex operation"
      - TestEngineer: Mention "need test coverage analysis"
-     - NumericalStabilityGuard: Mention "numerical precision concern"
+     - FitFunctionSpecialist: Mention "curve fitting"
    - [ ] Verify skills auto-activate (check for skill activation messages)
    - **Pass Criteria:** ≥3 of 4 skills auto-activate correctly
 

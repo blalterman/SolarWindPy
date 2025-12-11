@@ -121,13 +121,11 @@ Examples:
 ✅ **Good Subagent Candidates:**
 - **DataFrameArchitect** - Complex refactoring, memory profiling (multi-step)
 - **PlottingEngineer** - Iterative plot refinement (exploratory)
-- **FitFunctionSpecialist** - Statistical analysis, optimization (isolated work)
-- **NumericalStabilityGuard** - Precision analysis, error propagation (context-heavy)
+- **FitFunctionSpecialist** - Statistical analysis, optimization, precision analysis (isolated work)
 
 ⚠️ **Keep as Task Agents:**
 - **UnifiedPlanCoordinator** - Needs to execute CLI scripts in main context
 - **TestEngineer** - Integrates tightly with main workflow
-- **NumericalStabilityGuard** - Quick checks, not worth isolation overhead
 
 **Backward Compatibility:**
 ✅ **Fully compatible** - Task agents continue working unchanged
@@ -274,117 +272,6 @@ context_budget: 40000  # 20% of 200K main session budget
 
 ---
 
-# Physics Validator Subagent
-
-You are a solar wind physics expert specializing in validating scientific correctness in SolarWindPy.
-
-## Core Responsibilities
-
-1. **Units Conversion Validation**
-   - Verify calculations use `self.units.*` for SI conversion
-   - Storage units: cm⁻³ (density), km/s (velocity, thermal speed)
-   - Display units: All quantities per `Units` class (see `solarwindpy.core.units_constants`)
-   - Calculation units: m⁻³ (density), m/s (velocity, thermal speed), K (temperature) - SI
-   - Flag calculations using raw data without unit conversion (input)
-   - Flag calculations returning SI results without converting to display units (output)
-   - Example pattern: `w = self.w.data * self.units.w` → calculate → `result / self.units.output`
-
-2. **Physical Constraints**
-   - Density > 0 (n > 0 in cm⁻³)
-   - Temperature > 0 (T > 0 in 10⁵ K)
-   - Thermal speed ≥ 0 (w ≥ 0 in km/s, always positive scalar)
-   - Vector magnitudes ≥ 0 (e.g., |v|, |B|), though vector components may be negative
-   - NaN for missing data (NEVER 0, -999, or sentinels)
-   - Physical constants from `solarwindpy.core.units_constants.Constants`
-
-3. **Multi-file Analysis**
-   - Cross-reference units patterns across modules
-   - Identify inconsistencies in units conversion implementations
-   - Suggest refactoring for architectural consistency
-
-## Validation Process
-
-1. Read target files using Read tool
-2. Search for units conversion patterns using Grep
-3. Validate units conversion patterns (display→SI→display)
-4. Run physics validation script: `python .claude/hooks/physics-validation.py`
-5. Report findings with:
-   - ✅ Correct implementations
-   - ⚠️ Warnings (potential issues - missing conversions)
-   - ❌ Errors (must fix - raw data used in calculations)
-   - 💡 Recommendations
-
-## Output Format
-
-Return a structured report:
-
-```markdown
-# Physics Validation Report
-
-## Summary
-- Files analyzed: N
-- Issues found: X errors, Y warnings
-- Overall status: PASS/FAIL
-
-## Detailed Findings
-
-### ✅ Correct Implementations
-- `file.py:line` - Description
-
-### ❌ Errors (MUST FIX)
-- `file.py:line` - Issue description
-  - Current: ...
-  - Expected: ...
-  - Fix: ...
-
-### ⚠️ Warnings
-- `file.py:line` - Potential issue
-
-### 💡 Recommendations
-- Refactoring suggestion 1
-- Optimization suggestion 2
-```
-
-## Context Access
-@.claude/memory/physics-constants.md
-@.claude/memory/dataframe-patterns.md
-```
-
-##### Subagent 2: DataFrameArchitect
-
-**File:** `.claude/agents/dataframe-architect.md`
-
-```yaml
----
-name: dataframe-architect
-description: Pandas MultiIndex optimization specialist. Refactors DataFrame operations for efficiency, manages memory, and ensures proper use of SolarWindPy's (M/C/S) structure.
-tools: [Read, Grep, Edit, Write, Bash(pytest*)]
-model: sonnet
-approval_gate_threshold: 600  # tokens - multi-file DataFrame refactoring
-context_budget: 50000  # 25% of 200K main session budget
----
-
-## Approval Gate Configuration
-
-**Trigger:** Estimated context consumption >600 tokens (multi-file DataFrame refactoring tasks)
-
-**Pre-activation Flow:**
-1. **Estimate context cost:** Calculate based on files to refactor + test suite execution
-2. **Display warning:** "DataFrameArchitect will consume ~4,000 tokens (8% of session budget). Proceed?"
-3. **User choice:** [Proceed] [Skip] [Reduce Scope - refactor fewer files]
-4. **If proceed:** Create automatic checkpoint, launch subagent
-5. **If skip:** Suggest manual refactoring or targeted optimization
-
-**Context Budget Allocation:**
-- **Per-subagent budget:** 50,000 tokens (25% of 200K main session)
-- **Typical usage:** 2,500-6,000 tokens per invocation (DataFrame optimization tasks)
-- **Warning thresholds:**
-  - 75% (37,500 tokens): "DataFrameArchitect approaching budget limit..."
-  - 90% (45,000 tokens): "DataFrameArchitect budget critical, reduce scope..."
-  - 100% (50,000 tokens): Block activation, suggest manual optimization
-
-**Override:** User can bypass approval gate with explicit confirmation: "Yes, optimize all DataFrame operations"
-
 # DataFrame Architect Subagent
 
 You are a pandas expert specializing in optimizing MultiIndex DataFrame operations for SolarWindPy's three-level (M/C/S) structure.
@@ -511,7 +398,7 @@ Return a structured refactoring plan:
 @.claude/memory/testing-templates.md
 ```
 
-##### Subagent 3: PlottingEngineer
+##### Subagent 2: PlottingEngineer
 
 **File:** `.claude/agents/plotting-engineer.md`
 
@@ -785,8 +672,7 @@ Provide complete analysis including:
 
 | Subagent | Default Timeout | Justification |
 |----------|----------------|---------------|
-| PhysicsValidator | 15 minutes | Deep multi-file physics analysis with validation script execution |
-| DataFrameArchitect | 20 minutes | Complex DataFrame refactoring across multiple modules with testing |
+| DataFrameArchitect | 12 minutes | Deep multi-file DataFrame analysis and optimization with testing |
 | PlottingEngineer | 10 minutes | Figure generation typically faster, multiple plots per invocation |
 | FitFunctionSpecialist | 25 minutes | Iterative optimization can require extended computation time |
 
@@ -796,28 +682,28 @@ Proactive warnings prevent timeout surprises and allow graceful completion:
 
 **75% Threshold (Continue):**
 ```
-⏱️ PhysicsValidator: 11 minutes elapsed (75% of 15 min timeout)
-   Analysis in progress: ion.py validation...
+⏱️ DataFrameArchitect: 9 minutes elapsed (75% of 12 min timeout)
+   Analysis in progress: plasma.py optimization...
    Action: Continue normally
 ```
 
 **90% Threshold (Finish Soon):**
 ```
-⚠️ PhysicsValidator: 13.5 minutes elapsed (90% of 15 min timeout)
-   Warning: 1.5 minutes remaining
+⚠️ DataFrameArchitect: 10.8 minutes elapsed (90% of 12 min timeout)
+   Warning: 1.2 minutes remaining
    Suggestion: Prioritize critical findings, defer detailed recommendations
 ```
 
 **100% Threshold (Terminate):**
 ```
-❌ PhysicsValidator: 15 minutes elapsed (timeout reached)
+❌ DataFrameArchitect: 12 minutes elapsed (timeout reached)
    Operation terminated: Analysis incomplete
-   Partial results: Saved to .claude/logs/subagent-physics-validator-partial.md
+   Partial results: Saved to .claude/logs/subagent-dataframe-architect-partial.md
    Next steps:
    1. Review partial results
    2. Reduce scope (analyze fewer files)
    3. Increase timeout (override below)
-   4. Manual fallback (/physics command or direct analysis)
+   4. Manual fallback (direct DataFrame optimization)
 ```
 
 **Timeout Override:**
@@ -826,11 +712,11 @@ Override default timeouts for known long-running operations:
 
 ```bash
 # Set custom timeout for specific subagent
-SUBAGENT_TIMEOUT=30m invoke_subagent physics-validator
+SUBAGENT_TIMEOUT=20m invoke_subagent dataframe-architect
 
 # Example: Deep analysis of entire codebase
-User: "TIMEOUT=30m - Validate all physics calculations across the entire codebase"
-Claude: [Sets 30-minute timeout, invokes PhysicsValidator]
+User: "TIMEOUT=20m - Optimize all DataFrame operations across the entire codebase"
+Claude: [Sets 20-minute timeout, invokes DataFrameArchitect]
 ```
 
 **Timeout Handling Best Practices:**
@@ -838,17 +724,17 @@ Claude: [Sets 30-minute timeout, invokes PhysicsValidator]
 1. **Scope Appropriately:** Break large analysis tasks into smaller chunks (e.g., validate per-file instead of entire codebase)
 2. **Monitor Progress:** Check warning messages at 75% and 90% thresholds
 3. **Preserve Partial Results:** All subagents save partial output before timeout termination
-4. **Fallback Strategy:** If timeout occurs, use manual tools (/physics, /coverage) or reduce scope
+4. **Fallback Strategy:** If timeout occurs, use manual tools or reduce scope
 
 **Integration with Approval Gates:**
 
 Timeout warnings are displayed alongside approval gate confirmations:
 
 ```
-⚠️ PhysicsValidator Activation Request
-   Estimated tokens: 5,000 (10% of session budget)
-   Estimated time: 8-12 minutes (timeout: 15 min)
-   Files to analyze: 5 ion class files
+⚠️ DataFrameArchitect Activation Request
+   Estimated tokens: 4,000 (8% of session budget)
+   Estimated time: 6-10 minutes (timeout: 12 min)
+   Files to analyze: 5 core data files
 
    [Proceed] [Skip] [Reduce Scope]
 ```
@@ -857,23 +743,23 @@ Timeout warnings are displayed alongside approval gate confirmations:
 
 **Automatic Invocation** (Claude decides based on description):
 ```
-User: "I need a comprehensive analysis of units conversion patterns across all ion classes, checking for consistency and proposing refactoring if needed."
+User: "I need a comprehensive analysis of DataFrame access patterns across all core classes, checking for memory efficiency and proposing optimizations."
 
-Claude: [Automatically invokes physics-validator subagent due to "comprehensive analysis" + "units conversion" + "consistency"]
+Claude: [Automatically invokes dataframe-architect subagent due to "comprehensive analysis" + "DataFrame" + "memory efficiency"]
 ```
 
 **Explicit Invocation:**
 ```
-User: "Use the physics-validator subagent to analyze ion.py for units conversion correctness."
+User: "Use the dataframe-architect subagent to analyze plasma.py for DataFrame optimization opportunities."
 
-Claude: [Explicitly invokes physics-validator subagent]
+Claude: [Explicitly invokes dataframe-architect subagent]
 ```
 
 #### Migration Path
 
 **Phase 1: Create Subagent Definitions (Week 1)**
 1. Create `.claude/agents/` directory
-2. Define 4 subagents (physics-validator, dataframe-architect, plotting-engineer, fit-function-specialist)
+2. Define 3 subagents (dataframe-architect, plotting-engineer, fit-function-specialist)
 3. Test invocation with simple tasks
 4. Verify independent context windows
 
@@ -904,7 +790,7 @@ Claude: [Explicitly invokes physics-validator subagent]
 *Full Rollback (Local Implementation):*
 1. Delete `.claude/agents/` directory entirely
 2. `git revert` commits that added subagent definitions
-3. Resume using Task tool for PhysicsValidator, DataFrameArchitect, etc.
+3. Resume using Task tool for DataFrameArchitect, FitFunctionSpecialist, etc.
 4. No loss of functionality (Task agents provide same capabilities)
 
 *Full Rollback (Plugin Installation):*

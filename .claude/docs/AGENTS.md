@@ -60,12 +60,11 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 "Use TestEngineer to design physics-specific test strategies"
 ```
 
-## Agent Selection Guidelines
+## Agent Selection Guidelines (5 Active Agents)
 - **Planning tasks** → UnifiedPlanCoordinator
-- **Data structure optimization** → DataFrameArchitect
-- **Numerical precision & curve fitting** → FitFunctionSpecialist
+- **Data structure optimization & physics** → DataFrameArchitect
+- **Numerical precision, curve fitting & stability** → FitFunctionSpecialist
 - **Visualization** → PlottingEngineer
-- **Statistical analysis** → FitFunctionSpecialist
 - **Test design** → TestEngineer
 
 ## Integration with Hooks

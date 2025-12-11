@@ -124,7 +124,7 @@ Use Cases:
 
 **Checkpoint-Before-Expensive-Operation Pattern:**
 
-When a subagent operation triggers an approval gate (e.g., PhysicsValidator with >800 token threshold), Claude Code automatically creates a checkpoint before proceeding. This provides:
+When a subagent operation triggers an approval gate (e.g., DataFrameArchitect with >800 token threshold), Claude Code automatically creates a checkpoint before proceeding. This provides:
 
 1. **Safety net:** If subagent edits break functionality, revert to pre-operation state instantly
 2. **Confidence boost:** Approval becomes lower-stakes decision ("I can always undo this")
@@ -136,7 +136,7 @@ When a subagent operation triggers an approval gate (e.g., PhysicsValidator with
 User: "Validate all physics calculations across the entire codebase"
     ↓
 Approval Gate Triggers:
-⚠️ PhysicsValidator Activation Request
+⚠️ DataFrameArchitect Activation Request
    Estimated tokens: 12,000 (24% of session budget)
    Estimated time: 18-22 minutes (timeout: 25 min)
    Files to analyze: 15 physics modules
@@ -147,7 +147,7 @@ Approval Gate Triggers:
     ↓
 User: [Proceed]
     ↓
-Claude creates checkpoint → Invokes PhysicsValidator subagent
+Claude creates checkpoint → Invokes DataFrameArchitect subagent
     ↓
 Subagent completes, suggests refactoring in 8 files
     ↓

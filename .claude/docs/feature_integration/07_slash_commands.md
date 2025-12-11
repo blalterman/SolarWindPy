@@ -89,7 +89,7 @@ User-invoked prompt shortcuts stored as markdown files in `.claude/commands/` (p
 
 ✅ **Agent Coordination (LOW-MEDIUM IMPACT)**
 *Current state:* Manually crafting agent invocation prompts
-*With Slash Commands:* Pre-defined agent workflows (`/validate-physics`, `/optimize-dataframes`)
+*With Slash Commands:* Pre-defined agent workflows (`/optimize-dataframes`, `/fit-function`)
 *Improvement:* Faster, more accurate agent delegation
 
 ### Productivity Improvements
@@ -134,7 +134,7 @@ Decision Matrix:
 | System Component | Integration Approach |
 |------------------|---------------------|
 | **Skills** | Commands for explicit control; Skills for automatic |
-| **Agents** | Commands can invoke specific agents (e.g., `/validate-physics` → PhysicsValidator) |
+| **Agents** | Commands can invoke specific agents (e.g., `/optimize-dataframes` → DataFrameArchitect) |
 | **Hooks** | Commands can trigger hook-checked workflows |
 | **Scripts** | Commands can execute `.claude/scripts/*.sh` with bash prefix |
 | **Memory** | Commands reference memory files via `@.claude/memory/...` |
@@ -1116,8 +1116,8 @@ Commands trigger hook validation:
 Commands can invoke subagents explicitly:
 
 ```yaml
-# In /validate-physics command
-Use the physics-validator subagent to perform deep analysis on $ARGUMENTS.
+# In /optimize-dataframes command
+Use the dataframe-architect subagent to perform deep analysis on $ARGUMENTS.
 ```
 
 ---
@@ -1345,7 +1345,7 @@ Complex multi-step analysis needed?
 | "Check coverage now" | `/coverage` | Explicit on-demand check |
 | Auto-detect coverage gaps | `test-generator` skill | Automatic when coverage drops |
 | Test after every edit | PostToolUse hook | Event-based automatic |
-| Deep physics refactoring | PhysicsValidator subagent | Complex isolated analysis |
+| Deep physics refactoring | DataFrameArchitect subagent | Complex isolated analysis |
 | Quick physics check | `/physics` | Explicit validation request |
 | Physics validation during edits | PreToolUse hook | Automatic prevention |
 | Create GitHub plan | `/plan-create` | Explicit planning action |

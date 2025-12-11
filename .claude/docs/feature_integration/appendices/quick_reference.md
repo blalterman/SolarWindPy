@@ -145,8 +145,8 @@ echo "Current conversation: ~$(wc -w .claude/logs/session-*.log | awk '{print $1
 # 100% (200K tokens): Session may be truncated, save state
 
 # Subagent specific:
-# 75% (37.5K): "PhysicsValidator approaching budget..."
-# 90% (45K): "PhysicsValidator budget critical..."
+# 75% (37.5K): "DataFrameArchitect approaching budget..."
+# 90% (45K): "DataFrameArchitect budget critical..."
 # 100% (50K): Block activation
 ```
 
@@ -155,13 +155,13 @@ echo "Current conversation: ~$(wc -w .claude/logs/session-*.log | awk '{print $1
 **Subagent Approval Thresholds:**
 ```bash
 # Thresholds (estimated tokens):
-PhysicsValidator: >800 tokens (deep multi-file analysis)
+DataFrameArchitect: >800 tokens (deep multi-file refactoring)
 DataFrameArchitect: >600 tokens (multi-file refactoring)
 PlottingEngineer: >400 tokens (multi-figure generation)
 FitFunctionSpecialist: >700 tokens (complex multi-parameter fitting)
 
 # Approval Prompt Format:
-⚠️ PhysicsValidator Activation Request
+⚠️ DataFrameArchitect Activation Request
    Estimated tokens: 5,000 (10% of session budget)
    Estimated time: 8-12 minutes (timeout: 15 min)
 
@@ -198,10 +198,9 @@ TIMEOUT=600 /coverage  # 10 minutes instead of 5
 
 **Subagent Timeouts:**
 ```bash
-PhysicsValidator: 15 min    # Deep physics analysis
-DataFrameArchitect: 20 min  # Complex refactoring
-PlottingEngineer: 10 min    # Multi-figure generation
+DataFrameArchitect: 12 min    # Complex DataFrame refactoring
 FitFunctionSpecialist: 25 min  # Iterative optimization
+PlottingEngineer: 10 min    # Multi-figure generation
 
 # Warning Messages:
 # 75%: "11 min elapsed (75%), continue normally"
