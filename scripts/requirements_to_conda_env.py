@@ -92,7 +92,7 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
         pip_packages = [
             line.strip()
             for line in req_file
-            if line.strip() and not line.startswith("#")
+            if line.strip() and not line.strip().startswith("#")
         ]
 
     # Translate pip package names to conda equivalents
