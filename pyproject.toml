@@ -82,7 +82,18 @@ docs = [
     "doc8>=1.1",
 ]
 dev = [
-    "solarwindpy[test,docs]",  # Include test and docs extras
+    # Testing tools
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    # Documentation tools
+    "sphinx>=7.0",
+    "sphinx_rtd_theme>=2.0",
+    "sphinxcontrib-spelling>=8.0",
+    "sphinxcontrib-bibtex>=2.6",
+    "numpydoc>=1.6",
+    "docstring-inheritance>=2.2.0,<3.0",
+    "doc8>=1.1",
+    # Development tools
     "black>=24.0",
     "flake8>=7.0",
     "flake8-docstrings>=1.7",

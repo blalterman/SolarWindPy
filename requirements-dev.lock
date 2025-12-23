@@ -7,9 +7,7 @@
 alabaster==1.0.0
     # via sphinx
 astropy==7.2.0
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 astropy-iers-data==0.2025.12.22.0.40.30
     # via astropy
 babel==2.17.0
@@ -19,9 +17,7 @@ black==25.12.0
 blosc2==3.12.2
     # via tables
 bottleneck==1.6.0
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 certifi==2025.11.12
     # via requests
 charset-normalizer==3.4.4
@@ -35,11 +31,9 @@ coverage[toml]==7.13.0
 cycler==0.12.1
     # via matplotlib
 doc8==2.0.0
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 docstring-inheritance==2.3.0
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 docutils==0.21.2
     # via
     #   doc8
@@ -57,9 +51,7 @@ flake8-docstrings==1.7.0
 fonttools==4.61.1
     # via matplotlib
 h5py==3.15.1
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 idna==3.11
     # via requests
 imagesize==1.4.1
@@ -77,9 +69,7 @@ llvmlite==0.46.0
 markupsafe==3.0.3
     # via jinja2
 matplotlib==3.10.8
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 mccabe==0.7.0
     # via flake8
 msgpack==1.1.2
@@ -89,13 +79,10 @@ mypy-extensions==1.1.0
 ndindex==1.10.1
     # via blosc2
 numba==0.63.1
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 numexpr==2.14.1
     # via
     #   blosc2
-    #   solarwindpy
     #   solarwindpy (pyproject.toml)
     #   tables
 numpy==2.3.5
@@ -111,11 +98,10 @@ numpy==2.3.5
     #   pandas
     #   pyerfa
     #   scipy
-    #   solarwindpy
     #   solarwindpy (pyproject.toml)
     #   tables
 numpydoc==1.10.0
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 packaging==25.0
     # via
     #   astropy
@@ -125,9 +111,7 @@ packaging==25.0
     #   sphinx
     #   tables
 pandas==2.3.3
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 pathspec==0.12.1
     # via black
 pillow==12.0.0
@@ -174,9 +158,9 @@ pyparsing==3.3.1
 pytest==9.0.2
     # via
     #   pytest-cov
-    #   solarwindpy
+    #   solarwindpy (pyproject.toml)
 pytest-cov==7.0.0
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
     #   matplotlib
@@ -189,7 +173,6 @@ pyyaml==6.0.3
     # via
     #   astropy
     #   pybtex
-    #   solarwindpy
     #   solarwindpy (pyproject.toml)
 requests==2.32.5
     # via
@@ -203,31 +186,27 @@ roman-numerals==4.1.0
 roman-numerals-py==4.1.0
     # via sphinx
 scipy==1.16.3
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 six==1.17.0
     # via python-dateutil
 snowballstemmer==3.0.1
     # via
     #   pydocstyle
     #   sphinx
-solarwindpy[docs,test] @ file:///Users/balterma/observatories/code/SolarWindPy-2
-    # via solarwindpy (pyproject.toml)
 sphinx==8.2.3
     # via
     #   numpydoc
-    #   solarwindpy
+    #   solarwindpy (pyproject.toml)
     #   sphinx-rtd-theme
     #   sphinxcontrib-bibtex
     #   sphinxcontrib-jquery
     #   sphinxcontrib-spelling
 sphinx-rtd-theme==3.0.2
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
 sphinxcontrib-bibtex==2.6.5
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 sphinxcontrib-devhelp==2.0.0
     # via sphinx
 sphinxcontrib-htmlhelp==2.1.0
@@ -241,15 +220,13 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 sphinxcontrib-spelling==8.0.2
-    # via solarwindpy
+    # via solarwindpy (pyproject.toml)
 stevedore==5.6.0
     # via doc8
 tables==3.10.2
     # via solarwindpy (pyproject.toml)
 tabulate==0.9.0
-    # via
-    #   solarwindpy
-    #   solarwindpy (pyproject.toml)
+    # via solarwindpy (pyproject.toml)
 typing-extensions==4.15.0
     # via
     #   docstring-inheritance
