@@ -74,21 +74,22 @@ Development
 -----------
 
 1. Fork the repository and clone your fork.
-2. Create a Conda environment using the provided YAML file (Python 3.11+):
+2. Install development dependencies:
+
+   .. code-block:: bash
+
+      git clone https://github.com/YOUR-USERNAME/SolarWindPy.git
+      cd SolarWindPy
+      pip install -r requirements-dev.lock  # Includes all dev tools
+      pip install -e .
+
+   **Alternative (Conda environment)**:
 
    .. code-block:: bash
 
       conda env create -f solarwindpy.yml  # Python 3.11+
       conda activate solarwindpy
-      pip install -e .
-
-   Alternatively generate the environment from ``requirements-dev.txt``:
-
-   .. code-block:: bash
-
-      python scripts/requirements_to_conda_env.py --name solarwindpy
-      conda env create -f solarwindpy.yml
-      conda activate solarwindpy
+      pip install -r requirements-dev.lock
       pip install -e .
 
 3. Run the test suite with ``pytest``:
@@ -96,6 +97,8 @@ Development
    .. code-block:: bash
 
       pytest -q
+
+**Note**: As of v0.3.0, dependency management uses ``pip-tools`` lockfiles. See `docs/MIGRATION-DEPENDENCY-OVERHAUL.md <docs/MIGRATION-DEPENDENCY-OVERHAUL.md>`_ for migration details
 
 4. Regenerate the Conda recipe if the version or dependencies change:
 

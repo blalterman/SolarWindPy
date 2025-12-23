@@ -4,18 +4,21 @@ Thank you for considering contributing to SolarWindPy.
 
 ## Development workflow
 
-1. Create a conda environment and install dependencies:
+1. **Set up development environment**:
+
+   ```bash
+   git clone https://github.com/blalterman/SolarWindPy.git
+   cd SolarWindPy
+   pip install -r requirements-dev.lock  # Lockfile with all dev tools
+   pip install -e .
+   ```
+
+   **Alternative (Conda environment)**:
 
    ```bash
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
-   pip install -e .
-   ```
-
-   Alternatively, create a virtual environment with pip:
-
-   ```bash
-   pip install -r requirements-dev.txt
+   pip install -r requirements-dev.lock
    pip install -e .
    ```
 
@@ -103,6 +106,45 @@ python scripts/simple_doc_validation/validation_utils.py --validation-priorities
 - **Targeted validation** (`--targeted`): Focuses on core physics modules - use for most contributions
 - **Full validation**: Tests all modules - use when making extensive changes
 - **CI validation**: Automated essential checks - runs on all pull requests
+
+## Dependency Management
+
+As of v0.3.0, SolarWindPy uses `pyproject.toml` as the single source of truth for dependencies with `pip-tools` lockfiles for reproducible builds.
+
+### Adding or Updating Dependencies
+
+**Runtime dependencies** (required by users):
+```toml
+# Edit pyproject.toml [project.dependencies]
+numpy>=1.26,<3.0
+scipy>=1.13
+```
+
+**Development tools**:
+```toml
+# Edit pyproject.toml [project.optional-dependencies.dev]
+black>=24.0
+flake8>=7.0
+```
+
+**After editing `pyproject.toml`**, regenerate lockfiles:
+```bash
+pip install pip-tools
+pip-compile pyproject.toml --output-file=requirements.txt --upgrade
+pip-compile --extra=dev pyproject.toml --output-file=requirements-dev.lock --upgrade
+pip-compile --extra=docs pyproject.toml --output-file=docs/requirements.txt --upgrade
+```
+
+**Commit both** `pyproject.toml` and the lockfiles together.
+
+### Dependency Guidelines
+
+- **Runtime dependencies**: Keep minimal - only packages users need to import solarwindpy
+- **Optional dependencies**: Group by purpose (`test`, `docs`, `dev`)
+- **Version constraints**: Use lower bounds for compatibility, upper bounds for breaking changes
+- **NumPy 2.0**: Ensure all dependencies support NumPy >=1.26,<3.0
+
+See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](docs/MIGRATION-DEPENDENCY-OVERHAUL.md) for detailed migration information.
 
 ## Documentation reviews
 

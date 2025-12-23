@@ -59,11 +59,22 @@ jobs:
           
           echo "✅ Publishing version $TAG (verified: $DETECTED_VERSION)"
       
+      - name: Verify lockfiles synced before release
+        run: |
+          pip install pip-tools
+          pip-compile pyproject.toml --output-file=/tmp/req-check.txt --dry-run --quiet
+          if ! diff -q requirements.txt /tmp/req-check.txt; then
+            echo "❌ CRITICAL: requirements.txt out of sync with pyproject.toml"
+            echo "Run: pip-compile pyproject.toml --output-file=requirements.txt"
+            exit 1
+          fi
+          echo "✅ Lockfiles are synced with pyproject.toml"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build twine
-          pip install -r requirements-dev.txt
+          pip install -r requirements-dev.lock
           pip install -e .  # Install solarwindpy package for testing
       
       - name: Run full test suite
