@@ -5,6 +5,7 @@ NumpyDocstringInheritanceMeta and ABCMeta that could break fitfunction imports.
 
 Critical for maintaining compatibility across docstring-inheritance versions.
 """
+
 import pytest
 from solarwindpy.fitfunctions.core import FitFunctionMeta, FitFunction
 
