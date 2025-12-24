@@ -45,6 +45,8 @@ PIP_TO_CONDA_NAMES = {
 def translate_package_name(pip_name: str) -> str:
     """Translate pip package names to conda package names.
 
+    Also converts pip version syntax to conda syntax (== → =).
+
     Parameters
     ----------
     pip_name : str
@@ -53,13 +55,17 @@ def translate_package_name(pip_name: str) -> str:
     Returns
     -------
     str
-        Package name translated for conda, preserving version specifiers
+        Package name translated for conda, with version syntax converted
 
     Notes
     -----
     This function handles the package naming differences between pip and conda.
     For example, PyTables is installed as 'pip install tables' but
     'conda install pytables'.
+
+    Additionally, this function converts pip's exact version syntax (==) to
+    conda's exact version syntax (=). For example, 'numpy==1.26.0' becomes
+    'numpy=1.26.0'.
     """
     # Handle version specifiers (e.g., "package>=1.0.0")
     for operator in [">=", "<=", "==", "!=", ">", "<", "~="]:
@@ -68,7 +74,9 @@ def translate_package_name(pip_name: str) -> str:
             translated_package = PIP_TO_CONDA_NAMES.get(
                 package.strip(), package.strip()
             )
-            return f"{translated_package}{operator}{version}"
+            # Convert pip's == to conda's =
+            conda_operator = "=" if operator == "==" else operator
+            return f"{translated_package}{conda_operator}{version}"
 
     # No version specifier, direct translation
     return PIP_TO_CONDA_NAMES.get(pip_name.strip(), pip_name.strip())
