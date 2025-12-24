@@ -75,8 +75,8 @@ class Config:
     Set to False to disable specific indicators and reduce status line length.
     """
 
-    # Phase 3: Optional advanced components (disabled by default)
-    SHOW_API_EFFICIENCY = False  # API time vs total time ratio
+    # Phase 3: Optional advanced components
+    SHOW_API_EFFICIENCY = True  # API time vs total time ratio
     SHOW_SESSION_SOURCE = False  # How session started (resume/compact/fresh)
 
     # Core components (always enabled)
