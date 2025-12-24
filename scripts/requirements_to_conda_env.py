@@ -48,24 +48,31 @@ INCOMPATIBLE_VERSION_SCHEMES = {
     "tzdata",  # PyPI: 2025.3 (dot notation), conda-forge: 2025a/b/c (letter suffix)
 }
 
+# If True, strip ALL version pins from exact matches (==) in the conda file.
+# This is safe because:
+# 1. Conda environment is used to set up the environment
+# 2. pip install -e . uses pyproject.toml which has the real minimum requirements
+# 3. The conda file just needs packages present, not pinned versions
+STRIP_EXACT_VERSIONS = True
+
 
 def translate_package_name(pip_name: str) -> str:
     """Translate pip package names to conda package names.
 
-    Handles three key differences between pip and conda:
+    Handles key differences between pip and conda:
 
     1. **Package names**: Some packages have different names
        (e.g., pip 'tables' → conda 'pytables')
 
-    2. **Version syntax**: pip uses '==' for exact, conda uses '='
+    2. **Version stripping**: By default (STRIP_EXACT_VERSIONS=True), exact
+       version pins (==) are stripped entirely. This is safe because:
+       - The conda environment just needs packages present
+       - `pip install -e .` enforces pyproject.toml's minimum requirements
+       - Avoids PyPI/conda-forge version mismatches
 
-    3. **Version availability**: PyPI versions may not exist on conda-forge.
-       For exact pins (==), this function converts to minimum version (>=)
-       using only major.minor, allowing conda to resolve to available versions.
-
-    4. **Version scheme differences**: Some packages use incompatible version
-       schemes between PyPI and conda-forge (e.g., tzdata: 2025.3 vs 2025a).
-       These have versions stripped entirely.
+    3. **Incompatible version schemes**: Some packages (e.g., tzdata) use
+       different version schemes on PyPI vs conda-forge and always have
+       versions stripped.
 
     Parameters
     ----------
@@ -75,15 +82,13 @@ def translate_package_name(pip_name: str) -> str:
     Returns
     -------
     str
-        Package name translated for conda, with version syntax converted
+        Package name translated for conda (typically without version)
 
     Notes
     -----
-    This approach ensures conda environment files work with conda-forge even
-    when PyPI pins versions that don't exist on conda-forge. The trade-off
-    is reduced reproducibility in exchange for CI stability.
-
-    For reproducible installs, use pip with requirements.txt directly.
+    The conda environment file is intentionally simple - just package names.
+    Real version constraints come from pyproject.toml via `pip install -e .`
+    after the conda environment is created.
     """
     # Handle version specifiers (e.g., "package>=1.0.0")
     for operator in [">=", "<=", "==", "!=", ">", "<", "~="]:
@@ -97,17 +102,20 @@ def translate_package_name(pip_name: str) -> str:
             if package in INCOMPATIBLE_VERSION_SCHEMES:
                 return translated_package
 
-            # For exact pins (==), convert to minimum version constraint
-            # This allows conda-forge to resolve to available versions
-            # Example: numexpr==2.11.0 → numexpr>=2.11
+            # For exact pins (==), either strip version or convert to minimum
             if operator == "==":
-                version_parts = version.split(".")
-                if len(version_parts) >= 2:
-                    major_minor = ".".join(version_parts[:2])
-                    return f"{translated_package}>={major_minor}"
+                if STRIP_EXACT_VERSIONS:
+                    # Strip version entirely - let conda resolve
+                    # pyproject.toml enforces minimum requirements via pip install -e .
+                    return translated_package
                 else:
-                    # Single-part version, use as minimum
-                    return f"{translated_package}>={version}"
+                    # Fallback: convert to minimum version constraint
+                    version_parts = version.split(".")
+                    if len(version_parts) >= 2:
+                        major_minor = ".".join(version_parts[:2])
+                        return f"{translated_package}>={major_minor}"
+                    else:
+                        return f"{translated_package}>={version}"
 
             # Other operators: preserve as-is
             return f"{translated_package}{operator}{version}"
@@ -156,19 +164,20 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
     header = """\
 # SolarWindPy Conda Environment File
 #
-# NOTE: Python version is intentionally NOT specified in this file.
-# It is dynamically injected by GitHub Actions workflows during matrix testing
-# to avoid setup-miniconda@v3 patching issues that break dependency resolution.
+# This file lists packages WITHOUT version pins. This is intentional:
+# 1. Conda resolves to latest compatible versions from conda-forge
+# 2. `pip install -e .` enforces pyproject.toml's minimum requirements
+# 3. Avoids PyPI/conda-forge version mismatches that break CI
+#
 # Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
 #
-# IMPORTANT: Version constraints use >= instead of exact pins (=).
-# This allows conda-forge to resolve to available versions, since PyPI and
-# conda-forge may have different versions available. For reproducible installs,
-# use pip with requirements.txt directly.
+# NOTE: Python version is dynamically injected by GitHub Actions workflows
+# during matrix testing to support multiple Python versions.
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
-#   (conda will resolve to latest compatible versions)
+#   conda activate solarwindpy
+#   pip install -e .  # Enforces version constraints from pyproject.toml
 #
 """
     with open(target_name, "w") as out_file:
