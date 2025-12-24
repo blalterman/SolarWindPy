@@ -151,6 +151,22 @@ Generate matrix-specific environment files **before** setup-miniconda runs, elim
     sed -i "/^dependencies:/a - python=${{ matrix.python-version }}" solarwindpy-matrix.yml
 ```
 
+### PyYAML Dependency
+
+The dynamic generation script requires PyYAML to parse and modify the environment file.
+
+**Installation**: Workflows install PyYAML via pip before running the generation script:
+```yaml
+- name: Install PyYAML for environment file generation
+  run: python -m pip install pyyaml
+```
+
+**Why not use conda's PyYAML?**: The script runs BEFORE the conda environment exists (chicken-and-egg problem). Installing via pip in the runner's Python is the simplest solution.
+
+**Impact**: Negligible (~3-5 seconds, ~500KB)
+
+**Note**: PyYAML will be installed twice (once in GitHub Actions runner via pip, once in conda environment). This is harmless - they exist in separate Python environments.
+
 ---
 
 ## Matrix Testing Preservation

@@ -35,6 +35,9 @@ jobs:
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
 
+    - name: Install PyYAML for environment file generation
+      run: python -m pip install pyyaml
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # Matrix-Specific Environment File Generation
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -256,6 +259,9 @@ jobs:
         echo "Environment file: $CONDA_ENV"
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
+
+    - name: Install PyYAML for environment file generation
+      run: python -m pip install pyyaml
 
     # Dynamic generation prevents setup-miniconda@v3 patching (see pr-405-conda-patching.md)
     - name: Create matrix-specific environment file
