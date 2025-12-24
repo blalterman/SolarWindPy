@@ -62,7 +62,7 @@ jobs:
       - name: Verify lockfiles synced before release
         run: |
           pip install pip-tools
-          pip-compile pyproject.toml --output-file=/tmp/req-check.txt --dry-run --quiet
+          pip-compile pyproject.toml --output-file=/tmp/req-check.txt --quiet
           if ! diff -q requirements.txt /tmp/req-check.txt; then
             echo "❌ CRITICAL: requirements.txt out of sync with pyproject.toml"
             echo "Run: pip-compile pyproject.toml --output-file=requirements.txt"
