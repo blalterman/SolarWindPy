@@ -82,7 +82,7 @@ This was a series of **five** cascading bugs discovered in PR #405, each masked 
 | **2** | `numexpr ==2.11.0 * does not exist` | pip `==` vs conda `=` syntax | Convert `==` → `=` in translation | 761f3ba3 |
 | **3** | `numexpr =2.11.0 * does not exist` | setup-miniconda patching adds spaces | Dynamic environment generation | 650e12f9 |
 | **4** | `ModuleNotFoundError: yaml` | PyYAML not in GitHub Actions runner | `pip install pyyaml` before script | fad3f1e3 |
-| **5** | `numexpr =2.11.0 * does not exist` | PyPI versions don't exist on conda-forge | Use `>=major.minor` constraints | [fifth] |
+| **5** | `numexpr =2.11.0 * does not exist` | PyPI versions don't exist on conda-forge | Strip all version pins | 6bcbf944 |
 
 **Why cascading**:
 - Bug #1 prevented conda from parsing YAML → couldn't reach bug #2
@@ -294,12 +294,16 @@ pip-compile pins exact versions from PyPI, but those versions may not exist on c
 
 ### Solution
 
-Modified `scripts/requirements_to_conda_env.py` to:
+**Simplified approach**: Strip ALL version pins from conda environment file.
 
-1. **Convert exact pins to minimum versions**: `numexpr==2.11.0` → `numexpr>=2.11`
-2. **Strip versions for incompatible schemes**: `tzdata==2025.3` → `tzdata`
+Modified `scripts/requirements_to_conda_env.py` to set `STRIP_EXACT_VERSIONS = True`:
+- `numexpr==2.11.0` → `numexpr` (no version)
+- `tzdata==2025.3` → `tzdata` (no version)
 
-This allows conda-forge to resolve to available versions while maintaining minimum compatibility.
+This works because:
+1. **Conda** just needs packages present, resolves to latest from conda-forge
+2. **pip install -e .** enforces `pyproject.toml`'s minimum requirements
+3. Eliminates entire class of PyPI/conda-forge version mismatch bugs
 
 ### Key Insight
 
