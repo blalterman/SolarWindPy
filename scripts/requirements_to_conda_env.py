@@ -41,11 +41,31 @@ PIP_TO_CONDA_NAMES = {
     "tables": "pytables",  # PyTables: pip uses 'tables', conda uses 'pytables'
 }
 
+# Packages with version schemes that differ between PyPI and conda-forge
+# These packages have their versions stripped entirely to let conda resolve
+# Reference: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
+INCOMPATIBLE_VERSION_SCHEMES = {
+    "tzdata",  # PyPI: 2025.3 (dot notation), conda-forge: 2025a/b/c (letter suffix)
+}
+
 
 def translate_package_name(pip_name: str) -> str:
     """Translate pip package names to conda package names.
 
-    Also converts pip version syntax to conda syntax (== → =).
+    Handles three key differences between pip and conda:
+
+    1. **Package names**: Some packages have different names
+       (e.g., pip 'tables' → conda 'pytables')
+
+    2. **Version syntax**: pip uses '==' for exact, conda uses '='
+
+    3. **Version availability**: PyPI versions may not exist on conda-forge.
+       For exact pins (==), this function converts to minimum version (>=)
+       using only major.minor, allowing conda to resolve to available versions.
+
+    4. **Version scheme differences**: Some packages use incompatible version
+       schemes between PyPI and conda-forge (e.g., tzdata: 2025.3 vs 2025a).
+       These have versions stripped entirely.
 
     Parameters
     ----------
@@ -59,24 +79,38 @@ def translate_package_name(pip_name: str) -> str:
 
     Notes
     -----
-    This function handles the package naming differences between pip and conda.
-    For example, PyTables is installed as 'pip install tables' but
-    'conda install pytables'.
+    This approach ensures conda environment files work with conda-forge even
+    when PyPI pins versions that don't exist on conda-forge. The trade-off
+    is reduced reproducibility in exchange for CI stability.
 
-    Additionally, this function converts pip's exact version syntax (==) to
-    conda's exact version syntax (=). For example, 'numpy==1.26.0' becomes
-    'numpy=1.26.0'.
+    For reproducible installs, use pip with requirements.txt directly.
     """
     # Handle version specifiers (e.g., "package>=1.0.0")
     for operator in [">=", "<=", "==", "!=", ">", "<", "~="]:
         if operator in pip_name:
             package, version = pip_name.split(operator, 1)
-            translated_package = PIP_TO_CONDA_NAMES.get(
-                package.strip(), package.strip()
-            )
-            # Convert pip's == to conda's =
-            conda_operator = "=" if operator == "==" else operator
-            return f"{translated_package}{conda_operator}{version}"
+            package = package.strip()
+            version = version.strip()
+            translated_package = PIP_TO_CONDA_NAMES.get(package, package)
+
+            # Packages with incompatible version schemes: strip version entirely
+            if package in INCOMPATIBLE_VERSION_SCHEMES:
+                return translated_package
+
+            # For exact pins (==), convert to minimum version constraint
+            # This allows conda-forge to resolve to available versions
+            # Example: numexpr==2.11.0 → numexpr>=2.11
+            if operator == "==":
+                version_parts = version.split(".")
+                if len(version_parts) >= 2:
+                    major_minor = ".".join(version_parts[:2])
+                    return f"{translated_package}>={major_minor}"
+                else:
+                    # Single-part version, use as minimum
+                    return f"{translated_package}>={version}"
+
+            # Other operators: preserve as-is
+            return f"{translated_package}{operator}{version}"
 
     # No version specifier, direct translation
     return PIP_TO_CONDA_NAMES.get(pip_name.strip(), pip_name.strip())
@@ -118,7 +152,27 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
         print(f"Error: {target_name} already exists. Use --overwrite to replace it.")
         raise FileExistsError(f"{target_name} already exists")
 
+    # Write environment file with explanatory header
+    header = """\
+# SolarWindPy Conda Environment File
+#
+# NOTE: Python version is intentionally NOT specified in this file.
+# It is dynamically injected by GitHub Actions workflows during matrix testing
+# to avoid setup-miniconda@v3 patching issues that break dependency resolution.
+# Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
+#
+# IMPORTANT: Version constraints use >= instead of exact pins (=).
+# This allows conda-forge to resolve to available versions, since PyPI and
+# conda-forge may have different versions available. For reproducible installs,
+# use pip with requirements.txt directly.
+#
+# For local use:
+#   conda env create -f solarwindpy.yml
+#   (conda will resolve to latest compatible versions)
+#
+"""
     with open(target_name, "w") as out_file:
+        out_file.write(header)
         yaml.safe_dump(env, out_file, sort_keys=False)
 
 

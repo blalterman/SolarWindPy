@@ -1,9 +1,9 @@
-# PR #405: setup-miniconda@v3 Patching Issue
+# PR #405: CI Conda Environment Resolution Issues
 
 **Status**: Resolved (December 2024)
 **Impact**: Critical - CI workflows failing with dependency resolution errors
-**Solution**: Dynamic environment file generation in GitHub Actions workflows
-**Related**: Third in cascading bug series (comments → `==` syntax → patching)
+**Solution**: Version range constraints + dynamic environment file generation
+**Related**: Five cascading bugs (comments → syntax → patching → PyYAML → version mismatch)
 
 ---
 
@@ -74,18 +74,21 @@ Reference: [setup-miniconda Issue #114](https://github.com/conda-incubator/setup
 
 ## Timeline: Cascading Bug Series
 
-This was the **third** bug discovered in PR #405, each masked by the previous:
+This was a series of **five** cascading bugs discovered in PR #405, each masked by the previous:
 
 | Bug # | Symptom | Root Cause | Fix | Commit |
 |-------|---------|------------|-----|--------|
 | **1** | `# [==astropy *\|...] does not exist` | Indented pip-compile comments not filtered | `line.strip().startswith("#")` | e37bc407 |
 | **2** | `numexpr ==2.11.0 * does not exist` | pip `==` vs conda `=` syntax | Convert `==` → `=` in translation | 761f3ba3 |
-| **3** | `numexpr =2.11.0 * does not exist` | setup-miniconda patching adds spaces | Dynamic environment generation | [third] |
+| **3** | `numexpr =2.11.0 * does not exist` | setup-miniconda patching adds spaces | Dynamic environment generation | 650e12f9 |
+| **4** | `ModuleNotFoundError: yaml` | PyYAML not in GitHub Actions runner | `pip install pyyaml` before script | fad3f1e3 |
+| **5** | `numexpr =2.11.0 * does not exist` | PyPI versions don't exist on conda-forge | Use `>=major.minor` constraints | [fifth] |
 
 **Why cascading**:
 - Bug #1 prevented conda from parsing YAML → couldn't reach bug #2
 - Bug #2 (after fix) prevented conda from resolving packages → couldn't reach bug #3
-- Bug #3 only visible after first two fixes succeeded
+- Bug #3 (patching bypass) required Bug #4 fix (PyYAML) to execute
+- Bug #5 only visible after syntax/tooling issues resolved; root cause was version availability
 
 ---
 
@@ -262,7 +265,45 @@ Line 753: mamba env create --file solarwindpy-matrix.yml
 **SolarWindPy PR #405**:
 - Commit e37bc407: Fix #1 (comment filtering)
 - Commit 761f3ba3: Fix #2 (== to = conversion)
-- Commit [third]: Fix #3 (dynamic generation)
+- Commit 650e12f9: Fix #3 (dynamic generation)
+- Commit fad3f1e3: Fix #4 (PyYAML installation)
+- Commit [fifth]: Fix #5 (version range constraints)
+
+---
+
+## Bug #5: PyPI/Conda-Forge Version Mismatch
+
+**Status**: Resolved (December 2024)
+
+### Problem
+
+After fixes #1-#4, the same error persisted:
+```
+numexpr =2.11.0 * does not exist
+tzdata =2025.3 * does not exist
+```
+
+### Root Cause
+
+pip-compile pins exact versions from PyPI, but those versions may not exist on conda-forge:
+
+| Package | PyPI Version | conda-forge Versions | Issue |
+|---------|-------------|---------------------|-------|
+| numexpr | 2.11.0 | 2.10.2, 2.12.1+ | **2.11.x skipped entirely** |
+| tzdata | 2025.3 | 2025a, 2025b, 2025c | **Different versioning scheme** |
+
+### Solution
+
+Modified `scripts/requirements_to_conda_env.py` to:
+
+1. **Convert exact pins to minimum versions**: `numexpr==2.11.0` → `numexpr>=2.11`
+2. **Strip versions for incompatible schemes**: `tzdata==2025.3` → `tzdata`
+
+This allows conda-forge to resolve to available versions while maintaining minimum compatibility.
+
+### Key Insight
+
+The error message format (`numexpr =2.11.0 *`) is conda's internal display format, not a syntax error. It appears the same whether the file has correct syntax or not—it means the version doesn't exist on the configured channels.
 
 ---
 
