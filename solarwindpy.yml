@@ -1,14 +1,21 @@
 # SolarWindPy Conda Environment File
 #
-# This file lists packages WITHOUT version pins. This is intentional:
-# 1. Conda resolves to latest compatible versions from conda-forge
-# 2. `pip install -e .` enforces pyproject.toml's minimum requirements
-# 3. Avoids PyPI/conda-forge version mismatches that break CI
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# IMPORTANT: Packages are listed WITHOUT version pins. This is intentional.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
-# Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
+# WHY: pip-compile generates versions from PyPI, but conda-forge often has
+# different versions or versioning schemes:
+#   - numexpr 2.11.0 doesn't exist on conda-forge (skipped from 2.10.2 to 2.12.1)
+#   - tzdata uses letter suffixes on conda-forge (2025a) vs dots on PyPI (2025.3)
 #
-# NOTE: Python version is dynamically injected by GitHub Actions workflows
-# during matrix testing to support multiple Python versions.
+# HOW IT WORKS:
+#   1. Conda resolves to latest compatible versions from conda-forge
+#   2. `pip install -e .` enforces pyproject.toml's minimum requirements
+#   3. This eliminates PyPI/conda-forge version mismatch errors
+#
+# HISTORY: PR #405 diagnosed 5 cascading CI bugs; this approach fixed all of them.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
