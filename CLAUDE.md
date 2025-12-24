@@ -183,6 +183,24 @@ black solarwindpy/ tests/                  # Format code
 flake8 solarwindpy/ tests/                 # Lint check
 ```
 
+### Quick Decision Analysis (Slash Commands)
+```bash
+/propositions <task description>           # Generate value propositions analysis
+```
+
+**Purpose:** Quick exploration and brainstorming tool for prompt development
+- Analyzes task using 8 strategic value propositions framework
+- Provides summary table with confidence indicators
+- Delivers PROCEED/MODIFY/DON'T PROCEED recommendation
+- **Note:** Uses AI estimation, not calculated metrics (exploratory only)
+- **For production plans:** Use `gh-plan-create.sh` with automated hooks
+
+**Example:**
+```
+/propositions refactor Ion class to use composition
+/propositions add thermal pressure calculation
+```
+
 ## Project Architecture Summary
 - **Core Data Model**: MultiIndex DataFrame (M: measurement, C: component, S: species)
 - **Key Classes**: Plasma (container), Ion (species), Base (abstract)

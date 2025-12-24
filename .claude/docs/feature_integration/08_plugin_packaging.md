@@ -2,7 +2,7 @@
 
 **Feature Type:** Infrastructure
 **Priority:** HIGH
-**Effort:** 6-10 hours
+**Effort:** 8-12 hours
 **ROI Break-even:** Immediate (enables distribution)
 
 [← Back to Index](./INDEX.md) | [Previous: Slash Commands ←](./07_slash_commands.md)
@@ -743,6 +743,92 @@ Review checklist:
 
 **No Integration Needed:** Checkpointing works automatically regardless of plugin.
 
+#### Skills
+
+**Packaging:**
+- Skills are officially supported in plugins
+- Include skill YAML files in `plugin-name/skills/` directory
+- Skills auto-register when plugin installs
+
+**Integration:**
+```yaml
+# Example: plugin-name/skills/physics-validator.yaml
+name: physics-validator
+version: 1.0.0
+triggers:
+  - "thermal speed"
+  - "plasma beta"
+  - "SI units"
+```
+
+**See:** [Skills System](./02_skills_system.md) for implementation details.
+
+#### Subagents
+
+**Packaging:**
+- Subagents are officially supported in plugins (called "agents" in plugin spec)
+- Include agent definitions in `plugin-name/agents/` directory
+- Agents register when plugin installs
+
+**Integration:**
+```json
+// Example: plugin-name/agents/physics-validator.json
+{
+  "name": "DataFrameArchitect",
+  "description": "Deep physics analysis with constraint validation",
+  "model": "sonnet",
+  "tools": ["Read", "Bash", "Grep"]
+}
+```
+
+**See:** [Subagents](./03_subagents.md) for implementation details.
+
+#### Hooks
+
+**Packaging:**
+- Hook configurations officially supported in plugins
+- Include `hooks.json` in `plugin-name/hooks/` directory
+- Executable scripts (`.sh` files) may need local installation for security
+
+**Integration:**
+```json
+// Example: plugin-name/hooks/hooks.json
+{
+  "hooks": [
+    {
+      "event": "file-edit",
+      "pattern": "*.py",
+      "script": "physics-validation.sh"
+    }
+  ]
+}
+```
+
+**Note:** Users install executable scripts separately to `.claude/hooks/` for security.
+
+**See:** [Enhanced Hooks](./04_enhanced_hooks.md) for implementation details.
+
+#### Slash Commands
+
+**Packaging:**
+- Slash commands are officially supported in plugins
+- Include command markdown files in `plugin-name/commands/` directory
+- Commands register when plugin installs
+
+**Integration:**
+```markdown
+<!-- Example: plugin-name/commands/coverage.md -->
+# /coverage
+
+Display test coverage report for SolarWindPy.
+
+\`\`\`bash
+pytest --cov=solarwindpy --cov-report=term -q
+\`\`\`
+```
+
+**See:** [Slash Commands](./07_slash_commands.md) for implementation details.
+
 ### 7. Advanced Features
 
 #### 7.1 MCP Server Integration
@@ -796,6 +882,139 @@ Review checklist:
 **Use Case:** Advanced analysis plugin that extends core devtools
 
 **Timeline:** If community demand arises
+
+#### 7.3 Version Control and Rollback
+
+**Purpose:** Manage plugin lifecycle with semantic versioning, enable safe updates, and provide rollback capability when updates cause issues.
+
+**Semantic Versioning (MAJOR.MINOR.PATCH):**
+
+```
+MAJOR: Breaking changes (backward-incompatible API changes, removed features)
+MINOR: New features (backward-compatible additions, new commands/skills)
+PATCH: Bug fixes (backward-compatible fixes, documentation updates)
+
+Examples:
+- 1.0.0 → 1.0.1: Fixed bug in /coverage command (PATCH)
+- 1.0.1 → 1.1.0: Added /refactor command (MINOR - new feature)
+- 1.1.0 → 2.0.0: Renamed all commands, removed /old-command (MAJOR - breaking)
+```
+
+**Plugin.json Versioning Structure:**
+
+```json
+{
+  "name": "solarwindpy-devtools",
+  "version": "1.2.3",
+  "compatibility": {
+    "claude-code": ">=1.5.0",
+    "min-version": "1.0.0"
+  },
+  "changelog": [
+    {
+      "version": "1.2.3",
+      "date": "2025-12-03",
+      "changes": [
+        "Added error recovery to /physics command",
+        "Fixed timeout handling in subagents"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2025-11-15",
+      "changes": [
+        "Added /refactor slash command",
+        "New plotting-engineer subagent"
+      ]
+    }
+  ],
+  "breaking-changes": {
+    "2.0.0": "Renamed /test → /run-tests, removed deprecated /old-physics"
+  }
+}
+```
+
+**Rollback Strategy:**
+
+**Pre-Update Backup:**
+```bash
+# Automatic backup before plugin update
+.claude/plugins/solarwindpy-devtools-1.2.3/  # Current version (backed up)
+.claude/plugins/solarwindpy-devtools-1.3.0/  # New version (installing)
+```
+
+**Rollback Command:**
+```bash
+/plugin rollback solarwindpy-devtools 1.2.3
+
+# Or automatic if current version broken
+claude-code --rollback-plugin solarwindpy-devtools
+```
+
+**Scope of Rollback:**
+- ✅ **Restored:** Commands, skills, agents, hooks from previous version
+- ✅ **Preserved:** User data, logs, session history
+- ❌ **Not restored:** External dependencies (must reinstall manually if changed)
+
+**Dependency Management:**
+
+**Required Dependencies (Installation Validation):**
+
+```json
+{
+  "dependencies": {
+    "pytest": {
+      "version": ">=7.0.0",
+      "required": true,
+      "install-command": "pip install pytest>=7.0.0",
+      "validation": "pytest --version"
+    },
+    "black": {
+      "version": ">=23.0.0",
+      "required": false,
+      "install-command": "pip install black>=23.0.0",
+      "validation": "black --version"
+    }
+  }
+}
+```
+
+**Installation Validation Flow:**
+
+```
+Plugin Install → Check required dependencies → Missing? → Show installation commands → User installs → Validate → Success
+                                             ↓
+                                         All present → Install plugin → Success
+```
+
+**Graceful Degradation (Missing Optional Dependencies):**
+
+```bash
+# Example: black formatter not installed
+/coverage command runs successfully
+/physics validation runs successfully
+/format-code → Warning: "black not found, skipping formatting. Install: pip install black>=23.0.0"
+```
+
+**Dependency Fallback Chain:**
+
+```
+Primary Tool (pytest) → Not found → Alternative Tool (unittest) → Not found → Manual fallback
+```
+
+**Version Compatibility Checks:**
+
+```bash
+# Before installation
+if claude_code_version < min_claude_code_version:
+    error("Plugin requires Claude Code >=1.5.0, current version: 1.4.2")
+    exit(1)
+
+# After installation
+if plugin_version incompatible with existing_plugins:
+    warn("solarwindpy-advanced requires solarwindpy-devtools ^1.0.0")
+    prompt("Update solarwindpy-devtools? [Y/n]")
+```
 
 ### 8. Priority & Effort Estimation
 
@@ -863,10 +1082,11 @@ Review checklist:
 **Initial Setup:**
 - Plugin structure creation: **1-2 hours**
 - Feature packaging: **2-3 hours** (copy from local implementations)
+- Version control and rollback documentation: **2 hours**
 - Local marketplace setup: **1 hour**
 - Testing & validation: **1-2 hours**
 - Documentation (README): **1-2 hours**
-- **Total: 6-10 hours**
+- **Total: 8-12 hours**
 
 **Ongoing Maintenance:**
 - Version bumps: **15-30 min** per release
@@ -942,6 +1162,77 @@ Expected: Installation from remote repository succeeds
 - ✅ Version updates work seamlessly
 - ✅ Team auto-install works from settings.json
 - ✅ GitHub marketplace installation succeeds
+
+#### Installation Testing Procedure (Objective Pass/Fail Validation)
+
+**Purpose:** Formal validation checklist for Critique Point 8 in integration_checklist.md
+
+**Test Environment:** Clean `.claude/` directory (backup and remove existing config before testing)
+
+**Procedure:**
+1. **Fresh Installation Test** (Pass/Fail)
+   - [ ] Install plugin in clean `.claude/` directory: `/plugin install solarwindpy-devtools`
+   - [ ] Verify plugin.json loaded: `/plugin info solarwindpy-devtools`
+   - [ ] Check no errors in `.claude/logs/plugin-*.log`
+   - **Pass Criteria:** Plugin shows as "installed" with correct version
+
+2. **Command Validation Test** (Pass/Fail)
+   - [ ] Test all 10 slash commands execute without errors:
+     - `/coverage` - displays coverage report
+     - `/physics` - runs physics validation
+     - `/test-changed` - tests modified files
+     - `/test-physics` - runs physics tests
+     - `/clean` - runs cleanup
+     - `/breakdown` - shows capability breakdown
+     - `/physics-validate` - validates physics constraints
+     - `/memory` - displays memory hierarchy
+     - `/checkpoint` - shows checkpoint status
+     - `/propositions` - analyzes with value propositions
+   - **Pass Criteria:** All 10 commands execute, no "command not found" errors
+
+3. **Skill Validation Test** (Pass/Fail)
+   - [ ] Trigger each skill with appropriate phrase:
+     - DataFrameArchitect: Mention "MultiIndex optimization"
+     - DataFrameArchitect: Mention "MultiIndex operation"
+     - TestEngineer: Mention "need test coverage analysis"
+     - FitFunctionSpecialist: Mention "curve fitting"
+   - [ ] Verify skills auto-activate (check for skill activation messages)
+   - **Pass Criteria:** ≥3 of 4 skills auto-activate correctly
+
+4. **Agent Validation Test** (Pass/Fail)
+   - [ ] Manually invoke each agent type
+   - [ ] Verify agent creates isolated context window
+   - [ ] Check agent reports returned successfully
+   - **Pass Criteria:** All 4 agents invocable, context isolation confirmed
+
+5. **Hook Validation Test** (Pass/Fail)
+   - [ ] Perform actions that trigger hooks (file edits, git operations)
+   - [ ] Check `.claude/logs/` for hook execution logs
+   - [ ] Verify hooks execute without blocking operations
+   - **Pass Criteria:** Hooks trigger, logs generated, no blocking errors
+
+6. **Dependency Test** (Pass/Fail)
+   - [ ] Simulate missing dependency (e.g., rename pytest temporarily)
+   - [ ] Verify graceful degradation (warning message, not crash)
+   - [ ] Restore dependency, verify functionality returns
+   - **Pass Criteria:** Missing dependencies show warnings, don't crash plugin
+
+7. **Error Recovery Test** (Pass/Fail)
+   - [ ] Introduce deliberate errors (malformed command syntax)
+   - [ ] Verify error messages are clear and actionable
+   - [ ] Confirm plugin remains stable after errors
+   - **Pass Criteria:** Errors handled gracefully, plugin doesn't become unusable
+
+8. **Final Validation** (Pass/Fail)
+   - [ ] Check `.claude/logs/` for any ERROR-level entries
+   - [ ] Verify all features operational after complete test suite
+   - [ ] Confirm plugin can be cleanly uninstalled: `/plugin uninstall solarwindpy-devtools`
+   - **Pass Criteria:** No ERROR logs, clean uninstall successful
+
+**Overall Test Result:**
+- **PASS:** All 8 tests pass (≥7 individual pass criteria met)
+- **FAIL:** Any critical test fails (commands non-functional, installation broken)
+- **PARTIAL PASS:** Minor issues (e.g., 1 skill doesn't auto-activate) - acceptable with documentation
 
 **Monitoring:**
 ```bash

@@ -9,10 +9,39 @@
 
 ---
 
+**⚠️ PREREQUISITES: PHASE 3 (OPTIONAL)**
+
+**This feature is OPTIONAL. Only implement if Decision Gate 3 indicates user need.**
+
+**Complete Phase 2 before implementing (if needed):**
+- ✅ All Phase 0-1 features implemented
+- ✅ Enhanced Hooks (04) + Checkpointing (05) + Plugin Packaging (08) implemented (Phase 2)
+- ✅ Decision Gate 3: User feedback indicates Explanatory style insufficient for physics work
+
+**⚠️ RECOMMENDED: SKIP Phase 3 unless explicitly requested by team.**
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
+
+---
+
 **❌ NOT A PLUGIN FEATURE - Local Configuration**
 
 Output styles are personal/team preferences (not distributable). Stored in `.claude/output-styles/` locally.
 See: [Plugin Packaging](./08_plugin_packaging.md#62-output-styles)
+
+---
+
+**⚠️ PHASE 3 OPTIONAL ENHANCEMENT**
+
+**Trigger Condition:** Only implement if Explanatory style proves insufficient
+
+**Decision Criteria:**
+- ✅ **Implement if:** User feedback indicates need for more domain-specific physics emphasis
+- ❌ **Skip if:** Current Explanatory style is satisfactory (likely outcome)
+
+**Anthropic Best Practice:** "Start with simple prompt customization. Add complexity like custom styles only when demonstrably beneficial."
+
+**Status:** NOT REQUIRED for Phases 0-2. Defer decision until Phase 2 completion.
 
 ---
 
@@ -248,7 +277,7 @@ Emphasize MultiIndex structure:
 
 Automatically recommend:
 - **physics-validator skill** when formulas are involved
-- **PhysicsValidator agent** for complex multi-file physics analysis
+- **DataFrameArchitect agent** for complex DataFrame refactoring
 - **dataframe-architect skill** for DataFrame operations
 - **DataFrameArchitect agent** for comprehensive refactoring
 - **test-generator skill** when coverage gaps exist

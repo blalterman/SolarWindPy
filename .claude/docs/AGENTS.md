@@ -10,35 +10,23 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 - **Critical**: MUST execute CLI scripts, not describe them
 - **Usage**: `"Use UnifiedPlanCoordinator to create GitHub Issues plan for <feature>"`
 
-### PhysicsValidator  
-- **Purpose**: Physics correctness and unit validation
-- **Capabilities**: Solar wind physics constraints, scientific validation
-- **Critical**: Thermal speed mw² = 2kT, SI units, NaN for missing data
-- **Usage**: `"Use PhysicsValidator to verify thermal speed calculations"`
-
 ### DataFrameArchitect
-- **Purpose**: MultiIndex data structure management  
+- **Purpose**: MultiIndex data structure management
 - **Capabilities**: Pandas performance optimization, memory management
 - **Critical**: Use .xs() for views, (M/C/S) level structure
 - **Usage**: `"Use DataFrameArchitect to optimize MultiIndex operations"`
 
-### NumericalStabilityGuard
-- **Purpose**: Numerical validation and edge cases
-- **Capabilities**: Prevents numerical errors, ensures stable computations
-- **Critical**: Handles edge cases, precision issues
-- **Usage**: `"Use NumericalStabilityGuard for computational stability"`
+### FitFunctionSpecialist
+- **Purpose**: Curve fitting, statistical analysis, and numerical operations
+- **Capabilities**: Statistical analysis, optimization algorithms, numerical stability patterns
+- **Critical**: Data fitting patterns, abstract base classes, edge case handling
+- **Usage**: `"Use FitFunctionSpecialist for curve fitting and numerical computations"`
 
 ### PlottingEngineer
-- **Purpose**: Visualization and plotting functionality  
+- **Purpose**: Visualization and plotting functionality
 - **Capabilities**: Matplotlib expertise, publication-quality figures
 - **Critical**: Scientific visualization standards
 - **Usage**: `"Use PlottingEngineer to create publication-quality figures"`
-
-### FitFunctionSpecialist
-- **Purpose**: Curve fitting and statistical analysis
-- **Capabilities**: Statistical analysis, optimization algorithms
-- **Critical**: Data fitting patterns, abstract base classes
-- **Usage**: `"Use FitFunctionSpecialist for statistical analysis"`
 
 ### TestEngineer
 - **Purpose**: Test coverage and quality assurance
@@ -67,19 +55,16 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 "Use UnifiedPlanCoordinator to create GitHub Issues plan for dark mode implementation"
 
 # Domain-specific work
-"Use PhysicsValidator to verify thermal speed calculations"
-"Use DataFrameArchitect to optimize MultiIndex operations"  
+"Use DataFrameArchitect to optimize MultiIndex operations"
 "Use PlottingEngineer to create publication-quality figures"
 "Use TestEngineer to design physics-specific test strategies"
 ```
 
-## Agent Selection Guidelines
+## Agent Selection Guidelines (5 Active Agents)
 - **Planning tasks** → UnifiedPlanCoordinator
-- **Physics calculations** → PhysicsValidator
-- **Data structure optimization** → DataFrameArchitect  
-- **Numerical precision** → NumericalStabilityGuard
+- **Data structure optimization & physics** → DataFrameArchitect
+- **Numerical precision, curve fitting & stability** → FitFunctionSpecialist
 - **Visualization** → PlottingEngineer
-- **Statistical analysis** → FitFunctionSpecialist
 - **Test design** → TestEngineer
 
 ## Integration with Hooks
@@ -130,9 +115,9 @@ The following agents were documented as "Planned Agents" in `.claude/agents.back
 
 ### IonSpeciesValidator
 - **Planned purpose**: Ion-specific physics validation (thermal speeds, mass/charge ratios, anisotropies)
-- **Decision rationale**: Functionality fully covered by existing PhysicsValidator agent
-- **Current status**: PhysicsValidator handles all ion validation requirements
-- **Implementation**: No separate agent needed - PhysicsValidator is comprehensive
+- **Decision rationale**: Functionality covered by test suite and code-style.md conventions
+- **Current status**: Physics validation handled by TestEngineer and pytest
+- **Implementation**: No separate agent needed - test-driven validation is sufficient
 
 ### CIAgent
 - **Planned purpose**: Continuous integration management for GitHub Actions workflows

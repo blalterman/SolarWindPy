@@ -2,10 +2,21 @@
 
 **Feature Type:** Automatic
 **Priority:** LOW-MEDIUM
-**Effort:** 4-6 hours
+**Effort:** 5.5-8.5 hours
 **ROI Break-even:** 4-6 weeks
 
 [← Back to Index](./INDEX.md) | [Previous: Subagents ←](./03_subagents.md) | [Next: Checkpointing →](./05_checkpointing.md)
+
+---
+
+**⚠️ PREREQUISITES: PHASE 2 (CONDITIONAL)**
+
+**Complete Phase 1 before implementing this feature:**
+- ✅ Memory Hierarchy (01) + Slash Commands (07) implemented (Phase 0)
+- ✅ Skills System (02) + Subagents (03) implemented (Phase 1)
+- ✅ Decision Gate 2 PASSED (≥40% automation, positive team feedback)
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
 
 ---
 
@@ -319,6 +330,26 @@ exit 0
 
 **Purpose:** Track skill activations, plan-related events, and general notifications for activity monitoring.
 
+**Graceful Degradation:**
+
+```
+Primary Behavior (Working):
+└─ Notification triggers → activity-logger.sh writes to .claude/logs/activity.log
+
+Fallback 1 (Script Fails - Permission/Missing File):
+└─ Hook timeout (5s) → Log warning to stderr → Continue main workflow
+
+Fallback 2 (Log Directory Not Writable):
+└─ Script exits gracefully → No log written → Main workflow unaffected
+
+Critical Principle: Activity logging is observability, not functionality. Hook failures NEVER block skill activations or plan events.
+```
+
+**Failure Modes & Handling:**
+- **Permission denied:** Hook fails silently, skill activation proceeds normally
+- **Disk full:** Script exits with error code, workflow continues
+- **Timeout exceeded:** Claude terminates hook after 5s, no impact on main session
+
 ##### Hook Script 2: Subagent Report
 
 **File:** `.claude/hooks/subagent-report.sh`
@@ -359,6 +390,26 @@ exit 0
 ```
 
 **Purpose:** Track subagent usage patterns, measure execution time, maintain metrics.
+
+**Graceful Degradation:**
+
+```
+Primary Behavior (Working):
+└─ SubagentStop event → subagent-report.sh logs completion + updates metrics
+
+Fallback 1 (Metrics Calculation Fails):
+└─ Log raw completion event → Skip metrics calculation → Continue workflow
+
+Fallback 2 (Log File Corrupted/Missing):
+└─ Create new log file → Initialize metrics at 0 → Resume logging
+
+Critical Principle: Subagent metrics are analytics, not core functionality. Metrics failures NEVER block subagent completion or prevent main session from continuing.
+```
+
+**Failure Modes & Handling:**
+- **Grep/awk errors:** Skip metrics calculation, log raw event only, subagent completion proceeds
+- **Timeout (10s):** Hook terminated, subagent result still returned to main session
+- **Disk full:** Partial log written or skipped, subagent workflow unaffected
 
 ##### Hook Script 3: Session Archival
 
@@ -415,6 +466,27 @@ exit 0
 ```
 
 **Purpose:** Create comprehensive session summaries for research notebooks and cross-session continuity.
+
+**Graceful Degradation:**
+
+```
+Primary Behavior (Working):
+└─ SessionEnd event → session-archival.sh creates summary + archives logs
+
+Fallback 1 (Git/Coverage Commands Fail):
+└─ Create minimal session summary → Archive what's available → Continue shutdown
+
+Fallback 2 (Archive Directory Not Writable):
+└─ Attempt write to /tmp fallback location → Log warning → Session ends normally
+
+Critical Principle: Session archival is post-session bookkeeping, not shutdown blocker. Archival failures NEVER prevent clean session termination.
+```
+
+**Failure Modes & Handling:**
+- **Git not available:** Skip git status section, archive remaining data, shutdown proceeds
+- **Coverage missing:** Mark coverage as "N/A", complete rest of archival
+- **Timeout (15s):** Hook terminated mid-archival, partial summary saved, session ends normally
+- **Cleanup failure:** Old sessions retained beyond 30-file limit, no impact on current session
 
 #### Migration Path
 
@@ -608,9 +680,11 @@ exit 0
 **Estimated Effort:**
 - Hook script creation: **2-3 hours** (3 scripts × 40-60 min)
 - Settings configuration: **30 minutes**
+- Graceful degradation documentation: **1-1.5 hours** (3 hooks × 20-30 min each)
+- Error rate monitoring implementation: **0.5-1 hour**
 - Testing & validation: **1-2 hours**
 - Documentation update: **30 minutes**
-- **Total: 4-6 hours**
+- **Total: 5.5-8.5 hours**
 
 **Break-even Analysis:**
 - Time saved per week: ~30-60 minutes (automated logging vs manual tracking)
@@ -674,6 +748,66 @@ cat .claude/logs/subagent-metrics.txt
 # Review last session
 ls -t .claude/logs/sessions/ | head -1 | xargs cat
 ```
+
+#### Error Rate Monitoring
+
+**Objective:** Track hook success/failure rates to ensure reliability and identify degradation early.
+
+**Error Rate Target:** <5% hook failures (95% success rate minimum)
+
+**Log Format for Hook Execution:**
+
+Each hook execution should log outcome to `.claude/logs/hook-health.log`:
+
+```
+[2025-12-03T14:23:45Z] [activity-logger] [SUCCESS] Duration: 0.24s
+[2025-12-03T14:24:12Z] [subagent-report] [SUCCESS] Duration: 1.03s
+[2025-12-03T14:25:00Z] [session-archival] [FAILURE] Reason: timeout (15s) Code: 124
+[2025-12-03T14:30:15Z] [activity-logger] [FAILURE] Reason: permission denied Code: 1
+```
+
+**Measuring Effectiveness:**
+
+```bash
+# Calculate error rate for all hooks (last 100 executions)
+tail -n 100 .claude/logs/hook-health.log | \
+  awk '{total++; if($3=="[FAILURE]") failures++} END {print "Error Rate:", (failures/total)*100 "%"}'
+
+# Per-hook error rates
+grep "\[activity-logger\]" .claude/logs/hook-health.log | tail -n 50 | \
+  awk '{total++; if($3=="[FAILURE]") failures++} END {print "Activity Logger Error Rate:", (failures/total)*100 "%"}'
+
+# Check if error rate exceeds target
+ERROR_RATE=$(tail -n 100 .claude/logs/hook-health.log | \
+  awk '{total++; if($3=="[FAILURE]") failures++} END {print (failures/total)*100}')
+if (( $(echo "$ERROR_RATE > 5" | bc -l) )); then
+  echo "⚠️ Hook error rate ${ERROR_RATE}% exceeds 5% target - investigate failures"
+fi
+```
+
+**Automated Health Checks:**
+
+Add to `.claude/hooks/session-end-health-check.sh` (runs at SessionEnd):
+
+```bash
+#!/usr/bin/env bash
+# Check hook health and warn if error rate high
+HEALTH_LOG=".claude/logs/hook-health.log"
+ERROR_RATE=$(tail -n 100 "$HEALTH_LOG" 2>/dev/null | \
+  awk '{total++; if($3=="[FAILURE]") failures++} END {if(total>0) print (failures/total)*100; else print 0}')
+
+if (( $(echo "$ERROR_RATE > 5" | bc -l 2>/dev/null || echo 0) )); then
+  echo "⚠️ Hook system health: ${ERROR_RATE}% error rate (target: <5%)"
+  echo "Review recent failures: tail -n 50 $HEALTH_LOG | grep FAILURE"
+fi
+```
+
+**Failure Investigation Workflow:**
+
+1. **Identify pattern:** `grep "\[FAILURE\]" .claude/logs/hook-health.log | tail -n 20`
+2. **Common causes:** Check for permission errors, timeouts, disk space
+3. **Remediate:** Fix underlying issue (chmod, increase timeout, free disk space)
+4. **Verify:** Monitor error rate for next 50 executions
 
 ---
 

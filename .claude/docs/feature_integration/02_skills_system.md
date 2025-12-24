@@ -2,10 +2,21 @@
 
 **Feature Type:** Automatic
 **Priority:** HIGH
-**Effort:** 5-8 hours (reduced from 7-11h via plugin infrastructure)
+**Effort:** 7-11 hours
 **ROI Break-even:** 3-4 weeks
 
 [← Back to Index](./INDEX.md) | [Next: Subagents →](./03_subagents.md)
+
+---
+
+**⚠️ PREREQUISITES: PHASE 1 (CONDITIONAL)**
+
+**Complete Phase 0 before implementing this feature:**
+- ✅ Memory Hierarchy (01_memory_hierarchy.md) implemented
+- ✅ Slash Commands (07_slash_commands.md) implemented
+- ✅ Decision Gate 1 PASSED (≥30% token reduction, ≥60 min/week saved)
+
+**See [EXECUTOR_GUIDE.md](./EXECUTOR_GUIDE.md) for correct implementation sequence.**
 
 ---
 
@@ -48,8 +59,8 @@ Skills are model-invoked capability packages that Claude autonomously activates 
 **Pain Points Addressed:**
 
 ✅ **Agent Coordination Overhead (HIGH IMPACT)**
-*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use PhysicsValidator to verify units conversion patterns"
-*With Skills:* Automatic activation when user requests physics validation, units pattern checks, or unit verification
+*Current state:* Manual agent selection via Task tool requires explicit prompts like "Use DataFrameArchitect to optimize MultiIndex operations"
+*With Skills:* Automatic activation when user requests DataFrame optimization, MultiIndex pattern checks, or performance improvements
 *Reduction:* 40-60% decrease in explicit agent invocation overhead
 
 ✅ **Repetitive Task Automation (HIGH IMPACT)**
@@ -198,59 +209,7 @@ User Request → Skill Auto-Detection → [Skill OR Task Agent] → Result
 
 #### Proposed Skills Library
 
-##### Skill 1: Physics Validator (`physics-validator`)
-
-**File:** `.claude/skills/physics-validator/SKILL.md`
-
-```yaml
----
-name: physics-validator
-description: Automatically validates solar wind physics calculations focusing on units conversion patterns, proper NaN handling for missing data, and physical constraint verification. Verifies calculations use self.units.* for SI conversion (display units → SI → display units). Activates when user mentions physics validation, unit checking, or scientific correctness.
-allowed-tools: [Read, Grep, Bash(python .claude/hooks/physics-validation.py*)]
----
-
-# Physics Validation Skill
-
-## Purpose
-Ensures all physics calculations in SolarWindPy maintain scientific correctness.
-
-## Automatic Activation Triggers
-- "validate physics"
-- "verify units conversion"
-- "check units pattern"
-- "ensure SI units"
-- "physics correctness"
-- Code changes to `solarwindpy/core/ion.py` or `solarwindpy/core/plasma.py`
-
-## Validation Checklist
-1. **Units Conversion Pattern:** Calculations must use `quantity * self.units.<name>` for SI conversion
-   - Storage units: cm⁻³ (density), km/s (velocity, thermal speed)
-   - Display units: All quantities per `Units` class (see `solarwindpy.core.units_constants`)
-   - Calculation units: m⁻³, m/s, K (SI)
-   - Example: `w = self.w.data * self.units.w` before `w.pow(2)` (ions.py:222)
-   - Check BOTH input conversion (display→SI) AND output conversion (SI→display)
-2. **NaN Handling:** Missing data as NaN, never 0 or -999
-3. **Physical Constraints:** Positive densities, temperatures, thermal speeds (scalars ≥ 0; velocity components may be negative)
-
-## Execution Pattern
-```bash
-# Run physics validation on changed files
-python .claude/hooks/physics-validation.py ${modified_files}
-
-# Generate validation report
-python .claude/hooks/physics-validation.py --report
-```
-
-## Integration with PhysicsValidator Agent
-- **Skill:** Quick validation checks, pre-commit verification
-- **Agent:** Deep analysis, formula derivation, multi-file refactoring
-```
-
-**Supporting Files:**
-- `.claude/skills/physics-validator/examples/thermal_speed_correct.py`
-- `.claude/skills/physics-validator/examples/thermal_speed_incorrect.py`
-
-##### Skill 2: MultiIndex Architect (`multiindex-architect`)
+##### Skill 1: MultiIndex Architect (`multiindex-architect`)
 
 **File:** `.claude/skills/multiindex-architect/SKILL.md`
 
@@ -259,6 +218,8 @@ python .claude/hooks/physics-validation.py --report
 name: multiindex-architect
 description: Optimizes pandas MultiIndex DataFrame operations for SolarWindPy's (M/C/S) structure. Recommends .xs() for views, prevents unnecessary copying, manages memory efficiently. Activates for DataFrame operations, MultiIndex queries, performance optimization, or memory management tasks.
 allowed-tools: [Read, Grep, Edit, Write]
+max_activations_per_hour: 8
+rate_limit_message: "MultiIndex architect activated 8 times this hour. Limit prevents repetitive DataFrame suggestions. Override: explicitly request 'optimize all DataFrame operations' to bypass."
 ---
 
 # MultiIndex Architect Skill
@@ -315,7 +276,7 @@ df_subset = df.xs((measurement, component), level=(0, 1))
 - `.claude/skills/multiindex-architect/templates/efficient_access_patterns.py`
 - `.claude/skills/multiindex-architect/templates/memory_optimization_checklist.md`
 
-##### Skill 3: Test Generator (`test-generator`)
+##### Skill 2: Test Generator (`test-generator`)
 
 **File:** `.claude/skills/test-generator/SKILL.md`
 
@@ -324,6 +285,8 @@ df_subset = df.xs((measurement, component), level=(0, 1))
 name: test-generator
 description: Automatically generates pytest test cases for SolarWindPy functions ensuring ≥95% coverage. Creates physics-specific tests, edge cases, and validates scientific correctness. Activates when coverage gaps identified or new functions added.
 allowed-tools: [Read, Write, Bash(python .claude/scripts/generate-test.py*), Bash(pytest*)]
+max_activations_per_hour: 12
+rate_limit_message: "Test generator activated 12 times this hour. Limit prevents excessive test creation. Override: explicitly request 'generate tests for all uncovered functions' to bypass."
 ---
 
 # Test Generator Skill
@@ -385,7 +348,79 @@ def test_function_name_physics():
 - `.claude/skills/test-generator/templates/pytest_template.py`
 - `.claude/skills/test-generator/examples/physics_test_examples.py`
 
-##### Skill 4: Plan Executor (`plan-executor`)
+##### Skill 3: Plan Executor (`plan-executor`)
+
+**File:** `.claude/skills/plan-executor/SKILL.md`
+
+```yaml
+---
+name: test-generator
+description: Automatically generates pytest test cases for SolarWindPy functions ensuring ≥95% coverage. Creates physics-specific tests, edge cases, and validates scientific correctness. Activates when coverage gaps identified or new functions added.
+allowed-tools: [Read, Write, Bash(python .claude/scripts/generate-test.py*), Bash(pytest*)]
+max_activations_per_hour: 12
+rate_limit_message: "Test generator activated 12 times this hour. Limit prevents excessive test creation. Override: explicitly request 'generate tests for all uncovered functions' to bypass."
+---
+
+# Test Generator Skill
+
+## Purpose
+Maintains ≥95% test coverage through intelligent test generation.
+
+## Automatic Activation Triggers
+- "generate tests"
+- "improve coverage"
+- "test this function"
+- "add test cases"
+- Coverage drops below 95%
+- New functions detected without tests
+
+## Test Generation Strategy
+1. **Happy path** - Standard valid inputs
+2. **Edge cases** - Boundaries, empty arrays, single elements
+3. **Physics validation** - Scientific correctness checks
+4. **Error conditions** - Invalid inputs, type errors
+
+## Execution Pattern
+```bash
+# Generate tests for specific file
+python .claude/scripts/generate-test.py solarwindpy/core/ion.py
+
+# Check coverage
+pytest --cov=solarwindpy --cov-report=term -q
+
+# Run only new tests
+pytest tests/test_ion_generated.py -v
+```
+
+## Test Template
+```python
+def test_function_name_happy_path():
+    """Test standard valid inputs."""
+    # Arrange
+    expected = ...
+
+    # Act
+    result = function_name(valid_input)
+
+    # Assert
+    assert result == expected
+
+def test_function_name_physics():
+    """Validate physics correctness."""
+    # Physics-specific assertions
+    assert units_conversion_pattern_check(result)
+```
+
+## Integration with TestEngineer Agent
+- **Skill:** Generate individual test cases, quick coverage fixes
+- **Agent:** Design comprehensive test strategies, framework architecture
+```
+
+**Supporting Files:**
+- `.claude/skills/test-generator/templates/pytest_template.py`
+- `.claude/skills/test-generator/examples/physics_test_examples.py`
+
+*Note: Skill numbering reflects current 3-skill implementation after agent consolidation*
 
 **File:** `.claude/skills/plan-executor/SKILL.md`
 
@@ -394,6 +429,8 @@ def test_function_name_physics():
 name: plan-executor
 description: Automates GitHub Issues plan creation using gh-plan-create.sh and gh-plan-phases.sh. Handles batch mode phase creation, value proposition generation, and scope auditing. Activates when planning new features or creating implementation roadmaps.
 allowed-tools: [Bash(.claude/scripts/gh-plan-*.sh*), Bash(mkdir*), Bash(cat*), Read, Write]
+max_activations_per_hour: 5
+rate_limit_message: "Plan executor activated 5 times this hour. Limit prevents excessive planning overhead. Override: explicitly request 'create all pending plans' to bypass."
 ---
 
 # Plan Executor Skill
@@ -445,6 +482,71 @@ gh issue view $OVERVIEW_ISSUE
 **Supporting Files:**
 - `.claude/skills/plan-executor/templates/phase_config_template.conf`
 - `.claude/skills/plan-executor/examples/sample_plans.md`
+
+#### Error Recovery and Fallback Chains
+
+**Anthropic Best Practice:** "Build fallback chains to handle failures gracefully. Skills should degrade to manual alternatives rather than block workflow."
+
+Skills provide automatic activation, but failures must not block user progress. Implement 4-level fallback pattern:
+
+##### Fallback Chain Pattern
+
+```
+Primary: Skill Auto-Activation
+    ↓ (if skill fails or rate-limited)
+Fallback 1: Manual Slash Command
+    ↓ (if command unavailable or fails)
+Fallback 2: Subagent Invocation
+    ↓ (if subagent unavailable)
+Manual Override: Direct user action
+```
+
+##### Example: Physics Validation Fallback Chain
+
+**Scenario:** Physics validator skill fails during ion.py calculation review
+
+**Step 1: Primary (Skill Auto-Activation)**
+- User: "Check if thermal speed calculation uses correct units"
+- System: Attempts physics-validator skill activation
+- **Failure modes:** Rate limit hit (10/hour exceeded), skill not found, allowed-tools restriction
+
+**Step 2: Fallback 1 (Manual Slash Command)**
+- System: "Physics validator skill unavailable. Using manual command..."
+- Executes: `/physics` slash command
+- **Fallback trigger:** If `/physics` command not defined
+
+**Step 3: Fallback 2 (Subagent Invocation)**
+- System: "Manual command unavailable. Invoking DataFrameArchitect subagent..."
+- Launches: physics-validator subagent with isolated context
+- **Fallback trigger:** If subagent system not configured
+
+**Step 4: Manual Override (Direct Action)**
+- System: "All automatic validation unavailable. Manual review required:"
+- Provides: Validation checklist, reference links, manual verification steps
+
+##### Error Rate Thresholds
+
+**Monitoring:** Track skill activation success/failure rates per session
+
+| Success Rate | Status | Action Required |
+|--------------|--------|-----------------|
+| ≥90% | ✅ **Good** | No action needed, skill descriptions are accurate |
+| 80-90% | ⚠️ **Review** | Check skill descriptions for clarity, adjust triggers |
+| <80% | 🔴 **Too Aggressive** | Skill activating incorrectly, revise description or disable |
+
+**Example Metrics:**
+```bash
+# Session summary
+physics-validator: 8 activations, 7 success, 1 fallback → 87.5% (⚠️ Review)
+multiindex-architect: 5 activations, 5 success, 0 fallback → 100% (✅ Good)
+test-generator: 3 activations, 1 success, 2 fallback → 33% (🔴 Too Aggressive)
+plan-executor: 2 activations, 2 success, 0 fallback → 100% (✅ Good)
+```
+
+**Corrective Actions:**
+- **<80% success:** Revise skill description to be more specific, reduce false activations
+- **0 activations in 5 sessions:** Description too narrow, broaden activation triggers
+- **>15 activations/session:** Too aggressive, increase rate limits or narrow scope
 
 #### Migration Path from Current System
 
@@ -682,14 +784,13 @@ gh issue view $OVERVIEW_ISSUE
 
 **Estimated Effort:**
 - Skill creation: **3-5 hours** (0.75-1.25 hours per skill × 4 skills, faster with official spec)
+- Rate limiting implementation: **1-2 hours** (add max_activations_per_hour to each skill)
+- Error recovery documentation: **1-1.5 hours** (fallback chains, monitoring thresholds)
 - Testing & refinement: **1-2 hours** (plugin installation simplifies testing)
-- Documentation: **1 hour** (plugin README)
-- **Total: 5-8 hours** (reduced from 7-11h via plugin infrastructure)
+- Documentation: **0.5-1 hour** (plugin README)
+- **Total: 7-11 hours**
 
-**Plugin vs. Local:**
-- Local implementation: 7-11h (full setup + custom distribution)
-- Plugin packaging: 5-8h (official spec + built-in distribution)
-- Savings: 2-3 hours via official plugin system
+**Note:** Increased from 5-8h to account for rate limiting and error recovery patterns required for safe automatic activation. These additions prevent skill over-activation and ensure graceful degradation when skills fail.
 
 **Detailed Breakdown of Plugin Savings:**
 
@@ -734,7 +835,7 @@ gh issue view $OVERVIEW_ISSUE
 
 *How Coordination Overhead Reduction (40-60%) Is Measured:*
 1. **Baseline:** Count explicit Task agent invocations in 20 sessions pre-skills implementation
-2. **Track:** "Use PhysicsValidator to..." type prompts (manual agent selection)
+2. **Track:** "Use DataFrameArchitect to..." type prompts (manual agent selection)
 3. **Post-implementation:** Count same pattern after skills deployed
 4. **Calculation:** (Baseline invocations - Post invocations) / Baseline invocations × 100%
 5. **Example:** 25 manual invocations → 12 after skills = (25-12)/25 = 52% reduction
@@ -787,7 +888,7 @@ Validation: Attempt Edit operation, should be restricted
 #### Test 3: Skill vs. Agent Boundary
 ```
 Scenario: User requests "comprehensive physics refactoring across 10 files"
-Expected: PhysicsValidator agent (Task) activates, not skill
+Expected: DataFrameArchitect agent (Task) activates, not skill
 Validation: Complex multi-step tasks should still use agents
 ```
 

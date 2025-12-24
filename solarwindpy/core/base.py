@@ -46,9 +46,12 @@ class Core(ABC):
         Returns
         -------
         str
-            Class name.
+            Class name or class name(species) if the class has a species.
         """
-        return self.__class__.__name__
+        try:
+            return f"{self.__class__.__name__}({self.species})"
+        except AttributeError:
+            return self.__class__.__name__
 
     def __eq__(self, other: Any) -> bool:
         """Check equality between Base objects.

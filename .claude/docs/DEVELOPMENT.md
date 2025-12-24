@@ -36,17 +36,48 @@ Development guidelines and standards for SolarWindPy scientific software.
 ## Environment Setup
 
 ```bash
-# Create and activate conda environment:
-conda env create -f solarwindpy.yml
-conda activate solarwindpy
+# Recommended: Install from lockfile
+pip install -r requirements-dev.lock  # All dev tools
 pip install -e .
 
-# Alternative: generate environment from requirements-dev.txt:
-python scripts/requirements_to_conda_env.py --name solarwindpy-dev
-conda env create -f solarwindpy-dev.yml
-conda activate solarwindpy-dev
+# Alternative: Conda environment
+conda env create -f solarwindpy.yml
+conda activate solarwindpy
+pip install -r requirements-dev.lock
 pip install -e .
 ```
+
+## Dependency Management (v0.3.0+)
+
+**Single Source**: `pyproject.toml` contains all dependency definitions
+
+**Lockfiles** (auto-generated - DO NOT EDIT):
+- `requirements.txt` - Production dependencies
+- `requirements-dev.lock` - Development dependencies
+- `docs/requirements.txt` - Documentation dependencies
+
+**Workflow**:
+```bash
+# 1. Edit dependencies in pyproject.toml
+[project.dependencies]
+numpy>=1.26,<3.0
+
+# 2. Regenerate lockfiles
+pip install pip-tools
+pip-compile pyproject.toml --output-file=requirements.txt --upgrade
+pip-compile --extra=dev pyproject.toml --output-file=requirements-dev.lock --upgrade
+
+# 3. Install from lockfile
+pip install -r requirements-dev.lock
+
+# 4. Test changes
+pytest -q
+
+# 5. Commit pyproject.toml AND lockfiles together
+git add pyproject.toml requirements*.txt requirements*.lock
+```
+
+**Migration Info**: See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](../../docs/MIGRATION-DEPENDENCY-OVERHAUL.md)
 
 ## Code Quality Standards
 - **Formatting**: Black for code formatting (88 characters)

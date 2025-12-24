@@ -1,31 +1,54 @@
+# SolarWindPy Conda Environment File
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# IMPORTANT: Packages are listed WITHOUT version pins. This is intentional.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# WHY: pip-compile generates versions from PyPI, but conda-forge often has
+# different versions or versioning schemes:
+#   - numexpr 2.11.0 doesn't exist on conda-forge (skipped from 2.10.2 to 2.12.1)
+#   - tzdata uses letter suffixes on conda-forge (2025a) vs dots on PyPI (2025.3)
+#
+# HOW IT WORKS:
+#   1. Conda resolves to latest compatible versions from conda-forge
+#   2. `pip install -e .` enforces pyproject.toml's minimum requirements
+#   3. This eliminates PyPI/conda-forge version mismatch errors
+#
+# HISTORY: PR #405 diagnosed 5 cascading CI bugs; this approach fixed all of them.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# For local use:
+#   conda env create -f solarwindpy.yml
+#   conda activate solarwindpy
+#   pip install -e .  # Enforces version constraints from pyproject.toml
+#
 name: solarwindpy
 channels:
 - conda-forge
 dependencies:
-- numpy
-- scipy
-- pandas
-- numexpr
-- bottleneck
-- h5py
-- pyyaml
-- matplotlib
 - astropy
+- astropy-iers-data
+- bottleneck
+- contourpy
+- cycler
+- docstring-inheritance
+- fonttools
+- h5py
+- kiwisolver
+- llvmlite
+- matplotlib
 - numba
+- numexpr
+- numpy
+- packaging
+- pandas
+- pillow
+- pyerfa
+- pyparsing
+- python-dateutil
+- pytz
+- pyyaml
+- scipy
+- six
 - tabulate
-- docstring-inheritance>=2.0
-- pytest
-- pytest-cov>=4.1.0
-- black
-- flake8
-- pytables
-- doc8
-- flake8-docstrings
-- pydocstyle
-- numpydoc
-- sphinx
-- sphinx_rtd_theme
-- sphinxcontrib-spelling
-- sphinxcontrib-bibtex
-- gh
-- psutil>=5.9.0
+- tzdata

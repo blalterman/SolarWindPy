@@ -11,7 +11,7 @@
             "Execute related unit tests",
             "Check MultiIndex usage patterns"
           ],
-          "suggestedAgents": ["PhysicsValidator", "DataFrameArchitect"]
+          "suggestedAgents": ["DataFrameArchitect"]
         },
         "instabilities/*.py": {
           "triggers": ["physics-validation", "numerical-stability", "unit-testing"],
@@ -20,7 +20,7 @@
             "Check numerical stability",
             "Run instability-specific tests"
           ],
-          "suggestedAgents": ["PhysicsValidator", "NumericalStabilityGuard"]
+          "suggestedAgents": ["FitFunctionSpecialist"]
         },
         "plotting/*.py": {
           "triggers": ["visualization-testing", "style-checking"],
@@ -38,7 +38,7 @@
             "Test statistical accuracy",
             "Check numerical convergence"
           ],
-          "suggestedAgents": ["FitFunctionSpecialist", "NumericalStabilityGuard"]
+          "suggestedAgents": ["FitFunctionSpecialist"]
         },
         "tests/*.py": {
           "triggers": ["test-execution", "coverage-analysis"],
@@ -66,7 +66,7 @@
           "keywords": ["thermal", "alfven", "units", "physics", "magnetic field", "velocity"],
           "patterns": ["calculate", "formula", "equation", "physical"],
           "automation": {
-            "suggestAgent": "PhysicsValidator",
+            "suggestAgent": "DataFrameArchitect",
             "preActions": ["validate_current_physics", "check_unit_consistency"],
             "postActions": ["run_physics_tests", "validate_constraints"]
           }
@@ -252,12 +252,12 @@
       "smartSuggestions": {
         "whenToUseAgents": {
           "multiStepTask": "Use UnifiedPlanCoordinator for complex multi-step implementations",
-          "physicsCalculation": "Use PhysicsValidator for any physics-related calculations or validations",
+          "physicsCalculation": "Use DataFrameArchitect for any physics-related calculations or validations",
           "dataOptimization": "Use DataFrameArchitect for DataFrame operations and memory optimization",
           "plotCreation": "Use PlottingEngineer for visualization and figure generation",
           "testDesign": "Use TestEngineer for comprehensive testing strategies",
           "curveFunction": "Use FitFunctionSpecialist for fitting and statistical analysis",
-          "numericalIssues": "Use NumericalStabilityGuard for numerical stability concerns"
+          "numericalIssues": "Use FitFunctionSpecialist for numerical stability concerns"
         }
       }
     },

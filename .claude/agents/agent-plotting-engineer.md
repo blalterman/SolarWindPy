@@ -322,7 +322,7 @@ class CachedPlot:
 
 - Uses data structures from **DataFrameArchitect**
 - Visualizes fits from **FitFunctionSpecialist**
-- Follows physics conventions from **PhysicsValidator**
+- Follows physics conventions from code-style.md (SI units, mw² = 2kT)
 - Tested by **TestEngineer** for correctness
 
 ## Common Issues

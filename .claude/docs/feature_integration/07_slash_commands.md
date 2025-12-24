@@ -2,7 +2,7 @@
 
 **Feature Type:** Manual
 **Priority:** HIGH
-**Effort:** 5.5-8 hours
+**Effort:** 8.5-12 hours
 **ROI Break-even:** 3-4 weeks
 
 [← Back to Index](./INDEX.md) | [← Previous: Output Styles](./06_output_styles.md)
@@ -89,7 +89,7 @@ User-invoked prompt shortcuts stored as markdown files in `.claude/commands/` (p
 
 ✅ **Agent Coordination (LOW-MEDIUM IMPACT)**
 *Current state:* Manually crafting agent invocation prompts
-*With Slash Commands:* Pre-defined agent workflows (`/validate-physics`, `/optimize-dataframes`)
+*With Slash Commands:* Pre-defined agent workflows (`/optimize-dataframes`, `/fit-function`)
 *Improvement:* Faster, more accurate agent delegation
 
 ### Productivity Improvements
@@ -134,7 +134,7 @@ Decision Matrix:
 | System Component | Integration Approach |
 |------------------|---------------------|
 | **Skills** | Commands for explicit control; Skills for automatic |
-| **Agents** | Commands can invoke specific agents (e.g., `/validate-physics` → PhysicsValidator) |
+| **Agents** | Commands can invoke specific agents (e.g., `/optimize-dataframes` → DataFrameArchitect) |
 | **Hooks** | Commands can trigger hook-checked workflows |
 | **Scripts** | Commands can execute `.claude/scripts/*.sh` with bash prefix |
 | **Memory** | Commands reference memory files via `@.claude/memory/...` |
@@ -302,6 +302,34 @@ Format output as:
 **Usage:** `/coverage`
 **Frequency:** 10-15 times/week
 **Time saved:** 2-3 min/invocation
+**Timeout:** 5 minutes (override: `TIMEOUT=600 /coverage`)
+
+**Error Recovery Procedures:**
+
+*Scenario 1: pytest command fails or hangs*
+- **Fallback Chain:**
+  1. Check if pytest installed: `pytest --version`
+  2. If missing → Install: `pip install pytest pytest-cov`
+  3. If still fails → Run subset: `pytest tests/test_core.py -q`
+  4. If subset works → Identify problematic test file and skip
+
+*Scenario 2: Coverage data corruption*
+- **Fallback Chain:**
+  1. Delete corrupted data: `rm -rf .coverage htmlcov/`
+  2. Retry command
+  3. If fails → Check for disk space: `df -h`
+  4. Manual fallback → Run tests without coverage: `pytest -q`
+
+*Timeout Handling:*
+- 5-minute default (large test suites ~300 tests)
+- Warning at 4 min: "Tests still running, 1 minute remaining..."
+- At 5 min: Kill process, report which test hung
+- Override for slower systems: `TIMEOUT=600 /coverage` (10 min)
+
+*Success Criteria:*
+- ✅ All tests pass OR fail count reported
+- ✅ Coverage percentage displayed for all modules
+- ✅ List of <95% modules provided (may be empty if all ≥95%)
 
 ##### 2. `/physics` - Physics Validation Check
 
@@ -342,6 +370,34 @@ Report format:
 
 **Frequency:** 8-12 times/week
 **Time saved:** 3-5 min/invocation
+**Timeout:** 3 minutes (override: `TIMEOUT=300 /physics`)
+
+**Error Recovery Procedures:**
+
+*Scenario 1: Physics validation script not found*
+- **Fallback Chain:**
+  1. Check script exists: `ls .claude/hooks/physics-validation.py`
+  2. If missing → Check if in wrong directory: `find . -name physics-validation.py`
+  3. If found elsewhere → Use correct path
+  4. Manual fallback → Use checklist in command definition above
+
+*Scenario 2: Python dependency errors (astropy, numpy)*
+- **Fallback Chain:**
+  1. Check environment: `conda info` or `python --version`
+  2. Activate environment: `conda activate solarwindpy`
+  3. If still fails → Install dependencies: `pip install -r requirements.txt`
+  4. Manual fallback → Visual code inspection for units patterns
+
+*Timeout Handling:*
+- 3-minute default (typical: 30-60 seconds for full codebase)
+- Warning at 2.5 min: "Validation running long, check for infinite loops..."
+- At 3 min: Kill process, report last file validated
+- Override for large refactors: `TIMEOUT=300 /physics` (5 min)
+
+*Success Criteria:*
+- ✅ Script executes without Python errors
+- ✅ Either "Physics correctness verified" OR specific issues with file:line refs
+- ✅ Exit code 0 (pass) or 1 (issues found, but script ran successfully)
 
 ##### 3. `/test` - Smart Test Runner
 
@@ -381,6 +437,34 @@ After tests complete:
 
 **Frequency:** 15-20 times/week
 **Time saved:** 1-2 min/invocation
+**Timeout:** 10 minutes (override: `TIMEOUT=900 /test all`)
+
+**Error Recovery Procedures:**
+
+*Scenario 1: test-runner.sh script not found*
+- **Fallback Chain:**
+  1. Check script exists: `ls .claude/hooks/test-runner.sh`
+  2. If missing → Use direct pytest: `pytest tests/ -q`
+  3. If pytest fails → Check if tests directory exists
+  4. Manual fallback → Run individual test files one at a time
+
+*Scenario 2: Large test suite timeout*
+- **Fallback Chain:**
+  1. If `/test all` times out → Use `/test changed` (subset)
+  2. If still hangs → Identify slow tests: `pytest --durations=10`
+  3. Skip slow tests temporarily → Investigate slow test later
+  4. Manual fallback → Test modules individually (test_core, test_ion, etc.)
+
+*Timeout Handling:*
+- 10-minute default (full suite with 300+ tests)
+- Mode-specific: changed (2 min), physics (3 min), fast (1 min), all (10 min)
+- Warning at 90%: "Tests running long, consider using /test changed..."
+- Override: `TIMEOUT=900 /test all` (15 min for coverage mode)
+
+*Success Criteria:*
+- ✅ Test runner executes and completes
+- ✅ Pass/fail status reported for all tests
+- ✅ If failures: specific test names and error messages shown
 
 #### Category 2: Code Review (2 commands)
 
@@ -444,6 +528,24 @@ Report findings with:
 
 **Frequency:** 5-8 times/week
 **Time saved:** 5-10 min/invocation
+**Timeout:** 5 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: No changes to review (git diff empty)*
+- **Fallback Chain:**
+  1. Check git status: `git status`
+  2. If clean → Check if on correct branch
+  3. If no files specified → Prompt user: "No changes found. Specify file?"
+  4. Manual fallback → Review last commit: `git show HEAD`
+
+*Scenario 2: Checklist template missing*
+- **Fallback Chain:**
+  1. Use inline checklist from command definition
+  2. If fails → Generate minimal checklist (physics, tests, docs, coverage)
+  3. Manual fallback → Standard review points (correctness, style, tests)
+
+*Timeout/Success:* Standard 5 min, checklist with ✅/⚠️/❌ markers
 
 ##### 5. `/refactor` - Refactoring Assistant
 
@@ -500,6 +602,25 @@ Output refactoring plan BEFORE making changes, wait for approval.
 
 **Frequency:** 3-5 times/week
 **Time saved:** 10-15 min/invocation
+**Timeout:** 8 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: Refactor breaks tests*
+- **Fallback Chain:**
+  1. Rollback changes: Use checkpointing or `git checkout -- <file>`
+  2. Retry with smaller scope (refactor one method instead of whole class)
+  3. If still fails → Manual incremental refactor with test after each change
+  4. Last resort → Document needed refactor, defer to later
+
+*Scenario 2: Target code not found*
+- **Fallback Chain:**
+  1. Verify file path correct: `ls solarwindpy/core/ion.py`
+  2. Check if method exists: `grep "def thermal_speed" solarwindpy/core/ion.py`
+  3. If renamed/moved → Find new location: `grep -r "thermal_speed" solarwindpy/`
+  4. Manual fallback → Ask user for correct target
+
+*Timeout/Success:* 8 min, completion confirmed via passing tests + physics validation
 
 #### Category 3: Planning (3 commands)
 
@@ -546,6 +667,25 @@ After creation:
 
 **Frequency:** 2-4 times/week
 **Time saved:** 5-10 min/invocation
+**Timeout:** 5 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: gh CLI not authenticated*
+- **Fallback Chain:**
+  1. Check auth: `gh auth status`
+  2. If not authenticated → Run: `gh auth login`
+  3. If auth fails → Check network connectivity
+  4. Manual fallback → Create issue via web UI at github.com
+
+*Scenario 2: Script execution fails*
+- **Fallback Chain:**
+  1. Verify script exists: `ls .claude/scripts/gh-plan-create.sh`
+  2. Check permissions: `chmod +x .claude/scripts/gh-plan-create.sh`
+  3. Run manually with debug: `bash -x .claude/scripts/gh-plan-create.sh ...`
+  4. Manual fallback → Copy command template, run steps manually
+
+*Timeout/Success:* 5 min, GitHub Issue created with #number returned
 
 ##### 7. `/plan-phases` - Add Plan Phases
 
@@ -593,6 +733,25 @@ After creation:
 
 **Frequency:** 2-4 times/week
 **Time saved:** 5-8 min/invocation
+**Timeout:** 6 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: Invalid issue number or batch config errors*
+- **Fallback Chain:**
+  1. Verify issue exists: `gh issue view 123`
+  2. Check tmp/phases.conf format (pipe-delimited, 3 columns)
+  3. If config malformed → Recreate with correct format
+  4. Manual fallback → Create phase issues individually via `gh issue create`
+
+*Scenario 2: API rate limiting (>60 requests/hour)*
+- **Fallback Chain:**
+  1. Wait 60 seconds, retry
+  2. Reduce phases (create 3-4 at a time instead of all)
+  3. Use authenticated gh CLI (higher rate limit)
+  4. Manual fallback → Create phases tomorrow when limit resets
+
+*Timeout/Success:* 6 min, all phase issues created with #numbers returned
 
 ##### 8. `/plan-status` - Show Plan Status
 
@@ -636,6 +795,25 @@ Format output to show:
 
 **Frequency:** 5-10 times/week
 **Time saved:** 1-2 min/invocation
+**Timeout:** 3 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: Script not found or no plans exist*
+- **Fallback Chain:**
+  1. Check script: `ls .claude/scripts/gh-plan-status.sh`
+  2. If missing → Run manual: `gh issue list --label "plan:"`
+  3. If no issues → "No active plans found"
+  4. Manual fallback → Check for plan/* branches: `git branch --list 'plan/*'`
+
+*Scenario 2: gh CLI errors*
+- **Fallback Chain:**
+  1. Check authentication: `gh auth status`
+  2. Check network: `ping github.com`
+  3. Use cached status (if available from last run)
+  4. Manual fallback → View plans at github.com/user/repo/issues
+
+*Timeout/Success:* 3 min, status display with active plans + completion %
 
 #### Category 4: Git Workflow (2 commands)
 
@@ -685,6 +863,25 @@ Wait for explicit approval.
 
 **Frequency:** 8-15 times/week
 **Time saved:** 2-3 min/invocation
+**Timeout:** 2 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: No changes to commit*
+- **Fallback Chain:**
+  1. Run `git status` to verify
+  2. If clean → Check if files need staging: `git diff`
+  3. If unstaged changes exist → Remind user to `git add`
+  4. Manual fallback → "No changes to commit. Make edits first."
+
+*Scenario 2: Pre-commit hooks fail*
+- **Fallback Chain:**
+  1. Review hook failure message (test failures, linting errors)
+  2. Fix issues reported by hooks
+  3. If hooks incorrect → Skip with `--no-verify` (user approval required)
+  4. Manual fallback → Fix code issues, re-run `/commit`
+
+*Timeout/Success:* 2 min, commit created with conventional format + Claude co-author
 
 ##### 10. `/branch` - Smart Branch Creation
 
@@ -726,6 +923,26 @@ Safety checks:
 
 **Frequency:** 3-6 times/week
 **Time saved:** 1-2 min/invocation
+**Timeout:** 2 minutes
+
+**Error Recovery Procedures:**
+
+*Scenario 1: Uncommitted changes on master*
+- **Fallback Chain:**
+  1. Run `git status` to show uncommitted files
+  2. Ask user: "Commit changes first? Stash? Or create branch anyway?"
+  3. If commit → Use `/commit` command
+  4. If stash → Run `git stash`, create branch, `git stash pop`
+  5. Manual fallback → User manually handles uncommitted changes
+
+*Scenario 2: Branch already exists*
+- **Fallback Chain:**
+  1. Check if branch exists: `git branch --list feature/name`
+  2. If exists → Ask: "Branch exists. Switch to it? (y/n) Or use different name?"
+  3. If switch → `git checkout feature/name`
+  4. Manual fallback → User provides alternative branch name
+
+*Timeout/Success:* 2 min, new branch created and checked out
 
 ---
 
@@ -899,8 +1116,8 @@ Commands trigger hook validation:
 Commands can invoke subagents explicitly:
 
 ```yaml
-# In /validate-physics command
-Use the physics-validator subagent to perform deep analysis on $ARGUMENTS.
+# In /optimize-dataframes command
+Use the dataframe-architect subagent to perform deep analysis on $ARGUMENTS.
 ```
 
 ---
@@ -966,9 +1183,13 @@ Use the physics-validator subagent to perform deep analysis on $ARGUMENTS.
 
 **Initial Implementation:**
 - 10 commands × 20-30 min each = **3.5-5 hours**
+- Error recovery documentation = **3-4 hours** (error procedures for all 10 commands)
+- Timeout specifications = **0.5-1 hour** (add timeout to each command)
 - Testing & validation = **1-2 hours**
 - Documentation = **1 hour**
-- **Total: 5.5-8 hours**
+- **Total: 8.5-12 hours**
+
+**Note:** Increased from 5.5-8h to account for error recovery procedures and timeout handling for all 10 commands. These additions ensure commands fail gracefully and provide fallback chains when primary operations fail.
 
 **Break-even Analysis:**
 - Time saved per week: **80-140 minutes** (1.3-2.3 hours)
@@ -1124,7 +1345,7 @@ Complex multi-step analysis needed?
 | "Check coverage now" | `/coverage` | Explicit on-demand check |
 | Auto-detect coverage gaps | `test-generator` skill | Automatic when coverage drops |
 | Test after every edit | PostToolUse hook | Event-based automatic |
-| Deep physics refactoring | PhysicsValidator subagent | Complex isolated analysis |
+| Deep physics refactoring | DataFrameArchitect subagent | Complex isolated analysis |
 | Quick physics check | `/physics` | Explicit validation request |
 | Physics validation during edits | PreToolUse hook | Automatic prevention |
 | Create GitHub plan | `/plan-create` | Explicit planning action |

@@ -2,7 +2,7 @@
 
 **Feature Type:** Automatic
 **Priority:** CRITICAL
-**Effort:** 9-14 hours
+**Effort:** 19-28 hours
 **ROI Break-even:** 4-6 weeks
 
 [← Back to Index](./INDEX.md) | [Next: Skills System →](./02_skills_system.md)
@@ -48,6 +48,24 @@ SolarWindPy uses **only** project-level memory to ensure:
 - Imports not evaluated inside code spans/blocks
 - Project memory is the only tier (no user/local/enterprise overrides)
 - Files discovered via recursive directory traversal from working directory
+
+### 1.1 AI Engineering Rationale
+
+**Anthropic Best Practice:** "Keep only what's relevant in context. Don't pollute context with redundant information."
+
+Memory hierarchy directly implements this principle for SolarWindPy by:
+
+1. **Context Efficiency:** Persistent memory eliminates repeated instructions like "Always use SI units" or "DataFrame uses M/C/S MultiIndex". These consume 5,000-10,000 tokens per session when manually provided.
+
+2. **Selective Loading:** Modular files (e.g., `physics-constants.md`, `dataframe-patterns.md`) allow importing only relevant context. Testing session imports test memory; physics work imports physics memory.
+
+3. **Reduction via Offloading:** Anthropic's advanced tool use guide recommends "external memory for information that doesn't change." Project conventions (code style, testing requirements, architecture patterns) are static and ideal for memory files.
+
+4. **Token Budget Preservation:** With 200K token context window, memory allocation should be ≤10% (20K tokens). SolarWindPy's 9 memory files (~15K tokens total) preserve 185K tokens for actual work.
+
+5. **Consistency Without Repetition:** Every physics calculation needs "verify SI units" reminder. Memory provides this once via import, not repeated manual prompts.
+
+**Impact Measurement:** Memory implementation should achieve ≥30% token reduction in first 2 weeks (measured via session token logs). This validates memory content relevance before investing in downstream features (Skills, Subagents) that depend on memory.
 
 ### 2. Value Proposition
 
@@ -737,6 +755,82 @@ All SolarWindPy-specific conventions, rules, and knowledge that should be consis
 - Import resolution dependency (mitigated by fallback content)
 - Slightly more files to maintain (offset by better organization)
 
+### 4.6. Stopping Conditions
+
+**Anthropic Best Practice:** "Implement stopping conditions to prevent runaway token consumption or over-activation of features."
+
+Memory system includes safeguards to prevent context window pollution:
+
+#### Rate Limiting: Memory Imports per Session
+
+**Limit:** Maximum 20 memory file imports per session
+
+**Rationale:**
+- Each memory file averages 1,500-2,000 tokens
+- 20 files × 2,000 tokens = 40,000 tokens maximum (20% of 200K budget)
+- SolarWindPy's 9 core files consume ~15K tokens (7.5% of budget)
+- Remaining headroom prevents accidental over-importing
+
+**Monitoring:**
+```bash
+# Count memory imports in current session
+grep "@.claude/memory/" .claude/logs/session-*.log | wc -l
+
+# Warning if ≥15 imports (75% of limit)
+# Error if ≥20 imports (100% of limit)
+```
+
+**Override:** Explicit user request bypasses limit ("Import all physics memory files")
+
+#### Budget Guards: Context Allocation Ceiling
+
+**Limit:** Memory allocation ≤10% of total context budget (20K of 200K tokens)
+
+**Rationale:**
+- Anthropic recommends keeping persistent context minimal
+- 90% of context window (180K tokens) reserved for:
+  - User conversation history
+  - Tool use outputs (grep, file reads)
+  - Code changes and diffs
+  - Subagent reports
+- Memory provides *reference* information, not active work
+
+**Token Budget Allocation:**
+| Category | Budget | Percentage | Justification |
+|----------|--------|------------|---------------|
+| Memory files | 20K tokens | 10% | Persistent project context |
+| Conversation | 70K tokens | 35% | User messages + assistant responses |
+| Tool outputs | 60K tokens | 30% | File reads, grep results, bash output |
+| Subagents | 50K tokens | 25% | Delegated task reports |
+| **Total** | **200K tokens** | **100%** | Full context window |
+
+**Enforcement:**
+- Memory file size monitoring: Each file ≤3K tokens (exception: testing-templates.md at 4K)
+- Total memory directory: ≤20K tokens (tracked in CI/CD)
+- Warning at 18K tokens (90% of budget)
+- Block commit if >20K tokens
+
+#### Context Budget Monitoring
+
+**Implementation:**
+```bash
+# Check current memory token usage
+python .claude/scripts/count-memory-tokens.py
+
+# Expected output:
+# .claude/memory/physics-constants.md: 1,200 tokens
+# .claude/memory/dataframe-patterns.md: 1,800 tokens
+# .claude/memory/testing-templates.md: 4,000 tokens
+# ... (other files)
+# TOTAL: 14,500 tokens (72.5% of 20K budget)
+```
+
+**Thresholds:**
+- ✅ **Green (0-15K tokens / 0-75%):** Normal operation
+- ⚠️ **Yellow (15K-18K tokens / 75-90%):** Warning, review memory content for redundancy
+- 🔴 **Red (18K-20K tokens / 90-100%):** Critical, identify files to split or archive
+- ❌ **Block (>20K tokens):** Exceeds budget, must reduce before commit
+
 ### 5. Priority & Effort Estimation
 
 **Impact Level:** 🔴 **CRITICAL**
@@ -789,9 +883,13 @@ All SolarWindPy-specific conventions, rules, and knowledge that should be consis
 **Estimated Effort:**
 - Memory structure design: **2-3 hours**
 - Content extraction: **4-6 hours** (9 memory files)
+- Implement stopping conditions: **6-10 hours** (rate limiting, budget guards, monitoring scripts)
+- Add metrics infrastructure: **4-6 hours** (token counting, budget tracking, CI/CD enforcement)
 - Testing & validation: **2-3 hours**
 - Documentation: **1-2 hours**
-- **Total: 9-14 hours**
+- **Total: 19-30 hours**
+
+**Note:** Increased from 9-14h to account for stopping conditions and metrics infrastructure required for safe deployment. These additions prevent memory system from consuming excessive context budget and enable measurement of ≥30% token reduction goal.
 
 **Break-even Analysis:**
 - Time saved per session: ~5-10 minutes (no repeated context-setting)
