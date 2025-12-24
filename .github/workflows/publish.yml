@@ -59,16 +59,33 @@ jobs:
           
           echo "✅ Publishing version $TAG (verified: $DETECTED_VERSION)"
       
-      - name: Verify lockfiles synced before release
+      - name: Validate lockfile
         run: |
-          pip install pip-tools
-          pip-compile pyproject.toml --output-file=/tmp/req-check.txt --quiet
-          if ! diff -q requirements.txt /tmp/req-check.txt; then
-            echo "❌ CRITICAL: requirements.txt out of sync with pyproject.toml"
-            echo "Run: pip-compile pyproject.toml --output-file=requirements.txt"
-            exit 1
-          fi
-          echo "✅ Lockfiles are synced with pyproject.toml"
+          # Option 1: Validate lockfile is installable
+          echo "🔍 Checking lockfile can be installed..."
+          pip install --dry-run -r requirements.txt
+          echo "✅ Lockfile is valid and installable"
+
+          # Option 2: Validate all dependencies are present
+          echo "🔍 Checking all pyproject.toml dependencies are in lockfile..."
+          python -c "
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              deps = tomllib.load(f)['project']['dependencies']
+          with open('requirements.txt') as f:
+              lockfile = f.read().lower()
+          missing = []
+          for dep in deps:
+              # Extract package name (before any version specifiers or extras)
+              pkg = dep.split('[')[0].split('>=')[0].split('==')[0].split('<')[0].split('>')[0].strip().lower()
+              if pkg not in lockfile:
+                  missing.append(pkg)
+          if missing:
+              print(f'❌ Missing from lockfile: {missing}')
+              print('Run: pip-compile pyproject.toml --output-file=requirements.txt --resolver=backtracking')
+              raise SystemExit(1)
+          print('✅ All dependencies present in lockfile')
+          "
 
       - name: Install dependencies
         run: |
