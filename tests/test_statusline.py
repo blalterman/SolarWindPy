@@ -68,214 +68,338 @@ class TestColors:
 class TestThresholds:
     """Test threshold constants."""
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - tests need updating for CONTEXT_YELLOW/RED"
-    )
-    def test_token_thresholds(self):
-        """Test token threshold values."""
-        assert statusline.Thresholds.TOKEN_YELLOW == 150_000
-        assert statusline.Thresholds.TOKEN_RED == 180_000
+    def test_context_ratio_thresholds(self):
+        """Test context window ratio thresholds."""
+        assert statusline.Thresholds.CONTEXT_YELLOW_RATIO == 0.75
+        assert statusline.Thresholds.CONTEXT_RED_RATIO == 0.90
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - compaction features removed/changed"
-    )
-    def test_compaction_thresholds(self):
-        """Test compaction threshold values."""
-        assert statusline.Thresholds.COMPACTION_YELLOW_RATIO == 0.6
-        assert statusline.Thresholds.COMPACTION_RED_RATIO == 0.8
+    def test_cache_thresholds(self):
+        """Test cache efficiency thresholds."""
+        assert statusline.Thresholds.CACHE_EXCELLENT == 0.50
+        assert statusline.Thresholds.CACHE_GOOD == 0.20
+        assert statusline.Thresholds.MIN_CACHE_DISPLAY == 0.10
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - SESSION_YELLOW_HOURS now 4, not 6"
-    )
     def test_session_thresholds(self):
         """Test session duration threshold values."""
-        assert statusline.Thresholds.SESSION_YELLOW_HOURS == 6
-        assert statusline.Thresholds.SESSION_RED_HOURS == 12
+        assert statusline.Thresholds.SESSION_YELLOW_HOURS == 4
+        assert statusline.Thresholds.SESSION_RED_HOURS == 8
+
+    def test_coverage_thresholds(self):
+        """Test coverage threshold values."""
+        assert statusline.Thresholds.COVERAGE_EXCELLENT == 95.0
+        assert statusline.Thresholds.COVERAGE_WARNING == 90.0
 
 
-class TestTokenUsage:
-    """Test token usage estimation and color coding."""
+class TestConversationTokenUsage:
+    """Test real conversation token usage from API data."""
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - output format changed to '25k/200k'"
-    )
-    def test_token_usage_green(self):
-        """Test green color for low token usage."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 100k chars (25k tokens)
-            tf.write(b"x" * 100_000)
-            tf.flush()
+    def test_token_usage_fresh_session(self):
+        """Test token display with no messages yet (fresh session)."""
+        data = {
+            "context_window": {
+                "context_window_size": 200_000,
+                "current_usage": None
+            }
+        }
+        result = statusline.get_conversation_token_usage(data)
+        assert result == "0/200k"
 
-            data = {"transcript_path": tf.name}
-            result = statusline.estimate_token_usage(data)
+    def test_token_usage_with_api_data(self):
+        """Test token display with real API usage data."""
+        data = {
+            "context_window": {
+                "context_window_size": 200_000,
+                "current_usage": {
+                    "input_tokens": 30000,
+                    "output_tokens": 5000,
+                    "cache_creation_input_tokens": 10000,
+                    "cache_read_input_tokens": 15000
+                }
+            }
+        }
+        # Total = 30000 + 10000 + 15000 = 55000 tokens = 55k
+        result = statusline.get_conversation_token_usage(data)
+        assert "55k/200k" in result
 
-            # Should be green (no color codes when testing)
-            with patch("sys.stdout.isatty", return_value=False):
-                clean_result = statusline.estimate_token_usage(data)
-                assert clean_result == "25k"
+    def test_token_usage_color_coding_green(self):
+        """Test green color for low token usage (<75%)."""
+        data = {
+            "context_window": {
+                "context_window_size": 200_000,
+                "current_usage": {
+                    "input_tokens": 50000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 0
+                }
+            }
+        }
+        with patch("sys.stdout.isatty", return_value=False):
+            result = statusline.get_conversation_token_usage(data)
+            assert "50k/200k" in result
 
-        os.unlink(tf.name)
+    def test_token_usage_different_context_size(self):
+        """Test token display adapts to different context window sizes."""
+        data = {
+            "context_window": {
+                "context_window_size": 128_000,
+                "current_usage": {
+                    "input_tokens": 64000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 0
+                }
+            }
+        }
+        result = statusline.get_conversation_token_usage(data)
+        assert "64k/128k" in result
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - output format changed to '150k/200k'"
-    )
-    def test_token_usage_yellow(self):
-        """Test yellow color for medium token usage."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 600k chars (150k tokens)
-            tf.write(b"x" * 600_000)
-            tf.flush()
-
-            data = {"transcript_path": tf.name}
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.estimate_token_usage(data)
-                assert result == "150k"
-
-        os.unlink(tf.name)
-
-    @pytest.mark.skip(
-        reason="Statusline refactored - output format changed to '200k/200k'"
-    )
-    def test_token_usage_red(self):
-        """Test red color for high token usage."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 800k chars (200k tokens)
-            tf.write(b"x" * 800_000)
-            tf.flush()
-
-            data = {"transcript_path": tf.name}
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.estimate_token_usage(data)
-                assert result == "200k"
-
-        os.unlink(tf.name)
-
-    @pytest.mark.skip(
-        reason="Statusline refactored - output format changed to '0/200k'"
-    )
-    def test_token_usage_missing_file(self):
-        """Test handling of missing transcript file."""
-        data = {"transcript_path": "/nonexistent/file.txt"}
-        result = statusline.estimate_token_usage(data)
-        assert result == "0"
-
-
-class TestCompactionIndicator:
-    """Test compaction indicator and color coding."""
-
-    @pytest.mark.skip(
-        reason="Statusline refactored - get_compaction_indicator function removed"
-    )
-    def test_compaction_green_low(self):
-        """Test green for low file size."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 200KB (25% of 800KB threshold)
-            tf.write(b"x" * 200_000)
-            tf.flush()
-
-            data = {"transcript_path": tf.name}
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.get_compaction_indicator(data)
-                assert result == "●●●"
-
-        os.unlink(tf.name)
-
-    @pytest.mark.skip(
-        reason="Statusline refactored - get_compaction_indicator function removed"
-    )
-    def test_compaction_yellow(self):
-        """Test yellow for medium file size."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 560KB (70% of 800KB threshold)
-            tf.write(b"x" * 560_000)
-            tf.flush()
-
-            data = {"transcript_path": tf.name}
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.get_compaction_indicator(data)
-                assert result == "●○○"
-
-        os.unlink(tf.name)
-
-    @pytest.mark.skip(
-        reason="Statusline refactored - get_compaction_indicator function removed"
-    )
-    def test_compaction_red(self):
-        """Test red for high file size."""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            # Write 720KB (90% of 800KB threshold)
-            tf.write(b"x" * 720_000)
-            tf.flush()
-
-            data = {"transcript_path": tf.name}
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.get_compaction_indicator(data)
-                assert result == "○○○"
-
-        os.unlink(tf.name)
+    def test_token_usage_missing_data(self):
+        """Test graceful handling of missing context_window data."""
+        data = {}
+        result = statusline.get_conversation_token_usage(data)
+        assert "200k" in result  # Should return default
 
 
-class TestUsageIndicator:
-    """Test usage indicator and session duration."""
+class TestCacheEfficiency:
+    """Test cache efficiency calculation and display."""
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - get_usage_indicator function removed"
-    )
-    def test_usage_green_fresh(self):
-        """Test green for fresh session."""
-        with (
-            patch("time.time", return_value=1000),
-            patch("pathlib.Path.exists", return_value=True),
-            patch("pathlib.Path.read_text", return_value="999.5"),
-        ):  # 0.5 hours ago
-            with patch("sys.stdout.isatty", return_value=False):
-                result = statusline.get_usage_indicator()
-                assert result == "█████"
+    def test_cache_efficiency_none_when_no_usage(self):
+        """Test returns None when no usage data available."""
+        data = {"context_window": {}}
+        result = statusline.get_cache_efficiency(data)
+        assert result is None
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - thresholds changed to 4 and 8 hours"
-    )
-    def test_usage_thresholds_logic(self):
-        """Test that usage indicator logic follows correct thresholds."""
-        # Test that SESSION_YELLOW_HOURS and SESSION_RED_HOURS are used correctly
-        assert statusline.Thresholds.SESSION_YELLOW_HOURS == 6
-        assert statusline.Thresholds.SESSION_RED_HOURS == 12
+    def test_cache_efficiency_none_when_no_cache_reads(self):
+        """Test returns None when cache reads are zero."""
+        data = {
+            "context_window": {
+                "current_usage": {
+                    "input_tokens": 10000,
+                    "cache_creation_input_tokens": 5000,
+                    "cache_read_input_tokens": 0
+                }
+            }
+        }
+        result = statusline.get_cache_efficiency(data)
+        assert result is None
 
-        # Test the pattern mapping
-        # <1h: █████, <3h: ████○, <6h: ███○○, <12h: ██○○○, ≥12h: █○○○○
+    def test_cache_efficiency_below_threshold(self):
+        """Test returns None when cache hit rate below 10% threshold."""
+        data = {
+            "context_window": {
+                "current_usage": {
+                    "input_tokens": 95000,
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 5000  # 5% hit rate
+                }
+            }
+        }
+        result = statusline.get_cache_efficiency(data)
+        assert result is None
+
+    def test_cache_efficiency_good_rate(self):
+        """Test display for good cache hit rate (20-50%)."""
+        data = {
+            "context_window": {
+                "current_usage": {
+                    "input_tokens": 30000,
+                    "cache_creation_input_tokens": 10000,
+                    "cache_read_input_tokens": 15000  # 27% hit rate
+                }
+            }
+        }
+        result = statusline.get_cache_efficiency(data)
+        assert "💾" in result
+        assert "27%" in result
+
+    def test_cache_efficiency_excellent_rate(self):
+        """Test display for excellent cache hit rate (≥50%)."""
+        data = {
+            "context_window": {
+                "current_usage": {
+                    "input_tokens": 20000,
+                    "cache_creation_input_tokens": 10000,
+                    "cache_read_input_tokens": 30000  # 50% hit rate
+                }
+            }
+        }
+        result = statusline.get_cache_efficiency(data)
+        assert "💾" in result
+        assert "50%" in result
+
+
+class TestEditActivity:
+    """Test edit activity tracking and display."""
+
+    def test_edit_activity_none_when_no_edits(self):
+        """Test returns None when no edits have been made."""
+        data = {
+            "cost": {
+                "total_lines_added": 0,
+                "total_lines_removed": 0
+            }
+        }
+        result = statusline.get_edit_activity(data)
+        assert result is None
+
+    def test_edit_activity_additions(self):
+        """Test display for net additions."""
+        data = {
+            "cost": {
+                "total_lines_added": 156,
+                "total_lines_removed": 23
+            }
+        }
+        result = statusline.get_edit_activity(data)
+        assert "✏️ +156/-23" in result
+
+    def test_edit_activity_deletions(self):
+        """Test display for net deletions."""
+        data = {
+            "cost": {
+                "total_lines_added": 20,
+                "total_lines_removed": 100
+            }
+        }
+        result = statusline.get_edit_activity(data)
+        assert "✏️ +20/-100" in result
+
+    def test_edit_activity_large_additions(self):
+        """Test display for significant additions (>100 net)."""
+        data = {
+            "cost": {
+                "total_lines_added": 250,
+                "total_lines_removed": 10
+            }
+        }
+        result = statusline.get_edit_activity(data)
+        assert "✏️ +250/-10" in result
+
+    def test_edit_activity_missing_data(self):
+        """Test graceful handling of missing cost data."""
+        data = {}
+        result = statusline.get_edit_activity(data)
+        assert result is None
+
+
+class TestModelDetection:
+    """Test model detection with color coding."""
+
+    def test_model_name_sonnet(self):
+        """Test Sonnet model (no color)."""
+        data = {
+            "model": {
+                "id": "claude-sonnet-4-20250514",
+                "display_name": "Sonnet 4.5"
+            }
+        }
+        with patch("sys.stdout.isatty", return_value=False):
+            result = statusline.get_model_name(data)
+            assert result == "Sonnet 4.5"
+
+    def test_model_name_haiku(self):
+        """Test Haiku model (yellow)."""
+        data = {
+            "model": {
+                "id": "claude-haiku-4",
+                "display_name": "Haiku"
+            }
+        }
+        result = statusline.get_model_name(data)
+        assert "Haiku" in result
+
+    def test_model_name_opus(self):
+        """Test Opus model (green)."""
+        data = {
+            "model": {
+                "id": "claude-opus-4-5",
+                "display_name": "Opus 4.5"
+            }
+        }
+        result = statusline.get_model_name(data)
+        assert "Opus 4.5" in result
 
 
 class TestStatusLineIntegration:
     """Test complete status line creation."""
 
-    @pytest.mark.skip(
-        reason="Statusline refactored - get_compaction_indicator and get_usage_indicator removed"
-    )
-    def test_create_status_line_basic(self):
-        """Test basic status line creation."""
+    def test_create_status_line_complete(self):
+        """Test complete status line with all new features."""
         data = {
-            "model": {"display_name": "Claude Sonnet 4"},
+            "model": {
+                "id": "claude-sonnet-4-20250514",
+                "display_name": "Sonnet 4.5"
+            },
+            "workspace": {"current_dir": "/Users/test/SolarWindPy-2"},
+            "context_window": {
+                "context_window_size": 200_000,
+                "current_usage": {
+                    "input_tokens": 30000,
+                    "cache_creation_input_tokens": 10000,
+                    "cache_read_input_tokens": 15000
+                }
+            },
+            "cost": {
+                "total_duration_ms": 3600000,  # 1 hour
+                "total_lines_added": 156,
+                "total_lines_removed": 23
+            }
+        }
+
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("os.environ.get", return_value="solarwindpy"),
+            patch("statusline.get_coverage_percentage", return_value="✓97%"),
+        ):
+            # Mock git commands
+            mock_run.return_value.returncode = 0
+            mock_run.return_value.stdout = "master\n"
+
+            result = statusline.create_status_line(data)
+
+            # Check all components are present
+            assert "Sonnet 4.5" in result
+            assert "📁 SolarWindPy-2" in result
+            assert "🐍 solarwindpy" in result
+            assert "🌿 master" in result
+            assert "🔤" in result  # Token usage
+            assert "55k/200k" in result  # Actual token count
+            assert "💾" in result  # Cache indicator
+            assert "✏️ +156/-23" in result  # Edit activity
+            assert "🎯 ✓97%" in result  # Coverage
+            assert "⏱️" in result  # Duration
+
+    def test_create_status_line_minimal(self):
+        """Test status line with minimal data (fresh session)."""
+        data = {
+            "model": {"id": "claude-sonnet-4", "display_name": "Sonnet"},
             "workspace": {"current_dir": "/Users/test/project"},
-            "transcript_path": "/dev/null",
+            "context_window": {
+                "context_window_size": 200_000,
+                "current_usage": None
+            },
+            "cost": {
+                "total_duration_ms": 0,
+                "total_lines_added": 0,
+                "total_lines_removed": 0
+            }
         }
 
         with (
             patch("subprocess.run") as mock_run,
             patch("os.environ.get", return_value=""),
-            patch("statusline.estimate_token_usage", return_value="25k"),
-            patch("statusline.get_compaction_indicator", return_value="●●●"),
-            patch("statusline.get_usage_indicator", return_value="█████"),
+            patch("statusline.get_coverage_percentage", return_value=None),
         ):
-
             mock_run.return_value.returncode = 0
             mock_run.return_value.stdout = "main\n"
 
             result = statusline.create_status_line(data)
-            assert "[Claude Sonnet 4]" in result
+
+            # Check basic components
+            assert "[Sonnet]" in result
             assert "📁 project" in result
-            assert "🔤 25k" in result
-            assert "⏱️ ●●●" in result
-            assert "📊 █████" in result
+            assert "0/200k" in result  # Fresh session
+            assert "💾" not in result  # No cache yet
+            assert "✏️" not in result  # No edits yet
 
 
 if __name__ == "__main__":
