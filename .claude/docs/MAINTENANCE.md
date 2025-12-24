@@ -43,17 +43,16 @@ count=$(gh run list -s skipped --limit 500 | wc -l)
 
 ### CI Conda Environment Setup
 
-**Important**: GitHub Actions workflows dynamically generate environment files instead of using `solarwindpy.yml` directly.
+**As of v0.3.0**: Workflows use simplified conda setup with unversioned packages.
 
-**Why**: setup-miniconda@v3 has a known issue where specifying both `environment-file` and `python-version` parameters causes automatic file patching that rewrites dependency syntax and breaks conda resolution.
+**Why**: Using unversioned packages in `solarwindpy.yml` eliminates PyPI/conda-forge version mismatches while allowing setup-miniconda patching to proceed harmlessly.
 
-**Implementation**: Workflows inject matrix-specific Python version into environment file before setup-miniconda runs, eliminating the conflict that triggers patching.
+**Implementation**:
+- `solarwindpy.yml` contains package names only (no version pins)
+- Workflows specify `python-version` parameter directly (no dynamic generation needed)
+- `pip install -e .` enforces `pyproject.toml` version constraints after conda setup
 
-**Full technical details**: `root-cause-analysis/pr-405-conda-patching.md`
-
-**Do NOT**:
-- Add `python-version:` parameter to `conda-incubator/setup-miniconda@v3` in workflows
-- Add Python version to base `solarwindpy.yml` (breaks dynamic injection for matrix testing)
+**Full technical details**: See `solarwindpy.yml` header comments
 
 ### Local Environment Management
 
