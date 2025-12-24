@@ -34,22 +34,52 @@ jobs:
         echo "Environment file: $CONDA_ENV"
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
-    
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # Matrix-Specific Environment File Generation
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # Dynamic generation prevents setup-miniconda@v3 patching that breaks conda resolution
+    # Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
+    # TL;DR: Specifying both environment-file AND python-version causes syntax changes
+    # DO NOT add python-version parameter to setup-miniconda action below!
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    - name: Create matrix-specific environment file
+      shell: python
+      run: |
+        import yaml
+
+        # Read base environment file (intentionally omits Python version)
+        with open('solarwindpy.yml', 'r') as f:
+            env = yaml.safe_load(f)
+
+        # Inject matrix-specific Python version as first dependency
+        python_version = '${{ matrix.python-version }}'
+        env['dependencies'].insert(0, f'python={python_version}')
+
+        # Write complete environment file for this matrix job
+        with open('solarwindpy-matrix.yml', 'w') as f:
+            yaml.safe_dump(env, f, sort_keys=False)
+
+        print(f'✅ Generated solarwindpy-matrix.yml with Python {python_version}')
+        print(f'📦 Dependencies: {len(env["dependencies"])} packages')
+
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env.outputs.conda_env_file) }}
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-matrix.yml') }}
         restore-keys: |
           ${{ runner.os }}-conda-
-    
+
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: ${{ steps.find-conda-env.outputs.conda_env_file }}
+        environment-file: solarwindpy-matrix.yml  # ← Generated file with Python version
         activate-environment: ${{ steps.find-conda-env.outputs.env_name }}
-        python-version: ${{ matrix.python-version }}
+        # IMPORTANT: python-version parameter intentionally OMITTED
+        # Adding it would reintroduce patching behavior (see comments above)
         auto-activate-base: false
         use-only-tar-bz2: true
         miniforge-version: latest  # For cache compatibility
@@ -226,20 +256,37 @@ jobs:
         echo "Environment file: $CONDA_ENV"
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
-    
+
+    # Dynamic generation prevents setup-miniconda@v3 patching (see pr-405-conda-patching.md)
+    - name: Create matrix-specific environment file
+      shell: python
+      run: |
+        import yaml
+
+        with open('solarwindpy.yml', 'r') as f:
+            env = yaml.safe_load(f)
+
+        python_version = '${{ matrix.python-version }}'
+        env['dependencies'].insert(0, f'python={python_version}')
+
+        with open('solarwindpy-matrix.yml', 'w') as f:
+            yaml.safe_dump(env, f, sort_keys=False)
+
+        print(f'✅ Generated solarwindpy-matrix.yml with Python {python_version}')
+
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env-spot.outputs.conda_env_file) }}
-    
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-matrix.yml') }}
+
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: ${{ steps.find-conda-env-spot.outputs.conda_env_file }}
+        environment-file: solarwindpy-matrix.yml
         activate-environment: ${{ steps.find-conda-env-spot.outputs.env_name }}
-        python-version: ${{ matrix.python-version }}
+        # python-version: OMITTED - prevents patching (see pr-405-conda-patching.md)
         auto-activate-base: false
         use-only-tar-bz2: true
         miniforge-version: latest

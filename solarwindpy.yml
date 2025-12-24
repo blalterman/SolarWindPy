@@ -1,3 +1,14 @@
+# SolarWindPy Conda Environment File
+#
+# NOTE: Python version is intentionally NOT specified in this file.
+# It is dynamically injected by GitHub Actions workflows during matrix testing
+# to avoid setup-miniconda@v3 patching issues that break dependency resolution.
+# Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
+#
+# For local use:
+#   conda env create -f solarwindpy.yml
+#   (conda will resolve to latest compatible Python, typically 3.12 or 3.13)
+#
 name: solarwindpy
 channels:
 - conda-forge

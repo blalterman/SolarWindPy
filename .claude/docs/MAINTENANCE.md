@@ -41,6 +41,22 @@ count=$(gh run list -s skipped --limit 500 | wc -l)
 
 ## Recipe and Environment Management
 
+### CI Conda Environment Setup
+
+**Important**: GitHub Actions workflows dynamically generate environment files instead of using `solarwindpy.yml` directly.
+
+**Why**: setup-miniconda@v3 has a known issue where specifying both `environment-file` and `python-version` parameters causes automatic file patching that rewrites dependency syntax and breaks conda resolution.
+
+**Implementation**: Workflows inject matrix-specific Python version into environment file before setup-miniconda runs, eliminating the conflict that triggers patching.
+
+**Full technical details**: `root-cause-analysis/pr-405-conda-patching.md`
+
+**Do NOT**:
+- Add `python-version:` parameter to `conda-incubator/setup-miniconda@v3` in workflows
+- Add Python version to base `solarwindpy.yml` (breaks dynamic injection for matrix testing)
+
+### Local Environment Management
+
 ```bash
 # Update conda recipe for new versions
 python scripts/update_conda_recipe.py
