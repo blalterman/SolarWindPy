@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.lines module &mdash; SolarWindPy 0.1.dev1+ge9b646b53 documentation</title>
+  <title>solarwindpy.fitfunctions.lines module &mdash; SolarWindPy 0.1.dev1+g724a08a89 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=db923887"></script>
+      <script src="../_static/documentation_options.js?v=611cbb51"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -357,17 +357,6 @@ Shape must match xobs.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.make_fit" title="solarwindpy.fitfunctions.lines.Line.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
-</dd>
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.popt" title="solarwindpy.fitfunctions.lines.Line.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
-</dd>
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.rsq" title="solarwindpy.fitfunctions.lines.Line.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
-</dd>
-</dl>
-</div>
 <p class="rubric">Notes</p>
 <p>The fitting procedure uses scipy.optimize.least_squares
 with robust loss functions (Huber by default) to handle
@@ -384,6 +373,17 @@ through the docstring-inheritance metaclass.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitted mu: </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.make_fit" title="solarwindpy.fitfunctions.lines.Line.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+</dd>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.popt" title="solarwindpy.fitfunctions.lines.Line.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+</dd>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.Line.html#solarwindpy.fitfunctions.lines.Line.rsq" title="solarwindpy.fitfunctions.lines.Line.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
@@ -504,37 +504,7 @@ treats weights as in <cite>curve_fit</cite>.</p>
 <li><p><strong>return_exception</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return exceptions from fitting routine, instead of raising.
 This is useful when looping through many fits and wanting to
 identify failed fits after the fact.</p></li>
-<li><p><strong>kwargs</strong> – <p>Unless specified here, defaults are as defined by <cite>curve_fit</cite>.</p>
-<blockquote>
-<div><table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>kwarg</p></th>
-<th class="head"><p>default</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>p0</p></td>
-<td><p>Setup by <cite>{self.__class__.__name__}</cite></p></td>
-</tr>
-<tr class="row-odd"><td><p>return_full</p></td>
-<td><p>False</p></td>
-</tr>
-<tr class="row-even"><td><p>method</p></td>
-<td><p>”trf”</p></td>
-</tr>
-<tr class="row-odd"><td><p>loss</p></td>
-<td><p>”huber”</p></td>
-</tr>
-<tr class="row-even"><td><p>max_nfev</p></td>
-<td><p>10000</p></td>
-</tr>
-<tr class="row-odd"><td><p>f_scale</p></td>
-<td><p>0.1</p></td>
-</tr>
-</tbody>
-</table>
-</div></blockquote>
-</p></li>
+<li><p><strong>**kwargs</strong> – The description is missing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -583,6 +553,11 @@ identify failed fits after the fact.</p></li>
 <span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Calculate the fit residuals.</p>
 <p>If pct, normalize by fit yvalues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pct</strong> – The description is missing.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -599,6 +574,25 @@ identify failed fits after the fact.</p></li>
 <p>By applying limits to xobs_raw and yobs_raw and checking for finite values.</p>
 <p>All boundaries are inclusive &lt;= or &gt;=.</p>
 <p>If logy, then make selection of <cite>wmin</cite> and <cite>wmax</cite> based on <span class="math notranslate nohighlight">\(w/(y \ln(10))\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xobs_raw</strong> – The description is missing.</p></li>
+<li><p><strong>yobs_raw</strong> – The description is missing.</p></li>
+<li><p><strong>weights_raw</strong> – The description is missing.</p></li>
+<li><p><strong>xmin</strong> – The description is missing.</p></li>
+<li><p><strong>xmax</strong> – The description is missing.</p></li>
+<li><p><strong>xoutside</strong> – The description is missing.</p></li>
+<li><p><strong>ymin</strong> – The description is missing.</p></li>
+<li><p><strong>ymax</strong> – The description is missing.</p></li>
+<li><p><strong>youtside</strong> – The description is missing.</p></li>
+<li><p><strong>wmin</strong> – The description is missing.</p></li>
+<li><p><strong>wmax</strong> – The description is missing.</p></li>
+<li><p><strong>logx</strong> – The description is missing.</p></li>
+<li><p><strong>logy</strong> – The description is missing.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -631,17 +625,6 @@ Shape must match xobs.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.make_fit" title="solarwindpy.fitfunctions.lines.LineXintercept.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
-</dd>
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.popt" title="solarwindpy.fitfunctions.lines.LineXintercept.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
-</dd>
-<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.rsq" title="solarwindpy.fitfunctions.lines.LineXintercept.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
-</dd>
-</dl>
-</div>
 <p class="rubric">Notes</p>
 <p>This parameterization is useful when fitting data where the
 x-intercept has physical meaning, such as threshold energies
@@ -655,6 +638,17 @@ or cutoff velocities in solar wind measurements.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitted mu: </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.make_fit" title="solarwindpy.fitfunctions.lines.LineXintercept.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+</dd>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.popt" title="solarwindpy.fitfunctions.lines.LineXintercept.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+</dd>
+<dt><a class="reference internal" href="../_autosummary/solarwindpy.fitfunctions.lines.LineXintercept.html#solarwindpy.fitfunctions.lines.LineXintercept.rsq" title="solarwindpy.fitfunctions.lines.LineXintercept.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
@@ -775,37 +769,7 @@ treats weights as in <cite>curve_fit</cite>.</p>
 <li><p><strong>return_exception</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return exceptions from fitting routine, instead of raising.
 This is useful when looping through many fits and wanting to
 identify failed fits after the fact.</p></li>
-<li><p><strong>kwargs</strong> – <p>Unless specified here, defaults are as defined by <cite>curve_fit</cite>.</p>
-<blockquote>
-<div><table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>kwarg</p></th>
-<th class="head"><p>default</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>p0</p></td>
-<td><p>Setup by <cite>{self.__class__.__name__}</cite></p></td>
-</tr>
-<tr class="row-odd"><td><p>return_full</p></td>
-<td><p>False</p></td>
-</tr>
-<tr class="row-even"><td><p>method</p></td>
-<td><p>”trf”</p></td>
-</tr>
-<tr class="row-odd"><td><p>loss</p></td>
-<td><p>”huber”</p></td>
-</tr>
-<tr class="row-even"><td><p>max_nfev</p></td>
-<td><p>10000</p></td>
-</tr>
-<tr class="row-odd"><td><p>f_scale</p></td>
-<td><p>0.1</p></td>
-</tr>
-</tbody>
-</table>
-</div></blockquote>
-</p></li>
+<li><p><strong>**kwargs</strong> – The description is missing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -854,6 +818,11 @@ identify failed fits after the fact.</p></li>
 <span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Calculate the fit residuals.</p>
 <p>If pct, normalize by fit yvalues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pct</strong> – The description is missing.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -870,6 +839,25 @@ identify failed fits after the fact.</p></li>
 <p>By applying limits to xobs_raw and yobs_raw and checking for finite values.</p>
 <p>All boundaries are inclusive &lt;= or &gt;=.</p>
 <p>If logy, then make selection of <cite>wmin</cite> and <cite>wmax</cite> based on <span class="math notranslate nohighlight">\(w/(y \ln(10))\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xobs_raw</strong> – The description is missing.</p></li>
+<li><p><strong>yobs_raw</strong> – The description is missing.</p></li>
+<li><p><strong>weights_raw</strong> – The description is missing.</p></li>
+<li><p><strong>xmin</strong> – The description is missing.</p></li>
+<li><p><strong>xmax</strong> – The description is missing.</p></li>
+<li><p><strong>xoutside</strong> – The description is missing.</p></li>
+<li><p><strong>ymin</strong> – The description is missing.</p></li>
+<li><p><strong>ymax</strong> – The description is missing.</p></li>
+<li><p><strong>youtside</strong> – The description is missing.</p></li>
+<li><p><strong>wmin</strong> – The description is missing.</p></li>
+<li><p><strong>wmax</strong> – The description is missing.</p></li>
+<li><p><strong>logx</strong> – The description is missing.</p></li>
+<li><p><strong>logy</strong> – The description is missing.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
