@@ -68,6 +68,30 @@ class Colors:
         return Colors.colorize(text, Colors.GREEN)
 
 
+# Configuration for optional status line features
+class Config:
+    """Feature toggles for status line components.
+
+    Set to False to disable specific indicators and reduce status line length.
+    """
+
+    # Phase 3: Optional advanced components (disabled by default)
+    SHOW_API_EFFICIENCY = False  # API time vs total time ratio
+    SHOW_SESSION_SOURCE = False  # How session started (resume/compact/fresh)
+
+    # Core components (always enabled)
+    SHOW_MODEL = True
+    SHOW_DIRECTORY = True
+    SHOW_CONDA_ENV = True
+    SHOW_GIT_BRANCH = True
+    SHOW_PLAN_NAME = True
+    SHOW_TOKENS = True
+    SHOW_CACHE_EFFICIENCY = True
+    SHOW_EDIT_ACTIVITY = True
+    SHOW_COVERAGE = True
+    SHOW_DURATION = True
+
+
 # Thresholds for status line indicators
 class Thresholds:
     # Context window limits (dynamic based on model)
@@ -78,6 +102,11 @@ class Thresholds:
     CACHE_EXCELLENT = 0.50  # ≥50% cache hit rate (green)
     CACHE_GOOD = 0.20  # ≥20% cache hit rate (yellow)
     MIN_CACHE_DISPLAY = 0.10  # Only show cache if ≥10% hit rate
+
+    # API efficiency thresholds
+    API_EXCELLENT = 0.50  # >50% time in API calls (expected for coding)
+    API_LOW = 0.20  # <20% time in API calls (lots of thinking/tools)
+    MIN_SESSION_DURATION_SECS = 60  # Only show after 1 minute
 
     # Coverage thresholds (SolarWindPy requirement: ≥95%)
     COVERAGE_EXCELLENT = 95.0  # Required minimum
@@ -302,6 +331,48 @@ def get_edit_activity(data):
         return None
 
 
+def get_api_efficiency(data):
+    """Calculate API time vs total session time ratio (Phase 3: Optional).
+
+    High ratios indicate lots of local processing (thinking, tool execution).
+    Low ratios indicate more time in API calls (generating responses).
+
+    Args:
+        data: Status line JSON data from Claude Code
+
+    Returns:
+        Formatted efficiency ratio (e.g., "⚡ 45%") or None if insufficient data
+    """
+    try:
+        cost = data.get("cost", {})
+        total_duration = cost.get("total_duration_ms", 0)
+        api_duration = cost.get("total_api_duration_ms", 0)
+
+        # Skip if session just started
+        if total_duration < (Thresholds.MIN_SESSION_DURATION_SECS * 1000):
+            return None
+
+        # Calculate API efficiency (what % of time is API calls)
+        api_ratio = api_duration / total_duration if total_duration > 0 else 0
+
+        # Format as percentage
+        efficiency_str = f"⚡ {api_ratio: .0%}"
+
+        # Color code based on typical patterns
+        if api_ratio > Thresholds.API_EXCELLENT:
+            # >50% in API = mostly generating (expected for coding)
+            return Colors.green(efficiency_str)
+        elif api_ratio > Thresholds.API_LOW:
+            # 20-50% = balanced (tools + generation)
+            return efficiency_str
+        else:
+            # <20% = lots of thinking/tool time (yellow for awareness)
+            return Colors.yellow(efficiency_str)
+
+    except Exception:
+        return None
+
+
 def get_plan_info():
     """Check if on a plan branch and extract plan name."""
     branch = get_git_branch()
@@ -402,51 +473,62 @@ def get_session_duration(data):
 def create_status_line(data):
     """Create the enhanced status line with real API data."""
     # Get all components
-    model = get_model_name(data)
-    current_dir = get_current_dir(data)
-    conda_env = get_conda_env()
-    git_branch = get_git_branch()
-    git_status = get_git_status_indicators()
-    plan_name = get_plan_info()
-    tokens = get_conversation_token_usage(data)
-    cache = get_cache_efficiency(data)
-    edits = get_edit_activity(data)
-    coverage = get_coverage_percentage()
-    duration = get_session_duration(data)
+    model = get_model_name(data) if Config.SHOW_MODEL else None
+    current_dir = get_current_dir(data) if Config.SHOW_DIRECTORY else None
+    conda_env = get_conda_env() if Config.SHOW_CONDA_ENV else None
+    git_branch = get_git_branch() if Config.SHOW_GIT_BRANCH else None
+    git_status = get_git_status_indicators() if Config.SHOW_GIT_BRANCH else ""
+    plan_name = get_plan_info() if Config.SHOW_PLAN_NAME else None
+    tokens = get_conversation_token_usage(data) if Config.SHOW_TOKENS else None
+    cache = get_cache_efficiency(data) if Config.SHOW_CACHE_EFFICIENCY else None
+    edits = get_edit_activity(data) if Config.SHOW_EDIT_ACTIVITY else None
+    api_eff = get_api_efficiency(data) if Config.SHOW_API_EFFICIENCY else None
+    coverage = get_coverage_percentage() if Config.SHOW_COVERAGE else None
+    duration = get_session_duration(data) if Config.SHOW_DURATION else None
 
     # Build status line components
-    parts = [f"[{model}]", f"📁 {current_dir}"]
+    parts = []
 
-    # Add conda environment
+    # Core identification
+    if model:
+        parts.append(f"[{model}]")
+    if current_dir:
+        parts.append(f"📁 {current_dir}")
+
+    # Environment
     if conda_env:
         parts.append(f"🐍 {conda_env}")
 
-    # Add git branch with status indicators
+    # Git info
     if git_branch:
         branch_display = f"🌿 {git_branch}{git_status}"
         parts.append(branch_display)
 
-    # Add plan indicator (if on plan branch)
+    # Plan indicator (if on plan branch)
     if plan_name:
         parts.append(f"📋 {plan_name}")
 
-    # Add token usage (context window awareness)
-    parts.append(f"🔤 {tokens}")
+    # Performance metrics
+    if tokens:
+        parts.append(f"🔤 {tokens}")
 
-    # Add cache efficiency (if available)
     if cache:
         parts.append(cache)
 
-    # Add edit activity (if available)
     if edits:
         parts.append(edits)
 
-    # Add coverage (if available)
+    # Phase 3: Optional API efficiency
+    if api_eff:
+        parts.append(api_eff)
+
+    # Quality metrics
     if coverage:
         parts.append(f"🎯 {coverage}")
 
-    # Add session duration
-    parts.append(f"⏱️ {duration}")
+    # Session info
+    if duration:
+        parts.append(f"⏱️ {duration}")
 
     return " | ".join(parts)
 
