@@ -35,43 +35,19 @@ jobs:
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
 
-    - name: Install PyYAML for environment file generation
-      run: python -m pip install pyyaml
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # Matrix-Specific Environment File Generation
+    # TEST: Simplified conda setup (Bug #3 removal test)
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # Dynamic generation prevents setup-miniconda@v3 patching that breaks conda resolution
-    # Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
-    # TL;DR: Specifying both environment-file AND python-version causes syntax changes
-    # DO NOT add python-version parameter to setup-miniconda action below!
+    # With unversioned packages in solarwindpy.yml, setup-miniconda patching
+    # should be harmless. Testing removal of dynamic generation.
+    # If this fails, revert to dynamic generation approach.
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    - name: Create matrix-specific environment file
-      shell: python
-      run: |
-        import yaml
-
-        # Read base environment file (intentionally omits Python version)
-        with open('solarwindpy.yml', 'r') as f:
-            env = yaml.safe_load(f)
-
-        # Inject matrix-specific Python version as first dependency
-        python_version = '${{ matrix.python-version }}'
-        env['dependencies'].insert(0, f'python={python_version}')
-
-        # Write complete environment file for this matrix job
-        with open('solarwindpy-matrix.yml', 'w') as f:
-            yaml.safe_dump(env, f, sort_keys=False)
-
-        print(f'✅ Generated solarwindpy-matrix.yml with Python {python_version}')
-        print(f'📦 Dependencies: {len(env["dependencies"])} packages')
 
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-matrix.yml') }}
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
         restore-keys: |
           ${{ runner.os }}-conda-
 
@@ -79,13 +55,12 @@ jobs:
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: solarwindpy-matrix.yml  # ← Generated file with Python version
+        environment-file: solarwindpy.yml
         activate-environment: ${{ steps.find-conda-env.outputs.env_name }}
-        # IMPORTANT: python-version parameter intentionally OMITTED
-        # Adding it would reintroduce patching behavior (see comments above)
+        python-version: ${{ matrix.python-version }}  # TEST: Direct python-version with unversioned packages
         auto-activate-base: false
         use-only-tar-bz2: true
-        miniforge-version: latest  # For cache compatibility
+        miniforge-version: latest
     
     - name: Install package in development mode
       shell: bash -l {0}
@@ -260,39 +235,20 @@ jobs:
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
 
-    - name: Install PyYAML for environment file generation
-      run: python -m pip install pyyaml
-
-    # Dynamic generation prevents setup-miniconda@v3 patching (see pr-405-conda-patching.md)
-    - name: Create matrix-specific environment file
-      shell: python
-      run: |
-        import yaml
-
-        with open('solarwindpy.yml', 'r') as f:
-            env = yaml.safe_load(f)
-
-        python_version = '${{ matrix.python-version }}'
-        env['dependencies'].insert(0, f'python={python_version}')
-
-        with open('solarwindpy-matrix.yml', 'w') as f:
-            yaml.safe_dump(env, f, sort_keys=False)
-
-        print(f'✅ Generated solarwindpy-matrix.yml with Python {python_version}')
-
+    # TEST: Simplified conda setup (Bug #3 removal test - same as doctest-validation)
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy-matrix.yml') }}
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
 
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: solarwindpy-matrix.yml
+        environment-file: solarwindpy.yml
         activate-environment: ${{ steps.find-conda-env-spot.outputs.env_name }}
-        # python-version: OMITTED - prevents patching (see pr-405-conda-patching.md)
+        python-version: ${{ matrix.python-version }}  # TEST: Direct python-version with unversioned packages
         auto-activate-base: false
         use-only-tar-bz2: true
         miniforge-version: latest
