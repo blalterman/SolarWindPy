@@ -122,6 +122,206 @@ gh pr create --title "Update solarwindpy to v0.1.5" --body "Update to latest PyP
 - Address any linting issues if they arise
 - Merge when approved by conda-forge maintainers
 
+## Autotick Bot Limitations and Dependency Management
+
+### Understanding the regro-cf-autotick-bot
+
+The **regro-cf-autotick-bot** provides **partial automation**:
+
+| Task | Automated? | Notes |
+|------|-----------|-------|
+| Version detection | ✅ Yes | Monitors PyPI every 2-6 hours |
+| SHA256 calculation | ✅ Yes | Downloads source and computes hash |
+| PR creation | ✅ Yes | Creates update PR automatically |
+| CI triggering | ✅ Yes | Azure Pipelines runs tests |
+| **Dependency updates** | ❌ **NO** | **Requires manual intervention** |
+| Test updates | ❌ No | Only if imports change |
+| Build number reset | ✅ Yes | Resets to 0 for new version |
+
+### Why Manual Dependency Updates Are Necessary
+
+**Root Cause:** The bot uses a simple regex-based approach:
+1. Detects new version on PyPI
+2. Downloads source tarball
+3. Calculates SHA256
+4. Updates `{% set version = "X.Y.Z" %}` and `sha256:` fields
+5. Creates PR
+
+**What it doesn't do:**
+- Parse `pyproject.toml`, `setup.py`, or `requirements.txt`
+- Detect dependency version changes
+- Update `requirements.run` section
+- Validate dependency compatibility
+
+**Consequence:** Feedstock can drift from upstream requirements, causing build failures.
+
+### Our Automated Detection System
+
+SolarWindPy implements automated dependency drift detection:
+
+#### 1. Automatic Comparison in Tracking Issues
+
+When a release is created, the tracking issue **automatically includes a dependency comparison table**:
+
+```
+================================================================================
+DEPENDENCY COMPARISON
+================================================================================
+
+pyproject.toml                           | feedstock meta.yaml
+-----------------------------------------+-----------------------------------------
+⚠️ numpy>=1.26,<3.0                       | numpy >=1.22,<2.0
+⚠️ scipy>=1.13                            | scipy >=1.10
+⚠️ pandas>=2.0                            | pandas >=1.5
+  ...
+================================================================================
+```
+
+- **⚠️ Different** - Version constraints changed
+- **➕ Added** - New dependency in pyproject.toml
+- **➖ Removed** - Dependency only in feedstock
+
+#### 2. Manual Comparison Tool
+
+Check alignment anytime:
+
+```bash
+# Quick visual comparison
+python scripts/compare_feedstock_deps.py
+```
+
+Output shows side-by-side comparison with markers indicating changes.
+
+### Manual Dependency Update Workflow
+
+When the tracking issue shows dependency changes:
+
+#### Step 1: Wait for Bot PR
+
+Bot typically creates PR within 2-6 hours of PyPI release:
+
+```bash
+gh pr list --repo conda-forge/solarwindpy-feedstock --state open
+```
+
+#### Step 2: Review Dependency Changes
+
+1. Open the tracking issue created during release
+2. Review the dependency comparison table
+3. Note all ⚠️ markers indicating changes
+4. Verify version compatibility (especially NumPy ecosystem changes)
+
+#### Step 3: Update Feedstock
+
+```bash
+# Checkout bot's PR branch
+gh pr checkout <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock
+
+# Edit recipe/meta.yaml requirements.run section
+# Update changed dependencies from comparison table
+
+# Commit changes
+git add recipe/meta.yaml
+git commit -m "Update runtime dependencies
+
+Align with pyproject.toml changes from upstream release.
+See tracking issue for full dependency diff."
+
+# Push to bot's branch
+git push
+```
+
+#### Step 4: Monitor CI
+
+```bash
+gh pr checks <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock --watch
+```
+
+CI runs for all platforms (~15-30 minutes).
+
+#### Step 5: Merge
+
+```bash
+# When CI passes
+gh pr merge <PR_NUMBER> --squash
+```
+
+### Common Scenarios
+
+#### Scenario A: No Dependency Changes
+
+- Tracking issue shows "No changes detected"
+- Bot PR is complete as-is
+- Proceed directly to CI monitoring
+
+#### Scenario B: Minor Version Bumps
+
+- Changes like `scipy >=1.10 → >=1.13`
+- Low risk - usually backward compatible
+- Update feedstock and verify CI passes
+
+#### Scenario C: Major Ecosystem Updates
+
+Example: NumPy 2.0 migration (v0.3.0):
+- Multiple dependencies updated for NumPy 2.0 compatibility
+- `numpy >=1.22,<2.0 → >=1.26,<3.0`
+- Requires careful review of downstream compatibility
+- May need extended testing before merge
+
+#### Scenario D: Package Name Differences
+
+Conda uses different names for some packages:
+- `matplotlib` → `matplotlib-base`
+- `astropy` → `astropy-base`
+
+These appear as ➕/➖ in comparison table - update manually with `-base` suffix.
+
+### Timeline Expectations
+
+| Stage | Duration | Notes |
+|-------|----------|-------|
+| PyPI publish | Instant | Triggered by tag push |
+| Bot detection | 2-6 hours | Depends on bot schedule |
+| Bot PR creation | 5-10 min | After detection |
+| **Manual update** | **5-15 min** | **If deps changed** |
+| CI checks | 15-30 min | Platform builds |
+| Merge to availability | 10 min | Package distribution |
+| **Total (no deps)** | **3-7 hours** | Fully automated |
+| **Total (with deps)** | **3-7 hours** | +15 min manual work |
+
+### Troubleshooting Dependency Updates
+
+**Problem:** CI fails with "nothing provides numpy >=1.26"
+
+**Cause:** Dependency not yet available on conda-forge
+
+**Solution:**
+1. Check `conda-forge/numpy-feedstock` for version availability
+2. Wait for dependency to be released on conda-forge
+3. Or adjust constraint to currently available version
+
+---
+
+**Problem:** Comparison table shows unexpected changes
+
+**Cause:** Parsing differences (spacing, package name normalization)
+
+**Solution:**
+1. Manually review `pyproject.toml`
+2. Verify changes make sense
+3. Update feedstock accordingly
+
+---
+
+**Problem:** Bot PR already has correct dependencies
+
+**Cause:** Another maintainer already updated the PR
+
+**Solution:**
+1. Verify changes match tracking issue
+2. Proceed to CI monitoring
+3. No action needed
+
 ## Configuration
 
 The system is configured via `scripts/conda_config.py`:

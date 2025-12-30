@@ -267,13 +267,44 @@ SolarWindPy uses the **regro-cf-autotick-bot** for automated conda-forge updates
 **How It Works**:
 1. Bot monitors PyPI for new releases (checks every 2-6 hours)
 2. Automatically creates PR in `conda-forge/solarwindpy-feedstock`
-3. Updates version, SHA256, and dependencies
+3. Updates version and SHA256 **ONLY** (see critical limitation below)
 4. Runs CI checks across platforms
 5. Auto-merges if CI passes (or waits for manual review)
 
 **Bot Limitations**:
 - **3 PR Limit**: Bot stops creating PRs when ≥3 open version update PRs exist
 - **Solution**: Close outdated/duplicate PRs to unblock automation
+
+#### ⚠️ CRITICAL LIMITATION: Dependency Drift
+
+**The autotick bot does NOT update runtime dependencies automatically!**
+
+**What the bot updates:**
+- ✅ Version number in `{% set version = "X.Y.Z" %}`
+- ✅ SHA256 checksum from PyPI source distribution
+
+**What the bot IGNORES:**
+- ❌ Runtime dependencies in `requirements.run`
+- ❌ Build dependencies in `requirements.host`
+- ❌ Test dependencies in `test.requires`
+
+**Real Example (v0.3.0):**
+- ✅ Bot updated: version `0.2.0` → `0.3.0`
+- ✅ Bot updated: SHA256 checksum
+- ❌ Bot ignored: `numpy >=1.26,<3.0` (kept old `>=1.22,<2.0`)
+- 💥 **Result**: Conda-forge build failed because feedstock blocked NumPy 2.0!
+
+**Our Solution:**
+
+The tracking issue created during release **automatically includes a dependency comparison table**:
+- Shows all dependency changes between `pyproject.toml` and current feedstock
+- Highlights differences with ⚠️ markers
+- Provides ready-to-use update instructions
+
+**When bot PR appears (2-6 hours after release):**
+1. Check tracking issue for dependency changes
+2. If dependencies changed: manually update the bot's PR (instructions in tracking issue)
+3. If no changes: proceed to CI monitoring
 
 **Related Scripts**: See [MAINTENANCE.md](./MAINTENANCE.md#conda-feedstock-automation) for `update_conda_feedstock.py` and `wait_for_pypi.py` usage.
 
@@ -311,22 +342,42 @@ gh pr checks <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock --watch
 ```
 
 **When Bot PR Appears**:
-1. **Verify PR Content**:
-   - Version matches release
-   - SHA256 matches tracking issue
-   - Dependencies updated correctly
 
-2. **Monitor CI** (15-30 minutes):
+1. **Review Tracking Issue for Dependency Changes**:
+   - Open the tracking issue created during release
+   - Check the dependency comparison table
+   - Note any ⚠️ markers indicating changes
+
+2. **Update Bot PR if Dependencies Changed**:
+   ```bash
+   # Checkout bot's PR branch
+   gh pr checkout <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock
+
+   # Edit recipe/meta.yaml requirements.run section
+   # (Copy changes from tracking issue comparison table)
+
+   # Commit and push
+   git add recipe/meta.yaml
+   git commit -m "Update runtime dependencies to match PyPI
+
+   See tracking issue for full dependency diff."
+   git push
+   ```
+
+3. **Monitor CI** (15-30 minutes):
+   ```bash
+   gh pr checks <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock --watch
+   ```
    - Linux (x86_64, aarch64, ppc64le)
    - macOS (x86_64, arm64)
    - Windows (x86_64)
 
-3. **Review/Merge**:
+4. **Review/Merge**:
    - If CI passes: Bot may auto-merge, or add comment `@conda-forge-admin, please rerender` to trigger
-   - If CI fails: Investigate failures, may need manual feedstock PR
+   - If CI fails: Investigate failures, may need additional feedstock updates
 
-4. **Close Related Issues**:
-   - Update tracking issue with PR link
+5. **Close Related Issues**:
+   - Update tracking issue with PR link and merge status
    - Close any related feedstock issues resolved by update
 
 ### 11. Verify Conda Package Availability
