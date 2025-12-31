@@ -260,3 +260,56 @@ def test_moyal_function_mathematical_properties():
     except (ValueError, TypeError, OverflowError):
         # The current implementation may have numerical issues
         pytest.skip("Moyal function implementation has numerical issues")
+
+
+# ============================================================================
+# Phase 6 Coverage Tests
+# ============================================================================
+
+
+class TestMoyalP0Phase6:
+    """Phase 6 tests for Moyal p0 edge cases."""
+
+    def test_p0_estimation_with_moyal_distribution(self):
+        """Verify p0 estimates for true Moyal-like data."""
+        mu = 2.0
+        sigma = 0.5
+        A = 10.0
+        x = np.linspace(0, 10, 100)
+        # Moyal distribution approximation
+        center = x - mu
+        ms_sq = (center / sigma) ** 2
+        arg0 = 0.5 * (ms_sq - np.exp(ms_sq))
+        y = A * np.exp(arg0)
+
+        obj = Moyal(x, y)
+        p0 = obj.p0
+
+        assert len(p0) == 3  # mu, sigma, A
+        assert all(np.isfinite(p0))
+
+
+class TestMoyalMakeFitPhase6:
+    """Phase 6 tests for Moyal fitting."""
+
+    def test_make_fit_with_moyal_data(self):
+        """Verify successful fit to Moyal distribution data."""
+        mu = 3.0
+        sigma = 0.8
+        A = 5.0
+        x = np.linspace(0, 10, 50)
+        center = x - mu
+        ms_sq = (center / sigma) ** 2
+        arg0 = 0.5 * (ms_sq - np.exp(ms_sq))
+        y = A * np.exp(arg0)
+        np.random.seed(42)
+        y += np.random.normal(0, 0.1, len(y))
+        y = np.maximum(y, 0.01)
+
+        obj = Moyal(x, y)
+        obj.make_fit()
+
+        assert hasattr(obj, "_fit_result")
+        assert "mu" in obj.popt
+        assert "sigma" in obj.popt
+        assert "A" in obj.popt

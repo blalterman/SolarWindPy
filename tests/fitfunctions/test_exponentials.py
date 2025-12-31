@@ -345,3 +345,53 @@ def test_edge_case_single_parameter_bounds(cls):
         result = obj.function(x, 100.0, 1.0)  # Very fast decay
         assert result[0] == 1.0  # At x=0
         assert result[-1] < 1e-40  # At x=2, essentially zero
+
+
+# ============================================================================
+# Phase 6 Coverage Tests
+# ============================================================================
+
+
+class TestExponentialP0Phase6:
+    """Phase 6 tests for exponential p0 estimation."""
+
+    def test_exponential_p0_valid_decay(self):
+        """Verify p0 estimates for clean exponential decay."""
+        x = np.linspace(0, 5, 50)
+        y = 10.0 * np.exp(-0.5 * x)
+
+        obj = Exponential(x, y)
+        p0 = obj.p0
+
+        assert len(p0) == 2  # c, A
+        assert all(np.isfinite(p0))
+
+
+class TestExponentialPlusCPhase6:
+    """Phase 6 tests for ExponentialPlusC p0 estimation."""
+
+    def test_exponential_plus_c_p0_valid(self):
+        """Verify p0 estimates for exponential + constant data."""
+        x = np.linspace(0, 5, 50)
+        y = 10.0 * np.exp(-0.5 * x) + 2.0
+
+        obj = ExponentialPlusC(x, y)
+        p0 = obj.p0
+
+        assert len(p0) == 3  # c, A, d
+        assert all(np.isfinite(p0))
+
+
+class TestExponentialTeXPhase6:
+    """Phase 6 tests for TeX function validation."""
+
+    def test_all_tex_functions_valid(self):
+        """Verify all exponential TeX functions are valid strings."""
+        x = np.linspace(0, 5, 20)
+        y = np.exp(-x)
+
+        for cls in [Exponential, ExponentialPlusC, ExponentialCDF]:
+            obj = cls(x, y)
+            tex = obj.TeX_function
+            assert isinstance(tex, str)
+            assert len(tex) > 0
