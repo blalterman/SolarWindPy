@@ -18,8 +18,7 @@ Comprehensive automation system for SolarWindPy development workflow.
 
 ### PreToolUse Hooks
 - **Bash Tool**: Git workflow validation for git/gh commands
-- **Edit/MultiEdit/Write Tools**: Physics validation before file changes
-- **Timeout**: 45 seconds for physics validation
+- **Timeout**: 15 seconds
 
 ### PostToolUse Hooks
 - **Trigger**: After Edit/MultiEdit/Write operations

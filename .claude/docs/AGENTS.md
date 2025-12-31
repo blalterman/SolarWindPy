@@ -30,7 +30,7 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 
 ### TestEngineer
 - **Purpose**: Test coverage and quality assurance
-- **Capabilities**: Physics-specific testing, scientific validation
+- **Capabilities**: Test design, coverage analysis, edge case identification
 - **Critical**: ≥95% coverage requirement
 - **Usage**: `"Use TestEngineer to design physics-specific test strategies"`
 

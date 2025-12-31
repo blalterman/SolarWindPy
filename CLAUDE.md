@@ -83,7 +83,7 @@ Analyze prompts for opportunities in all areas:
    - Include data format expectations (MultiIndex structure)
 
 3. **SolarWindPy Integration**
-   - Suggest appropriate agent selection (PhysicsValidator, DataFrameArchitect, etc.)
+   - Suggest appropriate agent selection (DataFrameArchitect, TestEngineer, etc.)
    - Reference hooks, workflows, and automation
    - Link to project conventions (≥95% coverage, SI units, etc.)
 
@@ -132,9 +132,7 @@ Proceed with:
 | Task Type | Agent | Critical Requirement |
 |-----------|-------|---------------------|
 | Planning | UnifiedPlanCoordinator | MUST execute gh-plan-*.sh scripts directly |
-| Physics | PhysicsValidator | Verify units, constraints, thermal speed |
 | Data | DataFrameArchitect | MultiIndex (M/C/S), use .xs() for views |
-| Numerical | NumericalStabilityGuard | Edge cases, precision |
 | Plotting | PlottingEngineer | Publication quality, matplotlib |
 | Fitting | FitFunctionSpecialist | Statistical analysis |
 | Testing | TestEngineer | ≥95% coverage requirement |

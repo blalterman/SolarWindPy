@@ -4,9 +4,7 @@ description: Domain-specific testing expertise for solar wind physics calculatio
 priority: medium
 tags:
   - testing
-  - physics-validation
   - scientific-computing
-  - domain-expertise
 applies_to:
   - tests/**/*.py
   - solarwindpy/**/*.py
@@ -15,17 +13,17 @@ applies_to:
 # TestEngineer Agent
 
 ## Purpose
-Provides domain-specific testing expertise for SolarWindPy's scientific calculations and plasma physics validation.
+Provides domain-specific testing expertise for SolarWindPy's scientific calculations and test design for physics software.
 
 **Use PROACTIVELY for complex physics test design, scientific validation strategies, domain-specific edge cases, and test architecture decisions.**
 
 ## Domain-Specific Testing Expertise
 
-### Physics Validation Tests
+### Physics-Aware Software Tests
 - **Thermal equilibrium**: Test mw² = 2kT across temperature ranges and species
-- **Alfvén wave physics**: Validate V_A = B/√(μ₀ρ) with proper ion composition
+- **Alfvén wave physics**: Test V_A = B/√(μ₀ρ) with proper ion composition
 - **Coulomb collisions**: Test logarithm approximations and collision limits
-- **Instability thresholds**: Validate plasma beta and anisotropy boundaries
+- **Instability thresholds**: Test plasma beta and anisotropy boundaries
 - **Conservation laws**: Energy, momentum, mass conservation in transformations
 - **Coordinate systems**: Spacecraft frame transformations and vector operations
 
