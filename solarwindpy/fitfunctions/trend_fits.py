@@ -204,12 +204,12 @@ class TrendFit(object):
         processes, which incurs serialization overhead. This overhead typically
         outweighs parallelization benefits for simple fits. Parallelization is
         most beneficial for:
-        
-        - Complex fitting functions with expensive computations  
+
+        - Complex fitting functions with expensive computations
         - Large datasets (>1000 points per fit)
         - Batch processing of many fits (>50)
         - Systems with many CPU cores and sufficient memory
-        
+
         For typical Gaussian fits on moderate data, sequential execution (n_jobs=1)
         may be faster due to Python's GIL and serialization overhead.
 
@@ -217,6 +217,12 @@ class TrendFit(object):
         """
         # Successful fits return None, which pandas treats as NaN.
         return_exception = kwargs.pop("return_exception", True)
+
+        # Filter out parallelization parameters from kwargs before passing to make_fit()
+        # These are specific to make_1dfits() and should not be passed to individual fits
+        fit_kwargs = {
+            k: v for k, v in kwargs.items() if k not in ["n_jobs", "verbose", "backend"]
+        }
 
         # Check if parallel execution is requested and possible
         if n_jobs != 1 and len(self.ffuncs) > 1:
@@ -230,11 +236,15 @@ class TrendFit(object):
                 n_jobs = 1
             else:
                 # Parallel execution - return fitted objects to preserve TrendFit architecture
-                def fit_single_from_data(column_name, x_data, y_data, ffunc_class, ffunc_kwargs):
+                def fit_single_from_data(
+                    column_name, x_data, y_data, ffunc_class, ffunc_kwargs
+                ):
                     """Create and fit FitFunction, return both result and fitted object."""
                     # Create new FitFunction instance in worker process
                     ffunc = ffunc_class(x_data, y_data, **ffunc_kwargs)
-                    fit_result = ffunc.make_fit(return_exception=return_exception, **kwargs)
+                    fit_result = ffunc.make_fit(
+                        return_exception=return_exception, **fit_kwargs
+                    )
                     # Return tuple: (fit_result, fitted_object)
                     return (fit_result, ffunc)
 
@@ -246,21 +256,29 @@ class TrendFit(object):
                     ffunc_class = type(ffunc)
                     # Extract constructor kwargs from ffunc (constraints, etc.)
                     ffunc_kwargs = {
-                        'xmin': getattr(ffunc, 'xmin', None),
-                        'xmax': getattr(ffunc, 'xmax', None),
-                        'ymin': getattr(ffunc, 'ymin', None),
-                        'ymax': getattr(ffunc, 'ymax', None),
-                        'xoutside': getattr(ffunc, 'xoutside', None),
-                        'youtside': getattr(ffunc, 'youtside', None),
+                        "xmin": getattr(ffunc, "xmin", None),
+                        "xmax": getattr(ffunc, "xmax", None),
+                        "ymin": getattr(ffunc, "ymin", None),
+                        "ymax": getattr(ffunc, "ymax", None),
+                        "xoutside": getattr(ffunc, "xoutside", None),
+                        "youtside": getattr(ffunc, "youtside", None),
                     }
                     # Remove None values
-                    ffunc_kwargs = {k: v for k, v in ffunc_kwargs.items() if v is not None}
-                    
-                    fit_tasks.append((col_name, x_data, y_data, ffunc_class, ffunc_kwargs))
+                    ffunc_kwargs = {
+                        k: v for k, v in ffunc_kwargs.items() if v is not None
+                    }
+
+                    fit_tasks.append(
+                        (col_name, x_data, y_data, ffunc_class, ffunc_kwargs)
+                    )
 
                 # Run fits in parallel and get both results and fitted objects
-                parallel_output = Parallel(n_jobs=n_jobs, verbose=verbose, backend=backend)(
-                    delayed(fit_single_from_data)(col_name, x_data, y_data, ffunc_class, ffunc_kwargs)
+                parallel_output = Parallel(
+                    n_jobs=n_jobs, verbose=verbose, backend=backend
+                )(
+                    delayed(fit_single_from_data)(
+                        col_name, x_data, y_data, ffunc_class, ffunc_kwargs
+                    )
                     for col_name, x_data, y_data, ffunc_class, ffunc_kwargs in fit_tasks
                 )
 
@@ -278,7 +296,7 @@ class TrendFit(object):
         if n_jobs == 1:
             # Original sequential implementation (unchanged)
             fit_success = self.ffuncs.apply(
-                lambda x: x.make_fit(return_exception=return_exception, **kwargs)
+                lambda x: x.make_fit(return_exception=return_exception, **fit_kwargs)
             )
 
         # Handle failed fits (original code, unchanged)
@@ -342,7 +360,6 @@ class TrendFit(object):
 
         axes = pd.DataFrame.from_dict(axes, orient="index")
         return axes
-
 
     def make_trend_func(self, **kwargs):
         r"""Make trend function.
@@ -528,7 +545,6 @@ class TrendFit(object):
     def set_agged(self, new):
         assert isinstance(new, pd.DataFrame)
         self._agged = new
-
 
     def set_fitfunctions(self, ffunc1d, trendfunc):
         if ffunc1d is None:
