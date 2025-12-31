@@ -38,19 +38,7 @@ class Gaussian(FitFunction):
         mean = (x * y).sum() / y.sum()
         std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if e.message.startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
+        peak = y.max()
 
         p0 = [mean, std, peak]
         return p0
@@ -104,19 +92,7 @@ class GaussianNormalized(FitFunction):
         mean = (x * y).sum() / y.sum()
         std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if e.message.startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
+        peak = y.max()
 
         n = peak * std * np.sqrt(2 * np.pi)
         p0 = [mean, std, n]
@@ -186,19 +162,7 @@ class GaussianLn(FitFunction):
         mean = (x * y).sum() / y.sum()
         std = ((x - mean) ** 2.0 * y).sum() / y.sum()
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if e.message.startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
+        peak = y.max()
 
         p0 = [mean, std, peak]
         p0 = [np.log(x) for x in p0]
