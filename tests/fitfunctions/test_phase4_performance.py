@@ -414,3 +414,233 @@ class TestPhase4Integration:
         ), "Percentage residuals should match fitted residuals"
 
         print("✓ All Phase 4 features working correctly")
+
+
+# ============================================================================
+# Phase 6 Coverage Tests for TrendFit
+# ============================================================================
+
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend for testing
+import matplotlib.pyplot as plt
+
+
+class TestMakeTrendFuncEdgeCases:
+    """Test make_trend_func edge cases (lines 378-379, 385)."""
+
+    def setup_method(self):
+        """Create test data with standard numeric index (not IntervalIndex)."""
+        np.random.seed(42)
+        x = np.linspace(0, 10, 50)
+        # Create data with numeric columns (not IntervalIndex)
+        self.data_numeric = pd.DataFrame(
+            {
+                i: 5 * np.exp(-((x - 5) ** 2) / 2)
+                + np.random.normal(0, 0.1, 50)
+                for i in range(5)
+            },
+            index=x,
+        )
+
+        # Create data with IntervalIndex columns
+        intervals = pd.IntervalIndex.from_breaks(range(6))
+        self.data_interval = pd.DataFrame(
+            {
+                intervals[i]: 5 * np.exp(-((x - 5) ** 2) / 2)
+                + np.random.normal(0, 0.1, 50)
+                for i in range(5)
+            },
+            index=x,
+        )
+
+    def test_make_trend_func_with_non_interval_index(self):
+        """Test make_trend_func handles non-IntervalIndex popt (lines 378-379)."""
+        tf = TrendFit(self.data_numeric, Line, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+
+        # popt_1d should have numeric index, not IntervalIndex
+        # This triggers the TypeError branch at lines 378-379
+        tf.make_trend_func()
+
+        # Verify trend_func was created successfully
+        assert hasattr(tf, '_trend_func')
+        assert tf.trend_func is not None
+
+    def test_make_trend_func_weights_error(self):
+        """Test make_trend_func raises ValueError when weights passed (line 385)."""
+        tf = TrendFit(self.data_interval, Line, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+
+        # Passing weights should raise ValueError
+        with pytest.raises(ValueError, match="Weights are handled by `wkey1d`"):
+            tf.make_trend_func(weights=np.ones(len(tf.popt_1d)))
+
+
+class TestPlotAllPopt1DEdgeCases:
+    """Test plot_all_popt_1d edge cases (lines 411, 419-425, 428, 439-466)."""
+
+    def setup_method(self):
+        """Create test data with IntervalIndex columns for proper trend fit."""
+        np.random.seed(42)
+        x = np.linspace(0, 10, 50)
+
+        # Create data with IntervalIndex columns
+        intervals = pd.IntervalIndex.from_breaks(range(6))
+        self.data = pd.DataFrame(
+            {
+                intervals[i]: 5 * np.exp(-((x - 5) ** 2) / 2)
+                + np.random.normal(0, 0.1, 50)
+                for i in range(5)
+            },
+            index=x,
+        )
+
+        # Set up complete TrendFit with trend_func
+        self.tf = TrendFit(self.data, Line, ffunc1d=Gaussian)
+        self.tf.make_ffunc1ds()
+        self.tf.make_1dfits()
+        self.tf.make_trend_func()
+        self.tf.trend_func.make_fit()
+
+    def test_plot_all_popt_1d_ax_none(self):
+        """Test plot_all_popt_1d creates axes when ax is None (line 411)."""
+        # When ax is None, should call subplots() to create figure and axes
+        plotted = self.tf.plot_all_popt_1d(ax=None, plot_window=False)
+
+        # Should return valid plotted objects
+        assert plotted is not None
+        plt.close('all')
+
+    def test_plot_all_popt_1d_only_in_trend_fit(self):
+        """Test only_plot_data_in_trend_fit=True path (lines 419-425)."""
+        plotted = self.tf.plot_all_popt_1d(
+            ax=None,
+            only_plot_data_in_trend_fit=True,
+            plot_window=False
+        )
+
+        # Should complete without error
+        assert plotted is not None
+        plt.close('all')
+
+    def test_plot_all_popt_1d_with_plot_window(self):
+        """Test plot_window=True path (lines 439-466)."""
+        # Default is plot_window=True
+        plotted = self.tf.plot_all_popt_1d(ax=None, plot_window=True)
+
+        # Should return tuple (line, window)
+        assert isinstance(plotted, tuple)
+        assert len(plotted) == 2
+        plt.close('all')
+
+    def test_plot_all_popt_1d_plot_window_wkey_none_error(self):
+        """Test plot_window=True raises error when wkey is None (lines 439-442)."""
+        # Pass wkey=None to trigger the NotImplementedError
+        with pytest.raises(NotImplementedError, match="`wkey` must be able to index"):
+            self.tf.plot_all_popt_1d(ax=None, plot_window=True, wkey=None)
+        plt.close('all')
+
+
+class TestTrendLogxPaths:
+    """Test trend_logx=True paths (lines 428, 503, 520)."""
+
+    def setup_method(self):
+        """Create test data for trend_logx testing."""
+        np.random.seed(42)
+        x = np.linspace(0, 10, 50)
+
+        # Create data with IntervalIndex columns
+        intervals = pd.IntervalIndex.from_breaks(range(6))
+        self.data = pd.DataFrame(
+            {
+                intervals[i]: 5 * np.exp(-((x - 5) ** 2) / 2)
+                + np.random.normal(0, 0.1, 50)
+                for i in range(5)
+            },
+            index=x,
+        )
+
+    def test_plot_all_popt_1d_trend_logx(self):
+        """Test plot_all_popt_1d with trend_logx=True (line 428)."""
+        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+        tf.make_trend_func()
+        tf.trend_func.make_fit()
+
+        # Verify trend_logx is True
+        assert tf.trend_logx is True
+
+        # Plot with trend_logx=True should apply 10**x transformation
+        plotted = tf.plot_all_popt_1d(ax=None, plot_window=False)
+
+        assert plotted is not None
+        plt.close('all')
+
+    def test_plot_trend_fit_resid_trend_logx(self):
+        """Test plot_trend_fit_resid with trend_logx=True (line 503)."""
+        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+        tf.make_trend_func()
+        tf.trend_func.make_fit()
+
+        # This should trigger line 503: rax.set_xscale("log")
+        hax, rax = tf.plot_trend_fit_resid()
+
+        assert hax is not None
+        assert rax is not None
+        # rax should have log scale on x-axis
+        assert rax.get_xscale() == 'log'
+        plt.close('all')
+
+    def test_plot_trend_and_resid_on_ffuncs_trend_logx(self):
+        """Test plot_trend_and_resid_on_ffuncs with trend_logx=True (line 520)."""
+        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+        tf.make_trend_func()
+        tf.trend_func.make_fit()
+
+        # This should trigger line 520: rax.set_xscale("log")
+        hax, rax = tf.plot_trend_and_resid_on_ffuncs()
+
+        assert hax is not None
+        assert rax is not None
+        # rax should have log scale on x-axis
+        assert rax.get_xscale() == 'log'
+        plt.close('all')
+
+
+class TestNumericIndexWorkflow:
+    """Test workflow with numeric (non-IntervalIndex) columns."""
+
+    def test_numeric_index_workflow(self):
+        """Test workflow with numeric (non-IntervalIndex) columns."""
+        np.random.seed(42)
+        x = np.linspace(0, 10, 50)
+
+        # Numeric column names trigger TypeError branch
+        data = pd.DataFrame(
+            {
+                i: 5 * np.exp(-((x - 5) ** 2) / 2)
+                + np.random.normal(0, 0.1, 50)
+                for i in range(5)
+            },
+            index=x,
+        )
+
+        tf = TrendFit(data, Line, ffunc1d=Gaussian)
+        tf.make_ffunc1ds()
+        tf.make_1dfits()
+
+        # This triggers the TypeError handling at lines 378-379
+        tf.make_trend_func()
+
+        assert tf.trend_func is not None
+        tf.trend_func.make_fit()
+
+        # Verify fit completed
+        assert hasattr(tf.trend_func, 'popt')
