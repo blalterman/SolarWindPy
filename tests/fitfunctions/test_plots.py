@@ -435,9 +435,7 @@ class TestPlotRawUsedFitResidWithAxes:
 
         fig, (hax, rax) = plt.subplots(2, 1, figsize=(6, 4))
 
-        result_hax, result_rax = plot.plot_raw_used_fit_resid(
-            fit_resid_axes=(hax, rax)
-        )
+        result_hax, result_rax = plot.plot_raw_used_fit_resid(fit_resid_axes=(hax, rax))
 
         assert result_hax is hax
         assert result_rax is rax

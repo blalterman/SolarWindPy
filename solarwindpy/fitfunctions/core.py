@@ -76,8 +76,6 @@ class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
     pass
 
 
-
-
 class FitFunction(ABC, metaclass=FitFunctionMeta):
     r"""Assuming that you don't want special formatting, call order is:
 

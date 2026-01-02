@@ -202,16 +202,16 @@ class FFPlot(object):
     def _get_default_plot_style(self, plot_type):
         """Get default style parameters for different plot types."""
         styles = {
-            'raw': {'color': 'k', 'label': r'$\mathrm{Obs}$'},
-            'used': {
-                'color': 'forestgreen',
-                'marker': 'P',
-                'markerfacecolor': 'none',
-                'markersize': 8,
-                'label': r'$\mathrm{Used}$'
+            "raw": {"color": "k", "label": r"$\mathrm{Obs}$"},
+            "used": {
+                "color": "forestgreen",
+                "marker": "P",
+                "markerfacecolor": "none",
+                "markersize": 8,
+                "label": r"$\mathrm{Used}$",
             },
-            'fit': {'color': 'tab:red', 'linewidth': 3, 'label': r'$\mathrm{Fit}$'},
-            'residuals': {'color': 'k', 'marker': 'o', 'markerfacecolor': 'none'}
+            "fit": {"color": "tab:red", "linewidth": 3, "label": r"$\mathrm{Fit}$"},
+            "residuals": {"color": "k", "marker": "o", "markerfacecolor": "none"},
         }
         return styles.get(plot_type, {})
 
@@ -233,7 +233,7 @@ class FFPlot(object):
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
 
         # Apply default style for raw plots
-        defaults = self._get_default_plot_style('raw')
+        defaults = self._get_default_plot_style("raw")
         color = kwargs.pop("color", defaults.get("color", "k"))
         label = kwargs.pop("label", defaults.get("label", r"$\mathrm{Obs}$"))
 
@@ -734,7 +734,6 @@ class FFPlot(object):
             r = 100.0 * (r / y_fit_used)
 
         return r
-
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels.

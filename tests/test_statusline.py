@@ -96,10 +96,7 @@ class TestConversationTokenUsage:
     def test_token_usage_fresh_session(self):
         """Test token display with no messages yet (fresh session)."""
         data = {
-            "context_window": {
-                "context_window_size": 200_000,
-                "current_usage": None
-            }
+            "context_window": {"context_window_size": 200_000, "current_usage": None}
         }
         result = statusline.get_conversation_token_usage(data)
         assert result == "0/200k"
@@ -113,8 +110,8 @@ class TestConversationTokenUsage:
                     "input_tokens": 30000,
                     "output_tokens": 5000,
                     "cache_creation_input_tokens": 10000,
-                    "cache_read_input_tokens": 15000
-                }
+                    "cache_read_input_tokens": 15000,
+                },
             }
         }
         # Total = 30000 + 10000 + 15000 = 55000 tokens = 55k
@@ -129,8 +126,8 @@ class TestConversationTokenUsage:
                 "current_usage": {
                     "input_tokens": 50000,
                     "cache_creation_input_tokens": 0,
-                    "cache_read_input_tokens": 0
-                }
+                    "cache_read_input_tokens": 0,
+                },
             }
         }
         with patch("sys.stdout.isatty", return_value=False):
@@ -145,8 +142,8 @@ class TestConversationTokenUsage:
                 "current_usage": {
                     "input_tokens": 64000,
                     "cache_creation_input_tokens": 0,
-                    "cache_read_input_tokens": 0
-                }
+                    "cache_read_input_tokens": 0,
+                },
             }
         }
         result = statusline.get_conversation_token_usage(data)
@@ -175,7 +172,7 @@ class TestCacheEfficiency:
                 "current_usage": {
                     "input_tokens": 10000,
                     "cache_creation_input_tokens": 5000,
-                    "cache_read_input_tokens": 0
+                    "cache_read_input_tokens": 0,
                 }
             }
         }
@@ -189,7 +186,7 @@ class TestCacheEfficiency:
                 "current_usage": {
                     "input_tokens": 95000,
                     "cache_creation_input_tokens": 0,
-                    "cache_read_input_tokens": 5000  # 5% hit rate
+                    "cache_read_input_tokens": 5000,  # 5% hit rate
                 }
             }
         }
@@ -203,7 +200,7 @@ class TestCacheEfficiency:
                 "current_usage": {
                     "input_tokens": 30000,
                     "cache_creation_input_tokens": 10000,
-                    "cache_read_input_tokens": 15000  # 27% hit rate
+                    "cache_read_input_tokens": 15000,  # 27% hit rate
                 }
             }
         }
@@ -218,7 +215,7 @@ class TestCacheEfficiency:
                 "current_usage": {
                     "input_tokens": 20000,
                     "cache_creation_input_tokens": 10000,
-                    "cache_read_input_tokens": 30000  # 50% hit rate
+                    "cache_read_input_tokens": 30000,  # 50% hit rate
                 }
             }
         }
@@ -232,45 +229,25 @@ class TestEditActivity:
 
     def test_edit_activity_none_when_no_edits(self):
         """Test returns None when no edits have been made."""
-        data = {
-            "cost": {
-                "total_lines_added": 0,
-                "total_lines_removed": 0
-            }
-        }
+        data = {"cost": {"total_lines_added": 0, "total_lines_removed": 0}}
         result = statusline.get_edit_activity(data)
         assert result is None
 
     def test_edit_activity_additions(self):
         """Test display for net additions."""
-        data = {
-            "cost": {
-                "total_lines_added": 156,
-                "total_lines_removed": 23
-            }
-        }
+        data = {"cost": {"total_lines_added": 156, "total_lines_removed": 23}}
         result = statusline.get_edit_activity(data)
         assert "✏️ +156/-23" in result
 
     def test_edit_activity_deletions(self):
         """Test display for net deletions."""
-        data = {
-            "cost": {
-                "total_lines_added": 20,
-                "total_lines_removed": 100
-            }
-        }
+        data = {"cost": {"total_lines_added": 20, "total_lines_removed": 100}}
         result = statusline.get_edit_activity(data)
         assert "✏️ +20/-100" in result
 
     def test_edit_activity_large_additions(self):
         """Test display for significant additions (>100 net)."""
-        data = {
-            "cost": {
-                "total_lines_added": 250,
-                "total_lines_removed": 10
-            }
-        }
+        data = {"cost": {"total_lines_added": 250, "total_lines_removed": 10}}
         result = statusline.get_edit_activity(data)
         assert "✏️ +250/-10" in result
 
@@ -287,10 +264,7 @@ class TestModelDetection:
     def test_model_name_sonnet(self):
         """Test Sonnet model (no color)."""
         data = {
-            "model": {
-                "id": "claude-sonnet-4-20250514",
-                "display_name": "Sonnet 4.5"
-            }
+            "model": {"id": "claude-sonnet-4-20250514", "display_name": "Sonnet 4.5"}
         }
         with patch("sys.stdout.isatty", return_value=False):
             result = statusline.get_model_name(data)
@@ -298,23 +272,13 @@ class TestModelDetection:
 
     def test_model_name_haiku(self):
         """Test Haiku model (yellow)."""
-        data = {
-            "model": {
-                "id": "claude-haiku-4",
-                "display_name": "Haiku"
-            }
-        }
+        data = {"model": {"id": "claude-haiku-4", "display_name": "Haiku"}}
         result = statusline.get_model_name(data)
         assert "Haiku" in result
 
     def test_model_name_opus(self):
         """Test Opus model (green)."""
-        data = {
-            "model": {
-                "id": "claude-opus-4-5",
-                "display_name": "Opus 4.5"
-            }
-        }
+        data = {"model": {"id": "claude-opus-4-5", "display_name": "Opus 4.5"}}
         result = statusline.get_model_name(data)
         assert "Opus 4.5" in result
 
@@ -325,24 +289,21 @@ class TestStatusLineIntegration:
     def test_create_status_line_complete(self):
         """Test complete status line with all new features."""
         data = {
-            "model": {
-                "id": "claude-sonnet-4-20250514",
-                "display_name": "Sonnet 4.5"
-            },
+            "model": {"id": "claude-sonnet-4-20250514", "display_name": "Sonnet 4.5"},
             "workspace": {"current_dir": "/Users/test/SolarWindPy-2"},
             "context_window": {
                 "context_window_size": 200_000,
                 "current_usage": {
                     "input_tokens": 30000,
                     "cache_creation_input_tokens": 10000,
-                    "cache_read_input_tokens": 15000
-                }
+                    "cache_read_input_tokens": 15000,
+                },
             },
             "cost": {
                 "total_duration_ms": 3600000,  # 1 hour
                 "total_lines_added": 156,
-                "total_lines_removed": 23
-            }
+                "total_lines_removed": 23,
+            },
         }
 
         with (
@@ -373,15 +334,12 @@ class TestStatusLineIntegration:
         data = {
             "model": {"id": "claude-sonnet-4", "display_name": "Sonnet"},
             "workspace": {"current_dir": "/Users/test/project"},
-            "context_window": {
-                "context_window_size": 200_000,
-                "current_usage": None
-            },
+            "context_window": {"context_window_size": 200_000, "current_usage": None},
             "cost": {
                 "total_duration_ms": 0,
                 "total_lines_added": 0,
-                "total_lines_removed": 0
-            }
+                "total_lines_removed": 0,
+            },
         }
 
         with (

@@ -149,7 +149,6 @@ class GaussianLn(FitFunction):
 
             return coeff * np.exp(arg)
 
-
         return gaussian_ln
 
     @property

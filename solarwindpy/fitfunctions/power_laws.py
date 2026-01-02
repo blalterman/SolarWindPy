@@ -147,5 +147,3 @@ class PowerLawOffCenter(FitFunction):
     def TeX_function(self):
         TeX = r"f(x)=A (x-x_0)^b"
         return TeX
-
-
