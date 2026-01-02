@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../../../_static/documentation_options.js?v=549044f3"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -399,23 +399,6 @@
 
 
 
-<span class="c1"># def __huber(z):</span>
-<span class="c1">#     cost = np.array(z)</span>
-<span class="c1">#     mask = z &lt;= 1</span>
-<span class="c1">#     cost[~mask] = 2 * z[~mask]**0.5 - 1</span>
-<span class="c1">#     return cost</span>
-<span class="c1">#</span>
-<span class="c1"># def __soft_l1(z):</span>
-<span class="c1">#     t = 1 + z</span>
-<span class="c1">#     cost = 2 * (t**0.5 - 1)</span>
-<span class="c1">#     return cost</span>
-<span class="c1">#</span>
-<span class="c1"># _loss_fcns = {&quot;huber&quot;: __huber,</span>
-<span class="c1"># &quot;soft_l1&quot;: __soft_l1,</span>
-<span class="c1"># &quot;cauchy&quot;: np.log1p,</span>
-<span class="c1"># &quot;arctan&quot;: np.arctan}</span>
-
-
 <div class="viewcode-block" id="FitFunction">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FitFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FitFunctionMeta</span><span class="p">):</span>
@@ -540,9 +523,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the fitted model at ``x``.&quot;&quot;&quot;</span>
 
-        <span class="c1"># TODO</span>
-        <span class="c1"># Do you want to have this function accept optional kwarg parameters?</span>
-        <span class="c1"># It adds a layer of complexity, but could be helfpul.</span>
+        <span class="c1"># Design decision: Keep interface simple - __call__ evaluates the fitted</span>
+        <span class="c1"># function using stored parameters. For parameter overrides, users should</span>
+        <span class="c1"># call self.function(x, param1, param2, ...) directly.</span>
 
         <span class="c1"># Sort the parameter keywords into the proper order to pass to the</span>
         <span class="c1"># numerical function.</span>
@@ -762,32 +745,26 @@
         <span class="k">return</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_one_obs_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">):</span>
-        <span class="c1">#         mask = np.full_like(x, True, dtype=bool)</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build observation mask with in-place operations for efficiency.&quot;&quot;&quot;</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">xmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">xmin_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">xmin</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">xmin_mask</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">xmin</span>  <span class="c1"># In-place AND instead of creating xmin_mask</span>
 
         <span class="k">if</span> <span class="n">xmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">xmax_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xmax</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">xmax_mask</span>
+            <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">xmax</span>  <span class="c1"># In-place AND instead of creating xmax_mask</span>
 
         <span class="k">return</span> <span class="n">mask</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_outside_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">outside</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Take data outside of the range `outside[0]:outside[1]`.&quot;&quot;&quot;</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build outside mask with in-place operations for efficiency.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">outside</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
         <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">outside</span>
         <span class="k">assert</span> <span class="n">lower</span> <span class="o">&lt;</span> <span class="n">upper</span>
-        <span class="n">l_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">lower</span>
-        <span class="n">u_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">upper</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">l_mask</span> <span class="o">|</span> <span class="n">u_mask</span>
-
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">lower</span>
+        <span class="n">mask</span> <span class="o">|=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">upper</span>  <span class="c1"># In-place OR instead of creating separate u_mask</span>
         <span class="k">return</span> <span class="n">mask</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_argnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -857,22 +834,64 @@
 
 <div class="viewcode-block" id="FitFunction.residuals">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.core.html#solarwindpy.fitfunctions.core.FitFunction.residuals">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the fit residuals.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate fit residuals.</span>
 
-<span class="sd">        If pct, normalize by fit yvalues.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pct : bool, default=False</span>
+<span class="sd">            If True, return percentage residuals.</span>
+<span class="sd">        use_all : bool, default=False</span>
+<span class="sd">            If True, calculate residuals for all input data including</span>
+<span class="sd">            points excluded by constraints (xmin, xmax, etc.) passed</span>
+<span class="sd">            during initialization.</span>
+<span class="sd">            If False (default), calculate only for points used in fit.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            Residuals as observed - fitted.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; # Create FitFunction with constraints</span>
+<span class="sd">        &gt;&gt;&gt; ff = Gaussian(x, y, xmin=3, xmax=7)</span>
+<span class="sd">        &gt;&gt;&gt; ff.make_fit()</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Residuals for fitted region only</span>
+<span class="sd">        &gt;&gt;&gt; r_fit = ff.residuals()</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Residuals for all original data</span>
+<span class="sd">        &gt;&gt;&gt; r_all = ff.residuals(use_all=True)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Percentage residuals</span>
+<span class="sd">        &gt;&gt;&gt; r_pct = ff.residuals(pct=True)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Addresses TODO: &quot;calculate with all values...including those</span>
+<span class="sd">        excluded by set_extrema&quot; (though set_extrema doesn&#39;t exist -</span>
+<span class="sd">        constraints are passed in __init__).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">use_all</span><span class="p">:</span>
+            <span class="c1"># Use all original observations</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use only observations included in fit (default)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
 
-        <span class="c1"># TODO: calculate with all values</span>
-        <span class="c1"># Make it an option to calculate with either</span>
-        <span class="c1"># the values used in the fit or all the values,</span>
-        <span class="c1"># including those excluded by `set_extrema`.</span>
-
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
-        <span class="c1">#         r = self.fit_result.fun</span>
+        <span class="c1"># Calculate residuals (observed - fitted)</span>
+        <span class="n">fitted_values</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">fitted_values</span>
 
         <span class="k">if</span> <span class="n">pct</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="bp">self</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+            <span class="c1"># Avoid division by zero</span>
+            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">/</span> <span class="n">fitted_values</span><span class="p">)</span>
+                <span class="n">r</span><span class="p">[</span><span class="n">fitted_values</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="k">return</span> <span class="n">r</span></div>
 

@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../../../_static/documentation_options.js?v=549044f3"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -317,10 +317,19 @@
 
 <span class="c1"># import warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="c1"># Parallel processing support</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+    <span class="n">JOBLIB_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">JOBLIB_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">subplots</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
@@ -469,13 +478,146 @@
 
 <div class="viewcode-block" id="TrendFit.make_1dfits">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_1dfits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Removes bad fits from `ffuncs` and saves them in `bad_fits`.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_1dfits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute fits for all 1D functions, optionally in parallel.</span>
+
+<span class="sd">        Each FitFunction instance represents a single dataset to fit.</span>
+<span class="sd">        TrendFit creates many such instances (one per column), making</span>
+<span class="sd">        this ideal for parallelization.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_jobs : int, default=1</span>
+<span class="sd">            Number of parallel jobs:</span>
+<span class="sd">            - 1: Sequential execution (default, backward compatible)</span>
+<span class="sd">            - -1: Use all available CPU cores</span>
+<span class="sd">            - n&gt;1: Use n cores</span>
+<span class="sd">            Requires joblib: pip install joblib</span>
+<span class="sd">        verbose : int, default=0</span>
+<span class="sd">            Joblib verbosity level (0=silent, 10=progress)</span>
+<span class="sd">        backend : str, default=&#39;loky&#39;</span>
+<span class="sd">            Joblib backend (&#39;loky&#39;, &#39;threading&#39;, &#39;multiprocessing&#39;)</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Passed to each FitFunction.make_fit()</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; # TrendFit creates one FitFunction per column</span>
+<span class="sd">        &gt;&gt;&gt; tf = TrendFit(agg_data, Gaussian, ffunc1d=Gaussian)</span>
+<span class="sd">        &gt;&gt;&gt; tf.make_ffunc1ds()  # Creates instances</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Fit all instances sequentially (default)</span>
+<span class="sd">        &gt;&gt;&gt; tf.make_1dfits()</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Fit in parallel using all cores</span>
+<span class="sd">        &gt;&gt;&gt; tf.make_1dfits(n_jobs=-1)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # With progress display</span>
+<span class="sd">        &gt;&gt;&gt; tf.make_1dfits(n_jobs=-1, verbose=10)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Parallel execution returns complete fitted FitFunction objects from worker</span>
+<span class="sd">        processes, which incurs serialization overhead. This overhead typically</span>
+<span class="sd">        outweighs parallelization benefits for simple fits. Parallelization is</span>
+<span class="sd">        most beneficial for:</span>
+
+<span class="sd">        - Complex fitting functions with expensive computations</span>
+<span class="sd">        - Large datasets (&gt;1000 points per fit)</span>
+<span class="sd">        - Batch processing of many fits (&gt;50)</span>
+<span class="sd">        - Systems with many CPU cores and sufficient memory</span>
+
+<span class="sd">        For typical Gaussian fits on moderate data, sequential execution (n_jobs=1)</span>
+<span class="sd">        may be faster due to Python&#39;s GIL and serialization overhead.</span>
+
+<span class="sd">        Removes bad fits from `ffuncs` and saves them in `bad_fits`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Successful fits return None, which pandas treats as NaN.</span>
         <span class="n">return_exception</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;return_exception&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">fit_success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="p">)</span>
+
+        <span class="c1"># Filter out parallelization parameters from kwargs before passing to make_fit()</span>
+        <span class="c1"># These are specific to make_1dfits() and should not be passed to individual fits</span>
+        <span class="n">fit_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">,</span> <span class="s2">&quot;backend&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Check if parallel execution is requested and possible</span>
+        <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">JOBLIB_AVAILABLE</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;joblib not installed. Install with &#39;pip install joblib&#39; &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;for parallel processing of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="p">)</span><span class="si">}</span><span class="s2"> fits. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Falling back to sequential execution.&quot;</span><span class="p">,</span>
+                    <span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">n_jobs</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Parallel execution - return fitted objects to preserve TrendFit architecture</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">fit_single_from_data</span><span class="p">(</span>
+                    <span class="n">column_name</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">ffunc_class</span><span class="p">,</span> <span class="n">ffunc_kwargs</span>
+                <span class="p">):</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;Create and fit FitFunction, return both result and fitted object.&quot;&quot;&quot;</span>
+                    <span class="c1"># Create new FitFunction instance in worker process</span>
+                    <span class="n">ffunc</span> <span class="o">=</span> <span class="n">ffunc_class</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="o">**</span><span class="n">ffunc_kwargs</span><span class="p">)</span>
+                    <span class="n">fit_result</span> <span class="o">=</span> <span class="n">ffunc</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span>
+                        <span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span>
+                    <span class="p">)</span>
+                    <span class="c1"># Return tuple: (fit_result, fitted_object)</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">fit_result</span><span class="p">,</span> <span class="n">ffunc</span><span class="p">)</span>
+
+                <span class="c1"># Prepare minimal data for each fit</span>
+                <span class="n">fit_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">ffunc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">x_data</span> <span class="o">=</span> <span class="n">ffunc</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
+                    <span class="n">y_data</span> <span class="o">=</span> <span class="n">ffunc</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">y</span>
+                    <span class="n">ffunc_class</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">ffunc</span><span class="p">)</span>
+                    <span class="c1"># Extract constructor kwargs from ffunc (constraints, etc.)</span>
+                    <span class="n">ffunc_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;xmin&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;xmin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s2">&quot;xmax&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;xmax&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s2">&quot;ymin&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;ymin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s2">&quot;ymax&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;ymax&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s2">&quot;xoutside&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;xoutside&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s2">&quot;youtside&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ffunc</span><span class="p">,</span> <span class="s2">&quot;youtside&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                    <span class="p">}</span>
+                    <span class="c1"># Remove None values</span>
+                    <span class="n">ffunc_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ffunc_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="p">}</span>
+
+                    <span class="n">fit_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">ffunc_class</span><span class="p">,</span> <span class="n">ffunc_kwargs</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Run fits in parallel and get both results and fitted objects</span>
+                <span class="n">parallel_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+                    <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
+                <span class="p">)(</span>
+                    <span class="n">delayed</span><span class="p">(</span><span class="n">fit_single_from_data</span><span class="p">)(</span>
+                        <span class="n">col_name</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">ffunc_class</span><span class="p">,</span> <span class="n">ffunc_kwargs</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">ffunc_class</span><span class="p">,</span> <span class="n">ffunc_kwargs</span> <span class="ow">in</span> <span class="n">fit_tasks</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Separate results and fitted objects, update self.ffuncs with fitted objects</span>
+                <span class="n">fit_results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">fitted_ffunc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parallel_output</span><span class="p">):</span>
+                    <span class="n">fit_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                    <span class="c1"># CRITICAL: Replace original with fitted object to preserve TrendFit architecture</span>
+                    <span class="n">col_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitted_ffunc</span>
+
+                <span class="c1"># Convert to Series for bad fit handling</span>
+                <span class="n">fit_success</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">fit_results</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Original sequential implementation (unchanged)</span>
+            <span class="n">fit_success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Handle failed fits (original code, unchanged)</span>
         <span class="n">bad_idx</span> <span class="o">=</span> <span class="n">fit_success</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
         <span class="n">bad_fits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffuncs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bad_idx</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bad_fits</span> <span class="o">=</span> <span class="n">bad_fits</span>
@@ -540,14 +682,6 @@
         <span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">axes</span></div>
 
-
-    <span class="c1">#     def make_popt_frame(self):</span>
-    <span class="c1">#         popt = {}</span>
-    <span class="c1">#         for k, v in self.ffuncs.items():</span>
-    <span class="c1">#             popt[k] = v.popt</span>
-
-    <span class="c1">#         popt = pd.DataFrame.from_dict(popt, orient=&quot;index&quot;)</span>
-    <span class="c1">#         self._popt_1d = popt</span>
 
 <div class="viewcode-block" id="TrendFit.make_trend_func">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.make_trend_func">[docs]</a>
@@ -751,39 +885,6 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_agged</span> <span class="o">=</span> <span class="n">new</span></div>
 
-
-    <span class="c1">#     def set_labels(self, **kwargs):</span>
-    <span class="c1">#         r&quot;&quot;&quot;Set or update x, y, or z labels. Any label not specified in kwargs</span>
-    <span class="c1">#         is propagated from `self.labels.&lt;x, y, or z&gt;`.</span>
-    <span class="c1">#         &quot;&quot;&quot;</span>
-
-    <span class="c1">#         x = kwargs.pop(&quot;x&quot;, self.labels.x)</span>
-    <span class="c1">#         y = kwargs.pop(&quot;y&quot;, self.labels.y)</span>
-    <span class="c1">#         z = kwargs.pop(&quot;z&quot;, self.labels.z)</span>
-
-    <span class="c1">#         if len(kwargs.keys()):</span>
-    <span class="c1">#             extra = &quot;\n&quot;.join([&quot;{}: {}&quot;.format(k, v) for k, v in kwargs.items()])</span>
-    <span class="c1">#             raise KeyError(&quot;Unexpected kwarg\n{}&quot;.format(extra))</span>
-
-    <span class="c1">#         self._labels = core.AxesLabels(x, y, z)</span>
-
-    <span class="c1">#         # log = logging.getLogger()</span>
-    <span class="c1">#         try:</span>
-    <span class="c1">#             # Update ffunc1d labels</span>
-    <span class="c1">#             self.ffuncs.apply(lambda x: x.set_labels(x=y, y=z))</span>
-    <span class="c1">#         #             log.warning(&quot;Set ffunc1d labels {}&quot;.format(self.ffuncs.iloc[0].labels))</span>
-    <span class="c1">#         except AttributeError:</span>
-    <span class="c1">#             #             log.warning(&quot;Skipping setting ffunc 1d labels&quot;)</span>
-    <span class="c1">#             pass</span>
-
-    <span class="c1">#         try:</span>
-    <span class="c1">#             # Update trendfunc labels</span>
-    <span class="c1">#             self.trend_func.set_labels(x=x, y=y, z=z)</span>
-    <span class="c1">#         #             log.warning(&quot;Set trend_func labels {}&quot;.format(self.trend_func.labels))</span>
-
-    <span class="c1">#         except AttributeError:</span>
-    <span class="c1">#             #             log.warning(&quot;Skipping setting trend_func labels&quot;)</span>
-    <span class="c1">#             pass</span>
 
 <div class="viewcode-block" id="TrendFit.set_fitfunctions">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.trend_fits.html#solarwindpy.fitfunctions.trend_fits.TrendFit.set_fitfunctions">[docs]</a>

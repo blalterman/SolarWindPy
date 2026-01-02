@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.trend_fits module &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.trend_fits module &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../_static/documentation_options.js?v=549044f3"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -446,8 +446,54 @@ passing to the `FitFunction</cite> for fitting the trend.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">make_1dfits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.make_1dfits"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Removes bad fits from <cite>ffuncs</cite> and saves them in <cite>bad_fits</cite>.</p>
+<span class="sig-name descname"><span class="pre">make_1dfits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'loky'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/trend_fits.html#TrendFit.make_1dfits"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Execute fits for all 1D functions, optionally in parallel.</p>
+<p>Each FitFunction instance represents a single dataset to fit.
+TrendFit creates many such instances (one per column), making
+this ideal for parallelization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=1</em>) – Number of parallel jobs:
+- 1: Sequential execution (default, backward compatible)
+- -1: Use all available CPU cores
+- n&gt;1: Use n cores
+Requires joblib: pip install joblib</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=0</em>) – Joblib verbosity level (0=silent, 10=progress)</p></li>
+<li><p><strong>backend</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default='loky'</em>) – Joblib backend (‘loky’, ‘threading’, ‘multiprocessing’)</p></li>
+<li><p><strong>**kwargs</strong> – Passed to each FitFunction.make_fit()</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># TrendFit creates one FitFunction per column</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span> <span class="o">=</span> <span class="n">TrendFit</span><span class="p">(</span><span class="n">agg_data</span><span class="p">,</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">ffunc1d</span><span class="o">=</span><span class="n">Gaussian</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">make_ffunc1ds</span><span class="p">()</span>  <span class="c1"># Creates instances</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fit all instances sequentially (default)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">make_1dfits</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fit in parallel using all cores</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">make_1dfits</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># With progress display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tf</span><span class="o">.</span><span class="n">make_1dfits</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Parallel execution returns complete fitted FitFunction objects from worker
+processes, which incurs serialization overhead. This overhead typically
+outweighs parallelization benefits for simple fits. Parallelization is
+most beneficial for:</p>
+<ul class="simple">
+<li><p>Complex fitting functions with expensive computations</p></li>
+<li><p>Large datasets (&gt;1000 points per fit)</p></li>
+<li><p>Batch processing of many fits (&gt;50)</p></li>
+<li><p>Systems with many CPU cores and sufficient memory</p></li>
+</ul>
+<p>For typical Gaussian fits on moderate data, sequential execution (n_jobs=1)
+may be faster due to Python’s GIL and serialization overhead.</p>
+<p>Removes bad fits from <cite>ffuncs</cite> and saves them in <cite>bad_fits</cite>.</p>
 </dd></dl>
 
 <dl class="py method">

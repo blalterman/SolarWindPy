@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.moyal &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.moyal &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../../../_static/documentation_options.js?v=549044f3"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -370,19 +370,7 @@
         <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="c1">#         std = self.sigma</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">&quot;zero-size array to reduction operation maximum &quot;</span>
-                <span class="s2">&quot;which has no identity&quot;</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;There is no maximum of a zero-size array. &quot;</span>
-                    <span class="s2">&quot;Please check input data.&quot;</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">peak</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>

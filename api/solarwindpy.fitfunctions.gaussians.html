@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.gaussians module &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians module &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../_static/documentation_options.js?v=549044f3"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -525,14 +525,44 @@ treats weights as in <cite>curve_fit</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Calculate the fit residuals.</p>
-<p>If pct, normalize by fit yvalues.</p>
+<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Calculate fit residuals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pct</strong> – The description is missing.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pct</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, return percentage residuals.</p></li>
+<li><p><strong>use_all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, calculate residuals for all input data including
+points excluded by constraints (xmin, xmax, etc.) passed
+during initialization.
+If False (default), calculate only for points used in fit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Residuals as observed - fitted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create FitFunction with constraints</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for fitted region only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_fit</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for all original data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">use_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Percentage residuals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_pct</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Addresses TODO: “calculate with all values…including those
+excluded by set_extrema” (though set_extrema doesn’t exist -
+constraints are passed in __init__).</p>
 </dd></dl>
 
 <dl class="py property">
@@ -764,14 +794,44 @@ treats weights as in <cite>curve_fit</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Calculate the fit residuals.</p>
-<p>If pct, normalize by fit yvalues.</p>
+<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Calculate fit residuals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pct</strong> – The description is missing.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pct</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, return percentage residuals.</p></li>
+<li><p><strong>use_all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, calculate residuals for all input data including
+points excluded by constraints (xmin, xmax, etc.) passed
+during initialization.
+If False (default), calculate only for points used in fit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Residuals as observed - fitted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create FitFunction with constraints</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for fitted region only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_fit</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for all original data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">use_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Percentage residuals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_pct</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Addresses TODO: “calculate with all values…including those
+excluded by set_extrema” (though set_extrema doesn’t exist -
+constraints are passed in __init__).</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1043,14 +1103,44 @@ identify failed fits after the fact.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Calculate the fit residuals.</p>
-<p>If pct, normalize by fit yvalues.</p>
+<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Calculate fit residuals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pct</strong> – The description is missing.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pct</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, return percentage residuals.</p></li>
+<li><p><strong>use_all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, calculate residuals for all input data including
+points excluded by constraints (xmin, xmax, etc.) passed
+during initialization.
+If False (default), calculate only for points used in fit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Residuals as observed - fitted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create FitFunction with constraints</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for fitted region only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_fit</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for all original data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">use_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Percentage residuals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_pct</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Addresses TODO: “calculate with all values…including those
+excluded by set_extrema” (though set_extrema doesn’t exist -
+constraints are passed in __init__).</p>
 </dd></dl>
 
 <dl class="py property">

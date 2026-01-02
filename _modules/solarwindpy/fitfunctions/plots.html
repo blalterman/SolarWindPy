@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g53a95de62 documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+gd549013e0 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f54c680a"></script>
+      <script src="../../../_static/documentation_options.js?v=549044f3"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -515,6 +515,28 @@
 
         <span class="k">return</span> <span class="n">ax</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_or_create_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get existing axes or create new figure/axes if None provided.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_default_plot_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get default style parameters for different plot types.&quot;&quot;&quot;</span>
+        <span class="n">styles</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Obs}</span><span class="s2">$&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;used&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;forestgreen&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Used}</span><span class="s2">$&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;fit&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;tab:red&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Fit}</span><span class="s2">$&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;residuals&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">styles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="p">{})</span>
+
 <div class="viewcode-block" id="FFPlot.plot_raw">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_raw">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">edge_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -528,14 +550,16 @@
 <span class="sd">        edge_kwargs: None, dict</span>
 <span class="sd">            If not None, plot edges on the window using these kwargs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_or_create_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
         <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
 
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="o">.</span><span class="n">_alias_map</span><span class="p">)</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Obs}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Apply default style for raw plots</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_plot_style</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">))</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$\mathrm</span><span class="si">{Obs}</span><span class="s2">$&quot;</span><span class="p">))</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">x</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">y</span>
@@ -619,8 +643,7 @@
 <span class="sd">        Plot from :py:meth:`self.observations.used.x`,</span>
 <span class="sd">        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_or_create_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
         <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
 
@@ -733,8 +756,7 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.plot_fit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">annotate_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plot the fit.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_or_create_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">annotate_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">annotate_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -805,8 +827,7 @@
 <span class="sd">        ax: mpl.Axes.axis_subplot</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_or_create_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">raw_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">raw_kwargs</span> <span class="o">=</span> <span class="p">(</span>
@@ -1056,18 +1077,6 @@
 
         <span class="k">return</span> <span class="n">r</span></div>
 
-
-    <span class="c1">#     def robust_residuals(self, pct=False):</span>
-    <span class="c1">#         r&quot;&quot;&quot;Return the fit residuals.</span>
-    <span class="c1">#         If pct, normalize by fit yvalues.</span>
-    <span class="c1">#         &quot;&quot;&quot;</span>
-    <span class="c1">#         r = self._robust_residuals</span>
-    <span class="c1">#</span>
-    <span class="c1">#         if pct:</span>
-    <span class="c1">#             y_fit_used = self.y_fit[self.observations.tk_observed]</span>
-    <span class="c1">#             r = 100.0 * (r / y_fit_used)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         return r</span>
 
 <div class="viewcode-block" id="FFPlot.set_labels">
 <a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.plots.html#solarwindpy.fitfunctions.plots.FFPlot.set_labels">[docs]</a>
