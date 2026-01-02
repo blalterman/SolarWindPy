@@ -19,9 +19,10 @@ The Claude Settings Ecosystem transforms SolarWindPy's `.claude/settings.json` i
    - Performance-optimized execution with timeouts
 
 3. **Agent Routing System** (`.claude/agent-routing.json`)
-   - 8 domain-specific agents with intelligent pattern matching
+   - 5 domain-specific agents with intelligent pattern matching
    - File-based, keyword-based, and context-based routing
    - Priority system and handoff protocols
+   - Physics validation rules documented in `.claude/docs/code-style.md`
 
 4. **Workflow Automation** (`.claude/workflow-automation.json`)
    - File change analysis with automated triggers
@@ -61,14 +62,18 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 # Use UnifiedPlanCoordinator for planning
 "Use UnifiedPlanCoordinator to create implementation plan for dark mode"
 
-# Use PhysicsValidator for physics work
-"Use PhysicsValidator to verify thermal speed calculations in Ion class"
-
-# Use DataFrameArchitect for data optimization
+# Use DataFrameArchitect for physics and data work
+"Use DataFrameArchitect to verify thermal speed calculations in Ion class"
 "Use DataFrameArchitect to optimize MultiIndex operations in plasma.py"
 
 # Use PlottingEngineer for visualizations
 "Use PlottingEngineer to create publication-quality solar wind plots"
+
+# Use FitFunctionSpecialist for numerical work
+"Use FitFunctionSpecialist for curve fitting and numerical stability analysis"
+
+# Physics validation documented in code-style.md
+"Physics validation rules and conventions are in .claude/docs/code-style.md"
 ```
 
 ## Security Model
@@ -144,32 +149,33 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 
 ## Agent Routing
 
-### 8 Domain Specialists
+### 5 Domain Specialists
 
 1. **UnifiedPlanCoordinator** - Multi-step planning and coordination
-2. **PhysicsValidator** - Physics correctness and unit validation
-3. **DataFrameArchitect** - MultiIndex operations and pandas optimization
-4. **NumericalStabilityGuard** - Numerical validation and stability
-5. **PlottingEngineer** - Visualization and matplotlib expertise
-6. **FitFunctionSpecialist** - Curve fitting and statistical analysis
-7. **TestEngineer** - Test coverage and quality assurance
+2. **DataFrameArchitect** - MultiIndex operations, pandas optimization, and physics validation
+3. **FitFunctionSpecialist** - Curve fitting, statistical analysis, and numerical stability
+4. **PlottingEngineer** - Visualization and matplotlib expertise
+5. **TestEngineer** - Test coverage and quality assurance
 
 ### Routing Logic
 
 **File Patterns:**
-- `solarwindpy/core/*.py` → PhysicsValidator, DataFrameArchitect
+- `solarwindpy/core/*.py` → DataFrameArchitect
+- `solarwindpy/instabilities/*.py` → FitFunctionSpecialist
 - `solarwindpy/plotting/*.py` → PlottingEngineer
 - `tests/*.py` → TestEngineer
 
 **Keywords:**
 - "plan", "implement" → UnifiedPlanCoordinator
 - "plot", "visualization" → PlottingEngineer
-- "physics", "units" → PhysicsValidator
+- "physics", "units" → DataFrameArchitect
+- "numerical", "stability" → FitFunctionSpecialist
 
 **Context:**
 - Multi-step tasks → UnifiedPlanCoordinator
-- Physics calculations → PhysicsValidator
+- Physics calculations → DataFrameArchitect
 - Data optimization → DataFrameArchitect
+- Numerical analysis → FitFunctionSpecialist
 
 ## Workflow Automation
 
@@ -182,7 +188,8 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 
 **User Intent Detection:**
 - Planning keywords → UnifiedPlanCoordinator suggestion
-- Physics terms → PhysicsValidator suggestion  
+- Physics terms → DataFrameArchitect suggestion
+- Numerical/stability terms → FitFunctionSpecialist suggestion
 - Visualization terms → PlottingEngineer suggestion
 
 **Quality Gates:**

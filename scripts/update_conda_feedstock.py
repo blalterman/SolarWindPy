@@ -347,6 +347,61 @@ class CondaFeedstockUpdater:
             print(f"❌ Failed to update meta.yaml: {e}")
             return False
     
+    def _get_dependency_comparison(self) -> str:
+        """Run comparison script and format output for issue.
+
+        Returns
+        -------
+        str
+            Formatted comparison output or error message
+        """
+        try:
+            result = subprocess.run(
+                [sys.executable, "scripts/compare_feedstock_deps.py"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                cwd=self.project_root
+            )
+
+            if result.returncode == 0:
+                # Script succeeded - include its output
+                return f"""### Dependency Comparison
+
+```
+{result.stdout}
+```
+
+📝 **Review the table above** - any ⚠️ markers indicate changes needed in feedstock.
+
+⚠️ **CRITICAL**: The autotick bot updates **version and SHA256 ONLY**, NOT dependencies!
+"""
+            else:
+                # Script failed - provide fallback message
+                return """### Dependency Comparison
+
+⚠️ Automatic comparison unavailable. Run manually:
+```bash
+python scripts/compare_feedstock_deps.py
+```
+
+⚠️ **CRITICAL**: The autotick bot updates **version and SHA256 ONLY**, NOT dependencies!
+"""
+
+        except Exception as e:
+            # Non-critical failure - provide fallback
+            return f"""### Dependency Comparison
+
+⚠️ Could not run automatic comparison: {e}
+
+Run manually to check:
+```bash
+python scripts/compare_feedstock_deps.py
+```
+
+⚠️ **CRITICAL**: The autotick bot updates **version and SHA256 ONLY**, NOT dependencies!
+"""
+
     def create_tracking_issue(self, version_str: str, sha256_hash: str,
                             dry_run: bool = False,
                             commit_sha: Optional[str] = None) -> Optional[str]:
@@ -370,6 +425,9 @@ class CondaFeedstockUpdater:
         """
         title = f"Conda feedstock update for SolarWindPy v{version_str}"
 
+        # Get dependency comparison
+        comparison_output = self._get_dependency_comparison()
+
         body = f"""## Automated Conda Feedstock Update
 
 **Version**: `{version_str}`
@@ -387,21 +445,43 @@ class CondaFeedstockUpdater:
         body += """
 
 
-### Update Details
+---
+
+{comparison_output}
+
+---
+
+### Update Checklist
 
 - [x] PyPI release validated
 - [x] SHA256 calculated from source distribution
-- [ ] Feedstock repository forked and cloned
-- [ ] meta.yaml updated with new version and hash
-- [ ] Pull request created on conda-forge/{self.package_name}-feedstock
+- [ ] **Dependencies reviewed** (see comparison above)
+- [ ] Autotick bot PR created (usually 2-6 hours)
+- [ ] If dependencies changed: manually update bot PR
 - [ ] CI checks passing
-- [ ] Pull request merged
+- [ ] PR merged
 
 ### Automation Status
 
 🤖 This issue was created automatically by the conda feedstock update automation.
 
-### Manual Steps (if automation fails)
+### Manual Update Instructions
+
+When bot PR appears (usually 2-6 hours):
+
+1. **Review dependency changes** in comparison table above
+2. **If dependencies changed**:
+   ```bash
+   gh pr checkout <PR_NUMBER> --repo conda-forge/{self.package_name}-feedstock
+   # Edit recipe/meta.yaml requirements.run section
+   git add recipe/meta.yaml
+   git commit -m "Update runtime dependencies"
+   git push
+   ```
+3. **Monitor CI**: `gh pr checks <PR_NUMBER> --watch`
+4. **Merge when green**: `gh pr merge <PR_NUMBER> --squash`
+
+### Manual Steps (if automation fails completely)
 
 1. **Fork and clone feedstock**:
    ```bash

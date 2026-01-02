@@ -31,21 +31,53 @@ Development guidelines and standards for SolarWindPy scientific software.
 - **Multi-computer sync**: Instant plan access across all development machines
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
+- **Releases**: Automated via GitHub Actions, see [RELEASING.md](./RELEASING.md)
 
 ## Environment Setup
 
 ```bash
-# Create and activate conda environment:
-conda env create -f solarwindpy.yml
-conda activate solarwindpy
+# Recommended: Install from lockfile
+pip install -r requirements-dev.lock  # All dev tools
 pip install -e .
 
-# Alternative: generate environment from requirements-dev.txt:
-python scripts/requirements_to_conda_env.py --name solarwindpy-dev
-conda env create -f solarwindpy-dev.yml
-conda activate solarwindpy-dev
+# Alternative: Conda environment
+conda env create -f solarwindpy.yml
+conda activate solarwindpy
+pip install -r requirements-dev.lock
 pip install -e .
 ```
+
+## Dependency Management (v0.3.0+)
+
+**Single Source**: `pyproject.toml` contains all dependency definitions
+
+**Lockfiles** (auto-generated - DO NOT EDIT):
+- `requirements.txt` - Production dependencies
+- `requirements-dev.lock` - Development dependencies
+- `docs/requirements.txt` - Documentation dependencies
+
+**Workflow**:
+```bash
+# 1. Edit dependencies in pyproject.toml
+[project.dependencies]
+numpy>=1.26,<3.0
+
+# 2. Regenerate lockfiles
+pip install pip-tools
+pip-compile pyproject.toml --output-file=requirements.txt --upgrade
+pip-compile --extra=dev pyproject.toml --output-file=requirements-dev.lock --upgrade
+
+# 3. Install from lockfile
+pip install -r requirements-dev.lock
+
+# 4. Test changes
+pytest -q
+
+# 5. Commit pyproject.toml AND lockfiles together
+git add pyproject.toml requirements*.txt requirements*.lock
+```
+
+**Migration Info**: See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](../../docs/MIGRATION-DEPENDENCY-OVERHAUL.md)
 
 ## Code Quality Standards
 - **Formatting**: Black for code formatting (88 characters)
@@ -53,6 +85,52 @@ pip install -e .
 - **Documentation**: NumPy-style docstrings with doc8 validation (100 characters)
 - **Commits**: Conventional Commits format with 'Generated with Claude Code'
 - **Testing**: All tests must pass before committing
+
+## Code Attribution
+
+All code incorporated into SolarWindPy must follow proper attribution practices.
+
+**See comprehensive guidelines:** [ATTRIBUTION.md](./ATTRIBUTION.md)
+
+### Quick Reference
+
+**AI-Generated Code:**
+```bash
+# Include in commit message:
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**External Code:**
+```python
+# Add in source file:
+# Source: [Description or author]
+# URL: [Link]
+# License: [License type]
+# Modifications: [What changed]
+```
+
+**Scientific Algorithms:**
+```python
+"""
+References
+----------
+.. [1] Author, A., & Author, B. (Year). "Title".
+       Journal, Volume(Issue), pages.
+       DOI: XX.XXXX/journal.year.article
+"""
+```
+
+**License Compatibility:**
+- ✅ Compatible (can copy code): MIT, BSD, Apache 2.0, Public Domain
+- ❌ Incompatible (cannot copy code): GPL, LGPL, proprietary, unknown
+- ⚠️ Dependencies: LGPL libraries OK as dependencies, GPL complex (avoid)
+
+**When Uncertain:**
+- External code → Ask maintainer or reimplement from scratch
+- Algorithms → Cite paper in docstring References section
+- Standard patterns → No attribution needed (NumPy/pandas idioms, common practices)
 
 ### Documentation Standards (doc8)
 

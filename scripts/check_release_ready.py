@@ -107,7 +107,7 @@ def check_changelog() -> Tuple[bool, str]:
 
     # Check if unreleased section has content
     unreleased_match = re.search(
-        r"## \[Unreleased\]\s*\n(.*?)\n## ", content, re.DOTALL
+        r"## \[Unreleased\]\s*\n(.*?)(?=## \[)", content, re.DOTALL
     )
     if unreleased_match and unreleased_match.group(1).strip():
         return (

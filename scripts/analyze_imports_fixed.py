@@ -106,12 +106,15 @@ class DependencyAnalyzer:
         print(f"Found {len(python_files)} Python files")
 
         for filepath in python_files:
-            # Skip test files and build artifacts
+            # Skip test files, build artifacts, and installed packages
             if (
                 "/tests/" in str(filepath)
                 or filepath.name.startswith("test_")
                 or "/__pycache__/" in str(filepath)
                 or "/build/" in str(filepath)
+                or "/.eggs/" in str(filepath)
+                or "/dist/" in str(filepath)
+                or "/.tox/" in str(filepath)
             ):
                 continue
 

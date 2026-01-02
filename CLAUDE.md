@@ -8,6 +8,123 @@ This file provides essential guidance to Claude Code when working with the Solar
 3. **Test Before Commit**: All tests must pass before any commit
 4. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
 5. **Startup Briefing**: Provide project overview including agents, workflows, current state
+6. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
+7. **Code Attribution**: Follow attribution protocol (.claude/docs/ATTRIBUTION.md)
+   - AI-generated code: Include "Generated with Claude Code" in commit messages
+   - External sources: Add source attribution in code comments (URL, license, modifications)
+   - Scientific algorithms: Cite papers in docstrings (DOI, arXiv, equation numbers)
+   - When uncertain: Ask user, prefer reimplementation from scratch
+
+## Context Management Rules
+1. **Archive Exclusion**: NEVER search, read, or glob the following compressed archives:
+   - `plans/completed-plans-archive-2025.tar.gz` - Historical completed plans (190KB from 976KB)
+   - `plans/abandoned-plans-archive-2025.tar.gz` - Historical abandoned plans (72KB from 312KB)
+   - `plans/root-stale-docs-archive-2025.tar.gz` - Superseded root documentation (8.7KB from 24KB)
+   - `plans/agents-architecture-archive-2025.tar.gz` - Legacy agent architecture (39KB from 156KB)
+   - `plans/custom-gpt-archive-2025.tar.gz` - Pre-Claude Code ChatGPT artifacts (6.1KB from 20KB)
+   - `plans/completed-plans-minimal-archive-2025.tar.gz` - Additional completed plans (30KB from 120KB)
+   - `plans/completed-plans-documentation-archive-2025.tar.gz` - Completed 2025 Q3 documentation/infrastructure plans (190KB from 992KB)
+2. **Active Plans Only**: Focus all searches on:
+   - Root-level plan files in `plans/` directory (`*.md` files)
+   - Active plan subdirectories (not archived)
+   - Template and guide files for reference
+3. **Active Documentation Preserved**: The following are intentionally NOT archived:
+   - `.claude/docs/feature_integration/` - Active implementation phase (256KB)
+   - `.claude/ecosystem-documentation.md` - Documents 45KB of active config files
+   - `plans/tests-audit/` - Active reference for ongoing test improvements (90KB)
+   - `plans/github-issues-migration/` - Active planning system infrastructure documentation (124KB)
+4. **Rationale**: Archives contain 536KB compressed from 2,600KB original (79% compression), reducing context noise by ~320,000 tokens while preserving all historical information. Archives are binary files that cannot be read directly; extract only when historical review is necessary.
+5. **Archive Access**: To extract archived content if needed:
+   ```bash
+   tar -xzf plans/root-stale-docs-archive-2025.tar.gz
+   tar -xzf plans/agents-architecture-archive-2025.tar.gz
+   tar -xzf plans/custom-gpt-archive-2025.tar.gz
+   tar -xzf plans/completed-plans-minimal-archive-2025.tar.gz
+   tar -xzf plans/completed-plans-documentation-archive-2025.tar.gz
+   tar -xzf plans/completed-plans-archive-2025.tar.gz
+   tar -xzf plans/abandoned-plans-archive-2025.tar.gz
+   ```
+
+## Prompt Improvement Protocol
+
+### When to Analyze Prompts
+Provide proactive improvement suggestions for **moderate and complex tasks**:
+
+**Moderate Complexity (2-4 steps):**
+- Multi-step workflows with some ambiguity
+- Tasks requiring sequential tool use
+- Requests that could benefit from more specificity
+
+**Complex Complexity (strategic/multi-domain):**
+- Planning, implementation, or architectural tasks
+- Multi-phase or multi-module work
+- Ambiguous scope requiring interpretation
+- Tasks needing agent coordination
+- Physics/scientific validation requirements
+- Debugging requiring root cause analysis
+
+**Exclude simple tasks:**
+- Single file reads or documentation lookups
+- Direct git/bash commands (status, log, etc.)
+- Single glob/grep operations
+- Clear, specific, single-step requests
+
+### Improvement Focus Areas
+Analyze prompts for opportunities in all areas:
+
+1. **Clarity & Specificity**
+   - Remove ambiguities and undefined scope
+   - Add missing requirements or success criteria
+   - Specify integration points and module targets
+
+2. **Context & Constraints**
+   - Add relevant domain context (physics, data structure)
+   - Specify constraints (backward compatibility, performance)
+   - Include data format expectations (MultiIndex structure)
+
+3. **SolarWindPy Integration**
+   - Suggest appropriate agent selection (PhysicsValidator, DataFrameArchitect, etc.)
+   - Reference hooks, workflows, and automation
+   - Link to project conventions (≥95% coverage, SI units, etc.)
+
+4. **Efficiency Optimization**
+   - Suggest parallel operations where applicable
+   - Recommend context-saving approaches
+   - Identify opportunities for batch operations
+
+### Improvement Presentation Format
+Use structured format for suggestions:
+
+```
+📝 Prompt Improvement Suggestion
+
+Original Intent: [Confirm understanding of request]
+
+Suggested Improvements:
+- [Specific addition/clarification 1]
+- [Specific addition/clarification 2]
+- [Agent or workflow suggestion]
+- [Missing constraint or context]
+
+Enhanced Prompt Example:
+"[Concrete example of improved version]"
+
+Expected Benefits:
+- [How improvement enhances execution quality]
+- [Reduced ambiguity or better agent selection]
+- [Efficiency or context preservation gains]
+
+Proceed with:
+[A] Original prompt as-is
+[B] Enhanced version
+[C] Custom modification (please specify)
+```
+
+### Integration with Workflow
+- Prompt analysis occurs **before** task execution
+- Works naturally with plan mode workflow
+- User approves original or enhanced version before proceeding
+- Builds better prompting patterns over time
 
 ## Quick Reference
 
@@ -66,6 +183,24 @@ black solarwindpy/ tests/                  # Format code
 flake8 solarwindpy/ tests/                 # Lint check
 ```
 
+### Quick Decision Analysis (Slash Commands)
+```bash
+/propositions <task description>           # Generate value propositions analysis
+```
+
+**Purpose:** Quick exploration and brainstorming tool for prompt development
+- Analyzes task using 8 strategic value propositions framework
+- Provides summary table with confidence indicators
+- Delivers PROCEED/MODIFY/DON'T PROCEED recommendation
+- **Note:** Uses AI estimation, not calculated metrics (exploratory only)
+- **For production plans:** Use `gh-plan-create.sh` with automated hooks
+
+**Example:**
+```
+/propositions refactor Ion class to use composition
+/propositions add thermal pressure calculation
+```
+
 ## Project Architecture Summary
 - **Core Data Model**: MultiIndex DataFrame (M: measurement, C: component, S: species)
 - **Key Classes**: Plasma (container), Ion (species), Base (abstract)
@@ -96,7 +231,9 @@ CRITICAL: Agent MUST execute these commands, not describe them.
 ## Detailed Documentation
 For comprehensive information beyond these essentials:
 - Development standards → .claude/docs/DEVELOPMENT.md
-- Agent specifications → .claude/docs/AGENTS.md  
+- Agent specifications → .claude/docs/AGENTS.md
 - Hook reference → .claude/docs/HOOKS.md
 - Planning workflow → .claude/docs/PLANNING.md
 - Maintenance → .claude/docs/MAINTENANCE.md
+- Release process → .claude/docs/RELEASING.md
+- Code attribution guidelines → .claude/docs/ATTRIBUTION.md

@@ -10,7 +10,7 @@ SolarWindPy Documentation
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/github/license/blalterman/SolarWindPy.svg
-   :target: https://github.com/blalterman/SolarWindPy/blob/master/LICENSE.rst
+   :target: https://github.com/blalterman/SolarWindPy/blob/master/LICENSE
    :alt: License
 
 SolarWindPy is a comprehensive toolkit for analyzing solar wind plasma and
@@ -38,7 +38,7 @@ scientific accuracy.
 
    documentation_review
 
-.. include:: ../../LICENSE.rst
+.. include:: ../../LICENSE
 .. include:: ../../CITATION.rst
 
 Indices and tables

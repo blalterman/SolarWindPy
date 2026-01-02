@@ -49,23 +49,23 @@ class Spacecraft(base.Base):
         Examples
         --------
         >>> epoch = pd.Series({0: pd.to_datetime("1995-01-01"),
-                               1: pd.to_datetime("2015-03-23"),
-                               2: pd.to_datetime("2022-10-09")}, name="Epoch")
+        ...                    1: pd.to_datetime("2015-03-23"),
+        ...                    2: pd.to_datetime("2022-10-09")}, name="Epoch")
         >>> data = {("pos", "x", ""): {0: -42, 1: -22, 2: -34},
-                    ("pos", "y", ""): {0: 23, 1: 31, 2: 11},
-                    ("pos", "z", ""): {0: 35, 1: 27, 2: 49},
-                    ("v", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
-                    ("v", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
-                    ("v", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
-                    ("carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},
-                    ("carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0}}
+        ...         ("pos", "y", ""): {0: 23, 1: 31, 2: 11},
+        ...         ("pos", "z", ""): {0: 35, 1: 27, 2: 49},
+        ...         ("v", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
+        ...         ("v", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
+        ...         ("v", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
+        ...         ("carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},
+        ...         ("carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0}}
         >>> spacecraft = pd.DataFrame.from_dict(data,
-                                                orient="columns",
-                                                dtype=np.float64)
+        ...                                     orient="columns",
+        ...                                     dtype=np.float64)
         >>> spacecraft.index = epoch
         >>> spacecraft.columns.names = ["M", "C", "S"]
         >>> spacecraft = spacecraft.xs("", axis=1, level="S")
-        >>> spacecraft
+        >>> spacecraft  # doctest: +NORMALIZE_WHITESPACE
         M            pos                 v            carr
         C              x     y     z     x     y    z  lat   lon
         Epoch

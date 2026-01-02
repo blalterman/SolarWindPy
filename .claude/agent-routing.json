@@ -5,14 +5,9 @@
     "filePatterns": {
       "solarwindpy/core/plasma.py": ["DataFrameArchitect"],
       "solarwindpy/core/ions.py": ["DataFrameArchitect"],
-      "solarwindpy/core/base.py": ["PhysicsValidator"],
-      "solarwindpy/core/units_constants.py": ["PhysicsValidator"],
-      "solarwindpy/core/vector.py": ["PhysicsValidator"],
-      "solarwindpy/core/tensor.py": ["PhysicsValidator"],
       "solarwindpy/core/spacecraft.py": ["DataFrameArchitect"],
-      "solarwindpy/instabilities/*.py": ["PhysicsValidator", "NumericalStabilityGuard"],
       "solarwindpy/plotting/*.py": ["PlottingEngineer"],
-      "solarwindpy/fitfunctions/*.py": ["FitFunctionSpecialist", "NumericalStabilityGuard"],
+      "solarwindpy/fitfunctions/*.py": ["FitFunctionSpecialist"],
       "tests/*.py": ["TestEngineer"],
       ".claude/hooks/*.py": ["TestEngineer"],
       ".claude/hooks/*.sh": ["TestEngineer"],
@@ -26,10 +21,6 @@
       "plot": ["PlottingEngineer"],
       "visualization": ["PlottingEngineer"],
       "figure": ["PlottingEngineer"],
-      "physics": ["PhysicsValidator"],
-      "units": ["PhysicsValidator"],
-      "thermal": ["PhysicsValidator"],
-      "alfven": ["PhysicsValidator"],
       "dataframe": ["DataFrameArchitect"],
       "multiindex": ["DataFrameArchitect"],
       "pandas": ["DataFrameArchitect"],
@@ -39,20 +30,15 @@
       "fit": ["FitFunctionSpecialist"],
       "curve": ["FitFunctionSpecialist"],
       "regression": ["FitFunctionSpecialist"],
-      "optimization": ["FitFunctionSpecialist"],
-      "numerical": ["NumericalStabilityGuard"],
-      "stability": ["NumericalStabilityGuard"],
-      "precision": ["NumericalStabilityGuard"]
+      "optimization": ["FitFunctionSpecialist"]
     },
     "contextTriggers": {
       "multiStepTask": ["UnifiedPlanCoordinator"],
       "complexImplementation": ["UnifiedPlanCoordinator"],
-      "physicsConcepts": ["PhysicsValidator"],
       "dataAnalysis": ["DataFrameArchitect"],
       "visualizationTasks": ["PlottingEngineer"],
       "testingTasks": ["TestEngineer"],
-      "fittingTasks": ["FitFunctionSpecialist"],
-      "numericalTasks": ["NumericalStabilityGuard"]
+      "fittingTasks": ["FitFunctionSpecialist"]
     }
   },
   "agents": {
@@ -67,17 +53,6 @@
         "Project-level decision making"
       ]
     },
-    "PhysicsValidator": {
-      "description": "Physics correctness, unit validation, scientific accuracy",
-      "capabilities": ["physics_validation", "unit_checking", "scientific_accuracy", "constraint_validation"],
-      "priority": 2,
-      "usagePatterns": [
-        "Physics calculations and formulas",
-        "Unit consistency checking",
-        "Scientific constraint validation",
-        "Thermal speed and Alfvén speed calculations"
-      ]
-    },
     "DataFrameArchitect": {
       "description": "MultiIndex operations, pandas optimization",
       "capabilities": ["dataframe_design", "multiindex_operations", "pandas_optimization", "memory_efficiency"],
@@ -87,17 +62,6 @@
         "MultiIndex operations and queries",
         "Memory optimization for large datasets",
         "Data manipulation and transformation"
-      ]
-    },
-    "NumericalStabilityGuard": {
-      "description": "Numerical validation, edge cases, stability",
-      "capabilities": ["numerical_stability", "precision_analysis", "edge_case_handling", "algorithm_optimization"],
-      "priority": 2,
-      "usagePatterns": [
-        "Numerical computation stability",
-        "Floating point precision issues",
-        "Algorithm optimization for stability",
-        "Edge case validation"
       ]
     },
     "PlottingEngineer": {
@@ -170,10 +134,10 @@
       "routing": ["UnifiedPlanCoordinator", "PlottingEngineer"],
       "rationale": "Planning task with plotting domain expertise needed"
     },
-    "physics": {
-      "input": "Fix the thermal speed calculation in the Ion class",
-      "routing": ["PhysicsValidator"],
-      "rationale": "Physics calculation requiring unit and formula validation"
+    "coredata": {
+      "input": "Optimize the Ion class DataFrame structure",
+      "routing": ["DataFrameArchitect"],
+      "rationale": "Core data structure requiring MultiIndex optimization"
     },
     "dataframe": {
       "input": "Optimize the MultiIndex operations in plasma.py",
@@ -192,7 +156,7 @@
     },
     "complex": {
       "input": "Implement a new plasma instability analysis with visualization and testing",
-      "routing": ["UnifiedPlanCoordinator", "PhysicsValidator", "PlottingEngineer", "TestEngineer"],
+      "routing": ["UnifiedPlanCoordinator", "FitFunctionSpecialist", "PlottingEngineer", "TestEngineer"],
       "rationale": "Multi-domain task requiring coordination and multiple specialists"
     }
   }

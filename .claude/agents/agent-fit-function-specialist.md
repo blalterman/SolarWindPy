@@ -197,8 +197,7 @@ def validate_convergence(result):
 
 ## Integration Points
 
-- Works with **PhysicsValidator** for physical constraints
-- Coordinates with **NumericalStabilityGuard** for edge cases
+- Implements numerical stability patterns for edge cases (overflow/underflow protection, matrix conditioning)
 - Provides results for **PlottingEngineer** visualization
 - Tested by **TestEngineer** against known solutions
 

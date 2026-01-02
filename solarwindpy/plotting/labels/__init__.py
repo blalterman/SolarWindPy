@@ -26,7 +26,7 @@ species_translation = base._run_species_substitution
 Vsw = special.Vsw
 Count = special.Count
 Ion = composition.Ion
-ChargeState = composition.ChargeState
+ChargeStateRatio = composition.ChargeStateRatio
 ElementalAbundance = elemental_abundance.ElementalAbundance
 
 

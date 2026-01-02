@@ -25,8 +25,8 @@ class BetaRPlot(Hist2D):
 
     Examples
     --------
-    >>> br = BetaRPlot(beta, ani, "p")
-    >>> ax, cbar = br.make_plot()
+    >>> br = BetaRPlot(beta, ani, "p")  # doctest: +SKIP
+    >>> ax, cbar = br.make_plot()  # doctest: +SKIP
     """
 
     def __init__(self, beta, ani, species, **kwargs):

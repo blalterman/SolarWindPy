@@ -1,4 +1,4 @@
-__all__ = ["Ion", "ChargeState"]
+__all__ = ["Ion", "ChargeStateRatio"]
 
 import pdb  # noqa: F401
 from pathlib import Path
@@ -55,7 +55,7 @@ class Ion(base.Base):
         self._charge = charge
 
 
-class ChargeState(base.Base):
+class ChargeStateRatio(base.Base):
     """Ratio of two ion abundances."""
 
     def __init__(self, ionA, ionB):

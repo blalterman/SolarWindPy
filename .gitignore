@@ -1,4 +1,6 @@
+coverage.json
 nohup.out
+tmp/
 # Byte-compiled / optimized / DLL files
 solarwindpy/solar_activity/data/*.csv
 solarwindpy/solar_activity/data/*.json
@@ -73,6 +75,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/source/api/
+docs/source/_autosummary/
 
 # PyBuilder
 target/

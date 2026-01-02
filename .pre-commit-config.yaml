@@ -45,8 +45,7 @@ repos:
   hooks:
   - id: check-conventional-commits
     name: Check Conventional Commits
-    entry: bash -c
-    args: ['[[ $(cat "$1") =~ ^(feat|fix|chore|docs|style|refactor|test|perf)(\(.+\))?: .+ ]] || { echo "❌ Commit message must follow Conventional Commits format."; exit 1; }']
+    entry: scripts/check_conventional_commits.sh
     language: system
     stages: [commit-msg]
   - id: solarwindpy-physics
@@ -62,3 +61,12 @@ repos:
     language: system
     files: ^solarwindpy/.*\.py$
     pass_filenames: false
+  - id: attribution-reminder
+    name: Attribution Guidelines Reminder
+    entry: bash -c
+    args: ['echo "📝 Remember: External code needs attribution - see .claude/docs/ATTRIBUTION.md"; exit 0']
+    language: system
+    stages: [commit]
+    pass_filenames: false
+    always_run: true
+    verbose: true

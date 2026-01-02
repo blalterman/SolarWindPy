@@ -15,7 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ['3.10']  # Focus on primary version, spot-check others
+        python-version: ['3.11']  # Focus on primary version, spot-check others
       fail-fast: false  # Allow other jobs to complete even if one fails
     
     steps:
@@ -34,25 +34,33 @@ jobs:
         echo "Environment file: $CONDA_ENV"
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
-    
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # TEST: Simplified conda setup (Bug #3 removal test)
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # With unversioned packages in solarwindpy.yml, setup-miniconda patching
+    # should be harmless. Testing removal of dynamic generation.
+    # If this fails, revert to dynamic generation approach.
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env.outputs.conda_env_file) }}
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
         restore-keys: |
           ${{ runner.os }}-conda-
-    
+
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: ${{ steps.find-conda-env.outputs.conda_env_file }}
+        environment-file: solarwindpy.yml
         activate-environment: ${{ steps.find-conda-env.outputs.env_name }}
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python-version }}  # TEST: Direct python-version with unversioned packages
         auto-activate-base: false
         use-only-tar-bz2: true
-        miniforge-version: latest  # For cache compatibility
+        miniforge-version: latest
     
     - name: Install package in development mode
       shell: bash -l {0}
@@ -226,20 +234,21 @@ jobs:
         echo "Environment file: $CONDA_ENV"
         echo "conda_env_file=$CONDA_ENV" >> $GITHUB_OUTPUT
         echo "env_name=solarwindpy" >> $GITHUB_OUTPUT
-    
+
+    # TEST: Simplified conda setup (Bug #3 removal test - same as doctest-validation)
     - name: Cache conda environment
       uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ hashFiles(steps.find-conda-env-spot.outputs.conda_env_file) }}
-    
+        key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
+
     - name: Set up conda environment
       uses: conda-incubator/setup-miniconda@v3
       timeout-minutes: 10
       with:
-        environment-file: ${{ steps.find-conda-env-spot.outputs.conda_env_file }}
+        environment-file: solarwindpy.yml
         activate-environment: ${{ steps.find-conda-env-spot.outputs.env_name }}
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python-version }}  # TEST: Direct python-version with unversioned packages
         auto-activate-base: false
         use-only-tar-bz2: true
         miniforge-version: latest

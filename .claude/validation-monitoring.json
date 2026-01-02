@@ -68,7 +68,7 @@
           {
             "name": "Physics file routing",
             "input": "Edit solarwindpy/core/plasma.py",
-            "expectedAgents": ["PhysicsValidator", "DataFrameArchitect"],
+            "expectedAgents": ["DataFrameArchitect"],
             "description": "Verify correct agent suggestions for physics files"
           },
           {
@@ -86,7 +86,7 @@
           {
             "name": "Multi-domain routing",
             "input": "Implement new instability analysis with plots and tests",
-            "expectedAgents": ["UnifiedPlanCoordinator", "PhysicsValidator", "PlottingEngineer", "TestEngineer"],
+            "expectedAgents": ["UnifiedPlanCoordinator", "PlottingEngineer", "TestEngineer"],
             "description": "Verify complex tasks get multiple agent suggestions"
           }
         ]

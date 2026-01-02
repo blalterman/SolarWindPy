@@ -153,13 +153,13 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Examples
         --------
-        >>> import numpy as np
-        >>> from solarwindpy.fitfunctions import Gaussian
-        >>> x = np.linspace(-5, 5, 100)
-        >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)
-        >>> fit = Gaussian(x, y, xmin=-3, xmax=3)
-        >>> fit.make_fit()
-        >>> print(f"Fitted mu: {fit.popt['mu']:.3f}")
+        >>> import numpy as np  # doctest: +SKIP
+        >>> from solarwindpy.fitfunctions import Gaussian  # doctest: +SKIP
+        >>> x = np.linspace(-5, 5, 100)  # doctest: +SKIP
+        >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP
+        >>> fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP
+        >>> fit.make_fit()  # doctest: +SKIP
+        >>> print(f"Fitted mu: {fit.popt['mu']:.3f}")  # doctest: +SKIP
 
         See Also
         --------

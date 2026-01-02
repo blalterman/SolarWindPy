@@ -40,17 +40,17 @@ jobs:
         run: |
           # Install pytables separately with verbose output for debugging
           pip install --verbose tables
-          pip install -r requirements-dev.txt
-          safety check --json > security-results/safety-report.json
-          safety check --output text > security-results/safety-report.txt
-          safety check  # Display to console
+          pip install -r requirements-dev.lock
+          safety check --requirement requirements-dev.lock --json > security-results/safety-report.json
+          safety check --requirement requirements-dev.lock --output text > security-results/safety-report.txt
+          safety check --requirement requirements-dev.lock  # Display to console
         continue-on-error: true
       
       - name: Run pip-audit
         run: |
-          pip-audit --requirement requirements-dev.txt --format json > security-results/pip-audit-report.json
-          pip-audit --requirement requirements-dev.txt --format text > security-results/pip-audit-report.txt
-          pip-audit --requirement requirements-dev.txt  # Display to console
+          pip-audit --requirement requirements-dev.lock --format json > security-results/pip-audit-report.json
+          pip-audit --requirement requirements-dev.lock --format text > security-results/pip-audit-report.txt
+          pip-audit --requirement requirements-dev.lock  # Display to console
         continue-on-error: true
       
       - name: Upload security reports

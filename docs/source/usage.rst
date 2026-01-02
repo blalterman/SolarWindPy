@@ -86,63 +86,169 @@ Create a plasma object with proton data:
 Working with MultiIndex DataFrames
 -----------------------------------
 
-SolarWindPy uses a three-level MultiIndex structure:
+SolarWindPy uses a three-level MultiIndex structure. The MultiIndex levels are:
+
+    M: Measurement (n, v, w, b, etc.)
+    C: Component (x, y, z for vectors, empty for scalars)
+    S: Species (p1, p2, a, etc.)
+
+
+Accessing Data
+--------------
+
+Data can be accessed from specialized methods or from underlying containers.
 
 .. code-block:: python
 
-   # Access specific measurements
-   proton_density = plasma.data.xs('n', level='M').xs('p1', level='S')
-   proton_velocity_x = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')
+   # Access measurements from plasma methods - RECOMMENDED
+   ndens = plasma.n('p1')
 
-   # The MultiIndex levels are:
-   # M: Measurement (n, v, w, b, etc.)
-   # C: Component (x, y, z for vectors, empty for scalars)
-   # S: Species (p1, p2, a, etc.)
+   # Access specific measurements from underlying data
+   ndens = plasma.data.xs('n', level='M').xs('p1', level='S')
+
+   # Access measurements from ions
+   ndens = plasma.ions.p1.n('p1')
+
+   # Access measurements from ion data
+   ndens = plasma.ions.p1.data.xs('n', level='M')
+   vpx = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')
+
 
 Physics Calculations
 --------------------
 
-Calculate derived quantities:
+The Plasma class is structured to intelligently combine observations from across ions
 
 .. code-block:: python
 
-   # Thermal speed (mw² = 2kT convention)
-   thermal_speed = plasma.p1.thermal_speed()
+   # Access the density for protons and alphas
+   n = plasma.number_density('p1,a')
+   # Caclculate the total proton + alpha density, using the shortcut method
+   n  = plasma.n('a+p1')
 
-   # Plasma beta for protons
+   # Access the proton and alpha velocities
+   v = plasma.velocity('a,p1')
+   # Calculate the center of mass velocity with the shortcut method
+   v = plasma.v('a+p1')
+
+   # Access the magnetic field data
+   b = plasma.bfield
+   b = plasma.b # shortcut
+
+   # Access the proton and alpha thermal speeds
+   w = plasma.thermal_speed('a,p1')
+   # The total thermal speed is physically ambiguous
+   w = plasma.w('a+p1')
+
+   # Thermal pressures
+   pth = plasma.pth('a,p1')
+   # Access the total pressure
+   pth = plasma.pth('a+p1')
+
+   # Proton plasma beta
    beta = plasma.beta('p1')
+   # Total beta
+   beta = plasma.beta('p1+a')
+   # Both betas
+   beta = plasma.beta('a,p1')
 
-   # Access ion properties directly
-   proton_density = plasma.p1.n      # Number density [cm^-3]
-   proton_velocity = plasma.p1.v     # Velocity vector [km/s]
-   proton_temp = plasma.p1.T         # Temperature [K]
 
 Data Visualization
 ------------------
 
-Use the plotting module for scientific visualizations:
+Use the plotting module for scientific visualizations. The MultiIndex structure maps
+directly to plot labels and paths.
 
 .. code-block:: python
 
    import matplotlib.pyplot as plt
-   import solarwindpy.plotting.labels as labels
+   from solarwindpy.plotting.labels import TeXlabels
 
    # Create time series plot of proton density
    fig, ax = plt.subplots()
-   proton_density = plasma.data.xs('n', level='M').xs('p1', level='S')
-   ax.plot(proton_density.index, proton_density.values)
-   ax.set_ylabel(labels.density('p1'))
-   ax.set_title('Proton Density Time Series')
+   ndens = plasma.n('a+p1')
+   ax.plot(ndens.index, ndens.values)
+   ax.set_ylabel(TeXlabel(('n', '', 'p1+a'))) # Density is a scalar
+   ax.set_title('Total Proton + Alpha Density Time Series')
    plt.show()
 
-   # Scientific scatter plot with proper labels
+   # Scatter plot with proper labels
    fig, ax = plt.subplots()
-   vx = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')
-   temp = plasma.data.xs('w', level='M').xs('par', level='S').xs('p1', level='S')
-   ax.scatter(vx, temp)
-   ax.set_xlabel(labels.velocity_x('p1'))
-   ax.set_ylabel(labels.thermal_speed_par('p1'))
+   vx = plasma.v('p1').xs('x', axis=1, level='C')
+   wpar = plasma.w('p1').xs('par', axis=1, level='C')
+   ax.scatter(vx, wpar)
+
+   # Create labels - note how MultiIndex maps directly to plot labels
+   xlbl = TeXlabel(('v', 'x', 'p1'))
+   ylbl = TeXlabel(('w', 'par', 'p1'))
+   ax.set_xlabel(xlbl)
+   ax.set_ylabel(ylbl)
+
    plt.show()
+
+The labels include units automatically:
+
+.. code-block:: pycon
+
+   >>> xlbl = TeXlabel(('v', 'x', 'p1'))
+   >>> print(xlbl)
+   r'v_{x;p_1} \; \left[\mathrm{km \, s^{-1}}\right]'
+   >>> ylbl = TeXlabel(('w', 'par', 'p1'))
+   >>> print(ylbl)
+   r'w_{\parallel;p_1} \; \left[\mathrm{km \, s^{-1}}\right]'
+
+TeXlabels have built-in path methods for defining figure paths:
+
+.. code-block:: pycon
+
+   >>> xlbl.path
+   Path('v_x_p1')
+   >>> ylbl.path
+   Path('w_par_p1')
+
+TeXlabels can generate normalized quantities and are unit-aware:
+
+.. code-block:: pycon
+
+   >>> ratio_label = TeXlabel(('v', 'x', 'p1'), ('w', 'par', 'p1'))
+   >>> print(ratio_label)
+   r'v_{x;p_1} / w_{\parallel;p_1} \; \left[\#\right]'
+
+Create a 2D histogram using SolarWindPy aggregation tools:
+
+.. code-block:: python
+
+   # Create a 2D histogram of the data
+   from solarwindpy.plotting import Hist2D
+
+   beta = plasma.beta('p1').xs('par', axis=1, level='S')
+   h2d = Hist2D(vx, beta, nbins=(50, 50), logy=True) # calculate log-scaled y-bins
+   h2d.set_labels(x=xlbl, y=TeXlabel('beta', 'par', 'p1'))
+   h2d.make_plot()
+
+SolarWindPy plotting tools have built-in path management that includes axis
+scales and plot normalizations:
+
+.. code-block:: pycon
+
+   >>> h2d.path
+   Path('Hist2D/v_x_p1/beta_par_p1/linX-logY/count')
+
+The path updates when you change normalization:
+
+.. code-block:: pycon
+
+   >>> h2d.set_axnorm('c')  # Make the plot column-normalized
+   >>> h2d.path
+   Path('Hist2D/v_x_p1/beta_par_p1/linX-logY/Cnorm')
+
+Show all available labels:
+
+.. code-block:: pycon
+
+   >>> import solarwindpy.plotting.labels as labels
+   >>> labels.available_labels()
+
 
 Error Handling and Missing Data
 -------------------------------
@@ -151,19 +257,20 @@ SolarWindPy follows scientific best practices:
 
 .. code-block:: python
 
-   # Missing data represented as NaN (never 0 or -999)
-   data_with_gaps = plasma.data.dropna()
+   # Missing data represented as NaN
+   data_without_gaps = plasma.data.dropna()
 
    # Check for physical constraints manually
    # Density should be positive
-   assert (plasma.p1.n > 0).all(), "Density must be positive"
+   assert (plasma.n('p1') > 0).all(), 'Density must be positive'
 
-   # Temperature should be positive
+   # Thermal speeds should be positive
    thermal_data = plasma.data.xs('w', level='M')
-   assert (thermal_data > 0).all().all(), "Thermal speeds must be positive"
+   assert (thermal_data > 0).all().all(), 'Thermal speeds must be positive'
 
-Advanced Features
------------------
+
+Non-Linear Fitting
+------------------
 
 For more complex analyses:
 
@@ -172,23 +279,29 @@ For more complex analyses:
    # Fit functions for statistical analysis
    from solarwindpy.fitfunctions import Gaussian
 
-   # Get thermal speed data for fitting
-   w_par = plasma.data.xs('w', level='M').xs('par', level='C').xs('p1', level='S')
-   x_data = w_par.index.astype('int64') // 10**9  # Convert to seconds
-   y_data = w_par.values
+   # Get thermal speed data
+   w_par = plasma.w('p1').xs('par', level='C')
+
+   # Histogram data
+   from solarwindpy.plotting import Hist1D
+   h1d = Hist1D(w_par, nbins=50)
+   h1d.set_labels(x=TeXlabel(('w', 'par', 'p1')))
+
+   # Get aggregated data
+   agg = h1d.agg()
+
+   # Aggregated index is an IntervalIndex, but was previously monkey patched to address
+   # a pandas pretty printing bug.
+   x_data = pd.IntervalIndex(agg.index).mid
+   y_data = agg.values
 
    fit = Gaussian(x_data, y_data)
-   fit.fit()
+   fit.make_fit()
 
-   # Instability analysis
-   from solarwindpy.instabilities.verscharen2016 import beta_ani_inst
+   # Plot the resulting fit
+   fit.plotter.set_labels(x=TeXlabel(('w', 'par', 'p1')))
+   fit.plotter.plot_raw_used_fit_resid()
 
-   # Calculate plasma betas
-   beta_par = plasma.beta('p1').par
-   beta_per = plasma.beta('p1').per
-
-   # Check instability threshold
-   instability_threshold = beta_ani_inst(beta_par)
 
 Best Practices
 --------------
@@ -196,8 +309,7 @@ Best Practices
 1. **Units**: All internal calculations use SI units
 2. **Time**: Use pandas DatetimeIndex for temporal data
 3. **Missing Data**: Represent gaps as NaN, not fill values
-4. **Physics**: Validate results against known constraints
-5. **Performance**: Use vectorized operations with NumPy/Pandas
+4. **Built-In Aggregation**: Use plasma methods to aggregate quantities where applicable
 
 Next Steps
 ----------

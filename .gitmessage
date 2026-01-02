@@ -1,0 +1,38 @@
+# <type>(<scope>): <subject>
+# Types: feat, fix, docs, style, refactor, perf, test, chore
+# Scope: module name (plasma, fitfunctions, plotting, core, etc.)
+# Subject: imperative mood, no period, <50 chars
+
+# Body (optional - explain WHAT and WHY, not HOW):
+# Wrap at 72 characters
+
+# Footer (optional - breaking changes, issue references):
+# BREAKING CHANGE: describe breaking change
+# Closes #123
+# See also #456
+
+# ============================================
+# CHECKLIST (complete before committing):
+# ============================================
+# [ ] Tests added/updated (coverage ≥95%)
+# [ ] Physics validation passed (if applicable)
+# [ ] Documentation updated (docstrings, README)
+# [ ] Code formatted (black) and linted (flake8)
+# [ ] External code attributed (if applicable)
+# [ ] Algorithm citations added (if applicable)
+# [ ] Backward compatibility maintained
+
+# ============================================
+# ATTRIBUTION (required for AI-assisted code):
+# ============================================
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
+
+# ============================================
+# ATTRIBUTION QUICK REFERENCE:
+# ============================================
+# - AI code: Include above footer in commit message
+# - External code: Add source comments in code file
+# - Algorithms: Cite papers in docstrings
+# - Uncertain? See .claude/docs/ATTRIBUTION.md

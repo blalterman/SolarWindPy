@@ -79,6 +79,7 @@ class TestSIDC:
         """Test SIDC initialization with dummy loader and SSNExtrema."""
         # Setup mocks - use spec to make it pass isinstance check
         from solarwindpy.solar_activity.base import ID
+
         mock_id = Mock(spec=ID)
         mock_id.key = "m"
         mock_id.url = "http://example.com"
@@ -196,6 +197,7 @@ class TestSIDC:
     def test_run_normalization_max(self, mock_loader_data, mock_extrema_data):
         """Test run_normalization with max normalization."""
         from solarwindpy.solar_activity.base import ID
+
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
             sidc._logger = Mock()
@@ -267,6 +269,7 @@ class TestSIDC:
     def test_cut_spec_by_ssn_band(self, mock_loader_data):
         """Test cut_spec_by_ssn_band method."""
         from solarwindpy.solar_activity.base import ID
+
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
             sidc._id = Mock(spec=ID)  # Add missing _id attribute
@@ -288,6 +291,7 @@ class TestSIDC:
     def test_cut_spec_by_ssn_band_normalized_validation(self, mock_loader_data):
         """Test that cut_spec_by_ssn_band validates dssn for normalized data."""
         from solarwindpy.solar_activity.base import ID
+
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
             sidc._id = Mock(spec=ID)  # Add missing _id attribute
@@ -373,6 +377,7 @@ class TestSIDCEdgeCases:
     def test_normalized_property_without_nssn_column(self, mock_loader_data):
         """Test normalized property when nssn column doesn't exist."""
         from solarwindpy.solar_activity.base import ID
+
         with patch.object(SIDC, "_init_logger"):
             sidc = SIDC.__new__(SIDC)
             sidc._id = Mock(spec=ID)  # Add missing _id attribute
@@ -386,7 +391,9 @@ class TestSIDCEdgeCases:
                 name="nssn",
             )
 
-            with patch.object(sidc, "run_normalization", return_value=expected_normalized):
+            with patch.object(
+                sidc, "run_normalization", return_value=expected_normalized
+            ):
                 result = sidc.normalized
 
                 # Should call run_normalization when nssn column doesn't exist

@@ -66,9 +66,11 @@ class Ion(base.Base):
         >>> import pandas as pd
         >>> import numpy as np
         >>> columns = pd.MultiIndex.from_tuples([
-        ...     ('n', '', 'p1'), ('v', 'x', 'p1'), ('w', 'par', 'p1')
+        ...     ('n', '', 'p1'),
+        ...     ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),
+        ...     ('w', 'par', 'p1'), ('w', 'per', 'p1')
         ... ], names=['M', 'C', 'S'])
-        >>> df = pd.DataFrame(np.random.rand(2, 3), columns=columns)
+        >>> df = pd.DataFrame(np.random.rand(2, 6), columns=columns)
         >>> proton_data = df.xs('p1', level='S', axis=1)
         >>> proton = Ion(proton_data, 'p1')
         >>> proton.species
