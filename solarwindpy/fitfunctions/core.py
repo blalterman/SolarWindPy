@@ -76,23 +76,6 @@ class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
     pass
 
 
-# def __huber(z):
-#     cost = np.array(z)
-#     mask = z <= 1
-#     cost[~mask] = 2 * z[~mask]**0.5 - 1
-#     return cost
-#
-# def __soft_l1(z):
-#     t = 1 + z
-#     cost = 2 * (t**0.5 - 1)
-#     return cost
-#
-# _loss_fcns = {"huber": __huber,
-# "soft_l1": __soft_l1,
-# "cauchy": np.log1p,
-# "arctan": np.arctan}
-
-
 class FitFunction(ABC, metaclass=FitFunctionMeta):
     r"""Assuming that you don't want special formatting, call order is:
 
@@ -212,9 +195,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     def __call__(self, x):
         """Evaluate the fitted model at ``x``."""
 
-        # TODO
-        # Do you want to have this function accept optional kwarg parameters?
-        # It adds a layer of complexity, but could be helfpul.
+        # Design decision: Keep interface simple - __call__ evaluates the fitted
+        # function using stored parameters. For parameter overrides, users should
+        # call self.function(x, param1, param2, ...) directly.
 
         # Sort the parameter keywords into the proper order to pass to the
         # numerical function.
@@ -434,32 +417,26 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
         return xobs, yobs, weights
 
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
-        #         mask = np.full_like(x, True, dtype=bool)
-
+        """Build observation mask with in-place operations for efficiency."""
         mask = np.isfinite(x)
 
         if xmin is not None:
-            xmin_mask = x >= xmin
-            mask = mask & xmin_mask
+            mask &= x >= xmin  # In-place AND instead of creating xmin_mask
 
         if xmax is not None:
-            xmax_mask = x <= xmax
-            mask = mask & xmax_mask
+            mask &= x <= xmax  # In-place AND instead of creating xmax_mask
 
         return mask
 
     def _build_outside_mask(self, axis, x, outside):
-        r"""Take data outside of the range `outside[0]:outside[1]`."""
-
+        """Build outside mask with in-place operations for efficiency."""
         if outside is None:
             return np.full_like(x, True, dtype=bool)
 
         lower, upper = outside
         assert lower < upper
-        l_mask = x <= lower
-        u_mask = x >= upper
-        mask = l_mask | u_mask
-
+        mask = x <= lower
+        mask |= x >= upper  # In-place OR instead of creating separate u_mask
         return mask
 
     def _set_argnames(self):
@@ -521,22 +498,64 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
         self._TeX_info = tex_info
         return tex_info
 
-    def residuals(self, pct=False):
-        r"""Calculate the fit residuals.
+    def residuals(self, pct=False, use_all=False):
+        r"""
+        Calculate fit residuals.
 
-        If pct, normalize by fit yvalues.
+        Parameters
+        ----------
+        pct : bool, default=False
+            If True, return percentage residuals.
+        use_all : bool, default=False
+            If True, calculate residuals for all input data including
+            points excluded by constraints (xmin, xmax, etc.) passed
+            during initialization.
+            If False (default), calculate only for points used in fit.
+
+        Returns
+        -------
+        numpy.ndarray
+            Residuals as observed - fitted.
+
+        Examples
+        --------
+        >>> # Create FitFunction with constraints
+        >>> ff = Gaussian(x, y, xmin=3, xmax=7)
+        >>> ff.make_fit()
+        >>>
+        >>> # Residuals for fitted region only
+        >>> r_fit = ff.residuals()
+        >>>
+        >>> # Residuals for all original data
+        >>> r_all = ff.residuals(use_all=True)
+        >>>
+        >>> # Percentage residuals
+        >>> r_pct = ff.residuals(pct=True)
+
+        Notes
+        -----
+        Addresses TODO: "calculate with all values...including those
+        excluded by set_extrema" (though set_extrema doesn't exist -
+        constraints are passed in __init__).
         """
+        if use_all:
+            # Use all original observations
+            x = self.observations.raw.x
+            y = self.observations.raw.y
+        else:
+            # Use only observations included in fit (default)
+            x = self.observations.used.x
+            y = self.observations.used.y
 
-        # TODO: calculate with all values
-        # Make it an option to calculate with either
-        # the values used in the fit or all the values,
-        # including those excluded by `set_extrema`.
-
-        r = self(self.observations.used.x) - self.observations.used.y
-        #         r = self.fit_result.fun
+        # Calculate residuals (observed - fitted)
+        fitted_values = self(x)
+        r = y - fitted_values
 
         if pct:
-            r = 100.0 * (r / self(self.observations.used.x))
+            # Avoid division by zero
+            with np.errstate(divide="ignore", invalid="ignore"):
+                r = 100.0 * (r / fitted_values)
+                r[fitted_values == 0] = np.nan
 
         return r
 

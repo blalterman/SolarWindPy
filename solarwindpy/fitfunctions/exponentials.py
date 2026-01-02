@@ -34,19 +34,7 @@ class Exponential(FitFunction):
         y = self.observations.used.y
 
         c = 1.0
-        try:
-            A = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if e.message.startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
+        A = y.max()
 
         p0 = [c, A]
         return p0
@@ -78,19 +66,7 @@ class ExponentialPlusC(FitFunction):
 
         c = 1.0
         d = 0.0
-        try:
-            A = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if e.message.startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
+        A = y.max()
 
         p0 = [c, A, d]
         return p0

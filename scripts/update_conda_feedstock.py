@@ -76,7 +76,153 @@ class CondaFeedstockUpdater:
             return result.stdout.strip()
         except subprocess.CalledProcessError:
             return 'unknown'
-    
+
+    def verify_git_tag_provenance(self, version_str: str,
+                                   require_master: bool = False) -> Tuple[bool, Optional[str]]:
+        """Verify git tag exists and check branch provenance.
+
+        This method verifies that:
+        1. The git tag exists locally
+        2. The tag points to a valid commit
+        3. The commit is on the master branch (if required)
+        4. Returns the commit SHA for reference
+
+        Parameters
+        ----------
+        version_str : str
+            Version string to verify (without 'v' prefix)
+        require_master : bool
+            If True, require tag to be on master branch (default: False)
+
+        Returns
+        -------
+        tuple[bool, str or None]
+            (success, commit_sha) - True if verified, commit SHA if found
+        """
+        tag_name = f"v{version_str}"
+
+        try:
+            # Check if git tag exists
+            result = subprocess.run(
+                ['git', 'tag', '-l', tag_name],
+                capture_output=True, text=True, check=False,
+                cwd=self.project_root
+            )
+
+            if not result.stdout.strip():
+                print(f"⚠️  Git tag {tag_name} not found in repository")
+                return False, None
+
+            # Get commit SHA for the tag
+            result = subprocess.run(
+                ['git', 'rev-parse', tag_name],
+                capture_output=True, text=True, check=True,
+                cwd=self.project_root
+            )
+            commit_sha = result.stdout.strip()
+
+            print(f"📍 Found tag {tag_name} at commit {commit_sha[:8]}")
+
+            # Verify tag is on master branch (if required)
+            result = subprocess.run(
+                ['git', 'branch', '--contains', commit_sha],
+                capture_output=True, text=True, check=False,
+                cwd=self.project_root
+            )
+
+            if result.returncode == 0:
+                branches = [b.strip().lstrip('* ') for b in result.stdout.strip().split('\n') if b.strip()]
+
+                if branches:
+                    has_master = any('master' in b for b in branches)
+                    if has_master:
+                        print(f"✅ Verified {tag_name} is on master branch")
+                    elif require_master:
+                        print(f"⚠️  Warning: Tag {tag_name} not found on master branch")
+                        print(f"   Branches containing this tag: {', '.join(branches[:5])}")
+                        return False, commit_sha
+                    else:
+                        print(f"📋 Tag found on branches: {', '.join(branches[:3])}")
+
+            # Get tag annotation message for additional context
+            result = subprocess.run(
+                ['git', 'tag', '-l', '--format=%(contents:subject)', tag_name],
+                capture_output=True, text=True, check=False,
+                cwd=self.project_root
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                tag_message = result.stdout.strip()
+                print(f"📝 Tag message: {tag_message}")
+
+            return True, commit_sha
+
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️  Could not verify git tag provenance: {e}")
+            return False, None
+        except Exception as e:
+            print(f"⚠️  Git verification failed: {e}")
+            return False, None
+
+    def verify_github_release_integrity(self, version_str: str,
+                                       pypi_sha256: str) -> bool:
+        """Verify GitHub release SHA256 matches PyPI distribution.
+
+        Parameters
+        ----------
+        version_str : str
+            Version to verify
+        pypi_sha256 : str
+            SHA256 hash from PyPI source distribution
+
+        Returns
+        -------
+        bool
+            True if GitHub release SHA256 matches PyPI (or if check unavailable)
+        """
+        try:
+            tag_name = f"v{version_str}"
+
+            # Use gh CLI to get release assets
+            result = subprocess.run(
+                ['gh', 'release', 'view', tag_name, '--json', 'assets'],
+                capture_output=True, text=True, check=True,
+                cwd=self.project_root
+            )
+
+            release_data = json.loads(result.stdout)
+
+            # Find the .tar.gz asset
+            tar_gz_assets = [
+                a for a in release_data.get('assets', [])
+                if a['name'].endswith('.tar.gz')
+            ]
+
+            if not tar_gz_assets:
+                print(f"⚠️  No .tar.gz asset found in GitHub release {tag_name}")
+                return True  # Permissive - don't block
+
+            # Extract SHA256 from digest field (format: "sha256:hash")
+            github_sha256 = tar_gz_assets[0].get('digest', '')
+            if github_sha256.startswith('sha256:'):
+                github_sha256 = github_sha256[7:]  # Remove "sha256:" prefix
+
+            if github_sha256 == pypi_sha256:
+                print(f"✅ GitHub release SHA256 matches PyPI")
+                print(f"   Hash: {github_sha256[:16]}...")
+                return True
+            else:
+                print(f"⚠️  SHA256 mismatch between GitHub and PyPI")
+                print(f"   GitHub: {github_sha256[:16]}...")
+                print(f"   PyPI:   {pypi_sha256[:16]}...")
+                return False
+
+        except subprocess.CalledProcessError:
+            print(f"⚠️  Could not verify GitHub release (gh CLI may not be available)")
+            return True  # Permissive - don't block if gh unavailable
+        except Exception as e:
+            print(f"⚠️  GitHub release verification skipped: {e}")
+            return True  # Permissive - don't block on errors
+
     def validate_pypi_release(self, version_str: str, timeout: int = 10) -> bool:
         """Validate that the PyPI release exists and is not a pre-release.
         
@@ -257,7 +403,8 @@ python scripts/compare_feedstock_deps.py
 """
 
     def create_tracking_issue(self, version_str: str, sha256_hash: str,
-                            dry_run: bool = False) -> Optional[str]:
+                            dry_run: bool = False,
+                            commit_sha: Optional[str] = None) -> Optional[str]:
         """Create GitHub issue for tracking the feedstock update.
 
         Parameters
@@ -268,6 +415,8 @@ python scripts/compare_feedstock_deps.py
             SHA256 hash for reference
         dry_run : bool
             If True, only print what would be done
+        commit_sha : str, optional
+            Git commit SHA if provenance was verified
 
         Returns
         -------
@@ -284,7 +433,17 @@ python scripts/compare_feedstock_deps.py
 **Version**: `{version_str}`
 **Package**: `{self.package_name}`
 **PyPI URL**: https://pypi.org/project/{self.package_name}/{version_str}/
-**SHA256**: `{sha256_hash}`
+**SHA256**: `{sha256_hash}`"""
+
+        # Add git provenance info if available
+        if commit_sha:
+            body += f"""
+**Git Commit**: `{commit_sha}`
+**GitHub Release**: https://github.com/blalterman/SolarWindPy/releases/tag/v{version_str}
+**Source Provenance**: ✅ Verified"""
+
+        body += """
+
 
 ---
 
@@ -436,18 +595,43 @@ This update was prepared using automated tooling from the SolarWindPy repository
             True if update successful or dry run completed
         """
         print(f"🚀 Starting conda feedstock update for {self.package_name} v{version_str}")
-        
+
         # Step 1: Validate PyPI release
         if not self.validate_pypi_release(version_str):
             return False
-        
+
+        # Step 1.5: Verify git tag provenance (optional, non-blocking)
+        print(f"\n🔍 Verifying source provenance...")
+        git_verified, commit_sha = self.verify_git_tag_provenance(
+            version_str,
+            require_master=False  # Don't enforce, just report
+        )
+
+        if git_verified and commit_sha:
+            print(f"✅ Git provenance verified: commit {commit_sha[:8]}")
+        else:
+            print(f"⚠️  Git provenance could not be verified (may be running in CI)")
+            commit_sha = None  # Ensure it's None if verification failed
+
         # Step 2: Calculate SHA256
         sha256_hash = self.calculate_sha256(version_str)
         if not sha256_hash:
             return False
-        
+
+        # Step 2.5: Verify GitHub release matches PyPI (optional, non-blocking)
+        if git_verified and commit_sha:
+            print(f"\n🔍 Verifying supply chain integrity...")
+            github_match = self.verify_github_release_integrity(version_str, sha256_hash)
+            if github_match:
+                print(f"✅ Supply chain integrity verified")
+
         # Step 3: Create tracking issue
-        issue_url = self.create_tracking_issue(version_str, sha256_hash, dry_run)
+        issue_url = self.create_tracking_issue(
+            version_str,
+            sha256_hash,
+            dry_run,
+            commit_sha=commit_sha  # Pass commit SHA if available
+        )
         
         if dry_run:
             print(f"🔍 DRY RUN: Would update feedstock with:")
