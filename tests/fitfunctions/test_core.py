@@ -22,7 +22,14 @@ class LinearFit(FitFunction):
 
     @property
     def p0(self):
-        return [0.0, 0.0]
+        # Use data-driven initial guess for robust convergence across platforms
+        x, y = self.observations.used.x, self.observations.used.y
+        if len(x) > 1:
+            slope = (y[-1] - y[0]) / (x[-1] - x[0])
+        else:
+            slope = 1.0
+        intercept = y.mean() - slope * x.mean()
+        return [slope, intercept]
 
     @property
     def TeX_function(self):
