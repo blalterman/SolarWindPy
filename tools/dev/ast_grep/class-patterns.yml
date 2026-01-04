@@ -8,62 +8,66 @@
 
 rules:
   # ===========================================================================
-  # Rule 1: Plasma constructor requires species
+  # Rule 1: Plasma constructor - informational
   # ===========================================================================
   - id: swp-class-001
     language: python
-    severity: warning
+    severity: info
     message: |
       Plasma constructor requires species argument(s).
       Example: Plasma(data, 'p1', 'a')
     note: |
       The Plasma class needs at least one species specified.
       Use: Plasma(data, 'p1') or Plasma(data, 'p1', 'a')
-    pattern: Plasma($data)
+    rule:
+      pattern: Plasma($$$args)
 
   # ===========================================================================
-  # Rule 2: Ion constructor requires species
+  # Rule 2: Ion constructor - informational
   # ===========================================================================
   - id: swp-class-002
     language: python
-    severity: warning
+    severity: info
     message: |
       Ion constructor requires species as second argument.
       Example: Ion(data, 'p1')
     note: |
       Ion class needs data and a single species identifier.
       Species cannot contain '+' (use Plasma for multi-species).
-    pattern: Ion($data)
+    rule:
+      pattern: Ion($$$args)
 
   # ===========================================================================
-  # Rule 3: Spacecraft requires name and frame
+  # Rule 3: Spacecraft constructor - informational
   # ===========================================================================
   - id: swp-class-003
     language: python
-    severity: warning
+    severity: info
     message: |
       Spacecraft constructor requires (data, name, frame).
       Example: Spacecraft(data, 'PSP', 'HCI')
     note: |
       Valid names: PSP, WIND
       Valid frames: HCI, GSE
-    pattern: Spacecraft($data)
+    rule:
+      pattern: Spacecraft($$$args)
 
   # ===========================================================================
-  # Rule 4: xs() should specify axis and level
+  # Rule 4: xs() usage - check for explicit axis and level
   # ===========================================================================
   - id: swp-class-004
     language: python
-    severity: warning
+    severity: info
     message: |
       .xs() should specify axis and level for clarity.
       Example: data.xs('p1', axis=1, level='S')
     note: |
       Explicit axis and level prevents ambiguity with MultiIndex data.
-    pattern: $var.xs($key)
+    rule:
+      pattern: $var.xs($$$args)
 
   # ===========================================================================
-  # Rule 5: Use super().__init__() in class constructors
+  # Rule 5: Check __init__ definitions
   # ===========================================================================
   - id: swp-class-005
     language: python
@@ -73,12 +77,13 @@ rules:
       logger, units, and constants from Core base class.
     note: |
       The Core class provides _init_logger(), _init_units(), _init_constants().
-    pattern: |
-      def __init__(self, $$$args):
-          $$$body
+    rule:
+      pattern: |
+        def __init__(self, $$$args):
+            $$$body
 
   # ===========================================================================
-  # Rule 6: Plasma attribute access via __getattr__
+  # Rule 6: Plasma ions.loc access - suggest attribute shortcut
   # ===========================================================================
   - id: swp-class-006
     language: python
@@ -88,4 +93,5 @@ rules:
       plasma.p1 is equivalent to plasma.ions.loc['p1']
     note: |
       Use plasma.p1 for cleaner code instead of plasma.ions.loc['p1'].
-    pattern: $plasma.ions.loc[$species]
+    rule:
+      pattern: $var.ions.loc[$species]

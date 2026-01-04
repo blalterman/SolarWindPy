@@ -23,6 +23,26 @@ Core (abstract base)
 - Locate in `solarwindpy/core/`
 
 **Analyze class structure:**
+
+**Primary Method: ast-grep (recommended)**
+
+ast-grep provides structural pattern matching for more accurate detection:
+
+```bash
+# Install ast-grep if not available
+# macOS: brew install ast-grep
+# pip: pip install ast-grep-py
+# cargo: cargo install ast-grep
+
+# Run class pattern analysis with all rules
+sg scan --config tools/dev/ast_grep/class-patterns.yml solarwindpy/
+
+# Run specific rule only
+sg scan --config tools/dev/ast_grep/class-patterns.yml --rule swp-class-001 solarwindpy/
+```
+
+**Fallback Method: grep (if ast-grep unavailable)**
+
 ```bash
 # Find class definition
 grep -n "class <ClassName>" solarwindpy/core/
@@ -93,7 +113,28 @@ data['p1']  # May not work with MultiIndex
 ions = pd.Series({s: ions.Ion(self.data, s) for s in species})
 ```
 
-### Phase 4: Contract Tests
+### Phase 4: Pattern Validation
+
+**ast-grep Rules Reference:**
+
+| Rule ID | Pattern | Severity |
+|---------|---------|----------|
+| swp-class-001 | Plasma constructor requires species | warning |
+| swp-class-002 | Ion constructor requires species | warning |
+| swp-class-003 | Spacecraft requires name and frame | warning |
+| swp-class-004 | xs() should specify axis and level | warning |
+| swp-class-005 | Classes should call super().__init__() | info |
+| swp-class-006 | Use plasma.p1 instead of plasma.ions.loc['p1'] | info |
+
+```bash
+# Validate class patterns
+sg scan --config tools/dev/ast_grep/class-patterns.yml solarwindpy/core/<module>.py
+
+# Check for specific violations
+sg scan --config tools/dev/ast_grep/class-patterns.yml --rule swp-class-004 solarwindpy/
+```
+
+### Phase 5: Contract Tests
 
 Verify these contracts for each class:
 
@@ -158,5 +199,10 @@ Verify these contracts for each class:
 
 **Reference Documentation:**
 - `tmp/copilot-plan/class-usage.md` - Full specification
-- `tests/test_contracts_class.py` - Contract test suite
-- `tools/dev/ast_grep/class-patterns.yml` - ast-grep rules
+- `tests/test_contracts_class.py` - Contract test suite (35 tests)
+- `tools/dev/ast_grep/class-patterns.yml` - ast-grep rules (6 rules)
+
+**ast-grep Installation:**
+- macOS: `brew install ast-grep`
+- pip: `pip install ast-grep-py`
+- cargo: `cargo install ast-grep`

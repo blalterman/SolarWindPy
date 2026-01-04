@@ -73,29 +73,54 @@ df.loc[:, ~df.columns.duplicated()]
 
 ### Audit Execution
 
-**Step 1: Search for pattern usage**
+**Primary Method: ast-grep (recommended)**
+
+ast-grep provides structural pattern matching for more accurate detection:
+
 ```bash
-# .xs() usage
+# Install ast-grep if not available
+# macOS: brew install ast-grep
+# pip: pip install ast-grep-py
+# cargo: cargo install ast-grep
+
+# Run full audit with all DataFrame rules
+sg scan --config tools/dev/ast_grep/dataframe-patterns.yml solarwindpy/
+
+# Run specific rule only
+sg scan --config tools/dev/ast_grep/dataframe-patterns.yml --rule swp-df-003 solarwindpy/
+```
+
+**Fallback Method: grep (if ast-grep unavailable)**
+
+If ast-grep is not installed, use grep for basic pattern detection:
+
+```bash
+# .xs() usage (informational)
 grep -rn "\.xs(" solarwindpy/
 
-# reorder_levels usage
+# reorder_levels usage (check for missing sort_index)
 grep -rn "reorder_levels" solarwindpy/
 
-# Deprecated level= aggregation
+# Deprecated level= aggregation (pandas 2.0+)
 grep -rn "axis=1, level=" solarwindpy/
+
+# Boolean indexing anti-pattern
+grep -rn "get_level_values" solarwindpy/
 ```
 
 **Step 2: Check for violations**
-- Boolean indexing instead of .xs()
-- reorder_levels without sort_index
-- axis=1, level= aggregation (deprecated)
-- Missing column duplicate checks
+- `swp-df-001`: Boolean indexing instead of .xs()
+- `swp-df-002`: reorder_levels without sort_index
+- `swp-df-003`: axis=1, level= aggregation (deprecated)
+- `swp-df-004`: MultiIndex without standard names
+- `swp-df-005`: Missing column duplicate checks
+- `swp-df-006`: multiply without level= parameter
 
 **Step 3: Report findings**
 
-| File | Line | Pattern | Issue | Severity |
+| File | Line | Rule ID | Issue | Severity |
 |------|------|---------|-------|----------|
-| ... | ... | ... | ... | warn/info |
+| ... | ... | swp-df-XXX | ... | warn/info |
 
 ### Contract Tests Reference
 
