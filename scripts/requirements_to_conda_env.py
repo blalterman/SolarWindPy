@@ -46,7 +46,7 @@ PIP_TO_CONDA_NAMES = {
 }
 
 # Packages that are pip-only (not available on conda-forge)
-# These will be excluded from the conda yml and must be installed via pip
+# These will be added to a `pip:` subsection in the conda yml
 PIP_ONLY_PACKAGES = {
     "ast-grep-py",  # Python bindings for ast-grep, not on conda-forge
 }
@@ -162,22 +162,35 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
                 return pkg.split(op, 1)[0].strip()
         return pkg.strip()
 
-    # Filter out pip-only packages, then translate the rest
-    filtered_packages = [
+    # Separate conda packages from pip-only packages
+    conda_packages_raw = [
         pkg for pkg in pip_packages if get_base_name(pkg) not in PIP_ONLY_PACKAGES
     ]
-    excluded = [pkg for pkg in pip_packages if get_base_name(pkg) in PIP_ONLY_PACKAGES]
+    pip_only_raw = [
+        pkg for pkg in pip_packages if get_base_name(pkg) in PIP_ONLY_PACKAGES
+    ]
 
-    if excluded:
-        print(f"Note: Excluding pip-only packages (install via pip): {excluded}")
+    # Translate conda package names (pip names -> conda names)
+    conda_packages = [translate_package_name(pkg) for pkg in conda_packages_raw]
 
-    # Translate pip package names to conda equivalents
-    conda_packages = [translate_package_name(pkg) for pkg in filtered_packages]
+    # Strip versions from pip-only packages (let pip resolve)
+    pip_only_packages = [get_base_name(pkg) for pkg in pip_only_raw]
+
+    if pip_only_packages:
+        print(f"Note: Adding pip-only packages to pip: subsection: {pip_only_packages}")
+
+    # Build dependencies list
+    dependencies = conda_packages.copy()
+
+    # Add pip subsection if there are pip-only packages
+    if pip_only_packages:
+        dependencies.append("pip")
+        dependencies.append({"pip": pip_only_packages})
 
     env = {
         "name": env_name,
         "channels": ["conda-forge"],
-        "dependencies": conda_packages,
+        "dependencies": dependencies,
     }
 
     target_name = Path(f"{env_name}.yml")
@@ -200,13 +213,13 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
 # NOTE: Python version is dynamically injected by GitHub Actions workflows
 # during matrix testing to support multiple Python versions.
 #
-# NOTE: Some dev packages (e.g., ast-grep-py) are pip-only and excluded here.
-# They are installed automatically by `pip install -e ".[dev]"`.
+# NOTE: Pip-only packages (e.g., ast-grep-py) are included in the pip: subsection
+# at the end of dependencies and installed automatically during env creation.
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
 #   conda activate solarwindpy
-#   pip install -e ".[dev]"  # Installs SolarWindPy + dev tools (including pip-only)
+#   pip install -e .  # Installs SolarWindPy in editable mode
 #
 """
     with open(target_name, "w") as out_file:

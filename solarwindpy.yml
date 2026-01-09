@@ -10,13 +10,13 @@
 # NOTE: Python version is dynamically injected by GitHub Actions workflows
 # during matrix testing to support multiple Python versions.
 #
-# NOTE: Some dev packages (e.g., ast-grep-py) are pip-only and excluded here.
-# They are installed automatically by `pip install -e ".[dev]"`.
+# NOTE: Pip-only packages (e.g., ast-grep-py) are included in the pip: subsection
+# at the end of dependencies and installed automatically during env creation.
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
 #   conda activate solarwindpy
-#   pip install -e ".[dev]"  # Installs SolarWindPy + dev tools (including pip-only)
+#   pip install -e .  # Installs SolarWindPy in editable mode
 #
 name: solarwindpy
 channels:
@@ -113,3 +113,6 @@ dependencies:
 - tzdata
 - urllib3
 - virtualenv
+- pip
+- pip:
+  - ast-grep-py
