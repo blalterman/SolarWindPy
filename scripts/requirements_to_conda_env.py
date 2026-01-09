@@ -47,9 +47,8 @@ PIP_TO_CONDA_NAMES = {
 
 # Packages that are pip-only (not available on conda-forge)
 # These will be added to a `pip:` subsection in the conda yml
-PIP_ONLY_PACKAGES = {
-    "ast-grep-py",  # Python bindings for ast-grep, not on conda-forge
-}
+# Note: ast-grep is now provided via MCP server, not Python package
+PIP_ONLY_PACKAGES: set[str] = set()  # Currently empty; add packages here as needed
 
 # Packages with version schemes that differ between PyPI and conda-forge
 # These packages have their versions stripped entirely to let conda resolve

@@ -6,8 +6,6 @@
 #
 alabaster==1.0.0
     # via sphinx
-ast-grep-py==0.40.4
-    # via solarwindpy (pyproject.toml)
 astropy==7.2.0
     # via solarwindpy (pyproject.toml)
 astropy-iers-data==0.2025.12.22.0.40.30

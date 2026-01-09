@@ -113,6 +113,3 @@ dependencies:
 - tzdata
 - urllib3
 - virtualenv
-- pip
-- pip:
-  - ast-grep-py
