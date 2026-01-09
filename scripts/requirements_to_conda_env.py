@@ -39,6 +39,16 @@ from pathlib import Path
 # This handles cases where pip and conda use different package names
 PIP_TO_CONDA_NAMES = {
     "tables": "pytables",  # PyTables: pip uses 'tables', conda uses 'pytables'
+    "blosc2": "python-blosc2",  # Blosc2: pip uses 'blosc2', conda uses 'python-blosc2'
+    "msgpack": "msgpack-python",  # MessagePack: pip uses 'msgpack', conda uses 'msgpack-python'
+    "mypy-extensions": "mypy_extensions",  # Underscore on conda-forge
+    "restructuredtext-lint": "restructuredtext_lint",  # Underscore on conda-forge
+}
+
+# Packages that are pip-only (not available on conda-forge)
+# These will be excluded from the conda yml and must be installed via pip
+PIP_ONLY_PACKAGES = {
+    "ast-grep-py",  # Python bindings for ast-grep, not on conda-forge
 }
 
 # Packages with version schemes that differ between PyPI and conda-forge
@@ -145,8 +155,24 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
             if line.strip() and not line.strip().startswith("#")
         ]
 
+    # Helper to extract base package name (without version specifiers)
+    def get_base_name(pkg: str) -> str:
+        for op in [">=", "<=", "==", "!=", ">", "<", "~="]:
+            if op in pkg:
+                return pkg.split(op, 1)[0].strip()
+        return pkg.strip()
+
+    # Filter out pip-only packages, then translate the rest
+    filtered_packages = [
+        pkg for pkg in pip_packages if get_base_name(pkg) not in PIP_ONLY_PACKAGES
+    ]
+    excluded = [pkg for pkg in pip_packages if get_base_name(pkg) in PIP_ONLY_PACKAGES]
+
+    if excluded:
+        print(f"Note: Excluding pip-only packages (install via pip): {excluded}")
+
     # Translate pip package names to conda equivalents
-    conda_packages = [translate_package_name(pkg) for pkg in pip_packages]
+    conda_packages = [translate_package_name(pkg) for pkg in filtered_packages]
 
     env = {
         "name": env_name,
@@ -174,10 +200,13 @@ def generate_environment(req_path: str, env_name: str, overwrite: bool = False) 
 # NOTE: Python version is dynamically injected by GitHub Actions workflows
 # during matrix testing to support multiple Python versions.
 #
+# NOTE: Some dev packages (e.g., ast-grep-py) are pip-only and excluded here.
+# They are installed automatically by `pip install -e ".[dev]"`.
+#
 # For local use:
 #   conda env create -f solarwindpy.yml
 #   conda activate solarwindpy
-#   pip install -e .  # Enforces version constraints from pyproject.toml
+#   pip install -e ".[dev]"  # Installs SolarWindPy + dev tools (including pip-only)
 #
 """
     with open(target_name, "w") as out_file:
