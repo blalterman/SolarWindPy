@@ -214,5 +214,57 @@ class TestPlotHistWithContours:
         plt.close("all")
 
 
+class TestPlotContours:
+    """Tests for plot_contours method."""
+
+    def test_single_level_no_boundary_norm_error(self, hist2d_instance):
+        """Single-level contours should not raise BoundaryNorm ValueError.
+
+        BoundaryNorm requires at least 2 boundaries. When levels has only 1 element,
+        plot_contours should skip BoundaryNorm creation and let matplotlib handle it.
+        Note: cbar=False is required because matplotlib's colorbar also requires 2+ levels.
+
+        Regression test for: ValueError: You must provide at least 2 boundaries
+        """
+        ax, lbls, mappable, qset = hist2d_instance.plot_contours(
+            levels=[0.5], cbar=False
+        )
+        assert len(qset.levels) == 1
+        assert qset.levels[0] == 0.5
+        plt.close("all")
+
+    def test_multiple_levels_preserved(self, hist2d_instance):
+        """Multiple levels should be preserved in returned contour set."""
+        levels = [0.3, 0.5, 0.7]
+        ax, lbls, mappable, qset = hist2d_instance.plot_contours(levels=levels)
+        assert len(qset.levels) == 3
+        np.testing.assert_allclose(qset.levels, levels)
+        plt.close("all")
+
+    def test_use_contourf_true_returns_filled_contours(self, hist2d_instance):
+        """use_contourf=True should return filled QuadContourSet."""
+        ax, _, _, qset = hist2d_instance.plot_contours(use_contourf=True)
+        assert qset.filled is True
+        plt.close("all")
+
+    def test_use_contourf_false_returns_line_contours(self, hist2d_instance):
+        """use_contourf=False should return unfilled QuadContourSet."""
+        ax, _, _, qset = hist2d_instance.plot_contours(use_contourf=False)
+        assert qset.filled is False
+        plt.close("all")
+
+    def test_cbar_true_returns_colorbar(self, hist2d_instance):
+        """With cbar=True, mappable should be a Colorbar instance."""
+        ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=True)
+        assert isinstance(mappable, matplotlib.colorbar.Colorbar)
+        plt.close("all")
+
+    def test_cbar_false_returns_contourset(self, hist2d_instance):
+        """With cbar=False, mappable should be the QuadContourSet."""
+        ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=False)
+        assert isinstance(mappable, matplotlib.contour.QuadContourSet)
+        plt.close("all")
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

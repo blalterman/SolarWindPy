@@ -1050,11 +1050,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             # Define a class that forces representation of float to look a certain way
             # This remove trailing zero so '1.0' becomes '1'
             def __repr__(self):
-                return str(self).rstrip("0")
+                return float.__repr__(self).rstrip("0")
 
         levels = self._get_contour_levels(levels)
 
-        if (norm is None) and (levels is not None):
+        if (norm is None) and (levels is not None) and (len(levels) >= 2):
             norm = mpl.colors.BoundaryNorm(levels, 256, clip=True)
 
         contour_fcn = ax.contour
