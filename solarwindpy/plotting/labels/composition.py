@@ -10,10 +10,21 @@ known_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
 class Ion(base.Base):
     """Represent a single ion."""
 
-    def __init__(self, species, charge):
-        """Instantiate the ion."""
+    def __init__(self, species, charge, description=None):
+        """Instantiate the ion.
+
+        Parameters
+        ----------
+        species : str
+            The element symbol, e.g. ``"He"``, ``"O"``, ``"Fe"``.
+        charge : int or str
+            The ion charge state, e.g. ``6``, ``"7"``, ``"i"``.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_species_charge(species, charge)
+        self.set_description(description)
 
     @property
     def species(self):
@@ -58,10 +69,21 @@ class Ion(base.Base):
 class ChargeStateRatio(base.Base):
     """Ratio of two ion abundances."""
 
-    def __init__(self, ionA, ionB):
-        """Instantiate the charge-state ratio."""
+    def __init__(self, ionA, ionB, description=None):
+        """Instantiate the charge-state ratio.
+
+        Parameters
+        ----------
+        ionA : Ion or tuple
+            The numerator ion. If tuple, passed to Ion constructor.
+        ionB : Ion or tuple
+            The denominator ion. If tuple, passed to Ion constructor.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_ions(ionA, ionB)
+        self.set_description(description)
 
     @property
     def ionA(self):

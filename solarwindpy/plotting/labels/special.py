@@ -31,20 +31,22 @@ class ArbitraryLabel(base.Base):
 class ManualLabel(ArbitraryLabel):
     r"""Label defined by raw LaTeX text and unit."""
 
-    def __init__(self, tex, unit, path=None):
+    def __init__(self, tex, unit, path=None, description=None):
         super().__init__()
         self.set_tex(tex)
         self.set_unit(unit)
         self._path = path
+        self.set_description(description)
 
     def __str__(self):
-        return (
+        result = (
             r"$\mathrm{%s} \; [%s]$"
             % (
                 self.tex.replace(" ", r" \; "),
                 self.unit,
             )
         ).replace(r"\; []", "")
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -73,8 +75,9 @@ class ManualLabel(ArbitraryLabel):
 class Vsw(base.Base):
     """Solar wind speed."""
 
-    def __init__(self):
+    def __init__(self, description=None):
         super().__init__()
+        self.set_description(description)
 
     #     def __str__(self):
     #         return r"$%s \; [\mathrm{km \, s^{-1}}]$" % self.tex
@@ -95,13 +98,15 @@ class Vsw(base.Base):
 class CarringtonRotation(ArbitraryLabel):
     """Carrington rotation count."""
 
-    def __init__(self, short_label=True):
+    def __init__(self, short_label=True, description=None):
         """Instantiate the label."""
         super().__init__()
         self._short_label = bool(short_label)
+        self.set_description(description)
 
     def __str__(self):
-        return r"$%s \; [\#]$" % self.tex
+        result = r"$%s \; [\#]$" % self.tex
+        return self._format_with_description(result)
 
     @property
     def short_label(self):
@@ -122,13 +127,15 @@ class CarringtonRotation(ArbitraryLabel):
 class Count(ArbitraryLabel):
     """Count histogram label."""
 
-    def __init__(self, norm=None):
+    def __init__(self, norm=None, description=None):
         super().__init__()
         self.set_axnorm(norm)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        result = r"${} \; [{}]$".format(self.tex, self.units)
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -188,11 +195,13 @@ class Count(ArbitraryLabel):
 class Power(ArbitraryLabel):
     """Power spectrum label."""
 
-    def __init__(self):
+    def __init__(self, description=None):
         super().__init__()
+        self.set_description(description)
 
     def __str__(self):
-        return rf"${self.tex} \; [{self.units}]$"
+        result = rf"${self.tex} \; [{self.units}]$"
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -210,15 +219,17 @@ class Power(ArbitraryLabel):
 class Probability(ArbitraryLabel):
     """Probability that a quantity meets a comparison criterion."""
 
-    def __init__(self, other_label, comparison=None):
+    def __init__(self, other_label, comparison=None, description=None):
         """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        result = r"${} \; [{}]$".format(self.tex, self.units)
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -287,21 +298,25 @@ class Probability(ArbitraryLabel):
 class CountOther(ArbitraryLabel):
     """Count of samples of another label fulfilling a comparison."""
 
-    def __init__(self, other_label, comparison=None, new_line_for_units=False):
+    def __init__(
+        self, other_label, comparison=None, new_line_for_units=False, description=None
+    ):
         """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.set_new_line_for_units(new_line_for_units)
+        self.set_description(description)
 
         self.build_label()
 
     def __str__(self):
-        return r"${tex} {sep} [{units}]$".format(
+        result = r"${tex} {sep} [{units}]$".format(
             tex=self.tex,
             sep="$\n$" if self.new_line_for_units else r"\;",
             units=self.units,
         )
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -376,18 +391,27 @@ class CountOther(ArbitraryLabel):
 class MathFcn(ArbitraryLabel):
     """Math function applied to another label."""
 
-    def __init__(self, fcn, other_label, dimensionless=True, new_line_for_units=False):
+    def __init__(
+        self,
+        fcn,
+        other_label,
+        dimensionless=True,
+        new_line_for_units=False,
+        description=None,
+    ):
         """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_function(fcn)
         self.set_dimensionless(dimensionless)
         self.set_new_line_for_units(new_line_for_units)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
         sep = "$\n$" if self.new_line_for_units else r"\;"
-        return rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        result = rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -471,7 +495,7 @@ class AbsoluteValue(ArbitraryLabel):
     absolute value preserves the original units since |x| has the same dimensions as x.
     """
 
-    def __init__(self, other_label, new_line_for_units=False):
+    def __init__(self, other_label, new_line_for_units=False, description=None):
         """Instantiate the label.
 
         Parameters
@@ -480,6 +504,8 @@ class AbsoluteValue(ArbitraryLabel):
             The label to wrap with absolute value bars.
         new_line_for_units : bool, default False
             If True, place units on a new line.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
 
         Notes
         -----
@@ -490,11 +516,13 @@ class AbsoluteValue(ArbitraryLabel):
         super().__init__()
         self.set_other_label(other_label)
         self.set_new_line_for_units(new_line_for_units)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
         sep = "$\n$" if self.new_line_for_units else r"\;"
-        return rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        result = rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -539,12 +567,14 @@ class AbsoluteValue(ArbitraryLabel):
 class Distance2Sun(ArbitraryLabel):
     """Distance to the Sun."""
 
-    def __init__(self, units):
+    def __init__(self, units, description=None):
         super().__init__()
         self.set_units(units)
+        self.set_description(description)
 
     def __str__(self):
-        return r"$%s \; [\mathrm{%s}]$" % (self.tex, self.units)
+        result = r"$%s \; [\mathrm{%s}]$" % (self.tex, self.units)
+        return self._format_with_description(result)
 
     @property
     def units(self):
@@ -572,12 +602,14 @@ class Distance2Sun(ArbitraryLabel):
 class SSN(ArbitraryLabel):
     """Sunspot number label."""
 
-    def __init__(self, key):
+    def __init__(self, key, description=None):
         super().__init__()
         self.set_kind(key)
+        self.set_description(description)
 
     def __str__(self):
-        return r"$%s \; [\#]$" % self.tex
+        result = r"$%s \; [\#]$" % self.tex
+        return self._format_with_description(result)
 
     @property
     def kind(self):
@@ -620,15 +652,17 @@ class SSN(ArbitraryLabel):
 class ComparisonLable(ArbitraryLabel):
     """Label comparing two other labels via a function."""
 
-    def __init__(self, labelA, labelB, fcn_name, fcn=None):
+    def __init__(self, labelA, labelB, fcn_name, fcn=None, description=None):
         """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        result = r"${} \; [{}]$".format(self.tex, self.units)
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -759,16 +793,18 @@ keys : {",".join(keys)}
 class Xcorr(ArbitraryLabel):
     """Cross-correlation coefficient between two labels."""
 
-    def __init__(self, labelA, labelB, method, short_tex=False):
+    def __init__(self, labelA, labelB, method, short_tex=False, description=None):
         """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)
         self.set_short_tex(short_tex)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
-        return r"${} \; [{}]$".format(self.tex, self.units)
+        result = r"${} \; [{}]$".format(self.tex, self.units)
+        return self._format_with_description(result)
 
     @property
     def tex(self):

@@ -342,6 +342,7 @@ class Base(ABC):
     def __init__(self):
         """Initialize the logger."""
         self._init_logger()
+        self._description = None
 
     def __str__(self):
         return self.with_units
@@ -378,8 +379,43 @@ class Base(ABC):
         self._logger = logger
 
     @property
+    def description(self):
+        """Optional human-readable description shown above the label."""
+        return self._description
+
+    def set_description(self, new):
+        """Set the description string.
+
+        Parameters
+        ----------
+        new : str or None
+            Human-readable description. None disables the description.
+        """
+        if new is not None:
+            new = str(new)
+        self._description = new
+
+    def _format_with_description(self, label_str):
+        """Prepend description to label string if set.
+
+        Parameters
+        ----------
+        label_str : str
+            The formatted label (typically with TeX and units).
+
+        Returns
+        -------
+        str
+            Label with description prepended if set, otherwise unchanged.
+        """
+        if self.description:
+            return f"{self.description}\n{label_str}"
+        return label_str
+
+    @property
     def with_units(self):
-        return rf"${self.tex} \; \left[{self.units}\right]$"
+        result = rf"${self.tex} \; \left[{self.units}\right]$"
+        return self._format_with_description(result)
 
     @property
     def tex(self):
@@ -406,7 +442,9 @@ class TeXlabel(Base):
     labels representing the same quantity compare equal.
     """
 
-    def __init__(self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False):
+    def __init__(
+        self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False, description=None
+    ):
         """Instantiate the label.
 
         Parameters
@@ -422,11 +460,14 @@ class TeXlabel(Base):
             Axis normalization used when building colorbar labels.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
         self.set_new_line_for_units(new_line_for_units)
+        self.set_description(description)
         self.build_label()
 
     @property
@@ -503,7 +544,6 @@ class TeXlabel(Base):
         return substitution[0]
 
     def _build_one_label(self, mcs):
-
         m = mcs.m
         c = mcs.c
         s = mcs.s
@@ -603,6 +643,8 @@ template   : %s
         return tex, units, path
 
     def _combine_tex_path_units_axnorm(self, tex, path, units):
+        # TODO: Re-evaluate method name - "path" in name is misleading for a
+        # display-focused method
         """Finalize label pieces with axis normalization."""
         axnorm = self.axnorm
         tex_norm = _trans_axnorm[axnorm]
@@ -616,6 +658,9 @@ template   : %s
             sep="$\n$" if self.new_line_for_units else r"\;",
             units=units,
         )
+
+        # Apply description formatting
+        with_units = self._format_with_description(with_units)
 
         return tex, path, units, with_units
 
