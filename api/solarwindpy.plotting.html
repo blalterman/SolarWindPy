@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting package &mdash; SolarWindPy 0.1.dev1+gbf7b9c1ed documentation</title>
+  <title>solarwindpy.plotting package &mdash; SolarWindPy 0.1.dev1+g31b423281 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ead586bb"></script>
+      <script src="../_static/documentation_options.js?v=f9fe6fd0"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -419,6 +419,68 @@ PNG version.</p></li>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">save</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;my_plot&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">nan_gaussian_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#nan_gaussian_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Apply Gaussian filter with proper NaN handling via normalized convolution.</p>
+<p>Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code> which propagates NaN values to
+all neighboring cells, this function:</p>
+<ol class="arabic simple">
+<li><p>Smooths valid data correctly near NaN regions</p></li>
+<li><p>Preserves NaN locations (no interpolation into NaN cells)</p></li>
+</ol>
+<p>The algorithm uses normalized convolution: both the data (with NaN replaced
+by 0) and a weight mask (1 for valid, 0 for NaN) are filtered. The result
+is the ratio of filtered data to filtered weights, ensuring proper
+normalization near boundaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>np.ndarray</em>) – 2D array possibly containing NaN values.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Standard deviation for the Gaussian kernel, in pixels.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered array with original NaN locations preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter</span></code></dt><dd><p>Underlying filter implementation.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>This implementation follows the normalized convolution approach described
+in <a class="reference internal" href="#re04cf4970134-1" id="id1">[1]</a>. The key insight is that filtering a weight mask alongside the
+data allows proper normalization at boundaries and near missing values.</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="re04cf4970134-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Knutsson, H., &amp; Westin, C. F. (1993). Normalized and differential
+convolution. In Proceedings of IEEE Conference on Computer Vision and
+Pattern Recognition (pp. 515-523).</p>
+</div>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">nan_gaussian_filter</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>  <span class="c1"># NaN preserved</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>  <span class="c1"># Neighbor is valid</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>

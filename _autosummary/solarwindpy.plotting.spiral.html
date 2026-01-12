@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gbf7b9c1ed documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g31b423281 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ead586bb"></script>
+      <script src="../_static/documentation_options.js?v=f9fe6fd0"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -661,32 +661,75 @@ splot.initialize_mesh()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.plot_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Make a contour plot on <cite>ax</cite> using <cite>ax.contour</cite>.</p>
+<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rbf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbf_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbf_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbf_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'thin_plate_spline'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_aware_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/spiral.html#SpiralPlot2D.plot_contours"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Make a contour plot from adaptive mesh data with optional smoothing.</p>
+<p>Supports three interpolation methods for generating contours from the
+irregular adaptive mesh:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rbf&quot;</span></code>: Sparse RBF interpolation (default, fastest with built-in smoothing)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;grid&quot;</span></code>: Grid interpolation + Gaussian smoothing (matches Hist2D API)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;tricontour&quot;</span></code>: Direct triangulated contours (no smoothing, for debugging)</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>mpl.axes.Axes</em><em>, </em><em>None</em>) – If None, create an <cite>Axes</cite> instance from <cite>plt.subplots</cite>.</p></li>
-<li><p><strong>label_levels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add labels to contours with <cite>ax.clabel</cite>.</p></li>
-<li><p><strong>cbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, create color bar with <cite>labels.z</cite>.</p></li>
-<li><p><strong>limit_color_norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, limit the color range to 0.001 and 0.999 percentile range
-of the z-value, count or otherwise.</p></li>
-<li><p><strong>cbar_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>None</em>) – If not None, kwargs passed to <cite>self._make_cbar</cite>.</p></li>
-<li><p><strong>fcn</strong> (<em>FunctionType</em><em>, </em><em>None</em>) – Aggregation function. If None, automatically select in <a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg" title="solarwindpy.plotting.spiral.SpiralPlot2D.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p></li>
-<li><p><strong>plot_edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, plot the smoothed, extreme edges of the 2D histogram.</p></li>
-<li><p><strong>clabel_kwargs</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – If not None, dictionary of kwargs passed to <cite>ax.clabel</cite>.</p></li>
-<li><p><strong>skip_max_clbl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, don’t label the maximum contour. Primarily used when the maximum
-contour is, effectively, a point.</p></li>
-<li><p><strong>maximum_color</strong> – The color for the maximum of the PDF.</p></li>
-<li><p><strong>use_contourf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, use <cite>ax.contourf</cite>. Else use <cite>ax.contour</cite>.</p></li>
-<li><p><strong>gaussian_filter_std</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – If &gt; 0, apply <cite>scipy.ndimage.gaussian_filter</cite> to the z-values using the
-standard deviation specified by <cite>gaussian_filter_std</cite>.</p></li>
-<li><p><strong>gaussian_filter_kwargs</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – If not None and gaussian_filter_std &gt; 0, passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code></p></li>
-<li><p><strong>kwargs</strong> – Passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">ax.pcolormesh()</span></code>.
-If row or column normalized data, <cite>norm</cite> defaults to <cite>mpl.colors.Normalize(0, 1)</cite>.</p></li>
+<li><p><strong>ax</strong> (<em>mpl.axes.Axes</em><em>, </em><em>None</em>) – If None, create an Axes instance from <code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code>.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;rbf&quot;</em><em>, </em><em>&quot;grid&quot;</em><em>, </em><em>&quot;tricontour&quot;}</em>) – Interpolation method. Default is <code class="docutils literal notranslate"><span class="pre">&quot;rbf&quot;</span></code> (fastest with smoothing).</p></li>
+<li><p><strong>Parameters</strong> (<em>Common</em>)</p></li>
+<li><p><strong>---------------------</strong></p></li>
+<li><p><strong>rbf_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of nearest neighbors for sparse RBF. Higher = smoother but slower.
+Default is 50.</p></li>
+<li><p><strong>rbf_smoothing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – RBF smoothing parameter. Higher values produce smoother surfaces.
+Default is 1.0.</p></li>
+<li><p><strong>rbf_kernel</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – RBF kernel type. Options: “thin_plate_spline”, “cubic”, “quintic”,
+“multiquadric”, “inverse_multiquadric”, “gaussian”.</p></li>
+<li><p><strong>Parameters</strong></p></li>
+<li><p><strong>----------------------</strong></p></li>
+<li><p><strong>grid_resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of grid points along each axis. Default is 100.</p></li>
+<li><p><strong>gaussian_filter_std</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Standard deviation for Gaussian smoothing. Default is 1.5.
+Set to 0 to disable smoothing.</p></li>
+<li><p><strong>interpolation</strong> (<em>{&quot;linear&quot;</em><em>, </em><em>&quot;cubic&quot;</em><em>, </em><em>&quot;nearest&quot;}</em>) – Interpolation method for griddata. Default is “cubic”.</p></li>
+<li><p><strong>nan_aware_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, use NaN-aware Gaussian filtering. Default is True.</p></li>
+<li><p><strong>Parameters</strong></p></li>
+<li><p><strong>-----------------</strong></p></li>
+<li><p><strong>label_levels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add labels to contours with <code class="docutils literal notranslate"><span class="pre">ax.clabel</span></code>. Default is True.</p></li>
+<li><p><strong>cbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, create a colorbar. Default is True.</p></li>
+<li><p><strong>cbar_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>None</em>) – Keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">self._make_cbar</span></code>.</p></li>
+<li><p><strong>fcn</strong> (<em>callable</em><em>, </em><em>None</em>) – Aggregation function. If None, automatically select in <a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg" title="solarwindpy.plotting.spiral.SpiralPlot2D.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p></li>
+<li><p><strong>clabel_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>None</em>) – Keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">ax.clabel</span></code>.</p></li>
+<li><p><strong>skip_max_clbl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, don’t label the maximum contour level. Default is True.</p></li>
+<li><p><strong>use_contourf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, use filled contours. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to the contour function.
+Common options: <code class="docutils literal notranslate"><span class="pre">levels</span></code>, <code class="docutils literal notranslate"><span class="pre">cmap</span></code>, <code class="docutils literal notranslate"><span class="pre">norm</span></code>, <code class="docutils literal notranslate"><span class="pre">linestyles</span></code>.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ax</strong> (<em>mpl.axes.Axes</em>) – The axes containing the plot.</p></li>
+<li><p><strong>lbls</strong> (<em>list or None</em>) – Contour labels if <code class="docutils literal notranslate"><span class="pre">label_levels=True</span></code>, else None.</p></li>
+<li><p><strong>cbar_or_mappable</strong> (<em>Colorbar or QuadContourSet</em>) – The colorbar if <code class="docutils literal notranslate"><span class="pre">cbar=True</span></code>, else the contour set.</p></li>
+<li><p><strong>qset</strong> (<em>QuadContourSet</em>) – The contour set object.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Default: sparse RBF (fastest)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="p">,</span> <span class="n">lbls</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">qset</span> <span class="o">=</span> <span class="n">splot</span><span class="o">.</span><span class="n">plot_contours</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Grid interpolation with Gaussian smoothing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="p">,</span> <span class="n">lbls</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">qset</span> <span class="o">=</span> <span class="n">splot</span><span class="o">.</span><span class="n">plot_contours</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;grid&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">gaussian_filter_std</span><span class="o">=</span><span class="mf">2.0</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Debug: see raw triangulation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="p">,</span> <span class="n">lbls</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">qset</span> <span class="o">=</span> <span class="n">splot</span><span class="o">.</span><span class="n">plot_contours</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;tricontour&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">

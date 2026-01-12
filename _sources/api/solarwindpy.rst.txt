@@ -15,6 +15,14 @@ Subpackages
    solarwindpy.solar_activity
    solarwindpy.tools
 
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.reproducibility
+
 Module contents
 ---------------
 

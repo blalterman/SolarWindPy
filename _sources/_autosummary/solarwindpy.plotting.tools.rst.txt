@@ -18,9 +18,10 @@
       build_ax_array_with_common_colorbar
       calculate_nrows_ncols
       joint_legend
-      multipanel_figure_shared_cbar
+      nan_gaussian_filter
       save
       subplots
+      use_style
    
    
 

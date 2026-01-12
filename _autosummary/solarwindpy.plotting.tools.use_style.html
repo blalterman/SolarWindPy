@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.tools.multipanel_figure_shared_cbar &mdash; SolarWindPy 0.1.dev1+gbf7b9c1ed documentation</title>
+  <title>solarwindpy.plotting.tools.use_style &mdash; SolarWindPy 0.1.dev1+g31b423281 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,14 +20,14 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ead586bb"></script>
+      <script src="../_static/documentation_options.js?v=f9fe6fd0"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.plotting.tools.save" href="solarwindpy.plotting.tools.save.html" />
-    <link rel="prev" title="solarwindpy.plotting.tools.joint_legend" href="solarwindpy.plotting.tools.joint_legend.html" />
+    <link rel="next" title="solarwindpy.plotting.select_data_from_figure" href="solarwindpy.plotting.select_data_from_figure.html" />
+    <link rel="prev" title="solarwindpy.plotting.tools.subplots" href="solarwindpy.plotting.tools.subplots.html" />
    
   <style>
     .sidebar-custom-info {
@@ -93,9 +93,10 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar.html">solarwindpy.plotting.tools.build_ax_array_with_common_colorbar</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.calculate_nrows_ncols.html">solarwindpy.plotting.tools.calculate_nrows_ncols</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.joint_legend.html">solarwindpy.plotting.tools.joint_legend</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.plotting.tools.multipanel_figure_shared_cbar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.nan_gaussian_filter.html">solarwindpy.plotting.tools.nan_gaussian_filter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.save.html">solarwindpy.plotting.tools.save</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.subplots.html">solarwindpy.plotting.tools.subplots</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.plotting.tools.use_style</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a></li>
@@ -147,7 +148,7 @@
         
         
         <li class="breadcrumb-item active" aria-current="page">
-          <span>solarwindpy.plotting.tools.multipanel_figure_shared_cbar</span>
+          <span>solarwindpy.plotting.tools.use_style</span>
         </li>
       </ol>
     </nav>
@@ -322,38 +323,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-plotting-tools-multipanel-figure-shared-cbar">
-<h1>solarwindpy.plotting.tools.multipanel_figure_shared_cbar<a class="headerlink" href="#solarwindpy-plotting-tools-multipanel-figure-shared-cbar" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-plotting-tools-use-style">
+<h1>solarwindpy.plotting.tools.use_style<a class="headerlink" href="#solarwindpy-plotting-tools-use-style" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="solarwindpy.plotting.tools.multipanel_figure_shared_cbar">
-<span class="sig-name descname"><span class="pre">multipanel_figure_shared_cbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_cbar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharey</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#multipanel_figure_shared_cbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.tools.multipanel_figure_shared_cbar" title="Link to this definition"></a></dt>
-<dd><p>Create a grid of axes that share a single colorbar.</p>
-<p>This is a lightweight wrapper around
-<a class="reference internal" href="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar.html#solarwindpy.plotting.tools.build_ax_array_with_common_colorbar" title="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_ax_array_with_common_colorbar()</span></code></a> for backward compatibility.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nrows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the axes grid.</p></li>
-<li><p><strong>ncols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the axes grid.</p></li>
-<li><p><strong>vertical_cbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> the colorbar is placed to the right of the axes; otherwise
-it is placed above them.</p></li>
-<li><p><strong>sharex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> share the respective axis limits across all panels.</p></li>
-<li><p><strong>sharey</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> share the respective axis limits across all panels.</p></li>
-<li><p><strong>**kwargs</strong> – Additional arguments controlling layout such as <code class="docutils literal notranslate"><span class="pre">figsize</span></code> or grid
-ratios.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>fig</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.figure.Figure</span></code></a>)</p></li>
-<li><p><strong>axes</strong> (ndarray of <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>)</p></li>
-<li><p><strong>cax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>)</p></li>
-</ul>
-</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="solarwindpy.plotting.tools.use_style">
+<span class="sig-name descname"><span class="pre">use_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#use_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.tools.use_style" title="Link to this definition"></a></dt>
+<dd><p>Apply the SolarWindPy matplotlib style.</p>
+<p>This sets publication-ready defaults including:
+- 4x4 inch figure size
+- 12pt base font size
+- Spectral_r colormap
+- 300 DPI PDF output</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span><span class="p">,</span> <span class="n">cax</span> <span class="o">=</span> <span class="n">multipanel_figure_shared_cbar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp_pp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">swp_pp</span><span class="o">.</span><span class="n">use_style</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -364,8 +347,8 @@ ratios.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.plotting.tools.joint_legend.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.tools.joint_legend" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.plotting.tools.save.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.tools.save" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.plotting.tools.subplots.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.tools.subplots" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.plotting.select_data_from_figure.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.select_data_from_figure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

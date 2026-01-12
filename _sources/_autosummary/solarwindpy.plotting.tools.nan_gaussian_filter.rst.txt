@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.nan\_gaussian\_filter
+================================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: nan_gaussian_filter

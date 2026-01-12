@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+gbf7b9c1ed documentation</title>
+  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+g31b423281 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ead586bb"></script>
+      <script src="../_static/documentation_options.js?v=f9fe6fd0"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -93,9 +93,10 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar.html">solarwindpy.plotting.tools.build_ax_array_with_common_colorbar</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.calculate_nrows_ncols.html">solarwindpy.plotting.tools.calculate_nrows_ncols</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.joint_legend.html">solarwindpy.plotting.tools.joint_legend</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.multipanel_figure_shared_cbar.html">solarwindpy.plotting.tools.multipanel_figure_shared_cbar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.nan_gaussian_filter.html">solarwindpy.plotting.tools.nan_gaussian_filter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.save.html">solarwindpy.plotting.tools.save</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.subplots.html">solarwindpy.plotting.tools.subplots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.use_style.html">solarwindpy.plotting.tools.use_style</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.select_data_from_figure.html">solarwindpy.plotting.select_data_from_figure</a></li>
@@ -325,8 +326,8 @@
   <section id="solarwindpy-plotting-tools">
 <h1>solarwindpy.plotting.tools<a class="headerlink" href="#solarwindpy-plotting-tools" title="Link to this heading"></a></h1>
 <p>Utility functions for common <a class="reference external" href="https://matplotlib.org/stable/index.html#module-matplotlib" title="(in Matplotlib v3.10.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">matplotlib</span></code></a> tasks.</p>
-<p>These helpers provide shortcuts for creating figures, saving output, and building grids
-of axes with shared colorbars.</p>
+<p>These helpers provide shortcuts for creating figures, saving output, building grids
+of axes with shared colorbars, and NaN-aware image filtering.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -339,8 +340,8 @@ of axes with shared colorbars.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.joint_legend.html#solarwindpy.plotting.tools.joint_legend" title="solarwindpy.plotting.tools.joint_legend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joint_legend</span></code></a>(*axes[, idx_for_legend])</p></td>
 <td><p>Create a combined legend for multiple axes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.multipanel_figure_shared_cbar.html#solarwindpy.plotting.tools.multipanel_figure_shared_cbar" title="solarwindpy.plotting.tools.multipanel_figure_shared_cbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multipanel_figure_shared_cbar</span></code></a>(nrows, ncols)</p></td>
-<td><p>Create a grid of axes that share a single colorbar.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.nan_gaussian_filter.html#solarwindpy.plotting.tools.nan_gaussian_filter" title="solarwindpy.plotting.tools.nan_gaussian_filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nan_gaussian_filter</span></code></a>(array, sigma, **kwargs)</p></td>
+<td><p>Apply Gaussian filter with proper NaN handling via normalized convolution.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.save.html#solarwindpy.plotting.tools.save" title="solarwindpy.plotting.tools.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(fig, spath[, add_info, info_x, info_y, ...])</p></td>
 <td><p>Save a figure in both PDF and PNG formats.</p></td>
@@ -348,8 +349,27 @@ of axes with shared colorbars.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.subplots.html#solarwindpy.plotting.tools.subplots" title="solarwindpy.plotting.tools.subplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subplots</span></code></a>([nrows, ncols, scale_width, ...])</p></td>
 <td><p>Create a grid of subplots with a scaled figure size.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.tools.use_style.html#solarwindpy.plotting.tools.use_style" title="solarwindpy.plotting.tools.use_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_style</span></code></a>()</p></td>
+<td><p>Apply the SolarWindPy matplotlib style.</p></td>
+</tr>
 </tbody>
 </table>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">use_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#use_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Apply the SolarWindPy matplotlib style.</p>
+<p>This sets publication-ready defaults including:
+- 4x4 inch figure size
+- 12pt base font size
+- Spectral_r colormap
+- 300 DPI PDF output</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp_pp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">swp_pp</span><span class="o">.</span><span class="n">use_style</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">subplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#subplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -445,41 +465,7 @@ assumes that the last axis is on the right hand side of the figure.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">multipanel_figure_shared_cbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_cbar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharey</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#multipanel_figure_shared_cbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Create a grid of axes that share a single colorbar.</p>
-<p>This is a lightweight wrapper around
-<a class="reference internal" href="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar.html#solarwindpy.plotting.tools.build_ax_array_with_common_colorbar" title="solarwindpy.plotting.tools.build_ax_array_with_common_colorbar"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_ax_array_with_common_colorbar()</span></code></a> for backward compatibility.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nrows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the axes grid.</p></li>
-<li><p><strong>ncols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the axes grid.</p></li>
-<li><p><strong>vertical_cbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> the colorbar is placed to the right of the axes; otherwise
-it is placed above them.</p></li>
-<li><p><strong>sharex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> share the respective axis limits across all panels.</p></li>
-<li><p><strong>sharey</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> share the respective axis limits across all panels.</p></li>
-<li><p><strong>**kwargs</strong> – Additional arguments controlling layout such as <code class="docutils literal notranslate"><span class="pre">figsize</span></code> or grid
-ratios.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>fig</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.figure.Figure</span></code></a>)</p></li>
-<li><p><strong>axes</strong> (ndarray of <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>)</p></li>
-<li><p><strong>cax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>)</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span><span class="p">,</span> <span class="n">cax</span> <span class="o">=</span> <span class="n">multipanel_figure_shared_cbar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">build_ax_array_with_common_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gs_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#build_ax_array_with_common_colorbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">build_ax_array_with_common_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gs_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#build_ax_array_with_common_colorbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Build an array of axes that share a colour bar.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -487,6 +473,12 @@ ratios.</p></li>
 <li><p><strong>nrows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Desired grid shape.</p></li>
 <li><p><strong>ncols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Desired grid shape.</p></li>
 <li><p><strong>cbar_loc</strong> (<em>{&quot;top&quot;</em><em>, </em><em>&quot;bottom&quot;</em><em>, </em><em>&quot;left&quot;</em><em>, </em><em>&quot;right&quot;}</em><em>, </em><em>optional</em>) – Location of the colorbar relative to the axes grid.</p></li>
+<li><p><strong>figsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> or </em><em>&quot;auto&quot;</em><em>, </em><em>optional</em>) – Figure size as (width, height) in inches. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> (default),
+scales from <code class="docutils literal notranslate"><span class="pre">rcParams[&quot;figure.figsize&quot;]</span></code> based on nrows/ncols.</p></li>
+<li><p><strong>sharex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, share x-axis limits across all panels. Default <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>sharey</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, share y-axis limits across all panels. Default <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>hspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Vertical spacing between subplots. Default <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>wspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Horizontal spacing between subplots. Default <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
 <li><p><strong>fig_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Keyword arguments forwarded to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="(in Matplotlib v3.10.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.figure()</span></code></a>.</p></li>
 <li><p><strong>gs_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional options for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.gridspec.GridSpec.html#matplotlib.gridspec.GridSpec" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.gridspec.GridSpec</span></code></a>.</p></li>
 </ul>
@@ -502,6 +494,7 @@ ratios.</p></li>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">cax</span> <span class="o">=</span> <span class="n">build_ax_array_with_common_colorbar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">cbar_loc</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">cax</span> <span class="o">=</span> <span class="n">build_ax_array_with_common_colorbar</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -527,6 +520,68 @@ typical display aspect ratios into account.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">calculate_nrows_ncols</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="go">(...2..., ...3...)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">nan_gaussian_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/tools.html#nan_gaussian_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Apply Gaussian filter with proper NaN handling via normalized convolution.</p>
+<p>Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code> which propagates NaN values to
+all neighboring cells, this function:</p>
+<ol class="arabic simple">
+<li><p>Smooths valid data correctly near NaN regions</p></li>
+<li><p>Preserves NaN locations (no interpolation into NaN cells)</p></li>
+</ol>
+<p>The algorithm uses normalized convolution: both the data (with NaN replaced
+by 0) and a weight mask (1 for valid, 0 for NaN) are filtered. The result
+is the ratio of filtered data to filtered weights, ensuring proper
+normalization near boundaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>np.ndarray</em>) – 2D array possibly containing NaN values.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Standard deviation for the Gaussian kernel, in pixels.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered array with original NaN locations preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter</span></code></dt><dd><p>Underlying filter implementation.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>This implementation follows the normalized convolution approach described
+in <a class="reference internal" href="../api/solarwindpy.plotting.tools.html#rec25cb0484c2-1" id="id1">[1]</a>. The key insight is that filtering a weight mask alongside the
+data allows proper normalization at boundaries and near missing values.</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="rec25cb0484c2-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Knutsson, H., &amp; Westin, C. F. (1993). Normalized and differential
+convolution. In Proceedings of IEEE Conference on Computer Vision and
+Pattern Recognition (pp. 515-523).</p>
+</div>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">nan_gaussian_filter</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>  <span class="c1"># NaN preserved</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>  <span class="c1"># Neighbor is valid</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>

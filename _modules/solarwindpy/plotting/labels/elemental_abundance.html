@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.labels.elemental_abundance &mdash; SolarWindPy 0.1.dev1+gbf7b9c1ed documentation</title>
+  <title>solarwindpy.plotting.labels.elemental_abundance &mdash; SolarWindPy 0.1.dev1+g31b423281 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=ead586bb"></script>
+      <script src="../../../../_static/documentation_options.js?v=f9fe6fd0"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -329,11 +329,34 @@
 
 <div class="viewcode-block" id="ElementalAbundance.__init__">
 <a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">reference_species</span><span class="p">,</span> <span class="n">pct_unit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">photospheric</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the abundance label.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">,</span>
+        <span class="n">reference_species</span><span class="p">,</span>
+        <span class="n">pct_unit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">photospheric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the abundance label.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        species : str</span>
+<span class="sd">            The element symbol for the numerator.</span>
+<span class="sd">        reference_species : str</span>
+<span class="sd">            The element symbol for the denominator (reference).</span>
+<span class="sd">        pct_unit : bool, default False</span>
+<span class="sd">            If True, use percent units instead of #.</span>
+<span class="sd">        photospheric : bool, default True</span>
+<span class="sd">            If True, label indicates ratio to photospheric value.</span>
+<span class="sd">        description : str or None, optional</span>
+<span class="sd">            Human-readable description displayed above the mathematical label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_species</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">reference_species</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pct_unit</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pct_unit</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_photospheric</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">photospheric</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_photospheric</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">photospheric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>

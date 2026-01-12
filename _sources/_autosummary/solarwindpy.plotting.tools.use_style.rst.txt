@@ -1,0 +1,6 @@
+solarwindpy.plotting.tools.use\_style
+=====================================
+
+.. currentmodule:: solarwindpy.plotting.tools
+
+.. autofunction:: use_style
