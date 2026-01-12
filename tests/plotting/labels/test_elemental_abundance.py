@@ -1,9 +1,8 @@
 """Test suite for elemental abundance label functionality."""
 
-import pytest
+import logging
 import warnings
 from pathlib import Path
-from unittest.mock import patch
 
 from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 
@@ -165,21 +164,19 @@ class TestElementalAbundanceSetMethods:
         assert abundance.species == "Fe"
         assert abundance.reference_species == "O"
 
-    def test_set_species_unknown_warning(self):
+    def test_set_species_unknown_warning(self, caplog):
         """Test set_species warns for unknown species."""
         abundance = ElementalAbundance("He", "H")
-        with patch("logging.getLogger") as mock_logger:
-            mock_log = mock_logger.return_value
+        with caplog.at_level(logging.WARNING):
             abundance.set_species("Unknown", "H")
-            mock_log.warning.assert_called()
+        assert "not recognized" in caplog.text or len(caplog.records) > 0
 
-    def test_set_species_unknown_reference_warning(self):
+    def test_set_species_unknown_reference_warning(self, caplog):
         """Test set_species warns for unknown reference species."""
         abundance = ElementalAbundance("He", "H")
-        with patch("logging.getLogger") as mock_logger:
-            mock_log = mock_logger.return_value
+        with caplog.at_level(logging.WARNING):
             abundance.set_species("He", "Unknown")
-            mock_log.warning.assert_called()
+        assert "not recognized" in caplog.text or len(caplog.records) > 0
 
 
 class TestElementalAbundanceInheritance:
@@ -239,15 +236,12 @@ class TestElementalAbundanceKnownSpecies:
             ]
             assert len(relevant_warnings) == 0
 
-    def test_unknown_species_validation(self):
+    def test_unknown_species_validation(self, caplog):
         """Test validation warns for unknown species."""
-        import logging
-
-        with patch("logging.getLogger") as mock_logger:
-            mock_log = mock_logger.return_value
+        with caplog.at_level(logging.WARNING):
             ElementalAbundance("Unknown", "H")
-            # Should have warning for unknown species
-            mock_log.warning.assert_called()
+        # Should have warning for unknown species
+        assert "not recognized" in caplog.text or len(caplog.records) > 0
 
 
 class TestElementalAbundanceIntegration:
@@ -362,5 +356,5 @@ def test_module_imports():
     from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
     from solarwindpy.plotting.labels.elemental_abundance import known_species
 
-    assert ElementalAbundance is not None
-    assert known_species is not None
+    assert isinstance(ElementalAbundance, type), "ElementalAbundance should be a class"
+    assert isinstance(known_species, tuple), "known_species should be a tuple"

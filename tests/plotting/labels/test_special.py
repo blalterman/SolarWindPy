@@ -310,7 +310,7 @@ class TestDistance2Sun:
         valid_units = ["rs", "re", "au", "m", "km"]
         for unit in valid_units:
             dist = labels_special.Distance2Sun(unit)
-            assert dist.units is not None
+            assert isinstance(dist.units, str), f"units should be str for '{unit}'"
 
     def test_unit_translation(self):
         """Test unit translation."""
@@ -534,8 +534,8 @@ class TestLabelIntegration:
     def test_mixed_label_comparison(self, basic_texlabel):
         """Test comparison using mixed label types."""
         manual = labels_special.ManualLabel("Custom", "units")
-        comp = labels_special.ComparisonLable(basic_texlabel, manual, "add")
-        # Should work without error
+        # Verify construction succeeds (result intentionally unused)
+        labels_special.ComparisonLable(basic_texlabel, manual, "add")
 
     def test_probability_with_manual_label(self):
         """Test probability with manual label."""

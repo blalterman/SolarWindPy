@@ -64,7 +64,10 @@ class TestTimedelta:
 
         for offset in test_cases:
             td = datetime_labels.Timedelta(offset)
-            assert td.offset is not None
+            # Offset is a pandas DateOffset object with freqstr attribute
+            assert hasattr(
+                td.offset, "freqstr"
+            ), f"offset should be DateOffset for '{offset}'"
             assert isinstance(td.path, Path)
             assert r"\Delta t" in td.tex
 
