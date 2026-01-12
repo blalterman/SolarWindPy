@@ -17,3 +17,4 @@ image.cmap: Spectral_r
 # Savefig - PDF at high DPI for publication/presentation quality
 savefig.dpi: 300
 savefig.format: pdf
+savefig.bbox: tight

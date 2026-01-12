@@ -464,6 +464,78 @@ class MathFcn(ArbitraryLabel):
         self._path = self._build_path()
 
 
+class AbsoluteValue(ArbitraryLabel):
+    """Absolute value of another label, rendered as |...|.
+
+    Unlike MathFcn which can transform units (e.g., log makes things dimensionless),
+    absolute value preserves the original units since |x| has the same dimensions as x.
+    """
+
+    def __init__(self, other_label, new_line_for_units=False):
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        other_label : Base or str
+            The label to wrap with absolute value bars.
+        new_line_for_units : bool, default False
+            If True, place units on a new line.
+
+        Notes
+        -----
+        Absolute value preserves units - |σc| has the same units as σc.
+        This differs from MathFcn(r"log_{10}", ..., dimensionless=True) where
+        the result is dimensionless.
+        """
+        super().__init__()
+        self.set_other_label(other_label)
+        self.set_new_line_for_units(new_line_for_units)
+        self.build_label()
+
+    def __str__(self):
+        sep = "$\n$" if self.new_line_for_units else r"\;"
+        return rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+
+    @property
+    def tex(self):
+        return self._tex
+
+    @property
+    def units(self):
+        """Return units from underlying label - absolute value preserves dimensions."""
+        return self.other_label.units
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def other_label(self):
+        return self._other_label
+
+    @property
+    def new_line_for_units(self):
+        return self._new_line_for_units
+
+    def set_new_line_for_units(self, new):
+        self._new_line_for_units = bool(new)
+
+    def set_other_label(self, other):
+        assert isinstance(other, (str, base.Base))
+        self._other_label = other
+
+    def _build_tex(self):
+        return rf"\left|{self.other_label.tex}\right|"
+
+    def _build_path(self):
+        other = str(self.other_label.path)
+        return Path(f"abs-{other}")
+
+    def build_label(self):
+        self._tex = self._build_tex()
+        self._path = self._build_path()
+
+
 class Distance2Sun(ArbitraryLabel):
     """Distance to the Sun."""
 
@@ -615,7 +687,6 @@ labelB : {labelB.units}
         self._units = units
 
     def set_function(self, fcn_name, fcn):
-
         if fcn is None:
             get_fcn = fcn_name.lower()
             translate = {
