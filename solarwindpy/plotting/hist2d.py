@@ -153,7 +153,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     #     set_path.__doc__ = base.Base.set_path.__doc__
 
     def set_labels(self, **kwargs):
-
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
             try:
@@ -729,7 +728,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
             class nf(float):
                 def __repr__(self):
-                    return str(self).rstrip("0")
+                    return float.__repr__(self).rstrip("0")
 
             try:
                 clabel_args = (qset, levels[:-1] if skip_max_clbl else levels)
