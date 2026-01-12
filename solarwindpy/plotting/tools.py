@@ -222,7 +222,7 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     return axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
 
 
-def build_ax_array_with_common_colorbar(
+def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by 4 cbar positions
     nrows=1,
     ncols=1,
     cbar_loc="top",
@@ -364,11 +364,8 @@ def build_ax_array_with_common_colorbar(
         cax.yaxis.set_label_position("left")
 
     if axes.shape != (nrows, ncols):
-        raise ValueError(
-            f"""Unexpected axes shape
-Expected : {(nrows, ncols)}
-Created  : {axes.shape}
-"""
+        raise ValueError(  # noqa: E203 - aligned table format intentional
+            f"Unexpected axes shape\nExpected : {(nrows, ncols)}\nCreated  : {axes.shape}"
         )
 
     #     print("rows")
@@ -477,9 +474,9 @@ def nan_gaussian_filter(array, sigma, **kwargs):
     >>> import numpy as np
     >>> arr = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])
     >>> result = nan_gaussian_filter(arr, sigma=1.0)
-    >>> np.isnan(result[0, 2])  # NaN preserved
+    >>> bool(np.isnan(result[0, 2]))  # NaN preserved
     True
-    >>> np.isfinite(result[0, 1])  # Neighbor is valid
+    >>> bool(np.isfinite(result[0, 1]))  # Neighbor is valid
     True
     """
     arr = array.copy()

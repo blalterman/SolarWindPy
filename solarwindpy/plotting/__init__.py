@@ -25,7 +25,7 @@ __all__ = [
     "select_data_from_figure",
 ]
 
-from . import (
+from . import (  # noqa: E402 - imports after style application is intentional
     labels,
     histograms,
     scatter,
