@@ -2,7 +2,7 @@
 description: Diagnose and fix failing tests with guided recovery
 ---
 
-## Fix Tests Workflow: $ARGUMENTS
+## Diagnose Test Failures: $ARGUMENTS
 
 ### Phase 1: Test Execution & Analysis
 
