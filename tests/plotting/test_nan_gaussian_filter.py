@@ -1,31 +1,17 @@
 #!/usr/bin/env python
-"""Tests for NaN-aware Gaussian filtering in Hist2D.
-
-Tests the _nan_gaussian_filter method which uses normalized convolution
-to properly handle NaN values during Gaussian smoothing.
-"""
+"""Tests for NaN-aware Gaussian filtering in solarwindpy.plotting.tools."""
 
 import pytest
 import numpy as np
-import pandas as pd
 from scipy.ndimage import gaussian_filter
 
-from solarwindpy.plotting.hist2d import Hist2D
-
-
-@pytest.fixture
-def hist2d_instance():
-    """Create a minimal Hist2D instance for testing."""
-    np.random.seed(42)
-    x = pd.Series(np.random.randn(100), name="x")
-    y = pd.Series(np.random.randn(100), name="y")
-    return Hist2D(x, y, nbins=10)
+from solarwindpy.plotting.tools import nan_gaussian_filter
 
 
 class TestNanGaussianFilter:
-    """Tests for _nan_gaussian_filter method."""
+    """Tests for nan_gaussian_filter function."""
 
-    def test_matches_scipy_without_nans(self, hist2d_instance):
+    def test_matches_scipy_without_nans(self):
         """Without NaNs, should match scipy.ndimage.gaussian_filter.
 
         When no NaNs exist:
@@ -36,27 +22,27 @@ class TestNanGaussianFilter:
         """
         np.random.seed(42)
         arr = np.random.rand(10, 10)
-        result = hist2d_instance._nan_gaussian_filter(arr, sigma=1)
+        result = nan_gaussian_filter(arr, sigma=1)
         expected = gaussian_filter(arr, sigma=1)
         assert np.allclose(result, expected)
 
-    def test_preserves_nan_locations(self, hist2d_instance):
+    def test_preserves_nan_locations(self):
         """NaN locations in input should remain NaN in output."""
         np.random.seed(42)
         arr = np.random.rand(10, 10)
         arr[3, 3] = np.nan
         arr[7, 2] = np.nan
-        result = hist2d_instance._nan_gaussian_filter(arr, sigma=1)
+        result = nan_gaussian_filter(arr, sigma=1)
         assert np.isnan(result[3, 3])
         assert np.isnan(result[7, 2])
         assert np.isnan(result).sum() == 2
 
-    def test_no_nan_propagation(self, hist2d_instance):
+    def test_no_nan_propagation(self):
         """Neighbors of NaN cells should remain valid."""
         np.random.seed(42)
         arr = np.random.rand(10, 10)
         arr[5, 5] = np.nan
-        result = hist2d_instance._nan_gaussian_filter(arr, sigma=1)
+        result = nan_gaussian_filter(arr, sigma=1)
         # All 8 neighbors should be valid
         for di in [-1, 0, 1]:
             for dj in [-1, 0, 1]:
@@ -64,13 +50,13 @@ class TestNanGaussianFilter:
                     continue
                 assert not np.isnan(result[5 + di, 5 + dj])
 
-    def test_edge_nans(self, hist2d_instance):
+    def test_edge_nans(self):
         """NaNs at array edges should be handled correctly."""
         np.random.seed(42)
         arr = np.random.rand(10, 10)
         arr[0, 0] = np.nan
         arr[9, 9] = np.nan
-        result = hist2d_instance._nan_gaussian_filter(arr, sigma=1)
+        result = nan_gaussian_filter(arr, sigma=1)
         assert np.isnan(result[0, 0])
         assert np.isnan(result[9, 9])
         assert not np.isnan(result[5, 5])

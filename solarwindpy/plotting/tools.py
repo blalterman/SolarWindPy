@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Utility functions for common :mod:`matplotlib` tasks.
 
-These helpers provide shortcuts for creating figures, saving output, and building grids
-of axes with shared colorbars.
+These helpers provide shortcuts for creating figures, saving output, building grids
+of axes with shared colorbars, and NaN-aware image filtering.
 """
 
 import pdb  # noqa: F401
@@ -12,6 +12,27 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from datetime import datetime
 from pathlib import Path
+from scipy.ndimage import gaussian_filter
+
+# Path to the solarwindpy style file
+_STYLE_PATH = Path(__file__).parent / "solarwindpy.mplstyle"
+
+
+def use_style():
+    r"""Apply the SolarWindPy matplotlib style.
+
+    This sets publication-ready defaults including:
+    - 4x4 inch figure size
+    - 12pt base font size
+    - Spectral_r colormap
+    - 300 DPI PDF output
+
+    Examples
+    --------
+    >>> import solarwindpy.plotting as swp_pp
+    >>> swp_pp.use_style()  # doctest: +SKIP
+    """
+    plt.style.use(_STYLE_PATH)
 
 
 def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
@@ -205,6 +226,7 @@ def build_ax_array_with_common_colorbar(
     nrows=1,
     ncols=1,
     cbar_loc="top",
+    figsize="auto",
     sharex=True,
     sharey=True,
     hspace=0,
@@ -220,6 +242,9 @@ def build_ax_array_with_common_colorbar(
         Desired grid shape.
     cbar_loc : {"top", "bottom", "left", "right"}, optional
         Location of the colorbar relative to the axes grid.
+    figsize : tuple or "auto", optional
+        Figure size as (width, height) in inches. If ``"auto"`` (default),
+        scales from ``rcParams["figure.figsize"]`` based on nrows/ncols.
     sharex : bool, optional
         If ``True``, share x-axis limits across all panels. Default ``True``.
     sharey : bool, optional
@@ -242,6 +267,7 @@ def build_ax_array_with_common_colorbar(
     Examples
     --------
     >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')  # doctest: +SKIP
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(3, 1, figsize=(5, 12))  # doctest: +SKIP
     """
 
     if fig_kwargs is None:
@@ -253,24 +279,28 @@ def build_ax_array_with_common_colorbar(
     if cbar_loc not in ("top", "bottom", "left", "right"):
         raise ValueError
 
-    figsize = np.array(mpl.rcParams["figure.figsize"])
-    fig_scale = np.array([ncols, nrows])
+    # Compute figsize
+    if figsize == "auto":
+        base_figsize = np.array(mpl.rcParams["figure.figsize"])
+        fig_scale = np.array([ncols, nrows])
+        if cbar_loc in ("right", "left"):
+            cbar_scale = np.array([1.3, 1])
+        else:
+            cbar_scale = np.array([1, 1.3])
+        figsize = base_figsize * fig_scale * cbar_scale
 
+    # Compute grid ratios (independent of figsize)
     if cbar_loc in ("right", "left"):
-        cbar_scale = np.array([1.3, 1])
         height_ratios = nrows * [1]
         width_ratios = (ncols * [1]) + [0.05, 0.075]
         if cbar_loc == "left":
             width_ratios = width_ratios[::-1]
-
     else:
-        cbar_scale = np.array([1, 1.3])
         height_ratios = [0.075, 0.05] + (nrows * [1])
         if cbar_loc == "bottom":
             height_ratios = height_ratios[::-1]
         width_ratios = ncols * [1]
 
-    figsize = figsize * fig_scale * cbar_scale
     fig = plt.figure(figsize=figsize, **fig_kwargs)
 
     #     print(cbar_loc)
@@ -395,3 +425,85 @@ def calculate_nrows_ncols(n):
         nrows, ncols = ncols, nrows
 
     return nrows, ncols
+
+
+def nan_gaussian_filter(array, sigma, **kwargs):
+    r"""Apply Gaussian filter with proper NaN handling via normalized convolution.
+
+    Unlike :func:`scipy.ndimage.gaussian_filter` which propagates NaN values to
+    all neighboring cells, this function:
+
+    1. Smooths valid data correctly near NaN regions
+    2. Preserves NaN locations (no interpolation into NaN cells)
+
+    The algorithm uses normalized convolution: both the data (with NaN replaced
+    by 0) and a weight mask (1 for valid, 0 for NaN) are filtered. The result
+    is the ratio of filtered data to filtered weights, ensuring proper
+    normalization near boundaries.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        2D array possibly containing NaN values.
+    sigma : float
+        Standard deviation for the Gaussian kernel, in pixels.
+    **kwargs
+        Additional keyword arguments passed to
+        :func:`scipy.ndimage.gaussian_filter`.
+
+    Returns
+    -------
+    np.ndarray
+        Filtered array with original NaN locations preserved.
+
+    See Also
+    --------
+    scipy.ndimage.gaussian_filter : Underlying filter implementation.
+
+    Notes
+    -----
+    This implementation follows the normalized convolution approach described
+    in [1]_. The key insight is that filtering a weight mask alongside the
+    data allows proper normalization at boundaries and near missing values.
+
+    References
+    ----------
+    .. [1] Knutsson, H., & Westin, C. F. (1993). Normalized and differential
+       convolution. In Proceedings of IEEE Conference on Computer Vision and
+       Pattern Recognition (pp. 515-523).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> arr = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])
+    >>> result = nan_gaussian_filter(arr, sigma=1.0)
+    >>> np.isnan(result[0, 2])  # NaN preserved
+    True
+    >>> np.isfinite(result[0, 1])  # Neighbor is valid
+    True
+    """
+    arr = array.copy()
+    nan_mask = np.isnan(arr)
+
+    # Replace NaN with 0 for filtering
+    arr[nan_mask] = 0
+
+    # Create weights: 1 where valid, 0 where NaN
+    weights = (~nan_mask).astype(float)
+
+    # Filter both data and weights
+    filtered_data = gaussian_filter(arr, sigma=sigma, **kwargs)
+    filtered_weights = gaussian_filter(weights, sigma=sigma, **kwargs)
+
+    # Normalize: weighted average of valid neighbors only
+    result = np.divide(
+        filtered_data,
+        filtered_weights,
+        where=filtered_weights > 0,
+        out=np.full_like(filtered_data, np.nan),
+    )
+
+    # Preserve original NaN locations
+    result[nan_mask] = np.nan
+
+    return result

@@ -14,6 +14,7 @@ from scipy.signal import savgol_filter
 
 from . import base
 from . import labels as labels_module
+from .tools import nan_gaussian_filter
 
 # from .agg_plot import AggPlot
 # from .hist1d import Hist1D
@@ -389,54 +390,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return C, x, y
 
     def _nan_gaussian_filter(self, array, sigma, **kwargs):
-        """Gaussian filter that properly handles NaN values via normalized convolution.
-
-        Unlike scipy.ndimage.gaussian_filter which propagates NaN to all neighbors,
-        this method:
-        1. Smooths valid data correctly near NaN regions
-        2. Preserves NaN locations (no interpolation)
-
-        Parameters
-        ----------
-        array : np.ndarray
-            2D array possibly containing NaN values.
-        sigma : float
-            Standard deviation for Gaussian kernel.
-        **kwargs
-            Passed to scipy.ndimage.gaussian_filter.
-
-        Returns
-        -------
-        np.ndarray
-            Filtered array with NaN locations preserved.
-        """
-        from scipy.ndimage import gaussian_filter
-
-        arr = array.copy()
-        nan_mask = np.isnan(arr)
-
-        # Replace NaN with 0 for filtering
-        arr[nan_mask] = 0
-
-        # Create weights: 1 where valid, 0 where NaN
-        weights = (~nan_mask).astype(float)
-
-        # Filter both data and weights
-        filtered_data = gaussian_filter(arr, sigma=sigma, **kwargs)
-        filtered_weights = gaussian_filter(weights, sigma=sigma, **kwargs)
-
-        # Normalize: weighted average of valid neighbors only
-        result = np.divide(
-            filtered_data,
-            filtered_weights,
-            where=filtered_weights > 0,
-            out=np.full_like(filtered_data, np.nan),
-        )
-
-        # Preserve original NaN locations
-        result[nan_mask] = np.nan
-
-        return result
+        """Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""
+        return nan_gaussian_filter(array, sigma, **kwargs)
 
     def make_plot(
         self,
