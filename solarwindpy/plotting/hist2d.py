@@ -14,6 +14,7 @@ from scipy.signal import savgol_filter
 
 from . import base
 from . import labels as labels_module
+from .tools import nan_gaussian_filter
 
 # from .agg_plot import AggPlot
 # from .hist1d import Hist1D
@@ -153,7 +154,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     #     set_path.__doc__ = base.Base.set_path.__doc__
 
     def set_labels(self, **kwargs):
-
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
             try:
@@ -341,6 +341,58 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             norm.vmax = v1
         norm.clip = True
 
+    def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
+        """Prepare aggregated data and coordinates for plotting.
+
+        Parameters
+        ----------
+        fcn : FunctionType, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
+        use_edges : bool
+            If True, return bin edges (for pcolormesh).
+            If False, return bin centers (for contour).
+        mask_invalid : bool
+            If True, return masked array with NaN/inf masked.
+            If False, return raw values (use when applying gaussian_filter).
+
+        Returns
+        -------
+        C : np.ma.MaskedArray or np.ndarray
+            2D array of aggregated values (masked if mask_invalid=True).
+        x : np.ndarray
+            X coordinates (edges or centers based on use_edges).
+        y : np.ndarray
+            Y coordinates (edges or centers based on use_edges).
+        """
+        agg = self.agg(fcn=fcn).unstack("x")
+
+        if use_edges:
+            x = self.edges["x"]
+            y = self.edges["y"]
+            expected_offset = 1  # edges have n+1 points for n bins
+        else:
+            x = self.intervals["x"].mid
+            y = self.intervals["y"].mid
+            expected_offset = 0  # centers have n points for n bins
+
+        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
+        if x.size != agg.shape[1] + expected_offset:
+            agg = agg.reindex(columns=self.categoricals["x"])
+        if y.size != agg.shape[0] + expected_offset:
+            agg = agg.reindex(index=self.categoricals["y"])
+
+        x, y = self._maybe_convert_to_log_scale(x, y)
+
+        C = agg.values
+        if mask_invalid:
+            C = np.ma.masked_invalid(C)
+
+        return C, x, y
+
+    def _nan_gaussian_filter(self, array, sigma, **kwargs):
+        """Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""
+        return nan_gaussian_filter(array, sigma, **kwargs)
+
     def make_plot(
         self,
         ax=None,
@@ -466,6 +518,200 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
 
         return ax, cbar_or_mappable
+
+    def plot_hist_with_contours(
+        self,
+        ax=None,
+        cbar=True,
+        limit_color_norm=False,
+        cbar_kwargs=None,
+        fcn=None,
+        # Contour-specific parameters
+        levels=None,
+        label_levels=False,
+        use_contourf=True,
+        contour_kwargs=None,
+        clabel_kwargs=None,
+        skip_max_clbl=True,
+        gaussian_filter_std=0,
+        gaussian_filter_kwargs=None,
+        nan_aware_filter=False,
+        **kwargs,
+    ):
+        """Make a 2D pcolormesh plot with contour overlay.
+
+        Combines `make_plot` (pcolormesh background) with `plot_contours`
+        (contour/contourf overlay) in a single call.
+
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, None
+            If None, create an `Axes` instance from `plt.subplots`.
+        cbar : bool
+            If True, create color bar with `labels.z`.
+        limit_color_norm : bool
+            If True, limit the color range to 0.001 and 0.999 percentile range.
+        cbar_kwargs : dict, None
+            If not None, kwargs passed to `self._make_cbar`.
+        fcn : FunctionType, None
+            Aggregation function. If None, automatically select.
+        levels : array-like, int, None
+            Contour levels. If None, automatically determined.
+        label_levels : bool
+            If True, add labels to contours with `ax.clabel`.
+        use_contourf : bool
+            If True, use filled contours. Else use line contours.
+        contour_kwargs : dict, None
+            Additional kwargs passed to contour/contourf (e.g., linestyles, colors).
+        clabel_kwargs : dict, None
+            Kwargs passed to `ax.clabel`.
+        skip_max_clbl : bool
+            If True, don't label the maximum contour level.
+        gaussian_filter_std : int
+            If > 0, apply Gaussian filter to contour data.
+        gaussian_filter_kwargs : dict, None
+            Kwargs passed to `scipy.ndimage.gaussian_filter`.
+        nan_aware_filter : bool
+            If True and gaussian_filter_std > 0, use NaN-aware filtering via
+            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+        kwargs :
+            Passed to `ax.pcolormesh`.
+
+        Returns
+        -------
+        ax : mpl.axes.Axes
+        cbar_or_mappable : colorbar.Colorbar or QuadMesh
+        qset : QuadContourSet
+            The contour set from the overlay.
+        lbls : list or None
+            Contour labels if label_levels is True.
+        """
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        if contour_kwargs is None:
+            contour_kwargs = {}
+
+        # Determine normalization
+        axnorm = self.axnorm
+        default_norm = None
+        if axnorm in ("c", "r"):
+            default_norm = mpl.colors.BoundaryNorm(
+                np.linspace(0, 1, 11), 256, clip=True
+            )
+        elif axnorm in ("d", "cd", "rd"):
+            default_norm = mpl.colors.LogNorm(clip=True)
+        norm = kwargs.pop("norm", default_norm)
+
+        if limit_color_norm:
+            self._limit_color_norm(norm)
+
+        # Get cmap from kwargs (shared between pcolormesh and contour)
+        cmap = kwargs.pop("cmap", None)
+
+        # --- 1. Plot pcolormesh background ---
+        C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
+        XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
+        pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)
+
+        # --- 2. Plot contour overlay ---
+        # Delay masking if gaussian filter will be applied
+        needs_filter = gaussian_filter_std > 0
+        C_centers, x_centers, y_centers = self._prep_agg_for_plot(
+            fcn=fcn, use_edges=False, mask_invalid=not needs_filter
+        )
+
+        # Apply Gaussian filter if requested
+        if needs_filter:
+            if gaussian_filter_kwargs is None:
+                gaussian_filter_kwargs = {}
+
+            if nan_aware_filter:
+                C_centers = self._nan_gaussian_filter(
+                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
+                )
+            else:
+                from scipy.ndimage import gaussian_filter
+
+                C_centers = gaussian_filter(
+                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
+                )
+
+            C_centers = np.ma.masked_invalid(C_centers)
+
+        XX_centers, YY_centers = np.meshgrid(x_centers, y_centers)
+
+        # Get contour levels
+        levels = self._get_contour_levels(levels)
+
+        # Contour function
+        contour_fcn = ax.contourf if use_contourf else ax.contour
+
+        # Default linestyles for contour
+        linestyles = contour_kwargs.pop(
+            "linestyles",
+            [
+                "-",
+                ":",
+                "--",
+                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+                "--",
+                ":",
+                "-",
+                (0, (7, 3, 1, 3)),
+            ],
+        )
+
+        if levels is None:
+            args = [XX_centers, YY_centers, C_centers]
+        else:
+            args = [XX_centers, YY_centers, C_centers, levels]
+
+        qset = contour_fcn(
+            *args, linestyles=linestyles, cmap=cmap, norm=norm, **contour_kwargs
+        )
+
+        # --- 3. Contour labels ---
+        lbls = None
+        if label_levels:
+            if clabel_kwargs is None:
+                clabel_kwargs = {}
+
+            inline = clabel_kwargs.pop("inline", True)
+            inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
+            fmt = clabel_kwargs.pop("fmt", "%s")
+
+            class nf(float):
+                def __repr__(self):
+                    return float.__repr__(self).rstrip("0")
+
+            try:
+                clabel_args = (qset, levels[:-1] if skip_max_clbl else levels)
+            except TypeError:
+                clabel_args = (qset,)
+
+            qset.levels = [nf(level) for level in qset.levels]
+            lbls = ax.clabel(
+                *clabel_args,
+                inline=inline,
+                inline_spacing=inline_spacing,
+                fmt=fmt,
+                **clabel_kwargs,
+            )
+
+        # --- 4. Colorbar ---
+        cbar_or_mappable = pc
+        if cbar:
+            if cbar_kwargs is None:
+                cbar_kwargs = {}
+            if "cax" not in cbar_kwargs and "ax" not in cbar_kwargs:
+                cbar_kwargs["ax"] = ax
+            cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
+
+        # --- 5. Format axis ---
+        self._format_axis(ax)
+
+        return ax, cbar_or_mappable, qset, lbls
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -632,6 +878,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         use_contourf=False,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
+        nan_aware_filter=False,
         **kwargs,
     ):
         """Make a contour plot on `ax` using `ax.contour`.
@@ -669,6 +916,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             standard deviation specified by `gaussian_filter_std`.
         gaussian_filter_kwargs: None, dict
             If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
+        nan_aware_filter: bool
+            If True and gaussian_filter_std > 0, use NaN-aware filtering via
+            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
         kwargs:
             Passed to :py:meth:`ax.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
@@ -733,12 +983,17 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         C = agg.values
         if gaussian_filter_std:
-            from scipy.ndimage import gaussian_filter
-
             if gaussian_filter_kwargs is None:
                 gaussian_filter_kwargs = dict()
 
-            C = gaussian_filter(C, gaussian_filter_std, **gaussian_filter_kwargs)
+            if nan_aware_filter:
+                C = self._nan_gaussian_filter(
+                    C, gaussian_filter_std, **gaussian_filter_kwargs
+                )
+            else:
+                from scipy.ndimage import gaussian_filter
+
+                C = gaussian_filter(C, gaussian_filter_std, **gaussian_filter_kwargs)
 
         C = np.ma.masked_invalid(C)
 
@@ -750,11 +1005,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             # Define a class that forces representation of float to look a certain way
             # This remove trailing zero so '1.0' becomes '1'
             def __repr__(self):
-                return str(self).rstrip("0")
+                return float.__repr__(self).rstrip("0")
 
         levels = self._get_contour_levels(levels)
 
-        if (norm is None) and (levels is not None):
+        if (norm is None) and (levels is not None) and (len(levels) >= 2):
             norm = mpl.colors.BoundaryNorm(levels, 256, clip=True)
 
         contour_fcn = ax.contour

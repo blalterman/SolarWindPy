@@ -1,0 +1,20 @@
+# SolarWindPy matplotlib style
+# Use with: plt.style.use('path/to/solarwindpy.mplstyle')
+# Or via: import solarwindpy.plotting as swp_pp; swp_pp.use_style()
+
+# Figure
+figure.figsize: 4, 4
+
+# Font - 12pt base for publication-ready figures
+font.size: 12
+
+# Legend
+legend.framealpha: 0
+
+# Colormap
+image.cmap: Spectral_r
+
+# Savefig - PDF at high DPI for publication/presentation quality
+savefig.dpi: 300
+savefig.format: pdf
+savefig.bbox: tight

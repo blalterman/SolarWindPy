@@ -6,13 +6,10 @@ including subplot creation, figure saving, legends, and colorbar management.
 """
 
 import pytest
-import logging
 import numpy as np
 from pathlib import Path
-from unittest.mock import patch, MagicMock, call
-from datetime import datetime
+from unittest.mock import patch, MagicMock
 import tempfile
-import os
 
 import matplotlib
 
@@ -44,7 +41,6 @@ class TestToolsModuleStructure:
             "subplots",
             "save",
             "joint_legend",
-            "multipanel_figure_shared_cbar",
             "build_ax_array_with_common_colorbar",
             "calculate_nrows_ncols",
         ]
@@ -327,80 +323,144 @@ class TestJointLegendFunction:
         plt.close(fig)
 
 
-class TestMultipanelFigureSharedCbar:
-    """Test multipanel_figure_shared_cbar function."""
-
-    def test_multipanel_function_exists(self):
-        """Test that multipanel function exists and is callable."""
-        assert hasattr(tools_module, "multipanel_figure_shared_cbar")
-        assert callable(tools_module.multipanel_figure_shared_cbar)
-
-    def test_multipanel_basic_structure(self):
-        """Test basic multipanel figure structure."""
-        try:
-            fig, axes, cax = tools_module.multipanel_figure_shared_cbar(1, 1)
-
-            assert isinstance(fig, Figure)
-            assert isinstance(cax, Axes)
-            # axes might be ndarray or single Axes depending on input
-
-            plt.close(fig)
-        except AttributeError:
-            # Skip if matplotlib version incompatibility
-            pytest.skip("Matplotlib version incompatibility with axis sharing")
-
-    def test_multipanel_parameters(self):
-        """Test multipanel parameter handling."""
-        # Test that function accepts the expected parameters
-        try:
-            fig, axes, cax = tools_module.multipanel_figure_shared_cbar(
-                1, 1, vertical_cbar=True, sharex=False, sharey=False
-            )
-            plt.close(fig)
-        except AttributeError:
-            pytest.skip("Matplotlib version incompatibility")
-
-
 class TestBuildAxArrayWithCommonColorbar:
     """Test build_ax_array_with_common_colorbar function."""
 
-    def test_build_ax_array_function_exists(self):
-        """Test that build_ax_array function exists and is callable."""
-        assert hasattr(tools_module, "build_ax_array_with_common_colorbar")
-        assert callable(tools_module.build_ax_array_with_common_colorbar)
+    def test_returns_correct_types_2x3_grid(self):
+        """Test 2x3 grid returns Figure, 2x3 ndarray of Axes, and colorbar Axes."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(2, 3)
 
-    def test_build_ax_array_basic_interface(self):
-        """Test basic interface without axis sharing."""
-        try:
-            fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
-                1, 1, gs_kwargs={"sharex": False, "sharey": False}
-            )
+        assert isinstance(fig, Figure)
+        assert isinstance(cax, Axes)
+        assert isinstance(axes, np.ndarray)
+        assert axes.shape == (2, 3)
+        for ax in axes.flat:
+            assert isinstance(ax, Axes)
 
-            assert isinstance(fig, Figure)
-            assert isinstance(cax, Axes)
+        plt.close(fig)
 
-            plt.close(fig)
-        except AttributeError:
-            pytest.skip("Matplotlib version incompatibility with axis sharing")
+    def test_single_row_squeezed_to_1d(self):
+        """Test 1x3 grid returns squeezed 1D array of shape (3,)."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(1, 3)
 
-    def test_build_ax_array_invalid_location(self):
-        """Test invalid colorbar location raises error."""
+        assert axes.shape == (3,)
+        assert all(isinstance(ax, Axes) for ax in axes)
+
+        plt.close(fig)
+
+    def test_single_cell_squeezed_to_scalar(self):
+        """Test 1x1 grid returns single Axes object (not array)."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(1, 1)
+
+        assert isinstance(axes, Axes)
+        assert not isinstance(axes, np.ndarray)
+
+        plt.close(fig)
+
+    def test_invalid_cbar_loc_raises_valueerror(self):
+        """Test invalid colorbar location raises ValueError."""
         with pytest.raises(ValueError):
             tools_module.build_ax_array_with_common_colorbar(2, 2, cbar_loc="invalid")
 
-    def test_build_ax_array_location_validation(self):
-        """Test colorbar location validation."""
-        valid_locations = ["top", "bottom", "left", "right"]
+    def test_sharex_true_links_xlim_across_axes(self):
+        """Test sharex=True: changing xlim on one axis changes all."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, sharex=True, sharey=False
+        )
 
-        for loc in valid_locations:
-            try:
-                fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
-                    1, 1, cbar_loc=loc, gs_kwargs={"sharex": False, "sharey": False}
-                )
-                plt.close(fig)
-            except AttributeError:
-                # Skip if matplotlib incompatibility
-                continue
+        axes.flat[0].set_xlim(0, 10)
+
+        for ax in axes.flat[1:]:
+            assert ax.get_xlim() == (0, 10), "X-limits should be shared"
+
+        plt.close(fig)
+
+    def test_sharey_true_links_ylim_across_axes(self):
+        """Test sharey=True: changing ylim on one axis changes all."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, sharex=False, sharey=True
+        )
+
+        axes.flat[0].set_ylim(-5, 5)
+
+        for ax in axes.flat[1:]:
+            assert ax.get_ylim() == (-5, 5), "Y-limits should be shared"
+
+        plt.close(fig)
+
+    def test_sharex_false_keeps_xlim_independent(self):
+        """Test sharex=False: each axis has independent xlim."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 1, sharex=False, sharey=False
+        )
+
+        axes[0].set_xlim(0, 10)
+        axes[1].set_xlim(0, 100)
+
+        assert axes[0].get_xlim() == (0, 10)
+        assert axes[1].get_xlim() == (0, 100)
+
+        plt.close(fig)
+
+    def test_cbar_loc_right_positions_cbar_right_of_axes(self):
+        """Test cbar_loc='right': colorbar x-position > rightmost axis x-position."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, cbar_loc="right"
+        )
+
+        cax_left = cax.get_position().x0
+        ax_right = axes.flat[-1].get_position().x1
+
+        assert (
+            cax_left > ax_right
+        ), f"Colorbar x0={cax_left} should be > axes x1={ax_right}"
+
+        plt.close(fig)
+
+    def test_cbar_loc_left_positions_cbar_left_of_axes(self):
+        """Test cbar_loc='left': colorbar x-position < leftmost axis x-position."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, cbar_loc="left"
+        )
+
+        cax_right = cax.get_position().x1
+        ax_left = axes.flat[0].get_position().x0
+
+        assert (
+            cax_right < ax_left
+        ), f"Colorbar x1={cax_right} should be < axes x0={ax_left}"
+
+        plt.close(fig)
+
+    def test_cbar_loc_top_positions_cbar_above_axes(self):
+        """Test cbar_loc='top': colorbar y-position > topmost axis y-position."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, cbar_loc="top"
+        )
+
+        cax_bottom = cax.get_position().y0
+        ax_top = axes.flat[0].get_position().y1
+
+        assert (
+            cax_bottom > ax_top
+        ), f"Colorbar y0={cax_bottom} should be > axes y1={ax_top}"
+
+        plt.close(fig)
+
+    def test_cbar_loc_bottom_positions_cbar_below_axes(self):
+        """Test cbar_loc='bottom': colorbar y-position < bottommost axis y-position."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            2, 2, cbar_loc="bottom"
+        )
+
+        cax_top = cax.get_position().y1
+        ax_bottom = axes.flat[-1].get_position().y0
+
+        assert (
+            cax_top < ax_bottom
+        ), f"Colorbar y1={cax_top} should be < axes y0={ax_bottom}"
+
+        plt.close(fig)
 
 
 class TestCalculateNrowsNcols:
@@ -485,27 +545,25 @@ class TestToolsIntegration:
 
             plt.close(fig)
 
-    def test_multipanel_joint_legend_integration(self):
-        """Test integration between multipanel and joint legend."""
-        try:
-            fig, axes, cax = tools_module.multipanel_figure_shared_cbar(
-                1, 3, sharex=False, sharey=False
-            )
+    def test_build_ax_array_joint_legend_integration(self):
+        """Test integration between build_ax_array and joint legend."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
+            1, 3, sharex=False, sharey=False
+        )
 
-            # Handle case where axes might be 1D array or single Axes
-            if isinstance(axes, np.ndarray):
-                for i, ax in enumerate(axes.flat):
-                    ax.plot([1, 2, 3], [i, i + 1, i + 2], label=f"Series {i}")
-                legend = tools_module.joint_legend(*axes.flat)
-            else:
-                axes.plot([1, 2, 3], [1, 2, 3], label="Series")
-                legend = tools_module.joint_legend(axes)
+        # axes should be 1D array of shape (3,)
+        assert axes.shape == (3,)
 
-            assert isinstance(legend, Legend)
+        for i, ax in enumerate(axes):
+            ax.plot([1, 2, 3], [i, i + 1, i + 2], label=f"Series {i}")
 
-            plt.close(fig)
-        except AttributeError:
-            pytest.skip("Matplotlib version incompatibility")
+        legend = tools_module.joint_legend(*axes)
+
+        assert isinstance(legend, Legend)
+        # Legend should have 3 entries
+        assert len(legend.get_texts()) == 3
+
+        plt.close(fig)
 
     def test_calculate_nrows_ncols_with_basic_plotting(self):
         """Test using calculate_nrows_ncols with basic plotting."""
@@ -537,31 +595,15 @@ class TestToolsErrorHandling:
 
         plt.close(fig)
 
-    def test_multipanel_invalid_parameters(self):
-        """Test multipanel with edge case parameters."""
-        try:
-            # Test with minimal parameters
-            fig, axes, cax = tools_module.multipanel_figure_shared_cbar(
-                1, 1, sharex=False, sharey=False
-            )
-            plt.close(fig)
-        except AttributeError:
-            pytest.skip("Matplotlib version incompatibility")
+    def test_build_ax_array_minimal_parameters(self):
+        """Test build_ax_array with minimal parameters."""
+        fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(1, 1)
 
-    def test_build_ax_array_basic_validation(self):
-        """Test build_ax_array basic validation."""
-        try:
-            fig, axes, cax = tools_module.build_ax_array_with_common_colorbar(
-                1, 1, gs_kwargs={"sharex": False, "sharey": False}
-            )
+        assert isinstance(fig, Figure)
+        assert isinstance(axes, Axes)
+        assert isinstance(cax, Axes)
 
-            # Should return valid matplotlib objects
-            assert isinstance(fig, Figure)
-            assert isinstance(cax, Axes)
-
-            plt.close(fig)
-        except AttributeError:
-            pytest.skip("Matplotlib version incompatibility")
+        plt.close(fig)
 
 
 class TestToolsDocumentation:
@@ -573,7 +615,6 @@ class TestToolsDocumentation:
             tools_module.subplots,
             tools_module.save,
             tools_module.joint_legend,
-            tools_module.multipanel_figure_shared_cbar,
             tools_module.build_ax_array_with_common_colorbar,
             tools_module.calculate_nrows_ncols,
         ]
@@ -593,7 +634,6 @@ class TestToolsDocumentation:
             tools_module.subplots,
             tools_module.save,
             tools_module.joint_legend,
-            tools_module.multipanel_figure_shared_cbar,
             tools_module.build_ax_array_with_common_colorbar,
             tools_module.calculate_nrows_ncols,
         ]

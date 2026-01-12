@@ -18,7 +18,7 @@ Development guidelines and standards for SolarWindPy scientific software.
 - **Coverage**: ≥95% required (enforced by pre-commit hook)
 - **Structure**: `/tests/` mirrors source structure
 - **Automation**: Smart test execution via `.claude/hooks/test-runner.sh`
-- **Quality**: Physics constraints, numerical stability, scientific validation
+- **Quality Patterns**: See [TEST_PATTERNS.md](./TEST_PATTERNS.md) for comprehensive patterns
 - **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
 
 ## Git Workflow (Automated via Hooks)

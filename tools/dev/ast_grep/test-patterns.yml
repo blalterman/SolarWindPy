@@ -1,0 +1,122 @@
+# SolarWindPy Test Patterns - ast-grep Rules
+# Mode: Advisory (warn only, do not block)
+#
+# These rules detect common test anti-patterns and suggest
+# SolarWindPy-idiomatic replacements based on TEST_PATTERNS.md.
+#
+# Usage: sg scan --config tools/dev/ast_grep/test-patterns.yml tests/
+#
+# Reference: .claude/docs/TEST_PATTERNS.md
+
+rules:
+  # ===========================================================================
+  # Rule 1: Trivial None assertions
+  # ===========================================================================
+  - id: swp-test-001
+    language: python
+    severity: warning
+    message: |
+      'assert X is not None' is often a trivial assertion that doesn't verify behavior.
+      Consider asserting specific types, values, or behaviors instead.
+    note: |
+      Replace: assert result is not None
+      With:    assert isinstance(result, ExpectedType)
+      Or:      assert result == expected_value
+    rule:
+      pattern: assert $X is not None
+
+  # ===========================================================================
+  # Rule 2: Mock without wraps (weak test)
+  # ===========================================================================
+  - id: swp-test-002
+    language: python
+    severity: warning
+    message: |
+      patch.object without wraps= replaces the method entirely.
+      Use wraps= to verify the real method is called while tracking calls.
+    note: |
+      Replace: patch.object(instance, "_method")
+      With:    patch.object(instance, "_method", wraps=instance._method)
+    rule:
+      pattern: patch.object($INSTANCE, $METHOD)
+      not:
+        has:
+          pattern: wraps=$_
+
+  # ===========================================================================
+  # Rule 3: Assert without error message
+  # ===========================================================================
+  - id: swp-test-003
+    language: python
+    severity: info
+    message: |
+      Assertions without error messages are hard to debug when they fail.
+      Consider adding context: assert x == 77, f"Expected 77, got {x}"
+    rule:
+      # Match simple assert without comma (no message)
+      pattern: assert $CONDITION
+      not:
+        has:
+          pattern: assert $CONDITION, $MESSAGE
+
+  # ===========================================================================
+  # Rule 4: plt.subplots without cleanup tracking
+  # ===========================================================================
+  - id: swp-test-004
+    language: python
+    severity: info
+    message: |
+      plt.subplots() creates figures that should be closed with plt.close()
+      to prevent resource leaks in the test suite.
+    note: |
+      Add plt.close() at the end of the test or use a fixture with cleanup.
+    rule:
+      pattern: plt.subplots()
+
+  # ===========================================================================
+  # Rule 5: Good pattern - mock with wraps (track adoption)
+  # ===========================================================================
+  - id: swp-test-005
+    language: python
+    severity: info
+    message: |
+      Good pattern: mock-with-wraps verifies real method is called.
+      This is the preferred pattern for method dispatch verification.
+    rule:
+      pattern: patch.object($INSTANCE, $METHOD, wraps=$WRAPPED)
+
+  # ===========================================================================
+  # Rule 6: Trivial length assertion
+  # ===========================================================================
+  - id: swp-test-006
+    language: python
+    severity: info
+    message: |
+      'assert len(x) > 0' without type checking may be insufficient.
+      Consider also verifying the type of elements.
+    note: |
+      Add: assert isinstance(x, list)  # or expected type
+    rule:
+      pattern: assert len($X) > 0
+
+  # ===========================================================================
+  # Rule 7: isinstance assertion (good pattern - track adoption)
+  # ===========================================================================
+  - id: swp-test-007
+    language: python
+    severity: info
+    message: |
+      Good pattern: isinstance assertions verify return types.
+    rule:
+      pattern: assert isinstance($OBJ, $TYPE)
+
+  # ===========================================================================
+  # Rule 8: pytest.raises with match (good pattern)
+  # ===========================================================================
+  - id: swp-test-008
+    language: python
+    severity: info
+    message: |
+      Good pattern: pytest.raises with match verifies both exception type and message.
+    rule:
+      pattern: pytest.raises($EXCEPTION, match=$PATTERN)

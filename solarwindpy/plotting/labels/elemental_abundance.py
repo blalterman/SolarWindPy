@@ -11,11 +11,34 @@ known_species = tuple(base._trans_species.keys()) + ("X",)
 class ElementalAbundance(base.Base):
     """Ratio of elemental abundances."""
 
-    def __init__(self, species, reference_species, pct_unit=False, photospheric=True):
-        """Instantiate the abundance label."""
+    def __init__(
+        self,
+        species,
+        reference_species,
+        pct_unit=False,
+        photospheric=True,
+        description=None,
+    ):
+        """Instantiate the abundance label.
+
+        Parameters
+        ----------
+        species : str
+            The element symbol for the numerator.
+        reference_species : str
+            The element symbol for the denominator (reference).
+        pct_unit : bool, default False
+            If True, use percent units instead of #.
+        photospheric : bool, default True
+            If True, label indicates ratio to photospheric value.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
+        super().__init__()
         self.set_species(species, reference_species)
         self._pct_unit = bool(pct_unit)
         self._photospheric = bool(photospheric)
+        self.set_description(description)
 
     @property
     def species(self):

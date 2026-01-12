@@ -73,26 +73,60 @@ df.loc[:, ~df.columns.duplicated()]
 
 ### Audit Execution
 
-**Primary Method: ast-grep (recommended)**
+**PRIMARY: ast-grep MCP Tools (No Installation Required)**
 
-ast-grep provides structural pattern matching for more accurate detection:
+Use these MCP tools for structural pattern matching:
 
-```bash
-# Install ast-grep if not available
-# macOS: brew install ast-grep
-# pip: pip install ast-grep-py
-# cargo: cargo install ast-grep
+```python
+# 1. Boolean indexing anti-pattern (swp-df-001)
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="get_level_values($LEVEL)",
+    language="python",
+    max_results=50
+)
 
-# Run full audit with all DataFrame rules
-sg scan --config tools/dev/ast_grep/dataframe-patterns.yml solarwindpy/
+# 2. reorder_levels usage - check for missing sort_index (swp-df-002)
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="reorder_levels($LEVELS)",
+    language="python",
+    max_results=30
+)
 
-# Run specific rule only
-sg scan --config tools/dev/ast_grep/dataframe-patterns.yml --rule swp-df-003 solarwindpy/
+# 3. Deprecated level= aggregation (swp-df-003) - pandas 2.0+
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="$METHOD(axis=1, level=$L)",
+    language="python",
+    max_results=30
+)
+
+# 4. Good .xs() usage - track adoption
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="$DF.xs($KEY, axis=1, level=$L)",
+    language="python"
+)
+
+# 5. pd.concat without duplicate check (swp-df-005)
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="pd.concat($ARGS)",
+    language="python",
+    max_results=50
+)
 ```
 
-**Fallback Method: grep (if ast-grep unavailable)**
+**FALLBACK: CLI ast-grep (requires local `sg` installation)**
 
-If ast-grep is not installed, use grep for basic pattern detection:
+```bash
+# Quick pattern search (if sg installed)
+sg run -p "get_level_values" -l python solarwindpy/
+sg run -p "reorder_levels" -l python solarwindpy/
+```
+
+**FALLBACK: grep (always available)**
 
 ```bash
 # .xs() usage (informational)
