@@ -358,6 +358,9 @@ This test:
 Use ast-grep MCP tools to automatically detect anti-patterns across the codebase.
 AST-aware patterns are far superior to regex for structural code analysis.
 
+**Rules File:** `tools/dev/ast_grep/test-patterns.yml` (8 rules)
+**Skill:** `.claude/commands/swp/test/audit.md` (proactive audit workflow)
+
 ### Trivial Assertion Detection
 
 ```yaml
