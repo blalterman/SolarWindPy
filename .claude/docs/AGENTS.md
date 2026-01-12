@@ -29,10 +29,11 @@ Specialized AI agents for SolarWindPy development using the Task tool.
 - **Usage**: `"Use PlottingEngineer to create publication-quality figures"`
 
 ### TestEngineer
-- **Purpose**: Test coverage and quality assurance
-- **Capabilities**: Test design, coverage analysis, edge case identification
-- **Critical**: ≥95% coverage requirement
-- **Usage**: `"Use TestEngineer to design physics-specific test strategies"`
+- **Purpose**: Test quality patterns and assertion strength
+- **Capabilities**: Mock-with-wraps patterns, parameter verification, anti-pattern detection
+- **Critical**: ≥95% coverage requirement; physics testing is OUT OF SCOPE
+- **Usage**: `"Use TestEngineer to audit test quality or write high-quality tests"`
+- **Reference**: See `.claude/docs/TEST_PATTERNS.md` for comprehensive patterns
 
 ## Agent Execution Requirements
 
@@ -116,7 +117,7 @@ The following agents were documented as "Planned Agents" in `.claude/agents.back
 ### IonSpeciesValidator
 - **Planned purpose**: Ion-specific physics validation (thermal speeds, mass/charge ratios, anisotropies)
 - **Decision rationale**: Functionality covered by test suite and code-style.md conventions
-- **Current status**: Physics validation handled by TestEngineer and pytest
+- **Current status**: Physics validation handled by pytest and automated hooks
 - **Implementation**: No separate agent needed - test-driven validation is sufficient
 
 ### CIAgent
@@ -130,6 +131,13 @@ The following agents were documented as "Planned Agents" in `.claude/agents.back
 - **Decision rationale**: Base Claude Code capabilities already handle refactoring excellently
 - **Current status**: General-purpose refactoring via standard Claude Code interaction
 - **Implementation**: No specialized agent needed - Claude Code's core capabilities are sufficient
+
+### PhysicsValidator
+- **Planned purpose**: Physics-aware testing with domain-specific validation (thermal equilibrium, Alfvén waves, conservation laws, instability thresholds)
+- **Decision rationale**: TestEngineer was refocused to test quality patterns only; physics testing needs dedicated expertise
+- **Current status**: Physics validation handled by pytest assertions and automated hooks; no dedicated agent
+- **Implementation**: **REQUIRES EXPLICIT USER APPROVAL** - This is a long-term planning placeholder only
+- **When to implement**: When physics-specific test failures become frequent or complex physics edge cases need systematic coverage
 
 **Strategic Context**: These agents represent thoughtful planning followed by pragmatic decision-making. Rather than over-engineering the agent system, we validated that existing capabilities (modules, agents, base Claude Code) already addressed these needs. This "plan but validate necessity" approach prevented agent proliferation.
 
