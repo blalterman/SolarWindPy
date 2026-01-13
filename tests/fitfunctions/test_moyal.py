@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from solarwindpy.fitfunctions.moyal import Moyal
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import ChisqPerDegreeOfFreedom, InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -114,11 +114,11 @@ def test_make_fit_success_moyal(moyal_data):
     try:
         obj.make_fit()
 
-        # Test fit results are available if fit succeeded
+        # Test fit results are available with correct types if fit succeeded
         if obj.fit_success:
-            assert obj.popt is not None
-            assert obj.pcov is not None
-            assert obj.chisq_dof is not None
+            assert isinstance(obj.popt, dict)
+            assert isinstance(obj.pcov, np.ndarray)
+            assert isinstance(obj.chisq_dof, ChisqPerDegreeOfFreedom)
             assert hasattr(obj, "psigma")
     except (ValueError, TypeError, AttributeError):
         # Expected due to broken implementation
@@ -152,8 +152,8 @@ def test_property_access_before_fit():
         _ = obj.psigma
 
     # But these should work
-    assert obj.p0 is not None  # Should be able to calculate initial guess
-    assert obj.TeX_function is not None
+    assert isinstance(obj.p0, list)  # Should be able to calculate initial guess
+    assert isinstance(obj.TeX_function, str)
 
 
 def test_moyal_with_weights(moyal_data):
@@ -167,7 +167,7 @@ def test_moyal_with_weights(moyal_data):
     obj = Moyal(x, y, weights=w_varied)
 
     # Test that weights are properly stored
-    assert obj.observations.raw.w is not None
+    assert isinstance(obj.observations.raw.w, np.ndarray)
     np.testing.assert_array_equal(obj.observations.raw.w, w_varied)
 
 
@@ -201,7 +201,7 @@ def test_moyal_edge_cases():
     obj = Moyal(x, y)  # xobs, yobs
 
     # Should be able to create object
-    assert obj is not None
+    assert isinstance(obj, Moyal)
 
     # Test with zero/negative y values
     y_with_zeros = np.array([0.0, 0.5, 1.0, 0.5, 0.0])
@@ -226,7 +226,7 @@ def test_moyal_constructor_issues():
 
     # This should work with the broken signature
     obj = Moyal(x, y)  # xobs=x, yobs=y
-    assert obj is not None
+    assert isinstance(obj, Moyal)
 
     # Test that the sigma parameter is not actually used properly
     # (the implementation has commented out the sigma usage)

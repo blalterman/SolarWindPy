@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 from types import SimpleNamespace
 
+from scipy.optimize import OptimizeResult
+
 from solarwindpy.fitfunctions.core import (
     FitFunction,
     ChisqPerDegreeOfFreedom,
@@ -9,6 +11,8 @@ from solarwindpy.fitfunctions.core import (
     InvalidParameterError,
     InsufficientDataError,
 )
+from solarwindpy.fitfunctions.plots import FFPlot
+from solarwindpy.fitfunctions.tex_info import TeXinfo
 
 
 def linear_function(x, m, b):
@@ -144,12 +148,12 @@ def test_make_fit_success_failure(monkeypatch, simple_linear_data, small_n):
     x, y, w = simple_linear_data
     lf = LinearFit(x, y, weights=w)
     lf.make_fit()
-    assert isinstance(lf.fit_result, object)
+    assert isinstance(lf.fit_result, OptimizeResult)
     assert set(lf.popt) == {"m", "b"}
     assert set(lf.psigma) == {"m", "b"}
     assert lf.pcov.shape == (2, 2)
     assert isinstance(lf.chisq_dof, ChisqPerDegreeOfFreedom)
-    assert lf.plotter is not None and lf.TeX_info is not None
+    assert isinstance(lf.plotter, FFPlot) and isinstance(lf.TeX_info, TeXinfo)
 
     x, y, w = small_n
     lf_small = LinearFit(x, y, weights=w)
@@ -187,10 +191,10 @@ def test_str_call_and_properties(fitted_linear):
     assert isinstance(lf.fit_bounds, dict)
     assert isinstance(lf.chisq_dof, ChisqPerDegreeOfFreedom)
     assert lf.dof == lf.observations.used.y.size - len(lf.p0)
-    assert lf.fit_result is not None
+    assert isinstance(lf.fit_result, OptimizeResult)
     assert isinstance(lf.initial_guess_info["m"], InitialGuessInfo)
     assert lf.nobs == lf.observations.used.x.size
-    assert lf.plotter is not None
+    assert isinstance(lf.plotter, FFPlot)
     assert set(lf.popt) == {"m", "b"}
     assert set(lf.psigma) == {"m", "b"}
     assert set(lf.psigma_relative) == {"m", "b"}
@@ -199,7 +203,7 @@ def test_str_call_and_properties(fitted_linear):
     assert lf.pcov.shape == (2, 2)
     assert 0.0 <= lf.rsq <= 1.0
     assert lf.sufficient_data is True
-    assert lf.TeX_info is not None
+    assert isinstance(lf.TeX_info, TeXinfo)
 
 
 # ============================================================================
@@ -265,7 +269,7 @@ class TestBoundsDictHandling:
 
         bounds_dict = {"m": (-10, 10), "b": (-5, 5)}
         res, p0 = lf._run_least_squares(bounds=bounds_dict)
-        assert captured["bounds"] is not None
+        assert isinstance(captured["bounds"], (list, tuple, np.ndarray))
 
 
 class TestCallableJacobian:

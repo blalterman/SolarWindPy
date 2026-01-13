@@ -2,8 +2,21 @@
 
 from __future__ import annotations
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def clean_matplotlib():
+    """Clean matplotlib state before and after each test.
+
+    Pattern sourced from tests/plotting/test_fixtures_utilities.py:37-43
+    which has been validated in production test runs.
+    """
+    plt.close("all")
+    yield
+    plt.close("all")
 
 
 @pytest.fixture

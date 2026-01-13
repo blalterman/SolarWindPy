@@ -36,7 +36,7 @@ class TestMetaclassMRO:
                 pass
 
             # Metaclass should have valid MRO
-            assert TestMeta.__mro__ is not None
+            assert isinstance(TestMeta.__mro__, tuple)
         except TypeError as e:
             if "consistent method resolution" in str(e).lower():
                 pytest.fail(f"MRO conflict detected: {e}")
@@ -79,7 +79,7 @@ class TestAbstractEnforcement:
         # Should instantiate successfully
         x, y = [0, 1, 2], [0, 1, 2]
         fit_func = CompleteFitFunction(x, y)
-        assert fit_func is not None
+        assert isinstance(fit_func, FitFunction)
         assert hasattr(fit_func, "function")
 
 
@@ -110,7 +110,7 @@ class TestDocstringInheritance:
             pass
 
         # Docstring should exist (inheritance working)
-        assert ChildFit.__doc__ is not None
+        assert isinstance(ChildFit.__doc__, str)
         assert len(ChildFit.__doc__) > 0
 
     def test_inherited_method_docstrings(self):
@@ -139,12 +139,13 @@ class TestAllFitFunctionsInstantiate:
             TrendFit,
         )
 
-        # All imports successful
-        assert Exponential is not None
-        assert Gaussian is not None
-        assert PowerLaw is not None
-        assert Line is not None
-        assert Moyal is not None
+        # All imports successful - verify they are proper FitFunction subclasses
+        assert issubclass(Exponential, FitFunction)
+        assert issubclass(Gaussian, FitFunction)
+        assert issubclass(PowerLaw, FitFunction)
+        assert issubclass(Line, FitFunction)
+        assert issubclass(Moyal, FitFunction)
+        # TrendFit is not a FitFunction subclass, just verify it exists
         assert TrendFit is not None
 
     def test_instantiate_all_fitfunctions(self):
@@ -166,7 +167,9 @@ class TestAllFitFunctionsInstantiate:
         for FitClass in fitfunctions:
             try:
                 instance = FitClass(x, y)
-                assert instance is not None, f"{FitClass.__name__} instantiation failed"
+                assert isinstance(
+                    instance, FitFunction
+                ), f"{FitClass.__name__} instantiation failed"
                 assert hasattr(
                     instance, "function"
                 ), f"{FitClass.__name__} missing function property"

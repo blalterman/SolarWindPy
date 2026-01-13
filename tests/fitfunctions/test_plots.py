@@ -1,10 +1,11 @@
+import logging
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from pathlib import Path
 
 from scipy.optimize import OptimizeResult
-
-import matplotlib.pyplot as plt
 
 from solarwindpy.fitfunctions.plots import FFPlot, AxesLabels, LogAxes
 from solarwindpy.fitfunctions.core import Observations, UsedRawObs
@@ -273,8 +274,6 @@ def test_plot_residuals_missing_fun_no_exception():
 # Phase 6 Coverage Tests
 # ============================================================================
 
-import logging
-
 
 class TestEstimateMarkeveryOverflow:
     """Test OverflowError handling in _estimate_markevery (lines 133-136)."""
@@ -339,7 +338,7 @@ class TestPlotRawEdgeKwargs:
 
         assert len(plotted) == 3
         line, window, edges = plotted
-        assert edges is not None
+        assert isinstance(edges, (list, tuple))
         assert len(edges) == 2
         plt.close(fig)
 
@@ -388,7 +387,7 @@ class TestPlotUsedEdgeKwargs:
 
         assert len(plotted) == 3
         line, window, edges = plotted
-        assert edges is not None
+        assert isinstance(edges, (list, tuple))
         assert len(edges) == 2
         plt.close(fig)
 

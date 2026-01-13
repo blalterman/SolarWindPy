@@ -19,11 +19,12 @@ Detects anti-patterns BEFORE they cause test failures.
 
 | ID | Pattern | Severity | Count (baseline) |
 |----|---------|----------|------------------|
-| swp-test-001 | `assert X is not None` (trivial) | warning | 133 |
+| swp-test-001 | `assert X is not None` (trivial) | warning | 74 |
 | swp-test-002 | `patch.object` without `wraps=` | warning | 76 |
 | swp-test-003 | Assert without error message | info | - |
 | swp-test-004 | `plt.subplots()` (verify cleanup) | info | 59 |
 | swp-test-006 | `len(x) > 0` without type check | info | - |
+| swp-test-009 | `isinstance(X, object)` (disguised trivial) | warning | 0 |
 
 ### Good Patterns to Track (Adoption Metrics)
 
@@ -76,6 +77,15 @@ mcp__ast-grep__find_code(
     pattern="plt.subplots()",
     language="python",
     max_results=30
+)
+
+# 5. Disguised trivial assertion (swp-test-009)
+# isinstance(X, object) is equivalent to X is not None
+mcp__ast-grep__find_code(
+    project_folder="/path/to/SolarWindPy",
+    pattern="isinstance($OBJ, object)",
+    language="python",
+    max_results=50
 )
 ```
 
@@ -163,6 +173,7 @@ This skill is for **routine audits** - quick pattern detection before/during tes
 | Anti-Pattern | Fix | TEST_PATTERNS.md Section |
 |--------------|-----|-------------------------|
 | `assert X is not None` | `assert isinstance(X, Type)` | #6 Return Type Verification |
+| `isinstance(X, object)` | `isinstance(X, SpecificType)` | #6 Return Type Verification |
 | `patch.object(i, m)` | `patch.object(i, m, wraps=i.m)` | #1 Mock-with-Wraps |
 | Missing `plt.close()` | Add at test end | #15 Resource Cleanup |
 | Default parameter values | Use distinctive values (77, 2.5) | #2 Parameter Passthrough |

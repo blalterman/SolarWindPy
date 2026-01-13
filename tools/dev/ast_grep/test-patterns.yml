@@ -120,3 +120,18 @@ rules:
       Good pattern: pytest.raises with match verifies both exception type and message.
     rule:
       pattern: pytest.raises($EXCEPTION, match=$PATTERN)
+
+  # ===========================================================================
+  # Rule 9: isinstance with object (disguised trivial assertion)
+  # ===========================================================================
+  - id: swp-test-009
+    language: python
+    severity: warning
+    message: |
+      'isinstance(X, object)' is equivalent to 'X is not None' - all objects inherit from object.
+      Use a specific type instead (e.g., OptimizeResult, FFPlot, dict, np.ndarray).
+    note: |
+      Replace: assert isinstance(result, object)
+      With:    assert isinstance(result, ExpectedType)  # e.g., OptimizeResult, FFPlot
+    rule:
+      pattern: isinstance($OBJ, object)
