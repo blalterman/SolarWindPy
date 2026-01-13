@@ -10,7 +10,9 @@ the functional form and an initial parameter guess.
 import pdb  # noqa: F401
 import logging  # noqa: F401
 import warnings
+
 import numpy as np
+import pandas as pd
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
@@ -337,22 +339,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         return dict(self._psigma)
 
     @property
-    def psigma_relative(self):
-        return {k: v / self.popt[k] for k, v in self.psigma.items()}
-
-    @property
     def combined_popt_psigma(self):
-        r"""Convenience to extract all versions of the optimized parameters."""
-        #         try:
-        popt = self.popt
-        psigma = self.psigma
-        prel = self.psigma_relative
-        #         except AttributeError:
-        #             popt = {k: np.nan for k in self.argnames}
-        #             psigma = {k: np.nan for k in self.argnames}
-        #             prel = {k: np.nan for k in self.argnames}
+        r"""Return optimized parameters and uncertainties as a DataFrame.
 
-        return {"popt": popt, "psigma": psigma, "psigma_relative": prel}
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns 'popt' and 'psigma', indexed by parameter names.
+            Relative uncertainty can be computed as: df['psigma'] / df['popt']
+        """
+        return pd.DataFrame({"popt": self.popt, "psigma": self.psigma})
 
     @property
     def pcov(self):

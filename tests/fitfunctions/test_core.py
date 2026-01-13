@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 from types import SimpleNamespace
 
@@ -197,9 +198,14 @@ def test_str_call_and_properties(fitted_linear):
     assert isinstance(lf.plotter, FFPlot)
     assert set(lf.popt) == {"m", "b"}
     assert set(lf.psigma) == {"m", "b"}
-    assert set(lf.psigma_relative) == {"m", "b"}
+    # combined_popt_psigma returns DataFrame; psigma_relative is trivially computable
     combined = lf.combined_popt_psigma
-    assert set(combined) == {"popt", "psigma", "psigma_relative"}
+    assert isinstance(combined, pd.DataFrame)
+    assert set(combined.columns) == {"popt", "psigma"}
+    assert set(combined.index) == {"m", "b"}
+    # Verify relative uncertainty is trivially computable from DataFrame
+    psigma_relative = combined["psigma"] / combined["popt"]
+    assert set(psigma_relative.index) == {"m", "b"}
     assert lf.pcov.shape == (2, 2)
     assert 0.0 <= lf.rsq <= 1.0
     assert lf.sufficient_data is True
