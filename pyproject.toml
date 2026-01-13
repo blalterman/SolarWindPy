@@ -100,6 +100,17 @@ dev = [
     "pydocstyle>=6.3",
     "tables>=3.9",  # PyTables for HDF5 testing
     "psutil>=5.9.0",
+    # Code analysis tools (ast-grep via MCP server, not Python package)
+    "pre-commit>=3.5",  # Git hook framework
+]
+performance = [
+    "joblib>=1.3.0",  # Parallel execution for TrendFit
+]
+analysis = [
+    # Interactive analysis environment
+    "jupyterlab>=4.0",
+    "tqdm>=4.0",        # Progress bars
+    "ipywidgets>=8.0",  # Interactive widgets
 ]
 performance = [
     "joblib>=1.3.0",  # Parallel execution for TrendFit

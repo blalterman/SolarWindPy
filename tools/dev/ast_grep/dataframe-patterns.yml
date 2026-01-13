@@ -1,0 +1,97 @@
+# SolarWindPy DataFrame Patterns - ast-grep Rules
+# Mode: Advisory (warn only, do not block)
+#
+# These rules detect common DataFrame anti-patterns and suggest
+# SolarWindPy-idiomatic replacements.
+#
+# Usage: sg scan --config tools/dev/ast_grep/dataframe-patterns.yml solarwindpy/
+
+rules:
+  # ===========================================================================
+  # Rule 1: Prefer .xs() over boolean indexing for level selection
+  # ===========================================================================
+  # Note: ast-grep has limitations with keyword arguments. Use grep fallback
+  # for patterns like: df[df.columns.get_level_values('S') == 'p1']
+  - id: swp-df-001
+    language: python
+    severity: warning
+    message: |
+      Consider using .xs() for level selection instead of get_level_values.
+      .xs() returns a view and is more memory-efficient.
+    note: |
+      Replace: df[df.columns.get_level_values('S') == 'p1']
+      With:    df.xs('p1', axis=1, level='S')
+    rule:
+      pattern: get_level_values($level)
+
+  # ===========================================================================
+  # Rule 2: Chain reorder_levels with sort_index
+  # ===========================================================================
+  - id: swp-df-002
+    language: python
+    severity: warning
+    message: |
+      reorder_levels should be followed by sort_index for consistent column order.
+    note: |
+      Pattern: df.reorder_levels(['M', 'C', 'S'], axis=1).sort_index(axis=1)
+    rule:
+      pattern: reorder_levels($$$args)
+
+  # ===========================================================================
+  # Rule 3: Use transpose-groupby pattern for level aggregation
+  # ===========================================================================
+  # Note: Patterns with keyword args require grep fallback
+  # grep -rn "axis=1, level=" solarwindpy/
+  - id: swp-df-003
+    language: python
+    severity: warning
+    message: |
+      axis=1, level=X aggregation is deprecated in pandas 2.0.
+      Use .T.groupby(level=X).agg().T instead.
+    note: |
+      Replace: df.sum(axis=1, level='S')
+      With:    df.T.groupby(level='S').sum().T
+      For keyword args, use: grep -rn "axis=1, level=" solarwindpy/
+    rule:
+      # Match .sum() calls - manual review needed for level= usage
+      pattern: $df.sum($$$args)
+
+  # ===========================================================================
+  # Rule 4: Validate MultiIndex names
+  # ===========================================================================
+  - id: swp-df-004
+    language: python
+    severity: info
+    message: |
+      MultiIndex.from_tuples should specify names=['M', 'C', 'S'] for SolarWindPy.
+    note: |
+      Pattern: pd.MultiIndex.from_tuples(tuples, names=['M', 'C', 'S'])
+    rule:
+      pattern: MultiIndex.from_tuples($$$args)
+
+  # ===========================================================================
+  # Rule 5: Check for duplicate columns before concat
+  # ===========================================================================
+  - id: swp-df-005
+    language: python
+    severity: info
+    message: |
+      Consider checking for column duplicates after concatenation.
+      Use .columns.duplicated() to detect and .loc[:, ~df.columns.duplicated()]
+      to remove duplicates.
+    rule:
+      pattern: pd.concat($$$args)
+
+  # ===========================================================================
+  # Rule 6: Prefer level parameter over manual iteration
+  # ===========================================================================
+  - id: swp-df-006
+    language: python
+    severity: info
+    message: |
+      If broadcasting by MultiIndex level, consider using level= parameter
+      for more efficient operations.
+    note: |
+      Pattern: df.multiply(series, axis=1, level='C')
+    rule:
+      pattern: $df.multiply($$$args)

@@ -569,5 +569,259 @@ class TestSpiralDocumentation:
         assert len(SpiralPlot2D.__doc__.strip()) > 0
 
 
+class TestSpiralPlot2DContours:
+    """Test SpiralPlot2D.plot_contours() method with interpolation options."""
+
+    @pytest.fixture
+    def spiral_plot_instance(self):
+        """Minimal SpiralPlot2D with initialized mesh."""
+        np.random.seed(42)
+        x = pd.Series(np.random.uniform(1, 100, 500))
+        y = pd.Series(np.random.uniform(1, 100, 500))
+        z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
+        splot = SpiralPlot2D(x, y, z, initial_bins=5)
+        splot.initialize_mesh(min_per_bin=10)
+        splot.build_grouped()
+        return splot
+
+    @pytest.fixture
+    def spiral_plot_with_nans(self, spiral_plot_instance):
+        """SpiralPlot2D with NaN values in z-data."""
+        # Add NaN values to every 10th data point
+        data = spiral_plot_instance.data.copy()
+        data.loc[data.index[::10], "z"] = np.nan
+        spiral_plot_instance._data = data
+        # Rebuild grouped data to include NaNs
+        spiral_plot_instance.build_grouped()
+        return spiral_plot_instance
+
+    def test_returns_correct_types(self, spiral_plot_instance):
+        """Test that plot_contours returns correct types (API contract)."""
+        fig, ax = plt.subplots()
+        result = spiral_plot_instance.plot_contours(ax=ax)
+        plt.close()
+
+        assert len(result) == 4, "Should return 4-tuple"
+        ret_ax, lbls, cbar_or_mappable, qset = result
+
+        # ax should be Axes
+        assert isinstance(ret_ax, matplotlib.axes.Axes), "First element should be Axes"
+
+        # lbls can be list of Text objects or None (if label_levels=False or no levels)
+        if lbls is not None:
+            assert isinstance(lbls, list), "Labels should be a list"
+            if len(lbls) > 0:
+                assert all(
+                    isinstance(lbl, matplotlib.text.Text) for lbl in lbls
+                ), "All labels should be Text objects"
+
+        # cbar_or_mappable should be Colorbar when cbar=True
+        assert isinstance(
+            cbar_or_mappable, matplotlib.colorbar.Colorbar
+        ), "Should return Colorbar when cbar=True"
+
+        # qset should be a contour set
+        assert hasattr(qset, "levels"), "qset should have levels attribute"
+        assert hasattr(qset, "allsegs"), "qset should have allsegs attribute"
+
+    def test_default_method_is_rbf(self, spiral_plot_instance):
+        """Test that default method is 'rbf'."""
+        fig, ax = plt.subplots()
+
+        # Mock _interpolate_with_rbf to verify it's called
+        with patch.object(
+            spiral_plot_instance,
+            "_interpolate_with_rbf",
+            wraps=spiral_plot_instance._interpolate_with_rbf,
+        ) as mock_rbf:
+            ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(ax=ax)
+            mock_rbf.assert_called_once()
+        plt.close()
+
+        # Should also produce valid contours
+        assert len(qset.levels) > 0, "Should produce contour levels"
+        assert qset.allsegs is not None, "Should have contour segments"
+
+    def test_rbf_respects_neighbors_parameter(self, spiral_plot_instance):
+        """Test that RBF neighbors parameter is passed to interpolator."""
+        fig, ax = plt.subplots()
+
+        # Verify rbf_neighbors is passed through to _interpolate_with_rbf
+        with patch.object(
+            spiral_plot_instance,
+            "_interpolate_with_rbf",
+            wraps=spiral_plot_instance._interpolate_with_rbf,
+        ) as mock_rbf:
+            spiral_plot_instance.plot_contours(
+                ax=ax, method="rbf", rbf_neighbors=77, cbar=False, label_levels=False
+            )
+            mock_rbf.assert_called_once()
+            # Verify the neighbors parameter was passed correctly
+            call_kwargs = mock_rbf.call_args.kwargs
+            assert (
+                call_kwargs["neighbors"] == 77
+            ), f"Expected neighbors=77, got neighbors={call_kwargs['neighbors']}"
+        plt.close()
+
+    def test_grid_respects_gaussian_filter_std(self, spiral_plot_instance):
+        """Test that Gaussian filter std parameter is passed to filter."""
+        from solarwindpy.plotting.tools import nan_gaussian_filter
+
+        fig, ax = plt.subplots()
+
+        # Verify nan_gaussian_filter is called with the correct sigma
+        # Patch where it's defined since spiral.py imports it locally
+        with patch(
+            "solarwindpy.plotting.tools.nan_gaussian_filter",
+            wraps=nan_gaussian_filter,
+        ) as mock_filter:
+            _, _, _, qset = spiral_plot_instance.plot_contours(
+                ax=ax,
+                method="grid",
+                gaussian_filter_std=2.5,
+                nan_aware_filter=True,
+                cbar=False,
+                label_levels=False,
+            )
+            mock_filter.assert_called_once()
+            # Verify sigma parameter was passed correctly
+            assert (
+                mock_filter.call_args.kwargs["sigma"] == 2.5
+            ), f"Expected sigma=2.5, got sigma={mock_filter.call_args.kwargs.get('sigma')}"
+        plt.close()
+
+        # Also verify valid output
+        assert len(qset.levels) > 0, "Should produce contour levels"
+
+    def test_tricontour_method_works(self, spiral_plot_instance):
+        """Test that tricontour method produces valid output."""
+        import matplotlib.tri
+
+        fig, ax = plt.subplots()
+
+        ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(
+            ax=ax, method="tricontour"
+        )
+        plt.close()
+
+        # Should produce valid contours (TriContourSet)
+        assert len(qset.levels) > 0, "Tricontour should produce levels"
+        assert qset.allsegs is not None, "Tricontour should have segments"
+
+        # Verify tricontour was used (not regular contour)
+        # ax.tricontour returns TriContourSet, ax.contour returns QuadContourSet
+        assert isinstance(
+            qset, matplotlib.tri.TriContourSet
+        ), "tricontour should return TriContourSet, not QuadContourSet"
+
+    def test_handles_nan_with_rbf(self, spiral_plot_with_nans):
+        """Test that RBF method handles NaN values correctly."""
+        fig, ax = plt.subplots()
+
+        # Verify RBF method is actually called with NaN data
+        with patch.object(
+            spiral_plot_with_nans,
+            "_interpolate_with_rbf",
+            wraps=spiral_plot_with_nans._interpolate_with_rbf,
+        ) as mock_rbf:
+            result = spiral_plot_with_nans.plot_contours(
+                ax=ax, method="rbf", cbar=False, label_levels=False
+            )
+            mock_rbf.assert_called_once()
+        plt.close()
+
+        # Verify valid output types
+        ret_ax, lbls, mappable, qset = result
+        assert isinstance(ret_ax, matplotlib.axes.Axes)
+        assert isinstance(qset, matplotlib.contour.QuadContourSet)
+        assert len(qset.levels) > 0, "Should produce contour levels despite NaN input"
+
+    def test_handles_nan_with_grid(self, spiral_plot_with_nans):
+        """Test that grid method handles NaN values correctly."""
+        fig, ax = plt.subplots()
+
+        # Verify grid method is actually called with NaN data
+        with patch.object(
+            spiral_plot_with_nans,
+            "_interpolate_to_grid",
+            wraps=spiral_plot_with_nans._interpolate_to_grid,
+        ) as mock_grid:
+            result = spiral_plot_with_nans.plot_contours(
+                ax=ax,
+                method="grid",
+                nan_aware_filter=True,
+                cbar=False,
+                label_levels=False,
+            )
+            mock_grid.assert_called_once()
+        plt.close()
+
+        # Verify valid output types
+        ret_ax, lbls, mappable, qset = result
+        assert isinstance(ret_ax, matplotlib.axes.Axes)
+        assert isinstance(qset, matplotlib.contour.QuadContourSet)
+        assert len(qset.levels) > 0, "Should produce contour levels despite NaN input"
+
+    def test_invalid_method_raises_valueerror(self, spiral_plot_instance):
+        """Test that invalid method raises ValueError."""
+        fig, ax = plt.subplots()
+
+        with pytest.raises(ValueError, match="Invalid method"):
+            spiral_plot_instance.plot_contours(ax=ax, method="invalid_method")
+        plt.close()
+
+    def test_cbar_false_returns_qset(self, spiral_plot_instance):
+        """Test that cbar=False returns qset instead of colorbar."""
+        fig, ax = plt.subplots()
+
+        ax, lbls, mappable, qset = spiral_plot_instance.plot_contours(ax=ax, cbar=False)
+        plt.close()
+
+        # When cbar=False, third element should be the same as qset
+        assert mappable is qset, "With cbar=False, should return qset as third element"
+        # Verify it's a ContourSet, not a Colorbar
+        assert isinstance(
+            mappable, matplotlib.contour.ContourSet
+        ), "mappable should be ContourSet when cbar=False"
+        assert not isinstance(
+            mappable, matplotlib.colorbar.Colorbar
+        ), "mappable should not be Colorbar when cbar=False"
+
+    def test_contourf_option(self, spiral_plot_instance):
+        """Test that use_contourf=True produces filled contours."""
+        fig, ax = plt.subplots()
+
+        ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(
+            ax=ax, use_contourf=True, cbar=False, label_levels=False
+        )
+        plt.close()
+
+        # Verify return type is correct
+        assert isinstance(qset, matplotlib.contour.QuadContourSet)
+        # Verify filled contours were produced
+        # Filled contours (contourf) produce filled=True on the QuadContourSet
+        assert qset.filled, "use_contourf=True should produce filled contours"
+        assert len(qset.levels) > 0, "Should have contour levels"
+
+    def test_all_three_methods_produce_output(self, spiral_plot_instance):
+        """Test that all three methods produce valid comparable output."""
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+        results = []
+        for ax, method in zip(axes, ["rbf", "grid", "tricontour"]):
+            result = spiral_plot_instance.plot_contours(
+                ax=ax, method=method, cbar=False, label_levels=False
+            )
+            results.append(result)
+        plt.close()
+
+        # All should produce valid output
+        for i, (ax, lbls, mappable, qset) in enumerate(results):
+            method = ["rbf", "grid", "tricontour"][i]
+            assert ax is not None, f"{method} should return ax"
+            assert qset is not None, f"{method} should return qset"
+            assert len(qset.levels) > 0, f"{method} should produce contour levels"
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

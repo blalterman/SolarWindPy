@@ -10,23 +10,27 @@ from . import special
 class Timedelta(special.ArbitraryLabel):
     """Label for a time interval."""
 
-    def __init__(self, offset):
+    def __init__(self, offset, description=None):
         """Instantiate the label.
 
         Parameters
         ----------
         offset : str or pandas offset
             Value convertible via :func:`pandas.tseries.frequencies.to_offset`.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
         """
         super().__init__()
         self.set_offset(offset)
+        self.set_description(description)
 
     def __str__(self):
         return self.with_units
 
     @property
     def with_units(self):
-        return rf"${self.tex} \; [{self.units}]$"  # noqa: W605
+        result = rf"${self.tex} \; [{self.units}]$"  # noqa: W605
+        return self._format_with_description(result)
 
     #     @property
     #     def dt(self):
@@ -69,23 +73,27 @@ class Timedelta(special.ArbitraryLabel):
 class DateTime(special.ArbitraryLabel):
     """Generic datetime label."""
 
-    def __init__(self, kind):
+    def __init__(self, kind, description=None):
         """Instantiate the label.
 
         Parameters
         ----------
         kind : str
             Text used to build the label, e.g. ``"Year"`` or ``"Month"``.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
         """
         super().__init__()
         self.set_kind(kind)
+        self.set_description(description)
 
     def __str__(self):
         return self.with_units
 
     @property
     def with_units(self):
-        return r"$%s$" % self.tex
+        result = r"$%s$" % self.tex
+        return self._format_with_description(result)
 
     @property
     def kind(self):
@@ -106,7 +114,7 @@ class DateTime(special.ArbitraryLabel):
 class Epoch(special.ArbitraryLabel):
     r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
-    def __init__(self, kind, of_thing, space=r"\,"):
+    def __init__(self, kind, of_thing, space=r"\,", description=None):
         """Instantiate the label.
 
         Parameters
@@ -117,11 +125,14 @@ class Epoch(special.ArbitraryLabel):
             The larger time unit, e.g. ``"Day"``.
         space : str, default ``","``
             TeX spacing command placed between words.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
         """
         super().__init__()
         self.set_smaller(kind)
         self.set_larger(of_thing)
         self.set_space(space)
+        self.set_description(description)
 
     def __str__(self):
         return self.with_units
@@ -153,7 +164,8 @@ class Epoch(special.ArbitraryLabel):
 
     @property
     def with_units(self):
-        return r"$%s$" % self.tex
+        result = r"$%s$" % self.tex
+        return self._format_with_description(result)
 
     def set_larger(self, new):
         self._larger = new.title()
@@ -171,13 +183,24 @@ class Epoch(special.ArbitraryLabel):
 class Frequency(special.ArbitraryLabel):
     """Frequency of another quantity."""
 
-    def __init__(self, other):
+    def __init__(self, other, description=None):
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        other : Timedelta or str
+            The time interval for frequency calculation.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_other(other)
+        self.set_description(description)
         self.build_label()
 
     def __str__(self):
-        return rf"${self.tex} \; [{self.units}]$"
+        result = rf"${self.tex} \; [{self.units}]$"
+        return self._format_with_description(result)
 
     @property
     def other(self):
@@ -216,15 +239,24 @@ class Frequency(special.ArbitraryLabel):
 class January1st(special.ArbitraryLabel):
     """Label for the first day of the year."""
 
-    def __init__(self):
+    def __init__(self, description=None):
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
+        self.set_description(description)
 
     def __str__(self):
         return self.with_units
 
     @property
     def with_units(self):
-        return r"$%s$" % self.tex
+        result = r"$%s$" % self.tex
+        return self._format_with_description(result)
 
     @property
     def tex(self):

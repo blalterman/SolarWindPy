@@ -661,7 +661,6 @@ data : {z.size}
         alpha_fcn=None,
         **kwargs,
     ):
-
         #         start = datetime.now()
         #         self.logger.warning("Making plot")
         #         self.logger.warning(f"Start {start}")
@@ -791,69 +790,211 @@ data : {z.size}
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
-    def plot_contours(
-        self,
-        ax=None,
-        label_levels=True,
-        cbar=True,
-        limit_color_norm=False,
-        cbar_kwargs=None,
-        fcn=None,
-        plot_edges=False,
-        edges_kwargs=None,
-        clabel_kwargs=None,
-        skip_max_clbl=True,
-        use_contourf=False,
-        #         gaussian_filter_std=0,
-        #         gaussian_filter_kwargs=None,
-        **kwargs,
-    ):
-        """Make a contour plot on `ax` using `ax.contour`.
+    def _interpolate_to_grid(self, x, y, z, resolution=100, method="cubic"):
+        r"""Interpolate scattered data to a regular grid.
 
         Parameters
         ----------
-        ax: mpl.axes.Axes, None
-            If None, create an `Axes` instance from `plt.subplots`.
-        label_levels: bool
-            If True, add labels to contours with `ax.clabel`.
-        cbar: bool
-            If True, create color bar with `labels.z`.
-        limit_color_norm: bool
-            If True, limit the color range to 0.001 and 0.999 percentile range
-            of the z-value, count or otherwise.
-        cbar_kwargs: dict, None
-            If not None, kwargs passed to `self._make_cbar`.
-        fcn: FunctionType, None
-            Aggregation function. If None, automatically select in :py:meth:`agg`.
-        plot_edges: bool
-            If True, plot the smoothed, extreme edges of the 2D histogram.
-        clabel_kwargs: None, dict
-            If not None, dictionary of kwargs passed to `ax.clabel`.
-        skip_max_clbl: bool
-            If True, don't label the maximum contour. Primarily used when the maximum
-            contour is, effectively, a point.
-        maximum_color:
-            The color for the maximum of the PDF.
-        use_contourf: bool
-            If True, use `ax.contourf`. Else use `ax.contour`.
-        gaussian_filter_std: int
-            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
-            standard deviation specified by `gaussian_filter_std`.
-        gaussian_filter_kwargs: None, dict
-            If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
-        kwargs:
-            Passed to :py:meth:`ax.pcolormesh`.
-            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+        x, y : np.ndarray
+            Coordinates of data points.
+        z : np.ndarray
+            Values at data points.
+        resolution : int
+            Number of grid points along each axis.
+        method : {"linear", "cubic", "nearest"}
+            Interpolation method passed to :func:`scipy.interpolate.griddata`.
+
+        Returns
+        -------
+        XX, YY : np.ndarray
+            2D meshgrid arrays.
+        ZZ : np.ndarray
+            Interpolated values on the grid.
         """
+        from scipy.interpolate import griddata
+
+        xi = np.linspace(x.min(), x.max(), resolution)
+        yi = np.linspace(y.min(), y.max(), resolution)
+        XX, YY = np.meshgrid(xi, yi)
+        ZZ = griddata((x, y), z, (XX, YY), method=method)
+        return XX, YY, ZZ
+
+    def _interpolate_with_rbf(
+        self,
+        x,
+        y,
+        z,
+        resolution=100,
+        neighbors=50,
+        smoothing=1.0,
+        kernel="thin_plate_spline",
+    ):
+        r"""Interpolate scattered data using sparse RBF.
+
+        Uses :class:`scipy.interpolate.RBFInterpolator` with the ``neighbors``
+        parameter for efficient O(N·k) computation instead of O(N²).
+
+        Parameters
+        ----------
+        x, y : np.ndarray
+            Coordinates of data points.
+        z : np.ndarray
+            Values at data points.
+        resolution : int
+            Number of grid points along each axis.
+        neighbors : int
+            Number of nearest neighbors to use for each interpolation point.
+            Higher values produce smoother results but increase computation time.
+        smoothing : float
+            Smoothing parameter. Higher values produce smoother surfaces.
+        kernel : str
+            RBF kernel type. Options include "thin_plate_spline", "cubic",
+            "quintic", "multiquadric", "inverse_multiquadric", "gaussian".
+
+        Returns
+        -------
+        XX, YY : np.ndarray
+            2D meshgrid arrays.
+        ZZ : np.ndarray
+            Interpolated values on the grid.
+        """
+        from scipy.interpolate import RBFInterpolator
+
+        points = np.column_stack([x, y])
+        rbf = RBFInterpolator(
+            points, z, neighbors=neighbors, smoothing=smoothing, kernel=kernel
+        )
+
+        xi = np.linspace(x.min(), x.max(), resolution)
+        yi = np.linspace(y.min(), y.max(), resolution)
+        XX, YY = np.meshgrid(xi, yi)
+        grid_pts = np.column_stack([XX.ravel(), YY.ravel()])
+        ZZ = rbf(grid_pts).reshape(XX.shape)
+
+        return XX, YY, ZZ
+
+    def plot_contours(
+        self,
+        ax=None,
+        method="rbf",
+        # RBF method params (default method)
+        rbf_neighbors=50,
+        rbf_smoothing=1.0,
+        rbf_kernel="thin_plate_spline",
+        # Grid method params
+        grid_resolution=100,
+        gaussian_filter_std=1.5,
+        interpolation="cubic",
+        nan_aware_filter=True,
+        # Common params
+        label_levels=True,
+        cbar=True,
+        cbar_kwargs=None,
+        fcn=None,
+        clabel_kwargs=None,
+        skip_max_clbl=True,
+        use_contourf=False,
+        **kwargs,
+    ):
+        r"""Make a contour plot from adaptive mesh data with optional smoothing.
+
+        Supports three interpolation methods for generating contours from the
+        irregular adaptive mesh:
+
+        - ``"rbf"``: Sparse RBF interpolation (default, fastest with built-in smoothing)
+        - ``"grid"``: Grid interpolation + Gaussian smoothing (matches Hist2D API)
+        - ``"tricontour"``: Direct triangulated contours (no smoothing, for debugging)
+
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, None
+            If None, create an Axes instance from ``plt.subplots``.
+        method : {"rbf", "grid", "tricontour"}
+            Interpolation method. Default is ``"rbf"`` (fastest with smoothing).
+
+        RBF Method Parameters
+        ---------------------
+        rbf_neighbors : int
+            Number of nearest neighbors for sparse RBF. Higher = smoother but slower.
+            Default is 50.
+        rbf_smoothing : float
+            RBF smoothing parameter. Higher values produce smoother surfaces.
+            Default is 1.0.
+        rbf_kernel : str
+            RBF kernel type. Options: "thin_plate_spline", "cubic", "quintic",
+            "multiquadric", "inverse_multiquadric", "gaussian".
+
+        Grid Method Parameters
+        ----------------------
+        grid_resolution : int
+            Number of grid points along each axis. Default is 100.
+        gaussian_filter_std : float
+            Standard deviation for Gaussian smoothing. Default is 1.5.
+            Set to 0 to disable smoothing.
+        interpolation : {"linear", "cubic", "nearest"}
+            Interpolation method for griddata. Default is "cubic".
+        nan_aware_filter : bool
+            If True, use NaN-aware Gaussian filtering. Default is True.
+
+        Common Parameters
+        -----------------
+        label_levels : bool
+            If True, add labels to contours with ``ax.clabel``. Default is True.
+        cbar : bool
+            If True, create a colorbar. Default is True.
+        cbar_kwargs : dict, None
+            Keyword arguments passed to ``self._make_cbar``.
+        fcn : callable, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
+        clabel_kwargs : dict, None
+            Keyword arguments passed to ``ax.clabel``.
+        skip_max_clbl : bool
+            If True, don't label the maximum contour level. Default is True.
+        use_contourf : bool
+            If True, use filled contours. Default is False.
+        **kwargs
+            Additional arguments passed to the contour function.
+            Common options: ``levels``, ``cmap``, ``norm``, ``linestyles``.
+
+        Returns
+        -------
+        ax : mpl.axes.Axes
+            The axes containing the plot.
+        lbls : list or None
+            Contour labels if ``label_levels=True``, else None.
+        cbar_or_mappable : Colorbar or QuadContourSet
+            The colorbar if ``cbar=True``, else the contour set.
+        qset : QuadContourSet
+            The contour set object.
+
+        Examples
+        --------
+        >>> # Default: sparse RBF (fastest)
+        >>> ax, lbls, cbar, qset = splot.plot_contours()
+
+        >>> # Grid interpolation with Gaussian smoothing
+        >>> ax, lbls, cbar, qset = splot.plot_contours(
+        ...     method='grid',
+        ...     grid_resolution=100,
+        ...     gaussian_filter_std=2.0
+        ... )
+
+        >>> # Debug: see raw triangulation
+        >>> ax, lbls, cbar, qset = splot.plot_contours(method='tricontour')
+        """
+        from .tools import nan_gaussian_filter
+
+        # Validate method
+        valid_methods = ("rbf", "grid", "tricontour")
+        if method not in valid_methods:
+            raise ValueError(
+                f"Invalid method '{method}'. Must be one of {valid_methods}."
+            )
+
+        # Pop contour-specific kwargs
         levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop(
-            "norm",
-            None,
-            #             mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-            #             if self.axnorm in ("c", "r")
-            #             else None,
-        )
+        norm = kwargs.pop("norm", None)
         linestyles = kwargs.pop(
             "linestyles",
             [
@@ -871,27 +1012,25 @@ data : {z.size}
         if ax is None:
             fig, ax = plt.subplots()
 
+        # Setup kwargs for clabel and cbar
         (
             clabel_kwargs,
-            edges_kwargs,
+            _edges_kwargs,
             cbar_kwargs,
         ) = self._verify_contour_passthrough_kwargs(
-            ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+            ax, clabel_kwargs, None, cbar_kwargs
         )
 
         inline = clabel_kwargs.pop("inline", True)
         inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
         fmt = clabel_kwargs.pop("fmt", "%s")
 
-        if ax is None:
-            fig, ax = plt.subplots()
-
+        # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
-        assert isinstance(C, np.ndarray)
-        assert C.ndim == 1
         if C.shape[0] != self.mesh.mesh.shape[0]:
             raise ValueError(
-                f"""{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned."""
+                f"{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have "
+                "a z-value. The z-values and mesh are not properly aligned."
             )
 
         x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
@@ -902,51 +1041,97 @@ data : {z.size}
         if self.log.y:
             y = 10.0**y
 
+        # Filter to finite values
         tk_finite = np.isfinite(C)
         x = x[tk_finite]
         y = y[tk_finite]
         C = C[tk_finite]
 
-        contour_fcn = ax.tricontour
-        if use_contourf:
-            contour_fcn = ax.tricontourf
+        # Select contour function based on method
+        if method == "tricontour":
+            # Direct triangulated contour (no smoothing)
+            contour_fcn = ax.tricontourf if use_contourf else ax.tricontour
+            if levels is None:
+                args = [x, y, C]
+            else:
+                args = [x, y, C, levels]
+            qset = contour_fcn(
+                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
+            )
 
-        if levels is None:
-            args = [x, y, C]
         else:
-            args = [x, y, C, levels]
+            # Interpolate to regular grid (rbf or grid method)
+            if method == "rbf":
+                XX, YY, ZZ = self._interpolate_with_rbf(
+                    x,
+                    y,
+                    C,
+                    resolution=grid_resolution,
+                    neighbors=rbf_neighbors,
+                    smoothing=rbf_smoothing,
+                    kernel=rbf_kernel,
+                )
+            else:  # method == "grid"
+                XX, YY, ZZ = self._interpolate_to_grid(
+                    x,
+                    y,
+                    C,
+                    resolution=grid_resolution,
+                    method=interpolation,
+                )
+                # Apply Gaussian smoothing if requested
+                if gaussian_filter_std > 0:
+                    if nan_aware_filter:
+                        ZZ = nan_gaussian_filter(ZZ, sigma=gaussian_filter_std)
+                    else:
+                        from scipy.ndimage import gaussian_filter
 
-        qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
+                        ZZ = gaussian_filter(
+                            np.nan_to_num(ZZ, nan=0), sigma=gaussian_filter_std
+                        )
 
+            # Mask invalid values
+            ZZ = np.ma.masked_invalid(ZZ)
+
+            # Standard contour on regular grid
+            contour_fcn = ax.contourf if use_contourf else ax.contour
+            if levels is None:
+                args = [XX, YY, ZZ]
+            else:
+                args = [XX, YY, ZZ, levels]
+            qset = contour_fcn(
+                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
+            )
+
+        # Handle contour labels
         try:
-            args = (qset, levels[:-1] if skip_max_clbl else levels)
+            label_args = (qset, levels[:-1] if skip_max_clbl else levels)
         except TypeError:
-            # None can't be subscripted.
-            args = (qset,)
+            label_args = (qset,)
 
-        class nf(float):
-            # Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html
-            # Define a class that forces representation of float to look a certain way
-            # This remove trailing zero so '1.0' becomes '1'
+        class _NumericFormatter(float):
+            """Format float without trailing zeros for contour labels."""
+
             def __repr__(self):
-                return str(self).rstrip("0")
+                # Use float's repr to avoid recursion (str(self) calls __repr__)
+                return float.__repr__(self).rstrip("0").rstrip(".")
 
         lbls = None
-        if label_levels:
-            qset.levels = [nf(level) for level in qset.levels]
+        if label_levels and len(qset.levels) > 0:
+            qset.levels = [_NumericFormatter(level) for level in qset.levels]
             lbls = ax.clabel(
-                *args,
+                *label_args,
                 inline=inline,
                 inline_spacing=inline_spacing,
                 fmt=fmt,
                 **clabel_kwargs,
             )
 
+        # Add colorbar
         cbar_or_mappable = qset
         if cbar:
-            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-            cbar_or_mappable = cbar
+            cbar_obj = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar_obj
 
         self._format_axis(ax)
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Claude Settings Ecosystem transforms SolarWindPy's `.claude/settings.json` into a comprehensive, secure, and intelligent development environment. This system integrates 7 specialized hooks, 8 domain-specific agents, multi-layered security, and intelligent workflow automation.
+The Claude Settings Ecosystem transforms SolarWindPy's `.claude/settings.json` into a comprehensive, secure, and intelligent development environment. This system integrates 6 specialized hooks, 5 domain-specific agents, multi-layered security, and intelligent workflow automation.
 
 ## System Architecture
 
@@ -49,7 +49,6 @@ The Claude Settings Ecosystem transforms SolarWindPy's `.claude/settings.json` i
 .claude/hooks/coverage-monitor.py
 
 # Validate system health
-python .claude/hooks/physics-validation.py --quick
 .claude/hooks/pre-commit-tests.sh
 
 # Emergency rollback
@@ -62,8 +61,8 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 # Use UnifiedPlanCoordinator for planning
 "Use UnifiedPlanCoordinator to create implementation plan for dark mode"
 
-# Use DataFrameArchitect for physics and data work
-"Use DataFrameArchitect to verify thermal speed calculations in Ion class"
+# Use DataFrameArchitect for data work
+"Use DataFrameArchitect to optimize DataFrame operations in Ion class"
 "Use DataFrameArchitect to optimize MultiIndex operations in plasma.py"
 
 # Use PlottingEngineer for visualizations
@@ -116,7 +115,7 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 ```json
 "Bash(.claude/hooks/test-runner.sh --changed)"
 "Bash(git add solarwindpy/**)"
-"Bash(python .claude/hooks/physics-validation.py)"
+"Bash(.claude/hooks/coverage-monitor.py)"
 ```
 
 **Blocked Operations:**
@@ -128,21 +127,19 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 
 ## Hook Integration
 
-### All 7 Hooks Active
+### All 6 Hooks Active
 
 1. **validate-session-state.sh** - Session startup validation
-2. **git-workflow-validator.sh** - Branch protection and commit standards  
+2. **git-workflow-validator.sh** - Branch protection and commit standards
 3. **test-runner.sh** - Smart test execution with contextual arguments
-4. **physics-validation.py** - Physics correctness on code changes
-5. **coverage-monitor.py** - Coverage analysis on session end
-6. **create-compaction.py** - Session state preservation before compaction
-7. **pre-commit-tests.sh** - Quality gates on bash operations
+4. **coverage-monitor.py** - Coverage analysis on session end
+5. **create-compaction.py** - Session state preservation before compaction
+6. **pre-commit-tests.sh** - Quality gates on bash operations
 
 ### Intelligent Triggering
 
 - **SessionStart**: Session validation
 - **UserPromptSubmit**: Branch enforcement for planning tasks
-- **PreToolUse**: Physics validation on edits
 - **PostToolUse**: Smart test execution on changes
 - **PreCompact**: State preservation
 - **Stop**: Coverage analysis
@@ -152,7 +149,7 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 ### 5 Domain Specialists
 
 1. **UnifiedPlanCoordinator** - Multi-step planning and coordination
-2. **DataFrameArchitect** - MultiIndex operations, pandas optimization, and physics validation
+2. **DataFrameArchitect** - MultiIndex operations and pandas optimization
 3. **FitFunctionSpecialist** - Curve fitting, statistical analysis, and numerical stability
 4. **PlottingEngineer** - Visualization and matplotlib expertise
 5. **TestEngineer** - Test coverage and quality assurance
@@ -182,7 +179,7 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 ### Smart Triggers
 
 **File Change Analysis:**
-- Core module changes → Physics validation + unit tests
+- Core module changes → Unit tests + coverage checks
 - Plotting changes → Visualization tests + style checks
 - Test changes → Test execution + coverage updates
 
@@ -214,7 +211,7 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 
 ### Performance Baselines
 
-- Hook execution: test-runner.sh ≤ 120s, physics-validation.py ≤ 45s
+- Hook execution: test-runner.sh ≤ 120s
 - Resource usage: ≤ 512MB memory, ≤ 80% CPU
 - Response times: Agent routing ≤ 200ms, pattern matching ≤ 100ms
 

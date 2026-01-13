@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Utility functions for common :mod:`matplotlib` tasks.
 
-These helpers provide shortcuts for creating figures, saving output, and building grids
-of axes with shared colorbars.
+These helpers provide shortcuts for creating figures, saving output, building grids
+of axes with shared colorbars, and NaN-aware image filtering.
 """
 
 import pdb  # noqa: F401
@@ -12,6 +12,27 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from datetime import datetime
 from pathlib import Path
+from scipy.ndimage import gaussian_filter
+
+# Path to the solarwindpy style file
+_STYLE_PATH = Path(__file__).parent / "solarwindpy.mplstyle"
+
+
+def use_style():
+    r"""Apply the SolarWindPy matplotlib style.
+
+    This sets publication-ready defaults including:
+    - 4x4 inch figure size
+    - 12pt base font size
+    - Spectral_r colormap
+    - 300 DPI PDF output
+
+    Examples
+    --------
+    >>> import solarwindpy.plotting as swp_pp
+    >>> swp_pp.use_style()  # doctest: +SKIP
+    """
+    plt.style.use(_STYLE_PATH)
 
 
 def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
@@ -113,7 +134,6 @@ def save(
         alog.info("Saving figure\n%s", spath.resolve().with_suffix(""))
 
     if pdf:
-
         fig.savefig(
             spath.with_suffix(".pdf"),
             bbox_inches=bbox_inches,
@@ -202,68 +222,17 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
     return axes[idx_for_legend].legend(handles, labels, loc=loc, **kwargs)
 
 
-def multipanel_figure_shared_cbar(
-    nrows: int,
-    ncols: int,
-    vertical_cbar: bool = True,
-    sharex: bool = True,
-    sharey: bool = True,
-    **kwargs,
-):
-    r"""Create a grid of axes that share a single colorbar.
-
-    This is a lightweight wrapper around
-    :func:`build_ax_array_with_common_colorbar` for backward compatibility.
-
-    Parameters
-    ----------
-    nrows, ncols : int
-        Shape of the axes grid.
-    vertical_cbar : bool, optional
-        If ``True`` the colorbar is placed to the right of the axes; otherwise
-        it is placed above them.
-    sharex, sharey : bool, optional
-        If ``True`` share the respective axis limits across all panels.
-    **kwargs
-        Additional arguments controlling layout such as ``figsize`` or grid
-        ratios.
-
-    Returns
-    -------
-    fig : :class:`matplotlib.figure.Figure`
-    axes : ndarray of :class:`matplotlib.axes.Axes`
-    cax : :class:`matplotlib.axes.Axes`
-
-    Examples
-    --------
-    >>> fig, axs, cax = multipanel_figure_shared_cbar(2, 2)  # doctest: +SKIP
-    """
-
-    fig_kwargs = {}
-    gs_kwargs = {}
-
-    if "figsize" in kwargs:
-        fig_kwargs["figsize"] = kwargs.pop("figsize")
-
-    for key in ("width_ratios", "height_ratios", "wspace", "hspace"):
-        if key in kwargs:
-            gs_kwargs[key] = kwargs.pop(key)
-
-    fig_kwargs.update(kwargs)
-
-    cbar_loc = "right" if vertical_cbar else "top"
-
-    return build_ax_array_with_common_colorbar(
-        nrows,
-        ncols,
-        cbar_loc=cbar_loc,
-        fig_kwargs=fig_kwargs,
-        gs_kwargs=dict(gs_kwargs, sharex=sharex, sharey=sharey),
-    )
-
-
-def build_ax_array_with_common_colorbar(
-    nrows=1, ncols=1, cbar_loc="top", fig_kwargs=None, gs_kwargs=None
+def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by 4 cbar positions
+    nrows=1,
+    ncols=1,
+    cbar_loc="top",
+    figsize="auto",
+    sharex=True,
+    sharey=True,
+    hspace=0,
+    wspace=0,
+    fig_kwargs=None,
+    gs_kwargs=None,
 ):
     r"""Build an array of axes that share a colour bar.
 
@@ -273,6 +242,17 @@ def build_ax_array_with_common_colorbar(
         Desired grid shape.
     cbar_loc : {"top", "bottom", "left", "right"}, optional
         Location of the colorbar relative to the axes grid.
+    figsize : tuple or "auto", optional
+        Figure size as (width, height) in inches. If ``"auto"`` (default),
+        scales from ``rcParams["figure.figsize"]`` based on nrows/ncols.
+    sharex : bool, optional
+        If ``True``, share x-axis limits across all panels. Default ``True``.
+    sharey : bool, optional
+        If ``True``, share y-axis limits across all panels. Default ``True``.
+    hspace : float, optional
+        Vertical spacing between subplots. Default ``0``.
+    wspace : float, optional
+        Horizontal spacing between subplots. Default ``0``.
     fig_kwargs : dict, optional
         Keyword arguments forwarded to :func:`matplotlib.pyplot.figure`.
     gs_kwargs : dict, optional
@@ -287,6 +267,7 @@ def build_ax_array_with_common_colorbar(
     Examples
     --------
     >>> fig, axes, cax = build_ax_array_with_common_colorbar(2, 3, cbar_loc='right')  # doctest: +SKIP
+    >>> fig, axes, cax = build_ax_array_with_common_colorbar(3, 1, figsize=(5, 12))  # doctest: +SKIP
     """
 
     if fig_kwargs is None:
@@ -298,30 +279,29 @@ def build_ax_array_with_common_colorbar(
     if cbar_loc not in ("top", "bottom", "left", "right"):
         raise ValueError
 
-    figsize = np.array(mpl.rcParams["figure.figsize"])
-    fig_scale = np.array([ncols, nrows])
+    # Compute figsize
+    if figsize == "auto":
+        base_figsize = np.array(mpl.rcParams["figure.figsize"])
+        fig_scale = np.array([ncols, nrows])
+        if cbar_loc in ("right", "left"):
+            cbar_scale = np.array([1.3, 1])
+        else:
+            cbar_scale = np.array([1, 1.3])
+        figsize = base_figsize * fig_scale * cbar_scale
 
+    # Compute grid ratios (independent of figsize)
     if cbar_loc in ("right", "left"):
-        cbar_scale = np.array([1.3, 1])
         height_ratios = nrows * [1]
         width_ratios = (ncols * [1]) + [0.05, 0.075]
         if cbar_loc == "left":
             width_ratios = width_ratios[::-1]
-
     else:
-        cbar_scale = np.array([1, 1.3])
         height_ratios = [0.075, 0.05] + (nrows * [1])
         if cbar_loc == "bottom":
             height_ratios = height_ratios[::-1]
         width_ratios = ncols * [1]
 
-    figsize = figsize * fig_scale * cbar_scale
     fig = plt.figure(figsize=figsize, **fig_kwargs)
-
-    hspace = gs_kwargs.pop("hspace", 0)
-    wspace = gs_kwargs.pop("wspace", 0)
-    sharex = gs_kwargs.pop("sharex", True)
-    sharey = gs_kwargs.pop("sharey", True)
 
     #     print(cbar_loc)
     #     print(nrows, ncols)
@@ -358,7 +338,23 @@ def build_ax_array_with_common_colorbar(
         raise ValueError
 
     cax = fig.add_subplot(cax)
-    axes = np.array([[fig.add_subplot(gs[i, j]) for j in col_range] for i in row_range])
+
+    # Create axes with sharex/sharey using modern matplotlib API
+    # (The old .get_shared_x_axes().join() approach is deprecated in matplotlib 3.6+)
+    axes = np.empty((nrows, ncols), dtype=object)
+    first_ax = None
+    for row_idx, i in enumerate(row_range):
+        for col_idx, j in enumerate(col_range):
+            if first_ax is None:
+                ax = fig.add_subplot(gs[i, j])
+                first_ax = ax
+            else:
+                ax = fig.add_subplot(
+                    gs[i, j],
+                    sharex=first_ax if sharex else None,
+                    sharey=first_ax if sharey else None,
+                )
+            axes[row_idx, col_idx] = ax
 
     if cbar_loc == "top":
         cax.xaxis.set_ticks_position("top")
@@ -367,17 +363,9 @@ def build_ax_array_with_common_colorbar(
         cax.yaxis.set_ticks_position("left")
         cax.yaxis.set_label_position("left")
 
-    if sharex:
-        axes.flat[0].get_shared_x_axes().join(*axes.flat)
-    if sharey:
-        axes.flat[0].get_shared_y_axes().join(*axes.flat)
-
     if axes.shape != (nrows, ncols):
-        raise ValueError(
-            f"""Unexpected axes shape
-Expected : {(nrows, ncols)}
-Created  : {axes.shape}
-"""
+        raise ValueError(  # noqa: E203 - aligned table format intentional
+            f"Unexpected axes shape\nExpected : {(nrows, ncols)}\nCreated  : {axes.shape}"
         )
 
     #     print("rows")
@@ -390,6 +378,8 @@ Created  : {axes.shape}
     #     print(width_ratios)
 
     axes = axes.squeeze()
+    if axes.ndim == 0:
+        axes = axes.item()
     return fig, axes, cax
 
 
@@ -432,3 +422,85 @@ def calculate_nrows_ncols(n):
         nrows, ncols = ncols, nrows
 
     return nrows, ncols
+
+
+def nan_gaussian_filter(array, sigma, **kwargs):
+    r"""Apply Gaussian filter with proper NaN handling via normalized convolution.
+
+    Unlike :func:`scipy.ndimage.gaussian_filter` which propagates NaN values to
+    all neighboring cells, this function:
+
+    1. Smooths valid data correctly near NaN regions
+    2. Preserves NaN locations (no interpolation into NaN cells)
+
+    The algorithm uses normalized convolution: both the data (with NaN replaced
+    by 0) and a weight mask (1 for valid, 0 for NaN) are filtered. The result
+    is the ratio of filtered data to filtered weights, ensuring proper
+    normalization near boundaries.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        2D array possibly containing NaN values.
+    sigma : float
+        Standard deviation for the Gaussian kernel, in pixels.
+    **kwargs
+        Additional keyword arguments passed to
+        :func:`scipy.ndimage.gaussian_filter`.
+
+    Returns
+    -------
+    np.ndarray
+        Filtered array with original NaN locations preserved.
+
+    See Also
+    --------
+    scipy.ndimage.gaussian_filter : Underlying filter implementation.
+
+    Notes
+    -----
+    This implementation follows the normalized convolution approach described
+    in [1]_. The key insight is that filtering a weight mask alongside the
+    data allows proper normalization at boundaries and near missing values.
+
+    References
+    ----------
+    .. [1] Knutsson, H., & Westin, C. F. (1993). Normalized and differential
+       convolution. In Proceedings of IEEE Conference on Computer Vision and
+       Pattern Recognition (pp. 515-523).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> arr = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])
+    >>> result = nan_gaussian_filter(arr, sigma=1.0)
+    >>> bool(np.isnan(result[0, 2]))  # NaN preserved
+    True
+    >>> bool(np.isfinite(result[0, 1]))  # Neighbor is valid
+    True
+    """
+    arr = array.copy()
+    nan_mask = np.isnan(arr)
+
+    # Replace NaN with 0 for filtering
+    arr[nan_mask] = 0
+
+    # Create weights: 1 where valid, 0 where NaN
+    weights = (~nan_mask).astype(float)
+
+    # Filter both data and weights
+    filtered_data = gaussian_filter(arr, sigma=sigma, **kwargs)
+    filtered_weights = gaussian_filter(weights, sigma=sigma, **kwargs)
+
+    # Normalize: weighted average of valid neighbors only
+    result = np.divide(
+        filtered_data,
+        filtered_weights,
+        where=filtered_weights > 0,
+        out=np.full_like(filtered_data, np.nan),
+    )
+
+    # Preserve original NaN locations
+    result[nan_mask] = np.nan
+
+    return result

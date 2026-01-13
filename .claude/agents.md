@@ -34,10 +34,6 @@
 - Validate data alignment when combining plasma/spacecraft data
 - Optimize memory usage through views rather than copies
 - Check for pandas SettingWithCopyWarning issues
-- Verify physical units consistency using units_constants module
-- Check thermal speed calculations (mw² = 2kT convention)
-- Validate ion mass/charge ratios match physical constants
-- Ensure magnetic field components maintain proper vector relationships
 
 ### TestEngineer
 **Applies to:** solarwindpy/tests/**/*.py  
