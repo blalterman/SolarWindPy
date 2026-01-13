@@ -9,7 +9,7 @@ from solarwindpy.fitfunctions.power_laws import (
     PowerLawPlusC,
     PowerLawOffCenter,
 )
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import ChisqPerDegreeOfFreedom, InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -123,10 +123,10 @@ def test_make_fit_success(cls, power_law_data):
     # Test fitting succeeds
     obj.make_fit()
 
-    # Test fit results are available
-    assert obj.popt is not None
-    assert obj.pcov is not None
-    assert obj.chisq_dof is not None
+    # Test fit results are available with correct types
+    assert isinstance(obj.popt, dict)
+    assert isinstance(obj.pcov, np.ndarray)
+    assert isinstance(obj.chisq_dof, ChisqPerDegreeOfFreedom)
 
     # Test output shapes
     assert len(obj.popt) == len(obj.p0)
@@ -279,7 +279,7 @@ def test_power_law_with_weights(power_law_data):
     obj.make_fit()
 
     # Should complete successfully
-    assert obj.popt is not None
+    assert isinstance(obj.popt, dict)
     assert len(obj.popt) == 2
 
 
@@ -309,8 +309,8 @@ def test_property_access_before_fit(cls):
     obj = cls(x, y)
 
     # These should work before fitting
-    assert obj.TeX_function is not None
-    assert obj.p0 is not None
+    assert isinstance(obj.TeX_function, str)
+    assert isinstance(obj.p0, list)
 
     # These should raise AttributeError before fitting
     with pytest.raises(AttributeError):
