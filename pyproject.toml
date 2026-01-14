@@ -117,6 +117,9 @@ analysis = [
 "Bug Tracker" = "https://github.com/blalterman/SolarWindPy/issues"
 "Source" = "https://github.com/blalterman/SolarWindPy"
 
+[tool.setuptools.package-data]
+solarwindpy = ["core/data/*.csv"]
+
 [tool.pip-tools]
 # pip-compile configuration for lockfile generation
 generate-hashes = false  # Set to true for security-critical deployments
