@@ -1,0 +1,8 @@
+solarwindpy.core.abundances module
+==================================
+
+.. automodule:: solarwindpy.core.abundances
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
