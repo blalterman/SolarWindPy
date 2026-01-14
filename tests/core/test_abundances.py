@@ -8,6 +8,7 @@ Tests verify:
 
 Run: pytest tests/core/test_abundances.py -v
 """
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -113,8 +114,12 @@ class TestGetElement:
             ref.get_element(3.14)  # float is invalid
 
     def test_unknown_element_raises_keyerror(self, ref):
-        with pytest.raises(KeyError):
+        with pytest.raises(KeyError, match="Xx"):
             ref.get_element("Xx")  # No element Xx
+
+    def test_invalid_kind_raises_keyerror(self, ref):
+        with pytest.raises(KeyError, match="Invalid"):
+            ref.get_element("Fe", kind="Invalid")
 
 
 class TestAbundanceRatio:
