@@ -6,7 +6,6 @@ system paths for saving figures.  Concrete plot classes derive from these mixins
 implement specific visualizations.
 """
 
-import pdb  # noqa: F401
 import logging
 import pandas as pd
 

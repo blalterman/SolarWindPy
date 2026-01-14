@@ -27,7 +27,6 @@ Examples
 True
 """
 
-import pdb  # noqa: F401
 import logging
 import numpy as np
 import pandas as pd

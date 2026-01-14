@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 r"""Plotting helpers specialized for solar wind orbits."""
 
-import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd

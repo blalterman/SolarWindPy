@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 r"""Two-dimensional histogram and heatmap plotting utilities."""
 
-import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd

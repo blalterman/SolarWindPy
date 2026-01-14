@@ -7,7 +7,6 @@ from a :class:`~solarwindpy.fitfunctions.core.FitFunction` and produces
 ready-to-plot annotation strings for Matplotlib.
 """
 
-import pdb  # noqa: F401
 import re
 import numpy as np
 from numbers import Number

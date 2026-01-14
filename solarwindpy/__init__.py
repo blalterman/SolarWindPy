@@ -4,7 +4,6 @@ Primary focus is in situ solar wind measurements and the additional tools necess
 context (e.g. solar activity indicies) and some simple plotting methods.
 """
 
-import pdb  # noqa: F401
 
 from importlib.metadata import PackageNotFoundError, version
 

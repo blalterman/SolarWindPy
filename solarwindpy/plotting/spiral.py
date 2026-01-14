@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 r"""Spiral mesh plots and associated binning utilities."""
 
-import pdb  # noqa: F401
 import logging
 
 import numpy as np
