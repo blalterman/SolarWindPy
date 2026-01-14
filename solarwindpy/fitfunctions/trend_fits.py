@@ -5,7 +5,6 @@ Apply a fit along one dimention of a 2D aggregated data and then fit the results
 those 1D fits along the 2nd dimension of the aggregated data.
 """
 
-import pdb  # noqa: F401
 
 # import warnings
 import logging  # noqa: F401

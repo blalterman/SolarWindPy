@@ -249,11 +249,7 @@ class Plasma(base.Base):
             -ion number density
             -ion thermal speed
         """
-        #         try:
         return self._auxiliary_data
-
-    #         except AttributeError:
-    #             raise AttributeError("No auxiliary data set.")
 
     @property
     def aux(self):
@@ -516,14 +512,6 @@ class Plasma(base.Base):
         minimal_species = np.unique([*itertools.chain(minimal_species)])
         minimal_species = pd.Index(minimal_species)
 
-        #        print("",
-        #              "<_chk_species>",
-        #              "<conformed>: {}".format(species),
-        #              "<minimal>: {}".format(minimal_species),
-        #              "<available>: {}".format(self.ions.index),
-        #              sep="\n",
-        #              end="\n\n")
-
         unavailable = minimal_species.difference(self.ions.index)
 
         if unavailable.any():
@@ -536,7 +524,6 @@ class Plasma(base.Base):
                 "Available: %s\n"
                 "Unavailable: %s"
             )
-            # print(msg % (requested, available, unavailable), flush=True, end="\n")
             raise ValueError(msg % (requested, available, unavailable))
         return species
 
@@ -736,18 +723,10 @@ class Plasma(base.Base):
 
     def set_data(self, new):
         r"""Set the data and log statistics about it."""
-        #         assert isinstance(new, pd.DataFrame)
         super(Plasma, self).set_data(new)
 
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
-        # new = new.sort_index(axis=1, inplace=True)
         assert new.columns.names == ["M", "C", "S"]
-
-        #         assert isinstance(new.index, pd.DatetimeIndex)
-        #         if not new.index.is_monotonic:
-        #             self.logger.warning(
-        #                 r"""A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working."""
-        #             )
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
@@ -770,32 +749,19 @@ class Plasma(base.Base):
             .multiply(coeff, axis=1, level="C")
         )
 
-        #         w = (
-        #         data.w.drop("scalar", axis=1, level="C")
-        #         .pow(2)
-        #         .multiply(coeff, axis=1, level="C")
-        #         )
-
         # TODO: test `skipna=False` to ensure we don't accidentially create valid data
         #       where there is none. Actually, not possible as we are combining along
         #       "S".
 
         # Workaround for `skipna=False` bug. (20200814)
-        # w = w.sum(axis=1, level="S", skipna=False).applymap(np.sqrt)
         # Changed to new groupby method (20250611)
         w = w.T.groupby("S").sum().T.pow(0.5)
-        #         w_is_finite = w.notna().all(axis=1, level="S")
-        #         w = w.sum(axis=1, level="S").applymap(np.sqrt)
-        #         w = w.where(w_is_finite, axis=1, level="S")
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
         w.columns = self.mi_tuples(w.columns)
 
-        #         data = pd.concat([data, w], axis=1, sort=True)
-        data = pd.concat([data, w], axis=1, sort=False).sort_index(
-            axis=1
-        )  # .sort_idex(axis=0)
+        data = pd.concat([data, w], axis=1, sort=False).sort_index(axis=1)
 
         data.columns = self.mi_tuples(data.columns)
         data = data.sort_index(axis=1)
@@ -919,7 +885,6 @@ class Plasma(base.Base):
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            # w = w.sum(axis=1, level="C")
             w = w.T.groupby(level="C").sum().T
 
         return w
@@ -955,9 +920,6 @@ class Plasma(base.Base):
 
         if len(species) == 1:
             pth = pth.T.groupby("C").sum().T
-            # pth["S"] = species[0]
-            # pth = pth.set_index("S", append=True).unstack()
-            # pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         return pth
 
     def temperature(self, *species):
@@ -983,9 +945,6 @@ class Plasma(base.Base):
 
         if len(species) == 1:
             temp = temp.T.groupby("C").sum().T
-            # temp["S"] = species[0]
-            # temp = temp.set_index("S", append=True).unstack()
-            # temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
         return temp
 
     def beta(self, *species):
@@ -1068,8 +1027,6 @@ class Plasma(base.Base):
         exp = pd.Series({"par": -1, "per": 1})
 
         if len(species) > 1:
-            # if "S" in pth.columns.names:
-            #             ani = pth.pow(exp, axis=1, level="C").product(axis=1, level="S")
             ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
         else:
             ani = pth.pow(exp, axis=1).product(axis=1)
@@ -1097,10 +1054,7 @@ class Plasma(base.Base):
         """
         stuple = self._chk_species(*species)
 
-        # print("", "<Module>", sep="\n")
-
         if len(stuple) == 1:
-            # print("<Module.ion>")
             s = stuple[0]
             v = self.ions.loc[s].velocity
             if project_m2q:
@@ -1120,7 +1074,6 @@ species: {}
             )
 
         else:
-            # print("<Module.sum>")
             v = self.ions.loc[list(stuple)].apply(lambda x: x.velocity)
             if len(species) == 1:
                 rhos = self.mass_density(*stuple)
@@ -1130,9 +1083,7 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                rv = (
-                    v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T
-                )  # sum(axis=1, level="C")
+                rv = v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T
                 v = rv.divide(rhos.sum(axis=1), axis=0)
                 v = vector.Vector(v)
 
@@ -1234,33 +1185,6 @@ species: {}
         pdv = pdv.multiply(const)
         pdv.name = "pdynamic"
 
-        #        print("",
-        #              "<Module>",
-        #              "<stuple>: {}".format(stuple),
-        #              "<scom> %s" % scom,
-        #              "<const> %s" % const,
-        #              "<rho_i>", type(rho_i), rho_i,
-        #              "<dv_i>", type(dv_i), dv_i,
-        #              "<dvsq_i>", type(dvsq_i), dvsq_i,
-        #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
-        #              "<pdv>", type(pdv), pdv,
-        #              sep="\n",
-        #              end="\n\n")
-
-        #        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-        #        pdv        = dvsq_rho_i.sum(axis=1).multiply(const)
-        # pdv = const * dv_i.pow(2.0).sum(axis=1,
-        #                                level="S").multiply(rhi_i,
-        #                                                    axis=1,
-        #                                                    level="S").sum(axis=1)
-        #        pdv.name = "pdynamic"
-
-        #        print(
-        #              "<dvsq_rho_i>", type(dvsq_rho_i), dvsq_rho_i,
-        #              "<pdv>", type(pdv), pdv,
-        #              sep="\n",
-        #              end="\n\n")
-
         return pdv
 
     def pdv(self, *species, project_m2q=False):
@@ -1285,13 +1209,9 @@ species: {}
 
         pth = pth.loc[:, "scalar"]
 
-        #         gamma = self.units_constants.misc.loc["gamma"]  # should be 5.0/3.0
         gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
         cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
 
-        #         raise NotImplementedError(
-        #             "How do we name this species? Need to figure out species processing up top."
-        #         )
         if len(species) == 1:
             cs.name = species[0]
         else:
@@ -1327,16 +1247,6 @@ species: {}
 
         if len(species) == 1:
             ca.name = species[0]
-
-        # print_inline_debug_info = False
-        # if print_inline_debug_info:
-        #     print("",
-        #             "<Module>",
-        #             "<species>", stuple,
-        #             "<b>", type(b), b,
-        #             "<rho>", type(rho), rho,
-        #             "<ca>", type(ca), ca,
-        #             sep="\n")
 
         return ca
 
@@ -1388,7 +1298,6 @@ species: {}
         # My guess is that following this line, we'd insert the subtraction
         # of the dynamic pressure with the appropriate alignment of the
         # species as necessary.
-        #         dp = dp.sum(axis=1, level="S" if multi_species else None)
         if multi_species:
             dp = dp.T.groupby(level="S").sum().T
         else:
@@ -1401,17 +1310,6 @@ species: {}
 
         if len(species) == 1:
             afsq.name = species[0]
-
-        #        print(""
-        #              "<Module>",
-        #              "<species>: {}".format(species),
-        #              "<bsq>", type(bsq), bsq,
-        #              "<coeff>", type(coeff), coeff,
-        #              "<pth>", type(pth), pth,
-        #              "<dp>", type(dp), dp,
-        #              "<afsq>", type(afsq), afsq,
-        #              "",
-        #              sep="\n")
 
         return afsq
 
@@ -1449,15 +1347,6 @@ species: {}
         ca = self.ca(ssum)
         afsq = self.afsq(ssum, pdynamic=pdynamic)
         caani = ca.multiply(afsq.pipe(np.sqrt))
-
-        # print("",
-        #       "<Module>",
-        #       "<species>: {}".format(ssum),
-        #       "<ca>", type(ca), ca,
-        #       "<afsq>", type(afsq), afsq,
-        #       "<caani>", type(caani), caani,
-        #       "",
-        #       sep="\n")
 
         return caani
 
@@ -1519,25 +1408,6 @@ species: {}
 
         lnlambda = (29.9 - np.log(left * right)) / units.lnlambda
         lnlambda.name = "%s,%s" % (s0, s1)
-
-        #        print("",
-        #              "<Module>",
-        #              "<ions>", type(self.ions), self.ions,
-        #              "<s0, s1>: %s, %s" % (s0, s1),
-        #              "<z0>", z0,
-        #              "<z1>", z1,
-        #              "<n0>", type(n0), n0,
-        #              "<n1>", type(n1), n1,
-        #              "<T0>", type(T0), T0,
-        #              "<T1>", type(T1), T1,
-        #              "<r0>", type(r0), r0,
-        #              "<r1>", type(r1), r1,
-        #              "<right>", type(right), right,
-        #              "<left>", type(left), left,
-        #              "<lnlambda>", type(lnlambda), lnlambda,
-        #              "<Module Done>",
-        #              "",
-        #              sep="\n")
 
         return lnlambda
 
@@ -1618,28 +1488,6 @@ species: {}
         )
         nuab /= units.nuc
 
-        # print("",
-        #       "<Module>",
-        #       "<species>: {}".format((sa, sb)),
-        #       "<ma>", type(ma), ma,
-        #       "<masses>", type(masses), masses,
-        #       "<mu>", type(mu), mu,
-        #       "<qab^2>", type(qabsq), qabsq,
-        #       "<qa^2 qb^2 / 4 pi e0^2 ma mu>", type(coeff), coeff,
-        #       "<w>", type(w), w,
-        #       "<wab>", type(wab), wab,
-        #       "<lnlambda>", type(lnlambda), lnlambda,
-        #       "<nb>", type(nb), nb,
-        #       "<wab>", type(wab), wab,
-        #       "<dv>", type(dv), dv,
-        #       "<dv/wab>", type(dvw), dvw,
-        #
-        #       "<erf(dv/wab)>", type(ldr1), ldr1,
-        #       "<(dv/wab) * 2/sqrt(pi) * exp(-(dv/wab)^2)>", type(ldr2), ldr2,
-        #       "<transverse diffusion rate>", type(ldr), ldr,
-        #       "<nuab>", type(nuab), nuab,
-        #       sep="\n")
-
         if both_species:
             exp = pd.Series({sa: 1.0, sb: -1.0})
             rho_ratio = pd.concat(
@@ -1648,22 +1496,10 @@ species: {}
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
-            #             nu.name = "%s+%s" % (sa, sb)
             nu.name = f"{sa}+{sb}"
-            # print(
-            #       "<rho_a/rho_b>", type(rho_ratio), rho_ratio,
-            #       "<nuba>", type(nuba), nuba,
-            #       sep="\n")
         else:
             nu = nuab
-            #             nu.name = "%s-%s" % (sa, sb)
             nu.name = f"{sa}-{sb}"
-
-        # print(
-        #       "<both_species> %s" % both_species,
-        #       "<nu>", type(nu), nu,
-        #       "",
-        #       sep="\n")
 
         return nu
 
@@ -1705,9 +1541,6 @@ species: {}
             raise ValueError(msg)
 
         r = sc.distance2sun * self.units.distance2sun
-        #         r = self.constants.misc.loc["1AU [m]"] - (
-        #             self.gse.x * self.constants.misc.loc["Re [m]"]
-        #         )
         vsw = self.velocity("+".join(self.species)).mag * self.units.v
         tau_exp = r.divide(vsw, axis=0)
 
@@ -1715,19 +1548,6 @@ species: {}
 
         nc = nuc.multiply(tau_exp, axis=0) / self.units.nc
         nc.name = nuc.name
-        # Nc name should be handled by nuc name conventions.
-
-        # print("",
-        #       "<Module>",
-        #       "<species>: {}".format((sa, sb)),
-        #       "<both species>: %s" % both_species,
-        #       "<r>", type(r), r,
-        #       "<vsw>", type(vsw), vsw,
-        #       "<tau_exp>", type(tau_exp), tau_exp,
-        #       "<nuc>", type(nuc), nuc,
-        #       "<nc>", type(nc), nc,
-        #       "",
-        #       sep="\n")
 
         return nc
 
@@ -1808,31 +1628,11 @@ species: {}
         nbar = n2 / n1
         wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
         coef = nbar.multiply(wbar, axis=0).apply(np.log)
-        # f2f1 = nbar * wbar * f2f1
         f2f1 = coef.add(dvw, axis=0)
 
         assert isinstance(f2f1, pd.Series)
         sbc = "%s/%s" % (beam, core)
         f2f1.name = sbc
-
-        #        print("",
-        #              "<Module>",
-        #              "<species>: {},{}".format(beam, core),
-        #              "<ni>", type(n1), n1,
-        #              "<nj>", type(n2), n2,
-        #              "<nbar>", type(nbar), nbar,
-        #              "<w1_par>", type(w1_par), w1_par,
-        #              "<w1_per>", type(w1_per), w1_per,
-        #              "<w2_par>", type(w2_par), w2_par,
-        #              "<w2_per>", type(w2_per), w2_per,
-        #              "<wbar>", type(wbar), wbar,
-        #              "<coef>", type(coef), coef,
-        #              "<dv>", type(dv), dv,
-        #              "<dvw>", type(dvw), dvw,
-        #              "<f2f1>", type(f2f1), f2f1,
-        #              "",
-        #              sep="\n"
-        #             )
 
         return f2f1
 
@@ -1889,10 +1689,7 @@ species: {}
             )
             niqi = ni.multiply(qi, axis=1, level="S")
             ne = niqi.sum(axis=1)
-            # niqivi = vi.multiply(niqi, axis=1, level="S").sum(axis=1, level="C")
-            niqivi = (
-                vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T
-            )  # sum(axis=1, level="C")
+            niqivi = vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T
 
         ve = niqivi.divide(ne, axis=0)
 
@@ -1926,23 +1723,6 @@ species: {}
                 self._set_species(*species)
                 self.set_data(data)
                 self._set_ions()
-
-        #        print("<Module>",
-        #              "<species>: {}".format(species),
-        #              "<qi>", type(qi), qi,
-        #              "<ni>", type(ni), ni,
-        #              "<vi>", type(vi), vi,
-        #              "<wp>", type(wp), wp,
-        #              "<niqi>", type(niqi), niqi,
-        #              "<niqivi>", type(niqivi), niqivi,
-        #              "<ne>", type(ne), ne,
-        #              "<ve>", type(ve), ve,
-        #              "<we>", type(we), we,
-        #              "<electrons>", type(electrons), electrons, electrons.data,
-        #              "<plasma.species>: {}".format(self.species),
-        #              "<plasma.ions>", type(self.ions), self.ions,
-        #              "<plasma.data>", type(self.data), self.data.T,
-        #              "", sep="\n")
 
         return electrons
 
@@ -1980,22 +1760,10 @@ species: {}
         qa = dv.pow(3)
         qb = dv.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
 
-        #        print("<Module>",
-        #              "<species> {}".format(species),
-        #              "<rho>", type(rho), rho,
-        #              "<v>", type(v), v,
-        #              "<w>", type(w), w,
-        #              "<qa>", type(qa), qa,
-        #              "<qb>", type(qb), qb,
-        #              sep="\n")
-
         qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
             qs = qs.sum(axis=1)
             qs.name = "+".join(species)
-
-        #        print("<qpar>", type(qs), qs,
-        #              sep="\n")
 
         coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
         q = coeff * qs

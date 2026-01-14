@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 r"""Tools for creating physical quantity plot labels."""
-import pdb  # noqa: F401
 import logging
 import re
 from abc import ABC

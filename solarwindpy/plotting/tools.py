@@ -5,7 +5,6 @@ These helpers provide shortcuts for creating figures, saving output, building gr
 of axes with shared colorbars, and NaN-aware image filtering.
 """
 
-import pdb  # noqa: F401
 import logging
 import numpy as np
 import matplotlib as mpl

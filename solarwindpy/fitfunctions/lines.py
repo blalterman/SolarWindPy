@@ -6,7 +6,6 @@ subclasses for straight-line models.  They are primarily used for
 quick trend estimation and serve as basic examples of the
 FitFunction interface.
 """
-import pdb  # noqa: F401
 import numpy as np
 
 from .core import FitFunction

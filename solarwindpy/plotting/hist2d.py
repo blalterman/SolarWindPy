@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 r"""Two-dimensional histogram and heatmap plotting utilities."""
 
-import pdb  # noqa: F401
 
 import numpy as np
 import pandas as pd
@@ -16,28 +15,13 @@ from . import base
 from . import labels as labels_module
 from .tools import nan_gaussian_filter
 
-# from .agg_plot import AggPlot
-# from .hist1d import Hist1D
-
 from . import agg_plot
 from . import hist1d
 
 AggPlot = agg_plot.AggPlot
 Hist1D = hist1d.Hist1D
 
-# import os
-# import psutil
 
-
-# def log_mem_usage():
-#    usage = psutil.Process(os.getpid()).memory_info()
-#    usage = "\n".join(
-#        ["{} {:.3f} GB".format(k, v * 1e-9) for k, v in usage._asdict().items()]
-#    )
-#    logging.getLogger("main").warning("Memory usage\n%s", usage)
-
-
-# class Hist2D(base.Plot2D, AggPlot):
 class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     r"""Create a 2D histogram with an optional z-value using an equal number.
 
@@ -124,35 +108,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         return x, y
 
-    #     def set_path(self, new, add_scale=True):
-    #         # Bug: path doesn't auto-set log information.
-    #         path, x, y, z, scale_info = super().set_path(new, add_scale)
-
-    #         if new == "auto":
-    #             path = path / x / y / z
-
-    #         else:
-    #             assert x is None
-    #             assert y is None
-    #             assert z is None
-
-    #         if add_scale:
-    #             assert scale_info is not None
-
-    #             scale_info = "-".join(scale_info)
-
-    #             if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
-    #                 # Insert <norm> at end of path so scale order is (x, y, z).
-    #                 path = path.parts
-    #                 path = path[:-1] + (scale_info + "-" + path[-1],)
-    #                 path = Path(*path)
-    #             else:
-    #                 path = path / scale_info
-
-    #         self._path = path
-
-    #     set_path.__doc__ = base.Base.set_path.__doc__
-
     def set_labels(self, **kwargs):
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
@@ -164,29 +119,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             z.build_label()
 
         super().set_labels(z=z, **kwargs)
-
-    #     def set_data(self, x, y, z, clip):
-    #         data = pd.DataFrame(
-    #             {
-    #                 "x": np.log10(np.abs(x)) if self.log.x else x,
-    #                 "y": np.log10(np.abs(y)) if self.log.y else y,
-    #             }
-    #         )
-    #
-    #
-    #         if z is None:
-    #             z = pd.Series(1, index=x.index)
-    #
-    #         data.loc[:, "z"] = z
-    #         data = data.dropna()
-    #         if not data.shape[0]:
-    #             raise ValueError(
-    #                 "You can't build a %s with data that is exclusively NaNs"
-    #                 % self.__class__.__name__
-    #             )
-    #
-    #         self._data = data
-    #         self._clip = clip
 
     def set_data(self, x, y, z, clip):
         super().set_data(x, y, z, clip)
@@ -307,10 +239,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         a0, a1 = self.alim
         if a0 is not None or a1 is not None:
             tk = pd.Series(True, index=agg.index)
-            #             tk  = pd.DataFrame(True,
-            #                                index=agg.index,
-            #                                columns=agg.columns
-            #                               )
             if a0 is not None:
                 tk = tk & (agg >= a0)
             if a1 is not None:
@@ -437,24 +365,15 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x = self.edges["x"]
         y = self.edges["y"]
 
-        #         assert x.size == agg.shape[1] + 1
-        #         assert y.size == agg.shape[0] + 1
-
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
         if x.size != agg.shape[1] + 1:
-            #             agg = agg.reindex(columns=self.intervals["x"])
             agg = agg.reindex(columns=self.categoricals["x"])
         if y.size != agg.shape[0] + 1:
-            #             agg = agg.reindex(index=self.intervals["y"])
             agg = agg.reindex(index=self.categoricals["y"])
 
         if ax is None:
             fig, ax = plt.subplots()
 
-        #         if self.log.x:
-        #             x = 10.0 ** x
-        #         if self.log.y:
-        #             y = 10.0 ** y
         x, y = self._maybe_convert_to_log_scale(x, y)
 
         axnorm = self.axnorm
@@ -507,12 +426,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             alpha = alpha.filled(0)
             # Must draw to initialize `facecolor`s
             plt.draw()
-            # Remove `pc` from axis so we can redraw with std
-            #             pc.remove()
             colors = pc.get_facecolors()
             colors[:, 3] = alpha
             pc.set_facecolor(colors)
-        #             ax.add_collection(pc)
 
         elif alpha_fcn is not None:
             self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
@@ -966,15 +882,10 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x = self.intervals["x"].mid
         y = self.intervals["y"].mid
 
-        #         assert x.size == agg.shape[1]
-        #         assert y.size == agg.shape[0]
-
         # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
         if x.size != agg.shape[1]:
-            #             agg = agg.reindex(columns=self.intervals["x"])
             agg = agg.reindex(columns=self.categoricals["x"])
         if y.size != agg.shape[0]:
-            #             agg = agg.reindex(index=self.intervals["y"])
             agg = agg.reindex(index=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
@@ -1133,10 +1044,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         hspace = kwargs.pop("hspace", 0)
         wspace = kwargs.pop("wspace", 0)
 
-        #         if fig_axes is not None:
-        #             fig, axes = fig_axes
-        #             hax, xax, yax, cax = axes
-        #         else:
         fig = plt.figure(figsize=figsize)
         gs = mpl.gridspec.GridSpec(
             4,

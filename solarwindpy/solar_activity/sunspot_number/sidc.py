@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Access sunspot-number data from the SIDC."""
 
-import pdb  # noqa: F401
 import numpy as np
 import pandas as pd
 import matplotlib as mpl

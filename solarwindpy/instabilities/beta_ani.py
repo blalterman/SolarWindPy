@@ -2,7 +2,6 @@
 
 __all__ = ["BetaRPlot"]
 
-import pdb  # noqa: F401
 
 from ..plotting.histograms import Hist2D
 from ..plotting import labels

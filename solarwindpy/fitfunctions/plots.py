@@ -5,7 +5,6 @@ This module contains :class:`FFPlot`, a helper for visualizing fitted
 models, residuals and associated annotations.
 """
 
-import pdb  # noqa: F401
 import logging  # noqa: F401
 
 import numpy as np

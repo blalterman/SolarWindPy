@@ -6,7 +6,6 @@ subclasses to fit power-law relations of the form ``f(x) = A x^b`` with
 optional offsets or centering.  These classes supply sensible initial
 guesses and convenience properties for plotting and LaTeX reporting.
 """
-import pdb  # noqa: F401
 
 from .core import FitFunction
 

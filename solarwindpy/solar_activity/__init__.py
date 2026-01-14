@@ -7,7 +7,6 @@ This package consolidates the different solar activity indicators available in
 
 __all__ = ["sunspot_number", "ssn", "lisird", "plots"]
 
-import pdb  # noqa: F401
 import pandas as pd
 
 from . import sunspot_number  # noqa: F401
