@@ -18,7 +18,6 @@ from . import base
 from . import labels as labels_module
 
 InitialSpiralEdges = namedtuple("InitialSpiralEdges", "x,y")
-# SpiralMeshData = namedtuple("SpiralMeshData", "x,y")
 SpiralMeshBinID = namedtuple("SpiralMeshBinID", "id,fill,visited")
 SpiralFilterThresholds = namedtuple(
     "SpiralFilterThresholds", "density,size", defaults=(False,)
@@ -176,10 +175,6 @@ class SpiralMesh(object):
         xbins = self.initial_edges.x
         ybins = self.initial_edges.y
 
-        #         # Account for highest bin = 0 already done in `SpiralPlot2D.initialize_mesh`.
-        #         xbins[-1] = np.max([0.01, 1.01 * xbins[-1]])
-        #         ybins[-1] = np.max([0.01, 1.01 * ybins[-1]])
-
         left = xbins[:-1]
         right = xbins[1:]
         bottom = ybins[:-1]
@@ -199,15 +194,11 @@ class SpiralMesh(object):
 
         mesh = np.array(mesh)
 
-        #         pdb.set_trace()
-
         self.initial_mesh = np.array(mesh)
         return mesh
 
     @staticmethod
     def process_one_spiral_step(bins, x, y, min_per_bin):
-        #         print("Processing spiral step", flush=True)
-        #         start0 = datetime.now()
         cell_count = get_counts_per_bin(bins, x, y)
 
         bins_to_replace = cell_count > min_per_bin
@@ -241,10 +232,6 @@ class SpiralMesh(object):
 
         bins[bins_to_replace] = np.nan
 
-        #         stop = datetime.now()
-        #         print(f"Done Building replacement grid cells (dt={stop-start1})", flush=True)
-        #         print(f"Done Processing spiral step (dt={stop-start0})", flush=True)
-
         return new_cells, nbins_to_replace
 
     @staticmethod
@@ -271,9 +258,6 @@ class SpiralMesh(object):
 
         dt_key = f"Elapsed [{dt_unit}]"
         stats = pd.DataFrame({dt_key: dt, "N Divisions": n_replaced}, index=index)
-
-        #         stats = pd.Series(stats[1:, 1].astype(int), index=stats[1:, 0].astype(int), name=stats[0, 1])
-        #         stats.index.name = stats[0, 0]
 
         fig, ax = plt.subplots()
         tax = ax.twinx()
@@ -313,7 +297,6 @@ class SpiralMesh(object):
         y = self.data.y.values
 
         min_per_bin = self.min_per_bin
-        #         max_bins = int(1e5)
 
         initial_bins = self.initialize_bins()
 
@@ -334,11 +317,8 @@ class SpiralMesh(object):
         y = y[tk_data_in_mesh]
 
         initial_cell_count = get_counts_per_bin(initial_bins, x, y)
-        #         initial_cell_count = self.get_counts_per_bin_loop(initial_bins, x, y)
         bins_to_replace = initial_cell_count > min_per_bin
         nbins_to_replace = bins_to_replace.sum()
-
-        #         raise ValueError
 
         list_of_bins = [initial_bins]
         active_bins = initial_bins
@@ -355,7 +335,6 @@ class SpiralMesh(object):
                 active_bins, x, y, min_per_bin
             )
             now = datetime.now()
-            #             if not(step % 10):
             logger.warning(f"{step:>6}  {nbins_to_replace:>7}  {(now - step_start)}")
             list_of_bins.append(active_bins)
             step += 1
@@ -367,7 +346,6 @@ class SpiralMesh(object):
         final_bins = final_bins[valid_bins]
 
         stop = datetime.now()
-        #         logger.warning(f"Complete at {stop}")
         logger.warning(f"\nCompleted {self.__class__.__name__} at {stop}")
         logger.warning(f"Elasped time {stop - start}")
         logger.warning(f"Split bin threshold {min_per_bin}")
@@ -376,8 +354,6 @@ class SpiralMesh(object):
         )
 
         self._mesh = final_bins
-
-    #         return final_bins
 
     def calculate_bin_number(self):
         logger = logging.getLogger(__name__)
@@ -395,29 +371,15 @@ class SpiralMesh(object):
 
         logger.warning(f"Elapsed time {stop - start}")
 
-        #         return calculate_bin_number_with_numba_broadcast(mesh, x, y, fill)
-
-        #             if ( verbose > 0 and
-        #                  (i % verbose == 0) ):
-        #                     print(i+1, end=", ")
-
         if (zbin == fill).any():
-            #         if (zbin < 0).any():
-            #             pdb.set_trace()
             logger.warning(
                 f"""`zbin` contains {(zbin == fill).sum()} ({100 * (zbin == fill).mean():.1f}%) fill values that are outside of mesh.
 They will be replaced by NaNs and excluded from the aggregation.
 """
             )
-            # raise ValueError(msg % (zbin == fill).sum())
 
         # Set fill bin to zero
         is_fill = zbin == fill
-        #         zbin[~is_fill] += 1
-        #         zbin[is_fill] = -1
-        #         print(zbin.min())
-        #         zbin += 1
-        #         print(zbin.min())
         # `minlength=nbins` forces us to include empty bins at the end of the array.
         bin_frequency = np.bincount(zbin[~is_fill], minlength=nbins)
         n_empty = (bin_frequency == 0).sum()
@@ -437,9 +399,6 @@ They will be replaced by NaNs and excluded from the aggregation.
                 f"{nbins - bin_frequency.shape[0]} mesh cells do not have an associated z-value"
             )
 
-        # zbin = _pd.Series(zbin, index=self.data.index, name="zbin")
-        # # Pandas groupby will treat NaN as not belonging to a bin.
-        # zbin.replace(fill, _np.nan, inplace=True)
         bin_id = SpiralMeshBinID(zbin, fill, bin_visited)
         self._bin_id = bin_id
         return bin_id
@@ -501,9 +460,6 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
         r"""Aggregate the z-values into their bins."""
         self.logger.debug("aggregating z-data")
 
-        #         start = datetime.now()
-        #         self.logger.warning(f"Start {start}")
-
         if fcn is None:
             if self.data.loc[:, "z"].unique().size == 1:
                 fcn = "count"
@@ -536,12 +492,7 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
 agg    : {agg.shape}
 filter : {cell_filter.shape}"""
             )
-        #         pdb.set_trace()
         agg = agg.where(cell_filter, axis=0)
-
-        #         stop = datetime.now()
-        #         self.logger.warning(f"Stop {stop}")
-        #         self.logger.warning(f"Elapsed {stop - start}")
 
         return agg
 
@@ -607,11 +558,6 @@ data : {z.size}
         x = self.data.loc[:, "x"]
         y = self.data.loc[:, "y"]
 
-        #         if self.log.x:
-        #             x = x.apply(np.log10)
-        #         if self.log.y:
-        #             y = y.apply(np.log10)
-
         xbins = self.initial_bins["x"]
         ybins = self.initial_bins["y"]
 
@@ -660,10 +606,6 @@ data : {z.size}
         alpha_fcn=None,
         **kwargs,
     ):
-        #         start = datetime.now()
-        #         self.logger.warning("Making plot")
-        #         self.logger.warning(f"Start {start}")
-
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -715,7 +657,6 @@ data : {z.size}
         norm = kwargs.pop("norm", None)
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
-        #         assert not kwargs
 
         if limit_color_norm and norm is not None:
             self._limit_color_norm(norm)
@@ -768,10 +709,6 @@ data : {z.size}
             colors = collection.get_facecolors()
             colors[:, 3] = alpha
             collection.set_facecolor(colors)
-
-        #         stop = datetime.now()
-        #         self.logger.warning(f"Stop {stop}")
-        #         self.logger.warning(f"Elapsed {stop - start}")
 
         return ax, cbar_or_mappable
 
@@ -1135,30 +1072,3 @@ data : {z.size}
         self._format_axis(ax)
 
         return ax, lbls, cbar_or_mappable, qset
-
-
-#    def plot_surface(self):
-#
-#        from scipy.interpolate import griddata
-#
-#        z = self.agg()
-#        x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
-#        y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
-#
-#        is_finite = np.isfinite(z)
-#        z = z[is_finite]
-#        x = x[is_finite]
-#        y = y[is_finite]
-#
-#        xi = np.linspace(x.min(), x.max(), 100)
-#        yi = np.linspace(y.min(), y.max(), 100)
-#        # VERY IMPORTANT, to tell matplotlib how is your data organized
-#        zi = griddata((x, y), y, (xi[None, :], yi[:, None]), method="cubic")
-#
-#        if ax is None:
-#            fig = plt.figure(figsize=(8, 8))
-#            ax = fig.add_subplot(projection="3d")
-#
-#        xig, yig = np.meshgrid(xi, yi)
-#
-#        ax.plot_surface(xx, yy, zz, cmap="Spectral_r", norm=chavp.norms.vsw)
