@@ -26,7 +26,7 @@ llvmlite==0.44.0
     # via numba
 matplotlib==3.10.6
     # via solarwindpy (pyproject.toml)
-numba==0.61.2
+numba==0.63.1
     # via solarwindpy (pyproject.toml)
 numexpr==2.11.0
     # via solarwindpy (pyproject.toml)
