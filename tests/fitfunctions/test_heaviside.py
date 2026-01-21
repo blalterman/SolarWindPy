@@ -42,9 +42,13 @@ def clean_step_data():
     true_params = {"x0": 5.0, "y0": 2.0, "y1": 3.0}
     x = np.linspace(0, 10, 201)  # Odd number to avoid x=5 exactly except at midpoint
     # Build y using the heaviside formula
-    y = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
     w = np.ones_like(x)
     return x, y, w, true_params
 
@@ -59,9 +63,13 @@ def noisy_step_data():
     rng = np.random.default_rng(42)
     true_params = {"x0": 5.0, "y0": 2.0, "y1": 3.0}
     x = np.linspace(0, 10, 200)
-    y_true = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y_true = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
     noise_std = 0.25
     y = y_true + rng.normal(0, noise_std, len(x))
     w = np.ones_like(x) / noise_std
@@ -78,9 +86,13 @@ def negative_step_data():
     """
     true_params = {"x0": 5.0, "y0": 8.0, "y1": -3.0}
     x = np.linspace(0, 10, 201)
-    y = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
     w = np.ones_like(x)
     return x, y, w, true_params
 
@@ -95,9 +107,13 @@ def zero_baseline_data():
     """
     true_params = {"x0": 3.0, "y0": 0.0, "y1": 4.0}
     x = np.linspace(0, 10, 201)
-    y = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
     w = np.ones_like(x)
     return x, y, w, true_params
 
@@ -277,9 +293,9 @@ def test_fit_recovers_negative_step_parameters(negative_step_data):
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -300,9 +316,9 @@ def test_fit_recovers_zero_baseline_parameters(zero_baseline_data):
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
             # For y0=0, check absolute tolerance
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -325,9 +341,13 @@ def test_fit_recovers_various_parameter_combinations(true_params):
     x = np.linspace(0, 10, 200)
 
     # Build y from parameters using the heaviside formula
-    y = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
 
     obj = HeavySide(x, y)
     p0 = [true_params["x0"], true_params["y0"], true_params["y1"]]
@@ -336,9 +356,9 @@ def test_fit_recovers_various_parameter_combinations(true_params):
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -399,9 +419,13 @@ def test_fit_uncertainty_scales_with_noise():
     rng = np.random.default_rng(42)
     true_params = {"x0": 5.0, "y0": 2.0, "y1": 3.0}
     x = np.linspace(0, 10, 200)
-    y_true = true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
-    ) + true_params["y0"]
+    y_true = (
+        true_params["y1"]
+        * np.heaviside(
+            true_params["x0"] - x, 0.5 * (true_params["y0"] + true_params["y1"])
+        )
+        + true_params["y0"]
+    )
 
     p0 = [true_params["x0"], true_params["y0"], true_params["y1"]]
 
@@ -459,9 +483,9 @@ def test_p0_provides_reasonable_initial_guesses(clean_step_data):
     p0 = obj.p0
 
     # x0 guess should be reasonable (within data range)
-    assert min(x) <= p0[0] <= max(x), (
-        f"x0 guess {p0[0]} should be within data range [{min(x)}, {max(x)}]"
-    )
+    assert (
+        min(x) <= p0[0] <= max(x)
+    ), f"x0 guess {p0[0]} should be within data range [{min(x)}, {max(x)}]"
 
     # y0 guess should be close to minimum y (baseline)
     np.testing.assert_allclose(
@@ -538,9 +562,12 @@ def test_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "x0", "y0", "y1"), (
-        f"Function should have signature (x, x0, y0, y1), got {params}"
-    )
+    assert params == (
+        "x",
+        "x0",
+        "y0",
+        "y1",
+    ), f"Function should have signature (x, x0, y0, y1), got {params}"
 
 
 def test_tex_function_property():
@@ -571,9 +598,9 @@ def test_callable_interface(clean_step_data):
     x_test = np.array([1.0, 5.0, 9.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -588,9 +615,9 @@ def test_popt_has_correct_keys(clean_step_data):
     expected_keys = {"x0", "y0", "y1"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_psigma_has_same_keys_as_popt(noisy_step_data):

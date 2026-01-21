@@ -220,9 +220,9 @@ def test_fit_recovers_sloped_plateau_parameters(clean_sloped_plateau_data):
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -241,9 +241,9 @@ def test_fit_recovers_offset_x1_parameters(offset_x1_data):
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -289,9 +289,9 @@ def test_fit_recovers_various_parameter_combinations(true_params):
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -390,9 +390,9 @@ def test_p0_enables_successful_convergence(noisy_saturation_data):
     obj.make_fit()
 
     # Fit should have converged (popt should exist and be finite)
-    assert all(np.isfinite(v) for v in obj.popt.values()), (
-        f"Fit did not converge: popt={obj.popt}"
-    )
+    assert all(
+        np.isfinite(v) for v in obj.popt.values()
+    ), f"Fit did not converge: popt={obj.popt}"
 
 
 # =============================================================================
@@ -485,18 +485,18 @@ def test_weighted_fit_respects_weights():
     fit_weighted.make_fit()
 
     # Verify fit converged and parameters are accurate
-    assert all(np.isfinite(v) for v in fit_weighted.popt.values()), (
-        f"Weighted fit did not converge: popt={fit_weighted.popt}"
-    )
+    assert all(
+        np.isfinite(v) for v in fit_weighted.popt.values()
+    ), f"Weighted fit did not converge: popt={fit_weighted.popt}"
 
     # With proper weighting, should recover true parameters within 5%
     for param, true_val in true_params.items():
         fitted_val = fit_weighted.popt[param]
         if abs(true_val) < 0.1:
             # Absolute tolerance for values near zero
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.05, (
@@ -525,9 +525,13 @@ def test_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "xh", "yh", "x1", "m2"), (
-        f"Function should have signature (x, xh, yh, x1, m2), got {params}"
-    )
+    assert params == (
+        "x",
+        "xh",
+        "yh",
+        "x1",
+        "m2",
+    ), f"Function should have signature (x, xh, yh, x1, m2), got {params}"
 
 
 def test_tex_function_property():
@@ -553,9 +557,9 @@ def test_callable_interface(clean_saturation_data):
     x_test = np.array([1.0, 5.0, 10.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -569,9 +573,9 @@ def test_popt_has_correct_keys(clean_saturation_data):
     expected_keys = {"xh", "yh", "x1", "m2"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_psigma_has_same_keys_as_popt(noisy_saturation_data):
@@ -614,7 +618,13 @@ def test_psigma_values_are_positive(noisy_saturation_data):
 # =============================================================================
 
 
-from solarwindpy.fitfunctions.hinge import TwoLine, Saturation, HingeMin, HingeMax, HingeAtPoint
+from solarwindpy.fitfunctions.hinge import (
+    TwoLine,
+    Saturation,
+    HingeMin,
+    HingeMax,
+    HingeAtPoint,
+)
 
 
 # =============================================================================
@@ -804,9 +814,9 @@ def test_twoline_fit_recovers_parallel_slopes_parameters(twoline_parallel_slopes
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -912,7 +922,9 @@ def test_twoline_theta_property_is_positive_for_converging_lines(clean_twoline_d
     m2 = true_params["m2"]
     theta_expected = np.arctan(m1) - np.arctan(m2)
 
-    assert obj.theta > 0, f"theta={obj.theta:.4f} should be positive for converging lines"
+    assert (
+        obj.theta > 0
+    ), f"theta={obj.theta:.4f} should be positive for converging lines"
     np.testing.assert_allclose(
         obj.theta,
         theta_expected,
@@ -935,9 +947,13 @@ def test_twoline_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "x1", "x2", "m1", "m2"), (
-        f"Function should have signature (x, x1, x2, m1, m2), got {params}"
-    )
+    assert params == (
+        "x",
+        "x1",
+        "x2",
+        "m1",
+        "m2",
+    ), f"Function should have signature (x, x1, x2, m1, m2), got {params}"
 
 
 def test_twoline_popt_has_correct_keys(clean_twoline_data):
@@ -950,9 +966,9 @@ def test_twoline_popt_has_correct_keys(clean_twoline_data):
     expected_keys = {"x1", "x2", "m1", "m2"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_twoline_callable_interface(clean_twoline_data):
@@ -965,9 +981,9 @@ def test_twoline_callable_interface(clean_twoline_data):
     x_test = np.array([1.0, 5.0, 10.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -1129,9 +1145,9 @@ def test_saturation_func_theta_controls_plateau_slope():
     m2_large = np.tan(np.arctan(m1) - theta_large)
 
     # Larger theta should give smaller m2 (less steep plateau)
-    assert m2_small > m2_large, (
-        f"m2_small={m2_small:.4f} should be > m2_large={m2_large:.4f}"
-    )
+    assert (
+        m2_small > m2_large
+    ), f"m2_small={m2_small:.4f} should be > m2_large={m2_large:.4f}"
 
 
 # -----------------------------------------------------------------------------
@@ -1139,7 +1155,9 @@ def test_saturation_func_theta_controls_plateau_slope():
 # -----------------------------------------------------------------------------
 
 
-def test_saturation_fit_recovers_exact_parameters_from_clean_data(clean_saturation_twoline_data):
+def test_saturation_fit_recovers_exact_parameters_from_clean_data(
+    clean_saturation_twoline_data,
+):
     """Fitting noise-free Saturation data should recover parameters within 2%."""
     x, y, w, true_params, derived = clean_saturation_twoline_data
 
@@ -1149,9 +1167,9 @@ def test_saturation_fit_recovers_exact_parameters_from_clean_data(clean_saturati
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -1171,9 +1189,9 @@ def test_saturation_fit_recovers_small_theta_parameters(saturation_small_theta_d
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.05, (
@@ -1187,7 +1205,9 @@ def test_saturation_fit_recovers_small_theta_parameters(saturation_small_theta_d
 # -----------------------------------------------------------------------------
 
 
-def test_saturation_fit_with_noise_recovers_parameters_within_2sigma(noisy_saturation_twoline_data):
+def test_saturation_fit_with_noise_recovers_parameters_within_2sigma(
+    noisy_saturation_twoline_data,
+):
     """Fitted Saturation parameters should be within 2sigma of true values."""
     x, y, w, true_params = noisy_saturation_twoline_data
 
@@ -1286,9 +1306,13 @@ def test_saturation_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "x1", "xs", "s", "theta"), (
-        f"Function should have signature (x, x1, xs, s, theta), got {params}"
-    )
+    assert params == (
+        "x",
+        "x1",
+        "xs",
+        "s",
+        "theta",
+    ), f"Function should have signature (x, x1, xs, s, theta), got {params}"
 
 
 def test_saturation_popt_has_correct_keys(clean_saturation_twoline_data):
@@ -1301,9 +1325,9 @@ def test_saturation_popt_has_correct_keys(clean_saturation_twoline_data):
     expected_keys = {"x1", "xs", "s", "theta"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_saturation_callable_interface(clean_saturation_twoline_data):
@@ -1316,9 +1340,9 @@ def test_saturation_callable_interface(clean_saturation_twoline_data):
     x_test = np.array([1.0, 5.0, 10.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -1362,7 +1386,11 @@ def clean_hingemin_data():
     """
     true_params = {"m1": 2.0, "x1": 0.0, "x2": 10.0, "h": 5.0}
     yh = true_params["m1"] * (true_params["h"] - true_params["x1"])
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-2, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1380,7 +1408,11 @@ def noisy_hingemin_data():
     """
     rng = np.random.default_rng(42)
     true_params = {"m1": 2.0, "x1": 0.0, "x2": 10.0, "h": 5.0}
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-2, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1403,7 +1435,11 @@ def hingemin_positive_slopes_data():
     Line2: y = 1.5*(x + 5) = 1.5x + 7.5
     """
     true_params = {"m1": 3.0, "x1": 0.0, "x2": -5.0, "h": 5.0}
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-3, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1506,9 +1542,9 @@ def test_hingemin_fit_recovers_exact_parameters_from_clean_data(clean_hingemin_d
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -1517,7 +1553,9 @@ def test_hingemin_fit_recovers_exact_parameters_from_clean_data(clean_hingemin_d
             )
 
 
-def test_hingemin_fit_recovers_positive_slopes_parameters(hingemin_positive_slopes_data):
+def test_hingemin_fit_recovers_positive_slopes_parameters(
+    hingemin_positive_slopes_data,
+):
     """Fitting HingeMin with positive slopes should recover parameters within 2%."""
     x, y, w, true_params = hingemin_positive_slopes_data
 
@@ -1527,9 +1565,9 @@ def test_hingemin_fit_recovers_positive_slopes_parameters(hingemin_positive_slop
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -1648,9 +1686,13 @@ def test_hingemin_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "m1", "x1", "x2", "h"), (
-        f"Function should have signature (x, m1, x1, x2, h), got {params}"
-    )
+    assert params == (
+        "x",
+        "m1",
+        "x1",
+        "x2",
+        "h",
+    ), f"Function should have signature (x, m1, x1, x2, h), got {params}"
 
 
 def test_hingemin_popt_has_correct_keys(clean_hingemin_data):
@@ -1663,9 +1705,9 @@ def test_hingemin_popt_has_correct_keys(clean_hingemin_data):
     expected_keys = {"m1", "x1", "x2", "h"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_hingemin_callable_interface(clean_hingemin_data):
@@ -1678,9 +1720,9 @@ def test_hingemin_callable_interface(clean_hingemin_data):
     x_test = np.array([1.0, 5.0, 9.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -1724,7 +1766,11 @@ def clean_hingemax_data():
     """
     true_params = {"m1": -2.0, "x1": 0.0, "x2": 10.0, "h": 5.0}
     yh = true_params["m1"] * (true_params["h"] - true_params["x1"])
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-2, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1742,7 +1788,11 @@ def noisy_hingemax_data():
     """
     rng = np.random.default_rng(42)
     true_params = {"m1": -2.0, "x1": 0.0, "x2": 10.0, "h": 5.0}
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-2, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1765,7 +1815,11 @@ def hingemax_negative_slopes_data():
     Line2: y = -1.5*(x + 5) = -1.5x - 7.5
     """
     true_params = {"m1": -3.0, "x1": 0.0, "x2": -5.0, "h": 5.0}
-    m2 = true_params["m1"] * (true_params["h"] - true_params["x1"]) / (true_params["h"] - true_params["x2"])
+    m2 = (
+        true_params["m1"]
+        * (true_params["h"] - true_params["x1"])
+        / (true_params["h"] - true_params["x2"])
+    )
 
     x = np.linspace(-3, 15, 300)
     y1 = true_params["m1"] * (x - true_params["x1"])
@@ -1868,9 +1922,9 @@ def test_hingemax_fit_recovers_exact_parameters_from_clean_data(clean_hingemax_d
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -1879,7 +1933,9 @@ def test_hingemax_fit_recovers_exact_parameters_from_clean_data(clean_hingemax_d
             )
 
 
-def test_hingemax_fit_recovers_negative_slopes_parameters(hingemax_negative_slopes_data):
+def test_hingemax_fit_recovers_negative_slopes_parameters(
+    hingemax_negative_slopes_data,
+):
     """Fitting HingeMax with negative slopes should recover parameters within 2%."""
     x, y, w, true_params = hingemax_negative_slopes_data
 
@@ -1889,9 +1945,9 @@ def test_hingemax_fit_recovers_negative_slopes_parameters(hingemax_negative_slop
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -2010,9 +2066,13 @@ def test_hingemax_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "m1", "x1", "x2", "h"), (
-        f"Function should have signature (x, m1, x1, x2, h), got {params}"
-    )
+    assert params == (
+        "x",
+        "m1",
+        "x1",
+        "x2",
+        "h",
+    ), f"Function should have signature (x, m1, x1, x2, h), got {params}"
 
 
 def test_hingemax_popt_has_correct_keys(clean_hingemax_data):
@@ -2025,9 +2085,9 @@ def test_hingemax_popt_has_correct_keys(clean_hingemax_data):
     expected_keys = {"m1", "x1", "x2", "h"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_hingemax_callable_interface(clean_hingemax_data):
@@ -2040,9 +2100,9 @@ def test_hingemax_callable_interface(clean_hingemax_data):
     x_test = np.array([1.0, 5.0, 9.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 
@@ -2219,7 +2279,9 @@ def test_hingeatpoint_func_evaluates_line2_region_correctly():
 # -----------------------------------------------------------------------------
 
 
-def test_hingeatpoint_fit_recovers_exact_parameters_from_clean_data(clean_hingeatpoint_data):
+def test_hingeatpoint_fit_recovers_exact_parameters_from_clean_data(
+    clean_hingeatpoint_data,
+):
     """Fitting noise-free HingeAtPoint data should recover parameters within 2%."""
     x, y, w, true_params, derived = clean_hingeatpoint_data
 
@@ -2229,9 +2291,9 @@ def test_hingeatpoint_fit_recovers_exact_parameters_from_clean_data(clean_hingea
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.05, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.05
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -2240,7 +2302,9 @@ def test_hingeatpoint_fit_recovers_exact_parameters_from_clean_data(clean_hingea
             )
 
 
-def test_hingeatpoint_fit_recovers_positive_slopes_parameters(hingeatpoint_positive_slopes_data):
+def test_hingeatpoint_fit_recovers_positive_slopes_parameters(
+    hingeatpoint_positive_slopes_data,
+):
     """Fitting HingeAtPoint with positive slopes should recover parameters within 2%."""
     x, y, w, true_params = hingeatpoint_positive_slopes_data
 
@@ -2250,9 +2314,9 @@ def test_hingeatpoint_fit_recovers_positive_slopes_parameters(hingeatpoint_posit
     for param, true_val in true_params.items():
         fitted_val = obj.popt[param]
         if abs(true_val) < 0.1:
-            assert abs(fitted_val - true_val) < 0.1, (
-                f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-            )
+            assert (
+                abs(fitted_val - true_val) < 0.1
+            ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
         else:
             rel_error = abs(fitted_val - true_val) / abs(true_val)
             assert rel_error < 0.02, (
@@ -2266,7 +2330,9 @@ def test_hingeatpoint_fit_recovers_positive_slopes_parameters(hingeatpoint_posit
 # -----------------------------------------------------------------------------
 
 
-def test_hingeatpoint_fit_with_noise_recovers_parameters_within_2sigma(noisy_hingeatpoint_data):
+def test_hingeatpoint_fit_with_noise_recovers_parameters_within_2sigma(
+    noisy_hingeatpoint_data,
+):
     """Fitted HingeAtPoint parameters should be within 2sigma of true values."""
     x, y, w, true_params = noisy_hingeatpoint_data
 
@@ -2377,9 +2443,13 @@ def test_hingeatpoint_function_signature():
     sig = inspect.signature(obj.function)
     params = tuple(sig.parameters.keys())
 
-    assert params == ("x", "xh", "yh", "m1", "m2"), (
-        f"Function should have signature (x, xh, yh, m1, m2), got {params}"
-    )
+    assert params == (
+        "x",
+        "xh",
+        "yh",
+        "m1",
+        "m2",
+    ), f"Function should have signature (x, xh, yh, m1, m2), got {params}"
 
 
 def test_hingeatpoint_popt_has_correct_keys(clean_hingeatpoint_data):
@@ -2392,9 +2462,9 @@ def test_hingeatpoint_popt_has_correct_keys(clean_hingeatpoint_data):
     expected_keys = {"xh", "yh", "m1", "m2"}
     actual_keys = set(obj.popt.keys())
 
-    assert actual_keys == expected_keys, (
-        f"popt keys should be {expected_keys}, got {actual_keys}"
-    )
+    assert (
+        actual_keys == expected_keys
+    ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
 
 def test_hingeatpoint_callable_interface(clean_hingeatpoint_data):
@@ -2407,9 +2477,9 @@ def test_hingeatpoint_callable_interface(clean_hingeatpoint_data):
     x_test = np.array([1.0, 5.0, 10.0])
     y_pred = obj(x_test)
 
-    assert y_pred.shape == x_test.shape, (
-        f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-    )
+    assert (
+        y_pred.shape == x_test.shape
+    ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
     assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
 

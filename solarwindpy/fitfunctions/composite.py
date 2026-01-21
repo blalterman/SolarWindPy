@@ -360,7 +360,9 @@ class GaussianTimesHeavySide(FitFunction):
         str
             LaTeX string describing the function.
         """
-        tex = r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2} \times H(x - x_0)"
+        tex = (
+            r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2} \times H(x - x_0)"
+        )
         return tex
 
 
@@ -476,9 +478,8 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
                 out = y1 * np.heaviside(x0 - x, 1.0)
                 return out
 
-            out = (
-                gaussian(x, mu, sigma, A) * np.heaviside(x - x0, 1.0)
-                + heavy_side(x, x0, y1)
+            out = gaussian(x, mu, sigma, A) * np.heaviside(x - x0, 1.0) + heavy_side(
+                x, x0, y1
             )
             return out
 

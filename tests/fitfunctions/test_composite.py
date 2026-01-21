@@ -171,9 +171,9 @@ def gthph_clean_data():
 
     # Build y: Gaussian * H(x-x0) + y1 * H(x0-x) with H(0) = 1.0
     gauss = gaussian(x, true_params["mu"], true_params["sigma"], true_params["A"])
-    y = gauss * np.heaviside(x - true_params["x0"], 1.0) + true_params["y1"] * np.heaviside(
-        true_params["x0"] - x, 1.0
-    )
+    y = gauss * np.heaviside(x - true_params["x0"], 1.0) + true_params[
+        "y1"
+    ] * np.heaviside(true_params["x0"] - x, 1.0)
 
     w = np.ones_like(x)
     return x, y, w, true_params
@@ -364,7 +364,9 @@ class TestGaussianPlusHeavySide:
             {"x0": 1.0, "y0": 2.0, "y1": 1.0, "mu": 4.0, "sigma": 1.5, "A": 5.0},
         ],
     )
-    def test_fit_recovers_gaussian_parameters_for_various_combinations(self, true_params):
+    def test_fit_recovers_gaussian_parameters_for_various_combinations(
+        self, true_params
+    ):
         """Gaussian parameters should be recovered for diverse parameter combinations.
 
         Note: Only Gaussian parameters (mu, sigma, A) are tested since step function
@@ -384,9 +386,9 @@ class TestGaussianPlusHeavySide:
             true_val = true_params[param]
             fitted_val = obj.popt[param]
             if abs(true_val) < 0.1:
-                assert abs(fitted_val - true_val) < 0.1, (
-                    f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-                )
+                assert (
+                    abs(fitted_val - true_val) < 0.1
+                ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
             else:
                 rel_error = abs(fitted_val - true_val) / abs(true_val)
                 assert rel_error < 0.10, (
@@ -398,7 +400,9 @@ class TestGaussianPlusHeavySide:
     # E3. Noisy Data Tests (Precision Bounds)
     # -------------------------------------------------------------------------
 
-    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(self, gph_noisy_data):
+    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(
+        self, gph_noisy_data
+    ):
         """Gaussian parameters should be within 2sigma of true values (95% confidence).
 
         Note: Step function parameters (x0, y0, y1) are excluded because Heaviside
@@ -425,7 +429,14 @@ class TestGaussianPlusHeavySide:
     def test_fit_uncertainty_scales_with_noise(self):
         """Higher noise should produce larger parameter uncertainties."""
         rng = np.random.default_rng(42)
-        true_params = {"x0": 2.0, "y0": 1.0, "y1": 3.0, "mu": 5.0, "sigma": 1.0, "A": 4.0}
+        true_params = {
+            "x0": 2.0,
+            "y0": 1.0,
+            "y1": 3.0,
+            "mu": 5.0,
+            "sigma": 1.0,
+            "A": 4.0,
+        }
         x = np.linspace(0, 10, 200)
         gauss = gaussian(x, true_params["mu"], true_params["sigma"], true_params["A"])
         heaviside_term = true_params["y1"] * np.heaviside(true_params["x0"] - x, 0.5)
@@ -469,9 +480,9 @@ class TestGaussianPlusHeavySide:
         obj = GaussianPlusHeavySide(x, y)
         obj.make_fit()
 
-        assert all(np.isfinite(v) for v in obj.popt.values()), (
-            f"Fit did not converge: popt={obj.popt}"
-        )
+        assert all(
+            np.isfinite(v) for v in obj.popt.values()
+        ), f"Fit did not converge: popt={obj.popt}"
 
     # -------------------------------------------------------------------------
     # E5. Edge Case and Error Handling Tests
@@ -496,9 +507,15 @@ class TestGaussianPlusHeavySide:
         sig = inspect.signature(obj.function)
         params = tuple(sig.parameters.keys())
 
-        assert params == ("x", "x0", "y0", "y1", "mu", "sigma", "A"), (
-            f"Function should have signature (x, x0, y0, y1, mu, sigma, A), got {params}"
-        )
+        assert params == (
+            "x",
+            "x0",
+            "y0",
+            "y1",
+            "mu",
+            "sigma",
+            "A",
+        ), f"Function should have signature (x, x0, y0, y1, mu, sigma, A), got {params}"
 
     def test_callable_interface(self, gph_clean_data):
         """Test that fitted object is callable and returns correct shape."""
@@ -510,9 +527,9 @@ class TestGaussianPlusHeavySide:
         x_test = np.array([1.0, 5.0, 10.0])
         y_pred = obj(x_test)
 
-        assert y_pred.shape == x_test.shape, (
-            f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-        )
+        assert (
+            y_pred.shape == x_test.shape
+        ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
         assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
     def test_popt_has_correct_keys(self, gph_clean_data):
@@ -525,9 +542,9 @@ class TestGaussianPlusHeavySide:
         expected_keys = {"x0", "y0", "y1", "mu", "sigma", "A"}
         actual_keys = set(obj.popt.keys())
 
-        assert actual_keys == expected_keys, (
-            f"popt keys should be {expected_keys}, got {actual_keys}"
-        )
+        assert (
+            actual_keys == expected_keys
+        ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
     def test_psigma_has_same_keys_as_popt(self, gph_noisy_data):
         """Test that psigma has same keys as popt."""
@@ -725,9 +742,9 @@ class TestGaussianTimesHeavySide:
         for param, true_val in true_params.items():
             fitted_val = obj.popt[param]
             if abs(true_val) < 0.1:
-                assert abs(fitted_val - true_val) < 0.1, (
-                    f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-                )
+                assert (
+                    abs(fitted_val - true_val) < 0.1
+                ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
             else:
                 rel_error = abs(fitted_val - true_val) / abs(true_val)
                 assert rel_error < 0.05, (
@@ -739,7 +756,9 @@ class TestGaussianTimesHeavySide:
     # E3. Noisy Data Tests (Precision Bounds)
     # -------------------------------------------------------------------------
 
-    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(self, gth_noisy_data):
+    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(
+        self, gth_noisy_data
+    ):
         """Gaussian parameters should be within 2sigma of true values (95% confidence).
 
         Note: x0 is excluded because Heaviside functions have zero gradient almost
@@ -810,9 +829,9 @@ class TestGaussianTimesHeavySide:
         obj = GaussianTimesHeavySide(x, y, guess_x0=true_params["x0"])
         obj.make_fit()
 
-        assert all(np.isfinite(v) for v in obj.popt.values()), (
-            f"Fit did not converge: popt={obj.popt}"
-        )
+        assert all(
+            np.isfinite(v) for v in obj.popt.values()
+        ), f"Fit did not converge: popt={obj.popt}"
 
     def test_guess_x0_is_required(self):
         """Test that guess_x0 parameter is required for initialization."""
@@ -847,9 +866,13 @@ class TestGaussianTimesHeavySide:
         sig = inspect.signature(obj.function)
         params = tuple(sig.parameters.keys())
 
-        assert params == ("x", "x0", "mu", "sigma", "A"), (
-            f"Function should have signature (x, x0, mu, sigma, A), got {params}"
-        )
+        assert params == (
+            "x",
+            "x0",
+            "mu",
+            "sigma",
+            "A",
+        ), f"Function should have signature (x, x0, mu, sigma, A), got {params}"
 
     def test_callable_interface(self, gth_clean_data):
         """Test that fitted object is callable and returns correct shape."""
@@ -861,9 +884,9 @@ class TestGaussianTimesHeavySide:
         x_test = np.array([1.0, 5.0, 10.0])
         y_pred = obj(x_test)
 
-        assert y_pred.shape == x_test.shape, (
-            f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-        )
+        assert (
+            y_pred.shape == x_test.shape
+        ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
         assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
     def test_popt_has_correct_keys(self, gth_clean_data):
@@ -876,9 +899,9 @@ class TestGaussianTimesHeavySide:
         expected_keys = {"x0", "mu", "sigma", "A"}
         actual_keys = set(obj.popt.keys())
 
-        assert actual_keys == expected_keys, (
-            f"popt keys should be {expected_keys}, got {actual_keys}"
-        )
+        assert (
+            actual_keys == expected_keys
+        ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
     def test_psigma_values_are_nonnegative(self, gth_noisy_data):
         """Test that parameter uncertainties are non-negative.
@@ -1071,9 +1094,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         for param, true_val in true_params.items():
             fitted_val = obj.popt[param]
             if abs(true_val) < 0.1:
-                assert abs(fitted_val - true_val) < 0.1, (
-                    f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
-                )
+                assert (
+                    abs(fitted_val - true_val) < 0.1
+                ), f"{param}: fitted={fitted_val:.4f}, true={true_val:.4f}"
             else:
                 rel_error = abs(fitted_val - true_val) / abs(true_val)
                 assert rel_error < 0.05, (
@@ -1085,7 +1108,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
     # E3. Noisy Data Tests (Precision Bounds)
     # -------------------------------------------------------------------------
 
-    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(self, gthph_noisy_data):
+    def test_fit_with_noise_recovers_gaussian_parameters_within_2sigma(
+        self, gthph_noisy_data
+    ):
         """Gaussian parameters should be within 2sigma of true values (95% confidence).
 
         Note: x0 and y1 are excluded because Heaviside functions have zero gradient
@@ -1120,7 +1145,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
 
         # Low noise fit
         y_low = y_true + rng.normal(0, 0.05, len(x))
-        fit_low = GaussianTimesHeavySidePlusHeavySide(x, y_low, guess_x0=true_params["x0"])
+        fit_low = GaussianTimesHeavySidePlusHeavySide(
+            x, y_low, guess_x0=true_params["x0"]
+        )
         fit_low.make_fit()
 
         # High noise fit
@@ -1158,9 +1185,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         obj = GaussianTimesHeavySidePlusHeavySide(x, y, guess_x0=true_params["x0"])
         obj.make_fit()
 
-        assert all(np.isfinite(v) for v in obj.popt.values()), (
-            f"Fit did not converge: popt={obj.popt}"
-        )
+        assert all(
+            np.isfinite(v) for v in obj.popt.values()
+        ), f"Fit did not converge: popt={obj.popt}"
 
     def test_guess_x0_is_required(self):
         """Test that guess_x0 parameter is required for initialization."""
@@ -1194,9 +1221,14 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         sig = inspect.signature(obj.function)
         params = tuple(sig.parameters.keys())
 
-        assert params == ("x", "x0", "y1", "mu", "sigma", "A"), (
-            f"Function should have signature (x, x0, y1, mu, sigma, A), got {params}"
-        )
+        assert params == (
+            "x",
+            "x0",
+            "y1",
+            "mu",
+            "sigma",
+            "A",
+        ), f"Function should have signature (x, x0, y1, mu, sigma, A), got {params}"
 
     def test_callable_interface(self, gthph_clean_data):
         """Test that fitted object is callable and returns correct shape."""
@@ -1208,9 +1240,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         x_test = np.array([1.0, 5.0, 10.0])
         y_pred = obj(x_test)
 
-        assert y_pred.shape == x_test.shape, (
-            f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
-        )
+        assert (
+            y_pred.shape == x_test.shape
+        ), f"Predicted shape {y_pred.shape} should match input shape {x_test.shape}"
         assert np.all(np.isfinite(y_pred)), "All predicted values should be finite"
 
     def test_popt_has_correct_keys(self, gthph_clean_data):
@@ -1223,9 +1255,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         expected_keys = {"x0", "y1", "mu", "sigma", "A"}
         actual_keys = set(obj.popt.keys())
 
-        assert actual_keys == expected_keys, (
-            f"popt keys should be {expected_keys}, got {actual_keys}"
-        )
+        assert (
+            actual_keys == expected_keys
+        ), f"popt keys should be {expected_keys}, got {actual_keys}"
 
     def test_psigma_values_are_nonnegative(self, gthph_noisy_data):
         """Test that parameter uncertainties are non-negative.
