@@ -7,7 +7,7 @@ from . import exponentials
 from . import power_laws
 from . import moyal
 
-# from . import hinge
+from . import hinge
 from . import trend_fits
 
 FitFunction = core.FitFunction
@@ -16,7 +16,7 @@ Exponential = exponentials.Exponential
 Line = lines.Line
 PowerLaw = power_laws.PowerLaw
 Moyal = moyal.Moyal
-# Hinge = hinge.Hinge
+HingeSaturation = hinge.HingeSaturation
 TrendFit = trend_fits.TrendFit
 
 # Exception classes for better error handling
