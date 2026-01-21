@@ -7,9 +7,12 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   solarwindpy.fitfunctions.composite
    solarwindpy.fitfunctions.core
    solarwindpy.fitfunctions.exponentials
    solarwindpy.fitfunctions.gaussians
+   solarwindpy.fitfunctions.heaviside
+   solarwindpy.fitfunctions.hinge
    solarwindpy.fitfunctions.lines
    solarwindpy.fitfunctions.moyal
    solarwindpy.fitfunctions.plots

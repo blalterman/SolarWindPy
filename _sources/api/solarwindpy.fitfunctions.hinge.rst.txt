@@ -1,0 +1,8 @@
+solarwindpy.fitfunctions.hinge module
+=====================================
+
+.. automodule:: solarwindpy.fitfunctions.hinge
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

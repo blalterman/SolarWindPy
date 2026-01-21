@@ -1,0 +1,8 @@
+solarwindpy.fitfunctions.composite module
+=========================================
+
+.. automodule:: solarwindpy.fitfunctions.composite
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
