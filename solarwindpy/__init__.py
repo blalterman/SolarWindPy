@@ -20,7 +20,7 @@ from .core import (
     spacecraft,
     alfvenic_turbulence,
 )
-from . import core, plotting, solar_activity, tools, fitfunctions
+from . import core, plotting, solar_activity, tools, fitfunctions, data
 from . import instabilities  # noqa: F401
 from . import reproducibility
 
@@ -43,6 +43,7 @@ TeXlabel = plotting.labels.TeXlabel
 
 __all__ = [
     "core",
+    "data",
     "plasma",
     "ions",
     "tensor",
