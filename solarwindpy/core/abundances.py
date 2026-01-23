@@ -20,7 +20,7 @@ __all__ = ["ReferenceAbundances", "Abundance"]
 import numpy as np
 import pandas as pd
 from collections import namedtuple
-from pathlib import Path
+from importlib import resources
 
 Abundance = namedtuple("Abundance", "measurement,uncertainty")
 
@@ -109,11 +109,12 @@ class ReferenceAbundances:
     def _load_data(self):
         """Load Asplund data from package CSV based on year."""
         filename = f"asplund{self._year}.csv"
-        path = Path(__file__).parent / "data" / filename
+        data_file = resources.files(__package__).joinpath("data", filename)
 
-        data = pd.read_csv(
-            path, skiprows=4, header=[0, 1], index_col=[0, 1]
-        )
+        with data_file.open() as f:
+            data = pd.read_csv(
+                f, skiprows=4, header=[0, 1], index_col=[0, 1]
+            )
 
         # 2021 has Comment column, extract before float conversion
         # Column is ('Comment', 'Unnamed: X_level_1') due to pandas MultiIndex parsing
