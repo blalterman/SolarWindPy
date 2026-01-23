@@ -8,7 +8,7 @@ from .plasma import Plasma
 from .spacecraft import Spacecraft
 from .units_constants import Units, Constants
 from .alfvenic_turbulence import AlfvenicTurbulence
-from .abundances import ReferenceAbundances
+from .abundances import ReferenceAbundances, Abundance
 
 __all__ = [
     "Base",
@@ -22,4 +22,5 @@ __all__ = [
     "Constants",
     "AlfvenicTurbulence",
     "ReferenceAbundances",
+    "Abundance",
 ]
