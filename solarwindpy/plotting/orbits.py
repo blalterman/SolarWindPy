@@ -100,10 +100,6 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
                 .sort_index(axis=0)
             )
 
-        #         for k, v in self.intervals.items():
-        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
-
         return agg
 
     def make_plot(self, ax=None, fcn=None, **kwargs):
@@ -142,13 +138,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         super(OrbitHist2D, self).__init__(orbit, x, y, **kwargs)
 
     def _format_in_out_axes(self, inbound, outbound):
-        #         logging.getLogger("main").warning("Formatting in out axes")
-        #         log_mem_usage()
-
         xlim = np.concatenate([inbound.get_xlim(), outbound.get_xlim()])
         x0 = xlim.min()
         x1 = xlim.max()
-        #         x0, x1 = outbound.get_xlim()
         inbound.set_xlim(x1, x0)
         outbound.set_xlim(x0, x1)
         outbound.yaxis.label.set_visible(False)
@@ -163,16 +155,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         # TODO: Get top and bottom axes to line up without `tight_layout`, which
         #       puts colorbar into an unusable location.
 
-    #         for k, ax in axes.items():
-    #             au = 1.49597871e+11 # [m]
-    #             rs = 695700000 # [m]
-    #             conversion = au/rs
-    #             if self.labels.x == labels.special.Distance2Sun("Rs"):
-    #                 tax = ax.twiny()
-    #                 tax.grid(False)
-    #                 tax.set_xlim(* (np.array(ax.get_xlim()) / conversion))
-    #                 tax.set_xlabel(labels.special.Distance2Sun("AU"))
-
     @staticmethod
     def _prune_lower_yaxis_ticks(ax0, ax1):
         nbins = ax0.get_yticks().size - 1
@@ -183,9 +165,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
                 )
 
     def _format_in_out_both_axes(self, axi, axo, axb, cbari, cbaro, cbarb):
-        #         logging.getLogger("main").warning("Formatting in out both axes")
-        #         log_mem_usage()
-
         ylim = np.concatenate([axi.get_ylim(), axi.get_ylim(), axb.get_ylim()])
         y0 = ylim.min()
         y1 = ylim.max()
@@ -202,14 +181,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.
 
         Legs: Inbound, Outbound, and Both."""
-        #         logging.getLogger("main").warning("Starting agg")
-        #         log_mem_usage()
-
         fcn = kwargs.pop("fcn", None)
         agg = super(OrbitHist2D, self).agg(fcn=fcn, **kwargs)
-
-        #         logging.getLogger("main").warning("Running Both agg")
-        #         log_mem_usage()
 
         if not self._disable_both:
             cut = self.cut.drop("Orbit", axis=1)
@@ -228,13 +201,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
                 .stack("Orbit")
                 .sort_index(axis=0)
             )
-
-        #         for k, v in self.intervals.items():
-        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
-
-        #         logging.getLogger("main").warning("Grouping agg for axis normalization")
-        #         log_mem_usage()
 
         grouped = agg.groupby(self._orbit_key)
         transformed = grouped.transform(self._axis_normalizer)
@@ -300,9 +266,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         r"""Refactored putting `agg` onto `ax`.
 
         Python was crashing due to the way too many `agg` runs (20190731)."""
-        #         logging.getLogger("main").warning("Putting agg on ax")
-        #         log_mem_usage()
-
         x = self.edges["x"]
         y = self.edges["y"]
 
@@ -318,19 +281,11 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
         )
 
-        #         pdb.set_trace()
-
         if limit_color_norm:
             self._limit_color_norm(norm)
 
-        #         logging.getLogger("main").warning("Reindexing agg on ax")
-        #         log_mem_usage()
-
         # Unstacking drops some NaN bins, so we must reindex again.
         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
-
-        #         logging.getLogger("main").warning("Do the plotting")
-        #         log_mem_usage()
 
         C = np.ma.masked_invalid(agg.values)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
@@ -338,13 +293,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            #             use_gridspec = kwargs.pop("use_gridspec", False)
             cbar = self._make_cbar(pc, ax, **cbar_kwargs)
 
         self._format_axis(ax)
-
-        #         logging.getLogger("main").warning("Done putting agg on axis")
-        #         log_mem_usage()
 
         return cbar
 
@@ -433,8 +384,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         # For the sake of legacy code. (20190731)
         axes = pd.Series(axes, index=("Inbound", "Outbound"))
         cbars = pd.Series([cbari, cbaro], index=("Inbound", "Outbound"))
-        #         logging.getLogger("main").warning("Done with plot")
-        #         log_mem_usage()
 
         return axes, cbars
 
@@ -483,18 +432,10 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             axb, aggb, cbar, limit_color_norm, cbar_kwargs, **kwargs
         )
 
-        #         axi, cbari = self.make_one_plot("Inbound", axes[0], **kwargs)
-        #         axo, cbaro = self.make_one_plot("Outbound", axes[1], **kwargs)
-        #         axb, cbarb = self.make_one_plot("Both", axes[2], **kwargs)
-
-        #         self._format_joint_axes(*axes)
         self._format_in_out_both_axes(axi, axo, axb, cbari, cbaro, cbarb)
 
         # For the sake of legacy code. (20190731)
         axes = pd.Series(axes, index=("Inbound", "Outbound", "Both"))
         cbars = pd.Series([cbari, cbaro, cbarb], index=("Inbound", "Outbound", "Both"))
-
-        #         logging.getLogger("main").warning("Done with plot")
-        #         log_mem_usage()
 
         return axes, cbars

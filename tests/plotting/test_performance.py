@@ -89,7 +89,6 @@ class TestBasicPerformance:
 
         # Test that performance scales reasonably
         assert len(times) == len(data_sizes)
-        print(f"Line plot timing: {list(zip(data_sizes, times))}")
 
     def test_scatter_plot_performance(self):
         """Test scatter plot performance with various data sizes."""
@@ -130,8 +129,6 @@ class TestBasicPerformance:
                 assert (
                     elapsed < 30.0
                 ), f"Scatter with {size} points took {elapsed:.3f}s (expected < 30.0s)"
-
-        print(f"Scatter plot timing: {list(zip(data_sizes, times))}")
 
     def test_histogram_performance(self):
         """Test histogram performance with large datasets."""
@@ -199,8 +196,6 @@ class TestBasicPerformance:
             assert (
                 memory_increase < 100
             ), f"Memory usage increased by {memory_increase:.1f}MB for {size} points"
-
-        print(f"Memory usage increases: {list(zip(data_sizes, memory_usages))}")
 
 
 class TestAdvancedPerformance:
@@ -506,8 +501,6 @@ class TestMemoryEfficiency:
                 memory_per_area < 2.0
             ), f"Memory per area: {memory_per_area:.3f} MB per unit²"
 
-        print(f"Figure size memory usage: {list(zip(sizes, memory_usages))}")
-
 
 @pytest.mark.slow
 class TestLargeDatasetPerformance:
@@ -520,10 +513,8 @@ class TestLargeDatasetPerformance:
 
     def test_space_physics_timeseries_performance(self):
         """Test performance with typical space physics time series."""
-        # Simulate 1 year of 1-minute cadence data
-        n_points = 365 * 24 * 60  # ~525,600 points
-
-        print(f"Testing with {n_points:,} data points (1 year of 1-min data)")
+        # Simulate 1 year of 1-minute cadence data (~525,600 points)
+        n_points = 365 * 24 * 60
 
         # Create realistic space physics data
         times = pd.date_range("2023-01-01", periods=n_points, freq="1min")
@@ -585,13 +576,11 @@ class TestLargeDatasetPerformance:
         assert (
             elapsed < 30.0
         ), f"Large dataset plot took {elapsed:.3f}s (expected < 30s)"
-        print(f"Large dataset plot completed in {elapsed:.3f}s")
 
     def test_high_resolution_contour_performance(self):
-        """Test performance with high-resolution 2D data."""
+        """Test performance with high-resolution 2D data (500x500 = 250,000 grid points)."""
         # High-resolution grid typical of simulation data
         nx, ny = 500, 500
-        print(f"Testing contour plot with {nx}x{ny} = {nx*ny:,} grid points")
 
         x = np.linspace(0, 10, nx)
         y = np.linspace(0, 10, ny)
@@ -640,7 +629,6 @@ class TestLargeDatasetPerformance:
         assert (
             elapsed < 60.0
         ), f"High-res contour plot took {elapsed:.3f}s (expected < 60s)"
-        print(f"High-resolution contour plot completed in {elapsed:.3f}s")
 
 
 def test_performance_regression():
