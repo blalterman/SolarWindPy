@@ -44,9 +44,9 @@ class ReferenceAbundances:
     def _load_data(self):
         """Load Asplund 2009 data from package resources."""
         with resources.files(__package__).joinpath("asplund.csv").open() as f:
-            data = pd.read_csv(
-                f, skiprows=4, header=[0, 1], index_col=[0, 1]
-            ).astype(np.float64)
+            data = pd.read_csv(f, skiprows=4, header=[0, 1], index_col=[0, 1]).astype(
+                np.float64
+            )
         self._data = data
 
     def get_element(self, key, kind="Photosphere"):
@@ -119,7 +119,7 @@ class ReferenceAbundances:
                 bu = 0
 
             rat = 10.0 ** (top_data.Ab - bottom_data.Ab)
-            uncert = rat * np.log(10) * np.sqrt((tu ** 2) + (bu ** 2))
+            uncert = rat * np.log(10) * np.sqrt((tu**2) + (bu**2))
         else:
             rat, uncert = self._convert_from_dex(top_data)
 
