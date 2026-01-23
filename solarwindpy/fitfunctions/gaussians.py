@@ -6,7 +6,6 @@ variations used throughout the package.  Each class inherits from
 :class:`~solarwindpy.fitfunctions.core.FitFunction` and defines the
 target function, initial parameter estimates, and LaTeX output helpers.
 """
-import pdb  # noqa: F401
 import numpy as np
 
 from .core import FitFunction

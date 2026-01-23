@@ -2,7 +2,6 @@
 
 __all__ = ["ExtremaCalculator"]
 
-import pdb  # noqa: F401
 
 import pandas as pd
 import matplotlib as mpl

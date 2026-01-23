@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 r"""Scatter plot utilities with optional color mapping."""
 
-import pdb  # noqa: F401
 
 from matplotlib import pyplot as plt
 

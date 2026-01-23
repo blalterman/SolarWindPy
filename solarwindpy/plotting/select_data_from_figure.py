@@ -1,7 +1,6 @@
 """Interactive selection utilities for plotted data."""
 
 __all__ = ["SelectFromPlot2D"]
-import pdb  # noqa: F401
 import logging
 
 import numpy as np

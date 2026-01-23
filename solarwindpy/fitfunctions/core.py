@@ -7,7 +7,6 @@ providing convenient plotting helpers.  Subclasses need only define
 the functional form and an initial parameter guess.
 """
 
-import pdb  # noqa: F401
 import logging  # noqa: F401
 import warnings
 

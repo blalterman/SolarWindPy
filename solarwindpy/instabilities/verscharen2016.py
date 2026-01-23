@@ -12,7 +12,6 @@ References
    (2016).
 """
 
-import pdb  # noqa: F401
 import logging
 
 import numpy as np
