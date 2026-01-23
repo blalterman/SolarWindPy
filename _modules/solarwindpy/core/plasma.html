@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g487fbccc1 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gdf7a4708a documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=6eb20c15"></script>
+      <script src="../../../_static/documentation_options.js?v=9af668eb"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -562,11 +562,7 @@
 <span class="sd">            -ion number density</span>
 <span class="sd">            -ion thermal speed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#         try:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span>
-
-    <span class="c1">#         except AttributeError:</span>
-    <span class="c1">#             raise AttributeError(&quot;No auxiliary data set.&quot;)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">aux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -838,14 +834,6 @@
         <span class="n">minimal_species</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="o">*</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">minimal_species</span><span class="p">)])</span>
         <span class="n">minimal_species</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">minimal_species</span><span class="p">)</span>
 
-        <span class="c1">#        print(&quot;&quot;,</span>
-        <span class="c1">#              &quot;&lt;_chk_species&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;conformed&gt;: {}&quot;.format(species),</span>
-        <span class="c1">#              &quot;&lt;minimal&gt;: {}&quot;.format(minimal_species),</span>
-        <span class="c1">#              &quot;&lt;available&gt;: {}&quot;.format(self.ions.index),</span>
-        <span class="c1">#              sep=&quot;\n&quot;,</span>
-        <span class="c1">#              end=&quot;\n\n&quot;)</span>
-
         <span class="n">unavailable</span> <span class="o">=</span> <span class="n">minimal_species</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">unavailable</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
@@ -858,7 +846,6 @@
                 <span class="s2">&quot;Available: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;Unavailable: </span><span class="si">%s</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="c1"># print(msg % (requested, available, unavailable), flush=True, end=&quot;\n&quot;)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="n">requested</span><span class="p">,</span> <span class="n">available</span><span class="p">,</span> <span class="n">unavailable</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">species</span>
 
@@ -1069,18 +1056,10 @@
 <a class="viewcode-back" href="../../../api/solarwindpy.core.plasma.html#solarwindpy.Plasma.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set the data and log statistics about it.&quot;&quot;&quot;</span>
-        <span class="c1">#         assert isinstance(new, pd.DataFrame)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
         <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># new = new.sort_index(axis=1, inplace=True)</span>
         <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">]</span>
-
-        <span class="c1">#         assert isinstance(new.index, pd.DatetimeIndex)</span>
-        <span class="c1">#         if not new.index.is_monotonic:</span>
-        <span class="c1">#             self.logger.warning(</span>
-        <span class="c1">#                 r&quot;&quot;&quot;A non-monotonic DatetimeIndex typically indicates the presence of bad data. This will impact perfomance and prevent some DatetimeIndex-dependent functionality from working.&quot;&quot;&quot;</span>
-        <span class="c1">#             )</span>
 
         <span class="c1"># These are the only quantities we want in plasma.</span>
         <span class="c1"># TODO: move `theta_rms`, `mag_rms` and anything not common to</span>
@@ -1103,32 +1082,19 @@
             <span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c1">#         w = (</span>
-        <span class="c1">#         data.w.drop(&quot;scalar&quot;, axis=1, level=&quot;C&quot;)</span>
-        <span class="c1">#         .pow(2)</span>
-        <span class="c1">#         .multiply(coeff, axis=1, level=&quot;C&quot;)</span>
-        <span class="c1">#         )</span>
-
         <span class="c1"># TODO: test `skipna=False` to ensure we don&#39;t accidentially create valid data</span>
         <span class="c1">#       where there is none. Actually, not possible as we are combining along</span>
         <span class="c1">#       &quot;S&quot;.</span>
 
         <span class="c1"># Workaround for `skipna=False` bug. (20200814)</span>
-        <span class="c1"># w = w.sum(axis=1, level=&quot;S&quot;, skipna=False).applymap(np.sqrt)</span>
         <span class="c1"># Changed to new groupby method (20250611)</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
-        <span class="c1">#         w_is_finite = w.notna().all(axis=1, level=&quot;S&quot;)</span>
-        <span class="c1">#         w = w.sum(axis=1, level=&quot;S&quot;).applymap(np.sqrt)</span>
-        <span class="c1">#         w = w.where(w_is_finite, axis=1, level=&quot;S&quot;)</span>
 
         <span class="c1"># TODO: can probably just `w.columns.map(lambda x: (&quot;w&quot;, &quot;scalar&quot;, x))`</span>
         <span class="n">w</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;scalar&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
         <span class="n">w</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mi_tuples</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 
-        <span class="c1">#         data = pd.concat([data, w], axis=1, sort=True)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span>
-            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
-        <span class="p">)</span>  <span class="c1"># .sort_idex(axis=0)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mi_tuples</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1267,7 +1233,6 @@
         <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># w = w.sum(axis=1, level=&quot;C&quot;)</span>
             <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">return</span> <span class="n">w</span></div>
@@ -1309,9 +1274,6 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-            <span class="c1"># pth[&quot;S&quot;] = species[0]</span>
-            <span class="c1"># pth = pth.set_index(&quot;S&quot;, append=True).unstack()</span>
-            <span class="c1"># pth = pth.reorder_levels([&quot;C&quot;, &quot;S&quot;], axis=1).sort_index(axis=1)</span>
         <span class="k">return</span> <span class="n">pth</span></div>
 
 
@@ -1340,9 +1302,6 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-            <span class="c1"># temp[&quot;S&quot;] = species[0]</span>
-            <span class="c1"># temp = temp.set_index(&quot;S&quot;, append=True).unstack()</span>
-            <span class="c1"># temp = temp.reorder_levels([&quot;C&quot;, &quot;S&quot;], axis=1).sort_index(axis=1)</span>
         <span class="k">return</span> <span class="n">temp</span></div>
 
 
@@ -1431,8 +1390,6 @@
         <span class="n">exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;par&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;per&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># if &quot;S&quot; in pth.columns.names:</span>
-            <span class="c1">#             ani = pth.pow(exp, axis=1, level=&quot;C&quot;).product(axis=1, level=&quot;S&quot;)</span>
             <span class="n">ani</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">prod</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ani</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1463,10 +1420,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">stuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="c1"># print(&quot;&quot;, &quot;&lt;Module&gt;&quot;, sep=&quot;\n&quot;)</span>
-
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stuple</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># print(&quot;&lt;Module.ion&gt;&quot;)</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">stuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">velocity</span>
             <span class="k">if</span> <span class="n">project_m2q</span><span class="p">:</span>
@@ -1486,7 +1440,6 @@
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># print(&quot;&lt;Module.sum&gt;&quot;)</span>
             <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">stuple</span><span class="p">)]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">rhos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">(</span><span class="o">*</span><span class="n">stuple</span><span class="p">)</span>
@@ -1496,9 +1449,7 @@
                     <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">],</span>
                     <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">rv</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">v</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rhos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-                <span class="p">)</span>  <span class="c1"># sum(axis=1, level=&quot;C&quot;)</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rhos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rhos</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
@@ -1609,33 +1560,6 @@
         <span class="n">pdv</span> <span class="o">=</span> <span class="n">pdv</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
         <span class="n">pdv</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;pdynamic&quot;</span>
 
-        <span class="c1">#        print(&quot;&quot;,</span>
-        <span class="c1">#              &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;stuple&gt;: {}&quot;.format(stuple),</span>
-        <span class="c1">#              &quot;&lt;scom&gt; %s&quot; % scom,</span>
-        <span class="c1">#              &quot;&lt;const&gt; %s&quot; % const,</span>
-        <span class="c1">#              &quot;&lt;rho_i&gt;&quot;, type(rho_i), rho_i,</span>
-        <span class="c1">#              &quot;&lt;dv_i&gt;&quot;, type(dv_i), dv_i,</span>
-        <span class="c1">#              &quot;&lt;dvsq_i&gt;&quot;, type(dvsq_i), dvsq_i,</span>
-        <span class="c1">#              &quot;&lt;dvsq_rho_i&gt;&quot;, type(dvsq_rho_i), dvsq_rho_i,</span>
-        <span class="c1">#              &quot;&lt;pdv&gt;&quot;, type(pdv), pdv,</span>
-        <span class="c1">#              sep=&quot;\n&quot;,</span>
-        <span class="c1">#              end=&quot;\n\n&quot;)</span>
-
-        <span class="c1">#        dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level=&quot;S&quot;)</span>
-        <span class="c1">#        pdv        = dvsq_rho_i.sum(axis=1).multiply(const)</span>
-        <span class="c1"># pdv = const * dv_i.pow(2.0).sum(axis=1,</span>
-        <span class="c1">#                                level=&quot;S&quot;).multiply(rhi_i,</span>
-        <span class="c1">#                                                    axis=1,</span>
-        <span class="c1">#                                                    level=&quot;S&quot;).sum(axis=1)</span>
-        <span class="c1">#        pdv.name = &quot;pdynamic&quot;</span>
-
-        <span class="c1">#        print(</span>
-        <span class="c1">#              &quot;&lt;dvsq_rho_i&gt;&quot;, type(dvsq_rho_i), dvsq_rho_i,</span>
-        <span class="c1">#              &quot;&lt;pdv&gt;&quot;, type(pdv), pdv,</span>
-        <span class="c1">#              sep=&quot;\n&quot;,</span>
-        <span class="c1">#              end=&quot;\n\n&quot;)</span>
-
         <span class="k">return</span> <span class="n">pdv</span></div>
 
 
@@ -1666,13 +1590,9 @@
 
         <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;scalar&quot;</span><span class="p">]</span>
 
-        <span class="c1">#         gamma = self.units_constants.misc.loc[&quot;gamma&quot;]  # should be 5.0/3.0</span>
         <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">polytropic_index</span><span class="p">[</span><span class="s2">&quot;scalar&quot;</span><span class="p">]</span>  <span class="c1"># should be 5/3</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">cs</span>
 
-        <span class="c1">#         raise NotImplementedError(</span>
-        <span class="c1">#             &quot;How do we name this species? Need to figure out species processing up top.&quot;</span>
-        <span class="c1">#         )</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">cs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1714,16 +1634,6 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">ca</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># print_inline_debug_info = False</span>
-        <span class="c1"># if print_inline_debug_info:</span>
-        <span class="c1">#     print(&quot;&quot;,</span>
-        <span class="c1">#             &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#             &quot;&lt;species&gt;&quot;, stuple,</span>
-        <span class="c1">#             &quot;&lt;b&gt;&quot;, type(b), b,</span>
-        <span class="c1">#             &quot;&lt;rho&gt;&quot;, type(rho), rho,</span>
-        <span class="c1">#             &quot;&lt;ca&gt;&quot;, type(ca), ca,</span>
-        <span class="c1">#             sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">ca</span></div>
 
@@ -1778,7 +1688,6 @@
         <span class="c1"># My guess is that following this line, we&#39;d insert the subtraction</span>
         <span class="c1"># of the dynamic pressure with the appropriate alignment of the</span>
         <span class="c1"># species as necessary.</span>
-        <span class="c1">#         dp = dp.sum(axis=1, level=&quot;S&quot; if multi_species else None)</span>
         <span class="k">if</span> <span class="n">multi_species</span><span class="p">:</span>
             <span class="n">dp</span> <span class="o">=</span> <span class="n">dp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1791,17 +1700,6 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">afsq</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1">#        print(&quot;&quot;</span>
-        <span class="c1">#              &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;species&gt;: {}&quot;.format(species),</span>
-        <span class="c1">#              &quot;&lt;bsq&gt;&quot;, type(bsq), bsq,</span>
-        <span class="c1">#              &quot;&lt;coeff&gt;&quot;, type(coeff), coeff,</span>
-        <span class="c1">#              &quot;&lt;pth&gt;&quot;, type(pth), pth,</span>
-        <span class="c1">#              &quot;&lt;dp&gt;&quot;, type(dp), dp,</span>
-        <span class="c1">#              &quot;&lt;afsq&gt;&quot;, type(afsq), afsq,</span>
-        <span class="c1">#              &quot;&quot;,</span>
-        <span class="c1">#              sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">afsq</span></div>
 
@@ -1842,15 +1740,6 @@
         <span class="n">ca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca</span><span class="p">(</span><span class="n">ssum</span><span class="p">)</span>
         <span class="n">afsq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">afsq</span><span class="p">(</span><span class="n">ssum</span><span class="p">,</span> <span class="n">pdynamic</span><span class="o">=</span><span class="n">pdynamic</span><span class="p">)</span>
         <span class="n">caani</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">afsq</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">))</span>
-
-        <span class="c1"># print(&quot;&quot;,</span>
-        <span class="c1">#       &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#       &quot;&lt;species&gt;: {}&quot;.format(ssum),</span>
-        <span class="c1">#       &quot;&lt;ca&gt;&quot;, type(ca), ca,</span>
-        <span class="c1">#       &quot;&lt;afsq&gt;&quot;, type(afsq), afsq,</span>
-        <span class="c1">#       &quot;&lt;caani&gt;&quot;, type(caani), caani,</span>
-        <span class="c1">#       &quot;&quot;,</span>
-        <span class="c1">#       sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">caani</span></div>
 
@@ -1915,25 +1804,6 @@
 
         <span class="n">lnlambda</span> <span class="o">=</span> <span class="p">(</span><span class="mf">29.9</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">left</span> <span class="o">*</span> <span class="n">right</span><span class="p">))</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">lnlambda</span>
         <span class="n">lnlambda</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span>
-
-        <span class="c1">#        print(&quot;&quot;,</span>
-        <span class="c1">#              &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;ions&gt;&quot;, type(self.ions), self.ions,</span>
-        <span class="c1">#              &quot;&lt;s0, s1&gt;: %s, %s&quot; % (s0, s1),</span>
-        <span class="c1">#              &quot;&lt;z0&gt;&quot;, z0,</span>
-        <span class="c1">#              &quot;&lt;z1&gt;&quot;, z1,</span>
-        <span class="c1">#              &quot;&lt;n0&gt;&quot;, type(n0), n0,</span>
-        <span class="c1">#              &quot;&lt;n1&gt;&quot;, type(n1), n1,</span>
-        <span class="c1">#              &quot;&lt;T0&gt;&quot;, type(T0), T0,</span>
-        <span class="c1">#              &quot;&lt;T1&gt;&quot;, type(T1), T1,</span>
-        <span class="c1">#              &quot;&lt;r0&gt;&quot;, type(r0), r0,</span>
-        <span class="c1">#              &quot;&lt;r1&gt;&quot;, type(r1), r1,</span>
-        <span class="c1">#              &quot;&lt;right&gt;&quot;, type(right), right,</span>
-        <span class="c1">#              &quot;&lt;left&gt;&quot;, type(left), left,</span>
-        <span class="c1">#              &quot;&lt;lnlambda&gt;&quot;, type(lnlambda), lnlambda,</span>
-        <span class="c1">#              &quot;&lt;Module Done&gt;&quot;,</span>
-        <span class="c1">#              &quot;&quot;,</span>
-        <span class="c1">#              sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">lnlambda</span></div>
 
@@ -2017,28 +1887,6 @@
         <span class="p">)</span>
         <span class="n">nuab</span> <span class="o">/=</span> <span class="n">units</span><span class="o">.</span><span class="n">nuc</span>
 
-        <span class="c1"># print(&quot;&quot;,</span>
-        <span class="c1">#       &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#       &quot;&lt;species&gt;: {}&quot;.format((sa, sb)),</span>
-        <span class="c1">#       &quot;&lt;ma&gt;&quot;, type(ma), ma,</span>
-        <span class="c1">#       &quot;&lt;masses&gt;&quot;, type(masses), masses,</span>
-        <span class="c1">#       &quot;&lt;mu&gt;&quot;, type(mu), mu,</span>
-        <span class="c1">#       &quot;&lt;qab^2&gt;&quot;, type(qabsq), qabsq,</span>
-        <span class="c1">#       &quot;&lt;qa^2 qb^2 / 4 pi e0^2 ma mu&gt;&quot;, type(coeff), coeff,</span>
-        <span class="c1">#       &quot;&lt;w&gt;&quot;, type(w), w,</span>
-        <span class="c1">#       &quot;&lt;wab&gt;&quot;, type(wab), wab,</span>
-        <span class="c1">#       &quot;&lt;lnlambda&gt;&quot;, type(lnlambda), lnlambda,</span>
-        <span class="c1">#       &quot;&lt;nb&gt;&quot;, type(nb), nb,</span>
-        <span class="c1">#       &quot;&lt;wab&gt;&quot;, type(wab), wab,</span>
-        <span class="c1">#       &quot;&lt;dv&gt;&quot;, type(dv), dv,</span>
-        <span class="c1">#       &quot;&lt;dv/wab&gt;&quot;, type(dvw), dvw,</span>
-        <span class="c1">#</span>
-        <span class="c1">#       &quot;&lt;erf(dv/wab)&gt;&quot;, type(ldr1), ldr1,</span>
-        <span class="c1">#       &quot;&lt;(dv/wab) * 2/sqrt(pi) * exp(-(dv/wab)^2)&gt;&quot;, type(ldr2), ldr2,</span>
-        <span class="c1">#       &quot;&lt;transverse diffusion rate&gt;&quot;, type(ldr), ldr,</span>
-        <span class="c1">#       &quot;&lt;nuab&gt;&quot;, type(nuab), nuab,</span>
-        <span class="c1">#       sep=&quot;\n&quot;)</span>
-
         <span class="k">if</span> <span class="n">both_species</span><span class="p">:</span>
             <span class="n">exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="n">sa</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">sb</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">})</span>
             <span class="n">rho_ratio</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
@@ -2047,22 +1895,10 @@
             <span class="n">rho_ratio</span> <span class="o">=</span> <span class="n">rho_ratio</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">nuba</span> <span class="o">=</span> <span class="n">nuab</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_ratio</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">nu</span> <span class="o">=</span> <span class="n">nuab</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nuba</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="c1">#             nu.name = &quot;%s+%s&quot; % (sa, sb)</span>
             <span class="n">nu</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sa</span><span class="si">}</span><span class="s2">+</span><span class="si">{</span><span class="n">sb</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="c1"># print(</span>
-            <span class="c1">#       &quot;&lt;rho_a/rho_b&gt;&quot;, type(rho_ratio), rho_ratio,</span>
-            <span class="c1">#       &quot;&lt;nuba&gt;&quot;, type(nuba), nuba,</span>
-            <span class="c1">#       sep=&quot;\n&quot;)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nu</span> <span class="o">=</span> <span class="n">nuab</span>
-            <span class="c1">#             nu.name = &quot;%s-%s&quot; % (sa, sb)</span>
             <span class="n">nu</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sa</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">sb</span><span class="si">}</span><span class="s2">&quot;</span>
-
-        <span class="c1"># print(</span>
-        <span class="c1">#       &quot;&lt;both_species&gt; %s&quot; % both_species,</span>
-        <span class="c1">#       &quot;&lt;nu&gt;&quot;, type(nu), nu,</span>
-        <span class="c1">#       &quot;&quot;,</span>
-        <span class="c1">#       sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">nu</span></div>
 
@@ -2107,9 +1943,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="n">r</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">distance2sun</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">distance2sun</span>
-        <span class="c1">#         r = self.constants.misc.loc[&quot;1AU [m]&quot;] - (</span>
-        <span class="c1">#             self.gse.x * self.constants.misc.loc[&quot;Re [m]&quot;]</span>
-        <span class="c1">#         )</span>
         <span class="n">vsw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">))</span><span class="o">.</span><span class="n">mag</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">v</span>
         <span class="n">tau_exp</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">vsw</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -2117,19 +1950,6 @@
 
         <span class="n">nc</span> <span class="o">=</span> <span class="n">nuc</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tau_exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">nc</span>
         <span class="n">nc</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">nuc</span><span class="o">.</span><span class="n">name</span>
-        <span class="c1"># Nc name should be handled by nuc name conventions.</span>
-
-        <span class="c1"># print(&quot;&quot;,</span>
-        <span class="c1">#       &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#       &quot;&lt;species&gt;: {}&quot;.format((sa, sb)),</span>
-        <span class="c1">#       &quot;&lt;both species&gt;: %s&quot; % both_species,</span>
-        <span class="c1">#       &quot;&lt;r&gt;&quot;, type(r), r,</span>
-        <span class="c1">#       &quot;&lt;vsw&gt;&quot;, type(vsw), vsw,</span>
-        <span class="c1">#       &quot;&lt;tau_exp&gt;&quot;, type(tau_exp), tau_exp,</span>
-        <span class="c1">#       &quot;&lt;nuc&gt;&quot;, type(nuc), nuc,</span>
-        <span class="c1">#       &quot;&lt;nc&gt;&quot;, type(nc), nc,</span>
-        <span class="c1">#       &quot;&quot;,</span>
-        <span class="c1">#       sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">nc</span></div>
 
@@ -2213,31 +2033,11 @@
         <span class="n">nbar</span> <span class="o">=</span> <span class="n">n2</span> <span class="o">/</span> <span class="n">n1</span>
         <span class="n">wbar</span> <span class="o">=</span> <span class="p">(</span><span class="n">w1_par</span> <span class="o">/</span> <span class="n">w2_par</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">((</span><span class="n">w1_per</span> <span class="o">/</span> <span class="n">w2_per</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">coef</span> <span class="o">=</span> <span class="n">nbar</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">wbar</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
-        <span class="c1"># f2f1 = nbar * wbar * f2f1</span>
         <span class="n">f2f1</span> <span class="o">=</span> <span class="n">coef</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvw</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f2f1</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>
         <span class="n">sbc</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">beam</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
         <span class="n">f2f1</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">sbc</span>
-
-        <span class="c1">#        print(&quot;&quot;,</span>
-        <span class="c1">#              &quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;species&gt;: {},{}&quot;.format(beam, core),</span>
-        <span class="c1">#              &quot;&lt;ni&gt;&quot;, type(n1), n1,</span>
-        <span class="c1">#              &quot;&lt;nj&gt;&quot;, type(n2), n2,</span>
-        <span class="c1">#              &quot;&lt;nbar&gt;&quot;, type(nbar), nbar,</span>
-        <span class="c1">#              &quot;&lt;w1_par&gt;&quot;, type(w1_par), w1_par,</span>
-        <span class="c1">#              &quot;&lt;w1_per&gt;&quot;, type(w1_per), w1_per,</span>
-        <span class="c1">#              &quot;&lt;w2_par&gt;&quot;, type(w2_par), w2_par,</span>
-        <span class="c1">#              &quot;&lt;w2_per&gt;&quot;, type(w2_per), w2_per,</span>
-        <span class="c1">#              &quot;&lt;wbar&gt;&quot;, type(wbar), wbar,</span>
-        <span class="c1">#              &quot;&lt;coef&gt;&quot;, type(coef), coef,</span>
-        <span class="c1">#              &quot;&lt;dv&gt;&quot;, type(dv), dv,</span>
-        <span class="c1">#              &quot;&lt;dvw&gt;&quot;, type(dvw), dvw,</span>
-        <span class="c1">#              &quot;&lt;f2f1&gt;&quot;, type(f2f1), f2f1,</span>
-        <span class="c1">#              &quot;&quot;,</span>
-        <span class="c1">#              sep=&quot;\n&quot;</span>
-        <span class="c1">#             )</span>
 
         <span class="k">return</span> <span class="n">f2f1</span></div>
 
@@ -2297,10 +2097,7 @@
             <span class="p">)</span>
             <span class="n">niqi</span> <span class="o">=</span> <span class="n">ni</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">qi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
             <span class="n">ne</span> <span class="o">=</span> <span class="n">niqi</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="c1"># niqivi = vi.multiply(niqi, axis=1, level=&quot;S&quot;).sum(axis=1, level=&quot;C&quot;)</span>
-            <span class="n">niqivi</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">vi</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">niqi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-            <span class="p">)</span>  <span class="c1"># sum(axis=1, level=&quot;C&quot;)</span>
+            <span class="n">niqivi</span> <span class="o">=</span> <span class="n">vi</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">niqi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
 
         <span class="n">ve</span> <span class="o">=</span> <span class="n">niqivi</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -2334,23 +2131,6 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_ions</span><span class="p">()</span>
-
-        <span class="c1">#        print(&quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;species&gt;: {}&quot;.format(species),</span>
-        <span class="c1">#              &quot;&lt;qi&gt;&quot;, type(qi), qi,</span>
-        <span class="c1">#              &quot;&lt;ni&gt;&quot;, type(ni), ni,</span>
-        <span class="c1">#              &quot;&lt;vi&gt;&quot;, type(vi), vi,</span>
-        <span class="c1">#              &quot;&lt;wp&gt;&quot;, type(wp), wp,</span>
-        <span class="c1">#              &quot;&lt;niqi&gt;&quot;, type(niqi), niqi,</span>
-        <span class="c1">#              &quot;&lt;niqivi&gt;&quot;, type(niqivi), niqivi,</span>
-        <span class="c1">#              &quot;&lt;ne&gt;&quot;, type(ne), ne,</span>
-        <span class="c1">#              &quot;&lt;ve&gt;&quot;, type(ve), ve,</span>
-        <span class="c1">#              &quot;&lt;we&gt;&quot;, type(we), we,</span>
-        <span class="c1">#              &quot;&lt;electrons&gt;&quot;, type(electrons), electrons, electrons.data,</span>
-        <span class="c1">#              &quot;&lt;plasma.species&gt;: {}&quot;.format(self.species),</span>
-        <span class="c1">#              &quot;&lt;plasma.ions&gt;&quot;, type(self.ions), self.ions,</span>
-        <span class="c1">#              &quot;&lt;plasma.data&gt;&quot;, type(self.data), self.data.T,</span>
-        <span class="c1">#              &quot;&quot;, sep=&quot;\n&quot;)</span>
 
         <span class="k">return</span> <span class="n">electrons</span></div>
 
@@ -2391,22 +2171,10 @@
         <span class="n">qa</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">qb</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
 
-        <span class="c1">#        print(&quot;&lt;Module&gt;&quot;,</span>
-        <span class="c1">#              &quot;&lt;species&gt; {}&quot;.format(species),</span>
-        <span class="c1">#              &quot;&lt;rho&gt;&quot;, type(rho), rho,</span>
-        <span class="c1">#              &quot;&lt;v&gt;&quot;, type(v), v,</span>
-        <span class="c1">#              &quot;&lt;w&gt;&quot;, type(w), w,</span>
-        <span class="c1">#              &quot;&lt;qa&gt;&quot;, type(qa), qa,</span>
-        <span class="c1">#              &quot;&lt;qb&gt;&quot;, type(qb), qb,</span>
-        <span class="c1">#              sep=&quot;\n&quot;)</span>
-
         <span class="n">qs</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">qb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">qs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-
-        <span class="c1">#        print(&quot;&lt;qpar&gt;&quot;, type(qs), qs,</span>
-        <span class="c1">#              sep=&quot;\n&quot;)</span>
 
         <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">v</span><span class="o">**</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">qpar</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">qs</span>

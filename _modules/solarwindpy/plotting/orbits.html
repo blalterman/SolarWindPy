@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+g487fbccc1 documentation</title>
+  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gdf7a4708a documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=6eb20c15"></script>
+      <script src="../../../_static/documentation_options.js?v=9af668eb"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,7 +309,6 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Plotting helpers specialized for solar wind orbits.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -319,20 +318,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">histograms</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tools</span>
-
-<span class="c1"># import logging</span>
-
-<span class="c1"># from . import labels</span>
-
-<span class="c1"># import os</span>
-<span class="c1"># import psutil</span>
-
-<span class="c1"># def log_mem_usage():</span>
-<span class="c1">#    usage = psutil.Process(os.getpid()).memory_info()</span>
-<span class="c1">#    usage = &quot;\n&quot;.join(</span>
-<span class="c1">#        [&quot;{} {:.3f} GB&quot;.format(k, v * 1e-9) for k, v in usage._asdict().items()]</span>
-<span class="c1">#    )</span>
-<span class="c1">#    logging.getLogger(&quot;main&quot;).warning(&quot;Memory usage\n%s&quot;, usage)</span>
 
 
 <div class="viewcode-block" id="OrbitPlot">
@@ -445,10 +430,6 @@
                 <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="c1">#         for k, v in self.intervals.items():</span>
-        <span class="c1">#             # if &gt; 1 intervals, pass level. Otherwise, don&#39;t as this raises a NotImplementedError. (20190619)</span>
-        <span class="c1">#             agg = agg.reindex(index=v, level=k if agg.index.nlevels &gt; 1 else None)</span>
-
         <span class="k">return</span> <span class="n">agg</span></div>
 
 
@@ -497,13 +478,9 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_in_out_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inbound</span><span class="p">,</span> <span class="n">outbound</span><span class="p">):</span>
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Formatting in out axes&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
-
         <span class="n">xlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">inbound</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="n">outbound</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()])</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">xlim</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">xlim</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="c1">#         x0, x1 = outbound.get_xlim()</span>
         <span class="n">inbound</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
         <span class="n">outbound</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span>
         <span class="n">outbound</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -518,16 +495,6 @@
         <span class="c1"># TODO: Get top and bottom axes to line up without `tight_layout`, which</span>
         <span class="c1">#       puts colorbar into an unusable location.</span>
 
-    <span class="c1">#         for k, ax in axes.items():</span>
-    <span class="c1">#             au = 1.49597871e+11 # [m]</span>
-    <span class="c1">#             rs = 695700000 # [m]</span>
-    <span class="c1">#             conversion = au/rs</span>
-    <span class="c1">#             if self.labels.x == labels.special.Distance2Sun(&quot;Rs&quot;):</span>
-    <span class="c1">#                 tax = ax.twiny()</span>
-    <span class="c1">#                 tax.grid(False)</span>
-    <span class="c1">#                 tax.set_xlim(* (np.array(ax.get_xlim()) / conversion))</span>
-    <span class="c1">#                 tax.set_xlabel(labels.special.Distance2Sun(&quot;AU&quot;))</span>
-
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_prune_lower_yaxis_ticks</span><span class="p">(</span><span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span><span class="p">):</span>
         <span class="n">nbins</span> <span class="o">=</span> <span class="n">ax0</span><span class="o">.</span><span class="n">get_yticks</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>
@@ -538,9 +505,6 @@
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_in_out_both_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axi</span><span class="p">,</span> <span class="n">axo</span><span class="p">,</span> <span class="n">axb</span><span class="p">,</span> <span class="n">cbari</span><span class="p">,</span> <span class="n">cbaro</span><span class="p">,</span> <span class="n">cbarb</span><span class="p">):</span>
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Formatting in out both axes&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
-
         <span class="n">ylim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">axi</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="n">axi</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">(),</span> <span class="n">axb</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()])</span>
         <span class="n">y0</span> <span class="o">=</span> <span class="n">ylim</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="n">y1</span> <span class="o">=</span> <span class="n">ylim</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -559,14 +523,8 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.</span>
 
 <span class="sd">        Legs: Inbound, Outbound, and Both.&quot;&quot;&quot;</span>
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Starting agg&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
-
         <span class="n">fcn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fcn&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Running Both agg&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disable_both</span><span class="p">:</span>
             <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Orbit&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -585,13 +543,6 @@
                 <span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="s2">&quot;Orbit&quot;</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="p">)</span>
-
-        <span class="c1">#         for k, v in self.intervals.items():</span>
-        <span class="c1">#             # if &gt; 1 intervals, pass level. Otherwise, don&#39;t as this raises a NotImplementedError. (20190619)</span>
-        <span class="c1">#             agg = agg.reindex(index=v, level=k if agg.index.nlevels &gt; 1 else None)</span>
-
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Grouping agg for axis normalization&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="n">grouped</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orbit_key</span><span class="p">)</span>
         <span class="n">transformed</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">)</span>
@@ -661,9 +612,6 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Refactored putting `agg` onto `ax`.</span>
 
 <span class="sd">        Python was crashing due to the way too many `agg` runs (20190731).&quot;&quot;&quot;</span>
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Putting agg on ax&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
-
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
 
@@ -679,19 +627,11 @@
             <span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
-        <span class="c1">#         pdb.set_trace()</span>
-
         <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
 
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Reindexing agg on ax&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
-
         <span class="c1"># Unstacking drops some NaN bins, so we must reindex again.</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
-
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Do the plotting&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">pc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">XX</span><span class="p">,</span> <span class="n">YY</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -699,13 +639,9 @@
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="c1">#             use_gridspec = kwargs.pop(&quot;use_gridspec&quot;, False)</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Done putting agg on axis&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="k">return</span> <span class="n">cbar</span>
 
@@ -799,8 +735,6 @@
         <span class="c1"># For the sake of legacy code. (20190731)</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Inbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Outbound&quot;</span><span class="p">))</span>
         <span class="n">cbars</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">cbari</span><span class="p">,</span> <span class="n">cbaro</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Inbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Outbound&quot;</span><span class="p">))</span>
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Done with plot&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="k">return</span> <span class="n">axes</span><span class="p">,</span> <span class="n">cbars</span></div>
 
@@ -852,19 +786,11 @@
             <span class="n">axb</span><span class="p">,</span> <span class="n">aggb</span><span class="p">,</span> <span class="n">cbar</span><span class="p">,</span> <span class="n">limit_color_norm</span><span class="p">,</span> <span class="n">cbar_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
-        <span class="c1">#         axi, cbari = self.make_one_plot(&quot;Inbound&quot;, axes[0], **kwargs)</span>
-        <span class="c1">#         axo, cbaro = self.make_one_plot(&quot;Outbound&quot;, axes[1], **kwargs)</span>
-        <span class="c1">#         axb, cbarb = self.make_one_plot(&quot;Both&quot;, axes[2], **kwargs)</span>
-
-        <span class="c1">#         self._format_joint_axes(*axes)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_in_out_both_axes</span><span class="p">(</span><span class="n">axi</span><span class="p">,</span> <span class="n">axo</span><span class="p">,</span> <span class="n">axb</span><span class="p">,</span> <span class="n">cbari</span><span class="p">,</span> <span class="n">cbaro</span><span class="p">,</span> <span class="n">cbarb</span><span class="p">)</span>
 
         <span class="c1"># For the sake of legacy code. (20190731)</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Inbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Outbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Both&quot;</span><span class="p">))</span>
         <span class="n">cbars</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">cbari</span><span class="p">,</span> <span class="n">cbaro</span><span class="p">,</span> <span class="n">cbarb</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Inbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Outbound&quot;</span><span class="p">,</span> <span class="s2">&quot;Both&quot;</span><span class="p">))</span>
-
-        <span class="c1">#         logging.getLogger(&quot;main&quot;).warning(&quot;Done with plot&quot;)</span>
-        <span class="c1">#         log_mem_usage()</span>
 
         <span class="k">return</span> <span class="n">axes</span><span class="p">,</span> <span class="n">cbars</span></div>
 </div>

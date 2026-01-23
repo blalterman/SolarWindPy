@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g487fbccc1 documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gdf7a4708a documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=6eb20c15"></script>
+      <script src="../../../_static/documentation_options.js?v=9af668eb"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,7 +309,6 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Two-dimensional histogram and heatmap plotting utilities.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>  <span class="c1"># noqa: F401</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -324,28 +323,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">labels</span> <span class="k">as</span> <span class="n">labels_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">nan_gaussian_filter</span>
 
-<span class="c1"># from .agg_plot import AggPlot</span>
-<span class="c1"># from .hist1d import Hist1D</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">agg_plot</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hist1d</span>
 
 <span class="n">AggPlot</span> <span class="o">=</span> <span class="n">agg_plot</span><span class="o">.</span><span class="n">AggPlot</span>
 <span class="n">Hist1D</span> <span class="o">=</span> <span class="n">hist1d</span><span class="o">.</span><span class="n">Hist1D</span>
 
-<span class="c1"># import os</span>
-<span class="c1"># import psutil</span>
 
-
-<span class="c1"># def log_mem_usage():</span>
-<span class="c1">#    usage = psutil.Process(os.getpid()).memory_info()</span>
-<span class="c1">#    usage = &quot;\n&quot;.join(</span>
-<span class="c1">#        [&quot;{} {:.3f} GB&quot;.format(k, v * 1e-9) for k, v in usage._asdict().items()]</span>
-<span class="c1">#    )</span>
-<span class="c1">#    logging.getLogger(&quot;main&quot;).warning(&quot;Memory usage\n%s&quot;, usage)</span>
-
-
-<span class="c1"># class Hist2D(base.Plot2D, AggPlot):</span>
 <div class="viewcode-block" id="Hist2D">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Hist2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">,</span> <span class="n">AggPlot</span><span class="p">):</span>
@@ -437,35 +421,6 @@
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
-    <span class="c1">#     def set_path(self, new, add_scale=True):</span>
-    <span class="c1">#         # Bug: path doesn&#39;t auto-set log information.</span>
-    <span class="c1">#         path, x, y, z, scale_info = super().set_path(new, add_scale)</span>
-
-    <span class="c1">#         if new == &quot;auto&quot;:</span>
-    <span class="c1">#             path = path / x / y / z</span>
-
-    <span class="c1">#         else:</span>
-    <span class="c1">#             assert x is None</span>
-    <span class="c1">#             assert y is None</span>
-    <span class="c1">#             assert z is None</span>
-
-    <span class="c1">#         if add_scale:</span>
-    <span class="c1">#             assert scale_info is not None</span>
-
-    <span class="c1">#             scale_info = &quot;-&quot;.join(scale_info)</span>
-
-    <span class="c1">#             if bool(len(path.parts)) and path.parts[-1].endswith(&quot;norm&quot;):</span>
-    <span class="c1">#                 # Insert &lt;norm&gt; at end of path so scale order is (x, y, z).</span>
-    <span class="c1">#                 path = path.parts</span>
-    <span class="c1">#                 path = path[:-1] + (scale_info + &quot;-&quot; + path[-1],)</span>
-    <span class="c1">#                 path = Path(*path)</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 path = path / scale_info</span>
-
-    <span class="c1">#         self._path = path</span>
-
-    <span class="c1">#     set_path.__doc__ = base.Base.set_path.__doc__</span>
-
 <div class="viewcode-block" id="Hist2D.set_labels">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -480,29 +435,6 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-    <span class="c1">#     def set_data(self, x, y, z, clip):</span>
-    <span class="c1">#         data = pd.DataFrame(</span>
-    <span class="c1">#             {</span>
-    <span class="c1">#                 &quot;x&quot;: np.log10(np.abs(x)) if self.log.x else x,</span>
-    <span class="c1">#                 &quot;y&quot;: np.log10(np.abs(y)) if self.log.y else y,</span>
-    <span class="c1">#             }</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#</span>
-    <span class="c1">#</span>
-    <span class="c1">#         if z is None:</span>
-    <span class="c1">#             z = pd.Series(1, index=x.index)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         data.loc[:, &quot;z&quot;] = z</span>
-    <span class="c1">#         data = data.dropna()</span>
-    <span class="c1">#         if not data.shape[0]:</span>
-    <span class="c1">#             raise ValueError(</span>
-    <span class="c1">#                 &quot;You can&#39;t build a %s with data that is exclusively NaNs&quot;</span>
-    <span class="c1">#                 % self.__class__.__name__</span>
-    <span class="c1">#             )</span>
-    <span class="c1">#</span>
-    <span class="c1">#         self._data = data</span>
-    <span class="c1">#         self._clip = clip</span>
 
 <div class="viewcode-block" id="Hist2D.set_data">
 <a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.set_data">[docs]</a>
@@ -631,10 +563,6 @@
         <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alim</span>
         <span class="k">if</span> <span class="n">a0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">a1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="c1">#             tk  = pd.DataFrame(True,</span>
-            <span class="c1">#                                index=agg.index,</span>
-            <span class="c1">#                                columns=agg.columns</span>
-            <span class="c1">#                               )</span>
             <span class="k">if</span> <span class="n">a0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">agg</span> <span class="o">&gt;=</span> <span class="n">a0</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">a1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -764,24 +692,15 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
 
-        <span class="c1">#         assert x.size == agg.shape[1] + 1</span>
-        <span class="c1">#         assert y.size == agg.shape[0] + 1</span>
-
         <span class="c1"># HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)</span>
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1">#             agg = agg.reindex(columns=self.intervals[&quot;x&quot;])</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1">#             agg = agg.reindex(index=self.intervals[&quot;y&quot;])</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
-        <span class="c1">#         if self.log.x:</span>
-        <span class="c1">#             x = 10.0 ** x</span>
-        <span class="c1">#         if self.log.y:</span>
-        <span class="c1">#             y = 10.0 ** y</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
@@ -834,12 +753,9 @@
             <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="c1"># Must draw to initialize `facecolor`s</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-            <span class="c1"># Remove `pc` from axis so we can redraw with std</span>
-            <span class="c1">#             pc.remove()</span>
             <span class="n">colors</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">get_facecolors</span><span class="p">()</span>
             <span class="n">colors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span>
             <span class="n">pc</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
-        <span class="c1">#             ax.add_collection(pc)</span>
 
         <span class="k">elif</span> <span class="n">alpha_fcn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring `alpha_fcn` because plotting counts&quot;</span><span class="p">)</span>
@@ -1305,15 +1221,10 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
 
-        <span class="c1">#         assert x.size == agg.shape[1]</span>
-        <span class="c1">#         assert y.size == agg.shape[0]</span>
-
         <span class="c1"># HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)</span>
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="c1">#             agg = agg.reindex(columns=self.intervals[&quot;x&quot;])</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="c1">#             agg = agg.reindex(index=self.intervals[&quot;y&quot;])</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -1478,10 +1389,6 @@
         <span class="n">hspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hspace&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">wspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;wspace&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-        <span class="c1">#         if fig_axes is not None:</span>
-        <span class="c1">#             fig, axes = fig_axes</span>
-        <span class="c1">#             hax, xax, yax, cax = axes</span>
-        <span class="c1">#         else:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
         <span class="n">gs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span>
             <span class="mi">4</span><span class="p">,</span>
