@@ -805,7 +805,7 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
 
         try:
             res, p0 = self._run_least_squares(**kwargs)
-        except (RuntimeError, ValueError) as e:
+        except (RuntimeError, ValueError, FitFailedError) as e:
             #             print("fitting failed", flush=True)
             #             raise
             if return_exception:
