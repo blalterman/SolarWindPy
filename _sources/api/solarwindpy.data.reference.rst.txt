@@ -1,0 +1,11 @@
+solarwindpy.data.reference package
+==================================
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.data.reference
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.plotting.hist1d module &mdash; SolarWindPy 0.1.dev1+g296ac07c0 documentation</title>
+  <title>solarwindpy.plotting.hist1d module &mdash; SolarWindPy 0.1.dev1+g487fbccc1 documentation</title>
   <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=3a00db3d"></script>
+      <script src="../_static/documentation_options.js?v=6eb20c15"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -354,8 +354,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a>) – Data from which to create bins.</p></li>
-<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Values to aggregate in bins of <code class="docutils literal notranslate"><span class="pre">x</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, counts of
+<li><p><strong>x</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.0)"><em>pandas.Series</em></a>) – Data from which to create bins.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.0)"><em>pandas.Series</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Values to aggregate in bins of <code class="docutils literal notranslate"><span class="pre">x</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, counts of
 <code class="docutils literal notranslate"><span class="pre">x</span></code> are used.</p></li>
 <li><p><strong>logx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, compute bins in logarithmic space.</p></li>
 <li><p><strong>axnorm</strong> (<em>{&quot;t&quot;</em><em>, </em><em>&quot;d&quot;</em><em>, </em><em>None}</em><em>, </em><em>optional</em>) – Normalisation applied to the histogram. <code class="docutils literal notranslate"><span class="pre">&quot;t&quot;</span></code> uses total
@@ -363,7 +363,7 @@ counts and <code class="docutils literal notranslate"><span class="pre">&quot;d&
 <li><p><strong>clip_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Remove extreme values at the 0.001 and 0.999 percentiles before
 binning or aggregation.</p></li>
 <li><p><strong>nbins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – Binning strategy passed to <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges" title="(in NumPy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.histogram_bin_edges()</span></code></a> or
-<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html#pandas.cut" title="(in pandas v2.3.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.cut()</span></code></a> depending on the input type.</p></li>
+<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html#pandas.cut" title="(in pandas v3.0.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.cut()</span></code></a> depending on the input type.</p></li>
 <li><p><strong>bin_precision</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Precision for decimal bin edges.</p></li>
 </ul>
 </dd>

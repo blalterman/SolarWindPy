@@ -1,0 +1,19 @@
+solarwindpy.data package
+========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.data.reference
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.data
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
