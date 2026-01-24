@@ -80,9 +80,7 @@ class ReferenceAbundances:
         if not isinstance(year, int):
             raise TypeError(f"year must be an integer, got {type(year).__name__}")
         if year not in self._VALID_YEARS:
-            raise ValueError(
-                f"year must be 2009 or 2021, got {year}"
-            )
+            raise ValueError(f"year must be 2009 or 2021, got {year}")
         self._year = year
         self._load_data()
 
@@ -114,9 +112,7 @@ class ReferenceAbundances:
         data_file = resources.files(__package__).joinpath("data", filename)
 
         with data_file.open() as f:
-            data = pd.read_csv(
-                f, skiprows=4, header=[0, 1], index_col=[0, 1]
-            )
+            data = pd.read_csv(f, skiprows=4, header=[0, 1], index_col=[0, 1])
 
         # 2021 has Comment column, extract before float conversion
         # Column is ('Comment', 'Unnamed: X_level_1') due to pandas MultiIndex parsing
