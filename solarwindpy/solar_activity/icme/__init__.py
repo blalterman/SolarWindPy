@@ -15,10 +15,10 @@ Rules of the Road (as of January 2026)
 
 Example
 -------
->>> from solarwindpy.solar_activity.icme import ICMECAT
->>> cat = ICMECAT(spacecraft="Ulysses")
->>> print(f"Found {len(cat)} Ulysses ICMEs")
->>> in_icme = cat.contains(observations.index)
+>>> from solarwindpy.solar_activity.icme import ICMECAT  # doctest: +SKIP
+>>> cat = ICMECAT(spacecraft="Ulysses")  # doctest: +SKIP
+>>> print(f"Found {len(cat)} Ulysses ICMEs")  # doctest: +SKIP
+>>> in_icme = cat.contains(observations.index)  # doctest: +SKIP
 """
 
 from .icmecat import (

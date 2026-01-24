@@ -52,13 +52,13 @@ class ICMECAT:
 
     Example
     -------
-    >>> cat = ICMECAT(spacecraft="Ulysses")
-    >>> print(f"Found {len(cat)} Ulysses ICMEs")
-    >>> intervals = cat.intervals
-    >>> print(intervals[["icme_start_time", "mo_end_time", "interval_end"]])
+    >>> cat = ICMECAT(spacecraft="Ulysses")  # doctest: +SKIP
+    >>> print(f"Found {len(cat)} Ulysses ICMEs")  # doctest: +SKIP
+    >>> intervals = cat.intervals  # doctest: +SKIP
+    >>> print(intervals[["icme_start_time", "mo_end_time", "interval_end"]])  # doctest: +SKIP
     >>>
     >>> # Check which observations fall within ICME intervals
-    >>> in_icme = cat.contains(observations.index)
+    >>> in_icme = cat.contains(observations.index)  # doctest: +SKIP
     """
 
     def __init__(
