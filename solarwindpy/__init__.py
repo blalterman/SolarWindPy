@@ -31,6 +31,7 @@ def _configure_pandas() -> None:
 _configure_pandas()
 
 Plasma = core.plasma.Plasma
+ReferenceAbundances = core.abundances.ReferenceAbundances
 at = alfvenic_turbulence
 sc = spacecraft
 pp = plotting
@@ -42,6 +43,7 @@ TeXlabel = plotting.labels.TeXlabel
 __all__ = [
     "core",
     "plasma",
+    "ReferenceAbundances",
     "ions",
     "tensor",
     "vector",
