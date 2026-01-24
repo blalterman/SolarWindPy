@@ -7,13 +7,27 @@ from pathlib import Path
 from typing import Optional
 
 
-ICMECAT_URL = "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv"
+ICMECAT_URL = (
+    "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv"
+)
 
-SPACECRAFT_NAMES = frozenset([
-    "Ulysses", "Wind", "STEREO-A", "STEREO-B", "ACE",
-    "Solar Orbiter", "PSP", "BepiColombo", "Juno", "MESSENGER",
-    "VEX", "MAVEN", "Cassini",
-])
+SPACECRAFT_NAMES = frozenset(
+    [
+        "Ulysses",
+        "Wind",
+        "STEREO-A",
+        "STEREO-B",
+        "ACE",
+        "Solar Orbiter",
+        "PSP",
+        "BepiColombo",
+        "Juno",
+        "MESSENGER",
+        "VEX",
+        "MAVEN",
+        "Cassini",
+    ]
+)
 
 _DATETIME_COLUMNS = ["icme_start_time", "mo_start_time", "mo_end_time"]
 
@@ -119,7 +133,9 @@ class ICMECAT:
         return len(self._data) if self._data is not None else 0
 
     def __repr__(self) -> str:
-        sc_str = f"spacecraft={self._spacecraft!r}" if self._spacecraft else "all spacecraft"
+        sc_str = (
+            f"spacecraft={self._spacecraft!r}" if self._spacecraft else "all spacecraft"
+        )
         return f"ICMECAT({sc_str}, n_events={len(self)})"
 
     # -------------------------------------------------------------------------
@@ -147,6 +163,7 @@ class ICMECAT:
 
         # Check age - re-download if > 30 days old
         import time
+
         age_days = (time.time() - cache_path.stat().st_mtime) / 86400
         if age_days > 30:
             self.logger.info("Cache stale (%.0f days), re-downloading", age_days)
@@ -186,7 +203,8 @@ class ICMECAT:
         else:
             self.logger.warning(
                 "Spacecraft '%s' not found. Available: %s",
-                spacecraft, sorted(available)
+                spacecraft,
+                sorted(available),
             )
             actual_name = spacecraft  # Will result in empty filter
 
@@ -256,12 +274,16 @@ class ICMECAT:
         # Fallback 1: mo_start_time + 24h
         mask_missing = interval_end.isna()
         if "mo_start_time" in result.columns:
-            fallback = result.loc[mask_missing, "mo_start_time"] + pd.Timedelta(hours=24)
+            fallback = result.loc[mask_missing, "mo_start_time"] + pd.Timedelta(
+                hours=24
+            )
             interval_end.loc[mask_missing] = fallback
 
         # Fallback 2: icme_start_time + 24h
         mask_still_missing = interval_end.isna()
-        fallback = result.loc[mask_still_missing, "icme_start_time"] + pd.Timedelta(hours=24)
+        fallback = result.loc[mask_still_missing, "icme_start_time"] + pd.Timedelta(
+            hours=24
+        )
         interval_end.loc[mask_still_missing] = fallback
 
         result["interval_end"] = interval_end
@@ -288,9 +310,8 @@ class ICMECAT:
         pd.DataFrame
             Events where icme_start_time <= end AND interval_end >= start.
         """
-        mask = (
-            (self._intervals["icme_start_time"] <= end) &
-            (self._intervals["interval_end"] >= start)
+        mask = (self._intervals["icme_start_time"] <= end) & (
+            self._intervals["interval_end"] >= start
         )
         return self._intervals[mask].copy()
 
