@@ -5,13 +5,14 @@ This package consolidates the different solar activity indicators available in
 :mod:`solarwindpy` and exposes convenience utilities for working with them.
 """
 
-__all__ = ["sunspot_number", "ssn", "lisird", "plots"]
+__all__ = ["sunspot_number", "ssn", "lisird", "plots", "icme"]
 
 import pandas as pd
 
 from . import sunspot_number  # noqa: F401
 from . import lisird  # noqa: F401
 from . import plots  # noqa: F401
+from . import icme  # noqa: F401
 
 ssn = sunspot_number
 
