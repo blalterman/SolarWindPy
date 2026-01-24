@@ -1,0 +1,8 @@
+solarwindpy.solar\_activity.icme.icmecat module
+===============================================
+
+.. automodule:: solarwindpy.solar_activity.icme.icmecat
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:

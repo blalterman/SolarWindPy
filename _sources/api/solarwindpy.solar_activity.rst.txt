@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   solarwindpy.solar_activity.icme
    solarwindpy.solar_activity.lisird
    solarwindpy.solar_activity.sunspot_number
 

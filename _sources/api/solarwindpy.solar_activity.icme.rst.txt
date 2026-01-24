@@ -1,0 +1,19 @@
+solarwindpy.solar\_activity.icme package
+========================================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   solarwindpy.solar_activity.icme.icmecat
+
+Module contents
+---------------
+
+.. automodule:: solarwindpy.solar_activity.icme
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
