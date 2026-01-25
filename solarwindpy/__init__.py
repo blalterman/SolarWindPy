@@ -18,7 +18,7 @@ from .core import (
     spacecraft,
     alfvenic_turbulence,
 )
-from . import core, plotting, solar_activity, tools, fitfunctions, data
+from . import core, plotting, solar_activity, tools, fitfunctions
 from . import instabilities  # noqa: F401
 from . import reproducibility
 
@@ -31,6 +31,7 @@ def _configure_pandas() -> None:
 _configure_pandas()
 
 Plasma = core.plasma.Plasma
+ReferenceAbundances = core.abundances.ReferenceAbundances
 at = alfvenic_turbulence
 sc = spacecraft
 pp = plotting
@@ -41,8 +42,8 @@ TeXlabel = plotting.labels.TeXlabel
 
 __all__ = [
     "core",
-    "data",
     "plasma",
+    "ReferenceAbundances",
     "ions",
     "tensor",
     "vector",
