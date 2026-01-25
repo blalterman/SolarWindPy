@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.core.abundances &mdash; SolarWindPy 0.1.dev1+ga910f9858 documentation</title>
+  <title>solarwindpy.core.abundances &mdash; SolarWindPy 0.1.dev1+g51cff45fd documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=76cd3fcd"></script>
+      <script src="../../../_static/documentation_options.js?v=ab7c7041"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -306,60 +306,142 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.core.abundances</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ReferenceAbundances&quot;</span><span class="p">]</span>
+<span></span><span class="sd">&quot;&quot;&quot;Reference elemental abundances from Asplund et al. (2009, 2021).</span>
+
+<span class="sd">This module provides access to solar photospheric and CI chondrite</span>
+<span class="sd">(meteoritic) abundances from the Asplund reference papers.</span>
+
+<span class="sd">References</span>
+<span class="sd">----------</span>
+<span class="sd">Asplund, M., Amarsi, A. M., &amp; Grevesse, N. (2021).</span>
+<span class="sd">The chemical make-up of the Sun: A 2020 vision.</span>
+<span class="sd">A&amp;A, 653, A141. https://doi.org/10.1051/0004-6361/202140445</span>
+
+<span class="sd">Asplund, M., Grevesse, N., Sauval, A. J., &amp; Scott, P. (2009).</span>
+<span class="sd">The Chemical Composition of the Sun.</span>
+<span class="sd">Annu. Rev. Astron. Astrophys., 47, 481-522.</span>
+<span class="sd">https://doi.org/10.1146/annurev.astro.46.060407.145222</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ReferenceAbundances&quot;</span><span class="p">,</span> <span class="s2">&quot;Abundance&quot;</span><span class="p">]</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
 
 <span class="n">Abundance</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Abundance&quot;</span><span class="p">,</span> <span class="s2">&quot;measurement,uncertainty&quot;</span><span class="p">)</span>
 
+<span class="c1"># Alias mapping for backward compatibility</span>
+<span class="n">_KIND_ALIASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Meteorites&quot;</span><span class="p">:</span> <span class="s2">&quot;CI_chondrites&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
 
 <div class="viewcode-block" id="ReferenceAbundances">
-<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.core.ReferenceAbundances">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.ReferenceAbundances">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReferenceAbundances</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Elemental abundances from Asplund et al. (2009).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Elemental abundances from Asplund et al. (2009, 2021).</span>
 
-<span class="sd">    Provides both photospheric and meteoritic abundances.</span>
+<span class="sd">    Provides photospheric and CI chondrite (meteoritic) abundances</span>
+<span class="sd">    in the standard dex scale: log ε_X = log(N_X/N_H) + 12.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    year : int, default 2021</span>
+<span class="sd">        Reference year: 2009 or 2021. Default uses Asplund 2021.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        MultiIndex DataFrame with abundances and uncertainties.</span>
+<span class="sd">    year : int</span>
+<span class="sd">        The reference year for the loaded data.</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
+<span class="sd">    Asplund, M., Amarsi, A. M., &amp; Grevesse, N. (2021).</span>
+<span class="sd">    The chemical make-up of the Sun: A 2020 vision.</span>
+<span class="sd">    A&amp;A, 653, A141. https://doi.org/10.1051/0004-6361/202140445</span>
+
 <span class="sd">    Asplund, M., Grevesse, N., Sauval, A. J., &amp; Scott, P. (2009).</span>
 <span class="sd">    The Chemical Composition of the Sun.</span>
-<span class="sd">    Annual Review of Astronomy and Astrophysics, 47(1), 481–522.</span>
+<span class="sd">    Annu. Rev. Astron. Astrophys., 47, 481-522.</span>
 <span class="sd">    https://doi.org/10.1146/annurev.astro.46.060407.145222</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; fe = ref.get_element(&quot;Fe&quot;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Fe = {fe.Ab:.2f} ± {fe.Uncert:.2f}&quot;)  # doctest: +SKIP</span>
+<span class="sd">    Fe = 7.46 ± 0.04</span>
+
+<span class="sd">    Using 2009 data:</span>
+
+<span class="sd">    &gt;&gt;&gt; ref_2009 = ReferenceAbundances(year=2009)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; fe_2009 = ref_2009.get_element(&quot;Fe&quot;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Fe (2009) = {fe_2009.Ab:.2f}&quot;)  # doctest: +SKIP</span>
+<span class="sd">    Fe (2009) = 7.50</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">_VALID_YEARS</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2009</span><span class="p">,</span> <span class="mi">2021</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ReferenceAbundances.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.core.ReferenceAbundances.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span></div>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.ReferenceAbundances.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="mi">2021</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;year must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">year</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">year</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_VALID_YEARS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;year must be 2009 or 2021, got </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_year</span> <span class="o">=</span> <span class="n">year</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">()</span></div>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Elemental abundances in dex scale:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">year</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The reference year for the loaded data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_year</span>
 
-<span class="sd">        log ε_X = log(N_X/N_H) + 12</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Elemental abundances in dex scale.</span>
+
+<span class="sd">        The dex scale is defined as:</span>
+<span class="sd">            log ε_X = log(N_X/N_H) + 12</span>
 
 <span class="sd">        where N_X is the number density of species X.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            MultiIndex DataFrame with index (Z, Symbol) and columns</span>
+<span class="sd">            (CI_chondrites, Photosphere) × (Ab, Uncert).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-<div class="viewcode-block" id="ReferenceAbundances.load_data">
-<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.core.ReferenceAbundances.load_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load Asplund 2009 data from package CSV.&quot;&quot;&quot;</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;asplund2009.csv&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load Asplund data from package CSV based on year.&quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;asplund</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_year</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+        <span class="n">data_file</span> <span class="o">=</span> <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
+        <span class="k">with</span> <span class="n">data_file</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># 2021 has Comment column, extract before float conversion</span>
+        <span class="c1"># Column is (&#39;Comment&#39;, &#39;Unnamed: X_level_1&#39;) due to pandas MultiIndex parsing</span>
+        <span class="n">comment_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Comment&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">comment_cols</span><span class="p">:</span>
+            <span class="n">comment_col</span> <span class="o">=</span> <span class="n">comment_cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">comment_col</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">comment_col</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Convert remaining columns to float64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ReferenceAbundances.get_element">
-<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.core.ReferenceAbundances.get_element">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.ReferenceAbundances.get_element">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;Photosphere&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get measurements for element stored at `key`.</span>
 
@@ -368,8 +450,41 @@
 <span class="sd">        key : str or int</span>
 <span class="sd">            Element symbol (&#39;Fe&#39;) or atomic number (26).</span>
 <span class="sd">        kind : str, default &quot;Photosphere&quot;</span>
-<span class="sd">            Which abundance source: &quot;Photosphere&quot; or &quot;Meteorites&quot;.</span>
+<span class="sd">            Which abundance source: &quot;Photosphere&quot;, &quot;CI_chondrites&quot;,</span>
+<span class="sd">            or &quot;Meteorites&quot; (alias for CI_chondrites).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.Series</span>
+<span class="sd">            Series with &#39;Ab&#39; (abundance in dex) and &#39;Uncert&#39; (uncertainty).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If key is not a string or integer.</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If element not found or invalid kind.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; ref.get_element(&quot;Fe&quot;)  # doctest: +SKIP</span>
+<span class="sd">        Ab        7.46</span>
+<span class="sd">        Uncert    0.04</span>
+<span class="sd">        Name: 26, dtype: float64</span>
+<span class="sd">        &gt;&gt;&gt; ref.get_element(26)  # Same result using atomic number  # doctest: +SKIP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Handle backward compatibility alias</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">_KIND_ALIASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+
+        <span class="c1"># Validate kind</span>
+        <span class="n">valid_kinds</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Photosphere&quot;</span><span class="p">,</span> <span class="s2">&quot;CI_chondrites&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_kinds</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid kind &#39;</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">&#39;. Must be one of: </span><span class="si">{</span><span class="n">valid_kinds</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(or &#39;Meteorites&#39; as alias for &#39;CI_chondrites&#39;)&quot;</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">level</span> <span class="o">=</span> <span class="s2">&quot;Symbol&quot;</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -382,8 +497,74 @@
         <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="ReferenceAbundances.get_comment">
+<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.ReferenceAbundances.get_comment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the source comment for an element (2021 data only).</span>
+
+<span class="sd">        The comment indicates the source methodology for elements where</span>
+<span class="sd">        the adopted abundance is not from photospheric spectroscopy:</span>
+<span class="sd">        - &#39;definition&#39;: H abundance is defined as 12.00</span>
+<span class="sd">        - &#39;helioseismology&#39;: Derived from helioseismology (He)</span>
+<span class="sd">        - &#39;meteorites&#39;: Adopted from CI chondrite measurements</span>
+<span class="sd">        - &#39;solar wind&#39;: Derived from solar wind measurements (Ne, Ar, Kr)</span>
+<span class="sd">        - &#39;nuclear physics&#39;: Derived from nuclear physics (Xe)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str or int</span>
+<span class="sd">            Element symbol (&#39;Fe&#39;) or atomic number (26).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or None</span>
+<span class="sd">            The comment string, or None if no comment (spectroscopic</span>
+<span class="sd">            measurement) or if using 2009 data.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; ref.get_comment(&quot;H&quot;)  # doctest: +SKIP</span>
+<span class="sd">        &#39;definition&#39;</span>
+<span class="sd">        &gt;&gt;&gt; print(ref.get_comment(&quot;Fe&quot;))  # Spectroscopic, no comment  # doctest: +SKIP</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s2">&quot;Symbol&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s2">&quot;Z&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized key type (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Handle empty strings and NaN</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span> <span class="ow">or</span> <span class="n">comment</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">comment</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_convert_from_dex</span><span class="p">(</span><span class="n">case</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert from dex to linear abundance ratio relative to H.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        case : pd.Series</span>
+<span class="sd">            Series with &#39;Ab&#39; and &#39;Uncert&#39; in dex.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            (measurement, uncertainty) in linear units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Ab&quot;</span><span class="p">]</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Uncert&quot;</span><span class="p">]</span>
         <span class="n">mm</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="mf">12.0</span><span class="p">)</span>
@@ -391,7 +572,7 @@
         <span class="k">return</span> <span class="n">mm</span><span class="p">,</span> <span class="n">uu</span>
 
 <div class="viewcode-block" id="ReferenceAbundances.abundance_ratio">
-<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.core.ReferenceAbundances.abundance_ratio">[docs]</a>
+<a class="viewcode-back" href="../../../api/solarwindpy.core.abundances.html#solarwindpy.ReferenceAbundances.abundance_ratio">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">abundance_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate abundance ratio N_X/N_Y with uncertainty.</span>
 
@@ -404,6 +585,21 @@
 <span class="sd">        -------</span>
 <span class="sd">        Abundance</span>
 <span class="sd">            namedtuple with (measurement, uncertainty).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Uncertainty is propagated assuming independent uncertainties:</span>
+<span class="sd">            σ_ratio = ratio × ln(10) × √(σ_X² + σ_Y²)</span>
+
+<span class="sd">        For denominator=&#39;H&#39;, uses the special conversion from dex</span>
+<span class="sd">        since H is the reference element (log ε_H = 12 by definition).</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; fe_o = ref.abundance_ratio(&quot;Fe&quot;, &quot;O&quot;)  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; print(f&quot;Fe/O = {fe_o.measurement:.4f} ± {fe_o.uncertainty:.4f}&quot;)  # doctest: +SKIP</span>
+<span class="sd">        Fe/O = 0.0589 ± 0.0077</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">numerator</span><span class="p">)</span>
         <span class="n">tu</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">Uncert</span>

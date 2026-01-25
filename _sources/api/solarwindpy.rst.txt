@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    solarwindpy.core
-   solarwindpy.data
    solarwindpy.fitfunctions
    solarwindpy.instabilities
    solarwindpy.plotting
