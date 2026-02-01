@@ -44,7 +44,7 @@ jobs:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
@@ -237,7 +237,7 @@ jobs:
 
     # TEST: Simplified conda setup (Bug #3 removal test - same as doctest-validation)
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
