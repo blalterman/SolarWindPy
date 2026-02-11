@@ -80,7 +80,7 @@ packaging==25.0
     #   sphinx
 pandas==2.3.3
     # via solarwindpy (pyproject.toml)
-pillow==12.0.0
+pillow==12.1.1
     # via matplotlib
 pybtex==0.25.1
     # via
