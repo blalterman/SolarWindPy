@@ -6,21 +6,11 @@ those 1D fits along the 2nd dimension of the aggregated data.
 """
 
 
-# import warnings
 import logging  # noqa: F401
-import warnings
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from collections import namedtuple
-
-# Parallel processing support
-try:
-    from joblib import Parallel, delayed
-
-    JOBLIB_AVAILABLE = True
-except ImportError:
-    JOBLIB_AVAILABLE = False
 
 from ..plotting import subplots
 from . import core
@@ -159,146 +149,24 @@ class TrendFit(object):
         ffuncs = pd.Series(ffuncs)
         self._ffuncs = ffuncs
 
-    def make_1dfits(self, n_jobs=1, verbose=0, backend="loky", **kwargs):
-        r"""
-        Execute fits for all 1D functions, optionally in parallel.
+    def make_1dfits(self, **kwargs):
+        r"""Execute fits for all 1D functions.
 
-        Each FitFunction instance represents a single dataset to fit.
-        TrendFit creates many such instances (one per column), making
-        this ideal for parallelization.
+        Removes bad fits from `ffuncs` and saves them in `bad_fits`.
 
         Parameters
         ----------
-        n_jobs : int, default=1
-            Number of parallel jobs:
-            - 1: Sequential execution (default, backward compatible)
-            - -1: Use all available CPU cores
-            - n>1: Use n cores
-            Requires joblib: pip install joblib
-        verbose : int, default=0
-            Joblib verbosity level (0=silent, 10=progress)
-        backend : str, default='loky'
-            Joblib backend ('loky', 'threading', 'multiprocessing')
         **kwargs
             Passed to each FitFunction.make_fit()
-
-        Examples
-        --------
-        >>> # TrendFit creates one FitFunction per column
-        >>> tf = TrendFit(agg_data, Gaussian, ffunc1d=Gaussian)
-        >>> tf.make_ffunc1ds()  # Creates instances
-        >>>
-        >>> # Fit all instances sequentially (default)
-        >>> tf.make_1dfits()
-        >>>
-        >>> # Fit in parallel using all cores
-        >>> tf.make_1dfits(n_jobs=-1)
-        >>>
-        >>> # With progress display
-        >>> tf.make_1dfits(n_jobs=-1, verbose=10)
-
-        Notes
-        -----
-        Parallel execution returns complete fitted FitFunction objects from worker
-        processes, which incurs serialization overhead. This overhead typically
-        outweighs parallelization benefits for simple fits. Parallelization is
-        most beneficial for:
-
-        - Complex fitting functions with expensive computations
-        - Large datasets (>1000 points per fit)
-        - Batch processing of many fits (>50)
-        - Systems with many CPU cores and sufficient memory
-
-        For typical Gaussian fits on moderate data, sequential execution (n_jobs=1)
-        may be faster due to Python's GIL and serialization overhead.
-
-        Removes bad fits from `ffuncs` and saves them in `bad_fits`.
         """
         # Successful fits return None, which pandas treats as NaN.
         return_exception = kwargs.pop("return_exception", True)
 
-        # Filter out parallelization parameters from kwargs before passing to make_fit()
-        # These are specific to make_1dfits() and should not be passed to individual fits
-        fit_kwargs = {
-            k: v for k, v in kwargs.items() if k not in ["n_jobs", "verbose", "backend"]
-        }
+        fit_success = self.ffuncs.apply(
+            lambda x: x.make_fit(return_exception=return_exception, **kwargs)
+        )
 
-        # Check if parallel execution is requested and possible
-        if n_jobs != 1 and len(self.ffuncs) > 1:
-            if not JOBLIB_AVAILABLE:
-                warnings.warn(
-                    f"joblib not installed. Install with 'pip install joblib' "
-                    f"for parallel processing of {len(self.ffuncs)} fits. "
-                    f"Falling back to sequential execution.",
-                    UserWarning,
-                )
-                n_jobs = 1
-            else:
-                # Parallel execution - return fitted objects to preserve TrendFit architecture
-                def fit_single_from_data(
-                    column_name, x_data, y_data, ffunc_class, ffunc_kwargs
-                ):
-                    """Create and fit FitFunction, return both result and fitted object."""
-                    # Create new FitFunction instance in worker process
-                    ffunc = ffunc_class(x_data, y_data, **ffunc_kwargs)
-                    fit_result = ffunc.make_fit(
-                        return_exception=return_exception, **fit_kwargs
-                    )
-                    # Return tuple: (fit_result, fitted_object)
-                    return (fit_result, ffunc)
-
-                # Prepare minimal data for each fit
-                fit_tasks = []
-                for col_name, ffunc in self.ffuncs.items():
-                    x_data = ffunc.observations.raw.x
-                    y_data = ffunc.observations.raw.y
-                    ffunc_class = type(ffunc)
-                    # Extract constructor kwargs from ffunc (constraints, etc.)
-                    ffunc_kwargs = {
-                        "xmin": getattr(ffunc, "xmin", None),
-                        "xmax": getattr(ffunc, "xmax", None),
-                        "ymin": getattr(ffunc, "ymin", None),
-                        "ymax": getattr(ffunc, "ymax", None),
-                        "xoutside": getattr(ffunc, "xoutside", None),
-                        "youtside": getattr(ffunc, "youtside", None),
-                    }
-                    # Remove None values
-                    ffunc_kwargs = {
-                        k: v for k, v in ffunc_kwargs.items() if v is not None
-                    }
-
-                    fit_tasks.append(
-                        (col_name, x_data, y_data, ffunc_class, ffunc_kwargs)
-                    )
-
-                # Run fits in parallel and get both results and fitted objects
-                parallel_output = Parallel(
-                    n_jobs=n_jobs, verbose=verbose, backend=backend
-                )(
-                    delayed(fit_single_from_data)(
-                        col_name, x_data, y_data, ffunc_class, ffunc_kwargs
-                    )
-                    for col_name, x_data, y_data, ffunc_class, ffunc_kwargs in fit_tasks
-                )
-
-                # Separate results and fitted objects, update self.ffuncs with fitted objects
-                fit_results = []
-                for idx, (result, fitted_ffunc) in enumerate(parallel_output):
-                    fit_results.append(result)
-                    # CRITICAL: Replace original with fitted object to preserve TrendFit architecture
-                    col_name = self.ffuncs.index[idx]
-                    self.ffuncs[col_name] = fitted_ffunc
-
-                # Convert to Series for bad fit handling
-                fit_success = pd.Series(fit_results, index=self.ffuncs.index)
-
-        if n_jobs == 1:
-            # Original sequential implementation (unchanged)
-            fit_success = self.ffuncs.apply(
-                lambda x: x.make_fit(return_exception=return_exception, **fit_kwargs)
-            )
-
-        # Handle failed fits (original code, unchanged)
+        # Handle failed fits
         bad_idx = fit_success.dropna().index
         bad_fits = self.ffuncs.loc[bad_idx]
         self._bad_fits = bad_fits

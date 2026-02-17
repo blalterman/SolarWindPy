@@ -103,9 +103,6 @@ dev = [
     # Code analysis tools (ast-grep via MCP server, not Python package)
     "pre-commit>=3.5",  # Git hook framework
 ]
-performance = [
-    "joblib>=1.3.0",  # Parallel execution for TrendFit
-]
 analysis = [
     # Interactive analysis environment
     "jupyterlab>=4.0",
