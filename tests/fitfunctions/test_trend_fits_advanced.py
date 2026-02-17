@@ -1,232 +1,17 @@
-"""Test Phase 4 performance optimizations."""
+"""Test TrendFit advanced features."""
 
 import time
-import warnings
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-from unittest.mock import patch
 
 from solarwindpy.fitfunctions import Gaussian, Line
 from solarwindpy.fitfunctions.trend_fits import TrendFit
 
 matplotlib.use("Agg")  # Non-interactive backend for testing
-
-
-class TestTrendFitParallelization:
-    """Test TrendFit parallel execution."""
-
-    def setup_method(self):
-        """Create test data for reproducible tests."""
-        np.random.seed(42)
-        x = np.linspace(0, 10, 50)
-        self.data = pd.DataFrame(
-            {
-                f"col_{i}": 5 * np.exp(-((x - 5) ** 2) / 2)
-                + np.random.normal(0, 0.1, 50)
-                for i in range(10)
-            },
-            index=x,
-        )
-
-    def test_backward_compatibility(self):
-        """Verify default behavior unchanged."""
-        tf = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-
-        # Should work without n_jobs parameter (default behavior)
-        tf.make_1dfits()
-        assert len(tf.ffuncs) > 0
-        assert hasattr(tf, "_bad_fits")
-
-    def test_parallel_sequential_equivalence(self):
-        """Verify parallel gives same results as sequential."""
-        # Sequential execution
-        tf_seq = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf_seq.make_ffunc1ds()
-        tf_seq.make_1dfits(n_jobs=1)
-
-        # Parallel execution
-        tf_par = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf_par.make_ffunc1ds()
-        tf_par.make_1dfits(n_jobs=2)
-
-        # Should have same number of successful fits
-        assert len(tf_seq.ffuncs) == len(tf_par.ffuncs)
-
-        # Compare all fit parameters
-        for key in tf_seq.ffuncs.index:
-            assert (
-                key in tf_par.ffuncs.index
-            ), f"Fit {key} missing from parallel results"
-
-            seq_popt = tf_seq.ffuncs[key].popt
-            par_popt = tf_par.ffuncs[key].popt
-
-            # Parameters should match within numerical precision
-            for param in seq_popt:
-                np.testing.assert_allclose(
-                    seq_popt[param],
-                    par_popt[param],
-                    rtol=1e-10,
-                    atol=1e-10,
-                    err_msg=f"Parameter {param} differs between sequential and parallel",
-                )
-
-    def test_parallel_execution_correctness(self):
-        """Verify parallel execution works correctly, acknowledging Python GIL limitations."""
-        # Check if joblib is available - if not, test falls back gracefully
-        try:
-            import joblib  # noqa: F401
-
-            joblib_available = True
-        except ImportError:
-            joblib_available = False
-
-        # Create test dataset - focus on correctness rather than performance
-        x = np.linspace(0, 10, 100)
-        data = pd.DataFrame(
-            {
-                f"col_{i}": 5 * np.exp(-((x - 5) ** 2) / 2)
-                + np.random.normal(0, 0.1, 100)
-                for i in range(20)  # Reasonable number of fits
-            },
-            index=x,
-        )
-
-        # Time sequential execution
-        tf_seq = TrendFit(data, Gaussian, ffunc1d=Gaussian)
-        tf_seq.make_ffunc1ds()
-        start = time.perf_counter()
-        tf_seq.make_1dfits(n_jobs=1)
-        seq_time = time.perf_counter() - start
-
-        # Time parallel execution with threading
-        tf_par = TrendFit(data, Gaussian, ffunc1d=Gaussian)
-        tf_par.make_ffunc1ds()
-        start = time.perf_counter()
-        tf_par.make_1dfits(n_jobs=4, backend="threading")
-        par_time = time.perf_counter() - start
-
-        speedup = seq_time / par_time if par_time > 0 else float("inf")
-
-        print(
-            f"Sequential time: {seq_time:.3f}s, fits: {len(tf_seq.ffuncs)}"  # noqa: E231
-        )
-        print(
-            f"Parallel time: {par_time:.3f}s, fits: {len(tf_par.ffuncs)}"  # noqa: E231
-        )
-        print(
-            f"Speedup achieved: {speedup:.2f}x (joblib available: {joblib_available})"  # noqa: E231
-        )
-
-        if joblib_available:
-            # Main goal: verify parallel execution works and produces correct results
-            # Note: Due to Python GIL and serialization overhead, speedup may be minimal
-            # or even negative for small/fast workloads. This is expected behavior.
-            assert (
-                speedup > 0.05
-            ), f"Parallel execution extremely slow, got {speedup:.2f}x"  # noqa: E231
-            print(
-                "NOTE: Python GIL and serialization overhead may limit speedup for small workloads"
-            )
-        else:
-            # Without joblib, both should be sequential (speedup ~1.0)
-            # Widen tolerance to 1.5 for timing variability across platforms
-            assert (
-                0.5 <= speedup <= 1.5
-            ), f"Expected ~1.0x speedup without joblib, got {speedup:.2f}x"  # noqa: E231
-
-        # Most important: verify both produce the same number of successful fits
-        assert len(tf_seq.ffuncs) == len(
-            tf_par.ffuncs
-        ), "Parallel and sequential should have same success rate"
-
-        # Verify results are equivalent (this is the key correctness test)
-        for key in tf_seq.ffuncs.index:
-            if key in tf_par.ffuncs.index:  # Both succeeded
-                seq_popt = tf_seq.ffuncs[key].popt
-                par_popt = tf_par.ffuncs[key].popt
-                for param in seq_popt:
-                    np.testing.assert_allclose(
-                        seq_popt[param],
-                        par_popt[param],
-                        rtol=1e-10,
-                        atol=1e-10,
-                        err_msg=f"Parameter {param} differs between sequential and parallel",
-                    )
-
-    def test_joblib_not_installed_fallback(self):
-        """Test graceful fallback when joblib unavailable."""
-        # Mock joblib as unavailable
-        with patch.dict("sys.modules", {"joblib": None}):
-            # Force reload to simulate joblib not being installed
-            import solarwindpy.fitfunctions.trend_fits as tf_module
-
-            # Temporarily mock JOBLIB_AVAILABLE
-            original_available = tf_module.JOBLIB_AVAILABLE
-            tf_module.JOBLIB_AVAILABLE = False
-
-            try:
-                tf = tf_module.TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-                tf.make_ffunc1ds()
-
-                with warnings.catch_warnings(record=True) as w:
-                    warnings.simplefilter("always")
-                    tf.make_1dfits(n_jobs=-1)  # Request parallel
-
-                    # Should warn about joblib not being available
-                    assert len(w) == 1
-                    assert "joblib not installed" in str(w[0].message)
-                    assert "parallel processing" in str(w[0].message)
-
-                # Should still complete successfully with sequential execution
-                assert len(tf.ffuncs) > 0
-            finally:
-                # Restore original state
-                tf_module.JOBLIB_AVAILABLE = original_available
-
-    def test_n_jobs_parameter_validation(self):
-        """Test different n_jobs parameter values."""
-        tf = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-
-        # Test various n_jobs values
-        for n_jobs in [1, 2, -1]:
-            tf_test = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-            tf_test.make_ffunc1ds()
-            tf_test.make_1dfits(n_jobs=n_jobs)
-            assert len(tf_test.ffuncs) > 0, f"n_jobs={n_jobs} failed"
-
-    def test_verbose_parameter(self):
-        """Test verbose parameter doesn't break execution."""
-        tf = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-
-        # Should work with verbose output (though we can't easily test the output)
-        tf.make_1dfits(n_jobs=2, verbose=0)
-        assert len(tf.ffuncs) > 0
-
-    def test_backend_parameter(self):
-        """Test different joblib backends."""
-        tf = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-
-        # Test different backends (may not all be available in all environments)
-        for backend in ["loky", "threading"]:
-            tf_test = TrendFit(self.data, Gaussian, ffunc1d=Gaussian)
-            tf_test.make_ffunc1ds()
-            try:
-                tf_test.make_1dfits(n_jobs=2, backend=backend)
-                assert len(tf_test.ffuncs) > 0, f"Backend {backend} failed"
-            except ValueError:
-                # Some backends may not be available in all environments
-                pytest.skip(
-                    f"Backend {backend} not available in this environment"  # noqa: E713
-                )
 
 
 class TestResidualsEnhancement:
@@ -400,7 +185,7 @@ class TestPhase4Integration:
                     * np.exp(-((x - (10 + i * 0.2)) ** 2) / (2 * (2 + i * 0.1) ** 2))
                     + np.random.normal(0, 0.05, 200)
                 )
-                for i in range(25)  # 25 measurements for good parallelization test
+                for i in range(25)
             },
             index=x,
         )
@@ -409,9 +194,8 @@ class TestPhase4Integration:
         tf = TrendFit(data, Gaussian, ffunc1d=Gaussian)
         tf.make_ffunc1ds()
 
-        # Fit with parallelization
         start_time = time.perf_counter()
-        tf.make_1dfits(n_jobs=-1, verbose=0)
+        tf.make_1dfits()
         execution_time = time.perf_counter() - start_time
 
         # Verify results
