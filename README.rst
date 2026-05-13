@@ -145,7 +145,7 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
 .. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 .. |Zenodo| image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17042839-blue.svg
-  :target: https://doi.org/10.5281/zenodo.17042839
+   :target: https://doi.org/10.5281/zenodo.17042839
 .. |PyPI| image:: https://img.shields.io/pypi/v/solarwindpy.svg
    :target: https://pypi.org/project/solarwindpy/
 .. |Python| image:: https://img.shields.io/pypi/pyversions/solarwindpy.svg
