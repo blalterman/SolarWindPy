@@ -239,7 +239,7 @@ Then provide:
 - [Areas needing more information if confidence is low]
 - [How to address flagged concerns]
 - **Prompt Improvements (Prop 9):** [Apply patterns #1-5 as recommended: examples, success criteria, edge cases, step-by-step, existing patterns]
-- **Agent Selection (Prop 9):** [Invoke specialized agents based on domain: DataFrameArchitect, FitFunctionSpecialist, PlottingEngineer, TestEngineer, UnifiedPlanCoordinator]
+- **Domain Focus (Prop 9):** [Name the domain the task lands in: MultiIndex data structures, curve fitting, plotting, testing, or planning]
 - **Clarifications Needed (Prop 9):** [List specific questions to ask based on Requirement Clarity dimension and decision points]
 - **Execution Approach (Prop 9):** [AUTONOMOUS: proceed directly | GUIDED: clarify then execute | COLLABORATIVE: continuous feedback | HUMAN-LED: user drives, AI supports]
 

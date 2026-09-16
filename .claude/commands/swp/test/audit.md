@@ -160,11 +160,11 @@ See `.claude/docs/TEST_PATTERNS.md` for fix patterns:
 - Anti-Patterns section: Common mistakes to avoid
 ```
 
-### Integration with TestEngineer Agent
-
-For **complex test quality work** (strategy design, coverage planning, physics-aware testing), use the full TestEngineer agent instead of this skill.
+### Scope
 
 This skill is for **routine audits** - quick pattern detection before/during test writing.
+
+For **complex test quality work** (strategy design, coverage planning, physics-aware testing), work through it directly rather than running this audit.
 
 ---
 
