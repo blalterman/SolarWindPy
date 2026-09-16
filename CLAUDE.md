@@ -1,236 +1,90 @@
-# CLAUDE.md - Essential Claude AI Instructions
+# CLAUDE.md
 
-This file provides essential guidance to Claude Code when working with the SolarWindPy repository.
+Guidance for Claude Code working in the SolarWindPy repository.
 
-## Critical Rules (ALWAYS ENFORCE)
-1. **Script Execution**: Agents MUST execute CLI scripts, never just describe them
-2. **Test Before Commit**: All tests must pass before any commit
-3. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
-4. **Startup Briefing**: Provide project overview including agents, workflows, current state
-5. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
-6. **Code Attribution**: Follow attribution protocol (.claude/docs/ATTRIBUTION.md)
-   - AI-generated code: Include "Generated with Claude Code" in commit messages
-   - External sources: Add source attribution in code comments (URL, license, modifications)
-   - Scientific algorithms: Cite papers in docstrings (DOI, arXiv, equation numbers)
-   - When uncertain: Ask user, prefer reimplementation from scratch
+## What this package is
 
-## Context Management Rules
-1. **Archive Exclusion**: NEVER search, read, or glob the following compressed archives:
-   - `plans/completed-plans-archive-2025.tar.gz` - Historical completed plans (190KB from 976KB)
-   - `plans/abandoned-plans-archive-2025.tar.gz` - Historical abandoned plans (72KB from 312KB)
-   - `plans/root-stale-docs-archive-2025.tar.gz` - Superseded root documentation (8.7KB from 24KB)
-   - `plans/agents-architecture-archive-2025.tar.gz` - Legacy agent architecture (39KB from 156KB)
-   - `plans/custom-gpt-archive-2025.tar.gz` - Pre-Claude Code ChatGPT artifacts (6.1KB from 20KB)
-   - `plans/completed-plans-minimal-archive-2025.tar.gz` - Additional completed plans (30KB from 120KB)
-   - `plans/completed-plans-documentation-archive-2025.tar.gz` - Completed 2025 Q3 documentation/infrastructure plans (190KB from 992KB)
-2. **Active Plans Only**: Focus all searches on:
-   - Root-level plan files in `plans/` directory (`*.md` files)
-   - Active plan subdirectories (not archived)
-   - Template and guide files for reference
-3. **Active Documentation Preserved**: The following are intentionally NOT archived:
-   - `.claude/docs/feature_integration/` - Active implementation phase (256KB)
-   - `.claude/ecosystem-documentation.md` - Documents 45KB of active config files
-   - `plans/tests-audit/` - Active reference for ongoing test improvements (90KB)
-   - `plans/github-issues-migration/` - Active planning system infrastructure documentation (124KB)
-4. **Rationale**: Archives contain 536KB compressed from 2,600KB original (79% compression), reducing context noise by ~320,000 tokens while preserving all historical information. Archives are binary files that cannot be read directly; extract only when historical review is necessary.
-5. **Archive Access**: To extract archived content if needed:
-   ```bash
-   tar -xzf plans/root-stale-docs-archive-2025.tar.gz
-   tar -xzf plans/agents-architecture-archive-2025.tar.gz
-   tar -xzf plans/custom-gpt-archive-2025.tar.gz
-   tar -xzf plans/completed-plans-minimal-archive-2025.tar.gz
-   tar -xzf plans/completed-plans-documentation-archive-2025.tar.gz
-   tar -xzf plans/completed-plans-archive-2025.tar.gz
-   tar -xzf plans/abandoned-plans-archive-2025.tar.gz
-   ```
+SolarWindPy analyzes in-situ solar wind plasma measurements. The public surface
+lives under `solarwindpy/`: `core/` (data model and physics), `fitfunctions/`
+(curve fitting), `plotting/`, `instabilities/`, `solar_activity/`, `tools/`.
 
-## Prompt Improvement Protocol
+## Data model
 
-### When to Analyze Prompts
-Provide proactive improvement suggestions for **moderate and complex tasks**:
+Measurements are held in a single pandas DataFrame with a three-level column
+MultiIndex named `M`, `C`, `S`:
 
-**Moderate Complexity (2-4 steps):**
-- Multi-step workflows with some ambiguity
-- Tasks requiring sequential tool use
-- Requests that could benefit from more specificity
+- `M` — measurement (e.g. `n`, `v`, `w`, `b`)
+- `C` — component (e.g. `x`, `y`, `z`, or empty for scalars)
+- `S` — species (e.g. `p1`, `p2`, `a`, or empty for spacecraft-frame quantities)
 
-**Complex Complexity (strategic/multi-domain):**
-- Planning, implementation, or architectural tasks
-- Multi-phase or multi-module work
-- Ambiguous scope requiring interpretation
-- Tasks needing agent coordination
-- Physics/scientific validation requirements
-- Debugging requiring root cause analysis
+See the docstring at `solarwindpy/core/plasma.py:102` for a constructed example.
 
-**Exclude simple tasks:**
-- Single file reads or documentation lookups
-- Direct git/bash commands (status, log, etc.)
-- Single glob/grep operations
-- Clear, specific, single-step requests
+**Access columns with `.xs()`, and do not `.copy(deep=True)`.** The codebase
+relies on `.xs()` returning a view to keep memory down; this is stated at
+`solarwindpy/core/units_constants.py:16`. Introducing a deep copy in a hot path
+is a real regression, not a style preference.
 
-### Improvement Focus Areas
-Analyze prompts for opportunities in all areas:
+Key classes: `Plasma` (the container, `core/plasma.py`), `Ion` (per-species,
+`core/ions.py`), `Base` (abstract, `core/base.py`). Physical constants come from
+`scipy.constants` via `core/units_constants.py`, which also provides a `Units`
+converter for every quantity `Plasma` stores.
 
-1. **Clarity & Specificity**
-   - Remove ambiguities and undefined scope
-   - Add missing requirements or success criteria
-   - Specify integration points and module targets
+## Commands
 
-2. **Context & Constraints**
-   - Add relevant domain context (physics, data structure)
-   - Specify constraints (backward compatibility, performance)
-   - Include data format expectations (MultiIndex structure)
-
-3. **SolarWindPy Integration**
-   - Suggest appropriate agent selection (DataFrameArchitect, TestEngineer, etc.)
-   - Reference hooks, workflows, and automation
-   - Link to project conventions (≥95% coverage, SI units, etc.)
-
-4. **Efficiency Optimization**
-   - Suggest parallel operations where applicable
-   - Recommend context-saving approaches
-   - Identify opportunities for batch operations
-
-### Improvement Presentation Format
-Use structured format for suggestions:
-
-```
-📝 Prompt Improvement Suggestion
-
-Original Intent: [Confirm understanding of request]
-
-Suggested Improvements:
-- [Specific addition/clarification 1]
-- [Specific addition/clarification 2]
-- [Agent or workflow suggestion]
-- [Missing constraint or context]
-
-Enhanced Prompt Example:
-"[Concrete example of improved version]"
-
-Expected Benefits:
-- [How improvement enhances execution quality]
-- [Reduced ambiguity or better agent selection]
-- [Efficiency or context preservation gains]
-
-Proceed with:
-[A] Original prompt as-is
-[B] Enhanced version
-[C] Custom modification (please specify)
-```
-
-### Integration with Workflow
-- Prompt analysis occurs **before** task execution
-- Works naturally with plan mode workflow
-- User approves original or enhanced version before proceeding
-- Builds better prompting patterns over time
-
-## Quick Reference
-
-### Agent Selection Matrix
-| Task Type | Agent | Critical Requirement |
-|-----------|-------|---------------------|
-| Planning | UnifiedPlanCoordinator | MUST execute gh-plan-*.sh scripts directly |
-| Data | DataFrameArchitect | MultiIndex (M/C/S), use .xs() for views |
-| Plotting | PlottingEngineer | Publication quality, matplotlib |
-| Fitting | FitFunctionSpecialist | Statistical analysis |
-| Testing | TestEngineer | ≥95% coverage requirement |
-
-### Critical Workflow Paths
-```
-GitHub Issues → feature/* → PR → master
-Plan Creation → gh-plan-create.sh → gh-plan-phases.sh → Value Props
-File Edit → Physics Hook → Test Runner Hook → Coverage Check
-```
-
-## Essential Commands (EXACT SYNTAX REQUIRED)
-
-### Plan Creation
 ```bash
-# Create overview with required flags
+pytest -q                                  # full suite
+pytest tests/core -q                       # one subpackage
+.claude/hooks/test-runner.sh --changed     # only tests for changed files
+.claude/hooks/test-runner.sh --physics     # physics validation subset
+
+black solarwindpy/ tests/                  # format (CI runs black --check)
+flake8 solarwindpy/ tests/                 # lint
+```
+
+CI runs `pytest`, `black --check`, and `flake8` against `solarwindpy/`.
+Coverage target is 95%, enforced by `.claude/hooks/coverage-monitor.py`.
+
+Known state: the `tests/solar_activity/` suite has pre-existing failures tied to
+network-dependent data loaders. They are unrelated to changes elsewhere.
+
+## Planning workflow
+
+Plans are GitHub Issues, created by scripts that must be **executed**, not
+described. The flag syntax is not guessable, so it is recorded here:
+
+```bash
+# Overview issue
 .claude/scripts/gh-plan-create.sh -p <priority> -d <domain> "Plan Title"
-# priority: critical|high|medium|low  
-# domain: physics|data|plotting|testing|infrastructure|docs
+#   priority: critical|high|medium|low
+#   domain:   physics|data|plotting|testing|infrastructure|docs
 
-# Example:
-.claude/scripts/gh-plan-create.sh -p high -d infrastructure "API Refactoring"
-```
-
-### Phase Creation (UnifiedPlanCoordinator MUST use batch mode)
-```bash
-# Step 1: Create config in repo tmp/
+# Phase issues, batch mode
 mkdir -p tmp
 cat > tmp/phases.conf <<'EOF'
 Phase Name|Estimated Duration|Dependencies
 Foundation Setup|2-3 hours|None
 Core Implementation|4-5 hours|Phase 1
-Testing & Validation|1-2 hours|Phase 2
 EOF
-
-# Step 2: Execute batch mode
 .claude/scripts/gh-plan-phases.sh -b tmp/phases.conf <issue_number>
+
+.claude/scripts/gh-plan-status.sh            # review open plans
 ```
 
-### Testing & Quality
-```bash
-.claude/hooks/test-runner.sh --changed     # Test changed files only
-.claude/hooks/test-runner.sh --physics     # Physics validation
-pytest -q                                   # Quick test run
-black solarwindpy/ tests/                  # Format code
-flake8 solarwindpy/ tests/                 # Lint check
-```
+If the result is prose instead of a created GitHub Issue, the step did not run.
 
-### Quick Decision Analysis (Slash Commands)
-```bash
-/propositions <task description>           # Generate value propositions analysis
-```
+## Conventions
 
-**Purpose:** Quick exploration and brainstorming tool for prompt development
-- Analyzes task using 8 strategic value propositions framework
-- Provides summary table with confidence indicators
-- Delivers PROCEED/MODIFY/DON'T PROCEED recommendation
-- **Note:** Uses AI estimation, not calculated metrics (exploratory only)
-- **For production plans:** Use `gh-plan-create.sh` with automated hooks
+- NumPy-style docstrings.
+- Conventional commit subjects (`fix(core):`, `feat(plotting):`, `chore:`).
+- Cite scientific sources in docstrings: DOI or arXiv, and the equation number
+  when implementing a specific published result.
+- Attribution rules live in `.claude/docs/ATTRIBUTION.md`. In short: note
+  "Generated with Claude Code" in commit messages for AI-written code, and
+  record URL, license, and modifications in a comment for external code. When
+  the provenance of a snippet is unclear, reimplement rather than copy.
 
-**Example:**
-```
-/propositions refactor Ion class to use composition
-/propositions add thermal pressure calculation
-```
+## Further documentation
 
-## Project Architecture Summary
-- **Core Data Model**: MultiIndex DataFrame (M: measurement, C: component, S: species)
-- **Key Classes**: Plasma (container), Ion (species), Base (abstract)
-- **Hook System**: Automated validation at .claude/hooks/
-- **Plan System**: GitHub Issues with value propositions framework
-- **Coverage**: ≥95% required, enforced by pre-commit
-
-## UnifiedPlanCoordinator Execution Protocol
-
-CRITICAL: Agent MUST execute these commands, not describe them.
-
-1. **Overview Issue Creation:**
-   ```bash
-   .claude/scripts/gh-plan-create.sh -p <priority> -d <domain> "Title"
-   ```
-
-2. **Phase Issues Creation:**
-   ```bash
-   mkdir -p tmp
-   cat > tmp/phases.conf <<'EOF'
-   <phase_name>|<duration>|<dependencies>
-   EOF
-   .claude/scripts/gh-plan-phases.sh -b tmp/phases.conf $OVERVIEW_ISSUE
-   ```
-
-3. **Validation**: If text output instead of GitHub Issues → EXECUTION FAILED
-
-## Detailed Documentation
-For comprehensive information beyond these essentials:
-- Development standards → .claude/docs/DEVELOPMENT.md
-- Agent specifications → .claude/docs/AGENTS.md
-- Hook reference → .claude/docs/HOOKS.md
-- Planning workflow → .claude/docs/PLANNING.md
-- Maintenance → .claude/docs/MAINTENANCE.md
-- Release process → .claude/docs/RELEASING.md
-- Code attribution guidelines → .claude/docs/ATTRIBUTION.md
+`.claude/docs/` holds the detail beyond this file: `DEVELOPMENT.md`,
+`HOOKS.md`, `PLANNING.md`, `TEST_PATTERNS.md`, `MAINTENANCE.md`,
+`RELEASING.md`, `ATTRIBUTION.md`.
