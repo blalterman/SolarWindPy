@@ -1,6 +1,8 @@
 """ICMECAT class for accessing the HELIO4CAST ICME catalog."""
 
 import logging
+import time
+import warnings
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -11,39 +13,55 @@ ICMECAT_URL = (
     "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv"
 )
 
+_PINNED_VERSION = "v23"
+_CACHE_MAX_AGE_DAYS = 30
+
+# The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
+# ACE and Cassini were previously (and wrongly) included: both have zero
+# events in the catalog. "SolarOrbiter" (no space) and "ULYSSES" (all caps)
+# are the catalog's actual spellings; the old "Solar Orbiter" spelling broke
+# `_filter_by_spacecraft`, which lowercases before comparing.
 SPACECRAFT_NAMES = frozenset(
     [
-        "Ulysses",
-        "Wind",
-        "STEREO-A",
-        "STEREO-B",
-        "ACE",
-        "Solar Orbiter",
-        "PSP",
         "BepiColombo",
         "Juno",
-        "MESSENGER",
-        "VEX",
         "MAVEN",
-        "Cassini",
+        "MESSENGER",
+        "PSP",
+        "STEREO-A",
+        "STEREO-B",
+        "SolarOrbiter",
+        "ULYSSES",
+        "VEX",
+        "Wind",
     ]
 )
 
 _DATETIME_COLUMNS = ["icme_start_time", "mo_start_time", "mo_end_time"]
 
 
+RULES_OF_THE_ROAD = """\
+See https://helioforecast.space/icmecat for the most up-to-date rules of
+the road. As of January 2026, they are:
+
+    If this catalog is used for results that are published in peer-reviewed
+    international journals, please contact chris.moestl@outlook.com for
+    possible co-authorship.
+
+    Cite the catalog with: Möstl et al. (2020)
+    DOI: 10.6084/m9.figshare.6356420
+"""
+
+
+class ICMECATDownloadError(RuntimeError):
+    """Raised when the ICMECAT catalog cannot be downloaded from HELIO4CAST."""
+
+
 class ICMECAT:
     """Access the HELIO4CAST Interplanetary Coronal Mass Ejection Catalog.
 
-    See https://helioforecast.space/icmecat for the most up-to-date rules of
-    the road. As of January 2026, they are:
-
-        If this catalog is used for results that are published in peer-reviewed
-        international journals, please contact chris.moestl@outlook.com for
-        possible co-authorship.
-
-        Cite the catalog with: Möstl et al. (2020)
-        DOI: 10.6084/m9.figshare.6356420
+    See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog's
+    citation and co-authorship terms.
 
     Parameters
     ----------
@@ -143,39 +161,72 @@ class ICMECAT:
     # -------------------------------------------------------------------------
 
     def _load_data(self) -> None:
-        """Load ICMECAT data from URL or cache."""
-        cached = self._try_load_cache()
-        if cached is not None:
+        """Load ICMECAT data, applying the cache freshness policy.
+
+        Freshness policy: a cache younger than ``_CACHE_MAX_AGE_DAYS`` is
+        used directly. Otherwise (or with no cache at all) a download is
+        attempted. If the download fails and a cache exists -- even a stale
+        one -- the stale cache is served rather than losing data the user
+        already has on disk, with a warning naming its age. If no cache
+        exists, the download error propagates.
+        """
+        cached, age_days = self._read_cache()
+
+        if (
+            cached is not None
+            and age_days is not None
+            and age_days <= _CACHE_MAX_AGE_DAYS
+        ):
             self._data = cached
             self.logger.info("Loaded from cache: %d events", len(self._data))
             return
 
-        self._download()
+        try:
+            self._download()
+        except ICMECATDownloadError:
+            if cached is None:
+                raise
+            message = (
+                f"ICMECAT download failed, serving cached data that is "
+                f"{age_days:.0f} days old."
+            )
+            warnings.warn(message)
+            self.logger.warning(message)
+            self._data = cached
 
-    def _try_load_cache(self) -> Optional[pd.DataFrame]:
-        """Try to load from cache. Returns None if no cache or stale."""
+    def _read_cache(self) -> "tuple[Optional[pd.DataFrame], Optional[float]]":
+        """Read the on-disk cache with no freshness policy applied.
+
+        Returns
+        -------
+        tuple
+            ``(df, age_days)``, both ``None`` if there is no cache directory
+            configured or no cache file present.
+        """
         if self._cache_dir is None:
-            return None
+            return None, None
 
         cache_path = self._cache_dir / "icmecat.parquet"
         if not cache_path.exists():
-            return None
-
-        # Check age - re-download if > 30 days old
-        import time
+            return None, None
 
         age_days = (time.time() - cache_path.stat().st_mtime) / 86400
-        if age_days > 30:
-            self.logger.info("Cache stale (%.0f days), re-downloading", age_days)
-            return None
-
-        return pd.read_parquet(cache_path)
+        return pd.read_parquet(cache_path), age_days
 
     def _download(self) -> None:
         """Download ICMECAT from helioforecast.space."""
         self.logger.info("Downloading ICMECAT from %s", ICMECAT_URL)
 
-        self._data = pd.read_csv(ICMECAT_URL, parse_dates=_DATETIME_COLUMNS)
+        try:
+            self._data = pd.read_csv(ICMECAT_URL, parse_dates=_DATETIME_COLUMNS)
+        except Exception as exc:
+            raise ICMECATDownloadError(
+                f"Failed to download ICMECAT {_PINNED_VERSION} from {ICMECAT_URL}. "
+                f"Edit solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL) "
+                f"to point at a working catalog version, see "
+                f"https://helioforecast.space/icmecat for the current URL. "
+                f"Underlying error: {exc!r}"
+            ) from exc
 
         self.logger.info("Downloaded %d ICME events", len(self._data))
 

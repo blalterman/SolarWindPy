@@ -80,7 +80,8 @@ class ReferenceAbundances:
         if not isinstance(year, int):
             raise TypeError(f"year must be an integer, got {type(year).__name__}")
         if year not in self._VALID_YEARS:
-            raise ValueError(f"year must be 2009 or 2021, got {year}")
+            valid = " or ".join(str(y) for y in self._VALID_YEARS)
+            raise ValueError(f"year must be {valid}, got {year}")
         self._year = year
         self._load_data()
 

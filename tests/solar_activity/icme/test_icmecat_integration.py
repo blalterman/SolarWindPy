@@ -16,6 +16,7 @@ class TestLiveDownload:
     def test_instantiate_downloads_data(self):
         """ICMECAT() downloads real data."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT()
 
         assert len(cat) > 100, "Should have >100 ICME events"
@@ -23,6 +24,7 @@ class TestLiveDownload:
     def test_ulysses_events_exist(self):
         """Real catalog contains Ulysses events."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT(spacecraft="Ulysses")
 
         assert len(cat) > 0, "Should have Ulysses events"
@@ -35,6 +37,7 @@ class TestLiveDownload:
     def test_data_types_correct(self):
         """Real data has correct dtypes."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT()
 
         assert pd.api.types.is_datetime64_any_dtype(cat.data["icme_start_time"])
@@ -44,24 +47,27 @@ class TestLiveDownload:
     def test_filter_then_contains(self):
         """End-to-end: filter to Ulysses, check containment."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT(spacecraft="Ulysses")
 
         # Get first strict interval
         strict = cat.strict_intervals
         if len(strict) > 0:
             first = strict.iloc[0]
-            mid_time = first["icme_start_time"] + (
-                first["mo_end_time"] - first["icme_start_time"]
-            ) / 2
+            mid_time = (
+                first["icme_start_time"]
+                + (first["mo_end_time"] - first["icme_start_time"]) / 2
+            )
 
             times = pd.Series([mid_time])
             result = cat.contains(times)
 
-            assert result.iloc[0] == True, "Mid-point should be in interval"
+            assert result.iloc[0], "Mid-point should be in interval"
 
     def test_summary_on_real_data(self):
         """summary() works on real data."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT(spacecraft="Ulysses")
 
         result = cat.summary()
@@ -74,14 +80,14 @@ class TestLiveDownload:
 class TestMultipleSpacecraft:
     """Test filtering to different spacecraft."""
 
-    @pytest.mark.parametrize("spacecraft", ["Ulysses", "Wind", "ACE", "STEREO-A"])
+    @pytest.mark.parametrize("spacecraft", ["Ulysses", "Wind", "STEREO-A"])
     def test_filter_to_spacecraft(self, spacecraft):
         """Can filter to various spacecraft."""
         from solarwindpy.solar_activity.icme import ICMECAT
+
         cat = ICMECAT()
         filtered = cat.filter(spacecraft)
 
-        # Some spacecraft may have no events, that's OK
-        if len(filtered) > 0:
-            # Case-insensitive comparison (catalog uses ULYSSES, user may pass Ulysses)
-            assert all(filtered.data["sc_insitu"].str.lower() == spacecraft.lower())
+        assert len(filtered) > 0
+        # Case-insensitive comparison (catalog uses ULYSSES, user may pass Ulysses)
+        assert all(filtered.data["sc_insitu"].str.lower() == spacecraft.lower())
