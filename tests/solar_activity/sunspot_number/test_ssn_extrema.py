@@ -9,9 +9,8 @@ This module tests the SSNExtrema class from solar_activity.sunspot_number.sidc:
 
 import pytest
 import pandas as pd
-import numpy as np
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import patch
 
 from solarwindpy.solar_activity.sunspot_number.sidc import SSNExtrema
 
@@ -27,7 +26,7 @@ class TestSSNExtrema:
             """# Solar Cycle Extrema Data
 # Source: SIDC - Royal Observatory of Belgium
 # Data format: Cycle Number, Minimum Date, Maximum Date
-# 
+#
 # Additional header lines (total 45 lines to skip)
 """
             + "\n" * 40
@@ -48,7 +47,6 @@ class TestSSNExtrema:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Mock the CSV data
             mock_data = pd.DataFrame(
                 {
@@ -73,7 +71,6 @@ class TestSSNExtrema:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Create mock DataFrame that simulates the CSV structure
             raw_data = pd.DataFrame(
                 {
@@ -118,7 +115,6 @@ class TestSSNExtrema:
                 patch("pandas.to_datetime", return_value=stacked),
                 patch.object(pd.Series, "unstack", return_value=unstacked),
             ):
-
                 extrema.load_or_set_data()
 
                 # Verify CSV was read with correct parameters
@@ -170,7 +166,6 @@ class TestSSNExtrema:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Mock the CSV data
             mock_data = pd.DataFrame(
                 {"Min": ["1964-10-01"], "Max": ["1968-11-01"]}, index=[20]
@@ -188,7 +183,6 @@ class TestSSNExtrema:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             mock_data = pd.DataFrame(
                 {"Min": ["1964-10-01"], "Max": ["1968-11-01"]}, index=[20]
             )
@@ -210,7 +204,6 @@ class TestSSNExtrema:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Mock the CSV reading and processing
             raw_data = pd.DataFrame(
                 {
@@ -258,7 +251,6 @@ class TestSSNExtrema:
                         SSNExtrema, "calculate_intervals"
                     ),  # Skip interval calculation that uses "today"
                 ):
-
                     extrema = SSNExtrema()
 
                     # Verify data structure
@@ -277,7 +269,6 @@ class TestSSNExtremaEdgeCases:
             patch("pathlib.Path.exists", return_value=False),
             patch("pandas.read_csv") as mock_read_csv,
         ):
-
             # read_csv should still be called even if file check fails
             # (pandas will handle the FileNotFoundError)
             mock_read_csv.side_effect = FileNotFoundError("File not found")
@@ -291,7 +282,6 @@ class TestSSNExtremaEdgeCases:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Simulate malformed CSV that causes parsing error
             mock_read_csv.side_effect = pd.errors.ParserError("Malformed CSV")
 
@@ -304,7 +294,6 @@ class TestSSNExtremaEdgeCases:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Empty DataFrame
             empty_data = pd.DataFrame()
             mock_read_csv.return_value = empty_data
@@ -324,7 +313,6 @@ class TestSSNExtremaEdgeCases:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Data with invalid date formats
             invalid_data = pd.DataFrame(
                 {
@@ -381,7 +369,6 @@ class TestSSNExtremaEdgeCases:
             patch("pandas.read_csv") as mock_read_csv,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             # Mock successful CSV loading
             mock_data = pd.DataFrame(
                 {"Min": ["2008-12-01"], "Max": ["2014-04-01"]}, index=[24]
@@ -403,10 +390,72 @@ class TestSSNExtremaEdgeCases:
                 patch.object(pd.DataFrame, "stack"),
                 patch.object(pd.Series, "unstack", return_value=processed_data),
             ):
-
                 extrema = SSNExtrema()
 
                 # Check that the object has expected attributes from parent class
                 assert hasattr(extrema, "_data")
                 # IndicatorExtrema parent should provide additional attributes
                 assert hasattr(extrema, "data")  # Property from parent
+
+
+# =============================================================================
+# Drift: real ssn_extrema.csv header offset and end-to-end load
+# =============================================================================
+#
+# Every other test in this file mocks pandas.read_csv entirely, so these are
+# the first to read the real ssn_extrema.csv shipped with the package. Both
+# are unmarked (no network involved) and run in the fast suite.
+
+
+def find_line_index(path, prefix):
+    """Return the 0-based index of the first line starting with ``prefix``.
+
+    Returns ``None`` if no such line exists.
+    """
+    with open(path, "r") as f:
+        for i, line in enumerate(f):
+            if line.startswith(prefix):
+                return i
+    return None
+
+
+_SSN_EXTREMA_CSV = (
+    Path(__file__).resolve().parents[3]
+    / "solarwindpy"
+    / "solar_activity"
+    / "sunspot_number"
+    / "ssn_extrema.csv"
+)
+
+# Measured (not guessed): the "Number,Min,Max" header line's raw 0-based
+# line index in ssn_extrema.csv. sidc.py:552 uses skiprows=45, one less than
+# this, because a blank line at index 45 precedes the header and pandas'
+# default skip_blank_lines=True absorbs it during parsing -- confirmed below
+# by actually parsing with skiprows=45 and checking the resulting columns.
+_EXPECTED_HEADER_LINE_INDEX = 46
+_SKIPROWS = 45
+
+
+def test_ssn_extrema_header_line_index_matches_measurement():
+    """The 'Number,' header line is where sidc.py:552's skiprows expects.
+
+    skiprows=45 does not land directly on the header line (raw index 46);
+    it lands on the blank line immediately before it, which pandas'
+    skip_blank_lines default then absorbs. Both facts are measured here,
+    not assumed.
+    """
+    index = find_line_index(_SSN_EXTREMA_CSV, "Number,")
+    assert index == _EXPECTED_HEADER_LINE_INDEX
+
+    df = pd.read_csv(
+        _SSN_EXTREMA_CSV, header=0, skiprows=_SKIPROWS, index_col=0, nrows=1
+    )
+    assert list(df.columns) == ["Min", "Max"]
+
+
+def test_ssn_extrema_loads_end_to_end():
+    """SSNExtrema() loads the real CSV: columns {Min, Max}, cycle 25 present."""
+    extrema = SSNExtrema()
+
+    assert set(extrema.data.columns) == {"Min", "Max"}
+    assert extrema.data.index.max() >= 25

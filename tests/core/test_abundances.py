@@ -23,6 +23,7 @@ Run: pytest tests/core/test_abundances.py -v
 """
 
 from dataclasses import dataclass
+from importlib import resources
 from typing import Dict, Optional
 
 import numpy as np
@@ -174,25 +175,25 @@ class TestDataLoading:
     def test_default_loads_2021_data(self):
         """Default initialization loads 2021 data."""
         ref = ReferenceAbundances()
-        assert isinstance(ref.data, pd.DataFrame), (
-            f"Expected pd.DataFrame, got {type(ref.data).__name__}"
-        )
+        assert isinstance(
+            ref.data, pd.DataFrame
+        ), f"Expected pd.DataFrame, got {type(ref.data).__name__}"
         assert ref.year == 2021, f"Expected default year=2021, got {ref.year}"
 
     def test_explicit_2021_loads(self):
         """year=2021 loads 2021 data explicitly."""
         ref = ReferenceAbundances(year=2021)
-        assert isinstance(ref.data, pd.DataFrame), (
-            f"Expected pd.DataFrame, got {type(ref.data).__name__}"
-        )
+        assert isinstance(
+            ref.data, pd.DataFrame
+        ), f"Expected pd.DataFrame, got {type(ref.data).__name__}"
         assert ref.year == 2021, f"Expected year=2021, got {ref.year}"
 
     def test_explicit_2009_loads(self):
         """year=2009 loads 2009 data for backward compatibility."""
         ref = ReferenceAbundances(year=2009)
-        assert isinstance(ref.data, pd.DataFrame), (
-            f"Expected pd.DataFrame, got {type(ref.data).__name__}"
-        )
+        assert isinstance(
+            ref.data, pd.DataFrame
+        ), f"Expected pd.DataFrame, got {type(ref.data).__name__}"
         assert ref.year == 2009, f"Expected year=2009, got {ref.year}"
 
     def test_invalid_year_raises_valueerror(self):
@@ -216,25 +217,26 @@ class TestDataStructure:
 
     def test_data_is_dataframe(self, ref_any_year):
         """Data property returns pandas DataFrame."""
-        assert isinstance(ref_any_year.data, pd.DataFrame), (
-            f"Expected pd.DataFrame, got {type(ref_any_year.data).__name__}"
-        )
+        assert isinstance(
+            ref_any_year.data, pd.DataFrame
+        ), f"Expected pd.DataFrame, got {type(ref_any_year.data).__name__}"
 
     def test_data_has_83_elements(self, ref_any_year):
         """Both Asplund 2009 and 2021 have 83 elements."""
-        assert ref_any_year.data.shape[0] == 83, (
-            f"Expected 83 elements, got {ref_any_year.data.shape[0]}"
-        )
+        assert (
+            ref_any_year.data.shape[0] == 83
+        ), f"Expected 83 elements, got {ref_any_year.data.shape[0]}"
 
     def test_index_is_multiindex_with_z_symbol(self, ref_any_year):
         """Index is MultiIndex with levels ['Z', 'Symbol']."""
         idx = ref_any_year.data.index
-        assert isinstance(idx, pd.MultiIndex), (
-            f"Expected MultiIndex, got {type(idx).__name__}"
-        )
-        assert list(idx.names) == ["Z", "Symbol"], (
-            f"Expected index names ['Z', 'Symbol'], got {list(idx.names)}"
-        )
+        assert isinstance(
+            idx, pd.MultiIndex
+        ), f"Expected MultiIndex, got {type(idx).__name__}"
+        assert list(idx.names) == [
+            "Z",
+            "Symbol",
+        ], f"Expected index names ['Z', 'Symbol'], got {list(idx.names)}"
 
     def test_columns_have_photosphere_and_ci_chondrites(self, ref_any_year):
         """Top-level columns include Photosphere and CI_chondrites."""
@@ -244,12 +246,12 @@ class TestDataStructure:
 
     def test_columns_are_multiindex(self, ref_any_year):
         """Columns are MultiIndex with at least 2 levels."""
-        assert isinstance(ref_any_year.data.columns, pd.MultiIndex), (
-            f"Expected MultiIndex columns, got {type(ref_any_year.data.columns).__name__}"
-        )
-        assert ref_any_year.data.columns.nlevels >= 2, (
-            f"Expected at least 2 column levels, got {ref_any_year.data.columns.nlevels}"
-        )
+        assert isinstance(
+            ref_any_year.data.columns, pd.MultiIndex
+        ), f"Expected MultiIndex columns, got {type(ref_any_year.data.columns).__name__}"
+        assert (
+            ref_any_year.data.columns.nlevels >= 2
+        ), f"Expected at least 2 column levels, got {ref_any_year.data.columns.nlevels}"
 
     def test_abundance_values_are_float64(self, ref_any_year):
         """All Ab and Uncert columns are float64."""
@@ -257,29 +259,29 @@ class TestDataStructure:
             # Check columns that contain abundance data
             if len(col) >= 2 and col[1] in ["Ab", "Uncert"]:
                 dtype = ref_any_year.data[col].dtype
-                assert dtype == np.float64, (
-                    f"Column {col} has dtype {dtype}, expected float64"
-                )
+                assert (
+                    dtype == np.float64
+                ), f"Column {col} has dtype {dtype}, expected float64"
 
     @pytest.mark.parametrize("z", [1, 26, 92])
     def test_key_z_values_present(self, ref_any_year, z):
         """Key atomic numbers (H=1, Fe=26, U=92) are present in index."""
         z_values = ref_any_year.data.index.get_level_values("Z").tolist()
-        assert z in z_values, f"Z={z} not found in index"
+        assert z in z_values, f"Z={z} missing from index"
 
     @pytest.mark.parametrize("symbol", ["H", "He", "C", "O", "Fe", "Si"])
     def test_key_symbols_present(self, ref_any_year, symbol):
         """Key element symbols are present in index."""
         symbols = ref_any_year.data.index.get_level_values("Symbol").tolist()
-        assert symbol in symbols, f"Symbol '{symbol}' not found in index"
+        assert symbol in symbols, f"Symbol '{symbol}' missing from index"
 
     def test_z_values_are_integers(self, ref_any_year):
         """Z values in index are integers."""
         z_values = ref_any_year.data.index.get_level_values("Z")
         # Check that Z values can be used as integers
-        assert all(isinstance(z, (int, np.integer)) for z in z_values), (
-            "Z values should be integers"
-        )
+        assert all(
+            isinstance(z, (int, np.integer)) for z in z_values
+        ), "Z values should be integers"
 
     def test_z_range_is_1_to_92(self, ref_any_year):
         """Z values range from 1 (H) to 92 (U)."""
@@ -313,15 +315,15 @@ class TestYearParameter:
         fe_2021 = ref_2021.get_element("Fe")
 
         # 2009: Fe = 7.50, 2021: Fe = 7.46
-        assert not np.isclose(fe_2009.Ab, fe_2021.Ab, atol=0.01), (
-            f"Fe should differ between years: 2009={fe_2009.Ab}, 2021={fe_2021.Ab}"
-        )
-        assert np.isclose(fe_2009.Ab, 7.50, atol=0.01), (
-            f"2009 Fe should be 7.50, got {fe_2009.Ab}"
-        )
-        assert np.isclose(fe_2021.Ab, 7.46, atol=0.01), (
-            f"2021 Fe should be 7.46, got {fe_2021.Ab}"
-        )
+        assert not np.isclose(
+            fe_2009.Ab, fe_2021.Ab, atol=0.01
+        ), f"Fe should differ between years: 2009={fe_2009.Ab}, 2021={fe_2021.Ab}"
+        assert np.isclose(
+            fe_2009.Ab, 7.50, atol=0.01
+        ), f"2009 Fe should be 7.50, got {fe_2009.Ab}"
+        assert np.isclose(
+            fe_2021.Ab, 7.46, atol=0.01
+        ), f"2021 Fe should be 7.46, got {fe_2021.Ab}"
 
 
 # =============================================================================
@@ -335,9 +337,9 @@ class TestColumnNaming:
     def test_ci_chondrites_in_columns(self, ref_any_year):
         """'CI_chondrites' is a top-level column."""
         top_level = ref_any_year.data.columns.get_level_values(0).unique().tolist()
-        assert "CI_chondrites" in top_level, (
-            f"'CI_chondrites' not in columns: {top_level}"
-        )
+        assert (
+            "CI_chondrites" in top_level
+        ), f"'CI_chondrites' not in columns: {top_level}"
 
     def test_photosphere_in_columns(self, ref_any_year):
         """'Photosphere' is a top-level column."""
@@ -384,9 +386,9 @@ class TestCommentsColumn:
 
     def test_2021_has_get_comment_method(self, ref_2021):
         """2021 instance has get_comment method."""
-        assert hasattr(ref_2021, "get_comment"), (
-            "ReferenceAbundances should have get_comment method"
-        )
+        assert hasattr(
+            ref_2021, "get_comment"
+        ), "ReferenceAbundances should have get_comment method"
 
     @pytest.mark.parametrize(
         "symbol,expected_comment",
@@ -399,27 +401,27 @@ class TestCommentsColumn:
             ("Li", "meteorites"),
         ],
     )
-    def test_comment_values_match_asplund_2021(self, ref_2021, symbol, expected_comment):
+    def test_comment_values_match_asplund_2021(
+        self, ref_2021, symbol, expected_comment
+    ):
         """Comment values match Asplund 2021 Table 2."""
         comment = ref_2021.get_comment(symbol)
-        assert comment == expected_comment, (
-            f"{symbol} comment: expected '{expected_comment}', got '{comment}'"
-        )
+        assert (
+            comment == expected_comment
+        ), f"{symbol} comment: expected '{expected_comment}', got '{comment}'"
 
     @pytest.mark.parametrize("symbol", ["C", "O", "Fe", "Si", "N"])
     def test_spectroscopic_elements_have_no_comment(self, ref_2021, symbol):
         """Elements with spectroscopic measurements have empty/None comment."""
         comment = ref_2021.get_comment(symbol)
-        assert comment is None or comment == "" or pd.isna(comment), (
-            f"{symbol} should have no comment (spectroscopic), got '{comment}'"
-        )
+        assert (
+            comment is None or comment == "" or pd.isna(comment)
+        ), f"{symbol} should have no comment (spectroscopic), got '{comment}'"
 
     def test_2009_get_comment_returns_none(self, ref_2009):
         """2009 data get_comment returns None (no comments in 2009)."""
         comment = ref_2009.get_comment("H")
-        assert comment is None, (
-            f"2009 get_comment should return None, got '{comment}'"
-        )
+        assert comment is None, f"2009 get_comment should return None, got '{comment}'"
 
 
 # =============================================================================
@@ -433,37 +435,30 @@ class TestGetElement:
     def test_get_by_symbol_returns_series(self, ref_any_year):
         """get_element('Fe') returns pd.Series."""
         fe = ref_any_year.get_element("Fe")
-        assert isinstance(fe, pd.Series), (
-            f"Expected pd.Series, got {type(fe).__name__}"
-        )
+        assert isinstance(fe, pd.Series), f"Expected pd.Series, got {type(fe).__name__}"
 
     def test_get_by_symbol_series_has_correct_shape(self, ref_any_year):
         """get_element returns Series with shape (2,) for [Ab, Uncert]."""
         fe = ref_any_year.get_element("Fe")
-        assert fe.shape == (2,), (
-            f"Expected shape (2,) for [Ab, Uncert], got {fe.shape}"
-        )
+        assert fe.shape == (2,), f"Expected shape (2,) for [Ab, Uncert], got {fe.shape}"
 
     def test_get_by_symbol_series_has_correct_index(self, ref_any_year):
         """get_element returns Series with index ['Ab', 'Uncert']."""
         fe = ref_any_year.get_element("Fe")
-        assert list(fe.index) == ["Ab", "Uncert"], (
-            f"Expected index ['Ab', 'Uncert'], got {list(fe.index)}"
-        )
+        assert list(fe.index) == [
+            "Ab",
+            "Uncert",
+        ], f"Expected index ['Ab', 'Uncert'], got {list(fe.index)}"
 
     def test_get_by_symbol_series_dtype_is_float64(self, ref_any_year):
         """get_element returns Series with float64 dtype."""
         fe = ref_any_year.get_element("Fe")
-        assert fe.dtype == np.float64, (
-            f"Expected dtype float64, got {fe.dtype}"
-        )
+        assert fe.dtype == np.float64, f"Expected dtype float64, got {fe.dtype}"
 
     def test_get_by_z_returns_series(self, ref_any_year):
         """get_element(26) returns pd.Series."""
         fe = ref_any_year.get_element(26)
-        assert isinstance(fe, pd.Series), (
-            f"Expected pd.Series, got {type(fe).__name__}"
-        )
+        assert isinstance(fe, pd.Series), f"Expected pd.Series, got {type(fe).__name__}"
 
     def test_symbol_and_z_return_equal_values(self, ref_any_year):
         """get_element('Fe') equals get_element(26) in values."""
@@ -478,7 +473,10 @@ class TestGetElement:
         default = ref_any_year.get_element("Fe")
         explicit = ref_any_year.get_element("Fe", kind="Photosphere")
         pd.testing.assert_series_equal(
-            default, explicit, check_names=False, obj="Default kind vs explicit Photosphere"
+            default,
+            explicit,
+            check_names=False,
+            obj="Default kind vs explicit Photosphere",
         )
 
     def test_invalid_key_type_raises_valueerror(self, ref_any_year):
@@ -509,38 +507,36 @@ class TestMissingPhotosphereData:
     def test_missing_photosphere_ab_is_nan(self, ref_any_year, symbol):
         """Elements without photospheric data have NaN for Ab."""
         element = ref_any_year.get_element(symbol, kind="Photosphere")
-        assert np.isnan(element.Ab), (
-            f"{symbol} photosphere Ab should be NaN, got {element.Ab}"
-        )
+        assert np.isnan(
+            element.Ab
+        ), f"{symbol} photosphere Ab should be NaN, got {element.Ab}"
 
     @pytest.mark.parametrize("symbol", ELEMENTS_WITHOUT_PHOTOSPHERE[:5])
     def test_missing_photosphere_has_ci_chondrites(self, ref_any_year, symbol):
         """Elements without photosphere DO have CI chondrite values."""
         element = ref_any_year.get_element(symbol, kind="CI_chondrites")
-        assert not np.isnan(element.Ab), (
-            f"{symbol} CI chondrites Ab should NOT be NaN, got {element.Ab}"
-        )
+        assert not np.isnan(
+            element.Ab
+        ), f"{symbol} CI chondrites Ab should NOT be NaN, got {element.Ab}"
 
     def test_h_photosphere_ab_is_12(self, ref_any_year):
         """H photosphere Ab is 12.00 (by definition)."""
         h = ref_any_year.get_element("H", kind="Photosphere")
-        assert np.isclose(h.Ab, 12.00, atol=0.001), (
-            f"H photosphere Ab should be 12.00, got {h.Ab}"
-        )
+        assert np.isclose(
+            h.Ab, 12.00, atol=0.001
+        ), f"H photosphere Ab should be 12.00, got {h.Ab}"
 
     def test_h_2009_uncertainty_is_nan(self, ref_2009):
         """H uncertainty is NaN in 2009 (undefined)."""
         h = ref_2009.get_element("H", kind="Photosphere")
-        assert np.isnan(h.Uncert), (
-            f"H (2009) uncertainty should be NaN, got {h.Uncert}"
-        )
+        assert np.isnan(h.Uncert), f"H (2009) uncertainty should be NaN, got {h.Uncert}"
 
     def test_h_2021_uncertainty_is_zero(self, ref_2021):
         """H uncertainty is 0.00 in 2021 (by definition)."""
         h = ref_2021.get_element("H", kind="Photosphere")
-        assert np.isclose(h.Uncert, 0.00, atol=0.001), (
-            f"H (2021) uncertainty should be 0.00, got {h.Uncert}"
-        )
+        assert np.isclose(
+            h.Uncert, 0.00, atol=0.001
+        ), f"H (2021) uncertainty should be 0.00, got {h.Uncert}"
 
 
 # =============================================================================
@@ -573,9 +569,9 @@ class TestValueValidation:
         element = ref.get_element(symbol, kind="Photosphere")
 
         # Type and shape
-        assert isinstance(element, pd.Series), (
-            f"Expected pd.Series, got {type(element).__name__}"
-        )
+        assert isinstance(
+            element, pd.Series
+        ), f"Expected pd.Series, got {type(element).__name__}"
         assert element.shape == (2,), f"Expected shape (2,), got {element.shape}"
 
         # Content from published table
@@ -585,7 +581,9 @@ class TestValueValidation:
                 f"expected {expected.photosphere_ab}, got {element.Ab}"
             )
         if expected.photosphere_uncert is not None:
-            assert np.isclose(element.Uncert, expected.photosphere_uncert, atol=0.005), (
+            assert np.isclose(
+                element.Uncert, expected.photosphere_uncert, atol=0.005
+            ), (
                 f"Asplund {year} {symbol} photosphere Uncert: "
                 f"expected {expected.photosphere_uncert}, got {element.Uncert}"
             )
@@ -632,9 +630,9 @@ class TestAbundanceRatio:
     def test_returns_abundance_namedtuple(self, ref_any_year):
         """abundance_ratio returns Abundance namedtuple."""
         result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(result, Abundance), (
-            f"Expected Abundance namedtuple, got {type(result).__name__}"
-        )
+        assert isinstance(
+            result, Abundance
+        ), f"Expected Abundance namedtuple, got {type(result).__name__}"
 
     def test_abundance_has_measurement_and_uncertainty(self, ref_any_year):
         """Abundance namedtuple has measurement and uncertainty attributes."""
@@ -645,16 +643,16 @@ class TestAbundanceRatio:
     def test_measurement_is_float(self, ref_any_year):
         """measurement attribute is float."""
         result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(result.measurement, (float, np.floating)), (
-            f"measurement should be float, got {type(result.measurement).__name__}"
-        )
+        assert isinstance(
+            result.measurement, (float, np.floating)
+        ), f"measurement should be float, got {type(result.measurement).__name__}"
 
     def test_uncertainty_is_float(self, ref_any_year):
         """uncertainty attribute is float."""
         result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(result.uncertainty, (float, np.floating)), (
-            f"uncertainty should be float, got {type(result.uncertainty).__name__}"
-        )
+        assert isinstance(
+            result.uncertainty, (float, np.floating)
+        ), f"uncertainty should be float, got {type(result.uncertainty).__name__}"
 
     def test_ratio_can_be_destructured(self, ref_any_year):
         """Abundance namedtuple can be destructured."""
@@ -724,12 +722,12 @@ class TestBackwardCompatibility:
         """year=2009 Fe matches original test values (7.50±0.04)."""
         ref = ReferenceAbundances(year=2009)
         fe = ref.get_element("Fe")
-        assert np.isclose(fe.Ab, 7.50, atol=0.01), (
-            f"2009 Fe photosphere should be 7.50, got {fe.Ab}"
-        )
-        assert np.isclose(fe.Uncert, 0.04, atol=0.01), (
-            f"2009 Fe uncertainty should be 0.04, got {fe.Uncert}"
-        )
+        assert np.isclose(
+            fe.Ab, 7.50, atol=0.01
+        ), f"2009 Fe photosphere should be 7.50, got {fe.Ab}"
+        assert np.isclose(
+            fe.Uncert, 0.04, atol=0.01
+        ), f"2009 Fe uncertainty should be 0.04, got {fe.Uncert}"
 
     def test_2009_c_o_ratio_matches_original_calculation(self):
         """year=2009 C/O ratio matches original expected value."""
@@ -737,24 +735,24 @@ class TestBackwardCompatibility:
         result = ref.abundance_ratio("C", "O")
         # Original: 10^(8.43 - 8.69) = 0.5495
         expected = 10.0 ** (8.43 - 8.69)
-        assert np.isclose(result.measurement, expected, rtol=0.01), (
-            f"2009 C/O ratio: expected {expected:.4f}, got {result.measurement:.4f}"
-        )
+        assert np.isclose(
+            result.measurement, expected, rtol=0.01
+        ), f"2009 C/O ratio: expected {expected:.4f}, got {result.measurement:.4f}"
 
     def test_abundance_ratio_method_exists(self, ref_any_year):
         """abundance_ratio method exists and is callable."""
-        assert hasattr(ref_any_year, "abundance_ratio"), (
-            "Missing abundance_ratio method"
-        )
-        assert callable(ref_any_year.abundance_ratio), (
-            "abundance_ratio should be callable"
-        )
+        assert hasattr(
+            ref_any_year, "abundance_ratio"
+        ), "Missing abundance_ratio method"
+        assert callable(
+            ref_any_year.abundance_ratio
+        ), "abundance_ratio should be callable"
 
     def test_data_property_returns_dataframe(self, ref_any_year):
         """data property returns DataFrame as in original API."""
-        assert isinstance(ref_any_year.data, pd.DataFrame), (
-            f"data property should return DataFrame, got {type(ref_any_year.data)}"
-        )
+        assert isinstance(
+            ref_any_year.data, pd.DataFrame
+        ), f"data property should return DataFrame, got {type(ref_any_year.data)}"
 
     def test_get_element_method_exists(self, ref_any_year):
         """get_element method exists and is callable."""
@@ -772,9 +770,9 @@ def test_module_exports_referenceabundances():
     from solarwindpy.core import abundances
 
     assert hasattr(abundances, "__all__"), "Module missing __all__"
-    assert "ReferenceAbundances" in abundances.__all__, (
-        "ReferenceAbundances not in __all__"
-    )
+    assert (
+        "ReferenceAbundances" in abundances.__all__
+    ), "ReferenceAbundances not in __all__"
 
 
 def test_module_exports_abundance_namedtuple():
@@ -787,9 +785,10 @@ def test_module_exports_abundance_namedtuple():
 def test_abundance_namedtuple_structure():
     """Abundance namedtuple has correct fields."""
     assert hasattr(Abundance, "_fields"), "Abundance should be a namedtuple"
-    assert Abundance._fields == ("measurement", "uncertainty"), (
-        f"Expected fields ('measurement', 'uncertainty'), got {Abundance._fields}"
-    )
+    assert Abundance._fields == (
+        "measurement",
+        "uncertainty",
+    ), f"Expected fields ('measurement', 'uncertainty'), got {Abundance._fields}"
 
 
 def test_can_import_from_core():
@@ -797,3 +796,46 @@ def test_can_import_from_core():
     from solarwindpy.core import ReferenceAbundances as RA
 
     assert RA is ReferenceAbundances, "Import should resolve to same class"
+
+
+# =============================================================================
+# Consistency: shipped CSVs vs. _VALID_YEARS
+# =============================================================================
+
+
+def shipped_asplund_years(data_dir):
+    """Years present as ``asplund<year>.csv`` in ``data_dir``.
+
+    Parameters
+    ----------
+    data_dir : Path
+        Directory to scan for ``asplund*.csv`` files.
+
+    Returns
+    -------
+    set of int
+    """
+    years = set()
+    for path in data_dir.glob("asplund*.csv"):
+        digits = "".join(c for c in path.stem if c.isdigit())
+        if digits:
+            years.add(int(digits))
+    return years
+
+
+def test_shipped_asplund_csvs_agree_with_valid_years():
+    """The shipped asplund*.csv files and _VALID_YEARS agree in both directions.
+
+    This is an internal consistency fact (not a claim about whether a
+    successor Asplund compilation exists -- that judgment stays with the
+    author), so it runs unmarked in the fast suite.
+    """
+    data_dir = resources.files("solarwindpy.core") / "data"
+    with resources.as_file(data_dir) as data_path:
+        shipped = shipped_asplund_years(data_path)
+
+    valid = set(ReferenceAbundances._VALID_YEARS)
+
+    assert shipped == valid, (
+        f"asplund*.csv years {sorted(shipped)} != " f"_VALID_YEARS {sorted(valid)}"
+    )
