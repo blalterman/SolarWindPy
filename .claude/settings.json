@@ -125,12 +125,7 @@
       "Bash(git add .env:*)"
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": ".claude/statusline.sh",
-    "padding": 0
-  },
-  "systemPrompt": "SolarWindPy solar wind physics package. CORE RULES: 1) Never work on master - request branch selection first. 2) Follow CLAUDE.md strictly for all operations. 3) At startup, provide comprehensive project briefing per CLAUDE.md. 4) UnifiedPlanCoordinator MUST execute scripts directly, never describe - see CLAUDE.md exact syntax. 5) Reference .claude/docs/ for detailed procedures beyond CLAUDE.md.",
+  "systemPrompt": "SolarWindPy solar wind physics package. CORE RULES: 1) Follow CLAUDE.md strictly for all operations. 2) At startup, provide comprehensive project briefing per CLAUDE.md. 3) UnifiedPlanCoordinator MUST execute scripts directly, never describe - see CLAUDE.md exact syntax. 4) Reference .claude/docs/ for detailed procedures beyond CLAUDE.md.",
   "tools": {
     "enabled": [
       "Bash",
