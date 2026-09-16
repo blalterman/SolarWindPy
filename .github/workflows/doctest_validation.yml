@@ -8,6 +8,7 @@ on:
   schedule:
     # Run weekly to catch environmental changes
     - cron: '0 6 * * 0'
+  workflow_dispatch:
 
 jobs:
   doctest-validation:
@@ -269,3 +270,31 @@ jobs:
           --targeted \
           --verbose
       timeout-minutes: 3
+
+  # Drift detection: asserts the external facts SolarWindPy pins (catalog
+  # version, dependency resolution, toolchain pins, etc.) still hold. Opt-in
+  # and network-dependent, so it only runs on schedule or on demand.
+  drift-detection:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-dev.lock
+        pip install -e .
+
+    - name: Run drift detection suite
+      env:
+        SWP_RUN_DRIFT: "1"
+      run: |
+        pytest tests/drift/ -v --tb=short
