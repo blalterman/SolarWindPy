@@ -3,13 +3,12 @@
 This file provides essential guidance to Claude Code when working with the SolarWindPy repository.
 
 ## Critical Rules (ALWAYS ENFORCE)
-1. **Branch Protection**: Never work on master - always request branch selection first
-2. **Script Execution**: Agents MUST execute CLI scripts, never just describe them
-3. **Test Before Commit**: All tests must pass before any commit
-4. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
-5. **Startup Briefing**: Provide project overview including agents, workflows, current state
-6. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
-7. **Code Attribution**: Follow attribution protocol (.claude/docs/ATTRIBUTION.md)
+1. **Script Execution**: Agents MUST execute CLI scripts, never just describe them
+2. **Test Before Commit**: All tests must pass before any commit
+3. **Follow Conventions**: NumPy docstrings, conventional commits, 'Generated with Claude Code'
+4. **Startup Briefing**: Provide project overview including agents, workflows, current state
+5. **Prompt Improvement**: For moderate/complex tasks, proactively suggest prompt improvements before execution
+6. **Code Attribution**: Follow attribution protocol (.claude/docs/ATTRIBUTION.md)
    - AI-generated code: Include "Generated with Claude Code" in commit messages
    - External sources: Add source attribution in code comments (URL, license, modifications)
    - Scientific algorithms: Cite papers in docstrings (DOI, arXiv, equation numbers)
