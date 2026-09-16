@@ -22,7 +22,6 @@
       "Bash(.claude/hooks/git-workflow-validator.sh --enforce-branch)",
       "Bash(.claude/hooks/git-workflow-validator.sh --check-tests)",
       "Bash(.claude/hooks/git-workflow-validator.sh --validate-message)",
-      "Bash(.claude/hooks/validate-session-state.sh)",
       "Bash(python .claude/hooks/create-compaction.py)",
       "Bash(python .claude/scripts/generate-test.py)",
       "Bash(python .claude/scripts/generate-test.py *)",
@@ -143,18 +142,6 @@
   },
   "planningMode": true,
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/validate-session-state.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "matcher": "*plan*",
