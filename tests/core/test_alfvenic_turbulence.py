@@ -531,8 +531,8 @@ def test_set_data_requires_datetimeindex():
 def test_set_data_warns_on_mismatched_index(caplog):
     """Mismatched indices trigger a warning."""
 
-    v_idx = pd.date_range("2020-01-01", periods=3, freq="H")
-    b_idx = pd.date_range("2020-01-02", periods=3, freq="H")
+    v_idx = pd.date_range("2020-01-01", periods=3, freq="h")
+    b_idx = pd.date_range("2020-01-02", periods=3, freq="h")
     v = pd.DataFrame(np.arange(9).reshape(3, 3), index=v_idx, columns=["x", "y", "z"])
     b = pd.DataFrame(
         np.arange(9).reshape(3, 3) / 10.0, index=b_idx, columns=["x", "y", "z"]

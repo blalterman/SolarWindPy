@@ -60,7 +60,18 @@ class TestTimedelta:
 
     def test_timedelta_various_offsets(self):
         """Test Timedelta with various pandas offsets."""
-        test_cases = ["1h", "2H", "30min", "1d", "5s", "10ms", "1M", "1Y", "1W", "1Q"]
+        test_cases = [
+            "1h",
+            "2h",
+            "30min",
+            "1d",
+            "5s",
+            "10ms",
+            "1ME",
+            "1YE",
+            "1W",
+            "1QE",
+        ]
 
         for offset in test_cases:
             td = datetime_labels.Timedelta(offset)

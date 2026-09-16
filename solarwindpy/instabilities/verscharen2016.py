@@ -62,7 +62,7 @@ insta_params = pd.concat(
     },
     axis=1,
     names=["Growth Rate"],
-).stack("Growth Rate")
+).stack("Growth Rate", future_stack=True)
 
 _plot_contour_kwargs = pd.DataFrame(
     [
@@ -347,7 +347,7 @@ class StabilityCondition(object):
         """
         is_unstable = {
             k: self.instability_tests[k](self.anisotropy, v)
-            for k, v in self.instability_thresholds.iteritems()
+            for k, v in self.instability_thresholds.items()
         }
         is_unstable = pd.concat(is_unstable, axis=1).sort_index(axis=1)
 
@@ -357,8 +357,7 @@ class StabilityCondition(object):
         is_unstable.mask(self.instability_thresholds.isnull(), inplace=True)
 
         # When an instability is NaN, we have to check the other instabilities.
-        for key, column in is_unstable.iteritems():
-
+        for key, column in is_unstable.items():
             # Temporarily replace the NaNs here with False because NaNs don"t
             # qualify as unstable on their own. We make the replacement here
             # and not earlier because we are relying on those NaNs to indicate
@@ -505,7 +504,7 @@ class StabilityContours(object):
             target_contours = target_contours.loc[:, tk_kind]
         target_contours = target_contours.stack()
 
-        for k, v in target_contours.iteritems():
+        for k, v in target_contours.items():
             gamma, itype = k
 
             if plot_gamma is not None:

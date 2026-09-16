@@ -122,13 +122,13 @@ class AggPlot(base.Base):
 
         target = self.joint
         gb_axes = list(self._gb_axes)
-        gb = target.groupby(gb_axes, axis=0, observed=True)
+        gb = target.groupby(gb_axes, observed=True)
 
         #         agg_axes = self.agg_axes
         #         gb = (
         #             self.joint.set_index(gb_axes)
         #             .loc[:, agg_axes]
-        #             .groupby(gb_axes, axis=0, observed=False)
+        #             .groupby(gb_axes, observed=False)
         #         )
         return gb
 
