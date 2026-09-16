@@ -11,6 +11,14 @@ exclude = '''
 )/
 '''
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "drift: asserts an external fact still holds; requires network; opt-in",
+    "integration: downloads real data over the network",
+    "slow: takes more than a few seconds",
+]
+
 [build-system]
 requires = ["setuptools>=61", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
@@ -71,6 +79,7 @@ keywords = [
 test = [
     "pytest>=8.0",
     "pytest-cov>=6.0",
+    "packaging>=23.0",
 ]
 docs = [
     "sphinx>=7.0",
