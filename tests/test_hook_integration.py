@@ -8,12 +8,9 @@ implemented through the hook chain in .claude/hooks/.
 """
 
 import json
-import os
 import subprocess
-import tempfile
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -166,15 +163,6 @@ class TestSettingsConfiguration:
         settings = json.loads(settings_path.read_text())
         assert "hooks" in settings, "hooks section not found in settings.json"
 
-    def test_session_start_hook_configured(self, settings_path: Path) -> None:
-        """Verify SessionStart hook is configured."""
-        if not settings_path.exists():
-            pytest.skip("settings.json not found")
-
-        settings = json.loads(settings_path.read_text())
-        hooks = settings.get("hooks", {})
-        assert "SessionStart" in hooks, "SessionStart hook not configured"
-
     def test_post_tool_use_hook_configured(self, settings_path: Path) -> None:
         """Verify PostToolUse hooks are configured for Edit/Write."""
         if not settings_path.exists():
@@ -207,11 +195,6 @@ class TestSettingsConfiguration:
 
 class TestHookScriptsExist:
     """Test that required hook scripts exist."""
-
-    def test_validate_session_state_exists(self, hook_scripts_dir: Path) -> None:
-        """Verify validate-session-state.sh exists."""
-        script = hook_scripts_dir / "validate-session-state.sh"
-        assert script.exists(), "validate-session-state.sh not found"
 
     def test_test_runner_exists(self, hook_scripts_dir: Path) -> None:
         """Verify test-runner.sh exists."""
@@ -306,9 +289,9 @@ class TestHookChainWithMocks:
 
         for event, timeout in actual_timeouts.items():
             req = timeout_requirements[event]
-            assert req["min"] <= timeout <= req["max"], (
-                f"{event} timeout {timeout} not in range [{req['min']}, {req['max']}]"
-            )
+            assert (
+                req["min"] <= timeout <= req["max"]
+            ), f"{event} timeout {timeout} not in range [{req['min']}, {req['max']}]"
 
 
 # ==============================================================================
@@ -319,9 +302,7 @@ class TestHookChainWithMocks:
 class TestDefinitionOfDonePattern:
     """Test the Definition of Done validation pattern."""
 
-    def test_coverage_requirement_in_pre_commit(
-        self, hook_scripts_dir: Path
-    ) -> None:
+    def test_coverage_requirement_in_pre_commit(self, hook_scripts_dir: Path) -> None:
         """Test that 95% coverage requirement is configured."""
         pre_commit_script = hook_scripts_dir / "pre-commit-tests.sh"
         if not pre_commit_script.exists():

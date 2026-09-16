@@ -41,11 +41,18 @@ black solarwindpy/ tests/                  # format (CI runs black --check)
 flake8 solarwindpy/ tests/                 # lint
 ```
 
-CI runs `pytest`, `black --check`, and `flake8` against `solarwindpy/`.
-Coverage target is 95%, enforced by `.claude/hooks/coverage-monitor.py`.
+**Invoke the bare `pytest` binary, not `python3 -m pytest`.** The `-m` form
+prepends the working directory to `sys.path`, shadowing the installed package;
+the suite then reports ~25 spurious failures in import and inheritance tests.
+Under `pytest` the suite is green.
 
-Known state: the `tests/solar_activity/` suite has pre-existing failures tied to
-network-dependent data loaders. They are unrelated to changes elsewhere.
+CI runs `pytest`, `black --check`, and `flake8` against `solarwindpy/`.
+
+The `solarwindpy-physics` pre-commit hook runs the full suite with
+`--cov-fail-under=80` on any commit touching a `.py` file. Measured coverage is
+~82%, so this is a regression ratchet rather than a target; raise it as coverage
+rises. `.claude/hooks/coverage-monitor.py` separately reports per-module
+coverage from a `Stop` hook — those numbers are advisory and block nothing.
 
 ## Planning workflow
 

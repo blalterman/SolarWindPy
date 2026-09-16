@@ -23,11 +23,16 @@ fi
 echo "📁 Staged Python files:"
 echo "$staged_files" | sed 's/^/   /'
 
-# Run coverage analysis with required threshold
-echo "📊 Running coverage analysis (≥95% required)..."
-if ! pytest --cov=solarwindpy --cov-fail-under=95 -q --tb=short; then
+# Run coverage analysis with required threshold.
+# 80 is a ratchet set just under the measured baseline (~82%), not a target:
+# it blocks regressions without blocking every commit. Raise it as coverage
+# rises. The previous value of 95 was never met in 399 commits, so the hook
+# only ever taught people to pass --no-verify, which skips black and flake8
+# along with it.
+echo "📊 Running coverage analysis (≥80% required)..."
+if ! pytest --cov=solarwindpy --cov-fail-under=80 -q --tb=short; then
     echo ""
-    echo "❌ Coverage below 95% threshold or tests failed"
+    echo "❌ Coverage below 80% threshold or tests failed"
     echo "💡 Fix failing tests and improve coverage before committing"
     echo "💡 Run 'pytest --cov=solarwindpy --cov-report=html' for detailed report"
     exit 1
