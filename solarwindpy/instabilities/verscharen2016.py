@@ -483,7 +483,7 @@ class StabilityContours(object):
             index=self.contours.index, columns=self.contours.columns
         )
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         ms = kwargs.pop("markersize", 10)
         mew = kwargs.pop("markeredgewidth", 0.5)
         mec = kwargs.pop("markeredgecolor", "k")

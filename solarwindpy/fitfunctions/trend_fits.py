@@ -297,7 +297,7 @@ class TrendFit(object):
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
         wkey = kwargs.pop("wkey", wkey)  # For disabling errobars
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         color = kwargs.pop("color", "cyan")
         linestyle = kwargs.pop("ls", "--")
         label = kwargs.pop("label", "1D Fits")
@@ -309,7 +309,7 @@ class TrendFit(object):
                 )
 
             window_kwargs = mpl.cbook.normalize_kwargs(
-                window_kwargs, mpl.collections.Collection._alias_map
+                window_kwargs, mpl.collections.Collection
             )
             window_color = window_kwargs.pop("color", color)
             window_alpha = window_kwargs.pop("alpha", 0.15)

@@ -203,7 +203,6 @@ class Hist1D(AggPlot):
         return agg
 
     def set_labels(self, **kwargs):
-
         if "z" in kwargs:
             raise ValueError(r"{} doesn't have a z-label".format(self))
 
@@ -263,7 +262,6 @@ class Hist1D(AggPlot):
             dy = None
 
         elif len(fcn) == 2:
-
             f0, f1 = fcn
             if isinstance(f0, FunctionType):
                 f0 = f0.__name__
@@ -297,7 +295,7 @@ class Hist1D(AggPlot):
             dx, dy = dy, dx
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         if plot_window:
             window_plotter = ax.fill_between
             if transpose_axes:

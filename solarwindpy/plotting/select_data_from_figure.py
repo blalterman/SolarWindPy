@@ -122,7 +122,6 @@ Upper Right {x1, y1}"""
         self.text.set_text(tx)
 
     def disconnect(self, other_SelectFromPlot2D=None, scatter_kwargs=None, **kwargs):
-
         if scatter_kwargs is None:
             scatter_kwargs = dict()
 
@@ -154,7 +153,7 @@ Upper Right {x1, y1}"""
         ax = self.ax
         is_multipanel = self.is_multipanel
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.text.Text._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.text.Text)
 
         xloc = kwargs.pop("x", 0.015 if is_multipanel else 0.00)
         yloc = kwargs.pop("y", 0.975 if is_multipanel else 1.05)
@@ -203,7 +202,6 @@ Upper Right {x1, y1}"""
 
             already_selected = []
             for other in other_SelectFromPlot2D:
-
                 try:
                     already_selected.extend(other.sampled_indices.tolist())
                 except AttributeError:
@@ -279,9 +277,7 @@ y : ({self.ax.yaxis.get_label().get_text()}).
         if self.plotter.log.y:
             y = 10.0**y
 
-        kwargs = mpl.cbook.normalize_kwargs(
-            kwargs, mpl.collections.PatchCollection._alias_map
-        )
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.collections.PatchCollection)
         label = kwargs.pop("label", "Sample")
         s = kwargs.pop("s", 20)
         c = kwargs.pop("c", "fuchsia")

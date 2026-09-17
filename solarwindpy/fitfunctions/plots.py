@@ -229,7 +229,7 @@ class FFPlot(object):
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
 
         # Apply default style for raw plots
         defaults = self._get_default_plot_style("raw")
@@ -249,9 +249,7 @@ class FFPlot(object):
         #         )
 
         def _plot_window_edges(ax, **kwargs):
-            kwargs = mpl.cbook.normalize_kwargs(
-                kwargs, mpl.collections.Collection._alias_map
-            )
+            kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.collections.Collection)
 
             edge1 = ax.plot(x, y1, **kwargs)
             edge2 = ax.plot(x, y2, **kwargs)
@@ -266,7 +264,7 @@ class FFPlot(object):
                 w = 0
 
             window_kwargs = mpl.cbook.normalize_kwargs(
-                window_kwargs, mpl.collections.Collection._alias_map
+                window_kwargs, mpl.collections.Collection
             )
             window_color = window_kwargs.pop("color", color)
             window_alpha = window_kwargs.pop("alpha", 0.15)
@@ -287,7 +285,7 @@ class FFPlot(object):
             edges = None
             if edge_kwargs is not None:
                 edge_kwargs = mpl.cbook.normalize_kwargs(
-                    edge_kwargs, mpl.collections.Collection._alias_map
+                    edge_kwargs, mpl.collections.Collection
                 )
                 edge_color = edge_kwargs.pop("color", window_color)
                 edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
@@ -319,7 +317,7 @@ class FFPlot(object):
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         color = kwargs.pop("color", "forestgreen")
         marker = kwargs.pop("marker", "P")
         markerfacecolor = kwargs.pop("markerfacecolor", "none")
@@ -345,7 +343,7 @@ class FFPlot(object):
                 w = 0
 
             window_kwargs = mpl.cbook.normalize_kwargs(
-                window_kwargs, mpl.collections.Collection._alias_map
+                window_kwargs, mpl.collections.Collection
             )
             window_color = window_kwargs.pop("color", color)
             window_alpha = window_kwargs.pop("alpha", 0.15)
@@ -378,7 +376,7 @@ class FFPlot(object):
 
                 def _plot_window_edges(ax, **kwargs):
                     kwargs = mpl.cbook.normalize_kwargs(
-                        kwargs, mpl.collections.Collection._alias_map
+                        kwargs, mpl.collections.Collection
                     )
 
                     edge1 = ax.plot(x, y1, **kwargs)
@@ -387,11 +385,11 @@ class FFPlot(object):
                     return edge1, edge2
 
                 edge_kwargs = mpl.cbook.normalize_kwargs(
-                    edge_kwargs, mpl.collections.Collection._alias_map
+                    edge_kwargs, mpl.collections.Collection
                 )
                 edge_color = edge_kwargs.pop("color", window_color)
                 edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
-            #                 edge_kwargs = mpl.cbook.normalize_kwargs(edge_kwargs, mpl.collections.Collection._alias_map)
+            #                 edge_kwargs = mpl.cbook.normalize_kwargs(edge_kwargs, mpl.collections.Collection)
 
             #                 edge1 = ax.plot(x, y1,
             #                                 color=window_color,
@@ -430,7 +428,7 @@ class FFPlot(object):
         if annotate_kwargs is None:
             annotate_kwargs = {}
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         color = kwargs.pop("color", "darkorange")
         label = kwargs.pop("label", r"$\mathrm{Fit}$")
         linestyle = kwargs.pop("linestyle", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
@@ -560,7 +558,7 @@ class FFPlot(object):
         if ax is None:
             fig, ax = plt.subplots(**subplots_kwargs)
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D._alias_map)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
         #         color = kwargs.pop("color", "darkgreen")
         #         marker = kwargs.pop("marker", "P")
