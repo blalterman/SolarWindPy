@@ -8,7 +8,6 @@ Note: These are structure/interface tests, not physics validation tests.
 """
 
 import logging
-from typing import Any, Type
 
 import numpy as np
 import pandas as pd
@@ -181,9 +180,7 @@ class TestIonClass:
         # Should have correct number of columns
         assert len(ion.data.columns) == 6  # n, v.x, v.y, v.z, w.par, w.per
 
-    def test_ion_has_velocity_property(
-        self, sample_ion_data: pd.DataFrame
-    ) -> None:
+    def test_ion_has_velocity_property(self, sample_ion_data: pd.DataFrame) -> None:
         """Verify Ion has velocity property returning Vector."""
         ion = ions.Ion(sample_ion_data, "p1")
         assert hasattr(ion, "velocity")
@@ -215,38 +212,28 @@ class TestIonClass:
 class TestPlasmaClass:
     """Contract tests for Plasma class."""
 
-    def test_plasma_requires_species(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_requires_species(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma constructor requires species."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert p.species == ("p1",)
 
-    def test_plasma_species_is_tuple(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_species_is_tuple(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma.species returns tuple."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert isinstance(p.species, tuple)
 
-    def test_plasma_has_ions_property(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_has_ions_property(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma has ions property returning Series of Ion."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert hasattr(p, "ions")
         assert isinstance(p.ions, pd.Series)
 
-    def test_plasma_ion_is_ion_instance(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_ion_is_ion_instance(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma.ions contains Ion instances."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert isinstance(p.ions.loc["p1"], ions.Ion)
 
-    def test_plasma_has_bfield_property(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_has_bfield_property(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma has bfield property."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert hasattr(p, "bfield")
@@ -336,9 +323,7 @@ class TestTensorClass:
         # Note: magnitude calculation requires MultiIndex columns with level "C"
         # so it can't be called with simple column names
 
-    def test_tensor_data_access_via_loc(
-        self, sample_tensor_data: pd.DataFrame
-    ) -> None:
+    def test_tensor_data_access_via_loc(self, sample_tensor_data: pd.DataFrame) -> None:
         """Verify Tensor data can be accessed via .data.loc[]."""
         t = tensor.Tensor(sample_tensor_data)
         par_data = t.data.loc[:, "par"]
@@ -353,16 +338,12 @@ class TestTensorClass:
 class TestConstructorValidation:
     """Contract tests for constructor argument validation."""
 
-    def test_ion_validates_species_type(
-        self, sample_ion_data: pd.DataFrame
-    ) -> None:
+    def test_ion_validates_species_type(self, sample_ion_data: pd.DataFrame) -> None:
         """Verify Ion species must be string."""
         ion = ions.Ion(sample_ion_data, "p1")
         assert isinstance(ion.species, str)
 
-    def test_plasma_validates_species(
-        self, sample_plasma_data: pd.DataFrame
-    ) -> None:
+    def test_plasma_validates_species(self, sample_plasma_data: pd.DataFrame) -> None:
         """Verify Plasma validates species arguments."""
         p = plasma.Plasma(sample_plasma_data, "p1")
         assert all(isinstance(s, str) for s in p.species)

@@ -9,11 +9,8 @@ Tests cover:
 - Property types, shapes, and dtypes
 """
 
-import pytest
 import pandas as pd
-import numpy as np
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
 
 class TestICMECATInitialization:
@@ -23,6 +20,7 @@ class TestICMECATInitialization:
         """ICMECAT() downloads data on initialization."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert cat.data is not None
@@ -32,6 +30,7 @@ class TestICMECATInitialization:
         """ICMECAT(spacecraft='X') filters to that spacecraft."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT(spacecraft="Ulysses")
 
             assert cat.spacecraft == "Ulysses"
@@ -41,6 +40,7 @@ class TestICMECATInitialization:
         """ICMECAT() without spacecraft keeps all events."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert cat.spacecraft is None
@@ -54,6 +54,7 @@ class TestICMECATDataProperty:
         """data property returns a DataFrame."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert isinstance(cat.data, pd.DataFrame)
@@ -64,6 +65,7 @@ class TestICMECATDataProperty:
 
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             for col in required:
@@ -75,16 +77,19 @@ class TestICMECATDataProperty:
 
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             for col in datetime_cols:
-                assert pd.api.types.is_datetime64_any_dtype(cat.data[col]), \
-                    f"{col} should be datetime64, got {cat.data[col].dtype}"
+                assert pd.api.types.is_datetime64_any_dtype(
+                    cat.data[col]
+                ), f"{col} should be datetime64, got {cat.data[col].dtype}"
 
     def test_data_shape_nonzero(self, mock_icmecat_csv_data):
         """data has non-zero rows."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert cat.data.shape[0] > 0
@@ -98,6 +103,7 @@ class TestICMECATIntervalsProperty:
         """intervals property returns a DataFrame."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert isinstance(cat.intervals, pd.DataFrame)
@@ -106,6 +112,7 @@ class TestICMECATIntervalsProperty:
         """intervals has computed interval_end column."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert "interval_end" in cat.intervals.columns
@@ -114,6 +121,7 @@ class TestICMECATIntervalsProperty:
         """interval_end has no NaN values (fallbacks applied)."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert cat.intervals["interval_end"].notna().all()
@@ -122,16 +130,16 @@ class TestICMECATIntervalsProperty:
         """interval_end is datetime64."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
-            assert pd.api.types.is_datetime64_any_dtype(
-                cat.intervals["interval_end"]
-            )
+            assert pd.api.types.is_datetime64_any_dtype(cat.intervals["interval_end"])
 
     def test_interval_end_after_start(self, mock_icmecat_csv_data):
         """interval_end >= icme_start_time for all events."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert all(
@@ -146,6 +154,7 @@ class TestICMECATIntervalFallbacks:
         """When mo_end_time exists, interval_end equals mo_end_time."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # First event has mo_end_time
@@ -153,16 +162,19 @@ class TestICMECATIntervalFallbacks:
 
     def test_fallback_mo_start_plus_24h(self):
         """Fallback: mo_end_time missing -> mo_start_time + 24h."""
-        data = pd.DataFrame({
-            "icmecat_id": ["TEST"],
-            "sc_insitu": ["Ulysses"],
-            "icme_start_time": [pd.Timestamp("2000-01-01")],
-            "mo_start_time": [pd.Timestamp("2000-01-02")],
-            "mo_end_time": [pd.NaT],
-        })
+        data = pd.DataFrame(
+            {
+                "icmecat_id": ["TEST"],
+                "sc_insitu": ["Ulysses"],
+                "icme_start_time": [pd.Timestamp("2000-01-01")],
+                "mo_start_time": [pd.Timestamp("2000-01-02")],
+                "mo_end_time": [pd.NaT],
+            }
+        )
 
         with patch("pandas.read_csv", return_value=data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             expected = pd.Timestamp("2000-01-03")  # mo_start + 24h
@@ -170,16 +182,19 @@ class TestICMECATIntervalFallbacks:
 
     def test_fallback_icme_start_plus_24h(self):
         """Fallback: both missing -> icme_start_time + 24h."""
-        data = pd.DataFrame({
-            "icmecat_id": ["TEST"],
-            "sc_insitu": ["Ulysses"],
-            "icme_start_time": [pd.Timestamp("2000-01-01")],
-            "mo_start_time": [pd.NaT],
-            "mo_end_time": [pd.NaT],
-        })
+        data = pd.DataFrame(
+            {
+                "icmecat_id": ["TEST"],
+                "sc_insitu": ["Ulysses"],
+                "icme_start_time": [pd.Timestamp("2000-01-01")],
+                "mo_start_time": [pd.NaT],
+                "mo_end_time": [pd.NaT],
+            }
+        )
 
         with patch("pandas.read_csv", return_value=data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             expected = pd.Timestamp("2000-01-02")  # icme_start + 24h
@@ -193,6 +208,7 @@ class TestICMECATStrictIntervals:
         """strict_intervals only includes events with valid mo_end_time."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # strict_intervals should have fewer rows if there are NaT values
@@ -202,6 +218,7 @@ class TestICMECATStrictIntervals:
         """strict_intervals is subset of intervals."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert len(cat.strict_intervals) <= len(cat.intervals)
@@ -210,6 +227,7 @@ class TestICMECATStrictIntervals:
         """strict_intervals returns a copy, not a view."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             strict = cat.strict_intervals
@@ -226,6 +244,7 @@ class TestICMECATFilter:
         """filter() returns a new ICMECAT instance."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
             filtered = cat.filter("Ulysses")
 
@@ -236,6 +255,7 @@ class TestICMECATFilter:
         """filter() sets spacecraft property on new instance."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
             filtered = cat.filter("Ulysses")
 
@@ -246,6 +266,7 @@ class TestICMECATFilter:
         """filter() only includes events from specified spacecraft."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
             filtered = cat.filter("Ulysses")
 
@@ -255,6 +276,7 @@ class TestICMECATFilter:
         """filter() with unknown spacecraft returns empty catalog."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
             filtered = cat.filter("NONEXISTENT")
 
@@ -268,6 +290,7 @@ class TestICMECATContains:
         """contains() returns a boolean Series."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             times = pd.Series([pd.Timestamp("2000-01-12")])
@@ -280,12 +303,10 @@ class TestICMECATContains:
         """contains() preserves input index."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
-            times = pd.Series(
-                [pd.Timestamp("2000-01-12")],
-                index=["custom_index"]
-            )
+            times = pd.Series([pd.Timestamp("2000-01-12")], index=["custom_index"])
             result = cat.contains(times)
 
             assert result.index.tolist() == ["custom_index"]
@@ -294,54 +315,59 @@ class TestICMECATContains:
         """contains() returns True for times inside an interval."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # 2000-01-12 is inside first interval (01-10 to 01-15)
             times = pd.Series([pd.Timestamp("2000-01-12")])
             result = cat.contains(times)
 
-            assert result.iloc[0] == True
+            assert result.iloc[0]
 
     def test_contains_false_outside_interval(self, simple_icme_intervals):
         """contains() returns False for times outside all intervals."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # 2000-01-05 is before first interval
             times = pd.Series([pd.Timestamp("2000-01-05")])
             result = cat.contains(times)
 
-            assert result.iloc[0] == False
+            assert not result.iloc[0]
 
     def test_contains_boundary_start_inclusive(self, simple_icme_intervals):
         """contains() includes interval start time."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # Exactly at start of first interval
             times = pd.Series([pd.Timestamp("2000-01-10")])
             result = cat.contains(times)
 
-            assert result.iloc[0] == True
+            assert result.iloc[0]
 
     def test_contains_boundary_end_inclusive(self, simple_icme_intervals):
         """contains() includes interval end time."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             # Exactly at end of first interval
             times = pd.Series([pd.Timestamp("2000-01-15")])
             result = cat.contains(times)
 
-            assert result.iloc[0] == True
+            assert result.iloc[0]
 
     def test_contains_accepts_datetimeindex(self, simple_icme_intervals):
         """contains() accepts DatetimeIndex input."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             times = pd.DatetimeIndex(["2000-01-12", "2000-01-05"])
@@ -354,6 +380,7 @@ class TestICMECATContains:
         """contains() handles empty input gracefully."""
         with patch("pandas.read_csv", return_value=simple_icme_intervals):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             times = pd.Series([], dtype="datetime64[ns]")
@@ -370,6 +397,7 @@ class TestICMECATSummary:
         """summary() returns a DataFrame."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             result = cat.summary()
@@ -379,6 +407,7 @@ class TestICMECATSummary:
         """summary() includes event count."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             result = cat.summary()
@@ -389,6 +418,7 @@ class TestICMECATSummary:
         """summary() includes strict event count."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             result = cat.summary()
@@ -399,6 +429,7 @@ class TestICMECATSummary:
         """summary() includes duration statistics."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             result = cat.summary()
@@ -410,6 +441,7 @@ class TestICMECATSummary:
         """summary() includes spacecraft when filtered."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT(spacecraft="Ulysses")
 
             result = cat.summary()
@@ -424,6 +456,7 @@ class TestICMECATDunderMethods:
         """len(ICMECAT) returns number of events."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert len(cat) == len(cat.data)
@@ -432,6 +465,7 @@ class TestICMECATDunderMethods:
         """repr includes class name."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert "ICMECAT" in repr(cat)
@@ -440,6 +474,7 @@ class TestICMECATDunderMethods:
         """repr includes event count."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert str(len(cat)) in repr(cat)
@@ -448,6 +483,7 @@ class TestICMECATDunderMethods:
         """repr includes spacecraft when filtered."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT(spacecraft="Ulysses")
 
             assert "Ulysses" in repr(cat)
@@ -460,6 +496,7 @@ class TestICMECATEdgeCases:
         """Handles filtering to zero events gracefully."""
         with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT(spacecraft="NONEXISTENT")
 
             assert len(cat) == 0
@@ -468,16 +505,22 @@ class TestICMECATEdgeCases:
 
     def test_all_mo_end_time_missing(self):
         """Handles case where all mo_end_time are NaT."""
-        data = pd.DataFrame({
-            "icmecat_id": ["A", "B"],
-            "sc_insitu": ["Ulysses", "Ulysses"],
-            "icme_start_time": [pd.Timestamp("2000-01-01"), pd.Timestamp("2000-02-01")],
-            "mo_start_time": [pd.Timestamp("2000-01-02"), pd.NaT],
-            "mo_end_time": [pd.NaT, pd.NaT],
-        })
+        data = pd.DataFrame(
+            {
+                "icmecat_id": ["A", "B"],
+                "sc_insitu": ["Ulysses", "Ulysses"],
+                "icme_start_time": [
+                    pd.Timestamp("2000-01-01"),
+                    pd.Timestamp("2000-02-01"),
+                ],
+                "mo_start_time": [pd.Timestamp("2000-01-02"), pd.NaT],
+                "mo_end_time": [pd.NaT, pd.NaT],
+            }
+        )
 
         with patch("pandas.read_csv", return_value=data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             assert cat.intervals["interval_end"].notna().all()
@@ -485,19 +528,22 @@ class TestICMECATEdgeCases:
 
     def test_contains_with_no_strict_intervals(self):
         """contains() returns False when no strict intervals exist."""
-        data = pd.DataFrame({
-            "icmecat_id": ["A"],
-            "sc_insitu": ["Ulysses"],
-            "icme_start_time": [pd.Timestamp("2000-01-01")],
-            "mo_start_time": [pd.Timestamp("2000-01-02")],
-            "mo_end_time": [pd.NaT],
-        })
+        data = pd.DataFrame(
+            {
+                "icmecat_id": ["A"],
+                "sc_insitu": ["Ulysses"],
+                "icme_start_time": [pd.Timestamp("2000-01-01")],
+                "mo_start_time": [pd.Timestamp("2000-01-02")],
+                "mo_end_time": [pd.NaT],
+            }
+        )
 
         with patch("pandas.read_csv", return_value=data):
             from solarwindpy.solar_activity.icme import ICMECAT
+
             cat = ICMECAT()
 
             times = pd.Series([pd.Timestamp("2000-01-05")])
             result = cat.contains(times)
 
-            assert result.iloc[0] == False
+            assert not result.iloc[0]
