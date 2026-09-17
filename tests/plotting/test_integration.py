@@ -16,21 +16,6 @@ import warnings
 matplotlib.use("Agg")
 plt.ioff()
 
-# Import SolarWindPy components
-import solarwindpy.plotting.base as base_plotting
-import solarwindpy.plotting.histograms as hist_plotting
-import solarwindpy.plotting.tools as plot_tools
-import solarwindpy.plotting.labels as labels
-
-try:
-    import solarwindpy.plotting.scatter as scatter_plotting
-    import solarwindpy.plotting.spiral as spiral_plotting
-    import solarwindpy.plotting.orbits as orbit_plotting
-
-    ADVANCED_IMPORTS = True
-except ImportError:
-    ADVANCED_IMPORTS = False
-
 
 class TestBasicIntegrationWorkflows:
     """Test basic integration workflows across plotting modules."""
@@ -221,9 +206,7 @@ class TestBasicIntegrationWorkflows:
         data_normalized = [
             self.data[param] / self.data[param].std() for param in parameters
         ]
-        box_plot = ax_box.boxplot(
-            data_normalized, labels=[p.title() for p in parameters]
-        )
+        ax_box.boxplot(data_normalized, tick_labels=[p.title() for p in parameters])
         ax_box.set_ylabel("Normalized Value")
         ax_box.set_title("Parameter Distributions")
         ax_box.grid(True, alpha=0.3)
@@ -312,10 +295,9 @@ class TestLabelIntegrationWorkflow:
             species = ["H", "He", "C", "O", "Fe"]
 
             # Mass-to-charge ratio plot
-            mq_ratios = [1.0, 2.0, 6.0, 8.0, 28.0]  # Simplified M/Q ratios
             counts = np.random.poisson(100, len(species))
 
-            bars = axes[0, 0].bar(species, counts, alpha=0.7, color="skyblue")
+            axes[0, 0].bar(species, counts, alpha=0.7, color="skyblue")
             axes[0, 0].set_xlabel(str(mass_per_charge))  # Use chemistry label
             axes[0, 0].set_ylabel("Counts")
             axes[0, 0].set_title("Ion Mass-to-Charge Distribution")
@@ -566,7 +548,7 @@ class TestErrorHandlingIntegration:
             axes[1].grid(True, alpha=0.3)
 
             # Forward filled data
-            data_ffill = data.fillna(method="ffill")
+            data_ffill = data.ffill()
             axes[2].plot(
                 data_ffill.index, data_ffill["param1"], "b-", label="param1 (ffill)"
             )

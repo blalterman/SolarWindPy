@@ -260,7 +260,7 @@ class TestSolarWindPyPlottingVisualValidation:
             self.temperature / np.mean(self.temperature),
         ]
         box_plot = axes[1, 1].boxplot(
-            data_for_box, labels=["Density", "Velocity", "Temperature"]
+            data_for_box, tick_labels=["Density", "Velocity", "Temperature"]
         )
         axes[1, 1].set_ylabel("Normalized Value")
         axes[1, 1].set_title("Parameter Distributions")
