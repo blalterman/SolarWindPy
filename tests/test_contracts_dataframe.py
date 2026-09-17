@@ -81,49 +81,51 @@ class TestMultiIndexStructure:
 
     def test_multiindex_level_names(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify MultiIndex has correct level names."""
-        assert sample_plasma_df.columns.names == ["M", "C", "S"], (
-            "Column MultiIndex must have names ['M', 'C', 'S']"
-        )
+        assert sample_plasma_df.columns.names == [
+            "M",
+            "C",
+            "S",
+        ], "Column MultiIndex must have names ['M', 'C', 'S']"
 
     def test_multiindex_level_count(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify MultiIndex has exactly 3 levels."""
-        assert sample_plasma_df.columns.nlevels == 3, (
-            "Column MultiIndex must have exactly 3 levels"
-        )
+        assert (
+            sample_plasma_df.columns.nlevels == 3
+        ), "Column MultiIndex must have exactly 3 levels"
 
     def test_datetime_index(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify row index is DatetimeIndex."""
-        assert isinstance(sample_plasma_df.index, pd.DatetimeIndex), (
-            "Row index must be DatetimeIndex"
-        )
+        assert isinstance(
+            sample_plasma_df.index, pd.DatetimeIndex
+        ), "Row index must be DatetimeIndex"
 
     def test_monotonic_increasing_index(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify datetime index is monotonically increasing."""
-        assert sample_plasma_df.index.is_monotonic_increasing, (
-            "DatetimeIndex must be monotonically increasing"
-        )
+        assert (
+            sample_plasma_df.index.is_monotonic_increasing
+        ), "DatetimeIndex must be monotonically increasing"
 
     def test_no_duplicate_columns(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify no duplicate columns exist."""
-        assert not sample_plasma_df.columns.duplicated().any(), (
-            "DataFrame must not have duplicate columns"
-        )
+        assert (
+            not sample_plasma_df.columns.duplicated().any()
+        ), "DataFrame must not have duplicate columns"
 
     def test_bfield_empty_species(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify magnetic field uses empty string for species."""
         b_columns = sample_plasma_df.xs("b", axis=1, level="M").columns
         species_values = b_columns.get_level_values("S")
-        assert all(s == "" for s in species_values), (
-            "Magnetic field species level must be empty string"
-        )
+        assert all(
+            s == "" for s in species_values
+        ), "Magnetic field species level must be empty string"
 
     def test_density_empty_component(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify scalar quantities use empty string for component."""
         n_columns = sample_plasma_df.xs("n", axis=1, level="M").columns
         component_values = n_columns.get_level_values("C")
-        assert all(c == "" for c in component_values), (
-            "Density component level must be empty string"
-        )
+        assert all(
+            c == "" for c in component_values
+        ), "Density component level must be empty string"
 
 
 # ==============================================================================
@@ -136,9 +138,10 @@ class TestIonDataStructure:
 
     def test_ion_mc_column_names(self, sample_ion_df: pd.DataFrame) -> None:
         """Verify Ion data uses ['M', 'C'] column names."""
-        assert sample_ion_df.columns.names == ["M", "C"], (
-            "Ion data must have column names ['M', 'C']"
-        )
+        assert sample_ion_df.columns.names == [
+            "M",
+            "C",
+        ], "Ion data must have column names ['M', 'C']"
 
     def test_required_columns_present(self, sample_ion_df: pd.DataFrame) -> None:
         """Verify required columns for Ion class."""
@@ -150,13 +153,11 @@ class TestIonDataStructure:
             ("w", "par"),
             ("w", "per"),
         ]
-        assert pd.Index(required).isin(sample_ion_df.columns).all(), (
-            "Ion data must have all required columns"
-        )
+        assert (
+            pd.Index(required).isin(sample_ion_df.columns).all()
+        ), "Ion data must have all required columns"
 
-    def test_ion_extraction_from_mcs_data(
-        self, sample_plasma_df: pd.DataFrame
-    ) -> None:
+    def test_ion_extraction_from_mcs_data(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify Ion correctly extracts species from ['M', 'C', 'S'] data."""
         # Should extract 'p1' data via xs()
         p1_data = sample_plasma_df.xs("p1", axis=1, level="S")
@@ -173,9 +174,7 @@ class TestIonDataStructure:
 class TestCrossSectionPatterns:
     """Contract tests for .xs() usage patterns."""
 
-    def test_xs_extracts_single_species(
-        self, sample_plasma_df: pd.DataFrame
-    ) -> None:
+    def test_xs_extracts_single_species(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify .xs() extracts single species correctly."""
         p1_data = sample_plasma_df.xs("p1", axis=1, level="S")
 
@@ -183,18 +182,14 @@ class TestCrossSectionPatterns:
         assert p1_data.columns.nlevels == 2
         assert p1_data.columns.names == ["M", "C"]
 
-    def test_xs_extracts_measurement_type(
-        self, sample_plasma_df: pd.DataFrame
-    ) -> None:
+    def test_xs_extracts_measurement_type(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify .xs() extracts measurement type correctly."""
         v_data = sample_plasma_df.xs("v", axis=1, level="M")
 
         # Should have velocity components
         assert len(v_data.columns) >= 3  # x, y, z for p1
 
-    def test_xs_with_tuple_full_path(
-        self, sample_plasma_df: pd.DataFrame
-    ) -> None:
+    def test_xs_with_tuple_full_path(self, sample_plasma_df: pd.DataFrame) -> None:
         """Verify .xs() with tuple for full path selection."""
         # Select density for p1
         n_p1 = sample_plasma_df.xs(("n", "", "p1"), axis=1)
@@ -243,9 +238,7 @@ class TestReorderLevelsBehavior:
         )
         shuffled = pd.DataFrame([[1, 2]], columns=columns)
 
-        reordered = shuffled.reorder_levels(["M", "C", "S"], axis=1).sort_index(
-            axis=1
-        )
+        reordered = shuffled.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
 
         expected = pd.MultiIndex.from_tuples(
             [("n", "", "p1"), ("v", "x", "p1")], names=["M", "C", "S"]
@@ -314,9 +307,9 @@ class TestColumnDuplicationPrevention:
         df1 = pd.DataFrame([[1, 2]], columns=cols1)
         df2 = pd.DataFrame([[3, 4]], columns=cols2)
 
-        assert df2.columns.isin(df1.columns).any(), (
-            "Should detect overlapping column ('n', '', 'p1')"
-        )
+        assert df2.columns.isin(
+            df1.columns
+        ).any(), "Should detect overlapping column ('n', '', 'p1')"
 
     def test_duplicated_filters_duplicates(self) -> None:
         """Verify .duplicated() can filter duplicate columns."""

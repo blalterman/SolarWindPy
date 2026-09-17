@@ -520,9 +520,7 @@ This plan should advance SolarWindPy's mission to provide accurate, efficient to
                 impact_level = (
                     "High"
                     if info["weight"] >= 0.8
-                    else "Medium"
-                    if info["weight"] >= 0.5
-                    else "Low"
+                    else "Medium" if info["weight"] >= 0.5 else "Low"
                 )
                 analysis.append(
                     f"- **{module}** ({impact_level} Impact): {info['description']}"

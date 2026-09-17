@@ -19,8 +19,7 @@ def mock_icmecat_csv_data():
     data = {
         "icmecat_id": [f"ICME_{i:04d}" for i in range(n_events)],
         "sc_insitu": np.random.choice(
-            ["Ulysses", "Wind", "STEREO-A", "STEREO-B", "ACE"],
-            n_events
+            ["Ulysses", "Wind", "STEREO-A", "STEREO-B", "ACE"], n_events
         ),
         "icme_start_time": [
             base_date + pd.Timedelta(days=i * 30 + np.random.randint(0, 10))
@@ -31,8 +30,11 @@ def mock_icmecat_csv_data():
             for i in range(n_events)
         ],
         "mo_end_time": [
-            base_date + pd.Timedelta(days=i * 30 + np.random.randint(15, 25))
-            if np.random.random() > 0.1 else pd.NaT  # 10% missing
+            (
+                base_date + pd.Timedelta(days=i * 30 + np.random.randint(15, 25))
+                if np.random.random() > 0.1
+                else pd.NaT
+            )  # 10% missing
             for i in range(n_events)
         ],
         "mo_sc_heliodistance": np.random.uniform(0.7, 5.4, n_events),
@@ -46,33 +48,34 @@ def mock_icmecat_csv_data():
 def sample_observation_times():
     """Create sample observation timestamps for containment testing."""
     return pd.Series(
-        pd.date_range("2000-01-01", "2005-12-31", freq="4min"),
-        name="time"
+        pd.date_range("2000-01-01", "2005-12-31", freq="4min"), name="time"
     )
 
 
 @pytest.fixture
 def simple_icme_intervals():
     """Simple, predictable ICME intervals for testing containment."""
-    return pd.DataFrame({
-        "icmecat_id": ["TEST_001", "TEST_002", "TEST_003"],
-        "sc_insitu": ["Ulysses", "Ulysses", "Ulysses"],
-        "icme_start_time": [
-            pd.Timestamp("2000-01-10"),
-            pd.Timestamp("2000-02-15"),
-            pd.Timestamp("2000-03-20"),
-        ],
-        "mo_start_time": [
-            pd.Timestamp("2000-01-11"),
-            pd.Timestamp("2000-02-16"),
-            pd.Timestamp("2000-03-21"),
-        ],
-        "mo_end_time": [
-            pd.Timestamp("2000-01-15"),
-            pd.Timestamp("2000-02-20"),
-            pd.NaT,  # Missing - will use fallback
-        ],
-        "mo_sc_heliodistance": [1.0, 2.0, 3.0],
-        "mo_sc_lat_heeq": [10.0, 20.0, 30.0],
-        "mo_sc_long_heeq": [100.0, 200.0, 300.0],
-    })
+    return pd.DataFrame(
+        {
+            "icmecat_id": ["TEST_001", "TEST_002", "TEST_003"],
+            "sc_insitu": ["Ulysses", "Ulysses", "Ulysses"],
+            "icme_start_time": [
+                pd.Timestamp("2000-01-10"),
+                pd.Timestamp("2000-02-15"),
+                pd.Timestamp("2000-03-20"),
+            ],
+            "mo_start_time": [
+                pd.Timestamp("2000-01-11"),
+                pd.Timestamp("2000-02-16"),
+                pd.Timestamp("2000-03-21"),
+            ],
+            "mo_end_time": [
+                pd.Timestamp("2000-01-15"),
+                pd.Timestamp("2000-02-20"),
+                pd.NaT,  # Missing - will use fallback
+            ],
+            "mo_sc_heliodistance": [1.0, 2.0, 3.0],
+            "mo_sc_lat_heeq": [10.0, 20.0, 30.0],
+            "mo_sc_long_heeq": [100.0, 200.0, 300.0],
+        }
+    )
