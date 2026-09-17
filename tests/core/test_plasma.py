@@ -108,6 +108,11 @@ class PlasmaTestBase(ABC):
         return pd.Series({s: out[s] for s in self.stuple})
 
     def test_ions(self):
+        r"""Plasma exposes one Ion per species, built from the same DataFrame.
+
+        ON FAILURE: the code is wrong; `Plasma` is not building its per-species
+        `Ion` objects from the data it was given.
+        """
         ions_ = pd.Series({s: ions.Ion(self.data, s) for s in self.stuple})
         pdt.assert_index_equal(ions_.index, self.object_testing.ions.index)
         for k, i in ions_.items():
@@ -118,7 +123,11 @@ class PlasmaTestBase(ABC):
             )
 
     def test_conform_species(self):
-        r"""Just test that the species is a valid input."""
+        r"""Just test that the species is a valid input.
+
+        ON FAILURE: the code is wrong; `_conform_species` must accept "+"-joined
+        species and reject comma-joined ones.
+        """
         slist = (
             "a",
             "e",
@@ -163,6 +172,11 @@ class PlasmaTestBase(ABC):
                     self.object_testing._conform_species(*s.split(","))
 
     def test_chk_species_success(self):
+        r"""`_chk_species` accepts every species, subset, and "+"-sum this plasma holds.
+
+        ON FAILURE: the code is wrong; `_chk_species` is rejecting a species the
+        plasma actually contains.
+        """
         self.assertEqual(self.stuple, self.object_testing._chk_species(*self.stuple))
 
         # Ensure exception isn't raised for plasma's individual species.
@@ -195,21 +209,39 @@ class PlasmaTestBase(ABC):
         pass
 
     def test_species(self):
+        r"""`Plasma.species` returns the constructor's species as a sorted tuple.
+
+        ON FAILURE: the code is wrong.
+        """
         self.assertEqual(self.object_testing.species, self.stuple)
 
     def test__set_species(self):
+        r"""Constructing a Plasma without species raises rather than yielding an empty one.
+
+        ON FAILURE: the code is wrong.
+        """
         with self.assertRaisesRegex(
             ValueError, "You must specify a species to instantiate a Plasma."
         ):
             plasma.Plasma(self.object_testing.data)
 
     def test_bfield(self):
+        r"""`b` and `bfield` both return the spacecraft-frame vector from the `b` columns.
+
+        ON FAILURE: the code is wrong.
+        """
         b = self.data.b.xs("", axis=1, level="S").loc[:, ["x", "y", "z"]]
         self.assertEqual(vector.BField(b), self.object_testing.bfield)
         self.assertEqual(vector.BField(b), self.object_testing.b)
         self.assertEqual(self.object_testing.b, self.object_testing.bfield)
 
     def test_number_density(self):
+        r"""Plasma's number density per species, and summed over species, matches the ions.
+
+        ON FAILURE: the code is wrong in `Plasma`'s species selection or in its sum
+        over species. The expectation comes from `Ion.number_density`, so a defect
+        common to both is not caught here; `tests/core/test_ions.py` covers that.
+        """
         ot = self.object_testing
 
         ions_ = pd.concat(
@@ -249,6 +281,12 @@ class PlasmaTestBase(ABC):
                 )
 
     def test_mass_density(self):
+        r"""Plasma's mass density per species, and summed over species, matches the ions.
+
+        ON FAILURE: the code is wrong in `Plasma`'s species selection or in its sum
+        over species. The expectation comes from `Ion.mass_density`, so a defect
+        common to both is not caught here; `tests/core/test_ions.py` covers that.
+        """
         ot = self.object_testing
 
         ions_ = pd.concat(
@@ -288,6 +326,12 @@ class PlasmaTestBase(ABC):
                 )
 
     def test_thermal_speed(self):
+        r"""Thermal speeds match the ions and satisfy the scalar-moment identity.
+
+        ON FAILURE: the code is wrong, unless the author rejects the moment identity
+        w_scalar^2 = (2 w_perp^2 + w_par^2) / 3 that this test recomputes from the
+        parallel and perpendicular components.
+        """
         ot = self.object_testing
         ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
@@ -322,7 +366,13 @@ class PlasmaTestBase(ABC):
                     ot.thermal_speed(",".join(s))
 
     def test_pth(self):
-        print_inline_debug_info = True
+        r"""Plasma's thermal pressure per species, and summed over species, matches the ions.
+
+        ON FAILURE: `Plasma.pth` and `Ion.pth` disagree, or `Plasma`'s sum over
+        species is wrong. This test cannot say which of the two is at fault, and a
+        defect common to both passes it.
+        """
+        print_inline_debug_info = False
         # Test that Plasma returns each Ion plasma independently.
         ot = self.object_testing
 
@@ -352,6 +402,12 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(this_ion, ot.pth("+".join(s)))
 
     def test_temperature(self):
+        r"""Plasma's temperature per species, and summed over species, matches the ions.
+
+        ON FAILURE: `Plasma.temperature` and `Ion.temperature` disagree, or
+        `Plasma`'s sum over species is wrong. This test cannot say which of the two
+        is at fault, and a defect common to both passes it.
+        """
         # Test that Plasma returns each Ion plasma independently.
         ions_ = {s: self.object_testing.ions[s].temperature for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
@@ -373,6 +429,13 @@ class PlasmaTestBase(ABC):
                 )
 
     def test_beta(self):
+        r"""Plasma beta equals 2 mu_0 p_th / B^2, with the unit conversion built here.
+
+        ON FAILURE: the code is wrong in `Plasma.beta`'s unit conversion (pPa and nT
+        to SI, coefficient recomputed here from scipy's mu_0) or in its sum over
+        species. The pressures come from `Ion.pth`, so a defect there is not caught
+        here.
+        """
         pth = {s: self.object_testing.ions[s].pth for s in self.stuple}
         pth = pd.concat(pth, axis=1, names=["S"], sort=True)
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
@@ -399,6 +462,11 @@ class PlasmaTestBase(ABC):
                 pdt.assert_frame_equal(this_ion, self.object_testing.beta("+".join(s)))
 
     def test_anisotropy(self):
+        r"""Anisotropy is (w_perp/w_par)^2 per species and p_perp/p_par for a summed species.
+
+        ON FAILURE: the code is wrong; both forms are recomputed here from the
+        underlying thermal-speed columns.
+        """
         ot = self.object_testing
 
         # Test individual components. Should return RT values.
@@ -438,6 +506,11 @@ class PlasmaTestBase(ABC):
                 pdt.assert_series_equal(ani_sum, ot.anisotropy("+".join(s)))
 
     def test_velocity(self):
+        r"""Bulk velocity, its sqrt(m/q) projection, and the centre-of-mass velocity.
+
+        ON FAILURE: the code is wrong; the projection factor and the mass-density
+        weighted centre of mass are both recomputed here from the data.
+        """
         ot = self.object_testing
         for s in self.species_combinations:
             if len(s) == 1:
@@ -512,6 +585,11 @@ class PlasmaTestBase(ABC):
                     ot.v("+".join(s), project_m2q=True)
 
     def test_dv(self):
+        r"""Differential flow between two species and between a species and the CoM.
+
+        ON FAILURE: the code is wrong; dv is recomputed here as the component-wise
+        difference of the two bulk velocities.
+        """
         msg = "identically zero"
         for s in self.stuple:
             with self.assertRaisesRegex(NotImplementedError, msg):
@@ -706,6 +784,11 @@ class PlasmaTestBase(ABC):
                     ot.dv(scomma, ssum, project_m2q=True)
 
     def test_ca(self):
+        r"""Alfven speed c_A = B / sqrt(mu_0 rho).
+
+        ON FAILURE: the code is wrong; the expectation is recomputed here from
+        scipy's mu_0 and the CODATA species masses, independently of `Plasma`.
+        """
         tk = ["x", "y", "z"]
         b = self.data.b.loc[:, tk].pow(2).sum(axis=1).pipe(np.sqrt) * 1e-9
         n = self.data.n.loc[:, ""].loc[:, self.stuple] * 1e6
@@ -735,6 +818,14 @@ class PlasmaTestBase(ABC):
                 )
 
     def test_afsq(self):
+        r"""Squared anisotropy factor AF^2 = 1 + mu_0 (p_perp - p_par) / B^2.
+
+        ON FAILURE: the code is wrong, unless the author rejects the form of AF^2
+        recomputed here. Only the `pdynamic=False` branch is exercised, so the
+        -p_dv term in `Plasma.afsq` is not covered. That expression carries no
+        citation in either this test or `plasma.py`, so a disagreement in the
+        expression itself is the author's call.
+        """
         slist = list(self.stuple)
         tk = pd.IndexSlice[["par", "per"], slist]
 
@@ -780,6 +871,11 @@ class PlasmaTestBase(ABC):
                 pdt.assert_series_equal(left, self.object_testing.afsq("+".join(combo)))
 
     def test_caani(self):
+        r"""Anisotropy-corrected Alfven speed C_A;Ani = C_A sqrt(AFSQ).
+
+        ON FAILURE: the code is wrong; both factors are recomputed here from
+        scipy's mu_0 and the CODATA species masses.
+        """
         combos = [x for x in self.species_combinations]
         masses = self.mass
         n = self.data.n.xs("", axis=1, level="C") * 1e6
@@ -832,6 +928,13 @@ class PlasmaTestBase(ABC):
                 self.object_testing.caani("+".join(combo), pdynamic=True)
 
     def test_lnlambda(self):
+        r"""Coulomb logarithm between two species, and its species-argument contract.
+
+        ON FAILURE: `Plasma.lnlambda` disagrees with the expression in its own
+        docstring, which this test recomputes. The additive constant 29.9 carries no
+        citation in either the test or `plasma.py`, so a failure in that constant
+        alone is for the author to adjudicate.
+        """
         ot = self.object_testing
         regex_msg = (
             "`lnlambda` can only calculate with individual s0 " "and s1 species."
@@ -955,6 +1058,10 @@ class PlasmaTestBase(ABC):
         Hernandez & Marsch (JGR 1985, doi:10.1029/JA090iA11p11062) Eq.
 
         (18).
+
+        ON FAILURE: the code is wrong, unless the author rejects this transcription.
+        The `both_species=False` path is Eq. (18); the default `both_species=True`
+        path, which this test also asserts, is Eq. (23).
         """
         from scipy.special import erf
         from scipy import constants
@@ -1031,6 +1138,10 @@ class PlasmaTestBase(ABC):
             )
 
     def test_spacecraft_in_plasma(self):
+        r"""`set_spacecraft` stores the spacecraft and exposes it as `spacecraft` and `sc`.
+
+        ON FAILURE: the code is wrong.
+        """
         sc_data = base.TestData().spacecraft_data
 
         Wind = pd.concat(
@@ -1071,6 +1182,11 @@ class PlasmaTestBase(ABC):
         ot.set_spacecraft(None)
 
     def test_nc_without_spacecraft(self):
+        r"""`nc` raises when no spacecraft is set, since it has no expansion time.
+
+        ON FAILURE: the code is wrong; a collisional age computed without an
+        expansion time would be silently meaningless.
+        """
         ot = self.object_testing
         ot.set_spacecraft(None)
         combos2 = [x for x in self.species_combinations if len(x) == 2]
@@ -1081,6 +1197,12 @@ class PlasmaTestBase(ABC):
                 ot.nc(sa, sb)
 
     def test_nc_with_spacecraft(self):
+        r"""Collisional age is the collision frequency times the expansion time.
+
+        ON FAILURE: the code is wrong in `nc`'s expansion-time weighting. The
+        collision frequency is taken from `Plasma.nuc`, so a defect there surfaces in
+        `test_nuc`, not here.
+        """
         if len(self.stuple) == 1:
             # We only test plasmas w/ > 1 species.
             return None
@@ -1195,6 +1317,12 @@ class PlasmaTestBase(ABC):
             ot.nc(sa, combo)
 
     def test_estimate_electrons(self):
+        r"""Electron moments follow from charge neutrality and zero net current.
+
+        ON FAILURE: the code is wrong; n_e, v_e and w_e are recomputed here from
+        charge neutrality, zero net current, and the CODATA electron-proton mass
+        ratio, independently of `Plasma`.
+        """
         stuple = self.stuple
 
         if "p" not in self.stuple and "p1" not in self.stuple:
@@ -1264,6 +1392,11 @@ class PlasmaTestBase(ABC):
             )
 
     def test_pdynamic_without_m2q_projection(self):
+        r"""Dynamic pressure p_dv = (1/2) sum_s rho_s (v_s - v_com)^2.
+
+        ON FAILURE: the code is wrong; the expectation is recomputed here from
+        scipy's m_p and the data.
+        """
         slist = list(self.stuple)
 
         if len(slist) == 1:
@@ -1352,6 +1485,11 @@ class PlasmaTestBase(ABC):
                 ot.pdynamic(",".join(combo), scom)
 
     def test_pdynamic_with_m2q_projection(self):
+        r"""Dynamic pressure in reduced-mass form, p_dv = (1/2) mu dv^2.
+
+        ON FAILURE: the code is wrong in the reduced-mass form. The projected dv is
+        taken from `Plasma.dv`, so a defect there surfaces in `test_dv`, not here.
+        """
         slist = list(self.stuple)
 
         if len(slist) == 1:
@@ -1437,6 +1575,11 @@ class PlasmaTestBase(ABC):
                 ot.pdynamic(comma, scom, project_m2q=True)
 
     def test_heatflux(self):
+        r"""Parallel heat flux q_par = rho (dv_par^3 + (3/2) dv_par w_par^2).
+
+        ON FAILURE: the code is wrong; the expectation is recomputed here from
+        scipy's m_p, the field direction, and the centre-of-mass velocity.
+        """
         print_inline_debug_info = False
 
         # q = rho (dv^3 + (3/2) dv w^2)
@@ -1532,6 +1675,10 @@ class PlasmaTestBase(ABC):
         pdt.assert_series_equal(ot.heat_flux(scom), ot.qpar(scom))
 
     def test_set_auxiliary_data(self):
+        r"""Auxiliary data round-trips through `aux`, clears to None, and rejects dupes.
+
+        ON FAILURE: the code is wrong.
+        """
         ot = self.object_testing
         data = base.TestData().combined_data
         drop = data.columns.isin(ot.data.columns)
@@ -1548,6 +1695,10 @@ class PlasmaTestBase(ABC):
             ot.set_auxiliary_data(ot.data)
 
     def test_epoch(self):
+        r"""Plasma preserves the DatetimeIndex it was constructed with.
+
+        ON FAILURE: the code is wrong.
+        """
         epoch = self.data.index
         self.assertIsInstance(epoch, pd.DatetimeIndex)
 
@@ -1556,6 +1707,12 @@ class PlasmaTestBase(ABC):
         pdt.assert_index_equal(epoch, ot.data.index)
 
     def test_build_alfvenic_turbulence(self):
+        r"""Plasma hands the right velocity, density and label to AlfvenicTurbulence.
+
+        ON FAILURE: the code is wrong in `Plasma`'s dispatch. This test checks the
+        dispatch only; the turbulence quantities themselves are covered in
+        `tests/core/test_alfvenic_turbulence.py`.
+        """
         species = self.species
         slist = species.split("+")
         ns = len(slist)
@@ -1746,6 +1903,11 @@ class PlasmaTestBase(ABC):
             raise NotImplementedError(msg % (slist))
 
     def test_drop_species(self):
+        r"""`drop_species` returns a new Plasma without the dropped species.
+
+        ON FAILURE: the code is wrong; the result must keep the shared columns and
+        the surviving species, and must not mutate the original.
+        """
         print_inline_debug_info = True  # noqa: F841
 
         ot = self.object_testing
@@ -1789,6 +1951,12 @@ class PlasmaTestBase(ABC):
             self.assertEqual(ot.species, tuple(slist))
 
     def test_VDFratio(self):
+        r"""ln(f_beam/f_core) evaluated at the beam velocity for bi-Maxwellian VDFs.
+
+        ON FAILURE: the code is wrong, unless the author rejects the bi-Maxwellian
+        ratio derived in the `vdf_ratio` docstring, which this test recomputes from
+        the densities, thermal speeds, and field-projected differential flow.
+        """
         ot = self.object_testing
         slist = [s for s in self.species_combinations if len(s) == 2]
         sother = [sisj[::-1] for sisj in slist]
@@ -1864,6 +2032,11 @@ class PlasmaTestBase(ABC):
                 ot.vdf_ratio(scomma, ssum)
 
     def test_specific_entropy(self):
+        r"""Specific entropy S = p_th rho^-gamma with gamma = 5/3.
+
+        ON FAILURE: the code is wrong, per Siscoe (1983),
+        doi:10.1007/978-94-009-7194-3_2, cited in the `specific_entropy` docstring.
+        """
         ot = self.object_testing
 
         gamma = 5.0 / 3.0
@@ -1921,6 +2094,9 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             "a+p1",
@@ -1947,6 +2123,9 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             "a+p1",
@@ -1973,6 +2152,9 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             "a+p1",
@@ -1999,6 +2181,9 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             ("a", "p2"),
@@ -2026,6 +2211,9 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             ("a", "p1"),
@@ -2053,6 +2241,9 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             "a",
@@ -2079,6 +2270,9 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing._chk_species(*s)
+
+        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
+        plasma does not hold.
         """
         bad_species = [
             "a+e",
