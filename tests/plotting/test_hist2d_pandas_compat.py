@@ -12,6 +12,22 @@ import pytest
 from solarwindpy.plotting.hist2d import Hist2D
 
 
+# UNTESTED, DELIBERATELY -- AWAITING A DECISION, NOT FORGOTTEN.
+#
+# Density normalization (axnorm "d") on a log-scaled axis. `_axis_normalizer`
+# divides by `10 ** dx`, where dx is a bin's width in log10 space. That is
+# neither the bin's width in linear space (10**right - 10**left) nor its width
+# in log space (dx), so the result integrates to 1 under neither measure --
+# measured 38.2 and 0.0159 respectively on decade bins.
+#
+# There is no test here because writing one means choosing which of the two a
+# solar-wind density plot is meant to be, and that is the author's call, not
+# the test suite's. Both candidate fixes are one-line changes at
+# hist2d.py:191-194; once one is chosen, the corresponding integral belongs
+# here as an ordinary assertion alongside the linear-axis cases below, which
+# are unaffected and are checked normally.
+
+
 class TestHist2DPandasCompatibility:
     """Test pandas 2.3.1+ compatibility for Hist2D axis normalization."""
 
@@ -403,6 +419,132 @@ class TestHist2DPandasCompatibility:
         assert np.isclose(
             total_integral, 1.0, atol=0.01
         ), f"Count density integral is {total_integral}, expected 1.0"
+
+
+class TestCallableAxisNormalization:
+    """The undocumented ``(kind, fcn)`` form of ``axnorm``.
+
+    ``_axis_normalizer`` accepts a 2-tuple naming an axis and an aggregation to
+    divide by. The source marks it as undocumented and untested (TODO,
+    20250804), so the tests below assert only identities that follow from what
+    "divide each column by its sum" means -- not from what the code does.
+
+    ``set_axnorm`` rejects anything but the documented strings, so these cases
+    are reached by setting the private attribute, the way an `OrbitHist2D`-style
+    caller would have to.
+    """
+
+    def setup_method(self):
+        np.random.seed(7)
+        n = 800
+        self.x_data = pd.Series(np.random.normal(0, 1, n), name="x")
+        self.y_data = pd.Series(np.random.normal(0, 1, n), name="y")
+
+    def test_normalizing_by_column_sum_makes_each_column_sum_to_one(self):
+        """Dividing a column by its own sum leaves a column summing to 1.
+
+        ON FAILURE: the code is wrong. This is arithmetic, not a convention.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=6)
+        hist._axnorm = ("c", "sum")
+
+        columns = hist.agg().unstack("x").sum(axis=0)
+        np.testing.assert_allclose(columns.values, 1.0)
+
+    def test_normalizing_by_row_sum_makes_each_row_sum_to_one(self):
+        """Dividing a row by its own sum leaves a row summing to 1.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=6)
+        hist._axnorm = ("r", "sum")
+
+        rows = hist.agg().unstack("x").sum(axis=1)
+        np.testing.assert_allclose(rows.values, 1.0)
+
+    def test_column_max_form_agrees_with_the_documented_column_norm(self):
+        """``("c", "max")`` and ``"c"`` are the same normalisation spelled twice.
+
+        The documented ``"c"`` divides each column by its maximum, so the
+        callable form naming ``max`` must agree with it. Neither expectation is
+        read off a run: each is derived from the other.
+
+        ON FAILURE: the code is wrong -- the two spellings have diverged.
+        """
+        documented = Hist2D(self.x_data, self.y_data, nbins=6, axnorm="c")
+
+        callable_form = Hist2D(self.x_data, self.y_data, nbins=6)
+        callable_form._axnorm = ("c", "max")
+
+        pd.testing.assert_series_equal(
+            callable_form.agg(), documented.agg(), check_names=False
+        )
+
+    def test_unknown_axis_in_the_callable_form_is_rejected(self):
+        """Only "c" and "r" name an axis; anything else raises.
+
+        ON FAILURE: the code is wrong -- an unrecognised axis must not fall
+        through to an unnormalised result.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=6)
+        hist._axnorm = ("q", "sum")
+
+        with pytest.raises(ValueError, match="Unrecognized axnorm with function"):
+            hist.agg()
+
+
+class TestNormalizationBounds:
+    """Bounds that follow from each normalisation's definition.
+
+    ``"c"``, ``"r"`` and ``"t"`` each divide by a maximum, so no value can
+    exceed 1 and the maximum itself must be attained.
+    """
+
+    def setup_method(self):
+        np.random.seed(8)
+        n = 900
+        self.x_data = pd.Series(np.random.normal(0, 1, n), name="x")
+        self.y_data = pd.Series(np.random.normal(0, 1, n), name="y")
+
+    @pytest.mark.parametrize("axnorm", ["c", "r", "t"])
+    def test_dividing_by_a_maximum_bounds_the_result_by_one(self, axnorm):
+        """Values lie in [0, 1] and 1 is attained.
+
+        ON FAILURE: the code is wrong -- either it is not dividing by the
+        maximum, or it is dividing by the wrong axis' maximum.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=8, axnorm=axnorm)
+        values = hist.agg().dropna()
+
+        assert values.min() >= 0.0
+        assert values.max() <= 1.0
+        assert np.isclose(values.max(), 1.0)
+
+    @pytest.mark.parametrize("axnorm", ["c", "r", "t", "d", "cd", "rd"])
+    def test_normalization_is_invariant_to_duplicating_the_sample(self, axnorm):
+        """Every normalisation divides out the sample size.
+
+        Concatenating the data with an exact copy of itself doubles every bin
+        count on the same bins, so a normalised grid must come back unchanged.
+        That is what "normalised" means, and it is checked here without knowing
+        any particular value.
+
+        ON FAILURE: the code is wrong -- the result still depends on how much
+        data happened to be collected.
+        """
+        edges = np.round(np.linspace(-3.0, 3.0, 9), 5)
+
+        single = Hist2D(self.x_data, self.y_data, nbins=[edges, edges], axnorm=axnorm)
+        doubled = Hist2D(
+            pd.concat([self.x_data, self.x_data], ignore_index=True),
+            pd.concat([self.y_data, self.y_data], ignore_index=True),
+            nbins=[edges, edges],
+            axnorm=axnorm,
+        )
+
+        pd.testing.assert_series_equal(
+            doubled.agg(), single.agg(), check_names=False, rtol=1e-10
+        )
 
 
 if __name__ == "__main__":
