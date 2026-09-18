@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+g01e21b346 documentation</title>
+  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+gba71c0f03 documentation</title>
   <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
 
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
@@ -19,7 +19,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=cbd7f858"></script>
+      <script src="../../../../_static/documentation_options.js?v=bb967afd"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -315,6 +315,8 @@
 <span></span><span class="sd">&quot;&quot;&quot;ICMECAT class for accessing the HELIO4CAST ICME catalog.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -325,25 +327,51 @@
     <span class="s2">&quot;https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv&quot;</span>
 <span class="p">)</span>
 
+<span class="n">_PINNED_VERSION</span> <span class="o">=</span> <span class="s2">&quot;v23&quot;</span>
+<span class="n">_CACHE_MAX_AGE_DAYS</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="c1"># The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.</span>
+<span class="c1"># ACE and Cassini were previously (and wrongly) included: both have zero</span>
+<span class="c1"># events in the catalog. &quot;SolarOrbiter&quot; (no space) and &quot;ULYSSES&quot; (all caps)</span>
+<span class="c1"># are the catalog&#39;s actual spellings; the old &quot;Solar Orbiter&quot; spelling broke</span>
+<span class="c1"># `_filter_by_spacecraft`, which lowercases before comparing.</span>
 <span class="n">SPACECRAFT_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="s2">&quot;Ulysses&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wind&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;STEREO-A&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;STEREO-B&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ACE&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Solar Orbiter&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;PSP&quot;</span><span class="p">,</span>
         <span class="s2">&quot;BepiColombo&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Juno&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;MESSENGER&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;VEX&quot;</span><span class="p">,</span>
         <span class="s2">&quot;MAVEN&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Cassini&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;MESSENGER&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PSP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;STEREO-A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;STEREO-B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SolarOrbiter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ULYSSES&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VEX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Wind&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 <span class="p">)</span>
 
 <span class="n">_DATETIME_COLUMNS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;icme_start_time&quot;</span><span class="p">,</span> <span class="s2">&quot;mo_start_time&quot;</span><span class="p">,</span> <span class="s2">&quot;mo_end_time&quot;</span><span class="p">]</span>
+
+
+<span class="n">RULES_OF_THE_ROAD</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">See https://helioforecast.space/icmecat for the most up-to-date rules of</span>
+<span class="s2">the road. As of January 2026, they are:</span>
+
+<span class="s2">    If this catalog is used for results that are published in peer-reviewed</span>
+<span class="s2">    international journals, please contact chris.moestl@outlook.com for</span>
+<span class="s2">    possible co-authorship.</span>
+
+<span class="s2">    Cite the catalog with: Möstl et al. (2020)</span>
+<span class="s2">    DOI: 10.6084/m9.figshare.6356420</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ICMECATDownloadError">
+<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.icme.icmecat.html#solarwindpy.solar_activity.icme.ICMECATDownloadError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ICMECATDownloadError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when the ICMECAT catalog cannot be downloaded from HELIO4CAST.&quot;&quot;&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="ICMECAT">
@@ -351,15 +379,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ICMECAT</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Access the HELIO4CAST Interplanetary Coronal Mass Ejection Catalog.</span>
 
-<span class="sd">    See https://helioforecast.space/icmecat for the most up-to-date rules of</span>
-<span class="sd">    the road. As of January 2026, they are:</span>
-
-<span class="sd">        If this catalog is used for results that are published in peer-reviewed</span>
-<span class="sd">        international journals, please contact chris.moestl@outlook.com for</span>
-<span class="sd">        possible co-authorship.</span>
-
-<span class="sd">        Cite the catalog with: Möstl et al. (2020)</span>
-<span class="sd">        DOI: 10.6084/m9.figshare.6356420</span>
+<span class="sd">    See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog&#39;s</span>
+<span class="sd">    citation and co-authorship terms.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -462,39 +483,72 @@
     <span class="c1"># -------------------------------------------------------------------------</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load ICMECAT data from URL or cache.&quot;&quot;&quot;</span>
-        <span class="n">cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_load_cache</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load ICMECAT data, applying the cache freshness policy.</span>
+
+<span class="sd">        Freshness policy: a cache younger than ``_CACHE_MAX_AGE_DAYS`` is</span>
+<span class="sd">        used directly. Otherwise (or with no cache at all) a download is</span>
+<span class="sd">        attempted. If the download fails and a cache exists -- even a stale</span>
+<span class="sd">        one -- the stale cache is served rather than losing data the user</span>
+<span class="sd">        already has on disk, with a warning naming its age. If no cache</span>
+<span class="sd">        exists, the download error propagates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cached</span><span class="p">,</span> <span class="n">age_days</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cache</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">age_days</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">age_days</span> <span class="o">&lt;=</span> <span class="n">_CACHE_MAX_AGE_DAYS</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">cached</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loaded from cache: </span><span class="si">%d</span><span class="s2"> events&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">))</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_download</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_download</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ICMECATDownloadError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ICMECAT download failed, serving cached data that is &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">age_days</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> days old.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">cached</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_try_load_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to load from cache. Returns None if no cache or stale.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;tuple[Optional[pd.DataFrame], Optional[float]]&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the on-disk cache with no freshness policy applied.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            ``(df, age_days)``, both ``None`` if there is no cache directory</span>
+<span class="sd">            configured or no cache file present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="n">cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="s2">&quot;icmecat.parquet&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="c1"># Check age - re-download if &gt; 30 days old</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="n">age_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">cache_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">86400</span>
-        <span class="k">if</span> <span class="n">age_days</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cache stale (</span><span class="si">%.0f</span><span class="s2"> days), re-downloading&quot;</span><span class="p">,</span> <span class="n">age_days</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">cache_path</span><span class="p">),</span> <span class="n">age_days</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_download</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Download ICMECAT from helioforecast.space.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Downloading ICMECAT from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ICMECAT_URL</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ICMECAT_URL</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="n">_DATETIME_COLUMNS</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ICMECAT_URL</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="n">_DATETIME_COLUMNS</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ICMECATDownloadError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to download ICMECAT </span><span class="si">{</span><span class="n">_PINNED_VERSION</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">ICMECAT_URL</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Edit solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL) &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;to point at a working catalog version, see &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;https://helioforecast.space/icmecat for the current URL. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Underlying error: </span><span class="si">{</span><span class="n">exc</span><span class="si">!r}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Downloaded </span><span class="si">%d</span><span class="s2"> ICME events&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">))</span>
 
