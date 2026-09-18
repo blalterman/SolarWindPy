@@ -33,15 +33,17 @@ jobs:
 
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4.1)
-          # model: "claude-opus-4-1-20250805"
+          # Optional: Override the model. v1 has no `model` input; it is passed
+          # through to the CLI. Left unset so we inherit the action's current
+          # default rather than pinning an ID that will eventually be retired.
+          # claude_args: "--model claude-opus-4-1-20250805"
 
-          # Direct prompt for automated review (no @claude mention needed)
-          direct_prompt: |
+          # Prompt for automated review (no @claude mention needed)
+          prompt: |
             Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
@@ -55,7 +57,7 @@ jobs:
           # use_sticky_comment: true
           
           # Optional: Customize review based on file types
-          # direct_prompt: |
+          # prompt: |
           #   Review this PR focusing on:
           #   - For TypeScript files: Type safety and proper interface usage
           #   - For API endpoints: Security, input validation, and error handling
@@ -63,13 +65,14 @@ jobs:
           #   - For tests: Coverage, edge cases, and test quality
           
           # Optional: Different prompts for different authors
-          # direct_prompt: |
+          # prompt: |
           #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' && 
           #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
           #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
           
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
+          # Optional: Add specific tools for running tests or linting. v1 removed
+          # the `allowed_tools` input; tool permissions go through claude_args.
+          # claude_args: "--allowedTools 'Bash(pytest -q),Bash(black --check:*),Bash(flake8:*)'"
           
           # Optional: Skip review for certain conditions
           # if: |
