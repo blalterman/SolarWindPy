@@ -11,6 +11,18 @@ with several chats carries several entries. Written by /session:close (or a proj
 
 ---
 
+## 2026-09-18 18:48 (7108ad5)
+- Session: 7108ad5f-d192-4728-b72b-037ca240190f
+- Candidates: bf6d59a
+- Done: UNLOGGED SESSION. 1 commit(s) landed with no closeout. Run `git log --since=2026-09-18T22:40:37.911Z` for the list.
+- Decisions: none recorded.
+- Open threads: this block was written at session end by progress_stub.py because the session ended without /session:close. Replace it by running /session:close.
+- Next action: unknown.
+- Active dispatch: none
+- Active handoff: none
+- Session ended: other
+- Transcript: /Users/balterma/.claude/projects/-Users-balterma-observatories-code-SolarWindPy/7108ad5f-d192-4728-b72b-037ca240190f.jsonl
+
 ## 2026-09-17 01:08 (383db75)
 - Session: 383db759-1021-4825-85e7-e0a74fa7b417
 - Commits: 726bf44, 0e18057, b98f2b1
