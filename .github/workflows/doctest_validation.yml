@@ -20,10 +20,10 @@ jobs:
       fail-fast: false  # Allow other jobs to complete even if one fails
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     
@@ -45,7 +45,7 @@ jobs:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
@@ -53,7 +53,7 @@ jobs:
           ${{ runner.os }}-conda-
 
     - name: Set up conda environment
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@v4
       timeout-minutes: 10
       with:
         environment-file: solarwindpy.yml
@@ -127,7 +127,7 @@ jobs:
         "
     
     - name: Upload essential validation results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: doctest-results-py${{ matrix.python-version }}
@@ -139,7 +139,7 @@ jobs:
     
     - name: Comment PR with essential results
       if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       with:
         script: |
           const fs = require('fs');
@@ -191,7 +191,7 @@ jobs:
     
     steps:
     - name: Download validation results
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         path: artifacts/
     
@@ -220,10 +220,10 @@ jobs:
       fail-fast: false
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     
@@ -238,13 +238,13 @@ jobs:
 
     # TEST: Simplified conda setup (Bug #3 removal test - same as doctest-validation)
     - name: Cache conda environment
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ hashFiles('solarwindpy.yml') }}-py${{ matrix.python-version }}
 
     - name: Set up conda environment
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@v4
       timeout-minutes: 10
       with:
         environment-file: solarwindpy.yml
@@ -279,12 +279,12 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
 

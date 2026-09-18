@@ -18,7 +18,7 @@ jobs:
     name: Generate JOSS Paper PDF
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
@@ -27,7 +27,7 @@ jobs:
           paper-path: paper/paper.md
 
       - name: Upload PDF as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: joss-paper-${{ github.sha }}
           path: paper/paper.pdf
@@ -35,7 +35,7 @@ jobs:
 
       - name: Commit PDF to repository
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           message: 'docs(paper): auto-generate JOSS PDF preview [skip ci]'
           add: 'paper/paper.pdf'
