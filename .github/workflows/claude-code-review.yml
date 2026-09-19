@@ -2,7 +2,9 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    # track_progress below errors on any event outside this set, so these
+    # types are coupled to it rather than optional breadth.
+    types: [opened, synchronize, ready_for_review, reopened]
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
@@ -21,8 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      # write, not read: the review is delivered as PR comments, and a
+      # read-only token silently produces a green check with no review.
+      pull-requests: write
+      # PR comments are issue comments in the GitHub API, so the tracking
+      # comment needs this too.
+      issues: write
       id-token: write
     
     steps:
@@ -37,13 +43,25 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Optional: Override the model. v1 has no `model` input; it is passed
-          # through to the CLI. Left unset so we inherit the action's current
-          # default rather than pinning an ID that will eventually be retired.
-          # claude_args: "--model claude-opus-4-1-20250805"
+          # v1's automation mode stays silent by default "to reduce noise";
+          # this forces tag mode, which is what actually posts the review.
+          track_progress: true
 
-          # Prompt for automated review (no @claude mention needed)
+          # Without an explicit tool list Claude has no way to comment: it has
+          # the permission above but no means of using it. The @beta config
+          # granted this via the removed `allowed_tools` input.
+          # The model is deliberately unpinned so we inherit v1's current
+          # default rather than an ID that will eventually be retired.
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+          # Prompt for automated review (no @claude mention needed).
+          # The REPO/PR NUMBER lines are required: the docs note Claude cannot
+          # otherwise tell which PR it is reviewing.
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
