@@ -51,7 +51,7 @@ dependencies = [
   "astropy>=5.0",
   "numba>=0.59",       # Minimum for NumPy 2.0 support
   "tabulate>=0.9",
-  "docstring-inheritance>=2.2.0,<3.0",  # MRO compatibility with ABCMeta; v3.0 breaks compatibility
+  "docstring-inheritance>=2.2.0,<4.0",  # MRO compatibility with ABCMeta; v3.0 breaks compatibility
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -87,7 +87,7 @@ docs = [
     "sphinxcontrib-spelling>=8.0",
     "sphinxcontrib-bibtex>=2.6",
     "numpydoc>=1.6",
-    "docstring-inheritance>=2.2.0,<3.0",
+    "docstring-inheritance>=2.2.0,<4.0",
     "doc8>=1.1",
 ]
 dev = [
@@ -100,7 +100,7 @@ dev = [
     "sphinxcontrib-spelling>=8.0",
     "sphinxcontrib-bibtex>=2.6",
     "numpydoc>=1.6",
-    "docstring-inheritance>=2.2.0,<3.0",
+    "docstring-inheritance>=2.2.0,<4.0",
     "doc8>=1.1",
     # Development tools
     "black>=24.0",
