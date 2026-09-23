@@ -49,7 +49,7 @@ packaging==25.0
     #   matplotlib
 pandas==2.3.2
     # via solarwindpy (pyproject.toml)
-pillow==12.0.0
+pillow==12.3.0
     # via matplotlib
 pyerfa==2.0.1.5
     # via astropy
