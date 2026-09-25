@@ -30,7 +30,7 @@ numba==0.61.2
     # via solarwindpy (pyproject.toml)
 numexpr==2.11.0
     # via solarwindpy (pyproject.toml)
-numpy==2.2.6
+numpy==2.4.6
     # via
     #   astropy
     #   bottleneck
