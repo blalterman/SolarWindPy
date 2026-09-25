@@ -357,7 +357,6 @@ the assertion to match the defect:
 @pytest.mark.xfail(
     strict=True,
     raises=AttributeError,
-    match=r"no attribute '_age'",
     reason=(
         "DataLoader.age returns self._age but get_data_age assigns "
         "self._data_age, and nothing writes _age, so the public property is "
@@ -368,16 +367,41 @@ the assertion to match the defect:
 def test_dataloader_age_is_elapsed_time_since_ctime(self): ...
 ```
 
-Scope the marker tightly. Both omissions below let the marker absorb failures it
-was never meant to cover, which turns a precise alarm into a blanket one:
+Scope the marker as tightly as pytest allows, or it absorbs failures it was
+never meant to cover and a precise alarm becomes a blanket one.
 
-- `strict=True` with no `raises=` accepts *any* exception or assertion failure
-  as expected.
-- `raises=SomeError` with no `match=` accepts the same error type raised
-  anywhere else in the call chain.
+**`pytest.mark.xfail` narrows by exception type only.** It has no `match=`.
+`_pytest.skipping.evaluate_xfail_marks` reads `condition`, `reason`, `run`,
+`strict` and `raises`, and silently ignores every other keyword, so a marker
+carrying `match=` looks scoped and is not. Do not confuse it with
+`pytest.raises(..., match=...)`, where `match=` is real.
+
+That leaves two levers:
+
+- Always pass `raises=`. `strict=True` alone accepts *any* exception or
+  assertion failure as expected.
+- When the test raises the failure itself, give it a dedicated exception type
+  so `raises=` can be exact. `raises=AssertionError` absorbs every other
+  assertion in the test, including fixture guards:
+
+```python
+class NonFiniteCoordinate(AssertionError):
+    """Raised only for the defect the xfail below describes."""
+
+
+@pytest.mark.xfail(strict=True, raises=NonFiniteCoordinate, reason="...")
+def test_overlay_plots_finite_coordinates():
+    ...
+    if not np.isfinite(coords).all():
+        raise NonFiniteCoordinate(f"non-finite coordinate: {coords}")
+```
+
+When the failure originates in production code, the test cannot choose the
+type, so the broad `raises=` is the available granularity. Say so in `reason`,
+and record the expected message there since the marker cannot assert on it.
 
 State the fix and the instruction to delete the marker in `reason`. The marker
-is a dated obligation, and the next reader needs to know what discharges it.
+is an obligation, and the next reader needs to know what discharges it.
 
 ### Verify the marker in both directions
 
@@ -396,8 +420,23 @@ git diff --stat path/to/production.py       # -> no output
 ```
 
 Step 2 is the positive control, and it does double duty: a passing assertion
-under the fix also proves the rest of the test is correct, so the marker is
-confined to the one defect it names.
+under the fix also proves the rest of the test is correct.
+
+Then run the **negative** control, which is the one that catches a marker that
+only looks scoped. Inject an unrelated failure into the test and confirm it is
+*reported* rather than swallowed:
+
+```python
+# Temporarily, at the top of the test body:
+assert False, "an unrelated assertion"
+```
+
+Expect `FAILED`. If you get `xfailed`, the marker is broader than it appears and
+is currently hiding any regression in that test. Revert the injection.
+
+This control is not optional ceremony. It is what exposes a `match=` on
+`pytest.mark.xfail`, which is silently ignored, and it is the only one of the
+three that fails when a marker is over-broad rather than mis-aimed.
 
 ### Why this matters more than the repo's own checks
 

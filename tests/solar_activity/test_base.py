@@ -246,13 +246,16 @@ class TestDataLoaderClass:
     @pytest.mark.xfail(
         strict=True,
         raises=AttributeError,
-        match=r"no attribute '_age'",
         reason=(
             "DataLoader.age returns self._age (base.py:155) but get_data_age "
             "assigns self._data_age (base.py:210), and nothing in the package "
             "ever writes _age. The public property is therefore unreachable on "
-            "every instance. Fix by reading _data_age in the property; then "
-            "delete this marker."
+            "every instance. The message is \"'TestDataLoader' object has no "
+            "attribute '_age'\", but pytest.mark.xfail cannot assert on it: the "
+            "marker has no match= and narrows by exception type alone, and the "
+            "raising line is in production code so this test cannot choose a "
+            "narrower type. raises=AttributeError is the available granularity. "
+            "Fix by reading _data_age in the property; then delete this marker."
         ),
     )
     def test_dataloader_age_is_elapsed_time_since_ctime(
