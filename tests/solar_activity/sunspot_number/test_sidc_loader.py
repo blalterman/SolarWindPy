@@ -262,7 +262,12 @@ def test_ctime_is_the_epoch_when_no_cache_exists(make_loader):
         "which nothing ever sets, so the property always raises. Reported to "
         "the author rather than fixed: base.py is outside this unit's scope, "
         "and whether `age` or `get_data_age` is the one to change is the "
-        "author's call."
+        "author's call. The message is \"'SIDCLoader' object has no attribute "
+        "'_age'\"; pytest.mark.xfail cannot assert on it because the marker "
+        "has no match= (it narrows by exception type alone), and the raising "
+        "line is in production code so the test cannot choose a narrower "
+        "type. raises=AttributeError is therefore the available granularity. "
+        "Delete the marker once the property is fixed."
     ),
 )
 def test_age_is_the_time_since_the_cache_was_written(make_loader):

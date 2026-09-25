@@ -649,15 +649,28 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
         plt.close(figure)
 
 
+class NonFiniteCoordinate(AssertionError):
+    """Raised only for the divide-by-zero overlay defect below.
+
+    ``pytest.mark.xfail`` has no ``match=``; it narrows solely by exception
+    type, so ``raises=AssertionError`` would absorb every other assertion this
+    test can fail, including the ``no_download`` guard. A dedicated subclass is
+    what makes the marker specific.
+    """
+
+
 @pytest.mark.xfail(
     strict=True,
+    raises=NonFiniteCoordinate,
     reason=(
         "plot_on_colorbar scales by s1 = np.round(ssn.max(), -2) "
         "(sidc.py:508), which is 0 for any window peaking below SSN 50, so "
         "y = (y / s1) * dy + y0 divides by zero and every plotted coordinate "
         "is inf. No exception is raised; the overlay silently disappears and "
         "the tick labels read (0, 0, 0). Reported rather than fixed: the "
-        "right rounding for a low-activity colour bar is the author's call."
+        "right rounding for a low-activity colour bar is the author's call. "
+        "raises is pinned to NonFiniteCoordinate so this marker cannot absorb "
+        "an unrelated failure; delete the marker once the rounding is fixed."
     ),
 )
 def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index):
@@ -683,6 +696,13 @@ def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index)
             axes, seeded_index[0], seeded_index[-1], vertical_cbar=True
         )
         for line in axes.lines:
-            assert np.isfinite(np.asarray(line.get_data()[0], dtype=float)).all()
+            coords = np.asarray(line.get_data()[0], dtype=float)
+            # Raised, not asserted: the xfail above narrows on this exact type,
+            # which a bare `assert` cannot express.
+            if not np.isfinite(coords).all():
+                raise NonFiniteCoordinate(
+                    f"non-finite plotted coordinate: "
+                    f"{coords[~np.isfinite(coords)][:3]}"
+                )
     finally:
         plt.close(figure)
