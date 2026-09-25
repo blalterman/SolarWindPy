@@ -123,7 +123,7 @@ scipy==1.16.3
     # via solarwindpy (pyproject.toml)
 six==1.17.0
     # via python-dateutil
-snowballstemmer==3.0.1
+snowballstemmer==3.1.1
     # via sphinx
 sphinx==8.2.3
     # via
