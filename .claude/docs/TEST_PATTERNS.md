@@ -292,6 +292,145 @@ assert x == 77, f"Expected 77, got {x}"
 
 ---
 
+## Contract Testing vs State Testing
+
+A test either **specifies** what the code must do or **records** what it
+currently does. Both pass. Only the first can fail when the code is wrong.
+
+State-recording tests are the reason a suite can stay green across hundreds of
+commits while real defects sit untouched in the code the suite covers. They are
+not weak versions of good tests; they are a different thing wearing the same
+clothes, and they actively prevent discovery by occupying the place where a real
+test would go.
+
+### The three shapes state-recording takes
+
+Each of these was found in this repository, in tests that had passed for a long
+time, sitting directly beside a defect they could never detect.
+
+**1. Asserting the private attribute instead of the public contract.**
+
+```python
+# BAD: passes as long as *some* private name exists, whatever `age` does
+assert hasattr(instance, "_data_age")
+
+# GOOD: fails if the public property does not work
+age = instance.age
+assert isinstance(age, pd.Timedelta)
+assert 4.5 < age.total_seconds() / 86400 < 6.0
+```
+
+The bad form survives any rename and cannot notice that the public property
+reads a name nothing ever writes.
+
+**2. The assertion inside a conditional, which passes by doing nothing.**
+
+```python
+# BAD: rename the attribute and this test silently verifies nothing
+if hasattr(instance, "_data_age"):
+    assert 4.5 < instance._data_age.total_seconds() / 86400 < 6.0
+```
+
+A test that can reach its end without evaluating an assertion is worse than no
+test, because the suite reports it as coverage.
+
+**3. The tautological assertion.**
+
+```python
+# BAD: cannot fail under either name, so it encodes the ambiguity as correct
+assert hasattr(instance, "_data_age") or hasattr(instance, "_age")
+```
+
+The tell for all three: a comment in the test explaining the bug it is
+asserting around. When a previous author has written *"note: X creates `_a` but
+the property expects `_b`"* and then asserted `_a`, the defect has been promoted
+to specification. Finding such a comment is a signal to rewrite the test, not a
+note to preserve.
+
+### Write the contract, then mark it xfail
+
+When the contract test fails because the code is genuinely broken, the test is
+correct and the code is wrong. Keep the test and mark it, rather than weakening
+the assertion to match the defect:
+
+```python
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    match=r"no attribute '_age'",
+    reason=(
+        "DataLoader.age returns self._age but get_data_age assigns "
+        "self._data_age, and nothing writes _age, so the public property is "
+        "unreachable. Fix by reading _data_age in the property; then delete "
+        "this marker."
+    ),
+)
+def test_dataloader_age_is_elapsed_time_since_ctime(self): ...
+```
+
+Scope the marker tightly. Both omissions below let the marker absorb failures it
+was never meant to cover, which turns a precise alarm into a blanket one:
+
+- `strict=True` with no `raises=` accepts *any* exception or assertion failure
+  as expected.
+- `raises=SomeError` with no `match=` accepts the same error type raised
+  anywhere else in the call chain.
+
+State the fix and the instruction to delete the marker in `reason`. The marker
+is a dated obligation, and the next reader needs to know what discharges it.
+
+### Verify the marker in both directions
+
+A `strict=True` xfail is only a specification if it fails when the bug is fixed.
+Prove that before committing, by applying the fix transiently:
+
+```bash
+# 1. It xfails as committed.
+pytest path/to/test.py -k the_test          # -> 1 xfailed
+
+# 2. Apply the one-line fix, then confirm strict turns XPASS into a failure.
+pytest path/to/test.py -k the_test          # -> [XPASS(strict)] ... 1 failed
+
+# 3. Revert the production file and confirm it is clean.
+git diff --stat path/to/production.py       # -> no output
+```
+
+Step 2 is the positive control, and it does double duty: a passing assertion
+under the fix also proves the rest of the test is correct, so the marker is
+confined to the one defect it names.
+
+### Why this matters more than the repo's own checks
+
+The checks in this repository are load-bearing but fragile, and contract tests
+have repeatedly found things the checks did not:
+
+- **A green check means "did not crash", not "did the job."** An automated
+  reviewer ran, was denied its commenting tool on every attempt, exited 0, and
+  reported success while producing no review at all. Verify the artifact a step
+  produces, not its exit status.
+- **The local suite and CI can disagree on the same commit.** Import and
+  inheritance tests fail locally while CI passes. Until that is explained,
+  neither result alone establishes that the suite is healthy.
+- **A coverage gate set above what the code can reach teaches people to bypass
+  it.** A threshold that was never met in the project's history only ever
+  trained `--no-verify`, which skips formatting and linting too. Set gates as
+  ratchets just under the measured baseline.
+- **Pre-commit gates staged files, so unrelated lint debt blocks unrelated
+  work.** Touching a file with pre-existing findings forces you to either clean
+  debt you did not create or skip the hook. Prefer cleaning it, and say so in
+  the commit message.
+- **`SKIP=<hook-id>` is the supported escape hatch, not `--no-verify`.**
+  `--no-verify` disables every hook including formatting. When skipping, record
+  in the commit message what failed, that it pre-dates the change, and what you
+  ruled out.
+
+The contrast worth remembering: rebuilding tests around derived expectations and
+real inputs surfaced multiple genuine production defects, in code the existing
+green suite had covered all along. The defects were not hidden by missing tests.
+They were hidden by passing ones.
+
+---
+
 ## SolarWindPy-Specific Types Reference
 
 Common types to verify with `isinstance`:
