@@ -14,7 +14,7 @@ contourpy==1.3.3
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-docstring-inheritance==2.2.2
+docstring-inheritance==3.0.0
     # via solarwindpy (pyproject.toml)
 fonttools==4.61.1
     # via matplotlib

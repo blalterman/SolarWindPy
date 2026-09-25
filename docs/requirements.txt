@@ -24,7 +24,7 @@ cycler==0.12.1
     # via matplotlib
 doc8==2.0.0
     # via solarwindpy (pyproject.toml)
-docstring-inheritance==2.3.0
+docstring-inheritance==3.0.0
     # via solarwindpy (pyproject.toml)
 docutils==0.21.2
     # via
