@@ -13,10 +13,7 @@ import pytest
 import pandas as pd
 import numpy as np
 import logging
-import urllib.parse
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from collections import namedtuple
+from unittest.mock import Mock, patch
 
 from solarwindpy.solar_activity.base import (
     Base,
@@ -54,7 +51,7 @@ class TestBaseClass:
         assert isinstance(instance.logger, logging.Logger)
 
         # Test logger name follows expected pattern
-        expected_name = f"solarwindpy.solar_activity.base.ConcreteBase"
+        expected_name = "solarwindpy.solar_activity.base.ConcreteBase"
         assert instance.logger.name == expected_name
 
     def test_base_string_representation(self):
@@ -218,9 +215,9 @@ class TestDataLoaderClass:
 
         assert instance.key == test_key
         assert instance.url == test_url
-        assert hasattr(instance, "ctime")
-        # Note: DataLoader creates _data_age but age property expects _age
-        assert hasattr(instance, "_data_age")  # This is what actually gets set
+        # ctime is part of the public surface and must be resolved during
+        # __init__, not merely present as an attribute.
+        assert isinstance(instance.ctime, pd.Timestamp)
 
     def test_dataloader_get_data_ctime_no_files(
         self, concrete_dataloader_class, tmp_path
@@ -246,28 +243,44 @@ class TestDataLoaderClass:
         expected_ctime = pd.to_datetime("20230315")
         assert instance.ctime == expected_ctime
 
-    def test_dataloader_get_data_age(self, concrete_dataloader_class, tmp_path):
-        """Test get_data_age calculation."""
-        # Create a file from 5 days ago
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AttributeError,
+        match=r"no attribute '_age'",
+        reason=(
+            "DataLoader.age returns self._age (base.py:155) but get_data_age "
+            "assigns self._data_age (base.py:210), and nothing in the package "
+            "ever writes _age. The public property is therefore unreachable on "
+            "every instance. Fix by reading _data_age in the property; then "
+            "delete this marker."
+        ),
+    )
+    def test_dataloader_age_is_elapsed_time_since_ctime(
+        self, concrete_dataloader_class, tmp_path
+    ):
+        """DataLoader.age reports how long ago the cache was written.
+
+        Asserted through the public ``age`` property rather than through
+        whichever private attribute currently backs it, so that renaming the
+        storage cannot make this test vacuous.
+
+        ON FAILURE: either ``age`` resolves to the wrong private attribute, or
+        ``get_data_age`` is no longer computing ``today - ctime``. Compare
+        ``get_data_age`` against the name ``age`` reads.
+        """
+        # Cache written 5 days ago.
         past_date = (pd.Timestamp("today") - pd.Timedelta(days=5)).strftime("%Y%m%d")
         dated_dir = tmp_path / past_date
         dated_dir.mkdir()
-        test_file = dated_dir / "data.csv"
-        test_file.write_text("header\nvalue1")
+        (dated_dir / "data.csv").write_text("header\nvalue1")
 
         instance = concrete_dataloader_class("test", "http://example.com", tmp_path)
 
-        # Age should be approximately 5 days
-        # The base class has inconsistent naming: get_data_age stores in _data_age but age property returns _age
-        # Let's test both the actual stored value and see if age property works
-        if hasattr(instance, "_data_age"):
-            age_days = instance._data_age.total_seconds() / 86400  # Convert to days
-            assert (
-                4.5 < age_days < 6.0
-            )  # Allow for timing differences and date boundary effects
-
-        # Test that some age calculation occurred
-        assert hasattr(instance, "_data_age") or hasattr(instance, "_age")
+        age = instance.age
+        assert isinstance(age, pd.Timedelta)
+        # Bounded rather than exact: "today" truncates to midnight, so the
+        # elapsed span straddles a day boundary.
+        assert 4.5 < age.total_seconds() / 86400 < 6.0
 
     def test_dataloader_maybe_update_stale_data(
         self, concrete_dataloader_class, tmp_path
