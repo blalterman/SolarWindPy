@@ -8,11 +8,29 @@ that re-exports AggPlot, Hist1D, and Hist2D classes.
 import pytest
 import numpy as np
 import pandas as pd
+import matplotlib
 
-import solarwindpy.plotting.histograms as histograms
-from solarwindpy.plotting.agg_plot import AggPlot
-from solarwindpy.plotting.hist1d import Hist1D
-from solarwindpy.plotting.hist2d import Hist2D
+matplotlib.use("Agg")
+
+import solarwindpy.plotting.histograms as histograms  # noqa: E402
+from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
+from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
+from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+
+# Bins chosen by the test, so every count below is an input rather than a
+# recorded output. The edges are exact at the 5 decimal places at which
+# `calc_bins_intervals` stores interval endpoints.
+KNOWN_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+KNOWN_BIN_COUNTS = [3, 5, 2, 4, 6]
+
+
+def _known_1d_sample():
+    """Points placed at bin centers to realise ``KNOWN_BIN_COUNTS``."""
+    centers = 0.5 * (KNOWN_EDGES[:-1] + KNOWN_EDGES[1:])
+    values = []
+    for center, count in zip(centers, KNOWN_BIN_COUNTS):
+        values.extend([center] * count)
+    return pd.Series(values, name="x"), centers
 
 
 class TestHistogramsModuleExports:
@@ -113,7 +131,6 @@ class TestHist1DBasicFunctionality:
         hist = histograms.Hist1D(self.x_data)
         hist.set_labels(x="density", y="count")
 
-        original_path = hist.path
         hist.set_path("auto")
 
         # Path should be updated
@@ -194,14 +211,36 @@ class TestHist1DAxisNormalization:
         pd.testing.assert_series_equal(result, test_data)
 
     def test_axis_normalizer_density(self):
-        """Test _axis_normalizer('d') computes PDF correctly."""
-        hist = histograms.Hist1D(self.x_data)
+        """Density normalization yields a PDF: it integrates to 1.
+
+        The bins are the test's own, so the integral is a plain sum of
+        value * width with no quantity read back from the histogram.
+
+        ON FAILURE: the code is wrong. Normalizing to a PDF and then not
+        integrating to 1 is a contradiction, not a calibration choice.
+        """
+        x, _ = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
         hist.set_axnorm("d")
 
-        # This would require actual aggregated data with intervals
-        # For now, just test that the method exists and can be called
-        assert hasattr(hist, "_axis_normalizer")
-        assert callable(hist._axis_normalizer)
+        widths = np.diff(KNOWN_EDGES)
+        integral = (hist.agg().values * widths).sum()
+        assert np.isclose(integral, 1.0)
+
+    def test_density_normalization_is_the_counts_scaled_by_bin_area(self):
+        """Each density equals its count divided by (N * bin width).
+
+        Both the counts and the widths are the test's, so the whole expectation
+        is constructed.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist.set_axnorm("d")
+
+        expected = np.asarray(KNOWN_BIN_COUNTS) / (x.size * np.diff(KNOWN_EDGES))
+        np.testing.assert_allclose(hist.agg().values, expected)
 
     def test_axis_normalizer_total(self):
         """Test _axis_normalizer('t') normalizes by max."""
@@ -258,18 +297,33 @@ class TestHist1DAggregation:
         ):
             hist.agg(fcn="sum")
 
-    def test_agg_output_reindexed_correctly(self):
-        """Test that agg() output is reindexed correctly."""
-        hist = histograms.Hist1D(self.x_data)
+    def test_agg_reproduces_the_constructed_bin_counts(self):
+        """Counts equal the population the test placed in each bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
 
         result = hist.agg()
+        np.testing.assert_array_equal(result.values, KNOWN_BIN_COUNTS)
+        assert result.sum() == x.size
 
-        # Should be a Series with proper index
-        assert isinstance(result, pd.Series)
-        assert len(result) > 0
+    def test_agg_index_is_the_requested_bins_in_order(self):
+        """The aggregation is indexed by the requested intervals, ascending.
 
-        # Index should be interval-based
-        assert hasattr(result.index, "__iter__")
+        Positional comparisons elsewhere rest on this, so it is stated once
+        rather than assumed everywhere.
+
+        ON FAILURE: the code is wrong; counts would be attributed to the wrong
+        bins.
+        """
+        x, _ = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+
+        intervals = pd.IntervalIndex(hist.agg().index)
+        np.testing.assert_allclose(intervals.left.values, KNOWN_EDGES[:-1])
+        np.testing.assert_allclose(intervals.right.values, KNOWN_EDGES[1:])
 
 
 class TestHist1DLabels:
@@ -306,30 +360,61 @@ class TestHist1DPlotting:
         self.n = 100
         self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
 
-    def test_make_plot_returns_correct_structure(self):
-        """Test make_plot(ax) returns (ax,(pl,cl,bl)) with drawstyle='steps-mid'."""
+    def test_make_plot_draws_the_counts_against_the_bin_centers(self):
+        """The plotted series is (bin center, count) for each bin.
+
+        Both coordinates are the test's own, so this checks the numbers handed
+        to matplotlib rather than anything about the figure's appearance.
+
+        ON FAILURE: the code is wrong -- the figure would not show the data.
+        """
         import matplotlib.pyplot as plt
 
-        hist = histograms.Hist1D(self.x_data)
+        x, centers = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
         fig, ax = plt.subplots()
 
-        result = hist.make_plot(ax)
+        returned_ax, _ = hist.make_plot(ax)
 
-        # Should return just the axis (implementation may vary)
-        assert result is not None
+        assert returned_ax is ax
+        (line,) = ax.lines
+        np.testing.assert_allclose(np.asarray(line.get_xdata(), float), centers)
+        np.testing.assert_allclose(
+            np.asarray(line.get_ydata(), float), KNOWN_BIN_COUNTS
+        )
         plt.close(fig)
 
-    def test_make_plot_transpose_axes(self):
-        """Test make_plot(ax, transpose_axes=True) swaps axes."""
+    def test_make_plot_transpose_axes_swaps_the_two_coordinates(self):
+        """Transposing exchanges the plotted x- and y-data and nothing else.
+
+        The untransposed plot supplies the expectation, so this is a round trip
+        rather than a second recorded set of coordinates.
+
+        ON FAILURE: the code is wrong -- a side panel drawn this way would not
+        line up with the grid it annotates.
+        """
         import matplotlib.pyplot as plt
 
-        hist = histograms.Hist1D(self.x_data)
-        fig, ax = plt.subplots()
+        x, _ = _known_1d_sample()
+        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
 
-        # Should not raise an error (exact behavior depends on implementation)
-        result = hist.make_plot(ax, transpose_axes=True)
-        assert result is not None
-        plt.close(fig)
+        fig, ax = plt.subplots()
+        hist.make_plot(ax)
+        (upright,) = ax.lines
+
+        fig_t, ax_t = plt.subplots()
+        hist.make_plot(ax_t, transpose_axes=True)
+        (transposed,) = ax_t.lines
+
+        np.testing.assert_allclose(
+            np.asarray(transposed.get_xdata(), float),
+            np.asarray(upright.get_ydata(), float),
+        )
+        np.testing.assert_allclose(
+            np.asarray(transposed.get_ydata(), float),
+            np.asarray(upright.get_xdata(), float),
+        )
+        plt.close("all")
 
     def test_make_plot_invalid_fcn_raises_value_error(self):
         """Test that make_plot(fcn='bad') raises ValueError."""
@@ -464,39 +549,77 @@ class TestHist2DAxisNormalization:
         with pytest.raises(AssertionError):
             hist.set_axnorm("invalid")
 
-    def test_axis_normalizer_each_norm_branch(self):
-        """Test _axis_normalizer() for each norm branch."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+    @pytest.mark.parametrize(
+        "axnorm, along",
+        [("c", "columns"), ("r", "rows")],
+    )
+    def test_column_and_row_normalization_put_a_one_in_every_line(self, axnorm, along):
+        """Dividing by a maximum leaves exactly that maximum equal to 1.
 
-        # Create test data with MultiIndex using IntervalIndex for proper normalization
-        try:
-            # Test each normalization type by setting _axnorm directly
-            hist._axnorm = "c"  # Column normalize
-            assert hist._axis_normalizer is not None
+        "c" divides each column by its own maximum and "r" each row by its own,
+        so every populated column (respectively row) must peak at 1. Naming both
+        cases in one parametrization also catches the two being swapped.
 
-            hist._axnorm = "r"  # Row normalize
-            assert hist._axis_normalizer is not None
+        ON FAILURE: the code is wrong.
+        """
+        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6, axnorm=axnorm)
+        grid = hist.agg().unstack("x")
 
-            hist._axnorm = "t"  # Total normalize
-            assert hist._axis_normalizer is not None
+        axis = 0 if along == "columns" else 1
+        maxima = grid.max(axis=axis).dropna()
+        assert maxima.size > 0
+        np.testing.assert_allclose(maxima.values, 1.0)
 
-            hist._axnorm = "d"  # Density normalize
-            assert hist._axis_normalizer is not None
+    def test_total_normalization_puts_a_single_one_in_the_grid(self):
+        """Total normalization divides the grid by its maximum, so a bin holds 1.
 
-        except Exception:
-            # If normalization fails due to data structure, just verify method exists
-            assert hasattr(hist, "_axis_normalizer")
-            assert callable(hist._axis_normalizer)
+        ON FAILURE: the code is wrong -- it is normalizing per-axis rather than
+        over the whole grid.
+        """
+        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6, axnorm="t")
+        values = hist.agg().dropna()
+
+        assert np.isclose(values.max(), 1.0)
+        assert (values > 1.0).sum() == 0
+
+    def test_density_normalization_integrates_to_one(self):
+        """Density normalization makes a 2D PDF: sum of value * bin area is 1.
+
+        The bin areas come from the edges the test supplied, so the integral is
+        computed independently of the histogram.
+
+        ON FAILURE: the code is wrong.
+        """
+        edges = np.round(np.linspace(0.0, 20.0, 9), 5)
+        hist = histograms.Hist2D(
+            self.x_data, self.y_data, nbins=[edges, edges], axnorm="d"
+        )
+        agg = hist.agg()
+
+        # Unpopulated bins are absent from the aggregation, so the areas are
+        # taken per surviving bin rather than from the full outer product.
+        x_bins = pd.IntervalIndex(agg.index.get_level_values("x"))
+        y_bins = pd.IntervalIndex(agg.index.get_level_values("y"))
+        assert np.isin(x_bins.left.values, edges).all()
+        assert np.isin(y_bins.left.values, edges).all()
+
+        integral = np.nansum(agg.values * x_bins.length.values * y_bins.length.values)
+        assert np.isclose(integral, 1.0)
 
     def test_axis_normalizer_custom_function(self):
-        """Test that _axis_normalizer(('c','sum')) applies custom function."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
-        # Set _axnorm directly since set_axnorm expects string input
+        """``("c", "sum")`` divides each column by its sum, so columns sum to 1.
+
+        ``set_axnorm`` only admits the documented strings, so the private
+        attribute is the only way in; the identity asserted is arithmetic, not
+        a record of what the code returned.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6)
         hist._axnorm = ("c", "sum")
 
-        # Just verify that the custom function path works by checking the method exists
-        assert hasattr(hist, "_axis_normalizer")
-        assert callable(hist._axis_normalizer)
+        column_sums = hist.agg().unstack("x").sum(axis=0)
+        np.testing.assert_allclose(column_sums.values, 1.0)
 
     def test_axis_normalizer_invalid_raises_value_error(self):
         """Test that _axis_normalizer('bad') raises ValueError."""
