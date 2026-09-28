@@ -54,7 +54,6 @@
       "Bash(git add requirements.txt)",
       "Bash(git add requirements-dev.txt)",
       "Bash(git add .gitignore)",
-      "Bash(git add conda-recipe/meta.yaml)",
       "Bash(git status)",
       "Bash(git diff)",
       "Bash(git log)",
