@@ -165,6 +165,8 @@ class Units:
         Dimensionless count units.
     qpar : float
         Parallel heat flux units :math:`[\mathrm{\mu W\,m^{-2}}]`.
+    kinetic_energy_flux : float
+        Kinetic energy flux units :math:`[\mathrm{\mu W\,m^{-2}}]`, matching ``qpar``.
     distance2sun : float
         Distance to sun units ``[m]``.
     """
@@ -186,6 +188,7 @@ class Units:
     nuc: float = 1e-7
     nc: float = 1.0
     qpar: float = 1e-6
+    kinetic_energy_flux: float = 1e-6
     distance2sun: float = 1.0
     specific_entropy: float = field(init=False)
 

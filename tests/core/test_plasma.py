@@ -280,6 +280,23 @@ class PlasmaTestBase(ABC):
                     ot.number_density("+".join(s)), ot.n("+".join(s))
                 )
 
+    def test_kinetic_energy_flux(self):
+        """Plasma's kinetic energy flux is each ion's, and their sum for "a+b".
+
+        ON FAILURE: `Plasma.kinetic_energy_flux` does not reproduce or sum the
+        per-ion values; `Ion.kinetic_energy_flux` itself is tested in test_ions.
+        """
+        ot = self.object_testing
+        by_ion = {s: ot.ions.loc[s].kinetic_energy_flux for s in self.stuple}
+        for s, wk in by_ion.items():
+            pdt.assert_series_equal(ot.kinetic_energy_flux(s), wk, check_names=False)
+        if len(self.stuple) > 1:
+            total = sum(by_ion.values())
+            scom = "+".join(self.stuple)
+            pdt.assert_series_equal(
+                ot.kinetic_energy_flux(scom), total, check_names=False
+            )
+
     def test_mass_density(self):
         r"""Plasma's mass density per species, and summed over species, matches the ions.
 

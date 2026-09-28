@@ -11,6 +11,7 @@ import pandas as pd
 
 # import numpy.testing as npt
 import pandas.testing as pdt
+import pytest
 
 from abc import ABC, abstractproperty
 
@@ -191,6 +192,18 @@ class IonTestBase(ABC):
         cs.name = "cs"
         pdt.assert_frame_equal(cs, self.object_testing.cs)
 
+    def test_kinetic_energy_flux(self):
+        """W_k = rho |v|^3 / 2, in uW m^-2, recomputed from the raw n and v.
+
+        ON FAILURE: the code is wrong.
+        """
+        rho = self.mass * self.data.n * 1e6  # [kg m^-3]
+        v = self.data.v.loc[:, ["x", "y", "z"]].pow(2).sum(axis=1).pipe(np.sqrt) * 1e3
+        wk = 0.5 * rho * v.pow(3) / 1e-6  # [uW m^-2]
+        wk.name = "Wk"
+        pdt.assert_series_equal(wk, self.object_testing.kinetic_energy_flux)
+        pdt.assert_series_equal(wk, self.object_testing.Wk)
+
 
 class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
     pass
@@ -323,3 +336,22 @@ class TestIonSpecificsOptions(base.TestData):
         i0 = ions.Ion(self.data, s0)
         i1 = ions.Ion(self.data, s1)
         self.assertNotEqual(i0, i1)
+
+
+def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
+    """5 cm^-3 protons at 400 km/s carry rho v^3 / 2 = 267.6 uW m^-2.
+
+    ON FAILURE: the code is wrong.
+    """
+    cols = pd.MultiIndex.from_tuples(
+        [("n", ""), ("v", "x"), ("v", "y"), ("v", "z")]
+        + [("w", c) for c in ("par", "per", "scalar")],
+        names=["M", "C"],
+    )
+    data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
+    expected = 0.5 * (5e6 * constants.m_p) * (400e3) ** 3 / 1e-6  # [uW m^-2]
+    assert ions.Ion(data, "p1").kinetic_energy_flux.iloc[0] == pytest.approx(
+        expected, rel=1e-12
+    )
+    # Guard the hand value in the docstring against the formula above.
+    assert expected == pytest.approx(267.6, rel=1e-3)
