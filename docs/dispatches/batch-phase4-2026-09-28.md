@@ -87,7 +87,7 @@ conda run -n imap-loaders-20260225 pytest -q --no-header \
   --ignore=tests/plotting/test_performance.py --ignore=tests/test_issue_titles.py
 ```
 
-Both report `0 failed` at launch (pandas 2.3.3 / py3.13 and pandas 3.0.5 / py3.12). A unit is
+Both report `0 failed` at launch (pandas 3.0.6 / py3.13 and pandas 3.0.5 / py3.12). A unit is
 done when both stay at `0 failed`. Run pytest as the bare binary inside the env, never
 `python -m pytest`. Also run your own positive control and report its command and output,
 including a unit that changed nothing.
@@ -319,8 +319,8 @@ Baselines:
 
 OWNS: docs/source/installation.rst, CITATION.rst, README.rst
 
-Rewrite `installation.rst` against `pyproject.toml` (Python >=3.12, pandas >=2.2,<4); drop the
-outage note about a version three releases back. `README.rst:90` still says "Python 3.11+".
+Rewrite `installation.rst` against `pyproject.toml` (Python >=3.12, pandas >=3,<4); drop the
+outage note about a version three releases back. `README.rst:54` and `:65` still say Python 3.11.
 Fill `CITATION.rst` from the published DOI already in the repository; wording of how the
 author wants to be cited goes back to the author.
 
@@ -404,12 +404,13 @@ Each has zero inbound references:
 
 #### retire-reports
 
-OWNS: docs/DEPLOYMENT_STATUS.md, docs/BUILD_FAILURE_RESOLUTION.md, docs/PROGRESS.md, docs/transition-guide-doc-validation.md, coverage-monitor-fix.md, PYTHON-310-MIGRATION-NOTES.md, RELEASE_NOTES_PYTHON_310.md, baseline-coverage.json, pre-commit-config.yaml.old, fix_d205_docstrings.py, create_conda_env.sh
+OWNS: docs/DEPLOYMENT_STATUS.md, docs/READTHEDOCS_SETUP.md, docs/BUILD_FAILURE_RESOLUTION.md, docs/PROGRESS.md, docs/transition-guide-doc-validation.md, coverage-monitor-fix.md, PYTHON-310-MIGRATION-NOTES.md, RELEASE_NOTES_PYTHON_310.md, baseline-coverage.json, pre-commit-config.yaml.old, fix_d205_docstrings.py, create_conda_env.sh
 
 Candidates, not verdicts. Each has no inbound link by the same `git grep` rule. For each,
 state what event it recorded and whether that event is over; remove only those that are, and
 report the rest as undecided. `docs/transition-guide-doc-validation.md` documents the
-standalone doctest runner removed in `93337e07`. The program plan's "five one-time reports,
+standalone doctest runner removed in `93337e07`; `docs/READTHEDOCS_SETUP.md` describes a
+`.readthedocs.yaml` (Python 3.11, requirements files) that no longer exists. The program plan's "five one-time reports,
 628 lines" matches no exact subset here; re-derive rather than aim at it.
 
 ---
@@ -425,6 +426,4 @@ standalone doctest runner removed in `93337e07`. The program plan's "five one-ti
 
 ## Held outside phase 4
 
-- The lockfiles and `solarwindpy.yml`: the `sync-requirements.yml` pull request is unmerged
-  pending the author (see the W3 findings).
 - The planning scripts named under Reserved.
