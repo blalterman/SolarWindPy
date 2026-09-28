@@ -1,7 +1,11 @@
 {{ fullname | escape | underline}}
 
 .. automodule:: {{ fullname }}
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    {% block attributes %}
    {% if attributes %}

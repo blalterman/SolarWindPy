@@ -27,17 +27,20 @@ release = version
 
 needs_sphinx = "1.8"
 
-# Extensions for clean documentation generation
+# numpydoc is the only docstring processor. Running napoleon beside it made
+# both rewrite every docstring; napoleon's ``Attributes`` sections then emitted
+# ``.. attribute::`` directives that collided with ``autoclass :members:``.
+# ``docstring_inheritance`` is not listed: it is a runtime dependency
+# (``fitfunctions/core.py`` uses its metaclass), not a Sphinx extension.
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx.ext.napoleon",
+    "sphinx.ext.coverage",  # `sphinx-build -b coverage`, run by docs CI
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "numpydoc",
     "sphinxcontrib.bibtex",
-    "docstring_inheritance",  # Enable docstring inheritance for fit functions
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
@@ -68,19 +71,74 @@ autodoc_default_options = {
 # Don't prepend module names in titles
 add_module_names = False
 
-# -- Napoleon configuration -------------------------------------------------
-
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
-napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = False
-
 # -- NumPy doc configuration ------------------------------------------------
 
 # Create toctree entries for class members (separate pages)
 numpydoc_class_members_toctree = True
 numpydoc_show_class_members = False  # Don't show on parent page
 numpydoc_show_inherited_class_members = True  # Show inherited docstrings
+
+# Link parameter and return types. numpydoc splits a type spec on whitespace,
+# commas and "or", and wraps every token it does not ignore in :obj:.
+numpydoc_xref_param_type = True
+
+# Docstring type specs are written with the names the source imports: numpy,
+# pandas and matplotlib under their conventional short names, and package
+# modules under their import aliases (``from pandas import MultiIndex as MI``
+# and ``from . import units_constants as uc`` in ``core/base.py``). Map each
+# spelling to the fully qualified name that intersphinx or this build indexes.
+# A spelling that is not an import the source uses belongs in the docstring.
+numpydoc_xref_aliases = {
+    "np.ndarray": "numpy.ndarray",
+    "pd.DataFrame": "pandas.DataFrame",
+    "pd.Series": "pandas.Series",
+    "pd.Index": "pandas.Index",
+    "pd.MultiIndex": "pandas.MultiIndex",
+    "MI": "pandas.MultiIndex",
+    "pd.DatetimeIndex": "pandas.DatetimeIndex",
+    "pd.Timestamp": "pandas.Timestamp",
+    "pd.Timedelta": "pandas.Timedelta",
+    "pd.Interval": "pandas.Interval",
+    "pd.IntervalIndex": "pandas.IntervalIndex",
+    "pd.Categorical": "pandas.Categorical",
+    "DataFrame": "pandas.DataFrame",
+    "Series": "pandas.Series",
+    "mpl.axes.Axes": "matplotlib.axes.Axes",
+    "plt.Axes": "matplotlib.axes.Axes",
+    "Axes": "matplotlib.axes.Axes",
+    "mpl.axis.Axis": "matplotlib.axis.Axis",
+    "mpl.collections.QuadMesh": "matplotlib.collections.QuadMesh",
+    "QuadMesh": "matplotlib.collections.QuadMesh",
+    "QuadContourSet": "matplotlib.contour.QuadContourSet",
+    "colorbar.Colorbar": "matplotlib.colorbar.Colorbar",
+    "Colorbar": "matplotlib.colorbar.Colorbar",
+    "FunctionType": "types.FunctionType",
+    "Path": "pathlib.Path",
+    "uc.Units": "solarwindpy.core.units_constants.Units",
+    "uc.Constants": "solarwindpy.core.units_constants.Constants",
+    "vector.Vector": "solarwindpy.core.vector.Vector",
+    "Ion": "solarwindpy.core.ions.Ion",
+    "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
+}
+
+# Words of numpydoc type-spec grammar ("array-like, optional", "list of str",
+# "default False", "shape (N,)"). They qualify a type; they are not names, so
+# linking them can only fail.
+numpydoc_xref_ignore = {
+    "optional",
+    "default",
+    "of",
+    "or",
+    "and",
+    "shape",
+    "length",
+    "len",
+    "type",
+    "instance",
+    "object",
+    "objects",
+    "like",
+}
 
 # -- MathJax configuration ---------------------------------------------------
 
@@ -97,8 +155,19 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/docs/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
 }
+
+# -- Nitpicky reference exceptions -------------------------------------------
+
+# Each entry names a target that cannot resolve and says why. A reference that
+# fails because a docstring is wrong is fixed in the docstring, not listed here.
+nitpick_ignore = [
+    # Base of fitfunctions.core.FitFunctionMeta. docstring-inheritance publishes
+    # no Sphinx inventory: its documentation site returns 404 for objects.inv.
+    ("py:class", "docstring_inheritance.NumpyDocstringInheritanceMeta"),
+]
 
 # -- HTML output configuration -----------------------------------------------
 
@@ -137,18 +206,6 @@ html_css_files = [
 
 # Custom JavaScript files (for enhanced scientific features)
 html_js_files = []
-
-# RTD-specific configuration
-# Enable version switching and downloads for RTD
-if os.environ.get('READTHEDOCS'):
-    html_context['versions'] = [('latest', '/en/latest/')]
-    html_context['downloads'] = [('pdf', '/en/latest/_downloads/SolarWindPy.pdf')]
-    
-    # Analytics integration for RTD
-    html_theme_options.update({
-        'analytics_id': 'G-PLACEHOLDER',  # Replace with actual GA4 tracking ID
-        'analytics_anonymize_ip': True,
-    })
 
 # Favicon configuration
 html_favicon = '_static/favicon.ico'

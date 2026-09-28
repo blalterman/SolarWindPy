@@ -27,6 +27,9 @@ if errorlevel 9009 (
 
 if "%1" == "clean" (
         rmdir /S /Q %BUILDDIR%
+        if exist %SOURCEDIR%\_autosummary rmdir /S /Q %SOURCEDIR%\_autosummary
+        REM source\api is the retired sphinx-apidoc tree; see Makefile clean.
+        if exist %SOURCEDIR%\api rmdir /S /Q %SOURCEDIR%\api
         goto end
 )
 
