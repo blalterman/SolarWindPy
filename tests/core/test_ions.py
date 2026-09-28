@@ -159,7 +159,8 @@ class IonTestBase(ABC):
         #         ln_rho = np.log(rho)
         #
         gamma = 5.0 / 3.0
-        units = 1e4 / constants.e
+        # [S] = eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
+        units = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)
         S = pth.multiply(rho.pow(-gamma)) / units
         S.name = "S"
         #         print(
@@ -355,3 +356,26 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     )
     # Guard the hand value in the docstring against the formula above.
     assert expected == pytest.approx(267.6, rel=1e-3)
+
+
+def test_specific_entropy_of_a_hand_computed_proton_population():
+    """S = kT / n^(2/3) in eV cm^2 m_p^-5/3, with kT = m_p w^2 / 2.
+
+    5 cm^-3 protons with w = 50 km/s have kT = 13.05 eV, so S = 4.463.
+
+    ON FAILURE: the code is wrong.
+    """
+    cols = pd.MultiIndex.from_tuples(
+        [("n", ""), ("v", "x"), ("v", "y"), ("v", "z")]
+        + [("w", c) for c in ("par", "per", "scalar")],
+        names=["M", "C"],
+    )
+    data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
+    kt_ev = 0.5 * constants.m_p * (50e3) ** 2 / constants.e
+    expected = kt_ev / 5.0 ** (2.0 / 3.0)
+    assert ions.Ion(data, "p1").specific_entropy.iloc[0] == pytest.approx(
+        expected, rel=1e-12
+    )
+    # Guard the hand values in the docstring against the formula above.
+    assert kt_ev == pytest.approx(13.05, rel=1e-3)
+    assert expected == pytest.approx(4.463, rel=1e-3)

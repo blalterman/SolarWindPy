@@ -167,6 +167,8 @@ class Units:
         Parallel heat flux units :math:`[\mathrm{\mu W\,m^{-2}}]`.
     kinetic_energy_flux : float
         Kinetic energy flux units :math:`[\mathrm{\mu W\,m^{-2}}]`, matching ``qpar``.
+    specific_entropy : float
+        Specific entropy units :math:`[\mathrm{eV\,cm^{2}\,m_p^{-5/3}}]`.
     distance2sun : float
         Distance to sun units ``[m]``.
     """
@@ -201,4 +203,5 @@ class Units:
         self.cs = self.v
         self.cfms = self.v
         self.rho = self.n * constants.m_p
-        self.specific_entropy = 1e4 / constants.e
+        # eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
+        self.specific_entropy = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)

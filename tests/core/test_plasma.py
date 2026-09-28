@@ -2058,7 +2058,8 @@ class PlasmaTestBase(ABC):
         ot = self.object_testing
 
         gamma = 5.0 / 3.0
-        units = 1e4 / constants.e
+        # [S] = eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
+        units = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)
         for s in self.species_combinations:
             multi_species = len(s) > 1
             pth = ot.pth(*s).xs("scalar", axis=1, level="C" if multi_species else None)
