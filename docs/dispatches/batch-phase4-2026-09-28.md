@@ -117,9 +117,7 @@ Identified before launch. The pilot's hardest unit (`hist2d`) ran about ten time
 - `plotting-orbits`: `orbits.py` at 24.3% across 206 statements, 30 introspection-only asserts.
 - `plotting-spiral`: `spiral.py` at 66.9% across 517 statements, 32 introspection-only asserts.
 - `instabilities`: first tests for 192 statements at 32.8%, thresholds fitted in published papers.
-- `docs-build`: 2309 nitpicky Sphinx warnings under `-W -n`; docs CI is red until it merges.
-  Review this unit's pull request first.
-- `source-core`: 442 nitpicky warnings from `solarwindpy/core` docstrings plus the 355-line
+- `source-core`: 32 nitpicky warnings from `solarwindpy/core` docstrings plus the 355-line
   commented-out class.
 
 Coverage figures come from
@@ -285,23 +283,6 @@ Baselines:
 
 ### W5, documentation
 
-#### docs-build (long; review first)
-
-OWNS: docs/Makefile, docs/make.bat, docs/add_no_index.py, docs/TEMPLATE_SYSTEM.md, docs/source/conf.py, docs/source/_templates/, docs/source/_static/, docs/source/api_reference.rst, docs/source/index.rst, docs/source/documentation_review.rst, docs/source/tutorial.rst, docs/source/tutorial/, docs/source/fitfunctions_architecture.md, .github/workflows/docs.yml
-
-Delete the second API tree: the `api` make target (sphinx-apidoc into `docs/source/api/`),
-`add_no_index.py`, `TEMPLATE_SYSTEM.md`; keep autosummary as the sole mechanism. Resolve type
-references through `intersphinx_mapping` and a justified `nitpick_ignore` in `conf.py`.
-Docstring-level broken references belong to the `source-*` units; report the residual count per
-subpackage for them. Build from a clean checkout: `docs/source/_autosummary/` is gitignored and
-a stale local copy (for example `solarwindpy.plotting.select_data_from_figure`) aborts a local
-build under `-W`.
-
-Baselines (on a clean export of tracked `docs/` beside a `solarwindpy` symlink):
-- `cd docs && SPHINXOPTS='-W --keep-going -n' make html` → exit 2, 2309 warnings, of which 655
-  from `docs/source/api` and 1937 `[ref.class]`: `grep -c WARNING <log>`, `grep -oE '\[[a-z.]+\]$' <log> | sort | uniq -c`
-- Positive control: an injected `:func:` reference to a nonexistent name must fail the build.
-
 #### usage
 
 OWNS: docs/source/usage.rst, docs/source/conftest.py
@@ -347,8 +328,18 @@ commented-out code (prose comments stay). A defect found in your own files is yo
 with a test that fails before and passes after; that test lives in a new file under
 `tests/` named in your `OWNS:` line.
 
-Baseline for all four: `conda run -n solarwindpy python scripts/docstring_coverage.py` →
-Overall Coverage 53.6%, 1180 items.
+Baselines for all four:
+- `conda run -n solarwindpy python scripts/docstring_coverage.py` → Overall Coverage 53.6%,
+  1180 items.
+- Nitpicky Sphinx warnings, 122 total, every one attributed to a docstring in one of the four
+  slices; docs CI turns green only when all four reach 0. Build a clean export (the
+  `_autosummary/` directory is gitignored and a stale copy aborts the build):
+  `T=$(mktemp -d); git archive HEAD docs LICENSE CITATION.rst | tar -x -C $T; ln -s "$PWD/solarwindpy" $T/solarwindpy; (cd $T/docs && conda run -n solarwindpy env SPHINXOPTS='-W --keep-going -n' make html) > $T/log 2>&1`,
+  then count each warning once, by the first subpackage it names (a line usually names two: the
+  file path and the `docstring of` target; the `sed` folds the `solarwidpy` typo in):
+  `grep -E "WARNING|ERROR|CRITICAL" $T/log | sed 's/solarwidpy/solarwindpy/' | perl -ne 'print "$1\n" if /solarwindpy[\/.](core|fitfunctions|plotting|instabilities|solar_activity|tools)/' | sort | uniq -c`.
+  Measured in the Documentation CI run on PR #445: core 32, fitfunctions 31, plotting 36,
+  instabilities 14, solar_activity 9, tools 0.
 
 ##### source-core
 
@@ -378,8 +369,10 @@ Fix `solarwindpy/plotting/labels/__init__.py:10`: `__all__` exports
 
 ##### source-misc
 
-OWNS: solarwindpy/instabilities/, solarwindpy/solar_activity/, solarwindpy/tools/, solarwindpy/scripts/, solarwindpy/__init__.py, solarwindpy/reproducibility.py, solarwindpy/README.md, tests/test_source_misc_defects.py
+OWNS: solarwindpy/instabilities/, solarwindpy/solar_activity/, solarwindpy/tools/, solarwindpy/scripts/, solarwindpy/__init__.py, solarwindpy/reproducibility.py, solarwindpy/README.md, docs/source/solarwindpy.bib, tests/test_source_misc_defects.py
 
+`docs/source/solarwindpy.bib` is 0 bytes, so the `Verscharen2016a` citations in
+`instabilities` docstrings cannot resolve; fill it from the DOIs the docstrings cite.
 Untrack `solarwindpy/solar_activity/sunspot_number/.DS_Store`. Do not fix the two
 pilot-found `solar_activity` defects (`base.py:210`, `plot_on_colorbar`): `solar-activity-root`
 records them as strict xfails in this same run, and a concurrent fix would flip those red at
@@ -404,13 +397,20 @@ Each has zero inbound references:
 
 #### retire-reports
 
-OWNS: docs/DEPLOYMENT_STATUS.md, docs/READTHEDOCS_SETUP.md, docs/BUILD_FAILURE_RESOLUTION.md, docs/PROGRESS.md, docs/transition-guide-doc-validation.md, coverage-monitor-fix.md, PYTHON-310-MIGRATION-NOTES.md, RELEASE_NOTES_PYTHON_310.md, baseline-coverage.json, pre-commit-config.yaml.old, fix_d205_docstrings.py, create_conda_env.sh
+OWNS: docs/DEPLOYMENT_STATUS.md, docs/READTHEDOCS_SETUP.md, docs/BUILD_FAILURE_RESOLUTION.md, docs/VALIDATION_REPORT.md, docs/README.md, docs/transition-guide-doc-validation.md, coverage-monitor-fix.md, PYTHON-310-MIGRATION-NOTES.md, RELEASE_NOTES_PYTHON_310.md, baseline-coverage.json, pre-commit-config.yaml.old, fix_d205_docstrings.py, create_conda_env.sh, .gitignore
 
 Candidates, not verdicts. Each has no inbound link by the same `git grep` rule. For each,
 state what event it recorded and whether that event is over; remove only those that are, and
 report the rest as undecided. `docs/transition-guide-doc-validation.md` documents the
 standalone doctest runner removed in `93337e07`; `docs/READTHEDOCS_SETUP.md` describes a
-`.readthedocs.yaml` (Python 3.11, requirements files) that no longer exists. The program plan's "five one-time reports,
+`.readthedocs.yaml` (Python 3.11, requirements files) that no longer exists and links the
+deleted `docs/TEMPLATE_SYSTEM.md`. `docs/VALIDATION_REPORT.md` and
+`docs/BUILD_FAILURE_RESOLUTION.md` describe the sphinx-apidoc tree that PR #445 removed.
+`docs/README.md:18,32-35` describes that tree and `add_no_index.py`; the file is otherwise a
+live index, so remove only the dead passage, or report it undecided. In `.gitignore`, only the
+`docs/source/api/` line is yours: nothing generates that directory now. Dropping it retires the
+`api/` removal in `docs/Makefile`'s `clean` target, which is outside your paths; report that as a
+follow-up. The program plan's "five one-time reports,
 628 lines" matches no exact subset here; re-derive rather than aim at it.
 
 ---
@@ -423,6 +423,9 @@ standalone doctest runner removed in `93337e07`; `docs/READTHEDOCS_SETUP.md` des
 `tests/solar_activity/sunspot_number/` (rebuilt by PR #436), `tests/test_contracts_class.py`,
 `tests/test_contracts_dataframe.py`, `tests/test_hook_integration.py`,
 `tests/test_issue_titles.py`, `tests/test_declared_versions.py`.
+`docs/source/fitfunctions_architecture.md` (never built; names classes the code lacks) and the
+section prose of `docs/source/api_reference.rst` (omits hinge, heaviside, composite, ICME):
+what the library is described as doing is the author's call.
 
 ## Held outside phase 4
 
