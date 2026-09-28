@@ -6,10 +6,8 @@ to provide a baseline for standardization to NumPy format.
 """
 
 import ast
-import os
 from pathlib import Path
 from collections import defaultdict
-import re
 
 
 class DocstringFormatAnalyzer(ast.NodeVisitor):
@@ -81,9 +79,7 @@ class DocstringFormatAnalyzer(ast.NodeVisitor):
         docstring = ast.get_docstring(node)
         if docstring:
             self.stats["functions_with_docstrings"] += 1
-            format_type = self.analyze_docstring_format(
-                docstring, "function", node.name
-            )
+            self.analyze_docstring_format(docstring, "function", node.name)
         else:
             self.issues.append(
                 {
@@ -108,7 +104,7 @@ class DocstringFormatAnalyzer(ast.NodeVisitor):
         docstring = ast.get_docstring(node)
         if docstring:
             self.stats["classes_with_docstrings"] += 1
-            format_type = self.analyze_docstring_format(docstring, "class", node.name)
+            self.analyze_docstring_format(docstring, "class", node.name)
         else:
             self.issues.append(
                 {
@@ -175,8 +171,8 @@ def main():
     # Exclude test files
     python_files = [f for f in python_files if "test_" not in f.name]
 
-    print(f"SolarWindPy Docstring Baseline Analysis")
-    print(f"=" * 50)
+    print("SolarWindPy Docstring Baseline Analysis")
+    print("=" * 50)
     print(f"Found {len(python_files)} Python modules to analyze")
     print()
 
@@ -218,13 +214,13 @@ def main():
         (documented_objects / total_objects * 100) if total_objects > 0 else 0
     )
     print(
-        f"  Functions with docstrings: {total_stats['functions_with_docstrings']}/{total_stats['total_functions']} ({total_stats['functions_with_docstrings']/total_stats['total_functions']*100:.1f}%)"
+        f"  Functions with docstrings: {total_stats['functions_with_docstrings']}/{total_stats['total_functions']} ({total_stats['functions_with_docstrings'] / total_stats['total_functions'] * 100:.1f}%)"
     )
     print(
-        f"  Classes with docstrings: {total_stats['classes_with_docstrings']}/{total_stats['total_classes']} ({total_stats['classes_with_docstrings']/total_stats['total_classes']*100:.1f}%)"
+        f"  Classes with docstrings: {total_stats['classes_with_docstrings']}/{total_stats['total_classes']} ({total_stats['classes_with_docstrings'] / total_stats['total_classes'] * 100:.1f}%)"
     )
     print(
-        f"  Methods with docstrings: {total_stats['methods_with_docstrings']}/{total_stats['total_methods']} ({total_stats['methods_with_docstrings']/total_stats['total_methods']*100:.1f}%)"
+        f"  Methods with docstrings: {total_stats['methods_with_docstrings']}/{total_stats['total_methods']} ({total_stats['methods_with_docstrings'] / total_stats['total_methods'] * 100:.1f}%)"
     )
     print(
         f"  Overall Coverage: {documented_objects}/{total_objects} ({coverage_pct:.1f}%)"
@@ -239,13 +235,13 @@ def main():
     )
     if total_documented > 0:
         print(
-            f"  NumPy format: {total_stats['numpy_format']} ({total_stats['numpy_format']/total_documented*100:.1f}%)"
+            f"  NumPy format: {total_stats['numpy_format']} ({total_stats['numpy_format'] / total_documented * 100:.1f}%)"
         )
         print(
-            f"  Google format: {total_stats['google_format']} ({total_stats['google_format']/total_documented*100:.1f}%)"
+            f"  Google format: {total_stats['google_format']} ({total_stats['google_format'] / total_documented * 100:.1f}%)"
         )
         print(
-            f"  Informal format: {total_stats['informal_format']} ({total_stats['informal_format']/total_documented*100:.1f}%)"
+            f"  Informal format: {total_stats['informal_format']} ({total_stats['informal_format'] / total_documented * 100:.1f}%)"
         )
         print(f"  Empty docstrings: {total_stats['empty_docstrings']}")
     print()
@@ -267,7 +263,7 @@ def main():
 
     print()
     print(f"Missing docstrings: {len(all_issues)} items")
-    print(f"pydocstyle violations: ~1400 (from baseline analysis)")
+    print("pydocstyle violations: ~1400 (from baseline analysis)")
 
     print("\nConclusion:")
     print(f"- {coverage_pct:.1f}% documentation coverage")
@@ -276,7 +272,7 @@ def main():
         f"- {total_stats['google_format'] + total_stats['informal_format']} items need format conversion"
     )
     print(f"- {len(all_issues)} items need docstrings added")
-    print(f"- ~1400 pydocstyle violations to address")
+    print("- ~1400 pydocstyle violations to address")
 
 
 if __name__ == "__main__":

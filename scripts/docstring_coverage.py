@@ -8,7 +8,6 @@ enhancement prioritization.
 """
 
 import ast
-import os
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
@@ -281,7 +280,7 @@ def generate_coverage_report(solarwindpy_path: Path) -> None:
 
         print(f"\n{module_path}: {coverage:.1f}%")
         if coverage < 100:
-            print(f"  Missing documentation:")
+            print("  Missing documentation:")
             for item in missing:
                 print(f"    - {item['type']}: {item['name']} (line {item['line']})")
 

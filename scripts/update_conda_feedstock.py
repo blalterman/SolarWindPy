@@ -17,12 +17,10 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 import requests
-import yaml
 from packaging import version
 
 # Add project root to path for imports
@@ -31,16 +29,19 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 class CondaFeedstockUpdater:
     """Handles automated conda-forge feedstock updates.
-    
+
     This class manages the complete workflow of updating conda-forge
     feedstock repositories with new PyPI releases.
     """
-    
-    def __init__(self, package_name: str = "solarwindpy", 
-                 feedstock_repo: str = "conda-forge/solarwindpy-feedstock",
-                 fork_owner: Optional[str] = None):
+
+    def __init__(
+        self,
+        package_name: str = "solarwindpy",
+        feedstock_repo: str = "conda-forge/solarwindpy-feedstock",
+        fork_owner: Optional[str] = None,
+    ):
         """Initialize the feedstock updater.
-        
+
         Parameters
         ----------
         package_name : str
@@ -54,31 +55,34 @@ class CondaFeedstockUpdater:
         self.feedstock_repo = feedstock_repo
         self.fork_owner = fork_owner or self._get_github_username()
         self.project_root = Path(__file__).parent.parent
-        
+
     def _get_github_username(self) -> str:
         """Get current GitHub username from git config or environment.
-        
+
         Returns
         -------
         str
             GitHub username
         """
         # Try environment variable first
-        if 'GITHUB_ACTOR' in os.environ:
-            return os.environ['GITHUB_ACTOR']
-            
+        if "GITHUB_ACTOR" in os.environ:
+            return os.environ["GITHUB_ACTOR"]
+
         # Try git config
         try:
             result = subprocess.run(
-                ['git', 'config', 'user.name'], 
-                capture_output=True, text=True, check=True
+                ["git", "config", "user.name"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
-            return 'unknown'
+            return "unknown"
 
-    def verify_git_tag_provenance(self, version_str: str,
-                                   require_master: bool = False) -> Tuple[bool, Optional[str]]:
+    def verify_git_tag_provenance(
+        self, version_str: str, require_master: bool = False
+    ) -> Tuple[bool, Optional[str]]:
         """Verify git tag exists and check branch provenance.
 
         This method verifies that:
@@ -104,9 +108,11 @@ class CondaFeedstockUpdater:
         try:
             # Check if git tag exists
             result = subprocess.run(
-                ['git', 'tag', '-l', tag_name],
-                capture_output=True, text=True, check=False,
-                cwd=self.project_root
+                ["git", "tag", "-l", tag_name],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=self.project_root,
             )
 
             if not result.stdout.strip():
@@ -115,9 +121,11 @@ class CondaFeedstockUpdater:
 
             # Get commit SHA for the tag
             result = subprocess.run(
-                ['git', 'rev-parse', tag_name],
-                capture_output=True, text=True, check=True,
-                cwd=self.project_root
+                ["git", "rev-parse", tag_name],
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=self.project_root,
             )
             commit_sha = result.stdout.strip()
 
@@ -125,30 +133,40 @@ class CondaFeedstockUpdater:
 
             # Verify tag is on master branch (if required)
             result = subprocess.run(
-                ['git', 'branch', '--contains', commit_sha],
-                capture_output=True, text=True, check=False,
-                cwd=self.project_root
+                ["git", "branch", "--contains", commit_sha],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=self.project_root,
             )
 
             if result.returncode == 0:
-                branches = [b.strip().lstrip('* ') for b in result.stdout.strip().split('\n') if b.strip()]
+                branches = [
+                    b.strip().lstrip("* ")
+                    for b in result.stdout.strip().split("\n")
+                    if b.strip()
+                ]
 
                 if branches:
-                    has_master = any('master' in b for b in branches)
+                    has_master = any("master" in b for b in branches)
                     if has_master:
                         print(f"✅ Verified {tag_name} is on master branch")
                     elif require_master:
                         print(f"⚠️  Warning: Tag {tag_name} not found on master branch")
-                        print(f"   Branches containing this tag: {', '.join(branches[:5])}")
+                        print(
+                            f"   Branches containing this tag: {', '.join(branches[:5])}"
+                        )
                         return False, commit_sha
                     else:
                         print(f"📋 Tag found on branches: {', '.join(branches[:3])}")
 
             # Get tag annotation message for additional context
             result = subprocess.run(
-                ['git', 'tag', '-l', '--format=%(contents:subject)', tag_name],
-                capture_output=True, text=True, check=False,
-                cwd=self.project_root
+                ["git", "tag", "-l", "--format=%(contents:subject)", tag_name],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=self.project_root,
             )
             if result.returncode == 0 and result.stdout.strip():
                 tag_message = result.stdout.strip()
@@ -163,8 +181,9 @@ class CondaFeedstockUpdater:
             print(f"⚠️  Git verification failed: {e}")
             return False, None
 
-    def verify_github_release_integrity(self, version_str: str,
-                                       pypi_sha256: str) -> bool:
+    def verify_github_release_integrity(
+        self, version_str: str, pypi_sha256: str
+    ) -> bool:
         """Verify GitHub release SHA256 matches PyPI distribution.
 
         Parameters
@@ -184,17 +203,20 @@ class CondaFeedstockUpdater:
 
             # Use gh CLI to get release assets
             result = subprocess.run(
-                ['gh', 'release', 'view', tag_name, '--json', 'assets'],
-                capture_output=True, text=True, check=True,
-                cwd=self.project_root
+                ["gh", "release", "view", tag_name, "--json", "assets"],
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=self.project_root,
             )
 
             release_data = json.loads(result.stdout)
 
             # Find the .tar.gz asset
             tar_gz_assets = [
-                a for a in release_data.get('assets', [])
-                if a['name'].endswith('.tar.gz')
+                a
+                for a in release_data.get("assets", [])
+                if a["name"].endswith(".tar.gz")
             ]
 
             if not tar_gz_assets:
@@ -202,22 +224,22 @@ class CondaFeedstockUpdater:
                 return True  # Permissive - don't block
 
             # Extract SHA256 from digest field (format: "sha256:hash")
-            github_sha256 = tar_gz_assets[0].get('digest', '')
-            if github_sha256.startswith('sha256:'):
+            github_sha256 = tar_gz_assets[0].get("digest", "")
+            if github_sha256.startswith("sha256:"):
                 github_sha256 = github_sha256[7:]  # Remove "sha256:" prefix
 
             if github_sha256 == pypi_sha256:
-                print(f"✅ GitHub release SHA256 matches PyPI")
+                print("✅ GitHub release SHA256 matches PyPI")
                 print(f"   Hash: {github_sha256[:16]}...")
                 return True
             else:
-                print(f"⚠️  SHA256 mismatch between GitHub and PyPI")
+                print("⚠️  SHA256 mismatch between GitHub and PyPI")
                 print(f"   GitHub: {github_sha256[:16]}...")
                 print(f"   PyPI:   {pypi_sha256[:16]}...")
                 return False
 
         except subprocess.CalledProcessError:
-            print(f"⚠️  Could not verify GitHub release (gh CLI may not be available)")
+            print("⚠️  Could not verify GitHub release (gh CLI may not be available)")
             return True  # Permissive - don't block if gh unavailable
         except Exception as e:
             print(f"⚠️  GitHub release verification skipped: {e}")
@@ -225,14 +247,14 @@ class CondaFeedstockUpdater:
 
     def validate_pypi_release(self, version_str: str, timeout: int = 10) -> bool:
         """Validate that the PyPI release exists and is not a pre-release.
-        
+
         Parameters
         ----------
         version_str : str
             Version string to validate
         timeout : int
             Request timeout in seconds
-            
+
         Returns
         -------
         bool
@@ -242,65 +264,74 @@ class CondaFeedstockUpdater:
             # Parse version to check for pre-release
             v = version.parse(version_str)
             if v.is_prerelease:
-                print(f"❌ Pre-release version {version_str} - skipping feedstock update")
+                print(
+                    f"❌ Pre-release version {version_str} - skipping feedstock update"
+                )
                 return False
-            
+
             # Check PyPI availability
             url = f"https://pypi.org/pypi/{self.package_name}/{version_str}/json"
             response = requests.get(url, timeout=timeout)
-            
+
             if response.status_code != 200:
-                print(f"❌ PyPI version {version_str} not found (status: {response.status_code})")
+                print(
+                    f"❌ PyPI version {version_str} not found (status: {response.status_code})"
+                )
                 return False
-                
+
             data = response.json()
-            pypi_version = data.get('info', {}).get('version')
-            
+            pypi_version = data.get("info", {}).get("version")
+
             if pypi_version != version_str:
-                print(f"❌ Version mismatch: requested {version_str}, PyPI has {pypi_version}")
+                print(
+                    f"❌ Version mismatch: requested {version_str}, PyPI has {pypi_version}"
+                )
                 return False
-                
+
             print(f"✅ Validated PyPI release: {self.package_name} v{version_str}")
             return True
-            
+
         except Exception as e:
             print(f"❌ Failed to validate PyPI release: {e}")
             return False
-    
+
     def calculate_sha256(self, version_str: str, timeout: int = 30) -> Optional[str]:
         """Calculate SHA256 hash of the PyPI source distribution.
-        
+
         Parameters
         ----------
         version_str : str
             Version to download and hash
         timeout : int
             Download timeout in seconds
-            
+
         Returns
         -------
         str or None
             SHA256 hash as hex string, or None if failed
         """
         url = f"https://pypi.org/packages/source/{self.package_name[0]}/{self.package_name}/{self.package_name}-{version_str}.tar.gz"
-        
+
         try:
-            print(f"Downloading {self.package_name} v{version_str} for SHA256 calculation...")
+            print(
+                f"Downloading {self.package_name} v{version_str} for SHA256 calculation..."
+            )
             response = requests.get(url, timeout=timeout)
             response.raise_for_status()
-            
+
             sha256_hash = hashlib.sha256(response.content).hexdigest()
             print(f"✅ SHA256: {sha256_hash}")
             return sha256_hash
-            
+
         except Exception as e:
             print(f"❌ Failed to calculate SHA256: {e}")
             return None
-    
-    def update_meta_yaml(self, version_str: str, sha256_hash: str, 
-                        meta_path: Path) -> bool:
+
+    def update_meta_yaml(
+        self, version_str: str, sha256_hash: str, meta_path: Path
+    ) -> bool:
         """Update the conda recipe meta.yaml file.
-        
+
         Parameters
         ----------
         version_str : str
@@ -309,7 +340,7 @@ class CondaFeedstockUpdater:
             SHA256 hash of the source distribution
         meta_path : Path
             Path to the meta.yaml file
-            
+
         Returns
         -------
         bool
@@ -319,34 +350,34 @@ class CondaFeedstockUpdater:
             if not meta_path.exists():
                 print(f"❌ meta.yaml not found: {meta_path}")
                 return False
-                
+
             # Read current meta.yaml
             content = meta_path.read_text()
-            
+
             # Update version and SHA256
             # Handle Jinja2 template format
-            lines = content.split('\n')
+            lines = content.split("\n")
             updated_lines = []
-            
+
             for line in lines:
-                if line.strip().startswith('{% set version ='):
+                if line.strip().startswith("{% set version ="):
                     updated_lines.append(f'{{% set version = "{version_str}" %}}')
-                elif line.strip().startswith('sha256:'):
-                    updated_lines.append(f'  sha256: {sha256_hash}')
+                elif line.strip().startswith("sha256:"):
+                    updated_lines.append(f"  sha256: {sha256_hash}")
                 else:
                     updated_lines.append(line)
-            
+
             # Write updated content
-            updated_content = '\n'.join(updated_lines)
+            updated_content = "\n".join(updated_lines)
             meta_path.write_text(updated_content)
-            
+
             print(f"✅ Updated {meta_path} with version {version_str}")
             return True
-            
+
         except Exception as e:
             print(f"❌ Failed to update meta.yaml: {e}")
             return False
-    
+
     def _get_dependency_comparison(self) -> str:
         """Run comparison script and format output for issue.
 
@@ -361,7 +392,7 @@ class CondaFeedstockUpdater:
                 capture_output=True,
                 text=True,
                 timeout=15,
-                cwd=self.project_root
+                cwd=self.project_root,
             )
 
             if result.returncode == 0:
@@ -402,9 +433,13 @@ python scripts/compare_feedstock_deps.py
 ⚠️ **CRITICAL**: The autotick bot updates **version and SHA256 ONLY**, NOT dependencies!
 """
 
-    def create_tracking_issue(self, version_str: str, sha256_hash: str,
-                            dry_run: bool = False,
-                            commit_sha: Optional[str] = None) -> Optional[str]:
+    def create_tracking_issue(
+        self,
+        version_str: str,
+        sha256_hash: str,
+        dry_run: bool = False,
+        commit_sha: Optional[str] = None,
+    ) -> Optional[str]:
         """Create GitHub issue for tracking the feedstock update.
 
         Parameters
@@ -426,7 +461,7 @@ python scripts/compare_feedstock_deps.py
         title = f"Conda feedstock update for SolarWindPy v{version_str}"
 
         # Get dependency comparison
-        comparison_output = self._get_dependency_comparison()
+        self._get_dependency_comparison()
 
         body = f"""## Automated Conda Feedstock Update
 
@@ -515,43 +550,47 @@ When bot PR appears (usually 2-6 hours):
 
 🤖 Generated by conda feedstock automation
 """
-        
+
         if dry_run:
             print(f"🔍 DRY RUN: Would create issue '{title}'")
             print(f"Body length: {len(body)} characters")
             return None
-            
+
         try:
             # Use gh CLI to create issue
             cmd = [
-                'gh', 'issue', 'create',
-                '--title', title,
-                '--body', body,
-                '--label', 'conda-feedstock,automation'
+                "gh",
+                "issue",
+                "create",
+                "--title",
+                title,
+                "--body",
+                body,
+                "--label",
+                "conda-feedstock,automation",
             ]
-            
+
             result = subprocess.run(
-                cmd, capture_output=True, text=True, check=True,
-                cwd=self.project_root
+                cmd, capture_output=True, text=True, check=True, cwd=self.project_root
             )
-            
+
             issue_url = result.stdout.strip()
             print(f"✅ Created tracking issue: {issue_url}")
             return issue_url
-            
+
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to create GitHub issue: {e}")
             print(f"Error output: {e.stderr}")
             return None
-    
+
     def generate_pr_template(self, version_str: str) -> str:
         """Generate pull request template for conda-forge feedstock.
-        
+
         Parameters
         ----------
         version_str : str
             Version being updated
-            
+
         Returns
         -------
         str
@@ -578,39 +617,40 @@ This update was prepared using automated tooling from the SolarWindPy repository
 ---
 🤖 Automated update via conda feedstock automation
 """
-    
+
     def update_feedstock(self, version_str: str, dry_run: bool = False) -> bool:
         """Complete conda feedstock update workflow.
-        
+
         Parameters
         ----------
         version_str : str
             Version to update to
         dry_run : bool
             If True, only validate and show what would be done
-            
+
         Returns
         -------
         bool
             True if update successful or dry run completed
         """
-        print(f"🚀 Starting conda feedstock update for {self.package_name} v{version_str}")
+        print(
+            f"🚀 Starting conda feedstock update for {self.package_name} v{version_str}"
+        )
 
         # Step 1: Validate PyPI release
         if not self.validate_pypi_release(version_str):
             return False
 
         # Step 1.5: Verify git tag provenance (optional, non-blocking)
-        print(f"\n🔍 Verifying source provenance...")
+        print("\n🔍 Verifying source provenance...")
         git_verified, commit_sha = self.verify_git_tag_provenance(
-            version_str,
-            require_master=False  # Don't enforce, just report
+            version_str, require_master=False  # Don't enforce, just report
         )
 
         if git_verified and commit_sha:
             print(f"✅ Git provenance verified: commit {commit_sha[:8]}")
         else:
-            print(f"⚠️  Git provenance could not be verified (may be running in CI)")
+            print("⚠️  Git provenance could not be verified (may be running in CI)")
             commit_sha = None  # Ensure it's None if verification failed
 
         # Step 2: Calculate SHA256
@@ -620,38 +660,40 @@ This update was prepared using automated tooling from the SolarWindPy repository
 
         # Step 2.5: Verify GitHub release matches PyPI (optional, non-blocking)
         if git_verified and commit_sha:
-            print(f"\n🔍 Verifying supply chain integrity...")
-            github_match = self.verify_github_release_integrity(version_str, sha256_hash)
+            print("\n🔍 Verifying supply chain integrity...")
+            github_match = self.verify_github_release_integrity(
+                version_str, sha256_hash
+            )
             if github_match:
-                print(f"✅ Supply chain integrity verified")
+                print("✅ Supply chain integrity verified")
 
         # Step 3: Create tracking issue
         issue_url = self.create_tracking_issue(
             version_str,
             sha256_hash,
             dry_run,
-            commit_sha=commit_sha  # Pass commit SHA if available
+            commit_sha=commit_sha,  # Pass commit SHA if available
         )
-        
+
         if dry_run:
-            print(f"🔍 DRY RUN: Would update feedstock with:")
+            print("🔍 DRY RUN: Would update feedstock with:")
             print(f"  Version: {version_str}")
             print(f"  SHA256: {sha256_hash}")
             print(f"  Fork owner: {self.fork_owner}")
-            print(f"\nPR Template:")
+            print("\nPR Template:")
             print(self.generate_pr_template(version_str))
             return True
-        
+
         print(f"🎉 Feedstock update initiated for {self.package_name} v{version_str}")
         if issue_url:
             print(f"Tracking issue: {issue_url}")
-        
+
         return True
 
 
 def normalize_version(version_str: str) -> str:
     """Normalize version string by removing 'v' prefix if present."""
-    return version_str.lstrip('v')
+    return version_str.lstrip("v")
 
 
 def main():
@@ -663,53 +705,47 @@ def main():
   python scripts/update_conda_feedstock.py v0.1.5
   python scripts/update_conda_feedstock.py 0.1.5 --dry-run
   python scripts/update_conda_feedstock.py 0.2.0 --package mypackage
-"""
+""",
     )
-    
+
     parser.add_argument(
-        "version",
-        help="Version to update to (with or without 'v' prefix)"
+        "version", help="Version to update to (with or without 'v' prefix)"
     )
     parser.add_argument(
-        "--package",
-        default="solarwindpy",
-        help="Package name (default: solarwindpy)"
+        "--package", default="solarwindpy", help="Package name (default: solarwindpy)"
     )
     parser.add_argument(
         "--feedstock-repo",
         default="conda-forge/solarwindpy-feedstock",
-        help="Feedstock repository (default: conda-forge/solarwindpy-feedstock)"
+        help="Feedstock repository (default: conda-forge/solarwindpy-feedstock)",
     )
     parser.add_argument(
-        "--fork-owner",
-        help="GitHub username for fork (default: current user)"
+        "--fork-owner", help="GitHub username for fork (default: current user)"
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be done without making changes"
+        help="Show what would be done without making changes",
     )
     parser.add_argument(
-        "--no-issue",
-        action="store_true",
-        help="Skip creating tracking issue"
+        "--no-issue", action="store_true", help="Skip creating tracking issue"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Normalize version
     version_str = normalize_version(args.version)
-    
+
     # Create updater instance
     updater = CondaFeedstockUpdater(
         package_name=args.package,
         feedstock_repo=args.feedstock_repo,
-        fork_owner=args.fork_owner
+        fork_owner=args.fork_owner,
     )
-    
+
     # Run update workflow
     success = updater.update_feedstock(version_str, dry_run=args.dry_run)
-    
+
     if success:
         if args.dry_run:
             print("✅ Dry run completed successfully")

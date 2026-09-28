@@ -11,10 +11,9 @@ Usage:
 
 import subprocess
 import sys
-import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
 
 
 # Color codes for terminal output
@@ -191,9 +190,9 @@ def print_summary(results: Dict[str, Tuple[bool, str]]):
     total = len(results)
     failed = total - passed
 
-    print(f"\n{Colors.BOLD}{'='*80}{Colors.END}")
+    print(f"\n{Colors.BOLD}{'=' * 80}{Colors.END}")
     print(f"{Colors.BOLD}RELEASE READINESS SUMMARY{Colors.END}")
-    print(f"{Colors.BOLD}{'='*80}{Colors.END}")
+    print(f"{Colors.BOLD}{'=' * 80}{Colors.END}")
 
     if failed == 0:
         print(f"{Colors.GREEN}🚀 READY FOR RELEASE!{Colors.END}")
@@ -202,10 +201,10 @@ def print_summary(results: Dict[str, Tuple[bool, str]]):
         )
         print(f"\n{Colors.BLUE}Next steps:{Colors.END}")
         print(
-            f"  1. Create release tag: python scripts/bump_version.py [major|minor|patch|rc]"
+            "  1. Create release tag: python scripts/bump_version.py [major|minor|patch|rc]"
         )
-        print(f"  2. Push tag: git push origin <tag>")
-        print(f"  3. Monitor GitHub Actions workflow")
+        print("  2. Push tag: git push origin <tag>")
+        print("  3. Monitor GitHub Actions workflow")
     else:
         print(f"{Colors.RED}❌ NOT READY FOR RELEASE{Colors.END}")
         print(f"{Colors.RED}{failed} of {total} checks failed.{Colors.END}")
@@ -229,7 +228,7 @@ def main():
     verbose = "--verbose" in sys.argv
 
     print(f"{Colors.BOLD}SolarWindPy Release Readiness Check{Colors.END}")
-    print(f"{Colors.BOLD}{'='*50}{Colors.END}\n")
+    print(f"{Colors.BOLD}{'=' * 50}{Colors.END}\n")
 
     # Define all checks
     checks = [

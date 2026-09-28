@@ -9,8 +9,8 @@ import ast
 import os
 import sys
 from pathlib import Path
-from collections import defaultdict, deque
-from typing import Dict, List, Set, Tuple, Optional
+from collections import defaultdict
+from typing import Dict, List, Optional
 
 
 class ImportAnalyzer(ast.NodeVisitor):
@@ -377,7 +377,7 @@ def main():
     analyzer.print_summary()
     analyzer.save_detailed_report("import_analysis_report.txt")
 
-    print(f"\nDetailed report saved to: import_analysis_report.txt")
+    print("\nDetailed report saved to: import_analysis_report.txt")
 
 
 if __name__ == "__main__":

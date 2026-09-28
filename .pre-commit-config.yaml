@@ -3,28 +3,28 @@ repos:
   rev: v4.4.0
   hooks:
   - id: trailing-whitespace
-    files: ^(solarwindpy|tests|\.claude)/.*\.py$
+    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
   - id: check-merge-conflict
-    files: ^(solarwindpy|tests|\.claude)/.*\.py$
+    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
   - id: check-added-large-files
     args: [--maxkb=5000]
-    files: ^(solarwindpy|tests|\.claude)/.*\.py$
+    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/psf/black
   rev: 25.1.0
   hooks:
   - id: black
-    files: ^(solarwindpy|tests|\.claude)/.*\.py$
+    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/pycqa/flake8
   rev: 7.3.0
   hooks:
   - id: flake8
-    files: ^(solarwindpy|tests|\.claude)/.*\.py$
+    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/PyCQA/doc8

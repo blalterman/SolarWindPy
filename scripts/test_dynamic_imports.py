@@ -12,7 +12,7 @@ import importlib
 import importlib.util
 import traceback
 from pathlib import Path
-from typing import List, Dict, Set, Optional, Tuple
+from typing import List, Dict
 import time
 import gc
 
@@ -104,7 +104,7 @@ class DynamicImportTester:
                 if module.startswith(self.package_name) and module in sys.modules:
                     try:
                         del sys.modules[module]
-                    except:
+                    except KeyError:
                         pass
 
             # Force garbage collection
@@ -164,7 +164,7 @@ class DynamicImportTester:
         for module in to_remove:
             try:
                 del sys.modules[module]
-            except:
+            except KeyError:
                 pass
         gc.collect()
 
@@ -229,7 +229,8 @@ class DynamicImportTester:
         ]
 
         for i, first_module in enumerate(key_modules[:5]):  # Limit for performance
-            for second_module in key_modules[i + 1 : 6]:  # Test a few combinations
+            start = i + 1
+            for second_module in key_modules[start:6]:  # Test a few combinations
                 self._clear_package_modules()
 
                 cross_results["total_tests"] += 1
@@ -355,7 +356,7 @@ class DynamicImportTester:
                 for i, error in enumerate(results["circular_imports_found"], 1):
                     f.write(f"\n{i}. Module: {error['module']}\n")
                     f.write(f"   Error: {error['error']}\n")
-                    f.write(f"   Traceback:\n")
+                    f.write("   Traceback:\n")
                     for line in error["traceback"].split("\n"):
                         f.write(f"     {line}\n")
                 f.write("\n")
@@ -375,7 +376,7 @@ class DynamicImportTester:
                 f.write("\n")
 
             # Cross-import test details
-            f.write(f"\nCross-Import Test Results:\n")
+            f.write("\nCross-Import Test Results:\n")
             f.write("-" * 30 + "\n")
             cross_results = results["cross_import_tests"]
             f.write(
@@ -439,7 +440,7 @@ def main():
     tester.print_summary(results)
     tester.save_report(results, "dynamic_import_test_report.txt")
 
-    print(f"\nDetailed report saved to: dynamic_import_test_report.txt")
+    print("\nDetailed report saved to: dynamic_import_test_report.txt")
 
 
 if __name__ == "__main__":

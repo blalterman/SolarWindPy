@@ -5,10 +5,12 @@ Semantic Version Bump Script for SolarWindPy
 This script creates semantic version tags following the v{major}.{minor}.{patch}
 format with optional prerelease suffixes (rc, beta, alpha).
 
-Usage:
+Usage
+-----
     python scripts/bump_version.py [major|minor|patch|rc|beta|alpha] [--dry-run] [--from-version VERSION]
-    
-Examples:
+
+Examples
+--------
     python scripts/bump_version.py patch          # 1.0.0 -> 1.0.1
     python scripts/bump_version.py minor          # 1.0.0 -> 1.1.0
     python scripts/bump_version.py major          # 1.0.0 -> 2.0.0
@@ -63,7 +65,7 @@ def get_latest_version() -> Optional[str]:
 
     # Filter out compaction tags and find latest release tag
     release_tags = [
-        tag for tag in tags if tag.startswith("v") and not "compaction" in tag
+        tag for tag in tags if tag.startswith("v") and "compaction" not in tag
     ]
 
     if not release_tags:
@@ -187,9 +189,9 @@ def create_tag(tag_name: str, dry_run: bool = False) -> bool:
     print(f"\n{Colors.BLUE}Next steps:{Colors.END}")
     print(f"  1. Push tag: git push origin {tag_name}")
     print(
-        f"  2. Monitor GitHub Actions: https://github.com/blalterman/SolarWindPy/actions"
+        "  2. Monitor GitHub Actions: https://github.com/blalterman/SolarWindPy/actions"
     )
-    print(f"  3. Check release: https://github.com/blalterman/SolarWindPy/releases")
+    print("  3. Check release: https://github.com/blalterman/SolarWindPy/releases")
 
     return True
 
@@ -218,7 +220,7 @@ def main():
     args = parser.parse_args()
 
     print(f"{Colors.BOLD}SolarWindPy Version Bump{Colors.END}")
-    print(f"{Colors.BOLD}{'='*40}{Colors.END}\n")
+    print(f"{Colors.BOLD}{'=' * 40}{Colors.END}\n")
 
     # Check working directory unless dry run
     if not args.dry_run and not check_working_directory():

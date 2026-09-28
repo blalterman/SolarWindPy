@@ -24,9 +24,7 @@ def extract_pyproject_deps(pyproject_path: Path = Path("pyproject.toml")) -> lis
 
     # Find dependencies = [ ... ] section
     deps_match = re.search(
-        r'dependencies\s*=\s*\[(.*?)\]',
-        content,
-        re.MULTILINE | re.DOTALL
+        r"dependencies\s*=\s*\[(.*?)\]", content, re.MULTILINE | re.DOTALL
     )
 
     if not deps_match:
@@ -73,9 +71,7 @@ def extract_feedstock_deps(meta_yaml_content: str) -> list[str]:
     """Extract run dependencies from meta.yaml using simple regex."""
     # Find requirements.run section (stops at first blank line or next section)
     run_match = re.search(
-        r'run:\s*\n((?:    - [^\n]+\n)+)',
-        meta_yaml_content,
-        re.MULTILINE
+        r"run:\s*\n((?:    - [^\n]+\n)+)", meta_yaml_content, re.MULTILINE
     )
 
     if not run_match:
@@ -83,14 +79,14 @@ def extract_feedstock_deps(meta_yaml_content: str) -> list[str]:
 
     # Extract each dependency line
     run_section = run_match.group(1)
-    deps = re.findall(r'    - ([^\n]+)', run_section)
+    deps = re.findall(r"    - ([^\n]+)", run_section)
 
     # Filter out Jinja2 variables and clean
     cleaned_deps = []
     for dep in deps:
         dep = dep.strip()
         # Skip python variable lines (they start with {{)
-        if not dep.startswith('{{') and dep:
+        if not dep.startswith("{{") and dep:
             cleaned_deps.append(dep)
 
     return cleaned_deps
@@ -98,12 +94,12 @@ def extract_feedstock_deps(meta_yaml_content: str) -> list[str]:
 
 def display_side_by_side(pyproject_deps: list[str], feedstock_deps: list[str]):
     """Display dependencies side-by-side, matched by package name."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DEPENDENCY COMPARISON")
-    print("="*80)
+    print("=" * 80)
 
     print(f"\n{'pyproject.toml':<40} | {'feedstock meta.yaml':<40}")
-    print("-"*40 + "-+-" + "-"*40)
+    print("-" * 40 + "-+-" + "-" * 40)
 
     # Build maps of package name -> full spec
     def get_pkg_name(dep: str) -> str:
@@ -133,7 +129,7 @@ def display_side_by_side(pyproject_deps: list[str], feedstock_deps: list[str]):
 
         print(f"{marker} {left:<38} | {right:<38}")
 
-    print("="*80)
+    print("=" * 80)
     print("\nLegend: ⚠️ = Different  ➕ = Added in pyproject  ➖ = Only in feedstock")
     print("\n💡 Manually review differences and update feedstock if needed")
 

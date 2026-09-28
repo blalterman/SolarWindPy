@@ -14,7 +14,7 @@ import os
 import sys
 from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Optional
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -233,7 +233,7 @@ class DependencyGraphBuilder:
         # Use hierarchical layout for better visualization
         try:
             pos = nx.spring_layout(self.graph, k=1, iterations=50)
-        except:
+        except Exception:
             pos = nx.random_layout(self.graph)
 
         # Color nodes based on whether they're in cycles
@@ -377,8 +377,8 @@ def main():
     analyzer.save_detailed_report("import_analysis_report.txt")
     analyzer.visualize_graph("dependency_graph.png")
 
-    print(f"\nDetailed report saved to: import_analysis_report.txt")
-    print(f"Graph visualization saved to: dependency_graph.png")
+    print("\nDetailed report saved to: import_analysis_report.txt")
+    print("Graph visualization saved to: dependency_graph.png")
 
 
 if __name__ == "__main__":
