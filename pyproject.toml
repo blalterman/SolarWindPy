@@ -42,7 +42,7 @@ dynamic = ["version"]
 dependencies = [
   "numpy>=1.26,<3.0",  # NumPy 2.0 support; requires numba>=0.59
   "scipy>=1.13",       # NumPy 2.0 compatibility
-  "pandas>=2.0",       # NumPy 2.0 compatibility
+  "pandas>=2.2,<4",    # floor measured: suite fails on 2.1.1, passes on 2.2.0 and 3.0.5
   "numexpr>=2.8",
   "bottleneck>=1.3",
   "h5py>=3.8",
