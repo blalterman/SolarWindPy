@@ -37,14 +37,14 @@ jobs:
           pip install -e ".[docs]"
       
       - name: Lint documentation with doc8
-        run: doc8 README.rst docs CITATION.rst --max-line-length=100 --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
-      
+        run: doc8 README.rst docs CITATION.rst --max-line-length=100
+
+      # Advisory: external sites fail transiently. linkcheck is a builtin
+      # Sphinx builder; the source directory is the one holding conf.py.
       - name: Check documentation links
-        run: |
-          pip install sphinx-link-checker
-          sphinx-build -b linkcheck docs docs/build/linkcheck
+        run: sphinx-build -b linkcheck docs/source docs/build/linkcheck
         continue-on-error: true
-      
+
       - name: Build documentation
         env:
           SPHINXOPTS: -W --keep-going -n  # Warnings as errors, but show all
@@ -52,7 +52,14 @@ jobs:
         run: |
           make clean
           make html
-      
+
+      # Advisory report of undocumented objects (sphinx.ext.coverage builder).
+      - name: Check documentation coverage
+        run: |
+          sphinx-build -b coverage docs/source docs/build/coverage
+          cat docs/build/coverage/python.txt
+        continue-on-error: true
+
       - name: Upload documentation artifacts
         if: always()
         uses: actions/upload-artifact@v6
@@ -64,15 +71,6 @@ jobs:
             docs/build/coverage/
             docs/build/linkcheck/
           retention-days: 90
-      
-      - name: Check documentation coverage
-        run: |
-          mkdir -p docs/build/coverage
-          python -m sphinx.ext.coverage -d docs/build/doctrees -o docs/build/coverage docs
-          # Generate a summary report
-          echo "Documentation Coverage Summary:" > docs/build/coverage/summary.txt
-          find docs/build/coverage -name "*.txt" -exec cat {} \; >> docs/build/coverage/summary.txt
-        continue-on-error: true
 
   deploy:
     needs: build

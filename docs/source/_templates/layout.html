@@ -1,14 +1,7 @@
 {# Custom layout template for SolarWindPy documentation #}
 {% extends "!layout.html" %}
 
-{# Custom title with project branding #}
-{% set css_files = css_files + ["_static/custom.css"] %}
-
-{# Add custom favicon #}
-{% block htmltitle %}
-  {{ super() }}
-  <link rel="icon" type="image/x-icon" href="{{ pathto('_static/favicon.ico', 1) }}">
-{% endblock %}
+{# custom.css and the favicon are set by html_css_files and html_favicon in conf.py. #}
 
 {# Enhanced navigation sidebar #}
 {% block sidebar1 %}
