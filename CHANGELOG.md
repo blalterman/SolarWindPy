@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - BREAKING CHANGES
+
+- Python 3.12 or newer is required (was 3.11).
+- pandas 3 is required: the supported range is `pandas>=3,<4` (was `>=2.0`). The suite
+  also passes on pandas 2.2 and 2.3, but only one major version is tested and declared.
+- `pyproject.toml` is the only dependency declaration. `requirements.txt`,
+  `requirements-dev.lock`, and `docs/requirements.txt` are removed; install with
+  `pip install -e ".[dev]"` (or `".[docs]"` for documentation). `solarwindpy.yml`
+  remains the conda development environment.
+- The in-repository conda recipe (`recipe/`) is removed. The conda-forge feedstock,
+  `conda-forge/solarwindpy-feedstock`, is the only recipe.
+
 ### Fixed
 
 These change computed values; rerun any analysis that used them.
