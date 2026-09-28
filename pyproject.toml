@@ -1,4 +1,5 @@
 [tool.black]
+target-version = ["py312"]
 include = '\.pyi?$'
 exclude = '''
 /(

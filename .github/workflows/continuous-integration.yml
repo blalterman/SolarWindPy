@@ -53,9 +53,12 @@ jobs:
           pytest --tb=short --disable-warnings tests/
       
       - name: Check code formatting
+        # black and flake8 run at the versions pinned in .pre-commit-config.yaml,
+        # the one place those versions are declared.
         run: |
-          black --check solarwindpy/
-          flake8 solarwindpy/
+          pip install pre-commit
+          pre-commit run black --show-diff-on-failure --files $(git ls-files 'solarwindpy/*.py')
+          pre-commit run flake8 --files $(git ls-files 'solarwindpy/*.py')
       
       - name: Verify imports
         run: |
