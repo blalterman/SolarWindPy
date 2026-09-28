@@ -905,6 +905,17 @@ data : {z.size}
 
         Examples
         --------
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from solarwindpy.plotting.spiral import SpiralPlot2D
+        >>> rng = np.random.default_rng(42)
+        >>> x = pd.Series(rng.uniform(1, 100, 500))
+        >>> y = pd.Series(rng.uniform(1, 100, 500))
+        >>> z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
+        >>> splot = SpiralPlot2D(x, y, z, initial_bins=5)
+        >>> splot.initialize_mesh(min_per_bin=10)
+        >>> splot.build_grouped()
+
         >>> # Default: sparse RBF (fastest)
         >>> ax, lbls, cbar, qset = splot.plot_contours()
 

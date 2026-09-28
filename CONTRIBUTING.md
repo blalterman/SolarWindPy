@@ -40,11 +40,8 @@ Thank you for considering contributing to SolarWindPy.
 6. Validate documentation examples (when adding new documentation):
 
    ```bash
-   # For essential validation (recommended for most changes)
-   python scripts/simple_doc_validation/doctest_runner.py solarwindpy/ --targeted --verbose
-   
-   # For full validation (when making extensive documentation changes)
-   python scripts/simple_doc_validation/doctest_runner.py solarwindpy/ --verbose
+   pytest --doctest-modules solarwindpy -q
+   pytest --doctest-glob='*.rst' docs/source -q
    ```
 
 ## Documentation Guidelines
@@ -67,7 +64,6 @@ Thank you for considering contributing to SolarWindPy.
 - Focus on physics correctness over comprehensive coverage
 - Examples should demonstrate scientific accuracy
 - Avoid over-engineering validation for simple utility functions
-- Target 47 documentation examples appropriately (not enterprise-scale 1000+)
 
 ### Documentation Contribution Workflow
 
@@ -78,14 +74,11 @@ Thank you for considering contributing to SolarWindPy.
 
 **Local Testing Commands:**
 ```bash
-# Quick validation of critical modules only
-python scripts/simple_doc_validation/doctest_runner.py solarwindpy/ --targeted
+# Docstring examples in the package
+pytest --doctest-modules solarwindpy -q
 
-# Check essential imports and framework status
-python scripts/simple_doc_validation/validation_utils.py --check-imports --framework-status
-
-# View validation priorities and target modules
-python scripts/simple_doc_validation/validation_utils.py --validation-priorities --targeted-modules
+# Examples in the reStructuredText documentation
+pytest --doctest-glob='*.rst' docs/source -q
 ```
 
 **Troubleshooting Common Issues:**

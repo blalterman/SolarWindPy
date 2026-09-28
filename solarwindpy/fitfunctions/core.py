@@ -514,16 +514,24 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
 
         Examples
         --------
+        >>> import numpy as np
+        >>> from solarwindpy.fitfunctions import Gaussian
+        >>> x = np.linspace(0, 10, 101)
+        >>> y = 4 * np.exp(-0.5 * ((x - 5) / 1) ** 2)
         >>> # Create FitFunction with constraints
         >>> ff = Gaussian(x, y, xmin=3, xmax=7)
         >>> ff.make_fit()
-        >>>
+
         >>> # Residuals for fitted region only
         >>> r_fit = ff.residuals()
-        >>>
+        >>> r_fit.size == ((x >= 3) & (x <= 7)).sum()
+        True
+
         >>> # Residuals for all original data
         >>> r_all = ff.residuals(use_all=True)
-        >>>
+        >>> r_all.size == x.size
+        True
+
         >>> # Percentage residuals
         >>> r_pct = ff.residuals(pct=True)
 
