@@ -96,15 +96,9 @@ Development
 
       pytest -q
 
-**Note**: As of v0.3.0, dependency management uses ``pip-tools`` lockfiles. See `docs/MIGRATION-DEPENDENCY-OVERHAUL.md <docs/MIGRATION-DEPENDENCY-OVERHAUL.md>`_ for migration details
+**Note**: ``pyproject.toml`` is the only dependency declaration; there are no lockfiles.
 
-4. Regenerate the Conda recipe if the version or dependencies change:
-
-   .. code-block:: bash
-
-      python scripts/update_conda_recipe.py
-
-5. Optionally install the pre-commit hooks:
+4. Optionally install the pre-commit hooks:
 
    .. code-block:: bash
 
@@ -112,7 +106,7 @@ Development
 
    This will run ``black`` and ``flake8`` automatically when committing.
 
-6. Build the documentation and fail on warnings:
+5. Build the documentation and fail on warnings:
 
    .. code-block:: bash
 

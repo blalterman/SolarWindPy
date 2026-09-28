@@ -3,10 +3,11 @@
 """Every Python version the repository declares satisfies ``requires-python``.
 
 ``pyproject.toml`` is the single declaration of what the package supports.
-Classifiers, the tox envlist, Read the Docs, the conda recipe, and the GitHub
-workflows each restate a Python version; this module reads each site locally
-and checks it against ``requires-python``, so a floor that moves in one place
-and not the others fails the default suite rather than a later release.
+Classifiers, the tox envlist, Read the Docs, and the GitHub workflows each
+restate a Python version; this module reads each site locally and checks it
+against ``requires-python``, so a floor that moves in one place and not the
+others fails the default suite rather than a later release. The floor itself
+is held to the lowest version actually tested, by tox and by the CI matrix.
 """
 
 import re
@@ -40,7 +41,8 @@ def _workflow_versions(node, path, found):
                 for v in values:
                     v = str(v)
                     if "${{" not in v:
-                        found.append((f"{path}: {key}", v))
+                        kind = "matrix" if isinstance(value, list) else key
+                        found.append((f"{path}: {kind}", v))
             else:
                 _workflow_versions(value, path, found)
     elif isinstance(node, list):
@@ -77,12 +79,16 @@ def declared_python_versions():
 
 
 def declared_python_floors():
-    """Return ``(site, version)`` for every declared minimum Python version."""
-    recipe = (REPO_ROOT / "recipe" / "meta.yaml").read_text()
-    return [
-        ("recipe/meta.yaml: python >=", v)
-        for v in re.findall(r"^\s*-\s*python\s*>=\s*([\d.]+)", recipe, re.MULTILINE)
-    ]
+    """Return ``(site, version)`` for the lowest Python each test runner uses.
+
+    tox and every CI matrix each test a set of versions; the lowest of each
+    set is the floor that runner actually measures.
+    """
+    by_site = {}
+    for site, v in declared_python_versions():
+        if site == "tox.ini: envlist" or site.endswith(": matrix"):
+            by_site.setdefault(site, []).append(Version(v))
+    return [(site, str(min(vs))) for site, vs in sorted(by_site.items())]
 
 
 def test_requires_python_sites_are_found():
@@ -97,7 +103,9 @@ def test_requires_python_sites_are_found():
     sites = {site.split(":")[0] for site, _ in declared_python_versions()}
     assert {"pyproject.toml", "tox.ini", ".readthedocs.yaml"} <= sites
     assert any(s.startswith(".github/workflows/") for s in sites)
-    assert declared_python_floors()
+    floor_sites = {site for site, _ in declared_python_floors()}
+    assert "tox.ini: envlist" in floor_sites
+    assert any(s.endswith(": matrix") for s in floor_sites)
 
 
 def test_declared_versions_satisfy_requires_python():
@@ -116,10 +124,12 @@ def test_declared_versions_satisfy_requires_python():
 
 
 def test_declared_floors_equal_requires_python_floor():
-    """Every declared minimum Python equals the ``requires-python`` floor.
+    """The lowest Python each test runner uses is the ``requires-python`` floor.
 
-    ON FAILURE: the code is wrong; carry the requires-python floor to the
-    listed sites.
+    A floor no runner tests is a claim nothing checks.
+
+    ON FAILURE: the code is wrong; test the requires-python floor at the
+    listed sites, or move the floor to what is tested.
     """
     floor = _floor(_requires_python())
     drift = [

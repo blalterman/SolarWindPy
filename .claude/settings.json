@@ -76,7 +76,6 @@
       "Bash(flake8 solarwindpy/)",
       "Bash(flake8 tests/)",
       "Bash(flake8 solarwindpy/ tests/)",
-      "Bash(python scripts/update_conda_recipe.py)",
       "Bash(conda env create -f solarwindpy.yml)",
       "Bash(conda env create -f solarwindpy-dev.yml)",
       "Bash(conda activate :*)",

@@ -57,9 +57,6 @@ count=$(gh run list -s skipped --limit 500 | wc -l)
 ### Local Environment Management
 
 ```bash
-# Update conda recipe for new versions
-python scripts/update_conda_recipe.py
-
 # Create and activate environments
 conda env create -f solarwindpy.yml
 conda env create -f solarwindpy-dev.yml
