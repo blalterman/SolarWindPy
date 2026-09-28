@@ -353,7 +353,13 @@ Do not touch `Plasma.lnlambda`'s `29.9`.
 
 ##### source-fitfunctions
 
-OWNS: solarwindpy/fitfunctions/, conftest.py, tests/test_source_fitfunctions_defects.py
+OWNS: solarwindpy/fitfunctions/, conftest.py, docs/source/fitfunctions_architecture.md, tests/test_source_fitfunctions_defects.py
+
+`docs/source/fitfunctions_architecture.md` is never built and names classes the code lacks
+(`ExponentialPlusCSin`, `Parabola`, `MaxwellBoltzmann`); its line 132 calls the loss hardcoded
+while `make_fit` passes `loss` through. The author's decision: move what is still true into the
+`solarwindpy.fitfunctions` package docstring, where the nitpicky build checks it, then delete
+the file. Report each claim you dropped as false, with the code that contradicts it.
 
 `GaussianPlusHeavySide` never fits `x0` (the Heaviside term has zero gradient, so `curve_fit`
 returns `p0`'s `x0`); its doctest is strict xfail in the root `conftest.py`. A fix is in your
@@ -423,9 +429,8 @@ follow-up. The program plan's "five one-time reports,
 `tests/solar_activity/sunspot_number/` (rebuilt by PR #436), `tests/test_contracts_class.py`,
 `tests/test_contracts_dataframe.py`, `tests/test_hook_integration.py`,
 `tests/test_issue_titles.py`, `tests/test_declared_versions.py`.
-`docs/source/fitfunctions_architecture.md` (never built; names classes the code lacks) and the
-section prose of `docs/source/api_reference.rst` (omits hinge, heaviside, composite, ICME):
-what the library is described as doing is the author's call.
+The section prose of `docs/source/api_reference.rst` (omits hinge, heaviside, composite, ICME):
+the author has chosen to drop it; the owner of that change is not yet assigned.
 
 ## Held outside phase 4
 
