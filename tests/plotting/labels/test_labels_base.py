@@ -443,3 +443,25 @@ class TestDescriptionFeature:
         """__str__ returns with_units which includes description."""
         label = labels_base.TeXlabel(("v", "x", "p"), description="speed")
         assert str(label).startswith("speed\n")
+
+
+@pytest.mark.parametrize(
+    "mcs, tex",
+    [
+        (("Q", "par", "p1"), "Q_{{\\parallel};{p_1}}"),
+        (("Wk", "", "p1"), "W_{K;{p_1}}"),
+        (("Wk", "", "a"), "W_{K;{\\alpha}}"),
+    ],
+    ids=["heat_flux_Q", "kinetic_energy_flux_protons", "kinetic_energy_flux_alphas"],
+)
+def test_energy_flux_labels_match_author_declared_contract(labels_base, mcs, tex):
+    """Heat flux is labelled Q and kinetic energy flux W_K, both in uW m^-2.
+
+    The symbols are the author's declared contract; the unit matches what
+    Plasma.heat_flux and Plasma.kinetic_energy_flux report.
+
+    ON FAILURE: the label changed; confirm with the author before updating.
+    """
+    label = labels_base.TeXlabel(mcs)
+    assert label.tex == tex
+    assert label.units == "\\mathrm{\\mu W \\, m^{-2}}"
