@@ -22,10 +22,12 @@ _misc_constants = {
     "mu0": constants.mu_0,
     "c": constants.c,
     #     "gamma": 5.0 / 3.0,
-    "hbar": physical_constants["Planck constant over 2 pi"][0],
+    "hbar": constants.hbar,
     "1AU [m]": constants.au,
     "Re [m]": 6378.1e3,  # Earth Radius in meters
-    "Rs [m]": 695.508e6,  # Sun Radius in meters
+    # Nominal solar radius, IAU 2015 Resolution B3 (Prsa et al. 2016, AJ 152, 41,
+    # doi:10.3847/0004-6256/152/2/41).
+    "Rs [m]": 695.7e6,
     "gas constant": constants.R,
 }
 

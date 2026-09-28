@@ -116,7 +116,7 @@ class SpacecraftTestBase(ABC):
         elif frame == "HCI":
             # Origin is sun and propagationd distance is just magnitude
             assert pos.columns.equals(pd.Index(("x", "y", "z"), name="C"))
-            rs = 695.508e6  # Sun radius in meters
+            rs = 695.7e6  # IAU 2015 nominal solar radius [m], doi:10.3847/0004-6256/152/2/41
             pos = pos.multiply(rs)
 
         else:
