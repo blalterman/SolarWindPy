@@ -44,3 +44,8 @@ def test_constants_attributes():
     assert isinstance(c.kb, pd.Series)
     assert hasattr(c, "misc")
     assert isinstance(c.misc, pd.Series)
+
+
+def test_heat_flux_display_unit_is_one_microwatt_per_square_metre():
+    """ON FAILURE: `Units.qpar` is not 1 uW m^-2 expressed in W m^-2; the code is wrong."""
+    assert uc.Units().qpar == 1e-6

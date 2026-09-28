@@ -1616,7 +1616,8 @@ class PlasmaTestBase(ABC):
         qb = dvpar.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
         qc = rho.multiply(qa.add(qb, axis=1, level="S"), axis=1, level="S")
 
-        coeff = constants.m_p * 1e6 * 1e9 / 1e-7  # [m_p] [n] [v]^3 / [q]
+        # [m_p] [n] [v]^3 / [q], with [q] = 1 uW m^-2 = 1e-6 W m^-2.
+        coeff = constants.m_p * 1e6 * 1e9 / 1e-6
         q = qc.multiply(coeff)
         qtot = q.sum(axis=1)
         qtot.name = "+".join(slist)

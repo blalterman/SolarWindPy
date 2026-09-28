@@ -164,7 +164,7 @@ class Units:
     nc : float
         Dimensionless count units.
     qpar : float
-        Parallel heat flux units :math:`[\mathrm{mW\,cm^{-2}}]`.
+        Parallel heat flux units :math:`[\mathrm{\mu W\,m^{-2}}]`.
     distance2sun : float
         Distance to sun units ``[m]``.
     """
@@ -185,7 +185,7 @@ class Units:
     lnlambda: float = 1.0
     nuc: float = 1e-7
     nc: float = 1.0
-    qpar: float = 1e-7
+    qpar: float = 1e-6
     distance2sun: float = 1.0
     specific_entropy: float = field(init=False)
 

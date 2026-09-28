@@ -168,7 +168,7 @@ _trans_units = {
     "p": _inU["pPa"],
     "pth": _inU["pPa"],
     "T": r"10^5 \, \mathrm{K}",
-    "q": r"\mathrm{mW \, cm^{-2}}",  # heat flux,
+    "q": r"\mathrm{\mu W \, m^{-2}}",  # heat flux,
     "qhat": _inU["dimless"],  # normalized heat flux
     "Q": r"\mathrm{mW \, cm^{-2}}",  # heating rate
     "R": r"\perp/\parallel",
