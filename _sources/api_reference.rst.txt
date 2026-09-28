@@ -57,7 +57,6 @@ functions for figure management.
    solarwindpy.plotting.spiral
    solarwindpy.plotting.orbits
    solarwindpy.plotting.tools
-   solarwindpy.plotting.select_data_from_figure
 
 Fit Functions Module
 --------------------

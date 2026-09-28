@@ -22,7 +22,6 @@ Submodules
    solarwindpy.plotting.histograms
    solarwindpy.plotting.orbits
    solarwindpy.plotting.scatter
-   solarwindpy.plotting.select_data_from_figure
    solarwindpy.plotting.spiral
    solarwindpy.plotting.tools
 
