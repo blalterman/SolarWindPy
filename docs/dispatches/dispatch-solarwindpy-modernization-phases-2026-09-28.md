@@ -332,3 +332,73 @@ If the dispatch was abandoned without execution: skip steps 1, 1a and 2, and opt
 `## Abandoned (YYYY-MM-DD)` with a one-line reason. An abandoned unit's plan keeps its
 `NOT-YET`, which is the correct reading — the work stopped rather than finished, and no marker
 claims otherwise.
+
+---
+
+## Empirical Findings (2026-09-28 trial run)
+
+### End-state metrics
+
+- Commits: 14 landed across Stage 1 (3), Stage 2 (4, then 5 more after the author's single-source decision), Stage 3 (1, then 1 revision). The dispatch predicted no count.
+- Suites: pandas 3.0.6 / numpy 2.3.5 / py3.13 → 2254 passed, 20 skipped, 12 xfailed, 0 failed; pandas 3.0.5 / numpy 2.4.6 / py3.12 → 2238 passed, 18 skipped, 12 xfailed, 0 failed. At State Verification: 2253 and 2234 passed.
+- Doctests (`pytest --doctest-modules solarwindpy`): 3 failed / 22 passed / 37 skipped before; 24 passed / 37 skipped / 1 xfailed after. The retired runner reported 100% success at the start.
+- Sphinx under `-W --keep-going -n`: 2309 warnings, not the program plan's 83 (which was measured without `-n`); 655 from `docs/source/api/`, 1937 `[ref.class]`.
+- pandas floor measured on py3.12: 2.1.1 → 1 failed (`"ME"` offset alias arrives in 2.2); 2.2.0 → 0 failed. Declared range is `>=3,<4` by author decision.
+- flake8 `--all-files`: 97 residual violations, all under `tests/` and `.claude/hooks/`, all in phase-4 units; `scripts/` 0.
+- Phase-4 instruction: 25 units, 101 owned paths, 0 duplicates.
+
+### Governing Property
+
+served -- every declared Python and pandas version is one the suite ran (both envs above, `tests/test_declared_versions.py` holding the floor to the lowest tox and CI-matrix version); the doctest, Sphinx, and pre-commit gates each failed on a known-bad input recorded in `93337e07`, `ca29eda5`, `2ddc52c6`; CI now installs from `pyproject.toml` (`5447dc8e`), so the pinned pandas 2.3.3 lockfile that kept CI from ever running pandas 3 is gone.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| Standalone doctest runner removed | PASS | `test -d scripts/simple_doc_validation; echo $?` → `1` (`93337e07`) |
+| Doctests run under pytest and pass | PASS | `24 passed, 37 skipped, 1 xfailed, 1 warning`; 0 failed after `1acc42d0` fixed a numpy-2 `np.True_` repr |
+| Doctest workflow calls pytest | PASS | `grep -c doctest-modules .github/workflows/doctest_validation.yml` → `1` |
+| Sphinx options overridable | PASS | `4:SPHINXOPTS    ?=` |
+| Sphinx `-W` fails on a bad reference | PASS | `git log -1 -- docs/Makefile` is `ca29eda5`; `grep -ci 'exit\|error'` on its message → `4` |
+| Pre-commit covers scripts | PASS | `grep -cE 'files:.*scripts'` → `5`; `pre-commit run black --all-files` → `black....Passed` |
+| Python floor declared | PASS | `36:requires-python = ">=3.12,<4"` |
+| No declared Python below 3.12 | PASS | grep for `3.1[01]` quoted over pyproject, tox, RTD, workflows → no output; positive control: the same scan for `3.1[23]` returns 13 lines. `recipe/meta.yaml` no longer exists (`a66de393`) |
+| Declared-version consistency test | PASS | `-k requires_python` → `4 passed, 1 skipped, 2281 deselected`; failing demonstrations in `c4c849b1` and `a66de393` |
+| Single conda recipe | PASS | `test -e conda-recipe; echo $?` → `1` (`0742fd6a`); the in-repo `recipe/` was later removed too, leaving the conda-forge feedstock as the single recipe |
+| Dependabot targets pyproject | PASS | `8:    directory: "/"`, with `versioning-strategy: widen` (`a7ac9693`) |
+| Suite green in both environments | PASS | 2254 passed / 0 failed; 2238 passed / 0 failed |
+| Phase-4 instruction written | PASS | `test -f docs/dispatches/batch-phase4-2026-09-28.md; echo $?` → `0` (`36d3eaaa`, `80785f1d`) |
+| Phase-4 units own disjoint paths | PASS | `uniq -d` → no output; positive control: the same pipeline yields 101 paths across 25 `OWNS:` lines |
+| Nothing ahead of origin | PASS | `git rev-list --count origin/master..master` → `0` after pushing `1acc42d0` |
+
+### Deviations from plan
+
+- **Lockfiles retired instead of regenerated.** The `sync-requirements.yml` PR #440 failed local verification: pip-compile ran without `--upgrade`, so the three files kept disagreeing on numpy/pandas/astropy/scipy, and it rebuilt `solarwindpy.yml` from the runtime-only list, dropping pytest/black/flake8. The author chose a single source of truth: `requirements.txt`, `requirements-dev.lock`, `docs/requirements.txt`, the workflow, and `scripts/requirements_to_conda_env.py` are removed; CI, tox, and Read the Docs install `.[dev]`/`.[docs]` (`5447dc8e`). PR #440 closed unmerged.
+- **pandas range `>=3,<4`, not the measured `>=2.2,<4`.** Author decision (`6dddeb70`): without lockfiles CI always tests the newest pandas, so a 2.x floor would be untested. The measurement is kept above.
+- **`recipe/` removed instead of kept as the single recipe.** Releases work on `conda-forge/solarwindpy-feedstock`; the in-repo copy's only reader was the new version test. The floor test now reads the lowest tox and CI-matrix versions (`a66de393`).
+- **Dependabot `widen`, not a strategy that raises floors.** `increase` would overwrite measured floors on every release.
+- **Sphinx demonstration ran on a clean export of `docs/`**; a stale, gitignored `docs/source/_autosummary/` crashes a local `-W` build before it reaches the injected reference. Docs CI stays red until the phase-4 `docs-build` unit lands, accepted by the author.
+- **New files carry `Spent-When` declarations** (`conftest.py`, `docs/source/conftest.py`, `tests/test_declared_versions.py`), required by the commit hook.
+- **Read the Docs 3.12 on `ubuntu-22.04` is inferred, not built**: its docs list the image and 3.12 as supported without tying versions to images.
+- **Local `solarwindpy` env upgraded to pandas 3 via conda-forge.** The first `conda install` pulled numpy 2.5.3, which numba 0.62 rejects; pinning `numpy>=2,<2.4` gave numpy 2.3.5 / numba 0.67.0. A pip-installed numpy 1.26.4 had shadowed conda's view; an orphaned `numpy-1.26.4.dist-info` remains in site-packages (removal was denied by the permission layer), so `conda list` still shows `numpy 1.26.4 pypi` while `import numpy` gives 2.3.5.
+- **`staged-recipes-fork/` deleted by the author**, after the executor confirmed no unpushed commits, no dirty files, no stashes.
+- **Pre-existing doc8 failures** in `plans/tests-audit/artifacts/*_TEMPLATE.rst` (73 lines) keep `pre-commit run --all-files` from a full pass; no touched file fails.
+
+### Commits
+
+- `93337e07` ci(docs): run doctests under pytest and retire the standalone runner
+- `ca29eda5` fix(docs): let SPHINXOPTS from the environment reach sphinx-build
+- `2ddc52c6` ci(pre-commit): extend black and flake8 to scripts/, and lint scripts/
+- `c4c849b1` build!: require Python 3.12 and check every declared version against it
+- `f1563729` build: set the pandas range from measurement, >=2.2,<4
+- `a7ac9693` ci(dependabot): route pip updates through pyproject.toml ranges
+- `0742fd6a` build(conda): keep recipe/meta.yaml as the single conda recipe
+- `36d3eaaa` docs(dispatch): write the phase-4 batch instruction for W4, W5, W6
+- `6dddeb70` build!: require pandas 3
+- `5447dc8e` build!: retire the lockfiles; install everything from pyproject.toml
+- `a66de393` build(conda): remove the in-repo recipe copy; floor test reads what is tested
+- `9f31b51c` docs(changelog): record the Python 3.12 and pandas 3 floors and the single dependency source
+- `80785f1d` docs(dispatch): align the phase-4 instruction with the single dependency source
+- `1acc42d0` fix(fitfunctions): make the residuals doctest independent of numpy's bool repr
+
+## Spent-Mark: executed, findings recorded
