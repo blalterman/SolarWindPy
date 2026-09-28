@@ -2,7 +2,12 @@ version: 2
 updates:
   # Python dependencies
   - package-ecosystem: "pip"
+    # pyproject.toml is the single declaration; the lockfiles are generated
+    # from it by sync-requirements.yml. `widen` edits pyproject.toml ranges
+    # only to admit a release outside them, raising upper bounds and leaving
+    # the measured floors to the author.
     directory: "/"
+    versioning-strategy: widen
     schedule:
       interval: "weekly"
       day: "monday"
