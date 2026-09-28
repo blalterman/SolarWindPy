@@ -354,7 +354,7 @@ Overall Coverage 53.6%, 1180 items.
 
 OWNS: solarwindpy/core/, tests/test_source_core_defects.py
 
-Delete the commented-out `AlfvenicTurbulenceDAmicis` class at `alfvenic_turbulence.py:450-804`.
+Delete the commented-out `AlfvenicTurbulenceDAmicis` class at `alfvenic_turbulence.py:447-801`.
 Do not touch `Plasma.lnlambda`'s `29.9`.
 
 - commented lines in that range: 355 — `sed -n 450,804p solarwindpy/core/alfvenic_turbulence.py | grep -cE "^\s*#"`
@@ -372,7 +372,7 @@ files; whether a different fitting method is acceptable is a methodology call to
 
 OWNS: solarwindpy/plotting/, tests/test_source_plotting_defects.py
 
-Fix `solarwindpy/plotting/labels/__init__.py:9`: `__all__` exports
+Fix `solarwindpy/plotting/labels/__init__.py:10`: `__all__` exports
 `available_TeXlabel_measurements`, defined nowhere.
 - `conda run -n solarwindpy python -c "from solarwindpy.plotting.labels import *"` → `AttributeError: module 'solarwindpy.plotting.labels' has no attribute 'available_TeXlabel_measurements'`
 
