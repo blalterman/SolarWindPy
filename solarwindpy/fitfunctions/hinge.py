@@ -12,7 +12,6 @@ import numpy as np
 
 from .core import FitFunction
 
-
 # Named tuple for x-intercepts used by HingeAtPoint
 XIntercepts = namedtuple("XIntercepts", "x1,x2")
 

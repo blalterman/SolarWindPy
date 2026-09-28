@@ -5,6 +5,7 @@ The Moyal distribution is commonly used in particle physics and solar wind
 analysis for modeling energy loss distributions and asymmetric velocity
 distributions.
 """
+
 import numpy as np
 
 from .core import FitFunction

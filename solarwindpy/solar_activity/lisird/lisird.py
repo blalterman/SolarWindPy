@@ -239,10 +239,8 @@ class LISIRD(ActivityIndicator):
         pass
 
     def run_normalization(self, norm_by="feature-scale"):
-        raise NotImplementedError(
-            r"""Need to fix normalization handling for each LISIRD
-quantity"""
-        )
+        raise NotImplementedError(r"""Need to fix normalization handling for each LISIRD
+quantity""")
 
         # Note: "max" and "feature-scale" are the same if the min(SSN) = 0.
         assert norm_by in ("max", "zscore", "feature-scale")

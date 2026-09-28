@@ -323,11 +323,9 @@ class SpiralMesh(object):
         list_of_bins = [initial_bins]
         active_bins = initial_bins
 
-        logger.warning(
-            """
+        logger.warning("""
  Step      N      Elapsed Time
-======  =======  =============="""
-        )
+======  =======  ==============""")
         step_start = datetime.now()
         step = 0
         while nbins_to_replace > 0:
@@ -383,11 +381,9 @@ They will be replaced by NaNs and excluded from the aggregation.
         # `minlength=nbins` forces us to include empty bins at the end of the array.
         bin_frequency = np.bincount(zbin[~is_fill], minlength=nbins)
         n_empty = (bin_frequency == 0).sum()
-        logger.warning(
-            f"""Largest bin population is {bin_frequency.max()}
+        logger.warning(f"""Largest bin population is {bin_frequency.max()}
 {n_empty} of {nbins} bins ({100 * n_empty / nbins:.1f}%) are empty
-"""
-        )
+""")
 
         if not bin_visited.all():
             logger.warning(f"{(~bin_visited).sum()} bins went unvisited.")
@@ -487,11 +483,9 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
 
         cell_filter = self.mesh.cell_filter
         if agg.shape != cell_filter.shape:
-            raise ValueError(
-                f"""Unable to algin `agg` and `cell_filter.
+            raise ValueError(f"""Unable to algin `agg` and `cell_filter.
 agg    : {agg.shape}
-filter : {cell_filter.shape}"""
-            )
+filter : {cell_filter.shape}""")
         agg = agg.where(cell_filter, axis=0)
 
         return agg
@@ -501,12 +495,10 @@ filter : {cell_filter.shape}"""
         z = self.data.loc[:, "z"]
 
         if not (cat.size == z.size):
-            raise ValueError(
-                f"""`cat` must have same size as data's first dimesion
+            raise ValueError(f"""`cat` must have same size as data's first dimesion
 cat  : {cat.size}
 data : {z.size}
-"""
-            )
+""")
 
         gb = z.groupby(cat)
         self._grouped = gb

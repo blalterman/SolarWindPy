@@ -398,16 +398,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             weights = np.asarray(weights)
 
         if xobs.shape != yobs.shape:
-            raise InvalidParameterError(
-                f"""xobs and yobs must have the same shape.
-xobs: {xobs.shape}, yobs: {yobs.shape}"""
-            )
+            raise InvalidParameterError(f"""xobs and yobs must have the same shape.
+xobs: {xobs.shape}, yobs: {yobs.shape}""")
 
         if weights is not None and weights.shape != xobs.shape:
-            raise InvalidParameterError(
-                f"""weights and xobs must have the same shape.
-weights: {weights.shape}, xobs: {xobs.shape}"""
-            )
+            raise InvalidParameterError(f"""weights and xobs must have the same shape.
+weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return xobs, yobs, weights
 

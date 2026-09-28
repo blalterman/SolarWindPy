@@ -5,7 +5,6 @@ Apply a fit along one dimention of a 2D aggregated data and then fit the results
 those 1D fits along the 2nd dimension of the aggregated data.
 """
 
-
 import logging  # noqa: F401
 import numpy as np
 import pandas as pd

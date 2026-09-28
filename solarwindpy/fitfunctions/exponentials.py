@@ -6,6 +6,7 @@ using the :class:`~solarwindpy.fitfunctions.core.FitFunction` API.
 They provide reasonable starting parameters and formatted LaTeX output
 for visualization.
 """
+
 import numpy as np
 
 from numbers import Number

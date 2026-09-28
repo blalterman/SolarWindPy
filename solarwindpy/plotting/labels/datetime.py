@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 r"""Special labels not handled by :py:class:`TeXlabel`."""
+
 from pathlib import Path
 from pandas.tseries.frequencies import to_offset
 from . import base

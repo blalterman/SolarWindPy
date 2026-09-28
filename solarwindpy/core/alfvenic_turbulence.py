@@ -18,7 +18,6 @@ References
     *Astrophys. J.*, 856, 49.
 """
 
-
 import numpy as np
 import pandas as pd
 
@@ -323,10 +322,8 @@ class AlfvenicTurbulence(base.Core):
         if not v_in.index.equals(b_in.index):
             self.logger.warn("v and b have unequal indices. Results may be unexpected.")
         if not v_in.index.equals(rho.index):
-            self.logger.warn(
-                """v and rho have unequal indices. Results may be
-unexpected."""
-            )
+            self.logger.warn("""v and rho have unequal indices. Results may be
+unexpected.""")
         # Convert b -> Alfven units before averaging as in Bruno and Carbone
         # [2013], Section B.3.1.
         # Based on my read of Bruno and Carbone's definition in B.3.1 (p.166),

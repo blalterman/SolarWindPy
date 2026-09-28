@@ -28,6 +28,7 @@ Propoded Updates
 -Moved `_conform_species` to base.Base so that it is accessable for
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
 """
+
 import numpy as np
 import pandas as pd
 import itertools
@@ -1068,9 +1069,7 @@ class Plasma(base.Base):
             raise NotImplementedError(
                 """A multi-species velocity is not valid when projecting by sqrt(m/q).
 species: {}
-""".format(
-                    species
-                )
+""".format(species)
             )
 
         else:

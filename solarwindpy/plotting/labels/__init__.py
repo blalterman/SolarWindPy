@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 r"""Tools for creating physical quantity plot labels."""
+
 __all__ = [
     "TeXlabel",
     "Vsw",
@@ -79,8 +80,7 @@ def available_labels():
     a = sorted(a)
     a = ", ".join(a)
 
-    print(
-        r"""TeXlabel knows
+    print(r"""TeXlabel knows
 
 Measurements
 ------------
@@ -97,7 +97,4 @@ Species
 Special
 -------
 {a}
-""".format(
-            m=m, c=c, s=s, a=a
-        )
-    )
+""".format(m=m, c=c, s=s, a=a))

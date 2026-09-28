@@ -8,7 +8,6 @@ import numpy as np
 from pathlib import Path
 from typing import Optional
 
-
 ICMECAT_URL = (
     "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv"
 )
