@@ -524,7 +524,7 @@ weights: {weights.shape}, xobs: {xobs.shape}"""
 
         >>> # Residuals for fitted region only
         >>> r_fit = ff.residuals()
-        >>> r_fit.size == ((x >= 3) & (x <= 7)).sum()
+        >>> bool(r_fit.size == ((x >= 3) & (x <= 7)).sum())
         True
 
         >>> # Residuals for all original data
