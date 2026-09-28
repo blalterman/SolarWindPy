@@ -6,7 +6,7 @@ This directory contains the Sphinx documentation for SolarWindPy.
 
 ### Prerequisites
 ```bash
-pip install -r requirements.txt
+pip install -e ".[docs]"  # from the repository root
 ```
 
 ### Local Build

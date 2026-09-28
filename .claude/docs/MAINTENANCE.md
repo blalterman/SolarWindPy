@@ -60,10 +60,6 @@ count=$(gh run list -s skipped --limit 500 | wc -l)
 # Update conda recipe for new versions
 python scripts/update_conda_recipe.py
 
-# Generate conda environment from requirements
-python scripts/requirements_to_conda_env.py
-python scripts/requirements_to_conda_env.py --name solarwindpy-dev
-
 # Create and activate environments
 conda env create -f solarwindpy.yml
 conda env create -f solarwindpy-dev.yml

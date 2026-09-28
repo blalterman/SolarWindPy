@@ -9,8 +9,7 @@ Thank you for considering contributing to SolarWindPy.
    ```bash
    git clone https://github.com/blalterman/SolarWindPy.git
    cd SolarWindPy
-   pip install -r requirements-dev.lock  # Lockfile with all dev tools
-   pip install -e .
+   pip install -e ".[dev]"  # SolarWindPy plus all dev tools, from pyproject.toml
    ```
 
    **Alternative (Conda environment)**:
@@ -18,7 +17,6 @@ Thank you for considering contributing to SolarWindPy.
    ```bash
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
-   pip install -r requirements-dev.lock
    pip install -e .
    ```
 
@@ -120,15 +118,9 @@ black>=24.0
 flake8>=7.0
 ```
 
-**After editing `pyproject.toml`**, regenerate lockfiles:
-```bash
-pip install pip-tools
-pip-compile pyproject.toml --output-file=requirements.txt --upgrade
-pip-compile --extra=dev pyproject.toml --output-file=requirements-dev.lock --upgrade
-pip-compile --extra=docs pyproject.toml --output-file=docs/requirements.txt --upgrade
-```
-
-**Commit both** `pyproject.toml` and the lockfiles together.
+`pyproject.toml` is the only dependency declaration; there are no lockfiles
+to regenerate. After editing it, reinstall with `pip install -e ".[dev]"` and
+run the suite.
 
 ### Dependency Guidelines
 

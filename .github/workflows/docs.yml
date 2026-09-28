@@ -20,7 +20,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-docs-${{ hashFiles('docs/requirements.txt') }}
+          key: ${{ runner.os }}-pip-docs-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-docs-
       
@@ -34,8 +34,7 @@ jobs:
           python -m pip install --upgrade pip wheel
           # Install pytables separately if needed by the package
           pip install --verbose tables
-          pip install -r docs/requirements.txt
-          pip install -e .
+          pip install -e ".[docs]"
       
       - name: Lint documentation with doc8
         run: doc8 README.rst docs CITATION.rst --max-line-length=100 --ignore-path docs/source/solarwindpy.solar_activity.tests.rst
@@ -96,8 +95,7 @@ jobs:
           python -m pip install --upgrade pip wheel
           # Install pytables separately if needed by the package
           pip install --verbose tables
-          pip install -r docs/requirements.txt
-          pip install -e .
+          pip install -e ".[docs]"
       
       - name: Build documentation for deployment
         working-directory: docs

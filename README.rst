@@ -80,16 +80,14 @@ Development
 
       git clone https://github.com/YOUR-USERNAME/SolarWindPy.git
       cd SolarWindPy
-      pip install -r requirements-dev.lock  # Includes all dev tools
-      pip install -e .
+      pip install -e ".[dev]"  # Includes all dev tools
 
    **Alternative (Conda environment)**:
 
    .. code-block:: bash
 
-      conda env create -f solarwindpy.yml  # Python 3.11+
+      conda env create -f solarwindpy.yml  # Python 3.12+
       conda activate solarwindpy
-      pip install -r requirements-dev.lock
       pip install -e .
 
 3. Run the test suite with ``pytest``:

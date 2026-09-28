@@ -59,40 +59,16 @@ jobs:
           
           echo "✅ Publishing version $TAG (verified: $DETECTED_VERSION)"
       
-      - name: Validate lockfile
+      - name: Validate dependencies resolve
         run: |
-          # Option 1: Validate lockfile is installable
-          echo "🔍 Checking lockfile can be installed..."
-          pip install --dry-run -r requirements.txt
-          echo "✅ Lockfile is valid and installable"
-
-          # Option 2: Validate all dependencies are present
-          echo "🔍 Checking all pyproject.toml dependencies are in lockfile..."
-          python -c "
-          import tomllib
-          with open('pyproject.toml', 'rb') as f:
-              deps = tomllib.load(f)['project']['dependencies']
-          with open('requirements.txt') as f:
-              lockfile = f.read().lower()
-          missing = []
-          for dep in deps:
-              # Extract package name (before any version specifiers or extras)
-              pkg = dep.split('[')[0].split('>=')[0].split('==')[0].split('<')[0].split('>')[0].strip().lower()
-              if pkg not in lockfile:
-                  missing.append(pkg)
-          if missing:
-              print(f'❌ Missing from lockfile: {missing}')
-              print('Run: pip-compile pyproject.toml --output-file=requirements.txt --resolver=backtracking')
-              raise SystemExit(1)
-          print('✅ All dependencies present in lockfile')
-          "
+          # pyproject.toml is the single declaration; check it resolves.
+          pip install --dry-run .
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build twine
-          pip install -r requirements-dev.lock
-          pip install -e .  # Install solarwindpy package for testing
+          pip install -e ".[dev]"  # solarwindpy and its test tools, from pyproject.toml
       
       - name: Run full test suite
         run: |

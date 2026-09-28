@@ -36,14 +36,12 @@ Development guidelines and standards for SolarWindPy scientific software.
 ## Environment Setup
 
 ```bash
-# Recommended: Install from lockfile
-pip install -r requirements-dev.lock  # All dev tools
-pip install -e .
+# Recommended: install from pyproject.toml
+pip install -e ".[dev]"  # All dev tools
 
 # Alternative: Conda environment
 conda env create -f solarwindpy.yml
 conda activate solarwindpy
-pip install -r requirements-dev.lock
 pip install -e .
 ```
 
@@ -51,10 +49,10 @@ pip install -e .
 
 **Single Source**: `pyproject.toml` contains all dependency definitions
 
-**Lockfiles** (auto-generated - DO NOT EDIT):
-- `requirements.txt` - Production dependencies
-- `requirements-dev.lock` - Development dependencies
-- `docs/requirements.txt` - Documentation dependencies
+There are no lockfiles. CI, tox, and Read the Docs install from
+`pyproject.toml` directly (`.[dev]` or `.[docs]`), so every run tests the
+newest releases the declared ranges admit. `solarwindpy.yml` lists conda
+packages by name only and defers versions to `pyproject.toml`.
 
 **Workflow**:
 ```bash
@@ -62,19 +60,14 @@ pip install -e .
 [project.dependencies]
 numpy>=1.26,<3.0
 
-# 2. Regenerate lockfiles
-pip install pip-tools
-pip-compile pyproject.toml --output-file=requirements.txt --upgrade
-pip-compile --extra=dev pyproject.toml --output-file=requirements-dev.lock --upgrade
+# 2. Reinstall
+pip install -e ".[dev]"
 
-# 3. Install from lockfile
-pip install -r requirements-dev.lock
-
-# 4. Test changes
+# 3. Test changes
 pytest -q
 
-# 5. Commit pyproject.toml AND lockfiles together
-git add pyproject.toml requirements*.txt requirements*.lock
+# 4. Commit
+git add pyproject.toml
 ```
 
 **Migration Info**: See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](../../docs/MIGRATION-DEPENDENCY-OVERHAUL.md)

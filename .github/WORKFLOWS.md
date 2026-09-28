@@ -104,21 +104,6 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Success Criteria**: All documentation examples execute without errors
 
-### 6. Sync Requirements (sync-requirements.yml) 🔄 MAINTENANCE
-**Purpose**: Synchronize requirements across multiple files  
-**Triggers**: Changes to requirements-dev.txt, pyproject.toml, monthly schedule  
-**Safety**: Creates PRs instead of direct commits  
-
-**Features**:
-- Dynamic conda environment naming with timestamps
-- File validation with dry-run checks
-- Pull request creation for review
-- Pip dependency caching
-- Manual trigger with custom suffixes
-- Automatic labeling and branch cleanup
-
-**Success Criteria**: Generated files validate successfully
-
 ### 7. Claude Code Review (claude.yml & claude-code-review.yml) 🤖 AI-ASSISTANCE
 **Purpose**: AI-powered code analysis and review  
 **Triggers**: @claude mentions in issues/PRs, automatic PR reviews  
@@ -247,7 +232,7 @@ When branch protection is enabled for master:
 
 #### CI Failures
 1. **Matrix job failures**: Check specific OS/Python combination logs
-2. **Dependency issues**: Clear cache, check requirements-dev.txt
+2. **Dependency issues**: Clear cache, reinstall with `pip install -e ".[dev]"`
 3. **Test failures**: Run tests locally, check for platform-specific issues
 4. **pytables installation failures**: 
    - **Error**: "Failed building wheel for tables" or "HDF5 library not found"
@@ -264,7 +249,7 @@ When branch protection is enabled for master:
 
 #### Documentation Build Failures
 1. **Sphinx errors**: Check SPHINXOPTS configuration, fix warnings
-2. **Missing dependencies**: Verify docs/requirements.txt is current
+2. **Missing dependencies**: Check the `docs` extra in pyproject.toml
 3. **Link check failures**: Fix broken links or add to ignore list
 
 #### Publish Workflow Issues

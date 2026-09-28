@@ -55,8 +55,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r requirements-dev.lock
-        pip install -e .
+        pip install -e ".[dev]"
 
     - name: Run drift detection suite
       env:
