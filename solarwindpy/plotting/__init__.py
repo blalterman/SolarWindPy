@@ -22,7 +22,6 @@ __all__ = [
     "subplots",
     "save",
     "nan_gaussian_filter",
-    "select_data_from_figure",
 ]
 
 from . import (  # noqa: E402 - imports after style application is intentional
@@ -32,7 +31,6 @@ from . import (  # noqa: E402 - imports after style application is intentional
     spiral,
     orbits,
     tools,
-    select_data_from_figure,
 )
 
 subplots = tools.subplots

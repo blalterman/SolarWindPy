@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
+  passed the `rectprops` keyword, which current matplotlib's `RectangleSelector` no
+  longer accepts, so construction raised `TypeError` (verified on matplotlib 3.10.8).
+  Interactive selection of data from a plot is available in [glue](https://glueviz.org).
+
 ## [0.3.0] - 2025-12-24
 
 ### Changed - BREAKING CHANGES
