@@ -22,6 +22,7 @@ These change computed values; rerun any analysis that used them.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
+- Kinetic energy flux has a plot label, `"Wk"`, rendered W_K in uW m^-2.
 
 ### Removed
 
@@ -29,6 +30,9 @@ These change computed values; rerun any analysis that used them.
   passed the `rectprops` keyword, which current matplotlib's `RectangleSelector` no
   longer accepts, so construction raised `TypeError` (verified on matplotlib 3.10.8).
   Interactive selection of data from a plot is available in [glue](https://glueviz.org).
+- The `"Q"` plot label key. It was commented as a heating rate, carried a heat flux
+  unit, and nothing in the package computes a heating rate. Heat flux is labelled
+  `"q"`.
 
 ## [0.3.0] - 2025-12-24
 

@@ -170,7 +170,6 @@ _trans_units = {
     "T": r"10^5 \, \mathrm{K}",
     "q": r"\mathrm{\mu W \, m^{-2}}",  # heat flux,
     "qhat": _inU["dimless"],  # normalized heat flux
-    "Q": r"\mathrm{\mu W \, m^{-2}}",  # heat flux
     "Wk": r"\mathrm{\mu W \, m^{-2}}",  # kinetic energy flux
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
@@ -267,7 +266,6 @@ _templates = {
     "n": r"n_{$S}",
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
-    "Q": r"Q_{{$C};{$S}}",  # heat flux
     "Wk": r"W_{K;{$S}}",  # kinetic energy flux
     "S": r"S_{$S}",  # Specific entropy logarithm
     "ratio": r"\mathrm{Ratio}",
