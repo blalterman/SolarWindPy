@@ -27,23 +27,6 @@ class PowerLaw(FitFunction):
         r"""Return initial guesses ``[A, b]`` for the fit."""
         assert self.sufficient_data
 
-        #         y = self.yobs
-
-        #         c = 1.0
-        #         try:
-        #             A = y.max()
-        #         except ValueError as e:
-        #             chk = (
-        #                 r"zero-size array to reduction operation maximum "
-        #                 "which has no identity"
-        #             )
-        #             if e.message.startswith(chk):
-        #                 msg = (
-        #                     "There is no maximum of a zero-size array. "
-        #                     "Please check input data."
-        #                 )
-        #                 raise ValueError(msg)
-
         p0 = [1, 1]
         return p0
 
@@ -79,23 +62,6 @@ class PowerLawPlusC(FitFunction):
         r"""Return initial guesses ``[A, b, c]`` for the fit."""
         assert self.sufficient_data
 
-        #         y = self.yobs
-
-        #         c = 1.0
-        #         try:
-        #             A = y.max()
-        #         except ValueError as e:
-        #             chk = (
-        #                 r"zero-size array to reduction operation maximum "
-        #                 "which has no identity"
-        #             )
-        #             if e.message.startswith(chk):
-        #                 msg = (
-        #                     "There is no maximum of a zero-size array. "
-        #                     "Please check input data."
-        #                 )
-        #                 raise ValueError(msg)
-
         p0 = [1, 1, 0]
         return p0
 
@@ -121,23 +87,6 @@ class PowerLawOffCenter(FitFunction):
     def p0(self):
         r"""Return initial guesses ``[A, b, x0]`` for the fit."""
         assert self.sufficient_data
-
-        #         y = self.yobs
-
-        #         c = 1.0
-        #         try:
-        #             A = y.max()
-        #         except ValueError as e:
-        #             chk = (
-        #                 r"zero-size array to reduction operation maximum "
-        #                 "which has no identity"
-        #             )
-        #             if e.message.startswith(chk):
-        #                 msg = (
-        #                     "There is no maximum of a zero-size array. "
-        #                     "Please check input data."
-        #                 )
-        #                 raise ValueError(msg)
 
         p0 = [1, 1, 0]
         return p0

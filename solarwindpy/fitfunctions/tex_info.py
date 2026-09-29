@@ -83,7 +83,6 @@ class TeXinfo(object):
         info = (
             tabulate(
                 tbl,
-                #                         headers=["Param", "Lower", "Guess", "Upper"],
                 floatfmt=".3e",
                 tablefmt="plain",
             )
@@ -162,9 +161,6 @@ class TeXinfo(object):
             for k0, k1 in translate.items():
                 TeX[k1] = TeX.pop(k0)
 
-        #         template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
-        #         rel_err = [template.format(k, np.abs(v)) for k, v in TeX.items()]
-
         rel_err = tabulate(
             [[rf"{k} \;\;\; ", np.abs(v)] for k, v in TeX.items()],
             floatfmt=".3e",
@@ -213,8 +209,6 @@ class TeXinfo(object):
 
     @staticmethod
     def _simplify_for_paper(info):
-        #         text_info = []
-        #         numeric_info = []
         formatted_info = []
         for ii in info:
             ii = ii.strip("$")
@@ -228,7 +222,6 @@ class TeXinfo(object):
             except (ValueError, IndexError):
                 formatted_info.append(ii)
 
-        #         all_info = text_info + numeric_info
         return formatted_info
 
     def _add_additional_info(self, info, additional_info):
@@ -271,13 +264,7 @@ class TeXinfo(object):
         # of whether or not it contians 1 or more lines
         info = TeX_function.split("\n") + info
 
-        #         pdb.set_trace()
-
         if relative_error:
-            #             template = r"\left|\Delta({0})/{0}\right| = {1:.1e}"
-            #             rel_err = self.TeX_relative_error
-            #             rel_err = [template.format(k, np.abs(v)) for k, v in rel_err.items()]
-            #             info += [""] + rel_err  # blank for visual cue
             info += ["", self.TeX_relative_error]  # blank for visual cue
 
         if npts and self.npts is not None:
@@ -287,12 +274,6 @@ class TeXinfo(object):
             ]
 
         if chisq_dof:
-            #             info += [
-            #                 "",  # blank line for visual cue
-            #                 fr"\chi^2_\nu = {self.chisq_dof.linear:.2f}",
-            #                 #                      r"\widehat{\chi}^2_\nu = {%.2f}" % self.chisq_dof.robust,
-            #                 r"\chi^2_{\nu;R} = {%.2f}" % self.chisq_dof.robust,
-            #             ]
 
             chisq_info = (
                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
@@ -559,9 +540,4 @@ class TeXinfo(object):
 
         out = template.format(value, uncertainty)
 
-        # Clean out unnecessary
-        # pdb.set_trace()
-        # out = re.subn(_remove_exponential_pattern, "", out)
-        # out = out[0] # Drop the number of repetitions removed.
-        # pdb.set_trace()
         return out

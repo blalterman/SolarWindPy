@@ -45,7 +45,6 @@ class Gaussian(FitFunction):
 
     @property
     def TeX_function(self):
-        #         TeX = r"f(x)=\frac{1}{\sqrt{2 \pi} \sigma} A\cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
@@ -101,7 +100,6 @@ class GaussianNormalized(FitFunction):
     @property
     def TeX_function(self):
         TeX = r"f(x)=\frac{n}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
-        #         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} (\frac{x-\mu}{\sigma})^2}"
         return TeX
 
     def make_fit(self, *args, **kwargs):
@@ -143,7 +141,6 @@ class GaussianLn(FitFunction):
             lnx = np.log(x)
 
             coeff = A
-            #             coeff *= (np.sqrt(2.0 * np.pi) * s * x) ** (-1.0)
 
             arg = -0.5 * (((lnx - m) / s) ** 2.0)
 
@@ -177,7 +174,6 @@ class GaussianLn(FitFunction):
         TeX = (
             r"f(x) ="
             r"A \cdot"
-            #                r"\frac{1}{\sqrt{2\pi} s x}"
             r"\exp\left["
             r"\frac{\left(\ln x - m\right)^2}{2 s^2}"
             r"\right]"
@@ -227,7 +223,6 @@ class GaussianLn(FitFunction):
         TeX_popt = super(GaussianLn, self).TeX_popt
 
         if self.TeX_report_normal_parameters:
-            # psigma = self.psigma
             popt = self.normal_parameters.items()
             # use -9999 to indicate fill value that hasn't been set.
             # I need to figure out how to calculate the transformation

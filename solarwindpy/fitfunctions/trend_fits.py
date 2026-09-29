@@ -91,7 +91,6 @@ class TrendFit(object):
     @property
     def popt_1d(self):
         r"""Optimized parameters from 1D fits."""
-        #         return self._popt_1d
         return pd.DataFrame.from_dict(
             self.ffuncs.apply(lambda x: x.popt).to_dict(), orient="index"
         )
@@ -134,15 +133,9 @@ class TrendFit(object):
         except TypeError:
             x = x.values
 
-        #         ylbl = self.labels.y
-        #         zlbl = self.labels.z
-
         ffuncs = {}
         for k, y in agg.items():
             ff1d = self.ffunc1d_class(x, y.values, **kwargs)
-            # These are slices along y traversing the x-axis, so we
-            # rotate labels accordingly.
-            #             ff1d.set_labels(x=ylbl, y=zlbl)
             ffuncs[k] = ff1d
 
         ffuncs = pd.Series(ffuncs)
@@ -170,8 +163,6 @@ class TrendFit(object):
         bad_fits = self.ffuncs.loc[bad_idx]
         self._bad_fits = bad_fits
         self.ffuncs.drop(bad_idx, inplace=True)
-
-    #         self.make_popt_frame()
 
     def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
         r"""Plot all fit functions.
@@ -205,12 +196,6 @@ class TrendFit(object):
         in_trend = y_ok & w_ok
 
         legend_title = r"${}={} \; {}$" + "\n{}"
-
-        #         xlbl = self.labels.x
-        #         try:
-        #             xlbl = xlbl.tex
-        #         except AttributeError:
-        #             pass
 
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plotter.plot_raw_used_fit_resid(**kwargs)
@@ -259,7 +244,6 @@ class TrendFit(object):
             logx=self.trend_logx,
             **kwargs,
         )
-        #         trend.set_labels(**self.labels._asdict())
 
         self._trend_func = trend
 
@@ -348,9 +332,6 @@ class TrendFit(object):
             if wkey is not None:
                 bl[0].set_linestyle(linestyle)
 
-        #         ax.set_xlabel(self.labels.x)
-        #         ax.set_ylabel(self.labels.y)
-
         return plotted
 
     def plot_trend_fit_resid(self, **kwargs):
@@ -401,7 +382,6 @@ class TrendFit(object):
         self.trend_func.plotter.plot_raw_used_fit(
             ax,
             annotate_kwargs=annotate_kwargs,
-            #             color=color,
             fit_kwargs=fit_kwargs,
             **kwargs,
         )

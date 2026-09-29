@@ -18,7 +18,6 @@ from collections import namedtuple
 from inspect import getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceMeta
 
-# from scipy.optimize import curve_fit
 from scipy.optimize import least_squares, OptimizeWarning
 
 try:
@@ -203,7 +202,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # Sort the parameter keywords into the proper order to pass to the
         # numerical function.
 
-        #         try:
         popt_ = self.popt
         popt_ = [popt_[k] for k in self.argnames]
 
@@ -212,10 +210,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # function itself, a new instance of FitFunction should be required.
         # Therefore, we access the function directly.
         y = self.function(x, *popt_)
-
-        #         except AttributeError as e:
-        #             if "'PowerLaw' object has no attribute '_popt'" in str(e):
-        #                 y = np.full_like(x, np.nan, dtype=np.float64)
 
         return y
 
@@ -268,15 +262,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         If None, not calculated by `make_fit_old`. If `np.nan`, fit failed.
         """
-        #         r = self.residuals(pct=False)
-        #         sigma = self.observations.used.w
-        #         if sigma is not None:
-        #             r = r / sigma
-        #
-        #         chisq = (r ** 2).sum()
-        #         dof = r.size - len(self.p0)
-        #         chisq_dof = chisq / dof
-        #         return chisq_dof
         try:
             return self._chisq_dof
         except AttributeError:
@@ -306,9 +291,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             for name, guess in zip(names, p0)
         }
 
-        #         info = ["\n".join(param) for param in info]
-        #         info = "\n\n".join(info)
-
         return info
 
     @property
@@ -322,11 +304,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def plotter(self):
-        #         try:
         return self._plotter
-
-    #         except AttributeError:
-    #             return self.build_plotter()
 
     @property
     def popt(self):
@@ -381,11 +359,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def TeX_info(self):
-        #         try:
         return self._TeX_info
-
-    #         except AttributeError:
-    #             return self.build_TeX_info()
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""Set the raw x- and y-values along with weights for the fit.
@@ -445,19 +419,12 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             yfit = self(self.observations.raw.x)
         except AttributeError:
             yfit = np.full_like(self.observations.raw.x, np.nan)
-        #         robust_residuals = self.fit_result.fun
         tex_info = self.TeX_info
         fit_result = self.fit_result
-
-        #         try:
-        #             fit_result = self.fit_result
-        #         except AttributeError:
-        #             fit_result = None
 
         plotter = FFPlot(
             obs,
             yfit,
-            #             robust_residuals,
             tex_info,
             fit_result,
             fitfunction_name=self.__class__.__name__,
@@ -625,8 +592,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         f_scale = kwargs.pop("f_scale", 0.1)
         jac = kwargs.pop("jac", "2-point")
 
-        #         loss_fcn = _loss_fcns.pop(loss, loss)
-
         # Copied from `curve_fit` line 704 (20200527)
         if p0 is None:
             # determine number of parameters by inspecting the function
@@ -664,7 +629,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         # Determine type of sigma
         if sigma is not None:
             sigma = np.asarray(sigma)
-            # sigma = sigma / np.nansum(sigma)
 
             # if 1-d, sigma are errors, define transform = 1/sigma
             if sigma.shape == (ydata.size,):
@@ -708,7 +672,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         fit_bounds = tuple(fit_bounds.items())
         self._fit_bounds = fit_bounds
 
-        #         self._loss_fcn = loss_fcn
         return res, p0
 
     def _calc_popt_pcov_psigma_chisq(self, res, p0):
@@ -795,7 +758,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         try:
             assert self.sufficient_data  # Check we have enough data to fit.
         except (AssertionError, ValueError, InsufficientDataError) as e:
-            #             raise
             if isinstance(e, AssertionError):
                 e = InsufficientDataError("Insufficient data to fit the model")
             if return_exception:
@@ -810,8 +772,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         try:
             res, p0 = self._run_least_squares(**kwargs)
         except (RuntimeError, ValueError, FitFailedError) as e:
-            #             print("fitting failed", flush=True)
-            #             raise
             if return_exception:
                 return e
             else:
