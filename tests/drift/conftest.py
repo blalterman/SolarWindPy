@@ -4,17 +4,10 @@
 
 import urllib.error
 import urllib.request
-from pathlib import Path
 
 import pytest
 
 from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL, _DATETIME_COLUMNS
-
-
-@pytest.fixture(scope="session")
-def repo_root() -> Path:
-    """Repository root, three levels up from this file."""
-    return Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture(scope="session")
