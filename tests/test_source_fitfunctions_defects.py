@@ -13,7 +13,12 @@ the true step", and that is what these tests assert.
 import numpy as np
 import pytest
 
-from solarwindpy.fitfunctions import GaussianPlusHeavySide, InsufficientDataError
+from solarwindpy.fitfunctions import (
+    GaussianPlusHeavySide,
+    InsufficientDataError,
+    Line,
+    LineXintercept,
+)
 
 
 def _model(x, x0, y0, y1, mu, sigma, A):
@@ -88,3 +93,32 @@ def test_gaussian_plus_heavyside_returns_insufficient_data_error():
     fit = GaussianPlusHeavySide(x, x)
 
     assert isinstance(fit.make_fit(return_exception=True), InsufficientDataError)
+
+
+# y = 2x + 1 on integer x: slope 2, intercept 1, x-intercept -1/2, all exact
+# in floating point, so the initial guesses are compared exactly.
+LINE_X = np.arange(10.0)
+LINE_Y = 2.0 * LINE_X + 1.0
+
+
+def test_line_p0_is_slope_and_intercept_of_exact_line():
+    """``Line.p0`` on exact ``y = 2x + 1`` data is ``[2, 1]``.
+
+    Before the fix the intercept guess was ``median(m*x - y)``, which is
+    ``-b``, so ``p0`` was ``[2, -1]``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert Line(LINE_X, LINE_Y).p0 == pytest.approx([2.0, 1.0], rel=1e-12, abs=0)
+
+
+def test_line_x_intercept_p0_is_slope_and_x_intercept_of_exact_line():
+    """``LineXintercept.p0`` on exact ``y = 2x + 1`` data is ``[2, -0.5]``.
+
+    ``y = m (x - x0)`` with ``m = 2`` and ``x0 = -b/m = -1/2``. The intercept
+    sign error in the old guess made ``x0`` come out as ``+0.5``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p0 = LineXintercept(LINE_X, LINE_Y).p0
+    assert p0 == pytest.approx([2.0, -0.5], rel=1e-12, abs=0)
