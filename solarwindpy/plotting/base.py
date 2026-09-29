@@ -19,17 +19,16 @@ RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
 
 class Base(ABC):
-    r"""ABC for core plot tools.
+    r"""Abstract base for SolarWindPy plots.
 
-    Attributes
-    ----------
-
-    Methods
-    -------
+    Holds the axis labels, the log-scale flags, and the save path that every
+    concrete plot shares. Subclasses implement ``set_data``, ``set_path`` and
+    ``make_plot``.
     """
 
     @abstractmethod
     def __init__(self):
+        r"""Set default labels ``x`` and ``y``, linear axes, and an automatic path."""
         self._init_logger()
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
@@ -40,6 +39,7 @@ class Base(ABC):
 
     @property
     def logger(self):
+        r"""Logger named ``<module>.<class name>``."""
         return self._logger
 
     def _init_logger(self):
@@ -48,18 +48,22 @@ class Base(ABC):
 
     @property
     def data(self):
+        r"""Data stored by ``set_data``."""
         return self._data
 
     @property
     def clip(self):
+        r"""Clipping option stored by ``set_data``."""
         return self._clip
 
     @property
     def log(self):
+        r"""``LogAxes`` namedtuple of booleans: True where an axis is logarithmic."""
         return self._log
 
     @property
     def labels(self):
+        r"""``AxesLabels`` namedtuple holding the x, y and z labels."""
         return self._labels
 
     @property
@@ -68,6 +72,13 @@ class Base(ABC):
         return self._path
 
     def set_log(self, x=None, y=None):
+        r"""Set which axes use a logarithmic scale.
+
+        Parameters
+        ----------
+        x, y : bool, optional
+            If True, the axis is logarithmic. None keeps the current value.
+        """
         if x is None:
             x = self.log.x
         if y is None:
@@ -77,9 +88,21 @@ class Base(ABC):
         self._log = log
 
     def set_labels(self, **kwargs):
-        r"""Set or update x, y, or z labels. Any label not specified in kwargs.
+        r"""Set or update the x, y, or z labels.
 
-        is propagated from `self.labels.<x, y, or z>`.
+        Any label not passed keeps its current value in ``self.labels``.
+
+        Parameters
+        ----------
+        x, y, z : str or solarwindpy.plotting.labels.base.TeXlabel, optional
+            New axis labels.
+        auto_update_path : bool, optional
+            If True (default), rebuild the save path from the new labels.
+
+        Raises
+        ------
+        KeyError
+            If any other keyword is passed.
         """
         auto_update_path = kwargs.pop("auto_update_path", True)
 
@@ -102,10 +125,10 @@ class Base(ABC):
 
         Parameters
         ----------
-        new: str or Path
-            If str and == "auto", then build path from `self.labels`. Otherwise,
-            assume parameter specifies the desired path and use `Path(new)`.
-        add_scale: bool
+        new : str or Path
+            If ``"auto"``, build the path from ``self.labels``. Otherwise,
+            use ``Path(new)``.
+        add_scale : bool
             If True, add information about the axis scales to the end of the path.
         """
         # TODO: move "auto" methods here to iterate through `AxesLabels` named tuple
@@ -191,14 +214,18 @@ class Base(ABC):
 
     @abstractmethod
     def set_data(self):
+        r"""Store the data to plot. Implemented by each subclass."""
         pass
 
     @abstractmethod
     def make_plot(self):
+        r"""Draw the plot. Implemented by each subclass."""
         pass
 
 
 class DataLimFormatter(ABC):
+    r"""Mixin that limits the axes to the range of the x and y data."""
+
     def _format_axis(self, ax, collection, **kwargs):
         super()._format_axis(ax, **kwargs)
 
@@ -217,6 +244,8 @@ class DataLimFormatter(ABC):
 
 
 class CbarMaker(ABC):
+    r"""Mixin that draws a colorbar labelled with ``labels.z``."""
+
     def _make_cbar(self, mappable, **kwargs):
         """Make a colorbar on `ax` using `mappable`.
 
@@ -261,7 +290,25 @@ class CbarMaker(ABC):
 
 
 class PlotWithZdata(Base):
+    r"""Base for plots of x, y data with an optional z value per point."""
+
     def set_data(self, x, y, z=None, clip_data=False):
+        r"""Store x, y and z as columns of one DataFrame, dropping rows with NaN.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Coordinates of each point.
+        z : pd.Series, optional
+            Value at each point. If None, every point gets ``z = 1``.
+        clip_data : bool, optional
+            Stored as ``self.clip``.
+
+        Raises
+        ------
+        ValueError
+            If no row is left after dropping NaNs.
+        """
         data = pd.DataFrame({"x": x, "y": y})
 
         if z is None:
@@ -307,5 +354,6 @@ class PlotWithZdata(Base):
     set_path.__doc__ = Base.set_path.__doc__
 
     def set_labels(self, **kwargs):
+        r"""Set or update the x, y, or z labels; see ``Base.set_labels``."""
         z = kwargs.pop("z", self.labels.z)
         super().set_labels(z=z, **kwargs)

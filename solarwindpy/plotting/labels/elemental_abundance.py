@@ -1,3 +1,5 @@
+r"""Labels for elemental abundance ratios."""
+
 __all__ = ["ElementalAbundance"]
 
 import logging
@@ -41,18 +43,22 @@ class ElementalAbundance(base.Base):
 
     @property
     def species(self):
+        r"""Numerator element symbol, title-cased."""
         return self._species
 
     @property
     def photospheric(self):
+        r"""If True, the ratio is normalized to its photospheric value."""
         return self._photospheric
 
     @property
     def reference_species(self):
+        r"""Denominator element symbol, title-cased."""
         return self._reference_species
 
     @property
     def units(self):
+        r"""TeX of percent units if ``pct_unit``, otherwise count units."""
         if self.pct_unit:
             return r"\%"
         else:
@@ -60,6 +66,7 @@ class ElementalAbundance(base.Base):
 
     @property
     def tex(self):
+        r"""TeX of the ratio, over its photospheric value if ``photospheric``."""
         num = base._trans_species.get(self.species, self.species)
         den = base._trans_species.get(self.reference_species, self.reference_species)
         ratio = r"\mathrm{%s}/\mathrm{%s}" % (num, den)
@@ -71,6 +78,7 @@ class ElementalAbundance(base.Base):
 
     @property
     def path(self):
+        r"""Save path ``<species>-OV-<reference>``, suffixed when photospheric."""
         path = f"{self.species}-OV-{self.reference_species}"
         if self.photospheric:
             path += "_photospheric-ratio"
@@ -78,9 +86,11 @@ class ElementalAbundance(base.Base):
 
     @property
     def pct_unit(self):
+        r"""If True, the units are percent."""
         return self._pct_unit
 
     def set_species(self, species, reference_species):
+        r"""Store both element symbols, title-cased; an unrecognized one logs a warning."""
         species = species.title()
         reference_species = reference_species.title()
 

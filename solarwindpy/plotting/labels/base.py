@@ -23,27 +23,6 @@ _trans_species = {
     "p2": r"p_2",
     "he": r"\mathrm{He}",
     "dv": r"\Delta v",  # Because we want pdv in species
-    #     "H": r"\mathrm{H}",
-    #     "C": r"\mathrm{Fe}",
-    #     "Fe": ,
-    #     "He": ,
-    #     "Mg": ,
-    #     "Ne": ,
-    #     "N": ,
-    #     "O": ,
-    #     "Si": ,
-    #     "S": ,
-    #     "3He": __isotope_species % (3, "He"),
-    #     "4He": __isotope_species % (4, "He"),
-    #     "12C": __isotope_species % (12, "C"),
-    #     "14N": __isotope_species % (14, "N"),
-    #     "16O": __isotope_species % (16, "O"),
-    #     "20Ne": __isotope_species % (20, "Ne"),
-    #     "24Mg": __isotope_species % (24, "Mg"),
-    #     "28Si": __isotope_species % (28, "Si"),
-    #     "32S": __isotope_species % (32, "S"),
-    #     "40Ca": __isotope_species % (40, "Ca"),
-    #     "Fe": r"\mathrm{Fe}",
 }
 
 for s in ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S"):
@@ -101,6 +80,7 @@ def _run_species_substitution(pattern):
     """
 
     def repl(x):
+        """Return the TeX of the species matched by ``x``."""
         return _trans_species[x.group()]
 
     substitution = re.subn(_all_species_re, repl, pattern)
@@ -132,7 +112,6 @@ _inU = {
     "unknown": r"???",
     "km": r"\mathrm{km}",
     "deg": r"\mathrm{deg.}",
-    #     "deg": r"\degree",
     "Hz": r"\mathrm{Hz}",
 }
 
@@ -223,7 +202,6 @@ _trans_units = {
     # Spectral things
     "spectral_exponent": _inU["dimless"],
     "MeV/nuc": r"\mathrm{MeV/nuc}",
-    #     "SEP_differential_flux": r"\mathrm{\# \, cm^{-2} \, sr^{-1} \, s^{-1} \left(\frac{MeV}{nuc})^{-1}}",
     "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
     "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
     "SEP_energy": r"\mathrm{MeV/nuc}",
@@ -318,7 +296,6 @@ _templates = {
     "k": r"k_{$C}\rho_{$S}",
     "insta_power": r"\mathcal{P}_{{$S}}",
     # Solar Activity
-    #     "ssn": r"{{$C}} \; \mathrm{SSN}",
     "Lalpha": r"\mathrm{L}\alpha",
     "f10.7": r"\mathrm{F}10.7",
     "CaK": r"\mathrm{CaK}",
@@ -328,7 +305,6 @@ _templates = {
     # Spectral Exponents
     "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
     "MeV/nuc": r"\mathrm{Energy}",
-    #     "differential_flux": r"\mathrm{\frac{dJ}{dE}}",
     "SEP_differential_flux": r"{{$S}} \: dJ/dE",
     "SEP_intensity": r"{{$S}} \: \mathrm{Intensity}",
     "SEP_energy": r"{{$S}} \: \mathrm{Energy}",
@@ -355,7 +331,7 @@ class Base(ABC):
         return str(self) > str(other)
 
     def __le__(self, other):
-        return str(self) < str(other)
+        return str(self) <= str(other)
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -371,6 +347,7 @@ class Base(ABC):
 
     @property
     def logger(self):
+        r"""Logger named ``<module>.<class name>``."""
         return self._logger
 
     def _init_logger(self, handlers=None):
@@ -414,19 +391,23 @@ class Base(ABC):
 
     @property
     def with_units(self):
+        r"""Label with units, as a TeX math string."""
         result = rf"${self.tex} \; \left[{self.units}\right]$"
         return self._format_with_description(result)
 
     @property
     def tex(self):
+        r"""TeX of the quantity."""
         return self._tex
 
     @property
     def units(self):
+        r"""TeX of the units."""
         return self._units
 
     @property
     def path(self):
+        r"""Save path for figures using this label."""
         return self._path
 
 
@@ -438,7 +419,7 @@ class TeXlabel(Base):
 
     Notes
     -----
-    Comparison operators and hashing use :func:`str` of the object so two
+    Comparison operators and hashing use :class:`str` of the object so two
     labels representing the same quantity compare equal.
     """
 
@@ -472,37 +453,46 @@ class TeXlabel(Base):
 
     @property
     def mcs0(self):
+        r"""``MCS`` namedtuple (measurement, component, species) of the numerator."""
         return self._mcs0
 
     @property
     def mcs1(self):
+        r"""``MCS`` namedtuple of the denominator, or None."""
         return self._mcs1
 
     @property
     def new_line_for_units(self):
+        r"""If True, units are placed on a new line."""
         return self._new_line_for_units
 
     @property
     def tex(self):
+        r"""TeX of the quantity, set by ``build_label``."""
         return self._tex
 
     @property
     def units(self):
+        r"""TeX of the units, set by ``build_label``."""
         return self._units
 
     @property
     def with_units(self):
+        r"""Label with units, set by ``build_label``."""
         return self._with_units
 
     @property
     def path(self):
+        r"""Save path, set by ``build_label``."""
         return self._path
 
     @property
     def axnorm(self):
+        r"""Axis normalization key, or None."""
         return self._axnorm
 
     def set_mcs(self, mcs0, mcs1):
+        r"""Store the numerator and optional denominator as ``MCS`` namedtuples."""
         mcs0_ = MCS(*mcs0)
 
         mcs1_ = None
@@ -513,9 +503,17 @@ class TeXlabel(Base):
         self._mcs1 = mcs1_
 
     def set_new_line_for_units(self, new):
+        r"""Set whether units are placed on a new line."""
         self._new_line_for_units = bool(new)
 
     def set_axnorm(self, new):
+        r"""Set the axis normalization.
+
+        Parameters
+        ----------
+        new : str, optional
+            One of ``"c"``, ``"r"``, ``"t"``, ``"d"`` (case-insensitive), or None.
+        """
         if isinstance(new, str):
             new = new.lower()
 
@@ -523,9 +521,7 @@ class TeXlabel(Base):
         self._axnorm = new
 
     def make_species(self, pattern):
-        r"""Basic substitution of any species within a species string if the.
-
-        species has a substitution in the ion_species dictionary.
+        r"""Replace each species code in ``pattern`` that has a TeX translation.
 
         Notes
         -----
@@ -536,9 +532,6 @@ class TeXlabel(Base):
         :math:`\mathrm{He}^{2+}\rightarrow\text{He}^{2+}`.
         """
 
-        #         def repl(x):
-        #             return _trans_species[x.group()]
-
         substitution = _run_species_substitution(pattern)
 
         return substitution[0]
@@ -548,7 +541,6 @@ class TeXlabel(Base):
         c = mcs.c
         s = mcs.s
 
-        #         mcs = MCS(m, c, s)
         path = (
             "_".join(
                 [
@@ -605,14 +597,9 @@ class TeXlabel(Base):
             .replace("_{}", "")
             .rstrip("_")
             .strip(" ")
-            #             .lstrip(r"\:")
-            #             .rstrip(r"\:")
-            #             .strip(r"\:")
-            #             .strip(r"\;")
             .strip(" ")
         )
 
-        #         with_units = r"$%s \; [%s]$" % (tex, _trans_units[m])
         ukey = m
         if c in ("lat", "colat", "lon"):
             ukey = c
@@ -685,7 +672,6 @@ template   : %s
                 units = r"{}/{}".format(u0, u1)
 
             tex = "{}/{}".format(tex0, tex1)
-            #             with_units = r"$%s \; [%s]$" % (tex, units)
             path = Path("-OV-".join([path0, path1]))
 
         else:

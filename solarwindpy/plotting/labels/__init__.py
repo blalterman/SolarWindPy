@@ -74,7 +74,6 @@ def available():
 
     m = _clean_str_list_for_printing(m)
     c = _clean_str_list_for_printing(c)
-    #     s = _clean_str_list_for_printing(s)
     s = ", ".join(s)
 
     a = sorted(a)

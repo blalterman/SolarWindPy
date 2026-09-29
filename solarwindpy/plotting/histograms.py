@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 r"""Convenience accessors for histogram style plotters.
 
-This module re-exports :class:`AggPlot`, :class:`Hist1D`, and
-:class:`Hist2D` so they can be imported directly from
+This module re-exports :class:`~solarwindpy.plotting.agg_plot.AggPlot`,
+:class:`~solarwindpy.plotting.hist1d.Hist1D`, and
+:class:`~solarwindpy.plotting.hist2d.Hist2D` so they can be imported directly from
 :mod:`solarwindpy.plotting.histograms`.
 """
 
