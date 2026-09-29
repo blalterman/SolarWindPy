@@ -32,7 +32,6 @@ import pytest
 
 from solarwindpy.core.abundances import ReferenceAbundances, Abundance
 
-
 # =============================================================================
 # Test Data Specifications
 # =============================================================================
@@ -111,8 +110,6 @@ ELEMENTS_WITHOUT_PHOTOSPHERE = [
     "Cs",
     "Ta",
     "Re",
-    # "Ir",  # Has data in 2009, not 2021
-    # "Pt",  # Has data in 2009, not 2021
     "Hg",
     "Bi",
     "U",

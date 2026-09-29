@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for basic synthetic data setup."""
+
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -10,7 +11,7 @@ pd.set_option("mode.chained_assignment", "raise")
 DATA_PATH = Path(__file__).parent.parent / "data"
 
 
-class TestData(object):
+class SyntheticData(object):
     def __init__(self):
         self.set_plasma_data()
         self.set_spacecraft_data()
@@ -65,7 +66,7 @@ class TestData(object):
 class SWEData(TestCase):
     @classmethod
     def setUpClass(cls):
-        data = TestData()
+        data = SyntheticData()
         cls.data = data.plasma_data.sort_index(axis=1)
         cls.set_object_testing()
 

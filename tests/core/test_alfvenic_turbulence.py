@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Tests for Alfvenic turbulence calculations."""
 
-
 import numpy as np
 import pandas as pd
 import logging
@@ -14,7 +13,6 @@ from abc import ABC, abstractproperty
 from scipy import constants
 from scipy.constants import physical_constants
 
-# import test_base as base
 from . import test_base as base
 
 from solarwindpy import alfvenic_turbulence as turb
@@ -23,12 +21,6 @@ pd.set_option("mode.chained_assignment", "raise")
 
 
 class AlfvenicTrubulenceTestBase(ABC):
-    #    def setUp(self):
-    #        self.object_testing.set_agg("mean")
-    #        self.object_testing.update_rolling(window=2,
-    #                                           min_periods=1,
-    #                                           center=True)
-    #
     @classmethod
     def set_object_testing(cls):
         species = cls().species.split("+")
@@ -61,9 +53,7 @@ class AlfvenicTrubulenceTestBase(ABC):
             v.multiply(r, axis=1, level="S")
             .T.groupby(level="C")
             .sum()
-            .T
-            # sum(axis=1, level="C")
-            .divide(rtot, axis=0)
+            .T.divide(rtot, axis=0)
         )
 
         coef = 1e-9 / (np.sqrt(constants.mu_0 * constants.m_p * 1e6) * 1e3)
@@ -87,30 +77,12 @@ class AlfvenicTrubulenceTestBase(ABC):
             axis=1,
             names=["M", "C"],
         ).sort_index(axis=1)
-        # rolled = data.rolling(window=2, min_periods=1, center=True).agg("mean")
         rolled = data.rolling(window=test_window, min_periods=test_periods).agg("mean")
         deltas = data.subtract(rolled, axis=1)
 
         data.name = "measurements"
         deltas.name = "deltas"
 
-        #         print("",
-        #               "<Test>",
-        #               "<species>: %s" % species,
-        #               "<m>: %s" % m,
-        #               "<n>", type(n), n,
-        #               "<r>", type(r), r,
-        #               "<rtot>", type(rtot), rtot,
-        #               "<v>", type(v), v,
-        #               "<vcom>", type(vcom), vcom,
-        #               "<b>", type(b), b,
-        #               "<coeff>: %s" % coef,
-        #               "<b_ca_units>", type(b_ca_units), b_ca_units,
-        #               "<data>", type(data), data,
-        #               sep="\n",
-        #               end="\n\n")
-
-        # pdb.set_trace()
         cls.object_testing = module
         cls.data = deltas
         cls.unrolled_data = data
@@ -193,66 +165,6 @@ class AlfvenicTrubulenceTestBase(ABC):
         avg = ot.averaging_info
         expected = turb.AlvenicTurbAveraging(self.test_window, self.test_periods)
         self.assertEqual(expected, avg)
-
-    #    def test_auto_reindex(self):
-    #
-    #        v = self.unrolled_data.loc[:, "v"].drop(1, axis=0)
-    #        b = self.unrolled_data.loc[:, "b"].drop(1, axis=0)
-    #        r = self.unrolled_data.loc[:, ("r", self.species)].drop(1, axis=0)
-    #
-    #        idx_with_skip = pd.Int64Index([0, 2])
-    #        pdt.assert_index_equal(idx_with_skip, v.index)
-    #        pdt.assert_index_equal(idx_with_skip, b.index)
-    #        pdt.assert_index_equal(idx_with_skip, r.index)
-    #        pdt.assert_index_equal(v.index, b.index)
-    #        pdt.assert_index_equal(v.index, r.index)
-    #
-    #        # `unrolled_data` stores [b] = km/s. Need to get back to nT.
-    #        coef = 1e-9 / (np.sqrt(constants.mu_0 * constants.m_p * 1e6) * 1e3)
-    #        b_nT = b.multiply(np.sqrt(r), axis=0) / coef
-    #
-    #        chk = turb.AlfvenicTurbulence(
-    #            v,
-    #            b_nT,
-    #            r,
-    #            self.species,
-    #            auto_reindex=True,
-    #            window=2,
-    #            min_periods=1,
-    #            center=True,
-    #        )
-    #
-    #        idx = pd.RangeIndex(start=v.index.min(), stop=v.index.max() + 1, step=1)
-    #        pdt.assert_index_equal(idx, chk.v.index)
-    #        pdt.assert_index_equal(idx, chk.b.index)
-    #        pdt.assert_index_equal(chk.v.index, chk.b.index)
-    #
-    #        nans = pd.DataFrame(
-    #            {
-    #                "x": pd.Series([False, True, False]),
-    #                "y": pd.Series([False, True, False]),
-    #                "z": pd.Series([False, True, False]),
-    #            }
-    #        )
-    #        nans.columns.names = ["C"]
-    #
-    #        v = v.reindex(idx, axis=0)
-    #        b = b.reindex(idx, axis=0)
-    #
-    #        pdt.assert_frame_equal(nans, chk.v.isna())
-    #        pdt.assert_frame_equal(nans, chk.b.isna())
-    #
-    #        # TODO: I don't think I want to test values here, so I've removed this
-    #        #       code. All this function tests is if things automatically
-    #        #       reindex correctly.
-    #        # Rolled values will average with NaN -> zero.
-    #        # v = v.mask(~nans, 0.0)
-    #        # b = b.mask(~nans, 0.0)
-    #
-    #    #        pdb.set_trace()
-    #    #
-    #    #        pdt.assert_frame_equal(v, chk.v)
-    #    #        pdt.assert_frame_equal(b, chk.b)
 
     def test_bfield(self):
         # Test in Alfven units
@@ -458,56 +370,39 @@ class AlfvenicTrubulenceTestBase(ABC):
                 raise (e0)
 
 
-#     def test_neq(self):
-#         object_testing = self.object_testing
-#         # Data isn't equal
-#         self.assertNotEqual(object_testing,
-#                             object_testing.__class__(object_testing.data * 4))
-#          # Type isn't equal
-#         for other in ([], tuple(), np.array([]), pd.Series(), pd.DataFrame()):
-#             self.assertNotEqual(object_testing, other)
-
-
 #####
 # Tests
 #####
-# @unittest.skip
 class TestPlasmaAlpha(base.AlphaTest, AlfvenicTrubulenceTestBase, base.SWEData):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceP1(base.P1Test, AlfvenicTrubulenceTestBase, base.SWEData):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceP2(base.P2Test, AlfvenicTrubulenceTestBase, base.SWEData):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceAlphaP1(
     base.AlphaP1Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceAlphaP2(
     base.AlphaP2Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceP1P2(
     base.P1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):
     pass
 
 
-# @unittest.skip
 class TestAlfvenicTrubulenceAlphaP1P2(
     base.AlphaP1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
 ):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Tests for Vector and Tensor objects."""
+
 import numpy as np
-import pytest
 import pandas as pd
 import pandas.testing as pdt
 
@@ -9,7 +9,6 @@ from unittest import TestCase
 from abc import ABC, abstractproperty
 from scipy import constants
 
-# import test_base as base
 from . import test_base as base
 
 from solarwindpy import vector
@@ -80,33 +79,24 @@ class QuantityTestBase(ABC):
 #####
 class VectorTestBase(QuantityTestBase):
     def test_components(self):
-        # print("test_components")
-        # print(self.data.iloc[:, :7], flush=True)
 
         v = self.data
         ot = self.object_testing.data
-        # print(v, file=sys.stdout)
         pdt.assert_series_equal(v.x, ot.x)
         pdt.assert_series_equal(v.y, ot.y)
         pdt.assert_series_equal(v.z, ot.z)
 
     def test_mag(self):
-        # print("test_mag")
-        # print(self.data.iloc[:, :7], flush=True)
         x = self.data.x
         y = self.data.y
         z = self.data.z
-        # print(v, file=sys.stdout)
         mag = np.sqrt(x.pow(2) + y.pow(2) + z.pow(2))
-        # mag = self.data.loc[:, ["x", "y", "z"]].pow(2).sum(axis=1).pipe(np.sqrt)
         mag.name = "mag"
-        # print("", self.data, mag, self.object_testing.mag, sep="\n")
         pdt.assert_series_equal(mag, self.object_testing.mag)
         pdt.assert_series_equal(mag, self.object_testing.magnitude)
         pdt.assert_series_equal(self.object_testing.mag, self.object_testing.magnitude)
 
     def test_rho(self):
-        # print("test_rho")
         x = self.data.x
         y = self.data.y
         rho = np.sqrt(x.pow(2) + y.pow(2))
@@ -114,7 +104,6 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(rho, self.object_testing.rho)
 
     def test_colat(self):
-        # print("test_colat")
         x = self.data.x
         y = self.data.y
         z = self.data.z
@@ -124,7 +113,6 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(colat, self.object_testing.colat)
 
     def test_longitude(self):
-        # print("test_longitude")
         x = self.data.x
         y = self.data.y
         lon = np.arctan2(y, x)
@@ -135,7 +123,6 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(self.object_testing.lon, self.object_testing.longitude)
 
     def test_r(self):
-        # print("test_r")
         x = self.data.x
         y = self.data.y
         z = self.data.z
@@ -168,23 +155,16 @@ class VectorTestBase(QuantityTestBase):
 
     def test_project(self):
         b = (
-            base.TestData()
+            base.SyntheticData()
             .plasma_data.xs("b", axis=1, level="M")
             .xs("", axis=1, level="S")
             .loc[:, ["x", "y", "z"]]
         )
-        #         b.setUpClass()
-        #         b = (
-        #             b.data.b.loc[:, ["x", "y", "z"]]
-        #             .xs("", axis=1, level="S")
-        #             .xs("", axis=1, level="N")
-        #         )
         bmag = b.pow(2).sum(axis=1).pipe(np.sqrt)
         buv = b.divide(bmag, axis=0)
 
         v = self.data.loc[:, ["x", "y", "z"]]
         vmag = v.pow(2).sum(axis=1).pipe(np.sqrt)
-        #         vuv = v.divide(vmag, axis=0)
 
         par = v.multiply(buv, axis=1).sum(axis=1)
         per = (
@@ -194,16 +174,6 @@ class VectorTestBase(QuantityTestBase):
             .pipe(np.sqrt)
         )
         projected = pd.concat([par, per], axis=1, keys=["par", "per"], sort=True)
-
-        # print("",
-        #       "<Test>",
-        #       "<buv>", type(buv), buv,
-        #       "<v>", type(v), v,
-        #       "<vmag>", type(vmag), vmag,
-        #       "<vuv>", type(vuv), vuv,
-        #       "<projected>", type(projected), projected,
-        #       "",
-        #       sep="\n")
 
         b = vector.Vector(b)
         pdt.assert_frame_equal(projected, self.object_testing.project(b))
@@ -221,15 +191,8 @@ class VectorTestBase(QuantityTestBase):
             self.object_testing.project(b.data)
 
     def test_cos_theta(self):
-        #         b = base.TestData()
-        #         b.setUpClass()
-        #         b = (
-        #             b.data.b.loc[:, ["x", "y", "z"]]
-        #             .xs("", axis=1, level="S")
-        #             .xs("", axis=1, level="N")
-        #         )
         b = (
-            base.TestData()
+            base.SyntheticData()
             .plasma_data.xs("b", axis=1, level="M")
             .xs("", axis=1, level="S")
             .loc[:, ["x", "y", "z"]]
@@ -242,16 +205,6 @@ class VectorTestBase(QuantityTestBase):
         vuv = v.divide(vmag, axis=0)
 
         cos_theta = vuv.multiply(buv, axis=1).sum(axis=1)
-
-        # print("",
-        #       "<Test>",
-        #       "<buv>", type(buv), buv,
-        #       "<v>", type(v), v,
-        #       "<vmag>", type(vmag), vmag,
-        #       "<vuv>", type(vuv), vuv,
-        #       "<cos_theta>", type(cos_theta), cos_theta,
-        #       "",
-        #       sep="\n")
 
         b = vector.BField(b)
         pdt.assert_series_equal(cos_theta, self.object_testing.cos_theta(b))
@@ -269,27 +222,13 @@ class VectorTestBase(QuantityTestBase):
             self.object_testing.project(b.data)
 
 
-# class TestGSE(VectorTestBase, base.SWEData):
-#     @classmethod
-#     def set_object_testing(cls):
-#         # print("TestGSE.set_object_testing", flush=True)
-#         data = cls.data.gse.xs("", axis=1, level="S")
-#         gse = vector.Vector(data)
-#         cls.object_testing = gse
-#         cls.data = data
-#         # print("Done with TestGSE.set_object_testing", flush=True)
-
-
 class TestBField(VectorTestBase, base.SWEData):
     @classmethod
     def set_object_testing(cls):
-        # print("BField.set_object_testing", flush=True)
         data = cls.data.b.xs("", axis=1, level="S")
-        # b = vector.Vector(data)
         b = vector.BField(data)
         cls.object_testing = b
         cls.data = data
-        # print("Done with BField.set_object_testing", flush=True)
 
     def test_pressure(self):
         print_inline_debug = False
@@ -297,9 +236,6 @@ class TestBField(VectorTestBase, base.SWEData):
         const = 1e-18 / (2.0 * constants.mu_0 * 1e-12)  # ([b]**2 / 2.0 * \mu_0 * [p])
         pb = bsq * const
         pb.name = "pb"
-
-        # ot = self.object_testing
-        # pdb.set_trace()
 
         if print_inline_debug:
             print(
@@ -334,12 +270,10 @@ class TestBField(VectorTestBase, base.SWEData):
 class VelocityTestBase(VectorTestBase):
     @classmethod
     def set_object_testing(cls):
-        # print("VelocityTestBase.set_object_testing", flush=True)
         data = cls.data.v.xs(cls().species, axis=1, level="S")
         v = vector.Vector(data)
         cls.object_testing = v
         cls.data = data
-        # print("Done with VelocityTestBase.set_object_testing", flush=True)
 
     @abstractproperty
     def species(self):
@@ -373,21 +307,16 @@ class TensorTestBase(QuantityTestBase):
 class ThermalSpeedTestBase(TensorTestBase):
     @classmethod
     def set_object_testing(cls):
-        # print(cls.__class__, "set_object_testing", flush=True)
-        # print("Data", cls.data, sep="\n")
         data = cls.data.w.xs(cls().species, axis=1, level="S")
-        # print("Species", data, sep="\n")
         coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
         scalar = (
             data.pow(2).multiply(coeff, axis=1, level="C").sum(axis=1).pipe(np.sqrt)
         )
         scalar.name = "scalar"
         data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
-        # print("With Scalar", sep="\n")
         w = tensor.Tensor(data)
         cls.object_testing = w
         cls.data = data
-        # print("Done with ThermalSpeedTestBase.set_object_testing", flush=True)
 
     @abstractproperty
     def species(self):
@@ -406,39 +335,25 @@ class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
     pass
 
 
-# @unittest.skip
 class TestQuantitySubclassEquality(TestCase):
     @classmethod
     def setUpClass(cls):
         r"""Override `setUpClass` so that it doesn't call `set_object_testing`."""
-        # print("TestQuantitySubclassEquality.setUpClass", flush=True)
-        #         super(TestQuantitySubclassEquality, cls).setUpClass()
-        #         # print(cls.data.iloc[:, :7])
-        #         # print(cls.data.columns.values)
-        #         pdb.set_trace()
-        data = base.TestData().plasma_data
-        #         data = cls.data.xs("", axis=1, level="N")
-        # print(data.w)
-        # print()
+        fixture = base.SyntheticData()
+        data = fixture.plasma_data
+        cls.gse = fixture.spacecraft_data.gse
         coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
         scalar = data.w.pow(2).multiply(coeff, axis=1, level="C")
-        # print(scalar)
-        # print()
 
         scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
-        # scalar = scalar.sum(axis=1, level="S").pipe(np.sqrt)
 
         cols = pd.MultiIndex.from_tuples(
             scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
             names=data.columns.names,
         )
         scalar.columns = cols
-        # print(scalar)
-        # print()
         scalar.name = "scalar"
         data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
-        # print(data)
-        # print()
         cls.data = data
 
     def test_v(self):
@@ -465,29 +380,40 @@ class TestQuantitySubclassEquality(TestCase):
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
         self.assertNotEqual(b, w)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse(self):
-        data = self.data.gse.xs("", axis=1, level="S")
-        gse0 = vector.Vector(data)
-        gse1 = vector.Vector(data)
+        """Two Vectors built from the spacecraft GSE position are equal.
+
+        ON FAILURE: the code is wrong.
+        """
+        gse0 = vector.Vector(self.gse)
+        gse1 = vector.Vector(self.gse)
         self.assertEqual(gse0, gse0)
         self.assertEqual(gse0, gse1)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_b_gse(self):
+        """A BField never equals a Vector, here the GSE position.
+
+        ON FAILURE: the code is wrong.
+        """
         b = vector.BField(self.data.b.xs("", axis=1, level="S"))
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
+        gse = vector.Vector(self.gse)
         self.assertNotEqual(b, gse)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_v(self):
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
+        """Vectors holding different data (GSE position, p2 velocity) differ.
+
+        ON FAILURE: the code is wrong.
+        """
+        gse = vector.Vector(self.gse)
         v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
         self.assertNotEqual(gse, v)
 
-    @pytest.mark.skip(reason="Need to update with new `spacecraft` position vectors")
     def test_gse_w(self):
-        gse = vector.Vector(self.data.gse.xs("", axis=1, level="S"))
+        """A Vector (GSE position) never equals a Tensor (alpha thermal speed).
+
+        ON FAILURE: the code is wrong.
+        """
+        gse = vector.Vector(self.gse)
         w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
         self.assertNotEqual(gse, w)
 
