@@ -7,10 +7,11 @@ __all__ = [
     "Count",
     "base",
     "special",
-    "available_TeXlabel_measurements",
+    "available",
     "species_translation",
 ]
 
+import warnings
 from inspect import isclass
 import pandas as pd
 
@@ -55,7 +56,7 @@ def _clean_str_list_for_printing(data):
     return agg
 
 
-def available_labels():
+def available():
     """Print all available measurement, component and species labels."""
 
     m = sorted(list(base._trans_measurement.keys()) + list(base._templates.keys()))
@@ -98,3 +99,17 @@ Special
 -------
 {a}
 """.format(m=m, c=c, s=s, a=a))
+
+
+def available_labels():
+    """Print all available labels; deprecated alias of :func:`available`.
+
+    .. deprecated::
+        Use :func:`available`. This alias is removed in the next release.
+    """
+    warnings.warn(
+        "available_labels() is deprecated; use available()",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    available()
