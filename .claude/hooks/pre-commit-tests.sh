@@ -6,8 +6,11 @@ set -e
 
 echo "🧪 Running pre-commit test validation..."
 
+# Run pytest from the solarwindpy env; see project-env.sh
+ENV="$(dirname "$0")/project-env.sh"
+
 # Check if pytest is available
-if ! command -v pytest &> /dev/null; then
+if ! "$ENV" pytest --version &> /dev/null; then
     echo "❌ pytest not found. Install with: pip install pytest pytest-cov"
     exit 1
 fi
@@ -30,7 +33,7 @@ echo "$staged_files" | sed 's/^/   /'
 # only ever taught people to pass --no-verify, which skips black and flake8
 # along with it.
 echo "📊 Running coverage analysis (≥80% required)..."
-if ! pytest --cov=solarwindpy --cov-fail-under=80 -q --tb=short; then
+if ! "$ENV" pytest --cov=solarwindpy --cov-fail-under=80 -q --tb=short; then
     echo ""
     echo "❌ Coverage below 80% threshold or tests failed"
     echo "💡 Fix failing tests and improve coverage before committing"
@@ -52,7 +55,7 @@ for file in $staged_files; do
         # Check if corresponding test file exists
         if [[ -f "${test_path}.py" ]] || [[ -d "$(dirname ${test_path})" ]]; then
             echo "   Testing: $module_path"
-            if ! pytest "tests/${file#solarwindpy/}" -v --tb=short 2>/dev/null; then
+            if ! "$ENV" pytest "tests/${file#solarwindpy/}" -v --tb=short 2>/dev/null; then
                 echo "⚠️  Module-specific tests may need attention: $module_path"
             fi
         fi
@@ -67,7 +70,7 @@ if [[ -n "$physics_files" ]]; then
     echo "$physics_files" | sed 's/^/   /'
     
     # Run physics-specific tests
-    if ! pytest tests/core/ tests/instabilities/ tests/fitfunctions/ -k "physics or thermal or alfven or conservation" -q --tb=line 2>/dev/null; then
+    if ! "$ENV" pytest tests/core/ tests/instabilities/ tests/fitfunctions/ -k "physics or thermal or alfven or conservation" -q --tb=line 2>/dev/null; then
         echo "⚠️  Physics validation tests may need attention"
     fi
 fi
@@ -77,7 +80,7 @@ core_files=$(echo "$staged_files" | grep "core/" || true)
 if [[ -n "$core_files" ]]; then
     echo ""
     echo "⏱️  Running performance tests for core changes..."
-    if ! timeout 30s pytest -m "slow or performance" tests/core/ -q --tb=line 2>/dev/null; then
+    if ! timeout 30s "$ENV" pytest -m "slow or performance" tests/core/ -q --tb=line 2>/dev/null; then
         echo "⚠️  Performance tests completed with timeout (expected for large datasets)"
     fi
 fi
