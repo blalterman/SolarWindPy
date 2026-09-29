@@ -3,11 +3,12 @@ import pandas as pd
 import pytest
 from types import SimpleNamespace
 
-from scipy.optimize import OptimizeResult
+from scipy.optimize import OptimizeResult, least_squares
 
 from solarwindpy.fitfunctions.core import (
     FitFunction,
     ChisqPerDegreeOfFreedom,
+    FitFailedError,
     InitialGuessInfo,
     InvalidParameterError,
     InsufficientDataError,
@@ -101,30 +102,68 @@ def test_set_argnames():
     assert lf.argnames == ["m", "b"]
 
 
-def test_run_least_squares(monkeypatch, simple_linear_data):
+@pytest.fixture
+def line_with_outlier():
+    """Weighted line ``y = 2x + 1`` on integer ``x`` with one +20 outlier.
+
+    The outlier makes the robust (huber) and plain (linear) least-squares
+    solutions differ, so the default ``loss`` is observable in ``popt``.
+    """
+    x = np.arange(10.0)
+    y = 2.0 * x + 1.0
+    y[7] += 20.0
+    w = np.full_like(x, 2.0)
+    return x, y, w
+
+
+def _direct_least_squares(x, y, w, p0, **kwargs):
+    """Solve the weighted problem with scipy directly, as ``curve_fit`` would."""
+
+    def resid(p):
+        return (linear_function(x, *p) - y) / w
+
+    return least_squares(resid, p0, **kwargs).x
+
+
+def test_make_fit_defaults_match_documented_least_squares_call(line_with_outlier):
+    """make_fit's result equals scipy's least_squares with the documented defaults.
+
+    The ``make_fit`` docstring lists method="trf", loss="huber",
+    max_nfev=10000, f_scale=0.1, and weights act as ``sigma`` (residuals
+    divided by ``w``). The same problem solved by calling scipy directly with
+    those settings is the independent route. The outlier makes the huber and
+    linear solutions differ by ~0.6 in slope, so a changed default loss fails.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    lf = LinearFit(x, y, weights=w)
+    lf.make_fit()
+    p0 = np.array(lf.p0)
+    documented = _direct_least_squares(
+        x, y, w, p0, method="trf", loss="huber", max_nfev=10000, f_scale=0.1
+    )
+    plain = _direct_least_squares(x, y, w, p0, method="trf", loss="linear")
+
+    popt = np.array([lf.popt["m"], lf.popt["b"]])
+    # rel=1e-6: noise-free comparison of two identical solver calls.
+    assert popt == pytest.approx(documented, rel=1e-6, abs=0)
+    # The fixture must separate huber from linear, else the check above is idle.
+    assert popt != pytest.approx(plain, rel=1e-2, abs=0)
+
+
+def test_run_least_squares_returns_initial_guess_and_rejects_args(simple_linear_data):
+    """_run_least_squares hands back ``p0`` and refuses curve_fit's ``args``.
+
+    ON FAILURE: the code is wrong.
+    """
     x, y, w = simple_linear_data
     lf = LinearFit(x, y, weights=w)
-    captured = {}
-
-    def fake_ls(func, p0, **kwargs):
-        captured.update(kwargs)
-        jac = np.eye(lf.observations.used.x.size, len(p0))
-        return SimpleNamespace(
-            success=True, x=p0, cost=0.0, jac=jac, fun=np.zeros(lf.nobs)
-        )
-
-    from solarwindpy.fitfunctions import core as core_module
-
-    monkeypatch.setattr(core_module, "least_squares", fake_ls)
     res, p0 = lf._run_least_squares()
-    assert captured["method"] == "trf"
-    assert captured["loss"] == "huber"
-    assert captured["max_nfev"] == 10000
-    assert captured["f_scale"] == 0.1
-    assert captured["jac"] == "2-point"
     assert np.array_equal(p0, np.array(lf.p0))
+    assert res.success
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'args' is not a supported keyword"):
         lf._run_least_squares(args=(1,))
 
 
@@ -145,7 +184,14 @@ def test_calc_popt_pcov_psigma_chisq():
     assert chisq.linear == 0.0 and chisq.robust == 0.0
 
 
-def test_make_fit_success_failure(monkeypatch, simple_linear_data, small_n):
+def test_make_fit_success_failure(simple_linear_data, small_n):
+    """make_fit populates results on success and surfaces solver failure.
+
+    Failure is real: ``max_nfev=1`` stops scipy before convergence, which
+    make_fit reports as FitFailedError.
+
+    ON FAILURE: the code is wrong.
+    """
     x, y, w = simple_linear_data
     lf = LinearFit(x, y, weights=w)
     lf.make_fit()
@@ -161,16 +207,13 @@ def test_make_fit_success_failure(monkeypatch, simple_linear_data, small_n):
     err = lf_small.make_fit(return_exception=True)
     assert isinstance(err, InsufficientDataError)
 
-    def fail_run(*_, **__):
-        raise RuntimeError("fail")
-
     x, y, w = simple_linear_data
     lf_fail = LinearFit(x, y, weights=w)
-    monkeypatch.setattr(LinearFit, "_run_least_squares", fail_run)
-    err = lf_fail.make_fit(return_exception=True)
-    assert isinstance(err, RuntimeError)
-    with pytest.raises(RuntimeError):
-        lf_fail.make_fit()
+    err = lf_fail.make_fit(return_exception=True, max_nfev=1)
+    assert isinstance(err, FitFailedError)
+    assert "Optimal parameters not found" in str(err)
+    with pytest.raises(FitFailedError, match="Optimal parameters not found"):
+        lf_fail.make_fit(max_nfev=1)
 
 
 @pytest.fixture
@@ -253,104 +296,132 @@ class TestWeightShapeValidation:
 
 
 class TestBoundsDictHandling:
-    """Test bounds dict conversion in _run_least_squares (lines 649-650)."""
+    """A bounds dict keyed by parameter name constrains the fit."""
 
-    def test_run_least_squares_bounds_as_dict(self, monkeypatch, simple_linear_data):
-        """Verify _run_least_squares converts bounds dict to array."""
-        x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+    def test_bounds_dict_constrains_parameter_and_is_recorded(self):
+        """A binding upper bound on ``m`` given as a dict holds in ``popt``.
 
-        captured = {}
+        Noise-free data from m=2, b=1 with ``m`` capped at 1.5: the optimum sits
+        on the cap, and ``fit_bounds`` records the dict's limits per name.
 
-        def fake_ls(func, p0, **kwargs):
-            captured["bounds"] = kwargs.get("bounds")
-            jac = np.eye(lf.observations.used.x.size, len(p0))
-            return SimpleNamespace(
-                success=True, x=p0, cost=0.0, jac=jac, fun=np.zeros(lf.nobs)
-            )
+        ON FAILURE: the code is wrong.
+        """
+        x = np.arange(10.0)
+        lf = LinearFit(x, 2.0 * x + 1.0)
+        # p0 must start inside the bounds; LinearFit's data-driven guess is m=2.
+        lf.make_fit(p0=[1.0, 1.0], bounds={"m": (-10.0, 1.5), "b": (-5.0, 5.0)})
 
-        from solarwindpy.fitfunctions import core as core_module
-
-        monkeypatch.setattr(core_module, "least_squares", fake_ls)
-
-        bounds_dict = {"m": (-10, 10), "b": (-5, 5)}
-        res, p0 = lf._run_least_squares(bounds=bounds_dict)
-        assert isinstance(captured["bounds"], (list, tuple, np.ndarray))
+        # rel=1e-6: trf stops within its xtol of an active bound.
+        assert lf.popt["m"] == pytest.approx(1.5, rel=1e-6, abs=0)
+        assert tuple(lf.fit_bounds["m"]) == (-10.0, 1.5)
+        assert tuple(lf.fit_bounds["b"]) == (-5.0, 5.0)
 
 
 class TestCallableJacobian:
-    """Test callable jacobian path (line 692)."""
+    """A callable jacobian is used in place of finite differences."""
 
-    def test_run_least_squares_callable_jac(self, monkeypatch, simple_linear_data):
-        """Verify _run_least_squares handles callable jacobian."""
-        x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+    def test_callable_jac_is_used_and_weighted(self):
+        """``res.jac`` is the caller's jacobian divided by the weights.
 
-        captured = {}
+        The supplied jacobian is 3x the true one, so a finite-difference run
+        would leave ``res.jac`` a factor 3 away. Weights of 2 act as ``sigma``,
+        so each row is divided by 2 (curve_fit's transform). With loss="linear"
+        and a model linear in its parameters, ``res.jac`` is that constant
+        matrix.
 
-        def fake_ls(func, p0, **kwargs):
-            captured["jac"] = kwargs.get("jac")
-            jac = np.eye(lf.observations.used.x.size, len(p0))
-            return SimpleNamespace(
-                success=True, x=p0, cost=0.0, jac=jac, fun=np.zeros(lf.nobs)
-            )
+        ON FAILURE: the code is wrong.
+        """
+        x = np.arange(10.0)
+        w = np.full_like(x, 2.0)
+        lf = LinearFit(x, 2.0 * x + 1.0, weights=w)
 
-        from solarwindpy.fitfunctions import core as core_module
+        def tripled_jac(x, m, b):
+            return 3.0 * np.column_stack([x, np.ones_like(x)])
 
-        monkeypatch.setattr(core_module, "least_squares", fake_ls)
-
-        def my_jac(x, m, b):
-            return np.column_stack([x, np.ones_like(x)])
-
-        res, p0 = lf._run_least_squares(jac=my_jac)
-        assert callable(captured["jac"])
+        lf.make_fit(jac=tripled_jac, loss="linear")
+        expected = tripled_jac(x, 0.0, 0.0) / w[:, np.newaxis]
+        # Exact: the same float operations on integer-valued inputs.
+        np.testing.assert_array_equal(lf.fit_result.jac, expected)
 
 
 class TestFitFailedErrorPath:
-    """Test FitFailedError when optimization fails (line 707)."""
+    """Solver non-convergence becomes FitFailedError."""
 
-    def test_run_least_squares_fit_failed(self, monkeypatch, simple_linear_data):
-        """Verify _run_least_squares raises FitFailedError on failed optimization."""
-        from solarwindpy.fitfunctions.core import FitFailedError
+    def test_run_least_squares_fit_failed(self, simple_linear_data):
+        """One allowed function evaluation cannot converge, so the fit fails.
 
+        ON FAILURE: the code is wrong.
+        """
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
 
-        def fake_ls(func, p0, **kwargs):
-            jac = np.eye(lf.observations.used.x.size, len(p0))
-            return SimpleNamespace(
-                success=False,
-                message="Failed to converge",
-                x=p0,
-                cost=0.0,
-                jac=jac,
-                fun=np.zeros(lf.nobs),
-            )
-
-        from solarwindpy.fitfunctions import core as core_module
-
-        monkeypatch.setattr(core_module, "least_squares", fake_ls)
-
         with pytest.raises(FitFailedError, match="Optimal parameters not found"):
-            lf._run_least_squares()
+            lf._run_least_squares(max_nfev=1)
+
+
+class NeverEnoughData(LinearFit):
+    """LinearFit whose ``sufficient_data`` override returns False.
+
+    The base class raises from ``sufficient_data``; a subclass returning False
+    is the only way to reach make_fit's AssertionError branch.
+    """
+
+    @property
+    def sufficient_data(self):
+        return False
+
+
+class InsufficientDataLeakedAsAssertion(AssertionError):
+    """Raised by the test when make_fit lets a bare AssertionError escape."""
 
 
 class TestMakeFitAssertionError:
-    """Test make_fit AssertionError handling (line 803)."""
+    """A falsy ``sufficient_data`` becomes InsufficientDataError."""
 
-    def test_make_fit_assertion_error_converted(self, monkeypatch, simple_linear_data):
-        """Verify make_fit converts AssertionError to InsufficientDataError."""
+    def test_make_fit_assertion_error_returned_as_insufficient_data(
+        self, simple_linear_data
+    ):
+        """With return_exception=True the falsy check comes back converted.
+
+        ON FAILURE: the code is wrong.
+        """
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
-
-        def raise_assertion(self):
-            raise AssertionError("Test assertion")
-
-        monkeypatch.setattr(type(lf), "sufficient_data", property(raise_assertion))
+        lf = NeverEnoughData(x, y, weights=w)
 
         err = lf.make_fit(return_exception=True)
         assert isinstance(err, InsufficientDataError)
         assert "Insufficient data" in str(err)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=InsufficientDataLeakedAsAssertion,
+        reason="solarwindpy/fitfunctions/core.py make_fit: the sufficient_data "
+        "except-branch builds InsufficientDataError but re-raises the original "
+        "AssertionError with a bare raise; expected InsufficientDataError "
+        "'Insufficient data to fit the model'; remove this marker when that "
+        "branch raises the converted exception",
+    )
+    def test_make_fit_assertion_error_raised_as_insufficient_data(
+        self, simple_linear_data
+    ):
+        """With return_exception=False the same InsufficientDataError is raised.
+
+        ``return_exception`` chooses between returning and raising the
+        exception, so both paths must carry the same type.
+
+        ON FAILURE: (unexpected pass) make_fit now raises the converted
+        exception; drop the xfail marker.
+        """
+        x, y, w = simple_linear_data
+        lf = NeverEnoughData(x, y, weights=w)
+
+        try:
+            lf.make_fit()
+        except InsufficientDataError:
+            return
+        except AssertionError as e:
+            raise InsufficientDataLeakedAsAssertion(repr(e)) from e
+        pytest.fail("make_fit did not raise for insufficient data")
 
 
 class TestAbsoluteSigmaNotImplemented:
