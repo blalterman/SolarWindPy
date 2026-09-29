@@ -165,7 +165,6 @@ class SolarWindPyPlanValueGenerator:
         """Generate scientific software development and productivity value."""
 
         affects = plan_data.get("affects", "")
-        complexity = plan_data.get("complexity", "moderate")
 
         # Scientific software development value
         research_efficiency = self._assess_research_efficiency(affects)
@@ -331,7 +330,6 @@ class SolarWindPyPlanValueGenerator:
     def _detailed_token_analysis(self, plan_data: Dict) -> str:
         """Detailed token usage analysis."""
         complexity = plan_data.get("complexity", "moderate")
-        phase_count = plan_data.get("phase_count", 1)
 
         # Current vs enhanced token usage
         manual_base = {
@@ -378,10 +376,10 @@ class SolarWindPyPlanValueGenerator:
         )
         analysis.append("")
         analysis.append("**Break-even Analysis:**")
-        analysis.append(f"- Development investment: ~10-15 hours")
+        analysis.append("- Development investment: ~10-15 hours")
         analysis.append(f"- Token savings per plan: {net_savings} tokens")
         analysis.append(f"- Break-even point: {plans_to_break_even} plans")
-        analysis.append(f"- Expected annual volume: 20-30 plans")
+        analysis.append("- Expected annual volume: 20-30 plans")
 
         return "\n".join(analysis)
 
@@ -732,9 +730,6 @@ class SolarWindPyPlanValueGenerator:
     def _generate_token_optimization(self, plan_data: Dict) -> str:
         """Generate detailed token usage optimization analysis."""
 
-        complexity = plan_data.get("complexity", "moderate")
-        phase_count = plan_data.get("phase_count", 1)
-
         # Current patterns
         current_analysis = self._analyze_current_token_patterns(plan_data)
 
@@ -850,13 +845,13 @@ class SolarWindPyPlanValueGenerator:
             "**Compaction Efficiency:**",
             "- Value propositions compress well due to structured format",
             "- Key metrics preserved even in heavily compacted states",
-            f"- Phase-by-phase progress tracking reduces context loss",
+            "- Phase-by-phase progress tracking reduces context loss",
             "- Automated generation allows context-aware detail levels",
         ]
 
         if phase_count > 3:
             benefits.insert(
-                -3, f"- Multi-phase plans benefit from milestone-based compaction"
+                -3, "- Multi-phase plans benefit from milestone-based compaction"
             )
 
         return "\n".join(benefits)
@@ -942,8 +937,6 @@ class SolarWindPyPlanValueGenerator:
     def _analyze_time_savings(self, plan_data: Dict) -> str:
         """Analyze time savings from enhanced planning."""
 
-        phase_count = plan_data.get("phase_count", 1)
-
         # Per-plan time savings
         manual_planning = 90  # 90 minutes manual planning
         automated_planning = 20  # 20 minutes with hooks
@@ -957,12 +950,12 @@ class SolarWindPyPlanValueGenerator:
             "**Per-Plan Time Savings:**",
             f"- Manual planning process: {manual_planning} minutes",
             f"- Automated hook-based planning: {automated_planning} minutes",
-            f"- Net savings per plan: {per_plan_savings} minutes ({((per_plan_savings/manual_planning)*100):.0f}% reduction)",
+            f"- Net savings per plan: {per_plan_savings} minutes ({((per_plan_savings / manual_planning) * 100):.0f}% reduction)",
             "",
             "**Long-term Efficiency Gains:**",
             f"- Projected annual plans: {annual_plans}",
             f"- Annual time savings: {annual_savings:.1f} hours",
-            f"- Equivalent to {annual_savings/8:.1f} additional development days per year",
+            f"- Equivalent to {annual_savings / 8:.1f} additional development days per year",
             "",
             "**Qualitative Benefits:**",
             "- Reduced decision fatigue through systematic evaluation",
@@ -1171,7 +1164,7 @@ class SolarWindPyPlanValueGenerator:
                 # Fallback scope audit if the external script fails
                 return self._generate_fallback_scope_audit(plan_data)
 
-        except Exception as e:
+        except Exception:
             # Fallback scope audit if there's any error
             return self._generate_fallback_scope_audit(plan_data)
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Plan Completion Manager for SolarWindPy Automatically handles plan lifecycle
-completion workflow."""
+"""Plan Completion Manager for SolarWindPy.
+
+Automatically handles plan lifecycle completion workflow.
+"""
 
 import json
 import shutil
@@ -13,10 +15,14 @@ import subprocess
 def is_plan_completed(plan_dir: Path) -> bool:
     """Check if a plan is completed by examining the 0-Overview.md file.
 
-    Args:
-        plan_dir: Path to the plan directory
+    Parameters
+    ----------
+    plan_dir : Path
+        Path to the plan directory
 
-    Returns:
+    Returns
+    -------
+    bool
         True if plan shows completion status
     """
     overview_file = plan_dir / "0-Overview.md"
@@ -69,12 +75,18 @@ def move_plan_to_completed(
 ) -> bool:
     """Move a completed plan to the completed directory.
 
-    Args:
-        plan_name: Name of the plan
-        source_dir: Source plan directory
-        completed_dir: Destination completed directory
+    Parameters
+    ----------
+    plan_name : str
+        Name of the plan
+    source_dir : Path
+        Source plan directory
+    completed_dir : Path
+        Destination completed directory
 
-    Returns:
+    Returns
+    -------
+    bool
         True if move was successful
     """
     try:
@@ -103,11 +115,16 @@ def move_plan_to_completed(
 def generate_closeout_documentation(plan_name: str, plan_dir: Path) -> bool:
     """Generate closeout documentation for a completed plan.
 
-    Args:
-        plan_name: Name of the plan
-        plan_dir: Path to the plan directory
+    Parameters
+    ----------
+    plan_name : str
+        Name of the plan
+    plan_dir : Path
+        Path to the plan directory
 
-    Returns:
+    Returns
+    -------
+    bool
         True if closeout generation was successful
     """
     try:
@@ -191,10 +208,14 @@ def extract_section(content: str, header: str) -> str:
 def preserve_plan_branches(plan_name: str) -> dict:
     """Ensure plan branches are preserved and not deleted.
 
-    Args:
-        plan_name: Name of the plan
+    Parameters
+    ----------
+    plan_name : str
+        Name of the plan
 
-    Returns:
+    Returns
+    -------
+    dict
         Dictionary with branch preservation status
     """
     try:
