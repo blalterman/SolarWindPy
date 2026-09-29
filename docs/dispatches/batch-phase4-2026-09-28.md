@@ -369,8 +369,8 @@ files; whether a different fitting method is acceptable is a methodology call to
 
 OWNS: solarwindpy/plotting/, tests/test_source_plotting_defects.py
 
-`labels.available()` and its deprecated alias `labels.available_labels()` are covered by
-`tests/test_available.py`, which you do not own; keep both names working.
+`labels.available()` is covered by `tests/test_available.py` and
+`tests/plotting/labels/test_init.py`, which you do not own; keep it working.
 
 ##### source-misc
 
