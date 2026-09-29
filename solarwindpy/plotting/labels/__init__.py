@@ -11,7 +11,6 @@ __all__ = [
     "species_translation",
 ]
 
-import warnings
 from inspect import isclass
 import pandas as pd
 
@@ -99,17 +98,3 @@ Special
 -------
 {a}
 """.format(m=m, c=c, s=s, a=a))
-
-
-def available_labels():
-    """Print all available labels; deprecated alias of :func:`available`.
-
-    .. deprecated::
-        Use :func:`available`. This alias is removed in the next release.
-    """
-    warnings.warn(
-        "available_labels() is deprecated; use available()",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    available()

@@ -45,8 +45,8 @@ def test_clean_str_list_for_printing():
     assert result.splitlines() == ["Charlie", "alpha", "beta", "gamma"]
 
 
-def test_available_labels_output(capsys):
-    """Check that ``available_labels`` prints all major sections.
+def test_available_output(capsys):
+    """Check that ``available`` prints all major sections.
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ def test_available_labels_output(capsys):
         Pytest fixture used to capture standard output.
     """
     labels = _load_labels_module()
-    labels.available_labels()
+    labels.available()
     captured = capsys.readouterr().out
     for section in (
         "TeXlabel knows",

@@ -2,44 +2,18 @@
 # Supersedes: none
 """Contract tests for the ``available()`` listing functions.
 
-``solarwindpy.plotting.labels.available`` prints the label vocabulary and
-``solarwindpy.fitfunctions.available`` prints every fit function with its
-formula. Both discover what they list from the code, so neither needs a
-hand-kept list inside the package.
+``solarwindpy.fitfunctions.available`` prints every fit function in the
+package with its formula. These tests state what the listing promises, and
+none of them names a particular fit function, so adding or removing a fit
+function never requires editing this file.
 """
 
-import pytest
+import importlib
+import inspect
+import pkgutil
 
 import solarwindpy.fitfunctions as ff
-import solarwindpy.plotting.labels as labels
 from solarwindpy.fitfunctions.core import FitFunction
-
-# Every concrete FitFunction subclass defined in solarwindpy/fitfunctions,
-# read from the class statements in those modules.
-EXPECTED_FIT_FUNCTIONS = {
-    "Exponential",
-    "ExponentialCDF",
-    "ExponentialPlusC",
-    "Gaussian",
-    "GaussianLn",
-    "GaussianNormalized",
-    "GaussianPlusHeavySide",
-    "GaussianTimesHeavySide",
-    "GaussianTimesHeavySidePlusHeavySide",
-    "HeavySide",
-    "HingeAtPoint",
-    "HingeMax",
-    "HingeMin",
-    "HingeSaturation",
-    "Line",
-    "LineXintercept",
-    "Moyal",
-    "PowerLaw",
-    "PowerLawOffCenter",
-    "PowerLawPlusC",
-    "Saturation",
-    "TwoLine",
-}
 
 
 class _FitDefinedOutsideThePackage(FitFunction):
@@ -58,100 +32,83 @@ class _FitDefinedOutsideThePackage(FitFunction):
         return r"f(x)=a x"
 
 
-def _listed_names(printed):
-    """Return the first column of each table row printed by ``available``."""
-    rows = printed.splitlines()[2:]
-    return {row.split()[0] for row in rows if row.strip()}
+def _fit_functions_found_by_scanning_modules():
+    """Concrete FitFunction classes defined in the package's module files.
 
-
-def test_fitfunctions_available_lists_every_fit_function(capsys):
-    """``available()`` lists exactly the concrete fit functions in the package.
-
-    ON FAILURE: a fit function was added or removed; update
-    EXPECTED_FIT_FUNCTIONS if that was intended, else the discovery is wrong.
+    This finds classes by importing every module under
+    ``solarwindpy.fitfunctions`` and reading what each defines, a different
+    route from the subclass-tree walk that ``available`` uses.
     """
+    found = {}
+    for info in pkgutil.walk_packages(ff.__path__, ff.__name__ + "."):
+        module = importlib.import_module(info.name)
+        for name, obj in vars(module).items():
+            if (
+                inspect.isclass(obj)
+                and obj.__module__ == info.name
+                and issubclass(obj, FitFunction)
+                and not inspect.isabstract(obj)
+            ):
+                found[name] = obj
+    return found
+
+
+def _printed_rows(capsys):
+    """Run ``available`` and map each listed name to its printed row."""
     ff.available()
-    assert _listed_names(capsys.readouterr().out) == EXPECTED_FIT_FUNCTIONS
+    lines = capsys.readouterr().out.splitlines()[2:]
+    return {line.split()[0]: line for line in lines if line.strip()}
 
 
-@pytest.mark.parametrize(
-    "name, formula",
-    [
-        ("PowerLaw", r"f(x)=A x^b"),
-        ("Line", r"f(x)=m \cdot x + b"),
-        ("Exponential", r"f(x)=A \cdot e^{-cx}"),
-    ],
-)
-def test_fitfunctions_available_shows_each_formula(capsys, name, formula):
-    """Each row carries the fit function's LaTeX formula.
+def test_available_lists_exactly_the_fit_functions_defined_in_the_package(capsys):
+    """The listing and an independent scan of the module files agree.
 
-    Expected formulas are the textbook forms: A x^b, m x + b and A e^{-cx}.
-
-    ON FAILURE: the code is wrong, unless the author changed that formula.
+    ON FAILURE: the code is wrong; available() missed or invented a fit
+    function relative to the classes the modules define.
     """
-    ff.available()
-    row = next(
-        line
-        for line in capsys.readouterr().out.splitlines()
-        if line.split() and line.split()[0] == name
-    )
-    assert formula in row
+    assert set(_printed_rows(capsys)) == set(_fit_functions_found_by_scanning_modules())
+
+
+def test_each_row_shows_that_class_s_own_formula(capsys):
+    """Every line of each class's LaTeX formula appears in that class's row.
+
+    ON FAILURE: the code is wrong; a row lost or mixed up its formula.
+    """
+    rows = _printed_rows(capsys)
+    for name, cls in _fit_functions_found_by_scanning_modules().items():
+        for part in cls.TeX_function.fget(None).splitlines():
+            assert part in rows[name], name
 
 
 def test_every_fit_function_formula_reads_without_data(capsys):
-    """Every listed fit function shows its formula, not the needs-an-instance note.
+    """No row shows the needs-a-fitted-instance note.
 
     ON FAILURE: a fit function's TeX_function now depends on fitted values;
     make that formula readable from the class, or accept the note and update
     this test.
     """
-    ff.available()
-    assert "needs a fitted instance" not in capsys.readouterr().out
+    assert not any(
+        "needs a fitted instance" in row for row in _printed_rows(capsys).values()
+    )
 
 
-def test_fitfunctions_available_ignores_subclasses_defined_elsewhere(capsys):
+def test_available_ignores_subclasses_defined_elsewhere(capsys):
     """A FitFunction subclass defined outside the package is not listed.
 
     ON FAILURE: the code is wrong; discovery must stay inside
     solarwindpy.fitfunctions.
     """
-    ff.available()
-    listed = _listed_names(capsys.readouterr().out)
-    assert _FitDefinedOutsideThePackage.__name__ not in listed
+    assert _FitDefinedOutsideThePackage.__name__ not in _printed_rows(capsys)
 
 
-def test_labels_available_is_exported():
+def test_labels_star_import_brings_available():
     """``from solarwindpy.plotting.labels import *`` succeeds and brings ``available``.
 
-    Before this change ``__all__`` named ``available_TeXlabel_measurements``,
-    which does not exist, so the star import raised AttributeError.
+    Every name in a module's ``__all__`` must exist; a missing one makes the
+    star import raise AttributeError.
 
-    ON FAILURE: the code is wrong.
+    ON FAILURE: the code is wrong; labels.__all__ names something undefined.
     """
     namespace = {}
     exec("from solarwindpy.plotting.labels import *", namespace)
     assert callable(namespace["available"])
-
-
-def test_labels_available_prints_every_section(capsys):
-    """``available()`` prints the label vocabulary under each section heading.
-
-    ON FAILURE: the code is wrong.
-    """
-    labels.available()
-    printed = capsys.readouterr().out
-    for section in ("Measurements", "Components", "Species", "Special"):
-        assert section in printed
-
-
-def test_available_labels_is_a_deprecated_alias(capsys):
-    """The old name still prints the same text and warns that it is deprecated.
-
-    ON FAILURE: the code is wrong; remove this test only when the
-    deprecated alias is deleted.
-    """
-    labels.available()
-    new_output = capsys.readouterr().out
-    with pytest.warns(DeprecationWarning, match="use available"):
-        labels.available_labels()
-    assert capsys.readouterr().out == new_output
