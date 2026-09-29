@@ -59,7 +59,8 @@ class Plasma(base.Base):
 
     Attribute access is first attempted on the underlying :py:attr:`ions` table
     before falling back to ``super().__getattr__``. This allows convenient
-    shorthand such as ``plasma.a`` to access the alpha particle :class:`Ion`
+    shorthand such as ``plasma.a`` to access the alpha particle
+    :class:`~solarwindpy.core.ions.Ion`
     and ``plasma.p1`` for protons.
 
     Attributes
@@ -695,8 +696,6 @@ class Plasma(base.Base):
                     name,
                     nan_info.any(axis=1).sum(),
                 )
-                #             self.logger.log(10 * int(1 + nan_info.any().any()),
-                #                             "plasma NaN info\n%s", nan_info.to_string())
                 self.logger.debug("%s NaN info\n%s", name, nan_info.to_string())
             else:
                 self.logger.debug("%s does not contain NaNs", name)
@@ -958,7 +957,7 @@ class Plasma(base.Base):
 
         Returns
         -------
-        beta: :py:class:`pd.DataFrame`
+        beta : pd.DataFrame
             See Parameters for more info.
 
         Notes
@@ -1014,7 +1013,7 @@ class Plasma(base.Base):
 
         Returns
         -------
-        ani: :py:class:`pd.Series` or :py:class:`pd.DataFrame`
+        ani : pd.Series or pd.DataFrame
             See Parameters for more info.
         """
         pth = self.pth(*species).drop("scalar", axis=1)
@@ -1042,16 +1041,18 @@ class Plasma(base.Base):
         ----------
         species: str
             Each species is a string. If only one string is passed and contains
-            "+", return a pd.Series containing the center-of-mass velocity
-            :py:class:`~solarwindpy.core.vector.Vector`. If contains a single species,
-            return that ion's velocity.
+            "+", return the center-of-mass velocity. If it contains a single
+            species, return that ion's velocity.
         project_m2q: bool, False
             If True, project velocity by :math:`\sqrt{m/q}`. Disables center-of-
             mass species.
 
         Returns
         -------
-        velocity: :py:class:`pd.Series` or :py:class:`pd.DataFrame`
+        velocity : vector.Vector or pd.Series
+            A :py:class:`~solarwindpy.core.vector.Vector` for one species
+            string, or a `pd.Series` of them indexed by species when several
+            species are passed.
         """
         stuple = self._chk_species(*species)
 
@@ -1109,11 +1110,11 @@ species: {}
 
         Returns
         -------
-        dv: vector.Vector
+        dv : vector.Vector
 
         See Also
         --------
-        vector.Vector
+        solarwindpy.core.vector.Vector
         """
         if s0 == s1:
             msg = (
@@ -1200,7 +1201,8 @@ species: {}
 
         Returns
         -------
-        cs: pd.DataFrame or pd.Series depending on `species` inputs.
+        cs : pd.DataFrame or pd.Series
+            Depends on the `species` inputs.
         """
         slist = self._chk_species(*species)
         rho = self.mass_density(*species) * self.units.rho
@@ -1232,7 +1234,8 @@ species: {}
 
         Returns
         -------
-        ca: pd.DataFrame or pd.Series depending on `species` inputs.
+        ca : pd.DataFrame or pd.Series
+            Depends on the `species` inputs.
         """
         stuple = self._chk_species(*species)  # noqa: F841
 
@@ -1272,7 +1275,8 @@ species: {}
 
         Returns
         -------
-        afsq: pd.Series or pd.DataFrame depending on the len(species).
+        afsq : pd.Series or pd.DataFrame
+            Depends on the number of `species` passed.
         """
         if pdynamic:
             raise NotImplementedError(
@@ -1773,7 +1777,6 @@ species: {}
         return self.heat_flux(*species)
 
     def build_alfvenic_turbulence(self, species, **kwargs):
-        # raise NotImplementedError("Still working on module dev")
         r"""Create an Alfvenic turbulence instance.
 
         Parameters

@@ -21,7 +21,6 @@ _misc_constants = {
     "e0": constants.epsilon_0,
     "mu0": constants.mu_0,
     "c": constants.c,
-    #     "gamma": 5.0 / 3.0,
     "hbar": constants.hbar,
     "1AU [m]": constants.au,
     "Re [m]": 6378.1e3,  # Earth Radius in meters

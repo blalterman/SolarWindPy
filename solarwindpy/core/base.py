@@ -198,7 +198,7 @@ class Base(Core):
     Notes
     -----
     Subclasses override :meth:`set_data` to validate the underlying
-    :class:`DataFrame` structure.
+    :class:`pandas.DataFrame` structure.
     """
 
     def __init__(self, data: pd.DataFrame) -> None:
