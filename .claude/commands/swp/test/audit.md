@@ -95,10 +95,10 @@ mcp__ast-grep__find_code(
 
 ```bash
 # Run all rules
-sg scan --config tools/dev/ast_grep/test-patterns.yml tests/
+sg scan --rule tools/dev/ast_grep/test-patterns.yml tests/
 
-# Run specific rule
-sg scan --config tools/dev/ast_grep/test-patterns.yml --rule swp-test-002 tests/
+# Run specific rule (--filter has no effect with --rule, so filter the output)
+sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-002
 
 # Quick pattern search
 sg run -p "assert \$X is not None" -l python tests/
