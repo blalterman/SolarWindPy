@@ -355,6 +355,10 @@ Do not touch `Plasma.lnlambda`'s `29.9`.
 
 OWNS: solarwindpy/fitfunctions/, conftest.py, docs/source/fitfunctions_architecture.md, tests/test_source_fitfunctions_defects.py
 
+Every fit function is public at `solarwindpy.fitfunctions.<Name>` and listed in that package's
+`__all__`; `tests/test_fitfunctions_public_names.py` and `tests/test_available.py` (not yours)
+enforce it. Keep both passing.
+
 `docs/source/fitfunctions_architecture.md` is never built and names classes the code lacks
 (`ExponentialPlusCSin`, `Parabola`, `MaxwellBoltzmann`); its line 132 calls the loss hardcoded
 while `make_fit` passes `loss` through. The author's decision: move what is still true into the
