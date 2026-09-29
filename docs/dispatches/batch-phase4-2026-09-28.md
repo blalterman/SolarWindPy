@@ -369,9 +369,8 @@ files; whether a different fitting method is acceptable is a methodology call to
 
 OWNS: solarwindpy/plotting/, tests/test_source_plotting_defects.py
 
-Fix `solarwindpy/plotting/labels/__init__.py:10`: `__all__` exports
-`available_TeXlabel_measurements`, defined nowhere.
-- `conda run -n solarwindpy python -c "from solarwindpy.plotting.labels import *"` → `AttributeError: module 'solarwindpy.plotting.labels' has no attribute 'available_TeXlabel_measurements'`
+`labels.available()` and its deprecated alias `labels.available_labels()` are covered by
+`tests/test_available.py`, which you do not own; keep both names working.
 
 ##### source-misc
 
