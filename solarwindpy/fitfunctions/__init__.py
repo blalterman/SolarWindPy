@@ -1,4 +1,69 @@
-r""":py:mod:`~solarwidpy.fitfunctions` classes."""
+r"""Fit parametric models to observations with robust least squares.
+
+Each fit function is a subclass of
+:class:`~solarwindpy.fitfunctions.core.FitFunction` and is importable as
+``solarwindpy.fitfunctions.<Name>``. :func:`available` prints every one with
+its module and LaTeX formula.
+
+Using a fit function
+--------------------
+Construct it from the observations, then call ``make_fit``:
+
+>>> import numpy as np
+>>> from solarwindpy.fitfunctions import Line
+>>> x = np.arange(10.0)
+>>> fit = Line(x, 2.0 * x + 1.0)
+>>> fit.make_fit()
+>>> print(f"m={fit.popt['m']:.2f}, b={fit.popt['b']:.2f}")
+m=2.00, b=1.00
+
+Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of
+:class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations
+enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,
+``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few
+subclasses add their own, such as the ``guess_x0`` initial step position of
+:class:`~solarwindpy.fitfunctions.composite.GaussianTimesHeavySide`.
+
+How a fit runs
+--------------
+:meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit` is a template
+method shared by every subclass. It checks that there are at least as many
+observations as parameters, runs :func:`scipy.optimize.least_squares`,
+computes the optimized parameters, their covariance and
+:math:`\chi^2_\nu`, then builds the LaTeX annotation
+(:class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`) and the plotter
+(:class:`~solarwindpy.fitfunctions.plots.FFPlot`).
+
+- The default loss is ``"huber"`` with ``f_scale=0.1``, method ``"trf"``;
+  ``loss``, ``f_scale``, ``method``, ``bounds``, ``p0`` and other
+  :func:`~scipy.optimize.least_squares` keywords pass through ``make_fit``.
+- ``weights`` are treated as :func:`scipy.optimize.curve_fit` treats
+  ``sigma``: a 1-D array holds per-point uncertainties, a 2-D array a
+  covariance matrix. ``absolute_sigma=True`` raises ``NotImplementedError``.
+- The covariance is the pseudo-inverse of :math:`J^T J` from the final
+  Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square
+  root of its diagonal.
+- With ``return_exception=True``, a failed fit returns the exception instead
+  of raising it, for loops over many fits.
+
+Failures are reported with
+:class:`~solarwindpy.fitfunctions.core.FitFunctionError` and its subclasses
+:class:`~solarwindpy.fitfunctions.core.InsufficientDataError`,
+:class:`~solarwindpy.fitfunctions.core.FitFailedError` and
+:class:`~solarwindpy.fitfunctions.core.InvalidParameterError`.
+
+Writing a fit function
+----------------------
+A subclass implements three abstract properties: ``function`` (the model,
+whose arguments after ``x`` are the fit parameters, in order), ``p0`` (the
+initial guess, in the same order) and ``TeX_function`` (the model in LaTeX).
+The metaclass :class:`~solarwindpy.fitfunctions.core.FitFunctionMeta` combines
+:class:`abc.ABCMeta` with NumPy-style docstring inheritance, so a subclass
+method without a docstring, or with only some sections, inherits the missing
+sections from :class:`~solarwindpy.fitfunctions.core.FitFunction`.
+:class:`~solarwindpy.fitfunctions.trend_fits.TrendFit` fits one fit function
+in each bin of 2-D aggregated data and a second to the trend of the results.
+"""
 
 __all__ = [
     "FitFunction",
