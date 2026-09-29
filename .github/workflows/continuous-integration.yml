@@ -63,7 +63,12 @@ jobs:
       - name: Verify imports
         run: |
           python -c "import solarwindpy as swp; print(f'SolarWindPy imported successfully')"
-  
+
+      - name: Check import layering
+        # Contracts live in pyproject.toml [tool.importlinter].
+        run: |
+          lint-imports
+
   # Extended validation for plan branches (more comprehensive)
   extended-validation:
     runs-on: ${{ matrix.os }}
