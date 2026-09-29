@@ -40,7 +40,8 @@ class BetaRPlot(Hist2D):
         species : str
             Label used to generate axis titles.
         **kwargs
-            Additional options forwarded to :class:`Hist2D`.
+            Additional options forwarded to
+            :class:`~solarwindpy.plotting.hist2d.Hist2D`.
         """
 
         x = beta

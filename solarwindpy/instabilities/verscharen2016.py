@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 """Instability thresholds from Verscharen et al. (2016).
 
-The empirical fits of :cite:`Verscharen2016a` are implemented to
-evaluate when a plasma becomes unstable in the ``(beta, R)`` plane.
+The empirical fits of :cite:`Verscharen2016a`
+(`doi:10.3847/0004-637X/831/2/128 <https://doi.org/10.3847/0004-637X/831/2/128>`_)
+are implemented to evaluate when a plasma becomes unstable in the
+``(beta, R)`` plane.
 
 References
 ----------
-.. [1] Verscharen, D., Chandran, B. D. G., Klein, K. G., & Quataert, E.
-   *Collisionless Isotropization of the Solar-Wind Protons By Compressive
-   Fluctuations and Plasma Instabilities*, Astrophys. J., **831**, 128
-   (2016).
+.. bibliography::
+   :filter: False
+
+   Verscharen2016a
 """
 
 import logging
@@ -20,9 +22,6 @@ import matplotlib as mpl
 
 from collections import namedtuple
 from matplotlib import pyplot as plt
-
-_inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
-_param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
 _inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
 _param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
@@ -412,8 +411,8 @@ class StabilityCondition(object):
     def calculate_stability_criteria(self):
         r"""Run the full instability calculation.
 
-        This method calls :meth:`_calc_instability_thresholds`,
-        :meth:`_calc_is_unstable`, and :meth:`_calc_stability_bin` in that
+        This method calls ``_calc_instability_thresholds``,
+        ``_calc_is_unstable``, and ``_calc_stability_bin`` in that
         order. Use this method over calling the private methods individually.
         """
         self._calc_instability_thresholds()
@@ -520,7 +519,6 @@ class StabilityContours(object):
             im = ax.plot(
                 self.beta,
                 v,
-                # label=k,
                 markevery=markevery,
                 ms=ms,
                 mew=mew,
@@ -554,7 +552,6 @@ class StabilityContours(object):
         Source: https://stackoverflow.com/a/25995730/1200989
         """
         assert isinstance(images, pd.DataFrame)
-        #         assert images.shape == _plot_contour_kwargs.shape
 
         # create blank rectangle
         extra = mpl.patches.Rectangle(
@@ -620,10 +617,3 @@ class StabilityContours(object):
             handletextpad=-2,
             framealpha=0.75,
         )
-
-        # plt.show()
-
-
-# if __name__ == "__main__":
-#     import unittest
-#     unittest.runner
