@@ -9,7 +9,9 @@ description: Audit test quality patterns using validated SolarWindPy conventions
 Proactive test quality audit using patterns validated during the spiral plot contours test audit.
 Detects anti-patterns BEFORE they cause test failures.
 
-**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`
+**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`, which governs where this
+audit disagrees with it: its Fakes section does not endorse the `wraps=` mocks that
+swp-test-002 recommends and swp-test-005 tracks as good.
 **ast-grep Rules:** `tools/dev/ast_grep/test-patterns.yml`
 
 **Default Scope:** `tests/`
@@ -155,9 +157,10 @@ Point to TEST_PATTERNS.md sections for remediation guidance.
 
 ### Remediation
 See `.claude/docs/TEST_PATTERNS.md` for fix patterns:
-- Section 1: Mock-with-Wraps Pattern
-- Section 2: Parameter Passthrough Verification
-- Anti-Patterns section: Common mistakes to avoid
+- What a test asserts: expected values with a named source; errors; plots
+- Fakes: which boundaries may be faked; showing a parameter takes effect
+- Inputs and fixtures: distinctive non-default inputs
+- Checklist for writing or reviewing a test: common mistakes to avoid
 ```
 
 ### Scope
@@ -172,8 +175,8 @@ For **complex test quality work** (strategy design, coverage planning, physics-a
 
 | Anti-Pattern | Fix | TEST_PATTERNS.md Section |
 |--------------|-----|-------------------------|
-| `assert X is not None` | `assert isinstance(X, Type)` | #6 Return Type Verification |
-| `isinstance(X, object)` | `isinstance(X, SpecificType)` | #6 Return Type Verification |
-| `patch.object(i, m)` | `patch.object(i, m, wraps=i.m)` | #1 Mock-with-Wraps |
-| Missing `plt.close()` | Add at test end | #15 Resource Cleanup |
-| Default parameter values | Use distinctive values (77, 2.5) | #2 Parameter Passthrough |
+| `assert X is not None` | Assert the expected value, its source on the line | What a test asserts |
+| `isinstance(X, object)` | Assert the expected value, its source on the line | What a test asserts |
+| `patch.object(i, m)` | Run SolarWindPy for real; fake only network, clock, filesystem | Fakes |
+| Missing `plt.close()` | `plt.close("all")` | What a test asserts |
+| Default parameter values | Use distinctive non-default values | Inputs and fixtures |

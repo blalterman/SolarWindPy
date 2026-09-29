@@ -1,8 +1,10 @@
 # SolarWindPy Test Patterns - ast-grep Rules
 # Mode: Advisory (warn only, do not block)
 #
-# These rules detect common test anti-patterns and suggest
-# SolarWindPy-idiomatic replacements based on TEST_PATTERNS.md.
+# These rules detect common test anti-patterns and suggest replacements.
+# TEST_PATTERNS.md governs where a rule disagrees with it: its "Fakes"
+# section does not endorse the wraps= mocks that swp-test-002 recommends
+# and swp-test-005 tracks as good.
 #
 # Usage: sg scan --config tools/dev/ast_grep/test-patterns.yml tests/
 #
