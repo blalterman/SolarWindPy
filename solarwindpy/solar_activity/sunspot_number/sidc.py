@@ -17,8 +17,6 @@ IndicatorExtrema = base.IndicatorExtrema
 _Loader_Dtypes_Columns = base._Loader_Dtypes_Columns
 ActivityIndicator = base.ActivityIndicator
 
-# import Base, ID, DataLoader, _Loader_Dtypes_Columns, ActivityIndicator
-
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -160,6 +158,8 @@ _Dtypes_Columns = _Dtypes_Columns(
 
 
 class SIDC_ID(ID):
+    r"""Identifier mapping a SIDC sunspot-number series to its download URL."""
+
     def __init__(self, key):
         r"""Key identifies the SSN used.
 
@@ -182,10 +182,12 @@ class SIDC_ID(ID):
 
     @property
     def _url_base(self):
+        r"""Base URL of the SILSO data service."""
         return r"http://www.sidc.be/silso/INFO/"
 
     @property
     def _trans_url(self):
+        r"""Map from series key to file name under :attr:`_url_base`."""
         trans_url = (
             ("d", r"sndtotcsv.php"),
             ("m", r"snmtotcsv.php"),
@@ -199,11 +201,15 @@ class SIDC_ID(ID):
 
 
 class SIDCLoader(DataLoader):
+    r"""Download, cache, and load one SIDC sunspot-number series."""
+
     @property
     def data_path(self):
+        r"""Cache directory for this series, ``<DataLoader.data_path>/sidc/<key>``."""
         return super().data_path / "sidc" / self.key
 
     def convert_nans(self, data):
+        r"""Replace SILSO's missing-value sentinel, -1, with NaN in place."""
         data.replace(-1, np.nan, inplace=True)
 
     def download_data(self, new_data_path, old_data_path):
@@ -212,7 +218,7 @@ class SIDCLoader(DataLoader):
         If `old_data_path` exists,
         remove it.
         """
-        url = self.url  # self._trans_url.get(key)
+        url = self.url
         self.logger.info("Downloading from SIDC sunspot number\nurl: %s", url)
 
         key = self.key
@@ -278,6 +284,12 @@ class SIDCLoader(DataLoader):
             pass
 
     def load_data(self):
+        r"""Load today's cached series and label each row with its cycle.
+
+        Downloads the series first if the cache is stale. Adds a ``cycle``
+        column holding the number of the solar cycle, from
+        :class:`SSNExtrema`, that contains each time.
+        """
         super().load_data()
 
         extrema = SSNExtrema()
@@ -312,27 +324,41 @@ class SIDC(ActivityIndicator):
         self.calculate_extrema_kind()
         self.calculate_edge()
 
-    #     @property
-    #     def extrema(self):
-    #         return self._extrema
-
     @property
     def spec_by_ssn_band(self):
+        r"""SSN band holding each interpolated time; see :meth:`cut_spec_by_ssn_band`."""
         return self._spec_by_ssn_band
 
     @property
     def ssn_band_intervals(self):
+        r"""Band intervals used by :meth:`cut_spec_by_ssn_band`."""
         return self._ssn_band_intervals
 
     def load_data(self):
+        r"""Load the series through a :class:`SIDCLoader`."""
         loader = SIDCLoader(self.id.key, self.id.url)
         loader.load_data()
         self._loader = loader
 
     def set_extrema(self):
+        r"""Set :attr:`extrema` to the tabulated :class:`SSNExtrema`."""
         self._extrema = SSNExtrema()
 
     def interpolate_data(self, target_index, key="ssn"):
+        r"""Interpolate one column onto ``target_index``.
+
+        Parameters
+        ----------
+        target_index : pandas.DatetimeIndex
+            Times to interpolate onto.
+        key : str, optional
+            Column of :attr:`data` to interpolate.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Interpolated values; NaN outside the data's time range.
+        """
         interpolated = super(SIDC, self).interpolate_data(
             self.data.loc[:, key].dropna(how="any", axis=0), target_index
         )
@@ -391,13 +417,14 @@ class SIDC(ActivityIndicator):
     #################
     @property
     def normalized(self):
+        r"""SSN normalized within each cycle, computed by :meth:`run_normalization` if absent."""
         try:
-            #             return self._normalized_ssn
             return self.data.loc[:, "nssn"]
-        except KeyError:  # AttributeError:
+        except KeyError:
             return self.run_normalization()
 
     def _run_normalization(self, indicator, norm_fcn):
+        r"""Apply ``norm_fcn`` to ``indicator`` separately within each cycle."""
         cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
         joint = pd.concat(
             [indicator, cut], axis=1, keys=["indicator", "cycle"]
@@ -448,7 +475,7 @@ class SIDC(ActivityIndicator):
 
         return normed
 
-    run_normalization.__doc__ = ActivityIndicator.run_normalization
+    run_normalization.__doc__ = ActivityIndicator.run_normalization.__doc__
 
     def cut_spec_by_ssn_band(self, key="ssn", dssn=2.0):
         r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn."""
@@ -495,8 +522,7 @@ It causes a KeyError in `pd.cut`."""
         ssn = self.data.loc[t0:t1, "ssn"]
 
         x = mpl.dates.date2num(ssn.index)
-        y = ssn  # .values
-        #         print("SSN values", y.min(), y.max())
+        y = ssn
 
         if vertical_cbar:
             y0, y1 = cax.get_xlim()
@@ -504,11 +530,8 @@ It causes a KeyError in `pd.cut`."""
             y0, y1 = cax.get_ylim()
 
         dy = y1 - y0
-        #         s0, s1 = 0, 200
         s0, s1 = np.array([0, np.round(ssn.max(), -2)], dtype=int)
         y = ((y / s1) * dy) + y0
-        #       print("Map Range", y0, y1)
-        #       print("Scaled SSN", y.min(), y.max())
 
         if vertical_cbar:
             cax.plot(y, x, ls="-", color="w", lw=1)
@@ -542,7 +565,16 @@ It causes a KeyError in `pd.cut`."""
 
 
 class SSNExtrema(IndicatorExtrema):
+    r"""Solar-cycle sunspot-number extrema tabulated in ``ssn_extrema.csv``."""
+
     def load_or_set_data(self, *args, **kwargs):
+        r"""Read the ``Min`` and ``Max`` dates of each cycle from ``ssn_extrema.csv``.
+
+        Raises
+        ------
+        ValueError
+            If any argument is passed.
+        """
         if len(args) or len(kwargs):
             raise ValueError(
                 f"""{self.__class__.__name__} expects empty args and kwargs."""

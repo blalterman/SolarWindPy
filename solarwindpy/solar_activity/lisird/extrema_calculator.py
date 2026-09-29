@@ -66,10 +66,12 @@ class ExtremaCalculator(object):
 
     @property
     def data(self):
+        r"""Activity index after the rolling mean, :class:`pandas.Series`."""
         return self._data
 
     @property
     def raw(self):
+        r"""Activity index as passed in, before smoothing."""
         return self._raw
 
     @property
@@ -79,10 +81,12 @@ class ExtremaCalculator(object):
 
     @property
     def window(self):
+        r"""Rolling-mean window in days, or ``None`` for no smoothing."""
         return self._window
 
     @property
     def threshold(self):
+        r"""Threshold separating maxima from minima, one value per time in :attr:`data`."""
         return self._threshold
 
     @property
@@ -91,14 +95,17 @@ class ExtremaCalculator(object):
 
     @property
     def extrema(self):
+        r"""``"Max"`` or ``"Min"`` labels indexed by the time of each extremum."""
         return self._extrema
 
     @property
     def threshold_crossings(self):
+        r"""Values of :attr:`data` at the times it crosses :attr:`threshold`."""
         return self._threshold_crossings
 
     @property
     def data_in_extrema_finding_intervals(self):
+        r"""Interval between threshold crossings that holds each time in :attr:`data`."""
         return self._data_in_extrema_finding_intervals
 
     @property
@@ -124,6 +131,13 @@ class ExtremaCalculator(object):
         return self._formatted_extrema
 
     def set_name(self, new):
+        r"""Set the activity index name.
+
+        Raises
+        ------
+        ValueError
+            For CaK quantities whose threshold has not been determined.
+        """
         if new in ("delk2", "delwb", "k2vk3", "viored", "delk1"):
             raise ValueError(
                 "Unable to determine threshold. You need to check this one."
@@ -131,7 +145,18 @@ class ExtremaCalculator(object):
         self._name = str(new)
 
     def set_data(self, index, window):
+        r"""Store the raw index and its rolling mean.
 
+        Parameters
+        ----------
+        index : pandas.Series
+            Activity index with a :class:`pandas.DatetimeIndex`. CaK quantities
+            are truncated to start on 1977-01-01.
+        window : int or None
+            Rolling-mean window in days. The smoothed series is shifted back by
+            half a window so each mean is centered on its window. ``None``
+            skips smoothing.
+        """
         if self.name in ("delk1", "delk2", "delwb", "emdx", "k2vk3", "k3", "viored"):
             # We don't trust CaK before then.
             index = index.loc["1977-01-01":]
@@ -146,6 +171,7 @@ class ExtremaCalculator(object):
         self._window = window
 
     def _format_axis(self, ax):
+        r"""Set year ticks, the legend, and axis labels on ``ax``."""
         left, _ = ax.get_xlim()
         left = pd.to_datetime(
             "{}-01-01".format(pd.to_datetime(mpl.dates.num2date(left)).year - 1)
@@ -168,20 +194,19 @@ class ExtremaCalculator(object):
         ax.set_xlabel("Year")
 
     def _plot_data(self, ax):
+        r"""Plot the smoothed index :attr:`data` on ``ax``."""
         x = mpl.dates.date2num(self.data.index)
         y = self.data.values
         ax.plot(x, y, color="C0", label="Rolled")
 
-    #         x = mpl.dates.date2num(self.raw.index)
-    #         y = self.raw.values
-    #         ax.plot(x, y, color="C2", label="Raw")
-
     def _plot_threshold(self, ax):
+        r"""Plot :attr:`threshold` on ``ax``, labeled with its value."""
         x = mpl.dates.date2num(self.data.index)
         y = self.threshold
         ax.plot(x, y, color="C1", label="{:.5f}".format(self.threshold.unique()[0]))
 
     def _plot_extrema_ranges(self, ax):
+        r"""Plot each extrema-finding interval on ``ax`` in alternating colors."""
         joint = pd.concat(
             {"cut": self.data_in_extrema_finding_intervals, "indicator": self.data},
             axis=1,
@@ -197,11 +222,13 @@ class ExtremaCalculator(object):
         ax.legend_.set_visible(False)
 
     def _plot_threshold_crossings(self, ax):
+        r"""Mark :attr:`threshold_crossings` on ``ax``."""
         crossings = self.threshold_crossings
         crossings.plot(ax=ax, color="cyan", marker="P", ls="none", label="Changes")
         ax.legend()
 
     def _plot_extrema(self, ax):
+        r"""Mark the maxima and minima in :attr:`extrema` on ``ax``."""
         maxima = self.data.loc[self.extrema.index].loc[self.extrema == "Max"]
         minima = self.data.loc[self.extrema.index].loc[self.extrema == "Min"]
 
@@ -211,6 +238,16 @@ class ExtremaCalculator(object):
             ax.plot(x, y, color=c, label=lbl, ls="none", marker="*")
 
     def set_threshold(self, threshold):
+        r"""Set the threshold that separates maxima from minima.
+
+        Parameters
+        ----------
+        threshold : float, callable, or None
+            A number is used as is. A callable is called with :attr:`data`
+            and its result used. ``None`` selects the value tabulated for
+            :attr:`name`, or :func:`numpy.nanmedian` of :attr:`data` when
+            :attr:`name` is not tabulated.
+        """
         from numbers import Number
         from types import FunctionType
 
@@ -240,6 +277,25 @@ class ExtremaCalculator(object):
 
     @staticmethod
     def _find_extrema(threshold, cut, data):
+        r"""Find one extremum in each interval between threshold crossings.
+
+        An interval whose data lie above the threshold contributes its
+        maximum; one whose data lie below contributes its minimum.
+
+        Parameters
+        ----------
+        threshold : pandas.Series
+            Threshold, which must take a single value.
+        cut : pandas.Series
+            Interval label for each time in ``data``.
+        data : pandas.Series
+            Activity index.
+
+        Returns
+        -------
+        maxima, minima : pandas.Series
+            ``"Max"`` and ``"Min"`` labels indexed by the time of each extremum.
+        """
         joint = pd.concat({"cut": cut, "indicator": data}, axis=1)
         gb = joint.groupby("cut")
 
@@ -274,14 +330,22 @@ class ExtremaCalculator(object):
         return maxima, minima
 
     def _validate_extrema(self, maxima, minima):
+        r"""Drop spurious extrema.
+
+        Indices with known spurious extrema at the ends of their records have
+        those entries removed by name. Then any maximum (or minimum) that
+        follows the preceding one by 1000 days or less is dropped.
+
+        Returns
+        -------
+        maxima, minima : pandas.Series
+            The retained extrema.
+        """
         name = self.name
         if name == "LymanAlpha":
             maxima = maxima.iloc[1:]
         elif name == "delk1":
             minima = minima.iloc[1:-1]
-        #         elif name == "emdx":
-        #             minima = minima.iloc[2:]
-        #             maxima = maxima.iloc[:-1]
         elif name == "f107":
             minima = minima.iloc[:-1]
             maxima = maxima.iloc[1:]
@@ -307,6 +371,14 @@ class ExtremaCalculator(object):
         return maxima, minima
 
     def find_threshold_crossings(self):
+        r"""Find the times at which :attr:`data` crosses :attr:`threshold`.
+
+        Returns
+        -------
+        pandas.Series
+            Values of :attr:`data` at each crossing, also stored as
+            :attr:`threshold_crossings`.
+        """
         data = self.data
         threshold = self.threshold
 
@@ -322,6 +394,17 @@ class ExtremaCalculator(object):
         return crossings
 
     def cut_data_into_extrema_finding_intervals(self):
+        r"""Assign each time in :attr:`data` to an interval between crossings.
+
+        The bin edges are the times in :attr:`threshold_crossings`, extended to
+        the first and last times of :attr:`raw`.
+
+        Returns
+        -------
+        pandas.Series
+            Interval for each time in :attr:`data`, also stored as
+            :attr:`data_in_extrema_finding_intervals`.
+        """
         data = self.data
         raw = self.raw
         crossings = self.threshold_crossings
@@ -341,6 +424,21 @@ class ExtremaCalculator(object):
 
     @staticmethod
     def format_extrema(extrema):
+        r"""Arrange extrema as a cycle table.
+
+        Parameters
+        ----------
+        extrema : pandas.Series
+            ``"Max"`` or ``"Min"`` labels indexed by time.
+
+        Returns
+        -------
+        pandas.DataFrame
+            ``Min`` and ``Max`` times indexed by ``cycle``. Minima are numbered
+            from 0; when the first maximum precedes the first minimum, maxima
+            are numbered from -1 so each maximum shares a row with the
+            minimum that precedes it.
+        """
         minima = extrema.loc[extrema == "Min"]
         maxima = extrema.loc[extrema == "Max"]
 
@@ -360,7 +458,10 @@ class ExtremaCalculator(object):
         return formatted
 
     def find_extrema(self):
-        # raw = self.raw
+        r"""Find, validate, and tabulate the extrema.
+
+        Sets :attr:`extrema` and :attr:`formatted_extrema`.
+        """
         data = self.data
         threshold = self.threshold
         cut = self.cut_data_into_extrema_finding_intervals()
@@ -374,6 +475,21 @@ class ExtremaCalculator(object):
         self._formatted_extrema = formatted
 
     def make_plot(self, crossings=False, extrema=False, ranges=False):
+        r"""Plot the smoothed index and its threshold.
+
+        Parameters
+        ----------
+        crossings : bool, optional
+            If True, mark :attr:`threshold_crossings`.
+        extrema : bool, optional
+            If True, mark the maxima and minima.
+        ranges : bool, optional
+            If True, color each extrema-finding interval.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         fig, ax = subplots(scale_width=2.5)
 
         self._plot_data(ax)

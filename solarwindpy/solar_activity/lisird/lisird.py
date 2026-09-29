@@ -12,35 +12,20 @@ import pandas as pd
 
 from pathlib import Path
 
-# from scipy.interpolate import InterpolatedUnivariateSpline
-
 from ..base import (
     ID,
     DataLoader,
     ActivityIndicator,
     IndicatorExtrema,
-)  # , _Loader_Dtypes_Columns
+)
 from .extrema_calculator import ExtremaCalculator
 
 pd.set_option("mode.chained_assignment", "raise")
 
-# _m13_dtypes_columns = _Loader_Dtypes_Columns(
-# {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
-# ("year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive")
-# )
-#
-# _m_dtypes_columns = _Loader_Dtypes_Columns(
-# {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
-# ["year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"]
-# )
-#
-# _d_dtypes_columns = _Loader_Dtypes_Columns(
-# {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
-# ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"
-# )
-
 
 class LISIRD_ID(ID):
+    r"""Identifier mapping a LISIRD data set name to its download URL."""
+
     def __init__(self, key):
         r"""Identifier for LISIRD data products.
 
@@ -50,17 +35,18 @@ class LISIRD_ID(ID):
             Short name of the data set. Examples include ``"Lalpha"`` or
             ``"f107-noaa"``.
 
-            =========== ======================== =============================
-             Key           Description                     URL
-            =========== ======================== =============================
-             Lalpha      Lyman-alpha              composite_lyman_alpha.jsond
-             CaK         Calcium K line           cak.jsond
-             f107-noaa   NOAA F10.7 flux          noaa_radio_flux.jsond
-             f107-pen    Penticton F10.7 flux     penticton_radio_flux.jsond
-             MgII        Composite Magnesium II   composite_mg_index.jsond
-            =========== ======================== =============================
+            ================ ======================== ===========================
+             Key              Description              URL
+            ================ ======================== ===========================
+             Lalpha           Lyman-alpha              composite_lyman_alpha.jsond
+             CaK              Calcium K line           cak.jsond
+             f107-noaa        NOAA F10.7 flux          noaa_radio_flux.jsond
+             f107-penticton   Penticton F10.7 flux     penticton_radio_flux.jsond
+             MgII             Composite Magnesium II   composite_mg_index.jsond
+            ================ ======================== ===========================
 
-        URLs replace the wild card in ``http://lasp.colorado.edu/lisird/latis/*``.
+        URLs replace the wild card in
+        ``http://lasp.colorado.edu/lisird/latis/dap/*``.
 
         Note that the CaK line should probably be served directly from
         ``https://www.nso.edu/uncategorized/ca-ii-k-line-monitoring-program/``.
@@ -84,14 +70,15 @@ class LISIRD_ID(ID):
 
     @property
     def _url_base(self):
+        r"""Base URL of the LISIRD LaTiS data service."""
         return r"http://lasp.colorado.edu/lisird/latis/dap/"
 
     @property
     def _trans_url(self):
+        r"""Map from data set key to file name under :attr:`_url_base`."""
         trans_url = (
             ("Lalpha", "composite_lyman_alpha.jsond"),
             ("CaK", "cak.jsond"),
-            #             ("f107", "noaa_radio_flux.jsond"),
             ("f107-penticton", "penticton_radio_flux.jsond"),
             ("f107-noaa", "noaa_radio_flux.jsond"),
             (
@@ -104,15 +91,35 @@ class LISIRD_ID(ID):
 
 
 class LISIRDLoader(DataLoader):
+    r"""Download, cache, and load one LISIRD data set."""
+
     @property
     def data_path(self):
+        r"""Cache directory for this data set, ``<DataLoader.data_path>/lisird/<key>``."""
         return super(LISIRDLoader, self).data_path / "lisird" / self.key
 
     @property
     def meta(self):
+        r"""Metadata that LISIRD serves with the data set, as a dict."""
         return self._meta
 
     def convert_nans(self, data, meta):
+        r"""Replace the data set's missing-value sentinel with NaN, in place.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            Downloaded data.
+        meta : dict
+            LISIRD metadata holding each parameter's ``missing_value``.
+
+        Raises
+        ------
+        NotImplementedError
+            For a key whose missing values have not been inspected, or for
+            ``"Lalpha"`` when irradiance and uncertainty use different
+            sentinels.
+        """
         key = self.key
         if key in ("CaK", "MgII", "f107-noaa", "f107-penticton"):
             self.logger.info("Prior inspection shows no missing data in `%s`.", key)
@@ -126,14 +133,27 @@ class LISIRDLoader(DataLoader):
                     f"Unsure how to handle mv0 ({mv0:.0f}) != mv1 ({mv1:.0f})"
                 )
             mv = mv0
-        #         elif key == "f107":
-        #             mv = np.float64(meta["f107"]["missing_value"])
         else:
             raise NotImplementedError("Haven't inspected other data to convert.")
 
         data.replace(to_replace=mv, value=np.nan, inplace=True)
 
     def verify_monotonic_epoch(self, df):
+        r"""Drop rows with a duplicated timestamp.
+
+        For ``"f107-penticton"``, three timestamps identified by inspection as
+        bad are dropped too.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Data with a :class:`pandas.DatetimeIndex` and a ``milliseconds``
+            column.
+
+        Returns
+        -------
+        pandas.DataFrame
+        """
         epoch = df.index
         assert isinstance(epoch, pd.DatetimeIndex)
         epoch = epoch.to_series()
@@ -154,6 +174,16 @@ class LISIRDLoader(DataLoader):
         return df
 
     def download_data(self, new_data_path, old_data_path):
+        r"""Download the data set and write it to ``new_data_path``.
+
+        The data are written as ``.csv`` and the metadata as ``.json``. Files
+        at ``old_data_path`` with those suffixes are removed.
+
+        Parameters
+        ----------
+        new_data_path, old_data_path : pathlib.Path
+            Paths without suffix.
+        """
         key = self.key
         url = self.url
         self.logger.info("Downloading solar activity data: %s\nurl: %s" % (key, url))
@@ -194,16 +224,11 @@ class LISIRDLoader(DataLoader):
             pass
 
     def load_data(self):
+        r"""Load today's cached data and metadata, downloading if stale."""
         super(LISIRDLoader, self).load_data()
-        #        self.logger.info("Loading %s LISIRD data", self.key)
-        #
-        #        self.maybe_update_stale_data()
-        #
         today = pd.to_datetime("today").strftime("%Y%m%d")
         data_path = self.data_path / today
 
-        #        data = pd.read_csv(data_path.with_suffix(".csv"))
-        #        self._data = data
         with open(data_path.with_suffix(".json")) as f:
             meta = json.load(f)
 
@@ -228,17 +253,30 @@ class LISIRD(ActivityIndicator):
         self.set_extrema()
 
     def set_extrema(self):
+        r"""Do nothing: extrema are not set for LISIRD data sets.
+
+        Use :class:`LISIRDExtrema` to calculate them.
+        """
         pass
 
     @property
     def meta(self):
+        r"""Metadata that LISIRD serves with the data set, as a dict."""
         return self.loader.meta
 
     @property
     def normalized(self):
+        r"""``None``: normalization is not implemented for LISIRD data sets."""
         pass
 
     def run_normalization(self, norm_by="feature-scale"):
+        r"""Not implemented for LISIRD data sets.
+
+        Raises
+        ------
+        NotImplementedError
+            Always.
+        """
         raise NotImplementedError(r"""Need to fix normalization handling for each LISIRD
 quantity""")
 
@@ -279,14 +317,29 @@ quantity""")
 
         return normalized, normed_interpolated
 
-    run_normalization.__doc__ = ActivityIndicator.run_normalization
-
     def load_data(self):
+        r"""Load the data set through a :class:`LISIRDLoader`."""
         loader = LISIRDLoader(self.id.key, self.id.url)
         loader.load_data()
         self._loader = loader
 
     def interpolate_data(self, target_index):
+        r"""Interpolate the data set's primary quantity onto ``target_index``.
+
+        The quantity is ``irradiance`` for ``"Lalpha"``, ``mg_index`` for
+        ``"MgII"``, ``emdx`` for ``"CaK"``, and ``adjusted_flux`` for both F10.7
+        data sets.
+
+        Parameters
+        ----------
+        target_index : pandas.DatetimeIndex
+            Times to interpolate onto.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Interpolated values; NaN outside the data's time range.
+        """
         trans = {
             "Lalpha": "irradiance",
             "MgII": "mg_index",
@@ -303,13 +356,18 @@ quantity""")
 
 
 class LISIRDExtrema(IndicatorExtrema):
+    r"""Solar-cycle extrema of a LISIRD index, found by :class:`.ExtremaCalculator`.
+
+    Arguments are passed to :class:`.ExtremaCalculator`.
+    """
+
     @property
     def extrema_calculator(self):
-        r""":py:class:`ExtremaCalculator` used to calculate the extrema."""
+        r""":py:class:`.ExtremaCalculator` used to calculate the extrema."""
         return self._extrema_calculator
 
     def load_or_set_data(self, *args, **kwargs):
-        r"""Get extrema from :py:class:`ExtremaCalculator`."""
+        r"""Get extrema from :py:class:`.ExtremaCalculator`."""
         ec = ExtremaCalculator(*args, **kwargs)
         extrema = ec.formatted_extrema
         self._data = extrema
