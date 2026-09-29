@@ -72,12 +72,12 @@ class TrendFit(object):
 
     @property
     def ffunc1d_class(self):
-        r""":py:class:`FitFunction` to apply in each x-bin."""
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin."""
         return self._ffunc1d_class
 
     @property
     def trendfunc_class(self):
-        r""":py:class:`FitFunction` to apply each `popt`.
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt`.
 
         Of the `ffunc1d` along the x-axis.
         """
@@ -85,7 +85,7 @@ class TrendFit(object):
 
     @property
     def ffuncs(self):
-        r"""The 1D :py:class:`FitFunction` applied in each x-bin."""
+        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin."""
         return self._ffuncs
 
     @property
@@ -173,7 +173,8 @@ class TrendFit(object):
             A string template for formatting the legend titles. Use % formatting so we
             can easily instert TeX into `legend_title_fmt` should we desire.
         kwargs:
-            Passed to :py:meth:`ffunc.plot_raw_used_fit`.
+            Passed to each 1D fit's
+            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit`.
         """
         axes = {}
         popt = self.popt_1d

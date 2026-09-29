@@ -20,7 +20,7 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 class FFPlot(object):
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
-        """Container for plotting a :class:`~solarwindpy.fitfunctions.FitFunction`.
+        """Container for plotting a :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
         Parameters
         ----------
@@ -207,8 +207,8 @@ class FFPlot(object):
     def plot_raw(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
         r"""Plot the observations used in the fit from raw data.
 
-        Plot from :py:meth:`self.observations.raw.x`,
-        :py:meth:`self.observations.raw.y`, :py:meth:`self.observations.raw.w`.
+        Plot from ``observations.raw.x``, ``observations.raw.y``, and
+        ``observations.raw.w``.
 
         Parameters
         ----------
@@ -292,8 +292,8 @@ class FFPlot(object):
     def plot_used(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
         r"""Plot the observations used in the fit from used data.
 
-        Plot from :py:meth:`self.observations.used.x`,
-        :py:meth:`self.observations.used.y`, and :py:meth:`self.observations.used.w`.
+        Plot from ``observations.used.x``, ``observations.used.y``, and
+        ``observations.used.w``.
         """
         ax = self._get_or_create_axes(ax)
 
@@ -431,22 +431,22 @@ class FFPlot(object):
     ):
         r"""Make a plot of the raw observations, observations in fit, and the fit.
 
-        Combines the outputs of :py:meth:`self.plot_raw`, :py:meth:`self.plot_used`,
-        and :py:meth:`self.plot_fit`.
+        Combines the outputs of :py:meth:`plot_raw`, :py:meth:`plot_used`,
+        and :py:meth:`plot_fit`.
 
         Parameters
         ----------
-        ax: None, mpl.Axes.axis_subplot
+        ax: None, matplotlib.axes.Axes
 
         drawstyle: str, None
-            `mpl` `drawstyle`, shared by :py:meth:`self.plot_raw` and :py:meth:`self.plot_used`.
+            `mpl` `drawstyle`, shared by :py:meth:`plot_raw` and :py:meth:`plot_used`.
             If None, defaults to "steps-mid".
         annotate: True
             If True, add fit info to the annotation using ax.text.
         raw_kwargs: dict
-            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_raw`.
+            Passed to `ax.plot(**kwargs)` in :py:meth:`plot_raw`.
         used_kwargs: dict
-            Passed to `ax.plot(**kwargs)` in :py:meth:`self.plot_used`.
+            Passed to `ax.plot(**kwargs)` in :py:meth:`plot_used`.
         fit_kwargs: dict
             Passed to `ax.plot(**fit_kwargs)` for plotting fit.
         annotate_kwargs:
@@ -454,7 +454,7 @@ class FFPlot(object):
 
         Returns
         -------
-        ax: mpl.Axes.axis_subplot
+        ax: matplotlib.axes.Axes
         """
 
         ax = self._get_or_create_axes(ax)
@@ -630,13 +630,13 @@ class FFPlot(object):
             Additionally, if `fit_resid_axes` is None, the `hax` and `rax` will share
             an x-axis and `hax`'s x-ticks and label will be set invisible.
         figsize:
-            Any valid argument for :py:meth:`plt.figure(figsize=figsize)`. This code
+            Any valid ``figsize`` for :func:`matplotlib.pyplot.figure`. This code
             was developed with default size 6x4 and this size helps accomodate annotation.
             So we persist it here.
         resid_kwargs: dict, None
-            Passed to :py:meth:`{self.__class__.__name__}.plot_residuals`.
+            Passed to :py:meth:`plot_residuals`.
         kwargs:
-            Passed to :py:meth:`{self.__class__.__name__}.plot_raw_used_fit`.
+            Passed to :py:meth:`plot_raw_used_fit`.
 
         Returns
         -------
@@ -716,6 +716,12 @@ class FFPlot(object):
         self._log = LogAxes(**log)
 
     def set_TeX_info(self, new):
-        """Assign :class:`TeXinfo` used for annotations."""
+        """Assign the annotation source.
+
+        Parameters
+        ----------
+        new : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`
+            Formatted fit information used for annotations.
+        """
 
         self._TeX_info = new

@@ -28,7 +28,7 @@ class TeXinfo(object):
         initial_guess_info=None,
         npts=None,
     ):
-        r"""A container for printing :py:class:`FitFunction` info on a figure.
+        r"""A container for printing :py:class:`~solarwindpy.fitfunctions.core.FitFunction` info on a figure.
 
         Parameters
         ----------
@@ -333,15 +333,15 @@ class TeXinfo(object):
 
         Parameters
         ----------
-        ax: mpl.Axes.axis_subplot
+        ax: matplotlib.axes.Axes
 
         bbox: dict
             dict(color="wheat", alpha=0.75)
         xloc, yloc: scalar
-            0.05, 0.9
+            Defaults 1.1, 0.95.
         ha, va: str
-            ha - horizontalalignment (defaults "left")
-            va - verticalalignment (default "right")
+            ha - horizontalalignment (default "left")
+            va - verticalalignment (default "top")
         transform:
             ax.transAxes
         kwargs:
@@ -375,12 +375,6 @@ class TeXinfo(object):
 
         Parameters
         ----------
-        TeX_popt: dict
-            :py:meth:`FitFunction.TeX_popt` dictionary, which contains
-            keys identifying the parameter and values their value.
-        TeX_function: str
-            :py:meth:`FitFunction.TeX_function` contents giving the functional
-            form in TeX.
         chisq_dof: bool
             If True, include chisq/dof in the info. It is printed to 2 decimal
             places.
@@ -394,7 +388,7 @@ class TeXinfo(object):
         convert_pow_10: bool
             If True, use 10^{X} format. Otherwise, use eX format.
             Note that `simplify_info_for_paper` must be disabled.
-        strip_uncertaintites: bool
+        strip_uncertainties: bool
             If True, strip fit uncertainties from reported parameters.
         simplify_info_for_paper: bool
             If True, simplify the printout to only print the quantities
