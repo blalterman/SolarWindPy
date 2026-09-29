@@ -72,5 +72,3 @@ try:
 except PackageNotFoundError:
     # package is not installed
     __version__ = "unknown"
-
-# __version__ = "0.0.1.dev"
