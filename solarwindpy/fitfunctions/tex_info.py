@@ -1,11 +1,12 @@
 # !/usr/bin/env python
-__all__ = ["TeXinfo"]
 r"""Helpers for formatting fit results in LaTeX.
 
 The :class:`TeXinfo` class collects optimized parameters and statistics
 from a :class:`~solarwindpy.fitfunctions.core.FitFunction` and produces
 ready-to-plot annotation strings for Matplotlib.
 """
+
+__all__ = ["TeXinfo"]
 
 import re
 import numpy as np
@@ -18,6 +19,12 @@ _remove_exponential_pattern = re.compile(_remove_exponential_pattern)
 
 
 class TeXinfo(object):
+    r"""Fit results formatted as a LaTeX annotation.
+
+    Built by :meth:`~solarwindpy.fitfunctions.core.FitFunction.build_TeX_info`
+    after a fit; ``str(info)`` is the annotation text.
+    """
+
     def __init__(
         self,
         popt,
@@ -55,10 +62,12 @@ class TeXinfo(object):
         self.set_npts(npts)
 
     def __str__(self):
+        r"""Return :attr:`info`."""
         return self.info
 
     @property
     def info(self):
+        r"""Annotation text from the last :meth:`build_info`, built with defaults if none."""
         try:
             return self._info
         except AttributeError:
@@ -66,6 +75,7 @@ class TeXinfo(object):
 
     @property
     def initial_guess_info(self):
+        r"""Table of lower bound, initial guess and upper bound per parameter, or None."""
         info = self._initial_guess_info
         if info is None:
             # Fit failed to make a guess
@@ -94,18 +104,22 @@ class TeXinfo(object):
 
     @property
     def chisq_dof(self):
+        r"""Chi-squared per degree of freedom, as given."""
         return self._chisq_dof
 
     @property
     def npts(self):
+        r"""Number of points in the fit, or None."""
         return self._npts
 
     @property
     def popt(self):
+        r"""Optimized parameters by name."""
         return dict(self._popt)
 
     @property
     def psigma(self):
+        r"""Parameter uncertainties by name."""
         return dict(self._psigma)
 
     @property
@@ -115,6 +129,7 @@ class TeXinfo(object):
 
     @property
     def TeX_argnames(self):
+        r"""Mapping from parameter names to their LaTeX names, or None if unset."""
         try:
             # Saved as tuple, so convert from tuple.
             return dict(self._TeX_argnames)
@@ -124,6 +139,7 @@ class TeXinfo(object):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the fitted function."""
         return self._TeX_function
 
     @property
@@ -209,6 +225,7 @@ class TeXinfo(object):
 
     @staticmethod
     def _simplify_for_paper(info):
+        r"""Strip ``$`` and trailing zeros from each ``name = value`` entry."""
         formatted_info = []
         for ii in info:
             ii = ii.strip("$")
@@ -451,6 +468,7 @@ class TeXinfo(object):
         return info
 
     def set_initial_guess_info(self, new):
+        r"""Store per-parameter ``(p0, bounds)`` info; ``new`` is a dict or None."""
         if not (isinstance(new, dict) or new is None):
             raise TypeError(
                 f"Unsure how to parse `initial_guess_info` of type {type(new)}"
@@ -464,6 +482,7 @@ class TeXinfo(object):
         self._initial_guess_info = new
 
     def set_npts(self, new):
+        r"""Store the number of fitted points as an int, or None."""
         if not isinstance(new, Number) and (new is not None):
             raise TypeError(f"Unexpected npts type ({type(new)})")
 
@@ -472,6 +491,7 @@ class TeXinfo(object):
         self._npts = new
 
     def set_popt_psigma(self, popt, psigma):
+        r"""Store parameters and uncertainties; every ``popt`` key must be in ``psigma``."""
         for k in popt:
             if k not in psigma:
                 raise ValueError(f"key ({k}) must be in both 'popt' and 'psigma' ")
@@ -497,12 +517,15 @@ class TeXinfo(object):
         self._TeX_argnames = kwargs.items()
 
     def set_TeX_function(self, TeX_function):
+        r"""Store the LaTeX form of the fitted function."""
         self._TeX_function = TeX_function
 
     def set_chisq_dof(self, new):
+        r"""Store the chi-squared per degree of freedom."""
         self._chisq_dof = new
 
     def set_rsq(self, new):
+        r"""Store the :math:`R^2` coefficient of determination."""
         self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):

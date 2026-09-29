@@ -19,11 +19,15 @@ class Gaussian(FitFunction):
     """
 
     def __init__(self, xobs, yobs, **kwargs):
+        """Initialize a Gaussian fit to the observations."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
+        r"""The model as ``f(x, mu, sigma, A)``."""
+
         def gaussian(x, mu, sigma, A):
+            """Evaluate ``A * exp(-0.5 * ((x - mu) / sigma)**2)``."""
             arg = -0.5 * (((x - mu) / sigma) ** 2.0)
             return A * np.exp(arg)
 
@@ -45,10 +49,12 @@ class Gaussian(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model."""
         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
     def make_fit(self, *args, **kwargs):
+        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
         super().make_fit(*args, **kwargs)
         try:
             self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
@@ -75,7 +81,10 @@ class GaussianNormalized(FitFunction):
 
     @property
     def function(self):
+        r"""The model as ``f(x, mu, sigma, n)``."""
+
         def gaussian_normalized(x, mu, sigma, n):
+            """Evaluate a Gaussian of area ``n``, mean ``mu``, width ``sigma``."""
             arg = -0.5 * (((x - mu) / sigma) ** 2.0)
             A = n / (np.sqrt(2 * np.pi) * sigma)
             return A * np.exp(arg)
@@ -99,10 +108,12 @@ class GaussianNormalized(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model."""
         TeX = r"f(x)=\frac{n}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
     def make_fit(self, *args, **kwargs):
+        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
         super().make_fit(*args, **kwargs)
         try:
             self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
@@ -136,8 +147,10 @@ class GaussianLn(FitFunction):
 
     @property
     def function(self):
+        r"""The model as ``f(x, m, s, A)``."""
 
         def gaussian_ln(x, m, s, A):
+            """Evaluate ``A * exp(-0.5 * ((ln(x) - m) / s)**2)``."""
             lnx = np.log(x)
 
             coeff = A
@@ -166,6 +179,7 @@ class GaussianLn(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model."""
         TeX = (
             r"f(x) = A \cdot  "
             r"\mathrm{exp}\left[-\frac{1}{2}  "
@@ -208,6 +222,7 @@ class GaussianLn(FitFunction):
             return False
 
     def set_TeX_report_normal_parameters(self, new):
+        r"""Set :attr:`TeX_report_normal_parameters` to ``bool(new)``."""
         new = bool(new)
         self._use_normal_parameters = new
 
