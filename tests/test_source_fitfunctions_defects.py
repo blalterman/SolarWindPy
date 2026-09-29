@@ -147,3 +147,22 @@ def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
     keys = TrendFit(agged, Line, ykey1d="mu", wkey1d="sigma").popt1d_keys
 
     assert pickle.loads(pickle.dumps(keys)) == ("mu", "sigma")
+
+
+def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
+    """A repeated ``x`` makes ``Line.p0`` return ``None``; the fit still recovers the line.
+
+    ``make_fit`` falls back to a default starting point when ``p0`` is
+    ``None``. It used to import ``getargspec_no_self`` from SciPy's private
+    ``scipy._lib._util``, which current SciPy no longer has, so the fit raised
+    ``ImportError`` even with ``return_exception=True``.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 1.0, 2.0, 3.0, 4.0])
+    fit = Line(x, 2.0 * x + 1.0)
+    assert fit.p0 is None  # the input exists to exercise this branch
+
+    assert fit.make_fit(return_exception=True) is None
+    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
+    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)

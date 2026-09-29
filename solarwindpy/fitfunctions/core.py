@@ -278,11 +278,20 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def initial_guess_info(self):
-        # If failed to make an initial guess, then don't build the info.
+        r"""Initial guess and bounds for each parameter, or None.
+
+        Returns
+        -------
+        dict or None
+            ``{name: InitialGuessInfo(p0, bounds)}``, or None when no initial
+            guess was made (``p0`` is None) or no fit has set the bounds.
+        """
         try:
             p0 = self.p0
             bounds = self.fit_bounds
         except AttributeError:
+            return None
+        if p0 is None:
             return None
 
         names = self.argnames
@@ -592,15 +601,12 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         f_scale = kwargs.pop("f_scale", 0.1)
         jac = kwargs.pop("jac", "2-point")
 
-        # Copied from `curve_fit` line 704 (20200527)
+        # Adapted from `curve_fit` line 704 (20200527)
         if p0 is None:
-            # determine number of parameters by inspecting the function
-            from scipy._lib._util import getargspec_no_self as _getargspec
-
-            args, varargs, varkw, defaults = _getargspec(self.function)
-            if len(args) < 2:
+            # The fit parameters are the function's arguments after x.
+            n = len(self.argnames)
+            if n < 1:
                 raise ValueError("Unable to determine number of fit parameters.")
-            n = len(args) - 1
         else:
             p0 = np.atleast_1d(p0)
             n = p0.size
