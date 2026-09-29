@@ -15,7 +15,7 @@ from ..plotting import subplots
 from . import core
 from . import gaussians
 
-Popt1DKeys = namedtuple("Popt1Dkeys", "y,w", defaults=(None, None))
+Popt1DKeys = namedtuple("Popt1DKeys", "y,w", defaults=(None, None))
 
 
 class TrendFit(object):

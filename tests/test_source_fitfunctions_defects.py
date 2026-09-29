@@ -7,10 +7,13 @@
 guess. The model is evaluated only at the samples, so every ``x0`` strictly
 between the same two neighbouring samples fits equally well. The recoverable
 claim is therefore "the fitted step lies between the two samples that bracket
-the true step", and that is what these tests assert.
+the true step", and that is what those tests assert.
 """
 
+import pickle
+
 import numpy as np
+import pandas as pd
 import pytest
 
 from solarwindpy.fitfunctions import (
@@ -122,3 +125,25 @@ def test_line_x_intercept_p0_is_slope_and_x_intercept_of_exact_line():
     """
     p0 = LineXintercept(LINE_X, LINE_Y).p0
     assert p0 == pytest.approx([2.0, -0.5], rel=1e-12, abs=0)
+
+
+def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
+    """``TrendFit.popt1d_keys`` pickles and unpickles to an equal value.
+
+    Its namedtuple was created with typename ``"Popt1Dkeys"`` but bound to
+    ``Popt1DKeys``, so pickle's lookup of the class by name failed.
+
+    ON FAILURE: the code is wrong, unless a test earlier in the run deleted
+    ``solarwindpy`` modules from ``sys.modules`` after this import resolved.
+    """
+    # Resolve at call time: tests/test_circular_imports.py drops and re-imports
+    # every solarwindpy module, and pickle requires the class in sys.modules.
+    from solarwindpy.fitfunctions import Line, TrendFit
+
+    agged = pd.DataFrame(
+        {0: [1.0, 2.0, 3.0], 1: [2.0, 3.0, 4.0]},
+        index=pd.interval_range(0, 3, periods=3),
+    )
+    keys = TrendFit(agged, Line, ykey1d="mu", wkey1d="sigma").popt1d_keys
+
+    assert pickle.loads(pickle.dumps(keys)) == ("mu", "sigma")
