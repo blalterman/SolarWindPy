@@ -78,13 +78,16 @@ class GaussianPlusHeavySide(FitFunction):
     The model is only evaluated at the samples, so the fit quality changes
     only when ``x0`` crosses a sample and every ``x0`` between the same two
     neighbouring samples fits equally well. A gradient-based optimizer
-    therefore cannot move ``x0``. :meth:`make_fit` instead fits the other
-    five parameters once for each gap between neighbouring unique samples,
-    with ``x0`` held at the gap's midpoint, and keeps the gap with the lowest
-    cost. The fitted ``x0`` is that midpoint: it is known only to within the
-    gap, and its reported uncertainty (``psigma``) is not meaningful. A fit
-    costs one least-squares run per gap, so time grows linearly with the
-    number of unique ``x`` samples.
+    therefore cannot move ``x0``. :meth:`make_fit` instead holds ``x0`` at
+    the midpoint of a gap between neighbouring unique samples, fits the
+    other five parameters, and keeps the gap with the lowest cost. It
+    searches about :math:`\sqrt{n}` evenly spaced gaps of the :math:`n`
+    available, then every gap within one coarse step of the best, so a fit
+    costs about :math:`3\sqrt{n}` least-squares runs. The search finds the
+    best gap when the cost falls toward the true step at the scale of the
+    coarse spacing; a step small against the noise or the Gaussian can defeat
+    it. The fitted ``x0`` is a gap midpoint: it is known only to within the
+    gap, and its reported uncertainty (``psigma``) is not meaningful.
     """
 
     def __init__(self, xobs, yobs, **kwargs):
@@ -95,10 +98,12 @@ class GaussianPlusHeavySide(FitFunction):
 
         Each candidate ``x0`` is the midpoint of a gap between neighbouring
         unique ``x`` samples used in the fit. For each, the remaining
-        parameters are fitted with ``x0`` fixed (its gradient is zero there),
-        and the candidate with the lowest cost is refit through
-        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`. A ``p0`` passed by the caller supplies
-        the starting values of the other parameters; its ``x0`` is replaced.
+        parameters are fitted with ``x0`` fixed (its gradient is zero there).
+        Candidates are searched coarse to fine, as the class Notes describe,
+        and the one with the lowest cost is refit through
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`. A ``p0``
+        passed by the caller supplies the starting values of the other
+        parameters; its ``x0`` is replaced.
 
         Parameters
         ----------
@@ -121,14 +126,27 @@ class GaussianPlusHeavySide(FitFunction):
 
         scan_kwargs = {k: v for k, v in kwargs.items() if k != "absolute_sigma"}
         x = np.unique(self.observations.used.x)
-        best_cost = np.inf
-        for x0 in 0.5 * (x[1:] + x[:-1]):
-            try:
-                res, _ = self._run_least_squares(p0=[x0] + p0[1:], **scan_kwargs)
-            except (RuntimeError, ValueError, FitFailedError):
-                continue
-            if res.cost < best_cost:
-                best_cost, p0[0] = res.cost, x0
+        gaps = 0.5 * (x[1:] + x[:-1])
+
+        def lowest_cost(indices):
+            """Index into ``gaps`` of the lowest-cost candidate, or None."""
+            best, best_cost = None, np.inf
+            for i in indices:
+                try:
+                    res, _ = self._run_least_squares(
+                        p0=[gaps[i]] + p0[1:], **scan_kwargs
+                    )
+                except (RuntimeError, ValueError, FitFailedError):
+                    continue
+                if res.cost < best_cost:
+                    best, best_cost = i, res.cost
+            return best
+
+        step = max(1, int(np.sqrt(gaps.size)))
+        best = lowest_cost(range(0, gaps.size, step))
+        if best is not None:
+            fine = range(max(best - step, 0), min(best + step + 1, gaps.size))
+            p0[0] = gaps[lowest_cost(fine)]
 
         return super().make_fit(return_exception=return_exception, p0=p0, **kwargs)
 
