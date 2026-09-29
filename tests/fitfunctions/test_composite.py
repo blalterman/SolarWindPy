@@ -41,7 +41,6 @@ from solarwindpy.fitfunctions.composite import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 
-
 # =============================================================================
 # Helper Functions
 # =============================================================================
@@ -423,7 +422,7 @@ class TestGaussianPlusHeavySide:
 
             assert deviation < 2 * sigma, (
                 f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-                f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+                f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
             )
 
     def test_fit_uncertainty_scales_with_noise(self):
@@ -778,7 +777,7 @@ class TestGaussianTimesHeavySide:
 
             assert deviation < 2 * sigma, (
                 f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-                f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+                f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
             )
 
     def test_fit_uncertainty_scales_with_noise(self):
@@ -841,7 +840,7 @@ class TestGaussianTimesHeavySide:
         # This should either raise an error or require guess_x0
         # The exact behavior depends on implementation
         with pytest.raises((TypeError, ValueError)):
-            obj = GaussianTimesHeavySide(x, y)  # Missing guess_x0
+            GaussianTimesHeavySide(x, y)  # Missing guess_x0
 
     # -------------------------------------------------------------------------
     # E5. Edge Case and Error Handling Tests
@@ -1130,7 +1129,7 @@ class TestGaussianTimesHeavySidePlusHeavySide:
 
             assert deviation < 2 * sigma, (
                 f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-                f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+                f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
             )
 
     def test_fit_uncertainty_scales_with_noise(self):
@@ -1196,7 +1195,7 @@ class TestGaussianTimesHeavySidePlusHeavySide:
 
         # This should either raise an error or require guess_x0
         with pytest.raises((TypeError, ValueError)):
-            obj = GaussianTimesHeavySidePlusHeavySide(x, y)  # Missing guess_x0
+            GaussianTimesHeavySidePlusHeavySide(x, y)  # Missing guess_x0
 
     # -------------------------------------------------------------------------
     # E5. Edge Case and Error Handling Tests

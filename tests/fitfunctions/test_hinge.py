@@ -4,7 +4,7 @@ HingeSaturation models a piecewise linear function with a hinge point (xh, yh):
 - Rising region (x < xh): f(x) = m1 * (x - x1) where m1 = yh / (xh - x1)
 - Plateau region (x >= xh): f(x) = m2 * (x - x2) where x2 = xh - yh / m2
 
-Parameters:
+The fit parameters are:
 - xh: x-coordinate of hinge point
 - yh: y-coordinate of hinge point
 - x1: x-intercept of rising line
@@ -16,9 +16,15 @@ import inspect
 import numpy as np
 import pytest
 
-from solarwindpy.fitfunctions.hinge import HingeSaturation
+from solarwindpy.fitfunctions.hinge import (
+    HingeAtPoint,
+    HingeMax,
+    HingeMin,
+    HingeSaturation,
+    Saturation,
+    TwoLine,
+)
 from solarwindpy.fitfunctions.core import InsufficientDataError
-
 
 # =============================================================================
 # Fixtures
@@ -327,7 +333,7 @@ def test_fit_with_noise_recovers_parameters_within_2sigma(noisy_saturation_data)
         # 2σ gives 95% confidence per parameter, ~81% joint for 4 parameters
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2σ = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2σ = {2 * sigma:.4f}"
         )
 
 
@@ -618,15 +624,6 @@ def test_psigma_values_are_positive(noisy_saturation_data):
 # =============================================================================
 
 
-from solarwindpy.fitfunctions.hinge import (
-    TwoLine,
-    Saturation,
-    HingeMin,
-    HingeMax,
-    HingeAtPoint,
-)
-
-
 # =============================================================================
 # TwoLine Tests
 # =============================================================================
@@ -847,7 +844,7 @@ def test_twoline_fit_with_noise_recovers_parameters_within_2sigma(noisy_twoline_
 
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
         )
 
 
@@ -1221,7 +1218,7 @@ def test_saturation_fit_with_noise_recovers_parameters_within_2sigma(
 
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
         )
 
 
@@ -1595,7 +1592,7 @@ def test_hingemin_fit_with_noise_recovers_parameters_within_2sigma(noisy_hingemi
 
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
         )
 
 
@@ -1975,7 +1972,7 @@ def test_hingemax_fit_with_noise_recovers_parameters_within_2sigma(noisy_hingema
 
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
         )
 
 
@@ -2255,7 +2252,7 @@ def test_hingeatpoint_func_evaluates_line2_region_correctly():
     For x>5: -x+15 < 2x
     """
     xh, yh, m1, m2 = 5.0, 10.0, 2.0, -1.0
-    x1 = xh - yh / m1  # = 0
+    # x1 = xh - yh / m1 = 0, so line1 is m1 * x.
     x2 = xh - yh / m2  # = 15
 
     x_test = np.array([6.0, 8.0, 10.0, 12.0, 15.0])
@@ -2346,7 +2343,7 @@ def test_hingeatpoint_fit_with_noise_recovers_parameters_within_2sigma(
 
         assert deviation < 2 * sigma, (
             f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-            f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+            f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
         )
 
 
