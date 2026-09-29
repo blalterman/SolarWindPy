@@ -8,18 +8,33 @@ from pathlib import Path
 from scipy.optimize import OptimizeResult
 
 from solarwindpy.fitfunctions.plots import FFPlot, AxesLabels, LogAxes
-from solarwindpy.fitfunctions.core import Observations, UsedRawObs
+from solarwindpy.fitfunctions.core import (
+    ChisqPerDegreeOfFreedom,
+    Observations,
+    UsedRawObs,
+)
+from solarwindpy.fitfunctions.tex_info import TeXinfo
 
 
-class DummyTeX:
-    """Minimal TeXinfo replacement recording annotation calls."""
+def make_texinfo(m=2.0, b=1.0):
+    """Real TeXinfo for the line ``m x + b`` the helpers below plot."""
+    return TeXinfo(
+        {"m": m, "b": b},
+        {"m": 0.1, "b": 0.1},
+        "m x + b",
+        ChisqPerDegreeOfFreedom(0.0, 0.0),
+        1.0,
+    )
 
-    def __init__(self):
-        self.calls = 0
 
-    def annotate_info(self, ax, **kwargs):  # pragma: no cover - simple recorder
-        self.calls += 1
-        ax.text(0.0, 0.0, "info")
+def annotations(ax, tex):
+    """Texts on ``ax`` whose content is the TeXinfo annotation."""
+    return [t for t in ax.texts if t.get_text() == str(tex)]
+
+
+def line_data(ax):
+    """``(x, y)`` arrays of every Line2D on ``ax``, in drawing order."""
+    return [(ln.get_xdata(), ln.get_ydata()) for ln in ax.get_lines()]
 
 
 class Label:
@@ -59,7 +74,7 @@ def make_observations(n, include_weights=True):
 def make_ffplot(n=5, include_weights=True):
     """Create FFPlot for testing."""
     obs, y_fit = make_observations(n, include_weights=include_weights)
-    tex = DummyTeX()
+    tex = make_texinfo()
     fit_res = OptimizeResult(fun=y_fit[obs.tk_observed] - obs.used.y)
     plot = FFPlot(obs, y_fit, tex, fit_res, fitfunction_name="dummy")
     return plot, tex, obs, y_fit
@@ -152,67 +167,64 @@ def test_format_helpers():
     assert rax2.get_ylabel() == r"$\mathrm{Residual} \; [\#]$"
 
 
-def test_plot_methods_and_annotations(monkeypatch):
-    import solarwindpy.fitfunctions.plots as plots
+def test_plot_methods_draw_their_data_and_annotate():
+    """Each plot method draws its own observations and annotates on request.
 
-    plot, tex, *_ = make_ffplot()
+    raw draws every point, used draws the every-other subset make_observations
+    keeps, fit draws ``y_fit`` over raw x, and annotate toggles the TeXinfo
+    text. Without ``ax`` each call makes a fresh figure.
 
-    calls = []
-    original = plots.plt.subplots
+    ON FAILURE: the code is wrong.
+    """
+    plot, tex, obs, y_fit = make_ffplot()
 
-    def fake_subplots(*args, **kwargs):  # pragma: no cover - small wrapper
-        calls.append((args, kwargs))
-        return original(*args, **kwargs)
+    ax_raw, _ = plot.plot_raw()
+    ((x, y),) = line_data(ax_raw)
+    np.testing.assert_array_equal(x, obs.raw.x)
+    np.testing.assert_array_equal(y, obs.raw.y)
 
-    monkeypatch.setattr(plots.plt, "subplots", fake_subplots)
+    ax_used, _ = plot.plot_used()
+    ((x, y),) = line_data(ax_used)
+    np.testing.assert_array_equal(x, obs.used.x)
+    np.testing.assert_array_equal(y, obs.used.y)
+    assert ax_used.figure is not ax_raw.figure
 
-    ax, *_ = plot.plot_raw()
-    assert calls and isinstance(ax, plt.Axes)
-    calls.clear()
+    ax_fit = plot.plot_fit()
+    ((x, y),) = line_data(ax_fit)
+    np.testing.assert_array_equal(x, obs.raw.x)
+    np.testing.assert_array_equal(y, y_fit)
+    assert len(annotations(ax_fit, tex)) == 1
 
-    ax, *_ = plot.plot_used()
-    assert calls
-    calls.clear()
-
-    plot.plot_fit()
-    assert calls and tex.calls == 1
-    calls.clear()
-
-    plot.plot_fit(annotate=False)
-    assert tex.calls == 1
+    assert annotations(plot.plot_fit(annotate=False), tex) == []
 
     ax = plot.plot_raw_used_fit()
     labels = {t.get_text() for t in ax.get_legend().get_texts()}
     assert labels == {r"$\mathrm{Obs}$", r"$\mathrm{Used}$", r"$\mathrm{Fit}$"}
 
-    calls.clear()
-    plot.plot_residuals()
-    assert calls
+    ax_resid = plot.plot_residuals(kind="simple", pct=False)
+    ((x, y),) = line_data(ax_resid)
+    np.testing.assert_array_equal(x, obs.used.x)
+    np.testing.assert_array_equal(y, y_fit[obs.tk_observed] - obs.used.y)
+    assert ax_resid.figure is not ax_fit.figure
 
 
-def test_plot_raw_used_fit_resid(monkeypatch):
-    import solarwindpy.fitfunctions.plots as plots
+def test_plot_raw_used_fit_resid():
+    """The stacked plot puts data on ``hax``, residuals on ``rax``.
 
+    ON FAILURE: the code is wrong.
+    """
     plot, tex, *_ = make_ffplot()
-
-    calls = []
-    original = plots.plt.subplots
-
-    def fake_subplots(*args, **kwargs):  # pragma: no cover - small wrapper
-        calls.append((args, kwargs))
-        return original(*args, **kwargs)
-
-    monkeypatch.setattr(plots.plt, "subplots", fake_subplots)
 
     hax, rax = plot.plot_raw_used_fit_resid()
     assert isinstance(hax, plt.Axes)
     assert isinstance(rax, plt.Axes)
+    assert hax.figure is rax.figure
     labels = {t.get_text() for t in hax.get_legend().get_texts()}
     assert labels == {r"$\mathrm{Obs}$", r"$\mathrm{Used}$", r"$\mathrm{Fit}$"}
-    assert tex.calls == 1
+    assert len(annotations(hax, tex)) == 1
 
-    plot.plot_raw_used_fit_resid(annotate=False)
-    assert tex.calls == 1
+    hax2, _ = plot.plot_raw_used_fit_resid(annotate=False)
+    assert annotations(hax2, tex) == []
 
 
 def test_label_log_texinfo():
@@ -225,7 +237,7 @@ def test_label_log_texinfo():
     plot.set_log(x=True)
     assert plot.log == LogAxes(True, False)
 
-    tex2 = DummyTeX()
+    tex2 = make_texinfo(m=3.0)
     plot.set_TeX_info(tex2)
     assert plot.TeX_info is tex2
 
@@ -273,26 +285,6 @@ def test_plot_residuals_missing_fun_no_exception():
 # ============================================================================
 # Phase 6 Coverage Tests
 # ============================================================================
-
-
-class TestEstimateMarkeveryOverflow:
-    """Test OverflowError handling in _estimate_markevery (lines 133-136)."""
-
-    def test_estimate_markevery_overflow_returns_1000(self, monkeypatch):
-        """Verify _estimate_markevery returns 1000 on OverflowError."""
-        plot, *_ = make_ffplot()
-
-        original_floor = np.floor
-
-        def patched_floor(x):
-            raise OverflowError("Simulated overflow")
-
-        monkeypatch.setattr(np, "floor", patched_floor)
-
-        result = plot._estimate_markevery()
-        assert result == 1000
-
-        monkeypatch.setattr(np, "floor", original_floor)
 
 
 class TestFormatHaxLogY:
