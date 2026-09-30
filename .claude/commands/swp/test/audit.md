@@ -9,7 +9,8 @@ description: Audit test quality patterns using validated SolarWindPy conventions
 Proactive test quality audit using patterns validated during the spiral plot contours test audit.
 Detects anti-patterns BEFORE they cause test failures.
 
-**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`
+**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`. Where this audit and
+TEST_PATTERNS.md disagree, TEST_PATTERNS.md governs.
 **ast-grep Rules:** `tools/dev/ast_grep/test-patterns.yml`
 
 **Default Scope:** `tests/`
@@ -19,19 +20,13 @@ Detects anti-patterns BEFORE they cause test failures.
 
 | ID | Pattern | Severity | Count (baseline) |
 |----|---------|----------|------------------|
-| swp-test-001 | `assert X is not None` (trivial) | warning | 74 |
-| swp-test-002 | `patch.object` without `wraps=` | warning | 76 |
 | swp-test-003 | Assert without error message | info | - |
 | swp-test-004 | `plt.subplots()` (verify cleanup) | info | 59 |
-| swp-test-006 | `len(x) > 0` without type check | info | - |
-| swp-test-009 | `isinstance(X, object)` (disguised trivial) | warning | 0 |
 
 ### Good Patterns to Track (Adoption Metrics)
 
 | ID | Pattern | Goal | Count (baseline) |
 |----|---------|------|------------------|
-| swp-test-005 | `patch.object` WITH `wraps=` | Increase | 4 |
-| swp-test-007 | `isinstance` assertions | Increase | - |
 | swp-test-008 | `pytest.raises` with `match=` | Increase | - |
 
 ### Detection Methods
@@ -41,51 +36,12 @@ Detects anti-patterns BEFORE they cause test failures.
 Use these MCP tools for structural pattern matching:
 
 ```python
-# 1. Trivial assertions (swp-test-001)
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="assert $X is not None",
-    language="python",
-    max_results=50
-)
-
-# 2. Weak mocks without wraps (swp-test-002)
-mcp__ast-grep__find_code_by_rule(
-    project_folder="/path/to/SolarWindPy",
-    yaml="""
-id: mock-without-wraps
-language: python
-rule:
-  pattern: patch.object($INSTANCE, $METHOD)
-  not:
-    has:
-      pattern: wraps=$_
-""",
-    max_results=50
-)
-
-# 3. Good mock pattern - track adoption (swp-test-005)
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="patch.object($I, $M, wraps=$W)",
-    language="python"
-)
-
-# 4. plt.subplots calls to verify cleanup (swp-test-004)
+# 1. plt.subplots calls to verify cleanup (swp-test-004)
 mcp__ast-grep__find_code(
     project_folder="/path/to/SolarWindPy",
     pattern="plt.subplots()",
     language="python",
     max_results=30
-)
-
-# 5. Disguised trivial assertion (swp-test-009)
-# isinstance(X, object) is equivalent to X is not None
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="isinstance($OBJ, object)",
-    language="python",
-    max_results=50
 )
 ```
 
@@ -93,24 +49,18 @@ mcp__ast-grep__find_code(
 
 ```bash
 # Run all rules
-sg scan --config tools/dev/ast_grep/test-patterns.yml tests/
+sg scan --rule tools/dev/ast_grep/test-patterns.yml tests/
 
-# Run specific rule
-sg scan --config tools/dev/ast_grep/test-patterns.yml --rule swp-test-002 tests/
+# Run specific rule (--filter has no effect with --rule, so filter the output)
+sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-004
 
 # Quick pattern search
-sg run -p "assert \$X is not None" -l python tests/
+sg run -p "plt.subplots()" -l python tests/
 ```
 
 **FALLBACK: grep (always available)**
 
 ```bash
-# Trivial assertions
-grep -rn "assert .* is not None" tests/
-
-# Mock without wraps (approximate)
-grep -rn "patch.object" tests/ | grep -v "wraps="
-
 # plt.subplots
 grep -rn "plt.subplots()" tests/
 ```
@@ -121,7 +71,7 @@ grep -rn "plt.subplots()" tests/
 Execute MCP tools for each anti-pattern category.
 
 **Step 2: Count good patterns**
-Track adoption of recommended patterns (wraps=, isinstance, pytest.raises with match).
+Track adoption of recommended patterns (pytest.raises with match).
 
 **Step 3: Generate report**
 Compile findings into actionable table format.
@@ -140,13 +90,12 @@ Point to TEST_PATTERNS.md sections for remediation guidance.
 ### Anti-Pattern Summary
 | Rule | Description | Count | Trend |
 |------|-------------|-------|-------|
-| swp-test-001 | Trivial None assertions | X | ↑/↓/= |
-| swp-test-002 | Mock without wraps | X | ↑/↓/= |
+| swp-test-004 | plt.subplots() (verify cleanup) | X | ↑/↓/= |
 
 ### Good Pattern Adoption
 | Rule | Description | Count | Target |
 |------|-------------|-------|--------|
-| swp-test-005 | Mock with wraps | X | Increase |
+| swp-test-008 | pytest.raises with match | X | Increase |
 
 ### Top Issues by File
 | File | Issues | Primary Problem |
@@ -155,9 +104,10 @@ Point to TEST_PATTERNS.md sections for remediation guidance.
 
 ### Remediation
 See `.claude/docs/TEST_PATTERNS.md` for fix patterns:
-- Section 1: Mock-with-Wraps Pattern
-- Section 2: Parameter Passthrough Verification
-- Anti-Patterns section: Common mistakes to avoid
+- What a test asserts: expected values with a named source; errors; plots
+- Fakes: which boundaries may be faked; showing a parameter takes effect
+- Inputs and fixtures: distinctive non-default inputs
+- Checklist for writing or reviewing a test: common mistakes to avoid
 ```
 
 ### Scope
@@ -172,8 +122,8 @@ For **complex test quality work** (strategy design, coverage planning, physics-a
 
 | Anti-Pattern | Fix | TEST_PATTERNS.md Section |
 |--------------|-----|-------------------------|
-| `assert X is not None` | `assert isinstance(X, Type)` | #6 Return Type Verification |
-| `isinstance(X, object)` | `isinstance(X, SpecificType)` | #6 Return Type Verification |
-| `patch.object(i, m)` | `patch.object(i, m, wraps=i.m)` | #1 Mock-with-Wraps |
-| Missing `plt.close()` | Add at test end | #15 Resource Cleanup |
-| Default parameter values | Use distinctive values (77, 2.5) | #2 Parameter Passthrough |
+| `assert X is not None` | Assert the expected value, its source on the line | What a test asserts |
+| `isinstance(X, object)` | Assert the expected value, its source on the line | What a test asserts |
+| `patch.object(i, m)` | Run SolarWindPy for real; fake only network, clock, filesystem | Fakes |
+| Missing `plt.close()` | `plt.close("all")` | What a test asserts |
+| Default parameter values | Use distinctive non-default values | Inputs and fixtures |
