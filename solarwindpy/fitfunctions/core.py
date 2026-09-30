@@ -769,7 +769,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             if return_exception:
                 return e
             else:
-                raise
+                raise e
 
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:

@@ -392,15 +392,6 @@ class TestMakeFitAssertionError:
         assert isinstance(err, InsufficientDataError)
         assert "Insufficient data" in str(err)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=InsufficientDataLeakedAsAssertion,
-        reason="solarwindpy/fitfunctions/core.py make_fit: the sufficient_data "
-        "except-branch builds InsufficientDataError but re-raises the original "
-        "AssertionError with a bare raise; expected InsufficientDataError "
-        "'Insufficient data to fit the model'; remove this marker when that "
-        "branch raises the converted exception",
-    )
     def test_make_fit_assertion_error_raised_as_insufficient_data(
         self, simple_linear_data
     ):
@@ -409,8 +400,7 @@ class TestMakeFitAssertionError:
         ``return_exception`` chooses between returning and raising the
         exception, so both paths must carry the same type.
 
-        ON FAILURE: (unexpected pass) make_fit now raises the converted
-        exception; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, y, w = simple_linear_data
         lf = NeverEnoughData(x, y, weights=w)
