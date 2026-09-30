@@ -22,7 +22,6 @@ TEST_PATTERNS.md disagree, TEST_PATTERNS.md governs.
 |----|---------|----------|------------------|
 | swp-test-003 | Assert without error message | info | - |
 | swp-test-004 | `plt.subplots()` (verify cleanup) | info | 59 |
-| swp-test-009 | `isinstance(X, object)` (disguised trivial) | warning | 0 |
 
 ### Good Patterns to Track (Adoption Metrics)
 
@@ -44,15 +43,6 @@ mcp__ast-grep__find_code(
     language="python",
     max_results=30
 )
-
-# 2. Disguised trivial assertion (swp-test-009)
-# isinstance(X, object) is equivalent to X is not None
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="isinstance($OBJ, object)",
-    language="python",
-    max_results=50
-)
 ```
 
 **FALLBACK: CLI ast-grep (requires local `sg` installation)**
@@ -62,10 +52,10 @@ mcp__ast-grep__find_code(
 sg scan --rule tools/dev/ast_grep/test-patterns.yml tests/
 
 # Run specific rule (--filter has no effect with --rule, so filter the output)
-sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-009
+sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-004
 
 # Quick pattern search
-sg run -p "isinstance(\$OBJ, object)" -l python tests/
+sg run -p "plt.subplots()" -l python tests/
 ```
 
 **FALLBACK: grep (always available)**
@@ -100,7 +90,7 @@ Point to TEST_PATTERNS.md sections for remediation guidance.
 ### Anti-Pattern Summary
 | Rule | Description | Count | Trend |
 |------|-------------|-------|-------|
-| swp-test-009 | Disguised trivial assertion | X | ↑/↓/= |
+| swp-test-004 | plt.subplots() (verify cleanup) | X | ↑/↓/= |
 
 ### Good Pattern Adoption
 | Rule | Description | Count | Target |
