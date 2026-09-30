@@ -22,52 +22,33 @@ Hist1D = hist1d.Hist1D
 
 
 class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
-    r"""Create a 2D histogram with an optional z-value using an equal number.
-
-    of bins along the x and y axis.
+    r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
     Parameters
     ----------
-    x, y: pd.Series
-        x and y data to aggregate
-    z: None, pd.Series
-        If not None, the z-value to aggregate.
-    axnorm: str
-        Normalize the histogram.
-            key  normalization
-            ---  -------------
-            c    column
-            r    row
-            t    total
-            d    density
-    logx, logy: bool
-        If True, log10 scale the axis.
+    x, y : pd.Series
+        x and y data to bin.
+    z : pd.Series, optional
+        If not None, the value to aggregate in each bin. If None, each bin
+        counts its points.
+    axnorm : str, optional
+        Normalization of the aggregated values; see ``set_axnorm`` for the keys.
+    logx, logy : bool
+        If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.
+    clip_data : bool
+        If True, clip x and y to their 0.01st and 99.99th percentiles
+        (``AggPlot.clip_data``) when assigning points to bins; the bin edges
+        are computed from the unclipped data.
+    nbins : int or str or tuple
+        Bin specification passed to ``calc_bins_intervals``.
+    bin_precision : int, optional
+        Decimal places to which bin edges are rounded. If None, 5.
 
-    Attributes
-    ----------
-    data:
-    bins:
-    cut:
-    axnorm:
-    log<x,y>:
-    <x,y,z>label:
-    path: None, Path
-
-    Methods
-    -------
-    calc_bins:
-        calculate the x, y bins.
-    make_cut:
-        Utilize the calculated bins to convert (x, y) into pd.Categoral
-        or pd.Interval values used in aggregation.
-    set_[x,y,z]label:
-        Set the x, y, or z label.
-    agg:
-        Aggregate the data in the bins.
-        If z-value is None, count the number of points in each bin.
-        If z-value is not None, calculate the mean for each bin.
-    make_plot:
-        Make a 2D plot of the data with an optional color bar.
+    Notes
+    -----
+    ``calc_bins_intervals`` computes the bins, ``make_cut`` assigns each point
+    to a bin, ``agg`` aggregates and normalizes, and ``make_plot`` draws the
+    result with an optional colorbar.
     """
 
     def __init__(
@@ -82,6 +63,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         nbins=101,
         bin_precision=None,
     ):
+        r"""Store the data, labels and normalization, then bin the data."""
         super().__init__()
         self.set_log(x=logx, y=logy)
         self.set_data(x, y, z, clip_data)
@@ -108,6 +90,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return x, y
 
     def set_labels(self, **kwargs):
+        r"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""
         z = kwargs.pop("z", self.labels.z)
         if isinstance(z, labels_module.Count):
             try:
@@ -120,6 +103,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         super().set_labels(z=z, **kwargs)
 
     def set_data(self, x, y, z, clip):
+        r"""Store the data, taking ``log10(abs())`` of each axis flagged in ``self.log``."""
         super().set_data(x, y, z, clip)
         data = self.data
         if self.log.x:
@@ -195,7 +179,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
         elif axnorm == "cd":
-            #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
             N = agg.groupby(level="x").sum()
             dy = pd.IntervalIndex(
                 agg.index.get_level_values("y").unique()
@@ -205,7 +188,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             agg = agg.divide(N, level="x").divide(dy, level="y")
 
         elif axnorm == "rd":
-            #             raise NotImplementedError("Need to verify data alignment, especially `dx` values and index")
             N = agg.groupby(level="y").sum()
             dx = pd.IntervalIndex(
                 agg.index.get_level_values("x").unique()
@@ -231,6 +213,11 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return agg
 
     def agg(self, **kwargs):
+        r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
+
+        Every bin is present in the result; bins outside ``alim`` are NaN.
+        ``kwargs`` are passed to ``AggPlot.agg``.
+        """
         agg = super().agg(**kwargs)
         agg = self._axis_normalizer(agg)
         agg = self._agg_reindexer(agg)
@@ -597,6 +584,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             fmt = clabel_kwargs.pop("fmt", "%s")
 
             class nf(float):
+                r"""Float whose repr drops trailing zeros, for contour labels."""
+
                 def __repr__(self):
                     return float.__repr__(self).rstrip("0")
 
@@ -634,7 +623,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         Returns
         -------
         border: namedtuple
-            Contains "top" and "bottom" fields, each with a :py:class:`pd.Series`.
+            Contains "top" and "bottom" fields, each a :class:`pandas.Series`.
         """
 
         Border = namedtuple("Border", "top,bottom")
@@ -702,7 +691,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         if y1 is not None:
             tk = tk & (y <= y1)
 
-        #         if (~tk).any():
         x = x[tk]
         y = y[tk]
 
@@ -830,12 +818,12 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
             standard deviation specified by `gaussian_filter_std`.
         gaussian_filter_kwargs: None, dict
-            If not None and gaussian_filter_std > 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`
+            If not None and gaussian_filter_std > 0, passed to :func:`scipy.ndimage.gaussian_filter`
         nan_aware_filter: bool
             If True and gaussian_filter_std > 0, use NaN-aware filtering via
             normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
         kwargs:
-            Passed to :py:meth:`ax.pcolormesh`.
+            Passed to :meth:`matplotlib.axes.Axes.pcolormesh`.
             If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
         """
         levels = kwargs.pop("levels", None)
@@ -914,6 +902,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             # Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html
             # Define a class that forces representation of float to look a certain way
             # This remove trailing zero so '1.0' becomes '1'
+            r"""Float whose repr drops trailing zeros, for contour labels."""
+
             def __repr__(self):
                 return float.__repr__(self).rstrip("0")
 
@@ -964,7 +954,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         return ax, lbls, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
-        """Make a `Hist1D` from the data stored in this `His2D`.
+        """Make a ``Hist1D`` from the data stored in this ``Hist2D``.
 
         Parameters
         ----------
@@ -972,16 +962,17 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             "x" or "y", specifying the axis to project into 1D.
         only_plotted: bool
             If True, only pass data that appears in the {self.__class__.__name__} plot
-            to the :py:class:`Hist1D`.
+            to the :class:`~solarwindpy.plotting.hist1d.Hist1D`.
         project_counts: bool
-            If True, only send the variable plotted along `axis` to :py:class:`Hist1D`.
+            If True, only send the variable plotted along `axis` to
+            :class:`~solarwindpy.plotting.hist1d.Hist1D`.
             Otherwise, send both axes (but not z-values).
         kwargs:
             Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
 
         Returns
         -------
-        h1: :py:class:`Hist1D`
+        h1: solarwindpy.plotting.hist1d.Hist1D
         """
         axis = axis.lower()
         assert axis in ("x", "y")
@@ -1037,6 +1028,28 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     def make_joint_h2_h1_plot(
         self, project_counts=True, kwargs_1d=None, fig_axes=None, **kwargs
     ):
+        r"""Draw this histogram with its x and y projections on the margins.
+
+        Parameters
+        ----------
+        project_counts : bool
+            Passed to ``project_1d`` for both margins.
+        kwargs_1d : dict, optional
+            Passed to ``Hist1D.make_plot`` for both margins.
+        fig_axes : None
+            Accepted and ignored.
+        **kwargs
+            ``figsize``, ``height_ratios``, ``width_ratios``, ``hspace``,
+            ``wspace`` and ``cbar_kwargs`` lay out the figure; the rest is
+            passed to ``make_plot``.
+
+        Returns
+        -------
+        hax, xax, yax : Axes
+            The 2D histogram axis and the x and y projection axes.
+        cbar : Colorbar
+            The colorbar of the 2D histogram.
+        """
         figsize = kwargs.pop("figsize", (5, 6))
         height_ratios = kwargs.pop("height_ratios", [0.25, 1, 0.2, 0.1])
         width_ratios = kwargs.pop("width_ratios", [1, 0.25])

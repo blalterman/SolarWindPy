@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-r"""Special labels not handled by :py:class:`TeXlabel`."""
+r"""Labels for times, time intervals, and frequencies."""
 
 from pathlib import Path
 from pandas.tseries.frequencies import to_offset
@@ -29,23 +29,23 @@ class Timedelta(special.ArbitraryLabel):
 
     @property
     def with_units(self):
+        r"""Label with units, as a TeX math string."""
         result = rf"${self.tex} \; [{self.units}]$"  # noqa: W605
         return self._format_with_description(result)
 
-    #     @property
-    #     def dt(self):
-    #         return self._dt
-
     @property
     def offset(self):
+        r"""Pandas offset, or the raw value if it could not be converted."""
         return self._offset
 
     @property
     def tex(self):
+        r"""TeX of the label."""
         return r"\Delta t"
 
     @property
     def path(self):
+        r"""Save path ``dt-<freqstr>``, or ``dt-UNK`` without a valid offset."""
         try:
             return Path(f"dt-{self.offset.freqstr}")
         except AttributeError:
@@ -53,6 +53,7 @@ class Timedelta(special.ArbitraryLabel):
 
     @property
     def units(self):
+        r"""TeX of the offset's multiple and unit, or unknown units."""
         try:
             return r"%s \; \mathrm{%s}" % (
                 self.offset.n,
@@ -62,6 +63,7 @@ class Timedelta(special.ArbitraryLabel):
             return base._inU["unknown"]
 
     def set_offset(self, new):
+        r"""Store ``new`` converted with ``to_offset``, or unchanged if that fails."""
         try:
             new = to_offset(new)
         except ValueError:
@@ -92,22 +94,27 @@ class DateTime(special.ArbitraryLabel):
 
     @property
     def with_units(self):
+        r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
         return self._format_with_description(result)
 
     @property
     def kind(self):
+        r"""Text of the label, e.g. ``Year``."""
         return self._kind
 
     @property
     def tex(self):
+        r"""TeX of the label."""
         return r"\mathrm{%s}" % self.kind.replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
+        r"""Save path, ``kind`` lower-cased with spaces replaced by ``-``."""
         return Path(self.kind.lower().replace(" ", "-"))
 
     def set_kind(self, new):
+        r"""Store the text of the label."""
         self._kind = new
 
 
@@ -115,7 +122,7 @@ class Epoch(special.ArbitraryLabel):
     r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
     def __init__(self, kind, of_thing, space=r"\,", description=None):
-        """Instantiate the label.
+        r"""Instantiate the label.
 
         Parameters
         ----------
@@ -123,7 +130,7 @@ class Epoch(special.ArbitraryLabel):
             The smaller time unit, e.g. ``"Hour"``.
         of_thing : str
             The larger time unit, e.g. ``"Day"``.
-        space : str, default ``","``
+        space : str, default ``"\,"``
             TeX spacing command placed between words.
         description : str or None, optional
             Human-readable description displayed above the mathematical label.
@@ -139,22 +146,27 @@ class Epoch(special.ArbitraryLabel):
 
     @property
     def larger(self):
+        r"""Larger time unit, title-cased."""
         return self._larger
 
     @property
     def path(self):
+        r"""Save path ``<smaller>-of-<larger>``."""
         return Path(f"{self.smaller}-of-{self.larger}")
 
     @property
     def smaller(self):
+        r"""Smaller time unit, title-cased."""
         return self._smaller
 
     @property
     def space(self):
+        r"""TeX spacing command placed between words."""
         return self._space
 
     @property
     def tex(self):
+        r"""TeX of the label."""
         return r"\mathrm{%s %s of %s %s}" % (
             self.smaller,
             self.space,
@@ -164,16 +176,26 @@ class Epoch(special.ArbitraryLabel):
 
     @property
     def with_units(self):
+        r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
         return self._format_with_description(result)
 
     def set_larger(self, new):
+        r"""Store the larger time unit, title-cased."""
         self._larger = new.title()
 
     def set_smaller(self, new):
+        r"""Store the smaller time unit, title-cased."""
         self._smaller = new.title()
 
     def set_space(self, new):
+        r"""Set the spacing between words.
+
+        Raises
+        ------
+        ValueError
+            If ``new`` is not a space or one of the TeX spaces ``\,``, ``\;``, ``\:``.
+        """
         if new not in (" ", r"\,", r"\;", r"\:"):
             raise ValueError(f"Unrecognized Space {new}")
 
@@ -204,21 +226,26 @@ class Frequency(special.ArbitraryLabel):
 
     @property
     def other(self):
+        r"""``Timedelta`` label whose inverse this frequency is."""
         return self._other
 
     @property
     def tex(self):
+        r"""TeX of the label."""
         return r"\mathrm{Frequency}"
 
     @property
     def units(self):
+        r"""TeX of the inverse of the other label's units."""
         return f"({self.other.units})^{-1}"
 
     @property
     def path(self):
+        r"""Save path, set by ``build_label``."""
         return self._path
 
     def set_other(self, other):
+        r"""Store ``other``, wrapping it in a ``Timedelta`` if it is not one."""
         if not isinstance(other, Timedelta):
             other = Timedelta(other)
 
@@ -233,6 +260,7 @@ class Frequency(special.ArbitraryLabel):
         return path
 
     def build_label(self):
+        r"""Rebuild ``path`` from the units."""
         self._path = self._build_path()
 
 
@@ -255,13 +283,16 @@ class January1st(special.ArbitraryLabel):
 
     @property
     def with_units(self):
+        r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
         return self._format_with_description(result)
 
     @property
     def tex(self):
+        r"""TeX of the label."""
         return r"\mathrm{January 1^{st} of Year}".replace(" ", r" \; ")  # noqa: W605
 
     @property
     def path(self):
+        r"""Save path ``January-1st-of-Year``."""
         return Path("January-1st-of-Year")

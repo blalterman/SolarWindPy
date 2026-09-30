@@ -100,7 +100,7 @@ def save(
     png : bool, optional
         Save a PNG version of the figure.
     **kwargs
-        Additional keyword arguments passed to :meth:`Figure.savefig`.
+        Additional keyword arguments passed to :meth:`matplotlib.figure.Figure.savefig`.
 
     Returns
     -------
@@ -117,11 +117,7 @@ def save(
     assert isinstance(fig, mpl.figure.Figure)
     assert isinstance(spath, Path)
 
-    #     tight_layout = kwargs.pop("tight_layout", True)
     bbox_inches = kwargs.pop("bbox_inches", "tight")
-
-    #     if tight_layout:
-    #         fig.tight_layout()
 
     # Save the PDF without the timestamp so we can create the final LaTeX file
     # without them.
@@ -171,7 +167,7 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
         By default the legend is placed on the last axis. ``idx_for_legend=-1``
         assumes that the last axis is on the right hand side of the figure.
     **kwargs
-        Extra keyword arguments forwarded to :meth:`Axes.legend`.
+        Extra keyword arguments forwarded to :meth:`matplotlib.axes.Axes.legend`.
 
     Returns
     -------
@@ -199,13 +195,6 @@ def joint_legend(*axes, idx_for_legend=-1, **kwargs):
                 h = hdl[i]
                 if isinstance(h, mpl.container.ErrorbarContainer):
                     h = h[0]
-                #                 h = hdl[i]
-                #                 try:
-                #                     if len(h) == 3:
-                #                         # Used `ax.errorbar`, not `ax.plot`.
-                #                         h = h[0]
-                #                 except TypeError:
-                #                     pass
 
                 labels.append(l)
                 handles.append(h)
@@ -302,11 +291,6 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
 
     fig = plt.figure(figsize=figsize, **fig_kwargs)
 
-    #     print(cbar_loc)
-    #     print(nrows, ncols)
-    #     print(len(height_ratios), len(width_ratios))
-    #     print()
-
     gs = mpl.gridspec.GridSpec(
         len(height_ratios),
         len(width_ratios),
@@ -366,15 +350,6 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
         raise ValueError(  # noqa: E203 - aligned table format intentional
             f"Unexpected axes shape\nExpected : {(nrows, ncols)}\nCreated  : {axes.shape}"
         )
-
-    #     print("rows")
-    #     print(list(row_range))
-    #     print(height_ratios)
-    #     print()
-
-    #     print("cols")
-    #     print(list(col_range))
-    #     print(width_ratios)
 
     axes = axes.squeeze()
     if axes.ndim == 0:

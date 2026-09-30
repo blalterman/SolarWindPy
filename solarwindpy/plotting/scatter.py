@@ -4,20 +4,11 @@ r"""Scatter plot utilities with optional color mapping."""
 from matplotlib import pyplot as plt
 
 from . import base
+from .agg_plot import AggPlot
 
 
 class Scatter(base.PlotWithZdata, base.CbarMaker):
-    r"""Create a scatter plot.
-
-    Attributes
-    ----------
-
-    Methods
-    -------
-
-    Notes
-    -----
-    """
+    r"""Scatter plot of y against x, optionally colored by z."""
 
     def __init__(self, x, y, z=None, clip_data=False):
         r"""Initialize scatter plot data.
@@ -29,7 +20,8 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         z: pd.Series, optional
             If not None, used to specify the color for each point.
         clip_data: bool
-            If True, remove extreme values at the 0.001 and 0.999 percentitles.
+            If True, ``make_plot`` clips each column to its 0.01st and 99.99th
+            percentiles with ``AggPlot.clip_data``.
         """
         super(Scatter, self).__init__()
         self.set_data(x, y, z, clip_data)
@@ -72,7 +64,7 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
 
         data = self.data
         if self.clip:
-            data = self.clip_data(data, self.clip)
+            data = AggPlot.clip_data(data, self.clip)
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"

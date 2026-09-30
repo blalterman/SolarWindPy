@@ -26,6 +26,20 @@ SpiralFilterThresholds = namedtuple(
 
 @njit(parallel=True)
 def get_counts_per_bin(bins, x, y):
+    r"""Count the points in each rectangular bin.
+
+    Parameters
+    ----------
+    bins : np.ndarray
+        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+    x, y : np.ndarray
+        Point coordinates.
+
+    Returns
+    -------
+    np.ndarray
+        Number of points with ``x0 <= x < x1`` and ``y0 <= y < y1`` in each bin.
+    """
     nbins = bins.shape[0]
     cell_count = np.full(nbins, 0, dtype=np.int64)
 
@@ -43,6 +57,24 @@ def get_counts_per_bin(bins, x, y):
 
 @njit(parallel=True)
 def calculate_bin_number_with_numba(mesh, x, y):
+    r"""Assign each point the index of the mesh cell that contains it.
+
+    Parameters
+    ----------
+    mesh : np.ndarray
+        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+    x, y : np.ndarray
+        Point coordinates.
+
+    Returns
+    -------
+    zbin : np.ndarray
+        Cell index of each point, or ``fill`` for points in no cell.
+    fill : int
+        The fill value, -9999.
+    bin_visited : np.ndarray
+        Number of times each cell was processed.
+    """
     fill = -9999
     zbin = np.full(x.size, fill, dtype=np.int64)
 
@@ -63,7 +95,24 @@ def calculate_bin_number_with_numba(mesh, x, y):
 
 
 class SpiralMesh(object):
+    r"""Adaptive rectangular mesh that splits crowded cells into quarters.
+
+    Starting from the grid of initial edges, every cell holding more than
+    ``min_per_bin`` points is split into four equal cells until none does.
+    """
+
     def __init__(self, x, y, initial_xedges, initial_yedges, min_per_bin=250):
+        r"""Store the data, the initial edges and the split threshold.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        initial_xedges, initial_yedges : np.ndarray
+            Edges of the initial grid.
+        min_per_bin : int
+            A cell holding more points than this is split.
+        """
         self.set_data(x, y)
         self.set_min_per_bin(min_per_bin)
         self.set_initial_edges(initial_xedges, initial_yedges)
@@ -71,42 +120,48 @@ class SpiralMesh(object):
 
     @property
     def bin_id(self):
+        r"""``SpiralMeshBinID`` of (cell index per point, fill value, visit counts)."""
         return self._bin_id
 
     @property
     def cat(self):
-        r""":py:class:`pd.Categorical` version of `bin_id`, with fill bin removed."""
+        r"""``bin_id.id`` as a :class:`pandas.Categorical`, with the fill value removed."""
         return self._cat
 
     @property
     def data(self):
+        r"""DataFrame with columns ``x`` and ``y``."""
         return self._data
 
     @property
     def initial_edges(self):
+        r"""``InitialSpiralEdges`` namedtuple of the initial x and y edges."""
         return self._initial_edges
 
     @property
     def mesh(self):
+        r"""Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges."""
         return self._mesh
 
     @property
     def min_per_bin(self):
+        r"""A cell holding more points than this is split."""
         return self._min_per_bin
 
     @property
     def cell_filter_thresholds(self):
+        r"""``SpiralFilterThresholds`` of the density and size quantiles."""
         return self._cell_filter_thresholds
 
     @property
     def cell_filter(self):
-        r"""Boolean :py:class:`Series` identifying properly filled mesh cells.
+        r"""Boolean array identifying properly filled mesh cells.
 
-        Series selects mesh cells that meet density and area criteria specified
-        by :py:meth:`mesh_cell_filter_thresholds`.
+        Selects mesh cells that meet the density and area criteria in
+        ``cell_filter_thresholds``.
 
         Notes
-        ----
+        -----
         Neither `density` nor `size` convert log-scale edges into linear scale.
         Doing so would overweight the area of mesh cells at larger values on a
         given axis.
@@ -137,7 +192,7 @@ class SpiralMesh(object):
         return tk
 
     def set_cell_filter_thresholds(self, **kwargs):
-        r"""Set or update the :py:meth:`mesh_cell_filter_thresholds`.
+        r"""Set or update ``cell_filter_thresholds``.
 
         Parameters
         ----------
@@ -161,16 +216,26 @@ class SpiralMesh(object):
         )
 
     def set_initial_edges(self, xedges, yedges):
+        r"""Store the initial x and y edges."""
         self._initial_edges = InitialSpiralEdges(xedges, yedges)
 
     def set_data(self, x, y):
+        r"""Store ``x`` and ``y`` as the columns of one DataFrame."""
         data = pd.concat({"x": x, "y": y}, axis=1)
         self._data = data  # SpiralMeshData(x, y)
 
     def set_min_per_bin(self, new):
+        r"""Store the split threshold as an int."""
         self._min_per_bin = int(new)
 
     def initialize_bins(self):
+        r"""Build the initial grid of cells from the initial edges.
+
+        Returns
+        -------
+        np.ndarray
+            Shape (nx * ny, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+        """
         # Leaves initial edges altered when we change maximum edge.
         xbins = self.initial_edges.x
         ybins = self.initial_edges.y
@@ -199,6 +264,17 @@ class SpiralMesh(object):
 
     @staticmethod
     def process_one_spiral_step(bins, x, y, min_per_bin):
+        r"""Split every cell holding more than ``min_per_bin`` points into quarters.
+
+        The rows of ``bins`` that were split are set to NaN in place.
+
+        Returns
+        -------
+        new_cells : np.ndarray or None
+            Shape (4 * n, 4) array of the new cells, or None if none were split.
+        n : int
+            Number of cells split.
+        """
         cell_count = get_counts_per_bin(bins, x, y)
 
         bins_to_replace = cell_count > min_per_bin
@@ -210,6 +286,7 @@ class SpiralMesh(object):
         xhyh = 0.5 * (bins[:, [0, 2]] + bins[:, [1, 3]])
 
         def split_this_cell(idx):
+            r"""Return the four quarters of cell ``idx`` as edge lists."""
             x0, x1, y0, y1 = bins[idx]
             xh, yh = xhyh[idx]
 
@@ -289,6 +366,11 @@ class SpiralMesh(object):
         return ax, tax, stats
 
     def generate_mesh(self):
+        r"""Split cells repeatedly until none holds more than ``min_per_bin`` points.
+
+        Only finite points inside the initial grid are used. The result is
+        stored in ``mesh``.
+        """
         logger = logging.getLogger("__main__")
         start = datetime.now()
         logger.warning(f"Generating {self.__class__.__name__} at {start}")
@@ -354,6 +436,19 @@ class SpiralMesh(object):
         self._mesh = final_bins
 
     def calculate_bin_number(self):
+        r"""Assign each point to its mesh cell and store the result in ``bin_id``.
+
+        Returns
+        -------
+        SpiralMeshBinID
+            Cell index per point (fill value outside the mesh), the fill value,
+            and the visit count of each cell.
+
+        Raises
+        ------
+        ValueError
+            If the cell counts do not cover every mesh cell.
+        """
         logger = logging.getLogger(__name__)
         logger.warning(
             f"Calculating {self.__class__.__name__} bin_number at {datetime.now()}"
@@ -400,11 +495,13 @@ They will be replaced by NaNs and excluded from the aggregation.
         return bin_id
 
     def place_spectra_in_mesh(self):
+        r"""Generate the mesh, then assign each point to a cell; return ``bin_id``."""
         self.generate_mesh()
         bin_id = self.calculate_bin_number()
         return bin_id
 
     def build_cat(self):
+        r"""Store ``cat``, the cell indices as a Categorical without the fill value."""
         bin_id = self.bin_id.id
         fill = self.bin_id.fill
 
@@ -429,6 +526,21 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
     def __init__(
         self, x, y, z=None, logx=False, logy=False, initial_bins=5, clip_data=False
     ):
+        r"""Store the data and labels, then compute the initial bin edges.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        z : pd.Series, optional
+            Value to aggregate in each cell. If None, cells count points.
+        logx, logy : bool
+            If True, use ``log10(abs())`` of that coordinate.
+        initial_bins : int or tuple
+            Initial bins per axis; see ``calc_initial_bins``.
+        clip_data : bool
+            Stored as ``clip``.
+        """
         super().__init__()
         self.set_log(x=logx, y=logy)
         self.set_data(x, y, z, clip_data)
@@ -438,18 +550,22 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
 
     @property
     def clim(self):
+        r"""``RangeLimits`` of the minimum and maximum counts per cell."""
         return self._clim
 
     @property
     def initial_bins(self):
+        r"""Dict of the initial x and y bin edges."""
         return dict(self._initial_bins)
 
     @property
     def grouped(self):
+        r"""z-values grouped by mesh cell, set by ``build_grouped``."""
         return self._grouped
 
     @property
     def mesh(self):
+        r"""The ``SpiralMesh``, set by ``initialize_mesh``."""
         return self._mesh
 
     def agg(self, fcn=None):
@@ -491,6 +607,13 @@ filter : {cell_filter.shape}""")
         return agg
 
     def build_grouped(self):
+        r"""Group the z-values by mesh cell and store the result in ``grouped``.
+
+        Raises
+        ------
+        ValueError
+            If the mesh categories and the data differ in length.
+        """
         cat = self.mesh.cat
         z = self.data.loc[:, "z"]
 
@@ -504,6 +627,21 @@ data : {z.size}
         self._grouped = gb
 
     def calc_initial_bins(self, nbins):
+        r"""Compute the initial bin edges for x and y.
+
+        Parameters
+        ----------
+        nbins : int or tuple
+            An int gives that many bins per axis at equally spaced quantiles of
+            the finite data; a pair gives one int or edge array per axis. The
+            last edge is raised to the larger of 0.01 and 1.01 times the
+            largest edge so the maximum lies inside the grid.
+
+        Returns
+        -------
+        tuple
+            ``(("x", edges), ("y", edges))``.
+        """
         data = self.data
         keys = ("x", "y")
         bins = {}
@@ -547,6 +685,10 @@ data : {z.size}
         return bins
 
     def initialize_mesh(self, **kwargs):
+        r"""Build the ``SpiralMesh`` and assign every point to a cell.
+
+        ``kwargs`` are passed to ``SpiralMesh``, e.g. ``min_per_bin``.
+        """
         x = self.data.loc[:, "x"]
         y = self.data.loc[:, "y"]
 
@@ -564,12 +706,14 @@ data : {z.size}
     def set_clim(self, lower=None, upper=None):
         """Set the min (lower) and max (upper) counts per bin.
 
-        This limit is applied after the :py:meth:`groupby.agg` is run."""
+        This limit is applied after the groupby aggregation in ``agg``.
+        """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = base.RangeLimits(lower, upper)
 
     def set_data(self, x, y, z, clip):
+        r"""Store the data, taking ``log10(abs())`` of each axis flagged in ``log``."""
         super().set_data(x, y, z, clip)
         data = self.data
         if self.log.x:
@@ -598,6 +742,38 @@ data : {z.size}
         alpha_fcn=None,
         **kwargs,
     ):
+        r"""Draw each mesh cell as a rectangle colored by its aggregated z-value.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            If None, create one.
+        cbar : bool
+            If True, draw a colorbar.
+        limit_color_norm : bool
+            If True and ``norm`` is given, unset limits of ``norm`` default to
+            the 1st and 99th percentiles of z.
+        cbar_kwargs : dict, optional
+            Passed to the colorbar.
+        fcn : str, optional
+            Aggregation function passed to ``agg``.
+        alpha_fcn : str, optional
+            If given, cells are made more transparent the larger this
+            aggregation of z is.
+        **kwargs
+            Only ``cmap`` and ``norm`` are accepted.
+
+        Returns
+        -------
+        ax : Axes
+        cbar_or_mappable : Colorbar or matplotlib.collections.PatchCollection
+            The colorbar if ``cbar``, otherwise the patch collection.
+
+        Raises
+        ------
+        ValueError
+            If any other keyword is passed.
+        """
         if ax is None:
             fig, ax = plt.subplots()
 

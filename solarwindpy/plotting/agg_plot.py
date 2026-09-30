@@ -18,17 +18,6 @@ except ModuleNotFoundError:
 
 from . import base
 
-# import os
-# import psutil
-
-
-# def log_mem_usage():
-#    usage = psutil.Process(os.getpid()).memory_info()
-#    usage = "\n".join(
-#        ["{} {:.3f} GB".format(k, v * 1e-9) for k, v in usage._asdict().items()]
-#    )
-#    logging.getLogger("main").warning("Memory usage\n%s", usage)
-
 
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
@@ -57,7 +46,6 @@ class AggPlot(base.Base):
 
     @property
     def intervals(self):
-        #         return dict(self._intervals)
         return {k: pd.IntervalIndex(v) for k, v in self.categoricals.items()}
 
     @property
@@ -83,19 +71,6 @@ class AggPlot(base.Base):
     @property
     def joint(self):
         r"""Combines the categorical and continuous data for `Groupby`."""
-        #         cut = self.cut
-        #         tko = self.agg_axes
-
-        #         self.logger.debug(f"Joining data ({tko}) with cat ({cut.columns.values})")
-
-        #         other = self.data.loc[cut.index, tko]
-
-        #         #         joint = pd.concat([cut, other.to_frame(name=tko)], axis=1, sort=True)
-        #         joint = cut.copy(deep=True)
-        #         joint.loc[:, tko] = other
-        #         joint.sort_index(axis=1, inplace=True)
-        #         return joint
-
         cut = self.cut
         tk_target = self.agg_axes
         target = self.data.loc[cut.index, tk_target]
@@ -108,27 +83,11 @@ class AggPlot(base.Base):
     @property
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes."""
-        #         tko = self.agg_axes
-        #         gb = self.data.loc[:, tko].groupby([v for k, v in self.cut.items()], observed=False)
-        #         gb = self.joint.groupby(list(self._gb_axes))
-
-        #         cut = self.cut
-        #         tk_target = self.agg_axes
-        #         target = self.data.loc[cut.index, tk_target]
-
-        #         mi = pd.MultiIndex.from_frame(cut)
-        #         target.index = mi
 
         target = self.joint
         gb_axes = list(self._gb_axes)
         gb = target.groupby(gb_axes, observed=True)
 
-        #         agg_axes = self.agg_axes
-        #         gb = (
-        #             self.joint.set_index(gb_axes)
-        #             .loc[:, agg_axes]
-        #             .groupby(gb_axes, observed=False)
-        #         )
         return gb
 
     @property
@@ -140,9 +99,30 @@ class AggPlot(base.Base):
         """
         return self._axnorm
 
-    # Old version that cuts at percentiles.
     @staticmethod
     def clip_data(data, clip):
+        r"""Clip data to its 0.01st and 99.99th percentiles.
+
+        Parameters
+        ----------
+        data : pd.Series or pd.DataFrame
+            Data to clip. A DataFrame is clipped column by column.
+        clip : bool or str
+            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
+            tail only; any other value clips both tails. The one-tail branches
+            call ``clip_lower`` and ``clip_upper``, which pandas removed, so they
+            raise ``AttributeError``.
+
+        Returns
+        -------
+        pd.Series or pd.DataFrame
+            The clipped data.
+
+        Raises
+        ------
+        TypeError
+            If ``data`` is neither a Series nor a DataFrame.
+        """
         q0 = 0.0001
         q1 = 0.9999
         pct = data.quantile([q0, q1])
@@ -163,24 +143,6 @@ class AggPlot(base.Base):
         else:
             data = data.clip(lo, up, axis=ax)
         return data
-
-    # New version that uses binning to cut.
-    #     @staticmethod
-    #     def clip_data(data, bins, clip):
-    #         q0 = 0.001
-    #         q1 = 0.999
-    #         pct = data.quantile([q0, q1])
-    #         lo  = pct.loc[q0]
-    #         up  = pct.loc[q1]
-    #         lo = bins.iloc[0]
-    #         up = bins.iloc[-1]
-    #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo)
-    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up)
-    #         else:
-    #             data = data.clip(lo, up)
-    #         return data
 
     def set_clim(self, lower=None, upper=None):
         """Set the minimum (lower) and maximum (upper) allowed number of.
@@ -213,7 +175,7 @@ class AggPlot(base.Base):
             If array-like, treat as bins.
 
         precision: int or None
-            Precision at which to store intervals. If None, default to 3.
+            Decimal places to which bin edges are rounded. If None, 5.
         """
         data = self.data
         bins = {}
@@ -277,12 +239,10 @@ class AggPlot(base.Base):
             i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
 
             bins[k] = b
-            #             intervals[k] = pd.IntervalIndex(i)
             intervals[k] = pd.CategoricalIndex(i)
 
         bins = tuple(bins.items())
         intervals = tuple(intervals.items())
-        #         self._intervals = intervals
         self._categoricals = intervals
 
     def make_cut(self):
@@ -325,10 +285,6 @@ class AggPlot(base.Base):
         if c0 is not None or c1 is not None:
             cnt = gb.agg("count")  # .loc[:, tko]
             tk = pd.Series(True, index=agg.index)
-            #             tk  = pd.DataFrame(True,
-            #                                index=agg.index,
-            #                                columns=agg.columns
-            #                               )
             if c0 is not None:
                 tk = tk & (cnt >= c0)
             if c1 is not None:
@@ -336,19 +292,12 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
-        #         #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
-        #         # Ensure all bins are represented in the data. (20190605)
-        # #         for k, v in self.intervals.items():
-        #         for k, v in self.categoricals.items():
-        #             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-        #             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
-
         return agg
 
     def _agg_reindexer(self, agg):
-        #         Using `observed=False` in `self.grouped` raised a TypeError because mixed Categoricals and np.nans. (20200229)
+        # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError
+        # with mixed Categoricals and NaNs. (20200229)
         # Ensure all bins are represented in the data. (20190605)
-        #         for k, v in self.intervals.items():
         for k, v in self.categoricals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
             agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
@@ -430,48 +379,6 @@ class AggPlot(base.Base):
                 subset.loc[:, k] = 10 ** subset.loc[:, k]
 
         return subset, tk_h2
-
-    #     Old version that cuts at percentiles.
-    #     @staticmethod
-    #     def clip_data(data, clip):
-    #         q0 = 0.0001
-    #         q1 = 0.9999
-    #         pct = data.quantile([q0, q1])
-    #         lo = pct.loc[q0]
-    #         up = pct.loc[q1]
-    #
-    #         if isinstance(data, pd.Series):
-    #             ax = 0
-    #         elif isinstance(data, pd.DataFrame):
-    #             ax = 1
-    #         else:
-    #             raise TypeError("Unexpected object %s" % type(data))
-    #
-    #         if isinstance(clip, str) and clip.lower()[0] == "l":
-    #             data = data.clip_lower(lo, axis=ax)
-    #         elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #             data = data.clip_upper(up, axis=ax)
-    #         else:
-    #             data = data.clip(lo, up, axis=ax)
-    #         return data
-    #
-    #     New version that uses binning to cut.
-    #         @staticmethod
-    #         def clip_data(data, bins, clip):
-    #             q0 = 0.001
-    #             q1 = 0.999
-    #             pct = data.quantile([q0, q1])
-    #             lo  = pct.loc[q0]
-    #             up  = pct.loc[q1]
-    #             lo = bins.iloc[0]
-    #             up = bins.iloc[-1]
-    #             if isinstance(clip, str) and clip.lower()[0] == "l":
-    #                 data = data.clip_lower(lo)
-    #             elif isinstance(clip, str) and clip.lower()[0] == "u":
-    #                 data = data.clip_upper(up)
-    #             else:
-    #                 data = data.clip(lo, up)
-    #             return data
 
     @abstractproperty
     def _gb_axes(self):

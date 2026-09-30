@@ -1,3 +1,5 @@
+r"""Labels for heavy ion charge states and charge-state ratios."""
+
 __all__ = ["Ion", "ChargeStateRatio"]
 
 from pathlib import Path
@@ -27,27 +29,41 @@ class Ion(base.Base):
 
     @property
     def species(self):
+        r"""Element symbol, title-cased."""
         return self._species
 
     @property
     def charge(self):
+        r"""Charge state as passed, e.g. ``6`` or ``"i"``."""
         return self._charge
 
     @property
     def tex(self):
+        r"""TeX of the ion, ``{species}^{charge}``."""
         return "{%s}^{%s}" % (self.species, self.charge)
 
     @property
     def units(self):
+        r"""TeX of the count units."""
         return r"\#"  # noqa: W605
 
     @property
     def path(self):
+        r"""Save path ``<species>_<charge>``, with ``+`` as ``p`` and ``-`` as ``m``."""
         return Path(
-            f"""{self.species}_{self.charge.replace("+", "p").replace("-", "m")}"""
+            f"""{self.species}_{str(self.charge).replace("+", "p").replace("-", "m")}"""
         )
 
     def set_species_charge(self, species, charge):
+        r"""Store the species and charge.
+
+        An unrecognized species logs a warning.
+
+        Raises
+        ------
+        ValueError
+            If ``charge`` is neither an integer nor ``"i"`` or ``"j"``.
+        """
         species = species.title()
         if species not in known_species:
             self.logger.warning(f"Unknown species ({species})")
@@ -86,22 +102,27 @@ class ChargeStateRatio(base.Base):
 
     @property
     def ionA(self):
+        r"""Numerator ``Ion``."""
         return self._ionA
 
     @property
     def ionB(self):
+        r"""Denominator ``Ion``."""
         return self._ionB
 
     @property
     def path(self):
+        r"""Save path ``<ionA path>-OV-<ionB path>``."""
         return Path(f"{str(self.ionA.path)}-OV-{str(self.ionB.path)}")
 
     @property
     def tex(self):
+        r"""TeX of the ratio."""
         return f"{self.ionA.tex}/{self.ionB.tex}"
 
     @property
     def units(self):
+        r"""Count units when both ions share units, otherwise their ratio."""
         uA = self.ionA.units
         uB = self.ionB.units
 
@@ -112,6 +133,7 @@ class ChargeStateRatio(base.Base):
         return units
 
     def set_ions(self, ionA, ionB):
+        r"""Store both ions, building an ``Ion`` from each tuple."""
         if not isinstance(ionA, Ion):
             ionA = Ion(*ionA)
         if not isinstance(ionB, Ion):

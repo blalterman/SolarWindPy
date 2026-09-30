@@ -12,7 +12,21 @@ from . import tools
 
 
 class OrbitPlot(ABC):
+    r"""Mixin that splits an aggregation into the legs of an orbit.
+
+    Each point is assigned to the "Inbound" or "Outbound" leg by which
+    interval of ``orbit`` its timestamp falls in, and the leg becomes an
+    extra ``"Orbit"`` level of the groupby.
+    """
+
     def __init__(self, orbit, *args, **kwargs):
+        r"""Store ``orbit``, then initialize the histogram with the other arguments.
+
+        Parameters
+        ----------
+        orbit : pd.IntervalIndex
+            Two time intervals: the inbound leg first, then the outbound leg.
+        """
         self.set_orbit(orbit)
         super(OrbitPlot, self).__init__(*args, **kwargs)
 
@@ -22,6 +36,7 @@ class OrbitPlot(ABC):
 
     @property
     def orbit(self):
+        r"""Sorted ``IntervalIndex`` of the inbound and outbound time intervals."""
         return self._orbit
 
     @property
@@ -51,6 +66,7 @@ class OrbitPlot(ABC):
         self._orbit = new.sort_values()
 
     def make_cut(self):
+        r"""Bin the data, then add an ``"Orbit"`` column naming each point's leg."""
         super(OrbitPlot, self).make_cut()
         cut = self.cut
 
@@ -70,7 +86,10 @@ class OrbitPlot(ABC):
 
 
 class OrbitHist1D(OrbitPlot, histograms.Hist1D):
+    r"""1D histogram with one curve per orbit leg."""
+
     def __init__(self, orbit, x, **kwargs):
+        r"""Build a ``Hist1D`` of ``x`` split by the legs of ``orbit``."""
         super(OrbitHist1D, self).__init__(orbit, x, **kwargs)
 
     def _format_axis(self, ax):
@@ -78,6 +97,10 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
         ax.legend(loc=0, ncol=1, framealpha=0)
 
     def agg(self, **kwargs):
+        r"""Aggregate each bin separately for each orbit leg.
+
+        ``kwargs`` (including ``fcn``) are passed to ``Hist1D.agg``.
+        """
         fcn = kwargs.pop("fcn", None)
         agg = super(OrbitHist1D, self).agg(fcn=fcn, **kwargs)
 
@@ -133,7 +156,10 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
 
 
 class OrbitHist2D(OrbitPlot, histograms.Hist2D):
+    r"""2D histogram aggregated separately for each orbit leg, one axis per leg."""
+
     def __init__(self, orbit, x, y, **kwargs):
+        r"""Build a ``Hist2D`` of ``x`` and ``y`` split by the legs of ``orbit``."""
         super(OrbitHist2D, self).__init__(orbit, x, y, **kwargs)
 
     def _format_in_out_axes(self, inbound, outbound):
