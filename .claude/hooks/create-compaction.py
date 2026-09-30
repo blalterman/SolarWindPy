@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Compaction Creation Hook for SolarWindPy Creates structured compaction preserving
-plan state at token boundaries.
+"""Compaction Creation Hook for SolarWindPy.
+
+Creates structured compaction preserving plan state at token boundaries.
 
 Enhanced with intelligent token estimation and content-aware compression.
 """
@@ -287,7 +288,9 @@ def extract_critical_context(plan_dir, plan_name):
             lines = content.splitlines()
             for i, line in enumerate(reversed(lines[:50])):  # Check last 50 lines
                 if "Implementation Notes" in line or "Progress" in line:
-                    recent_notes = lines[-(i + 10) :] if i < 40 else lines[-i:]
+                    recent_notes = (
+                        lines[-(i + 10) :] if i < 40 else lines[-i:]  # noqa: E203
+                    )
                     critical_content["recent_decisions"] = [
                         line.strip()
                         for line in recent_notes
@@ -432,7 +435,7 @@ def create_compaction():
 
     # Calculate target tokens based on strategy
     target_tokens = int(tokens * (1 - compression_strategy["target_reduction"]))
-    target_description = f"{compression_strategy['level']} ({compression_strategy['target_reduction']*100:.0f}% reduction)"
+    target_description = f"{compression_strategy['level']} ({compression_strategy['target_reduction'] * 100:.0f}% reduction)"
 
     compaction_content = f"""# Compacted Context State - {timestamp}
 
@@ -575,7 +578,7 @@ def create_compaction():
 ```
 
 ### 🎯 Priority Actions for Next Session
-{chr(10).join(f"{i+1}. {action}" for i, action in enumerate(priority_actions[:5])) if priority_actions else "1. Review compacted state and determine next steps"}
+{chr(10).join(f"{i + 1}. {action}" for i, action in enumerate(priority_actions[:5])) if priority_actions else "1. Review compacted state and determine next steps"}
 
 ### 🔄 Session Continuity Checklist
 - [ ] **Environment**: Verify correct conda environment and working directory

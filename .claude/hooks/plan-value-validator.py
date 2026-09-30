@@ -761,8 +761,10 @@ class SolarWindPyPlanValueValidator:
         return suggestions
 
     def can_complete_plan(self, plan_file: Path) -> Tuple[bool, str]:
-        """Check if plan can be marked as completed (integration with plan-completion-
-        manager)."""
+        """Check if plan can be marked as completed.
+
+        Integrates with plan-completion-manager.
+        """
         validation_results = self.validate_plan_file(plan_file, strict=False)
 
         if validation_results["valid"]:
