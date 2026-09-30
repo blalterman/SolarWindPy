@@ -1,752 +1,241 @@
 #!/usr/bin/env python
-"""Tests for solarwindpy.plotting.scatter module.
+"""Tests for ``solarwindpy.plotting.scatter.Scatter``.
 
-This module provides comprehensive test coverage for the Scatter class used for creating
-scatter plots with optional color mapping functionality.
+A scatter plot hands matplotlib one point per complete (x, y, z) row, coloured
+by z when z varies, with a colorbar labelled ``labels.z``. Expectations come
+from the hand-typed ``ROWS`` table; assertions read the real ``PathCollection``
+(offsets, colour array, sizes), ``Axes`` and ``Colorbar`` on the Agg backend.
+
+The ``Scatter(..., clip_data=True)`` path is not tested here: its
+``make_plot`` calls ``self.clip_data``, which ``Scatter`` lacks, so it raises
+``AttributeError``. The fix to ``scatter.py`` carries its own test.
 """
 
-import pytest
-import logging
-import pandas as pd
-import numpy as np
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
+import warnings
 
+import numpy as np
+import pandas as pd
+import pytest
 import matplotlib
 
-matplotlib.use("Agg")  # Use non-interactive backend
-from matplotlib import pyplot as plt
-from matplotlib.collections import PathCollection
-
-import solarwindpy.plotting.scatter as scatter_module
-from solarwindpy.plotting.scatter import Scatter
-from solarwindpy.plotting.base import PlotWithZdata, CbarMaker, AxesLabels, LogAxes
-
-
-class TestScatterModuleStructure:
-    """Test scatter module structure and imports."""
-
-    def test_module_imports(self):
-        """Test that all required imports are accessible."""
-        # Test basic imports
-        assert hasattr(scatter_module, "base")
-        assert hasattr(scatter_module, "plt")
-        assert hasattr(scatter_module, "Scatter")
-
-    def test_scatter_class_available(self):
-        """Test that Scatter class is accessible from module."""
-        assert hasattr(scatter_module, "Scatter")
-        assert callable(scatter_module.Scatter)
-
-    def test_scatter_inheritance(self):
-        """Test that Scatter inherits from correct base classes."""
-        assert issubclass(Scatter, PlotWithZdata)
-        assert issubclass(Scatter, CbarMaker)
-
-        # Test MRO (Method Resolution Order)
-        mro = Scatter.__mro__
-        assert PlotWithZdata in mro
-        assert CbarMaker in mro
-
-
-class TestScatterInitialization:
-    """Test Scatter class initialization."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.axes import Axes  # noqa: E402
+from matplotlib.colorbar import Colorbar  # noqa: E402
+
+from solarwindpy.plotting.base import AxesLabels, LogAxes  # noqa: E402
+from solarwindpy.plotting.scatter import Scatter  # noqa: E402
+
+# ---------------------------------------------------------------------------
+# Chosen input: index, x, y, z. Row 1 lacks y and row 3 lacks z; both hold
+# values outside the kept extent (x = 9, y = 99) so keeping either shows up in
+# the offsets and the axis limits. Extremes of the kept rows are interior.
+# ---------------------------------------------------------------------------
+
+ROWS = [
+    (0, 2.0, 30.0, 0.5),
+    (1, 9.0, np.nan, 0.7),
+    (2, 1.0, 50.0, 0.9),
+    (3, 3.0, 99.0, np.nan),
+    (4, 4.0, 10.0, 0.2),
+    (5, 2.5, 40.0, 0.4),
+]
+KEPT = [r for r in ROWS if not any(np.isnan(v) for v in r[1:])]
+XY_KEPT = [r for r in ROWS if not (np.isnan(r[1]) or np.isnan(r[2]))]
+
+X = pd.Series([r[1] for r in ROWS])
+Y = pd.Series([r[2] for r in ROWS])
+Z = pd.Series([r[3] for r in ROWS])
+
+
+def _col(rows, i):
+    return np.array([r[i] for r in rows])
+
+
+@pytest.fixture
+def ax():
+    _, axis = plt.subplots()
+    yield axis
+    plt.close("all")
+
+
+def test_new_scatter_has_linear_axes_and_default_labels():
+    """Defaults: linear axes, labels x and y, z labelled only when z is given.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert Scatter(X, Y).log == LogAxes(False, False)
+    assert Scatter(X, Y).labels == AxesLabels("x", "y", None)
+    assert Scatter(X, Y, Z).labels == AxesLabels("x", "y", "z")
+    assert Scatter(X, Y).clip is False
+
+
+def test_points_handed_to_matplotlib_are_the_complete_rows(ax):
+    """Offsets are (x, y) of every row with no NaN, in input order.
+
+    ON FAILURE: the code is wrong.
+    """
+    Scatter(X, Y, Z).make_plot(ax=ax)
+    offsets = ax.collections[0].get_offsets()
+    np.testing.assert_array_equal(offsets, np.c_[_col(KEPT, 1), _col(KEPT, 2)])
+
+
+def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
+    """Colour array is z row for row; the colorbar maps it and shows labels.z.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = Scatter(X, Y, Z)
+    sc.set_labels(x="Vx", y="Np", z="T")
+    ret_ax, cbar = sc.make_plot(ax=ax)
+    coll = ax.collections[0]
+    np.testing.assert_array_equal(coll.get_array(), _col(KEPT, 3))
+    assert ret_ax is ax
+    assert isinstance(cbar, Colorbar)
+    assert cbar.mappable is coll
+    assert cbar.ax.get_ylabel() == "T"
+    assert (ax.get_xlabel(), ax.get_ylabel()) == ("Vx", "Np")
+
+
+@pytest.mark.parametrize("z", [None, pd.Series(7.0, index=X.index)])
+def test_absent_or_constant_z_gives_uncoloured_points_and_no_colorbar(ax, z):
+    """With no z, or one z value for every point, nothing is colour-mapped.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    assert ax.collections[0].get_array() is None
+    assert cbar is None
+    assert ax.figure.axes == [ax]
+
+
+def test_cbar_false_colours_points_but_draws_no_colorbar(ax):
+    """``cbar=False`` keeps the colour mapping and skips the colorbar.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
+    np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
+    assert cbar is None
+    assert ax.figure.axes == [ax]
+
 
-    def test_basic_initialization(self):
-        """Test basic initialization with x, y data only."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        assert scatter is not None
-        assert hasattr(scatter, "data")
-        assert hasattr(scatter, "_labels")
-        assert hasattr(scatter, "_log")
-        assert hasattr(scatter, "clip")
-
-    def test_initialization_with_z_data(self):
-        """Test initialization with z data for color mapping."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        assert scatter is not None
-        assert "z" in scatter.data.columns
-        assert scatter._labels.z == "z"
-
-    def test_initialization_with_clip_data_true(self):
-        """Test initialization with clip_data=True."""
-        scatter = Scatter(self.x_data, self.y_data, clip_data=True)
-
-        assert scatter.clip is True
-
-    def test_initialization_with_clip_data_false(self):
-        """Test initialization with clip_data=False."""
-        scatter = Scatter(self.x_data, self.y_data, clip_data=False)
-
-        assert scatter.clip is False
-
-    def test_labels_initialization(self):
-        """Test that labels are properly initialized."""
-        # Without z data
-        scatter = Scatter(self.x_data, self.y_data)
-        assert scatter._labels.x == "x"
-        assert scatter._labels.y == "y"
-        assert scatter._labels.z is None
-
-        # With z data
-        scatter_z = Scatter(self.x_data, self.y_data, self.z_data)
-        assert scatter_z._labels.x == "x"
-        assert scatter_z._labels.y == "y"
-        assert scatter_z._labels.z == "z"
-
-    def test_log_initialization(self):
-        """Test that log axes are properly initialized."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        assert hasattr(scatter, "_log")
-        assert scatter._log.x is False
-        assert scatter._log.y is False
-
-    def test_path_initialization(self):
-        """Test that path is initialized to None."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        assert hasattr(scatter, "_path")
-
-    def test_invalid_input_types(self):
-        """Test behavior with non-pandas Series inputs."""
-        # Lists are actually converted to Series internally
-        scatter = Scatter([1, 2, 3], self.y_data[:3])
-        assert len(scatter.data) == 3
+def test_without_ax_a_new_figure_is_made():
+    """``ax=None`` plots on fresh axes in a new figure (docstring).
 
-        # Both as lists
-        scatter2 = Scatter([1, 2, 3], [4, 5, 6])
-        assert len(scatter2.data) == 3
-
-    def test_empty_data_handling(self):
-        """Test behavior with empty pandas Series."""
-        empty_x = pd.Series([], dtype=float)
-        empty_y = pd.Series([], dtype=float)
-
-        with pytest.raises(ValueError, match="exclusively NaNs"):
-            Scatter(empty_x, empty_y)
-
-    def test_mismatched_data_lengths(self):
-        """Test error handling for different length x, y, z."""
-        short_data = pd.Series([1, 2])
-
-        # This should work - pandas will align indices
-        scatter = Scatter(short_data, self.y_data)
-        assert len(scatter.data) == 2  # Should keep only aligned data
-
-    def test_nan_data_handling(self):
-        """Test handling of NaN values in data."""
-        x_with_nan = pd.Series([1, 2, np.nan, 4, 5])
-        y_with_nan = pd.Series([2, np.nan, 6, 8, 10])
-
-        scatter = Scatter(x_with_nan, y_with_nan)
-
-        # NaN rows should be dropped
-        assert not scatter.data.isnull().any().any()
-        assert len(scatter.data) < 5
-
-
-class TestScatterDataManagement:
-    """Test data management methods and properties."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    def test_set_data_method(self):
-        """Test the set_data method."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        # Test basic data assignment
-        assert "x" in scatter.data.columns
-        assert "y" in scatter.data.columns
-        assert "z" in scatter.data.columns  # Should be filled with 1s
-
-    def test_set_data_with_z(self):
-        """Test set_data with z data."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        assert "z" in scatter.data.columns
-        assert not (scatter.data["z"] == 1).all()  # Should not be all 1s
-
-    def test_data_property_access(self):
-        """Test access to stored data via properties."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        data = scatter.data
-        assert isinstance(data, pd.DataFrame)
-        assert "x" in data.columns
-        assert "y" in data.columns
-        assert "z" in data.columns
-
-    def test_data_integrity(self):
-        """Test that data remains unchanged after storage."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # Check that original values are preserved
-        np.testing.assert_array_equal(scatter.data["x"].values, self.x_data.values)
-        np.testing.assert_array_equal(scatter.data["y"].values, self.y_data.values)
-        np.testing.assert_array_equal(scatter.data["z"].values, self.z_data.values)
-
-    def test_clip_property(self):
-        """Test the clip property."""
-        scatter_no_clip = Scatter(self.x_data, self.y_data, clip_data=False)
-        scatter_with_clip = Scatter(self.x_data, self.y_data, clip_data=True)
-
-        assert scatter_no_clip.clip is False
-        assert scatter_with_clip.clip is True
-
-
-class TestScatterLabelsAndAxes:
-    """Test label and axis configuration."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    def test_default_labels(self):
-        """Test that default labels are set correctly."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        assert scatter._labels.x == "x"
-        assert scatter._labels.y == "y"
-        assert scatter._labels.z is None
-
-    def test_labels_with_z_data(self):
-        """Test labels when z data is provided."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        assert scatter._labels.x == "x"
-        assert scatter._labels.y == "y"
-        assert scatter._labels.z == "z"
-
-    def test_label_customization(self):
-        """Test updating axis labels via namedtuple replacement."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # AxesLabels is a namedtuple, so we need to replace it entirely
-        original_labels = scatter._labels
-        new_labels = scatter._labels._replace(x="Custom X", y="Custom Y", z="Custom Z")
-        scatter._labels = new_labels
-
-        assert scatter._labels.x == "Custom X"
-        assert scatter._labels.y == "Custom Y"
-        assert scatter._labels.z == "Custom Z"
-
-    def test_label_persistence(self):
-        """Test that labels maintain values across operations."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        original_x = scatter._labels.x
-        original_y = scatter._labels.y
-
-        # Perform some operation (access data)
-        _ = scatter.data
-
-        # Labels should persist
-        assert scatter._labels.x == original_x
-        assert scatter._labels.y == original_y
-
-    def test_log_scale_defaults(self):
-        """Test default log scale settings."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        assert scatter._log.x is False
-        assert scatter._log.y is False
-
-    def test_log_scale_configuration(self):
-        """Test setting logarithmic scales via namedtuple replacement."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        # LogAxes is a namedtuple, so we need to replace it entirely
-        new_log = scatter._log._replace(x=True, y=True)
-        scatter._log = new_log
-
-        assert scatter._log.x is True
-        assert scatter._log.y is True
-
-
-class TestScatterPlotGeneration:
-    """Test plot generation and matplotlib integration."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_make_plot_basic(self, mock_subplots):
-        """Test basic scatter plot generation."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data)
-        ax, cbar = scatter.make_plot()
-
-        # Verify scatter plot was called
-        mock_ax.scatter.assert_called_once()
-        assert ax == mock_ax
-        assert cbar is None  # No colorbar for 2D plot
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_make_plot_with_z_data(self, mock_subplots):
-        """Test scatter plot generation with z data."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # Mock the _make_cbar method
-        with patch.object(scatter, "_make_cbar") as mock_make_cbar:
-            mock_cbar = MagicMock()
-            mock_make_cbar.return_value = mock_cbar
-
-            ax, cbar = scatter.make_plot()
-
-            # Verify scatter plot was called
-            mock_ax.scatter.assert_called_once()
-            # Verify colorbar was created
-            mock_make_cbar.assert_called_once()
-            assert ax == mock_ax
-            assert cbar == mock_cbar
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_make_plot_with_provided_ax(self, mock_subplots):
-        """Test plot generation with provided axes."""
-        # Setup mock
-        provided_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        provided_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data)
-        ax, cbar = scatter.make_plot(ax=provided_ax)
-
-        # Should not create new subplot
-        mock_subplots.assert_not_called()
-        # Should use provided axes
-        provided_ax.scatter.assert_called_once()
-        assert ax == provided_ax
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_make_plot_no_colorbar(self, mock_subplots):
-        """Test plot generation with colorbar disabled."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-        ax, cbar = scatter.make_plot(cbar=False)
-
-        assert cbar is None
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_make_plot_kwargs_passed(self, mock_subplots):
-        """Test that kwargs are passed to ax.scatter."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data)
-        scatter.make_plot(s=50, alpha=0.7, marker="s")
-
-        # Check that kwargs were passed
-        call_args = mock_ax.scatter.call_args
-        assert "s" in call_args.kwargs
-        assert "alpha" in call_args.kwargs
-        assert "marker" in call_args.kwargs
-        assert call_args.kwargs["s"] == 50
-        assert call_args.kwargs["alpha"] == 0.7
-        assert call_args.kwargs["marker"] == "s"
-
-    def test_format_axis_method(self):
-        """Test the _format_axis method."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        # Setup mock axes and collection
-        mock_ax = MagicMock()
-        mock_collection = MagicMock()
-        mock_collection.sticky_edges.x = [0, 0]
-        mock_collection.sticky_edges.y = [0, 0]
-
-        # Test the method
-        scatter._format_axis(mock_ax, mock_collection)
-
-        # Verify axes methods were called
-        mock_ax.update_datalim.assert_called_once()
-        mock_ax.autoscale_view.assert_called_once()
-
-        # Verify sticky edges were set
-        assert mock_collection.sticky_edges.x[0] == self.x_data.min()
-        assert mock_collection.sticky_edges.x[1] == self.x_data.max()
-        assert mock_collection.sticky_edges.y[0] == self.y_data.min()
-        assert mock_collection.sticky_edges.y[1] == self.y_data.max()
-
-
-class TestScatterColorMapping:
-    """Test color mapping and colorbar functionality."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-        self.uniform_z = pd.Series([5, 5, 5, 5, 5], name="uniform_z")
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_colorbar_creation_with_z_data(self, mock_subplots):
-        """Test colorbar creation when z data is provided."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        with patch.object(scatter, "_make_cbar") as mock_make_cbar:
-            mock_cbar = MagicMock()
-            mock_make_cbar.return_value = mock_cbar
-
-            ax, cbar = scatter.make_plot(cbar=True)
-
-            mock_make_cbar.assert_called_once()
-            assert cbar == mock_cbar
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_no_colorbar_with_uniform_z(self, mock_subplots):
-        """Test no colorbar when z data is uniform."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.uniform_z)
-        ax, cbar = scatter.make_plot()
-
-        # No colorbar should be created for uniform z data
-        assert cbar is None
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_colorbar_kwargs_passed(self, mock_subplots):
-        """Test that colorbar kwargs are passed correctly."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        cbar_kwargs = {"orientation": "horizontal", "shrink": 0.8}
-
-        with patch.object(scatter, "_make_cbar") as mock_make_cbar:
-            mock_cbar = MagicMock()
-            mock_make_cbar.return_value = mock_cbar
-
-            scatter.make_plot(cbar_kwargs=cbar_kwargs)
-
-            # Check that kwargs were passed
-            call_args = mock_make_cbar.call_args
-            assert "orientation" in call_args.kwargs
-            assert "shrink" in call_args.kwargs
-
-
-class TestScatterInheritance:
-    """Test integration with base classes."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    def test_plot_with_z_data_inheritance(self):
-        """Test inheritance from PlotWithZdata."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # Should have PlotWithZdata methods and properties
-        assert hasattr(scatter, "data")
-        assert hasattr(scatter, "clip")
-        assert hasattr(scatter, "set_data")
-
-        # Test inherited functionality
-        assert isinstance(scatter.data, pd.DataFrame)
-        assert isinstance(scatter.clip, bool)
-
-    def test_cbar_maker_inheritance(self):
-        """Test inheritance from CbarMaker."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # Should have CbarMaker methods
-        assert hasattr(scatter, "_make_cbar")
-
-        # Test that _make_cbar is callable
-        assert callable(scatter._make_cbar)
-
-    def test_base_class_properties_accessible(self):
-        """Test that base class properties are accessible."""
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        # Should have Base class properties
-        assert hasattr(scatter, "labels")
-        assert hasattr(scatter, "log")
-
-        # Test property access
-        labels = scatter.labels
-        log_settings = scatter.log
-        assert labels is not None
-        assert log_settings is not None
-
-
-class TestScatterErrorHandling:
-    """Test error handling and edge cases."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    def test_invalid_data_types(self):
-        """Test handling of non-pandas Series data types."""
-        # Lists are actually converted to Series internally
-        scatter1 = Scatter([1, 2, 3], self.y_data[:3])
-        assert len(scatter1.data) == 3
-
-        scatter2 = Scatter(self.x_data[:3], [4, 5, 6])
-        assert len(scatter2.data) == 3
-
-        scatter3 = Scatter(self.x_data, self.y_data, [7, 8, 9, 10, 11])
-        assert len(scatter3.data) == 5
-
-    def test_nan_inf_handling(self):
-        """Test handling of NaN and infinite values."""
-        x_with_inf = pd.Series([1, 2, np.inf, 4, 5])
-        y_with_nan = pd.Series([2, np.nan, 6, 8, 10])
-
-        # NaN rows are dropped, but inf values may remain
-        scatter = Scatter(x_with_inf, y_with_nan)
-
-        # Check that NaN values are removed
-        assert not scatter.data.isnull().any().any()
-
-        # Inf values might remain in the data (this is the actual behavior)
-        assert len(scatter.data) == 4  # Row with NaN is dropped
-
-    def test_missing_data(self):
-        """Test behavior with incomplete data."""
-        # Test with missing indices
-        x_missing = pd.Series([1, 3, 5], index=[0, 2, 4])
-        y_missing = pd.Series([2, 6, 10], index=[0, 2, 4])
-
-        scatter = Scatter(x_missing, y_missing)
-
-        # Should handle missing indices correctly
-        assert len(scatter.data) == 3
-        assert list(scatter.data.index) == [0, 2, 4]
-
-    def test_single_point_data(self):
-        """Test handling of single data point."""
-        single_x = pd.Series([1])
-        single_y = pd.Series([2])
-
-        scatter = Scatter(single_x, single_y)
-
-        assert len(scatter.data) == 1
-        assert scatter.data.iloc[0]["x"] == 1
-        assert scatter.data.iloc[0]["y"] == 2
-
-    def test_negative_values_with_log(self):
-        """Test behavior with negative values when log scale is set."""
-        negative_x = pd.Series([-1, -2, -3])
-        positive_y = pd.Series([1, 2, 3])
-
-        scatter = Scatter(negative_x, positive_y)
-        # Set log scale using namedtuple replacement
-        new_log = scatter._log._replace(x=True)
-        scatter._log = new_log
-
-        # This should not raise an error during initialization
-        # The error would occur during plotting, which matplotlib handles
-        assert scatter._log.x is True
-
-    def test_empty_data_after_processing(self):
-        """Test handling when data becomes empty after processing."""
-        # Create data that becomes empty after NaN removal
-        all_nan_x = pd.Series([np.nan, np.nan, np.nan])
-        all_nan_y = pd.Series([np.nan, np.nan, np.nan])
-
-        with pytest.raises(ValueError, match="exclusively NaNs"):
-            Scatter(all_nan_x, all_nan_y)
-
-
-class TestScatterPerformanceAndMemory:
-    """Test performance and memory usage."""
-
-    def test_large_datasets(self):
-        """Test performance with large datasets."""
-        # Create large dataset
-        n_points = 10000
-        large_x = pd.Series(np.random.randn(n_points))
-        large_y = pd.Series(np.random.randn(n_points))
-        large_z = pd.Series(np.random.randn(n_points))
-
-        # Should handle large datasets without issues
-        scatter = Scatter(large_x, large_y, large_z)
-
-        assert len(scatter.data) == n_points
-        assert "x" in scatter.data.columns
-        assert "y" in scatter.data.columns
-        assert "z" in scatter.data.columns
-
-    def test_memory_usage(self):
-        """Test efficient memory usage."""
-        scatter = Scatter(self.x_data, self.y_data)
-
-        # Data should be stored efficiently
-        data_memory = scatter.data.memory_usage(deep=True).sum()
-        assert data_memory > 0  # Should use some memory
-
-        # Should not create excessive copies
-        original_data = scatter.data
-        accessed_data = scatter.data
-        assert original_data is accessed_data  # Should be same object
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-
-
-class TestScatterDocumentation:
-    """Test documentation and examples."""
-
-    def test_class_docstring_exists(self):
-        """Test that class has docstring."""
-        assert Scatter.__doc__ is not None
-        assert len(Scatter.__doc__.strip()) > 0
-
-    def test_init_docstring_exists(self):
-        """Test that __init__ method has docstring."""
-        assert Scatter.__init__.__doc__ is not None
-        assert len(Scatter.__init__.__doc__.strip()) > 0
-
-    def test_make_plot_docstring_exists(self):
-        """Test that make_plot method has docstring."""
-        assert Scatter.make_plot.__doc__ is not None
-        assert len(Scatter.make_plot.__doc__.strip()) > 0
-
-    def test_docstring_parameter_documentation(self):
-        """Test that parameters are documented in docstrings."""
-        init_doc = Scatter.__init__.__doc__
-
-        # Check that key parameters are documented
-        assert "x" in init_doc
-        assert "y" in init_doc
-        assert "z" in init_doc
-        assert "clip_data" in init_doc
-
-        make_plot_doc = Scatter.make_plot.__doc__
-        assert "ax" in make_plot_doc
-        assert "cbar" in make_plot_doc
-
-
-class TestScatterIntegration:
-    """Integration tests for full scatter plot workflow."""
-
-    def setup_method(self):
-        """Set up test data for each test method."""
-        self.x_data = pd.Series([1, 2, 3, 4, 5], name="x_values")
-        self.y_data = pd.Series([2, 4, 6, 8, 10], name="y_values")
-        self.z_data = pd.Series([10, 20, 30, 40, 50], name="z_values")
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_full_workflow_2d(self, mock_subplots):
-        """Test complete workflow for 2D scatter plot."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        # Create scatter plot
-        scatter = Scatter(self.x_data, self.y_data)
-
-        # Customize labels using namedtuple replacement
-        new_labels = scatter._labels._replace(x="X Values", y="Y Values")
-        scatter._labels = new_labels
-
-        # Generate plot
-        ax, cbar = scatter.make_plot()
-
-        # Verify workflow
-        assert ax is not None
-        assert cbar is None
-        mock_ax.scatter.assert_called_once()
-
-    @patch("matplotlib.pyplot.subplots")
-    def test_full_workflow_3d_with_colorbar(self, mock_subplots):
-        """Test complete workflow for 3D scatter plot with colorbar."""
-        # Setup mock
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_collection = MagicMock(spec=PathCollection)
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_ax.scatter.return_value = mock_collection
-
-        scatter = Scatter(self.x_data, self.y_data, self.z_data)
-
-        with patch.object(scatter, "_make_cbar") as mock_make_cbar:
-            mock_cbar = MagicMock()
-            mock_make_cbar.return_value = mock_cbar
-
-            # Customize labels using namedtuple replacement
-            new_labels = scatter._labels._replace(
-                x="X Values", y="Y Values", z="Color Values"
-            )
-            scatter._labels = new_labels
-
-            # Generate plot with colorbar
-            ax, cbar = scatter.make_plot(cbar=True)
-
-            # Verify workflow
-            assert ax is not None
-            assert cbar is not None
-            mock_ax.scatter.assert_called_once()
-            mock_make_cbar.assert_called_once()
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
+    ON FAILURE: the code is wrong.
+    """
+    existing, _ = plt.subplots()
+    try:
+        new_ax, _ = Scatter(X, Y).make_plot()
+        assert isinstance(new_ax, Axes)
+        assert new_ax.figure is not existing
+        assert len(new_ax.collections) == 1
+        assert len(existing.axes[0].collections) == 0
+    finally:
+        plt.close("all")
+
+
+def test_extra_keywords_reach_ax_scatter(ax):
+    """Keywords like ``s`` and ``alpha`` are passed through to matplotlib.
+
+    ON FAILURE: the code is wrong.
+    """
+    Scatter(X, Y).make_plot(ax=ax, s=50.0, alpha=0.3)
+    coll = ax.collections[0]
+    np.testing.assert_array_equal(coll.get_sizes(), [50.0])
+    assert coll.get_alpha() == 0.3
+
+
+def test_cbar_kwargs_reach_the_colorbar(ax):
+    """``cbar_kwargs`` routes the colorbar to ``cax`` with a custom label.
+
+    ON FAILURE: the code is wrong.
+    """
+    cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
+    _, cbar = Scatter(X, Y, Z).make_plot(
+        ax=ax, cbar_kwargs={"cax": cax, "label": "custom"}
+    )
+    assert cbar.ax is cax
+    assert cax.get_ylabel() == "custom"
+
+
+def test_cbar_kwargs_with_ax_and_cax_raise_value_error(ax):
+    """Passing both ``ax`` and ``cax`` for the colorbar is refused.
+
+    ON FAILURE: the code is wrong.
+    """
+    cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
+    with pytest.raises(ValueError, match="Can't pass ax and cax"):
+        Scatter(X, Y, Z).make_plot(ax=ax, cbar_kwargs={"ax": ax, "cax": cax})
+
+
+def test_axis_limits_hug_the_plotted_points(ax):
+    """Limits are the kept data's min and max; dropped rows do not widen them.
+
+    ON FAILURE: the code is wrong.
+    """
+    Scatter(X, Y, Z).make_plot(ax=ax)
+    xs, ys = _col(KEPT, 1), _col(KEPT, 2)
+    assert ax.get_xlim() == (xs.min(), xs.max())
+    assert ax.get_ylim() == (ys.min(), ys.max())
+
+
+@pytest.mark.parametrize(
+    "axis, expected",
+    [("x", ("log", "linear")), ("y", ("linear", "log"))],
+)
+def test_set_log_makes_the_plotted_axis_logarithmic(ax, axis, expected):
+    """``set_log(<axis>=True)`` makes that axis log and leaves the other linear.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = Scatter(X, Y)
+    sc.set_log(**{axis: True})
+    sc.make_plot(ax=ax)
+    assert (ax.get_xscale(), ax.get_yscale()) == expected
+
+
+def test_list_inputs_plot_the_same_points_as_series(ax):
+    """Plain lists are accepted and plotted as the equivalent Series.
+
+    ON FAILURE: the code is wrong.
+    """
+    Scatter([1.0, 2.0, 3.0], [6.0, 4.0, 5.0], [0.1, 0.2, 0.3]).make_plot(ax=ax)
+    np.testing.assert_array_equal(
+        ax.collections[0].get_offsets(), [[1.0, 6.0], [2.0, 4.0], [3.0, 5.0]]
+    )
+
+
+class CbarKwargsMutated(AssertionError):
+    """A second plot's colorbar went to the axes of an earlier plot."""
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=CbarKwargsMutated,
+    reason="scatter.py Scatter.make_plot writes cbar_kwargs['ax'] = ax into "
+    "the caller's dict, so reusing that dict sends a later colorbar to the "
+    "first axes' figure; remove this marker when make_plot copies "
+    "cbar_kwargs before adding 'ax'",
+)
+def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
+    """One ``cbar_kwargs`` dict reused for two plots: each gets its colorbar.
+
+    ON FAILURE: (unexpected pass) make_plot no longer mutates cbar_kwargs;
+    drop the xfail marker.
+    """
+    kwargs = {"shrink": 0.5}
+    _, ax1 = plt.subplots()
+    _, ax2 = plt.subplots()
+    try:
+        Scatter(X, Y, Z).make_plot(ax=ax1, cbar_kwargs=kwargs)
+        # The defect makes matplotlib warn about a cross-figure colorbar; keep
+        # that warning from pre-empting the assertion under ``-W error``.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
+        if cbar2.ax.figure is not ax2.figure:
+            raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
+    finally:
+        plt.close("all")
