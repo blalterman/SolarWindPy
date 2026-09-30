@@ -149,9 +149,10 @@ The public import paths are one plain parametrized test that imports each promis
 
 ## Running and committing
 
-Run the suite in the project environment: `conda run -n solarwindpy pytest -q`. Commit from
-the same environment so the pre-commit hooks run the suite there:
-`conda run -n solarwindpy git commit ...`. Stage explicit paths.
+Run the suite in the project environment: `conda run -n solarwindpy pytest -q`. Commit with
+plain `git commit`: the pre-commit hooks run the suite in the solarwindpy environment
+themselves, through `.claude/hooks/project-env.sh`, whatever shell the commit starts from.
+Stage explicit paths.
 
 ## Checklist for writing or reviewing a test
 
