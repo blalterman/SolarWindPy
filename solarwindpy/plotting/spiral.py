@@ -573,7 +573,11 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
         return self._mesh
 
     def agg(self, fcn=None):
-        r"""Aggregate the z-values into their bins."""
+        r"""Aggregate the z-values into their cells.
+
+        ``clim``, the mesh's ``cell_filter`` and ``alim`` are applied in that
+        order; a cell removed by any of them is NaN.
+        """
         self.logger.debug("aggregating z-data")
 
         if fcn is None:
@@ -608,7 +612,7 @@ agg    : {agg.shape}
 filter : {cell_filter.shape}""")
         agg = agg.where(cell_filter, axis=0)
 
-        return agg
+        return self._apply_alim(agg)
 
     def build_grouped(self):
         r"""Group the z-values by mesh cell and store the result in ``grouped``.

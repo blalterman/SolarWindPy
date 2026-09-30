@@ -651,6 +651,24 @@ class TestAggregation:
         expected = np.where(keep, means, np.nan)
         np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
 
+    def test_alim_masks_cells_whose_value_is_outside_the_range(self):
+        """After ``set_alim(3, 4)`` a cell keeps its mean iff 3 <= mean <= 4.
+
+        At min_per_bin=2 the occupied cells hold means 1, 4, 3, 3.5 and 9
+        (p0; p5; p1; p2 and p3; p4), so 3, 3.5 and 4 survive: both bounds are
+        inclusive and both sides mask something.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        splot.set_alim(3.0, 4.0)
+        means = _expected_agg(splot, np.mean)
+        expected = np.where((means >= 3.0) & (means <= 4.0), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert sorted(splot.agg().dropna().tolist()) == [3.0, 3.5, 4.0]
+        assert splot.alim == (3.0, 4.0)
+
 
 class TestMakePlot:
     """``make_plot`` draws one rectangle per mesh cell coloured by ``agg``."""

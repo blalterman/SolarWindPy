@@ -57,10 +57,6 @@ class AggPlot(base.Base):
         return self._clim
 
     @property
-    def alim(self):
-        return self._alim
-
-    @property
     def agg_axes(self):
         r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
         tko = [c for c in self.data.columns if c not in self._gb_axes]
@@ -171,16 +167,6 @@ class AggPlot(base.Base):
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
-
-    def set_alim(self, lower=None, upper=None):
-        r"""Set the minimum (lower) and maximum (upper) allowed value when.
-
-        aggregating. This is different from `clim` because it uses the
-        `agg_fcn`. So behavior will change based on `axnorm`, etc.
-        """
-        assert isinstance(lower, Number) or lower is None
-        assert isinstance(upper, Number) or upper is None
-        self._alim = (lower, upper)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.

@@ -75,7 +75,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
-        self.set_alim(None, None)
 
     @property
     def _gb_axes(self):
@@ -203,27 +202,22 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         return agg
 
+    def _normalized_agg(self, **kwargs):
+        r"""Aggregate and normalize by ``axnorm``, every bin present, no ``alim``.
+
+        ``kwargs`` are passed to ``AggPlot.agg``.
+        """
+        agg = super().agg(**kwargs)
+        agg = self._axis_normalizer(agg)
+        return self._agg_reindexer(agg)
+
     def agg(self, **kwargs):
         r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
 
         Every bin is present in the result; bins outside ``alim`` are NaN.
         ``kwargs`` are passed to ``AggPlot.agg``.
         """
-        agg = super().agg(**kwargs)
-        agg = self._axis_normalizer(agg)
-        agg = self._agg_reindexer(agg)
-
-        a0, a1 = self.alim
-        if a0 is not None or a1 is not None:
-            tk = pd.Series(True, index=agg.index)
-            if a0 is not None:
-                tk = tk & (agg >= a0)
-            if a1 is not None:
-                tk = tk & (agg <= a1)
-
-            agg = agg.where(tk)
-
-        return agg
+        return self._apply_alim(self._normalized_agg(**kwargs))
 
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(

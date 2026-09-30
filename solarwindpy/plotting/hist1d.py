@@ -66,7 +66,6 @@ class Hist1D(AggPlot):
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
-        self.set_alim(None, None)
 
     @property
     def _gb_axes(self):

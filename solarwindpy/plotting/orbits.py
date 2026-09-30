@@ -222,12 +222,13 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             self._prune_lower_yaxis_ticks(cbari.ax, cbaro.ax)
 
     def agg(self, **kwargs):
-        r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.
+        r"""Aggregate each orbit leg, then apply ``alim`` to all legs together.
 
-        Legs: Inbound, Outbound, and Both. `Hist2D.agg` normalises each leg
-        once, via `OrbitPlot._axis_normalizer`."""
+        Legs: Inbound, Outbound, and Both. Each leg is normalised once, via
+        `OrbitPlot._axis_normalizer`. ``alim`` is applied once, after the
+        Both leg is added, so every leg is filtered by the same limits."""
         fcn = kwargs.pop("fcn", None)
-        agg = super(OrbitHist2D, self).agg(fcn=fcn, **kwargs)
+        agg = self._normalized_agg(fcn=fcn, **kwargs)
 
         if not self._disable_both:
             cut = self.cut.drop("Orbit", axis=1)
@@ -248,7 +249,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
                 .sort_index(axis=0)
             )
 
-        return agg
+        return self._apply_alim(agg)
 
     def project_1d(self, axis, project_counts=False, **kwargs):
         r"""Make a `Hist1D` from the data stored in this `His2D`.

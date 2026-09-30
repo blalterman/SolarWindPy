@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 
+from numbers import Number
 from pathlib import Path
 from collections import namedtuple
 from collections.abc import Mapping
@@ -332,6 +333,49 @@ class CbarMaker(ABC):
 
 class PlotWithZdata(Base):
     r"""Base for plots of x, y data with an optional z value per point."""
+
+    _alim = (None, None)
+
+    @property
+    def alim(self):
+        r"""``(lower, upper)`` limits on the aggregated value; see ``set_alim``."""
+        return self._alim
+
+    def set_alim(self, lower=None, upper=None):
+        r"""Set the minimum (lower) and maximum (upper) allowed aggregated value.
+
+        Unlike ``clim``, which limits the number of points in a bin, ``alim``
+        limits the value the bin aggregates to, after any ``axnorm``. Bins
+        outside ``[lower, upper]`` become NaN. None leaves that side open.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._alim = (lower, upper)
+
+    def _apply_alim(self, agg):
+        r"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            The final aggregated values, one per bin or cell.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` with every entry outside ``alim`` replaced by NaN.
+        """
+        lower, upper = self.alim
+        if lower is None and upper is None:
+            return agg
+
+        keep = pd.Series(True, index=agg.index)
+        if lower is not None:
+            keep = keep & (agg >= lower)
+        if upper is not None:
+            keep = keep & (agg <= upper)
+
+        return agg.where(keep)
 
     def set_data(self, x, y, z=None, clip_data=False):
         r"""Store x, y and z as columns of one DataFrame, dropping rows with NaN.
