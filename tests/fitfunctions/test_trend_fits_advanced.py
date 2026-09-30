@@ -1,6 +1,7 @@
 """Test TrendFit advanced features."""
 
 import time
+import warnings
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from solarwindpy.fitfunctions import Gaussian, Line
+from solarwindpy.fitfunctions import Gaussian, Line, PowerLaw
 from solarwindpy.fitfunctions.trend_fits import TrendFit
 
 matplotlib.use("Agg")  # Non-interactive backend for testing
@@ -102,24 +103,32 @@ class TestResidualsEnhancement:
         np.testing.assert_array_equal(r_default, r_explicit)
 
     def test_division_by_zero_handling(self):
-        """Test handling of division by zero in percentage residuals."""
-        # Create data that might lead to zero fitted values
-        x = np.array([0, 1, 2])
-        y = np.array([0, 1, 0])
+        """Percentage residuals are NaN where the fit is zero, finite elsewhere.
 
-        try:
-            ff = Line(x, y)
-            ff.make_fit()
+        A power law A x**b with b > 0 is exactly zero at x = 0 whatever the
+        fitted A and b, so that point must come back NaN (not inf) without a
+        RuntimeWarning; every other point is 100 (y - f) / f.
 
-            # Should handle division by zero gracefully
+        ON FAILURE: the code is wrong.
+        """
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        y = 3.0 * x**2
+        y[2] += 1.0  # nonzero residuals so the pct formula is exercised
+        y[0] = 0.5  # nonzero y where f == 0: unguarded, 0.5 / 0 is inf
+        ff = PowerLaw(x, y)
+        ff.make_fit()
+        assert ff.popt["b"] > 0
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
             r_pct = ff.residuals(pct=True)
 
-            # Should not raise exceptions
-            assert isinstance(r_pct, np.ndarray)
-
-        except Exception:
-            # Some fit configurations might not converge, which is OK for this test
-            pytest.skip("Fit did not converge for edge case data")
+        fitted = ff.popt["A"] * x[1:] ** ff.popt["b"]
+        assert np.isnan(r_pct[0])
+        # rel=1e-9: the same arithmetic evaluated from popt.
+        np.testing.assert_allclose(
+            r_pct[1:], 100.0 * (y[1:] - fitted) / fitted, rtol=1e-9, atol=0
+        )
 
 
 class TestInPlaceOperations:

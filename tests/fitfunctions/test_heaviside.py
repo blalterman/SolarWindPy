@@ -25,7 +25,6 @@ import pytest
 from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.core import InsufficientDataError
 
-
 # =============================================================================
 # Fixtures
 # =============================================================================
@@ -397,7 +396,7 @@ def test_fit_with_noise_recovers_parameters_within_tolerance(noisy_step_data):
             # 2sigma gives 95% confidence
             assert deviation < 2 * sigma, (
                 f"{param}: |fitted({fitted_val:.4f}) - true({true_val:.4f})| = "
-                f"{deviation:.4f} exceeds 2sigma = {2*sigma:.4f}"
+                f"{deviation:.4f} exceeds 2sigma = {2 * sigma:.4f}"
             )
         else:
             # If sigma is 0, check absolute tolerance
