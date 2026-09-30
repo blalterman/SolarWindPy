@@ -85,6 +85,9 @@ If the result is prose instead of a created GitHub Issue, the step did not run.
 
 - NumPy-style docstrings.
 - Conventional commit subjects (`fix(core):`, `feat(plotting):`, `chore:`).
+- Put reusable logic in one shared method that every caller uses; do not copy
+  lines between call sites. Extract at the second copy: in this repository this
+  overrides the global "three examples before abstracting" rule.
 - Cite scientific sources in docstrings: DOI or arXiv, and the equation number
   when implementing a specific published result.
 - Attribution rules live in `.claude/docs/ATTRIBUTION.md`. In short: note
