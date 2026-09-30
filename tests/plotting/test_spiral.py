@@ -943,7 +943,7 @@ class TestPlotContours:
 
 
 # ---------------------------------------------------------------------------
-# Defects in solarwindpy/plotting/spiral.py, outside this unit's paths.
+# Samples outside the mesh, and integer initial edges.
 # ---------------------------------------------------------------------------
 
 
@@ -951,17 +951,6 @@ class TopEdgeNotAboveData(AssertionError):
     """The top initial edge does not lie above the largest sample."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason=(
-        "spiral.py SpiralMesh.build_cat calls "
-        "Categorical.remove_categories(fill, inplace=True), removed in pandas 2, "
-        "so any sample outside the mesh (e.g. log10(0) = -inf) raises "
-        "\"got an unexpected keyword argument 'inplace'\"; remove this marker when "
-        "build_cat assigns cat = cat.remove_categories(fill)"
-    ),
-)
 @pytest.mark.parametrize(
     "outside, log",
     [((-1.0, 0.5, 100.0), False), ((-np.inf, 0.5, 100.0), True)],
@@ -974,7 +963,7 @@ def test_samples_outside_the_mesh_are_excluded_from_the_aggregation(outside, log
     samples "will be replaced by NaNs and excluded from the aggregation." In
     the log case the sample's x is 0, whose log10 is -inf.
 
-    ON FAILURE: (unexpected pass) the build_cat fix has landed; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     splot = _plot(1, z=None, log=log, rows=ROWS + [outside])
     if log:
@@ -983,23 +972,13 @@ def test_samples_outside_the_mesh_are_excluded_from_the_aggregation(outside, log
     assert np.nansum(splot.agg().values) == len(ROWS)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason=(
-        "spiral.py SpiralMesh.cell_filter passes bin ids including the -9999 "
-        "fill to np.bincount, which raises \"'list' argument must have no "
-        'negative elements" when any sample is outside the mesh; remove this '
-        "marker when the density count drops fill ids"
-    ),
-)
 def test_density_filter_ignores_samples_outside_the_mesh():
     """The density filter counts only samples inside the mesh.
 
     With one extra sample outside the grid, density=0.5 still keeps exactly the
     occupied cells (hand-worked in TestSpiralMesh).
 
-    ON FAILURE: (unexpected pass) the cell_filter fix has landed; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     rows = ROWS + [(-1.0, 0.5, 0.0)]
     x = pd.Series([r[0] for r in rows])
@@ -1011,20 +990,10 @@ def test_density_filter_ignores_samples_outside_the_mesh():
     assert mesh.cell_filter.tolist() == occupied
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TopEdgeNotAboveData,
-    reason=(
-        "spiral.py SpiralPlot2D.calc_initial_bins writes the raised top edge "
-        "into the caller's array, so an integer array truncates 10.1 back to "
-        "10 and the sample at 10 lies outside every cell; remove this marker "
-        "when calc_initial_bins works on a float copy of the edges"
-    ),
-)
 def test_integer_edges_are_raised_above_the_largest_sample():
     """Integer edge arrays get a top edge above the data, as float edges do.
 
-    ON FAILURE: (unexpected pass) the calc_initial_bins fix has landed; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     x = pd.Series([1.0, 10.0])
     splot = SpiralPlot2D(x, x, initial_bins=(np.array([0, 5, 10]), np.array([0, 10])))

@@ -694,30 +694,17 @@ class TestSwapProtons:
 
         new, swapped = swap_protons(protons, logger=logging.getLogger("tests.swap"))
 
-        # check_names=False: the lost M/C/S level names are the strict xfail
-        # test_output_keeps_mcs_level_names_so_it_can_be_swapped_again.
         pd.testing.assert_frame_equal(
-            new.loc[:, protons.columns], expected, check_like=True, check_names=False
+            new.loc[:, protons.columns], expected, check_like=True
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=(
-            "solarwindpy/tools/__init__.py swap_protons rebuilds the columns with "
-            "pd.concat and drops the M/C/S level names, so its own output fails "
-            "data.xs('p1', axis=1, level='S') with KeyError: 'Level S not "
-            "found'; remove this marker when the output keeps names M, C, S."
-        ),
-    )
     def test_output_keeps_mcs_level_names_so_it_can_be_swapped_again(
         self, protons, restore_logging
     ):
         """The output keeps the M/C/S column layout, so swapping it again works.
 
         A second swap finds nothing left to swap.
-        ON FAILURE: (unexpected pass) the level names survive; drop the xfail
-        marker.
+        ON FAILURE: the code is wrong.
         """
         logger = logging.getLogger("tests.swap")
         new, _ = swap_protons(protons, logger=logger)
@@ -781,24 +768,12 @@ class TestSwapProtons:
         assert records[0].levelno == logging.INFO
         assert re.search(r"count\s+2\b", records[0].getMessage())
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=HandlersAccumulated,
-        reason=(
-            "solarwindpy/tools/__init__.py swap_protons with logger=None adds a "
-            "new StreamHandler to its default logger on every call, so the Nth "
-            "call prints its stats N times (the logging HOWTO advises libraries "
-            "to add no handlers but NullHandler); remove this marker when the "
-            "default branch stops adding a handler per call."
-        ),
-    )
     def test_default_logger_does_not_accumulate_handlers(
         self, protons, restore_logging
     ):
         """Calling with ``logger=None`` twice leaves the handler counts of one call.
 
-        ON FAILURE: (unexpected pass) the default logger no longer gains a
-        handler per call; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         swap_protons(protons)
         after_one = _handler_counts()

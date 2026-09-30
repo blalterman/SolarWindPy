@@ -24,30 +24,6 @@ from scipy.signal import savgol_filter  # noqa: E402
 
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 
-PANDAS_3 = int(pd.__version__.split(".")[0]) >= 3
-
-# `id_data_above_contour` seeds a float64 Series with NaN and then writes
-# pd.Interval objects into it. pandas 2 silently widened the dtype to object;
-# pandas 3 raises LossySetitemError instead. The behaviour under test is the
-# same either way, so the tests below state it unconditionally and are marked
-# expected-to-fail only where the library refuses the assignment.
-#
-# Strict, because an unexpected pass is the signal that the dtype has been
-# fixed and the marker should go. That all three tests in the class do fail
-# was measured on pandas 3.0.5, not assumed; note that no CI job currently
-# runs pandas 3, so the first contributor to install it is the one who will
-# see this marker do its work.
-broken_on_pandas_3 = pytest.mark.xfail(
-    PANDAS_3,
-    strict=True,
-    reason=(
-        "id_data_above_contour assigns pd.Interval values into a float64 "
-        "Series, which pandas 3 rejects (LossySetitemError). Verified on "
-        "pandas 3.0.5. Remove this marker once the Series is built with an "
-        "object or Categorical dtype."
-    ),
-)
-
 
 @pytest.fixture
 def hist2d_instance():
@@ -852,20 +828,10 @@ class TestLimitColorNorm:
             assert norm.vmax is None
             assert norm.clip is False
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "make_plot(limit_color_norm=True) raises AttributeError when axnorm "
-            "is None, because no default norm is built and None has no .vmin. "
-            "Replaces nothing -- this path had no test. Remove the xfail when "
-            "the guard lands."
-        ),
-    )
     def test_limit_color_norm_works_without_a_normalisation(self, known_hist):
         """`limit_color_norm=True` is documented for any Hist2D, axnorm or not.
 
-        ON FAILURE (i.e. an unexpected pass): the guard has landed; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         known_hist.make_plot(limit_color_norm=True, cbar=False)
         plt.close("all")
@@ -1105,27 +1071,13 @@ class TestPlotEdges:
         )
         plt.close("all")
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "plot_edges hands the *same* sg_kwargs dict to both _plot_one_edge "
-            "calls, and _plot_one_edge pops window_length/polyorder out of it. "
-            "The top edge consumes the caller's parameters and the bottom edge "
-            "silently falls back to window_length=floor(n/10) (5 here) and "
-            "polyorder=3. No exception is raised: the bottom edge is simply "
-            "smoothed differently from the top, and the assertion below is "
-            "what catches it. Replaces nothing -- this path had no test. "
-            "Remove the xfail once sg_kwargs is copied per edge."
-        ),
-    )
     def test_both_edges_get_the_smoothing_the_caller_asked_for(self, smoothable_hist):
         """Top and bottom must be smoothed with the same requested parameters.
 
         Two edges of one distribution smoothed on different window lengths are
         not comparable to each other.
 
-        ON FAILURE (i.e. an unexpected pass): sg_kwargs is no longer shared;
-        drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         # Both parameters differ from the defaults the bottom edge falls back
         # to (window_length 5, polyorder 3), so the discrepancy is wide rather
@@ -1238,7 +1190,6 @@ class TestProject1D:
             known_hist.project_1d("z")
 
 
-@broken_on_pandas_3
 class TestIdDataAboveContour:
     """Labelling observations that sit in a well-populated part of the grid."""
 
@@ -1276,15 +1227,6 @@ class TestIdDataAboveContour:
         assert high.sum() <= low.sum()
         assert not (high & ~low).any()
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "id_data_above_contour raises AttributeError when a column has no "
-            "bin at or above `level`: the empty selection's min()/max() is NaN, "
-            "which has no .left. Replaces nothing -- this path had no test. "
-            "Remove the xfail when empty columns are skipped."
-        ),
-    )
     def test_columns_with_nothing_above_the_level_are_simply_unlabelled(
         self, known_hist, known_counts
     ):
@@ -1293,8 +1235,7 @@ class TestIdDataAboveContour:
         The docstring already says what should happen: "NaN are observations
         that are below `level`".
 
-        ON FAILURE (i.e. an unexpected pass): the fix has landed; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         level = known_counts.max()  # no column other than the peak's clears this
         labelled = known_hist.id_data_above_contour(level)
