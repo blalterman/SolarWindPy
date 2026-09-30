@@ -100,23 +100,23 @@ pytest --doctest-glob='*.rst' docs/source -q
 
 ## Dependency Management
 
-As of v0.3.0, SolarWindPy uses `pyproject.toml` as the single source of truth for dependencies with `pip-tools` lockfiles for reproducible builds.
+SolarWindPy uses `pyproject.toml` as the single source of truth for dependencies.
 
 ### Adding or Updating Dependencies
 
 **Runtime dependencies** (required by users):
 ```toml
 # Edit pyproject.toml [project.dependencies]
-numpy>=1.26,<3.0
-scipy>=1.13
+"somepackage>=X.Y",
 ```
 
 **Development tools**:
 ```toml
 # Edit pyproject.toml [project.optional-dependencies.dev]
-black>=24.0
-flake8>=7.0
+"sometool>=X.Y",
 ```
+
+Set a floor to the oldest version the test suite actually runs on.
 
 `pyproject.toml` is the only dependency declaration; there are no lockfiles
 to regenerate. After editing it, reinstall with `pip install -e ".[dev]"` and
@@ -128,8 +128,6 @@ run the suite.
 - **Optional dependencies**: Group by purpose (`test`, `docs`, `dev`)
 - **Version constraints**: Use lower bounds for compatibility, upper bounds for breaking changes
 - **NumPy 2.0**: Ensure all dependencies support NumPy >=1.26,<3.0
-
-See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](docs/MIGRATION-DEPENDENCY-OVERHAUL.md) for detailed migration information.
 
 ## Documentation reviews
 
