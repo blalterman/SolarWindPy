@@ -58,6 +58,11 @@ X = pd.Series([r[1] for r in ROWS], index=INDEX)
 Y = pd.Series([r[2] for r in ROWS], index=INDEX)
 Z = pd.Series([r[3] for r in ROWS], index=INDEX)
 
+# Label objects for the path tests: a plain x label and a column-normalized z
+# label, whose path ends in "norm" and so takes set_path's norm branch.
+PLAIN_XLABEL = TeXlabel(("v", "x", "p1"))
+NORM_ZLABEL = TeXlabel(("n", "", "p1"), axnorm="c")
+
 
 def _col(rows, i):
     return np.array([r[i] for r in rows])
@@ -303,6 +308,18 @@ def test_auto_path_is_class_then_labels_then_scale():
     assert plot.path == _expected_path("LinePlot", "bulk-speed", "y", "z", True)
 
 
+def test_norm_label_path_ends_in_norm_and_plain_label_path_does_not():
+    """The column-normalized z label reaches the norm branch; the x label not.
+
+    ``set_path`` treats a path whose last part ends in ``norm`` specially, so
+    the next test needs one label that does and one that does not.
+
+    ON FAILURE: the fixture no longer separates a normalized label path from a plain one; fix the fixture.
+    """
+    assert NORM_ZLABEL.path.name.endswith("norm")
+    assert not PLAIN_XLABEL.path.name.endswith("norm")
+
+
 def test_auto_path_uses_texlabel_paths_and_puts_scale_before_norm():
     """A label object contributes its ``path``; a trailing norm stays last.
 
@@ -311,10 +328,7 @@ def test_auto_path_uses_texlabel_paths_and_puts_scale_before_norm():
 
     ON FAILURE: the code is wrong.
     """
-    xl = TeXlabel(("v", "x", "p1"))
-    zl = TeXlabel(("n", "", "p1"), axnorm="c")
-    assert zl.path.name.endswith("norm")  # the fixture exercises the norm branch
-
+    xl, zl = PLAIN_XLABEL, NORM_ZLABEL
     plot = LinePlot(X, Y, Z)
     plot.set_labels(x=xl, y="y", z=zl)
     norm = "{}-{}".format(_scale(False, False), zl.path.name)
