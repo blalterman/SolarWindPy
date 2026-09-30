@@ -20,6 +20,26 @@ markers = [
     "slow: takes more than a few seconds",
 ]
 
+# Import layering, checked by `lint-imports` (import-linter). The layer rule is
+# stated in .claude/docs/TEST_PATTERNS.md "Structure and layering".
+[tool.importlinter]
+root_package = "solarwindpy"
+
+[[tool.importlinter.contracts]]
+name = "Subpackage layers: core and tools import nothing above them"
+type = "layers"
+containers = ["solarwindpy"]
+layers = [
+    "fitfunctions | instabilities | solar_activity",
+    "plotting",
+    "core | tools",
+]
+
+[[tool.importlinter.contracts]]
+name = "No import cycles between sibling modules"
+type = "acyclic_siblings"
+ancestors = ["solarwindpy"]
+
 [build-system]
 requires = ["setuptools>=61", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
@@ -109,6 +129,7 @@ dev = [
     "pydocstyle>=6.3",
     "tables>=3.9",  # PyTables for HDF5 testing
     "psutil>=5.9.0",
+    "import-linter>=2.6",  # lint-imports; 2.6 adds the acyclic_siblings contract
     # Code analysis tools (ast-grep via MCP server, not Python package)
     "pre-commit>=3.5",  # Git hook framework
 ]
