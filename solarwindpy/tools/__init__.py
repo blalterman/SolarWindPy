@@ -89,6 +89,9 @@ def swap_protons(data, logger=None):
     new_data = pd.concat(
         [data.drop(["p1", "p2"], axis=1, level="S"), new_protons, swapped], axis=1
     ).sort_index(axis=1)
+    # `swapped` carries unnamed columns, so the concat drops the level names;
+    # restore the caller's (M, C, S) so the output can be swapped again.
+    new_data.columns = new_data.columns.set_names(data.columns.names)
 
     chk = new_data.loc[:, ("n", "", "p2")].divide(
         new_data.loc[:, ("n", "", "p2")], axis=0
@@ -97,10 +100,12 @@ def swap_protons(data, logger=None):
 
     if logger is None:
         logger = logging.getLogger("main.{}".format(__name__))
-        hdlr = logging.StreamHandler()
-        hdlr.setLevel(logging.INFO)
-
-        logger.addHandler(hdlr)
+        # The logger is module-global: add its handler once, not per call, or
+        # the Nth call prints its stats N times.
+        if not logger.handlers:
+            hdlr = logging.StreamHandler()
+            hdlr.setLevel(logging.INFO)
+            logger.addHandler(hdlr)
         logger.setLevel(logging.DEBUG)
 
     assert isinstance(logger, logging.Logger)
