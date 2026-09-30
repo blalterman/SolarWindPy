@@ -11,6 +11,7 @@ import pandas as pd
 
 from pathlib import Path
 from collections import namedtuple
+from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
@@ -245,6 +246,44 @@ class DataLimFormatter(ABC):
 
 class CbarMaker(ABC):
     r"""Mixin that draws a colorbar labelled with ``labels.z``."""
+
+    @staticmethod
+    def _prepare_cbar_kwargs(cbar_kwargs, ax=None):
+        r"""Return a new colorbar kwargs dict, defaulting the colorbar's axes.
+
+        The caller's mapping is copied, never modified, so one dict can be
+        reused for several plots.
+
+        Parameters
+        ----------
+        cbar_kwargs : Mapping or None
+            The caller's colorbar kwargs. None is treated as empty.
+        ax : matplotlib.axes.Axes, optional
+            If given, and ``cbar_kwargs`` names neither ``ax`` nor ``cax``,
+            the colorbar is placed beside this axes.
+
+        Returns
+        -------
+        dict
+            A new dict holding ``cbar_kwargs`` and, if added, ``ax``.
+
+        Raises
+        ------
+        TypeError
+            If ``cbar_kwargs`` is neither None nor a mapping.
+        """
+        if cbar_kwargs is None:
+            cbar_kwargs = {}
+        if not isinstance(cbar_kwargs, Mapping):
+            raise TypeError(
+                "cbar_kwargs must be a mapping or None, "
+                f"not {type(cbar_kwargs).__name__}"
+            )
+
+        prepared = dict(cbar_kwargs)
+        if ax is not None and "cax" not in prepared and "ax" not in prepared:
+            prepared["ax"] = ax
+        return prepared
 
     def _make_cbar(self, mappable, **kwargs):
         """Make a colorbar on `ax` using `mappable`.

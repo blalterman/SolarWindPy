@@ -335,9 +335,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax=ax, **cbar_kwargs)
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
 
         self._format_axis(ax)
 

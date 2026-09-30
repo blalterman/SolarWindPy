@@ -385,11 +385,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         cbar_or_mappable = pc
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
-
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, **cbar_kwargs)
@@ -610,10 +606,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         # --- 4. Colorbar ---
         cbar_or_mappable = pc
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = {}
-            if "cax" not in cbar_kwargs and "ax" not in cbar_kwargs:
-                cbar_kwargs["ax"] = ax
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
             cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
 
         # --- 5. Format axis ---
@@ -764,10 +757,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             clabel_kwargs = dict()
         if edges_kwargs is None:
             edges_kwargs = dict()
-        if cbar_kwargs is None:
-            cbar_kwargs = dict()
-        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-            cbar_kwargs["ax"] = ax
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
@@ -1076,7 +1066,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         yax = fig.add_subplot(gs[1, 1], sharey=hax)
         cax = fig.add_subplot(gs[3, 0])
 
-        cbar_kwargs = kwargs.pop("cbar_kwargs", dict())
+        cbar_kwargs = self._prepare_cbar_kwargs(kwargs.pop("cbar_kwargs", None))
         cax = cbar_kwargs.pop("cax", cax)
         orientation = cbar_kwargs.pop("orientation", "horizontal")
         _, cbar = self.make_plot(

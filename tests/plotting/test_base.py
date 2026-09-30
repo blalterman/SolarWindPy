@@ -13,6 +13,7 @@ layout (class, x, y, z, scale) from ``pathlib`` alone.
 """
 
 import logging
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -481,3 +482,130 @@ def test_data_lim_formatter_pins_limits_to_the_data_extent(ax):
     assert ax.get_xlim() == (xs.min(), xs.max())
     assert ax.get_ylim() == (ys.min(), ys.max())
     assert (ax.get_xlabel(), ax.get_ylabel()) == ("Vx", "Np")
+
+
+# ---------------------------------------------------------------------------
+# ``cbar_kwargs`` belongs to the caller. Every public plot call that draws a
+# colorbar must leave the caller's dict as it was, so one dict can style many
+# plots. Chosen input: 12 points on a 2 x 2 grid whose cells hold 1, 2, 3 and
+# 6 points, so counts, means and contours are all defined.
+# ---------------------------------------------------------------------------
+
+GRID_EDGES = np.array([0.0, 1.0, 2.0])
+GRID_CELLS = [((0.5, 0.5), 1), ((1.5, 0.5), 2), ((0.5, 1.5), 3), ((1.5, 1.5), 6)]
+GRID_X = pd.Series([c[0] for c, n in GRID_CELLS for _ in range(n)], dtype=float)
+GRID_Y = pd.Series([c[1] for c, n in GRID_CELLS for _ in range(n)], dtype=float)
+GRID_Z = pd.Series(np.arange(GRID_X.size, dtype=float) + 1.0)
+LEVELS = [2.0, 3.0]  # inside the plotted counts and means, so contours draw
+
+
+def _hist2d():
+    from solarwindpy.plotting.hist2d import Hist2D
+
+    return Hist2D(GRID_X, GRID_Y, nbins=[GRID_EDGES, GRID_EDGES])
+
+
+def _spiral():
+    from solarwindpy.plotting.spiral import SpiralPlot2D
+
+    splot = SpiralPlot2D(
+        GRID_X + 0.1 * np.arange(GRID_X.size) / GRID_X.size,
+        GRID_Y,
+        GRID_Z,
+        initial_bins=(GRID_EDGES, GRID_EDGES),
+    )
+    splot.initialize_mesh(min_per_bin=100)
+    splot.build_grouped()
+    return splot
+
+
+# Each entry draws one colorbar on ``ax`` and returns it.
+CBAR_PLOTS = {
+    "Scatter.make_plot": lambda ax, kw: Scatter(X, Y, Z).make_plot(
+        ax=ax, cbar_kwargs=kw
+    )[1],
+    "Hist2D.make_plot": lambda ax, kw: _hist2d().make_plot(ax=ax, cbar_kwargs=kw)[1],
+    "Hist2D.plot_hist_with_contours": lambda ax, kw: _hist2d().plot_hist_with_contours(
+        ax=ax, cbar_kwargs=kw, levels=LEVELS
+    )[1],
+    "Hist2D.plot_contours": lambda ax, kw: _hist2d().plot_contours(
+        ax=ax, cbar_kwargs=kw, levels=LEVELS
+    )[2],
+    "SpiralPlot2D.make_plot": lambda ax, kw: _spiral().make_plot(ax=ax, cbar_kwargs=kw)[
+        1
+    ],
+    "SpiralPlot2D.plot_contours": lambda ax, kw: _spiral().plot_contours(
+        ax=ax, cbar_kwargs=kw, levels=LEVELS, method="tricontour"
+    )[2],
+}
+
+
+class CbarKwargsMutated(AssertionError):
+    """A plot call changed the caller's ``cbar_kwargs`` dict."""
+
+
+@pytest.mark.parametrize("plot", CBAR_PLOTS.values(), ids=CBAR_PLOTS.keys())
+def test_plot_calls_leave_the_callers_cbar_kwargs_unchanged(plot):
+    """After a plot call the caller's ``cbar_kwargs`` holds what it held before.
+
+    ON FAILURE: the code is wrong.
+    """
+    kwargs = {"shrink": 0.5}
+    _, ax = plt.subplots()
+    try:
+        plot(ax, kwargs)
+    finally:
+        plt.close("all")
+    if kwargs != {"shrink": 0.5}:  # the dict the caller built, above
+        raise CbarKwargsMutated(f"cbar_kwargs became {kwargs}")
+
+
+def test_joint_plot_leaves_the_callers_cbar_kwargs_unchanged():
+    """``make_joint_h2_h1_plot`` does not pop keys from the caller's dict.
+
+    ON FAILURE: the code is wrong.
+    """
+    kwargs = {"orientation": "horizontal", "label": "custom"}
+    try:
+        _, _, _, cbar = _hist2d().make_joint_h2_h1_plot(cbar_kwargs=kwargs)
+        assert cbar.ax.get_xlabel() == "custom"  # the label the caller passed
+    finally:
+        plt.close("all")
+    if kwargs != {"orientation": "horizontal", "label": "custom"}:  # as built above
+        raise CbarKwargsMutated(f"cbar_kwargs became {kwargs}")
+
+
+@pytest.mark.parametrize("plot", CBAR_PLOTS.values(), ids=CBAR_PLOTS.keys())
+def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes(plot):
+    """One dict reused for plots on two figures: each colorbar joins its own.
+
+    ON FAILURE: the code is wrong.
+    """
+    kwargs = {"shrink": 0.5}
+    _, ax1 = plt.subplots()
+    _, ax2 = plt.subplots()
+    try:
+        cbar1 = plot(ax1, kwargs)
+        # The defect makes matplotlib warn about a cross-figure colorbar; keep
+        # that warning from pre-empting the assertion under ``-W error``.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            cbar2 = plot(ax2, kwargs)
+        assert cbar1.ax.figure is ax1.figure  # the axes each call was given
+        assert cbar2.ax.figure is ax2.figure
+    finally:
+        plt.close("all")
+
+
+@pytest.mark.parametrize("plot", CBAR_PLOTS.values(), ids=CBAR_PLOTS.keys())
+def test_cbar_kwargs_that_are_not_a_mapping_raise_type_error(plot):
+    """A ``cbar_kwargs`` that is not a mapping is refused with ``TypeError``.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, ax = plt.subplots()
+    try:
+        with pytest.raises(TypeError, match="cbar_kwargs must be a mapping"):
+            plot(ax, [("shrink", 0.5)])
+    finally:
+        plt.close("all")
