@@ -182,7 +182,11 @@ class SpiralMesh(object):
             tk_size = dA < size_quantile
             tk = tk & (tk_size)
         if density:
-            cnt = np.bincount(self.bin_id.id, minlength=self.mesh.shape[0])
+            # Samples outside the mesh carry the negative fill id, which
+            # `np.bincount` rejects; they belong to no cell, so drop them.
+            ids = np.asarray(self.bin_id.id)
+            ids = ids[ids != self.bin_id.fill]
+            cnt = np.bincount(ids, minlength=self.mesh.shape[0])
             assert cnt.shape == tk.shape
             cell_density = cnt / dA
             density_quantile = np.quantile(cell_density, density)
@@ -509,7 +513,7 @@ They will be replaced by NaNs and excluded from the aggregation.
         # which the mesh was traversed.
         cat = pd.Categorical(bin_id, ordered=False)
         if fill in bin_id:
-            cat.remove_categories(fill, inplace=True)
+            cat = cat.remove_categories(fill)
 
         self._cat = cat
 
@@ -671,6 +675,10 @@ data : {z.size}
                 b = np.quantile(
                     d, np.linspace(0, 1, b + 1)
                 )  # Need N + 1 edges to make N bins.
+
+            # Work on a float copy: raising the top edge must neither write
+            # into the caller's array nor be truncated by an integer dtype.
+            b = np.array(b, dtype=float)
 
             # Extend the right most bin by the larger of 1% or 0.01 (in the case of zero)
             # So that y < y1 inludes data at real data edge.
