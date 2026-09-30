@@ -513,14 +513,6 @@ class TestSelection:
 # clip_data
 # ---------------------------------------------------------------------------
 
-ONE_TAIL_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot.clip_data calls "
-    "{kind}.clip_lower / .clip_upper, which pandas removed, so the one-tail "
-    "branches raise AttributeError: '{kind}' object has no attribute "
-    "'clip_lower' (or 'clip_upper'); remove this marker when they use "
-    ".clip(lower=...) / .clip(upper=...)."
-)
-
 SERIES = pd.Series(np.arange(1.0, 11.0))
 FRAME = pd.DataFrame({"a": np.arange(1.0, 6.0), "b": np.arange(10.0, 60.0, 10.0)})
 
@@ -556,16 +548,10 @@ class TestClipData:
         np.testing.assert_allclose(result, np.clip(FRAME, lo, hi), rtol=1e-12, atol=0)
         assert list(result.columns) == ["a", "b"]
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_series_lower(self):
         """``"l"`` raises only the low tail: 1 becomes 1.0009, 10 stays 10.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(SERIES, "l")
         expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
@@ -574,16 +560,10 @@ class TestClipData:
         assert result.iloc[0] == pytest.approx(1.0009, rel=1e-12, abs=0)
         assert result.iloc[-1] == 10.0
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_series_upper(self):
         """``"u"`` lowers only the high tail: 10 becomes 9.9991, 1 stays 1.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(upper=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(SERIES, "u")
         expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
@@ -592,48 +572,30 @@ class TestClipData:
         assert result.iloc[-1] == pytest.approx(9.9991, rel=1e-12, abs=0)
         assert result.iloc[0] == 1.0
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="DataFrame"),
-    )
     def test_dataframe_lower(self):
         """``"l"`` clips each column's low tail at that column's percentile.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(FRAME, "l")
         lo = np.quantile(FRAME, 1e-4, axis=0)
         # rel 1e-12: float rounding only.
         np.testing.assert_allclose(result, np.clip(FRAME, lo, None), rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="DataFrame"),
-    )
     def test_dataframe_upper(self):
         """``"u"`` clips each column's high tail at that column's percentile.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(upper=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(FRAME, "u")
         hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
         # rel 1e-12: float rounding only.
         np.testing.assert_allclose(result, np.clip(FRAME, None, hi), rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_tail_selector_is_case_insensitive(self):
         """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=/upper=...);
-        drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         lower = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
         upper = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
@@ -648,22 +610,10 @@ class TestClipData:
                 AggPlot.clip_data(SERIES, mode), expected, rtol=1e-12, atol=0
             )
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=(
-            "solarwindpy/plotting/agg_plot.py AggPlot.clip_data calls "
-            "data.quantile before its Series/DataFrame check, so a list raises "
-            "AttributeError: 'list' object has no attribute 'quantile' instead "
-            "of the intended TypeError('Unexpected object ...'); remove this "
-            "marker when the type check comes first."
-        ),
-    )
     def test_rejects_non_pandas_input_with_typeerror(self):
         """A list is neither Series nor DataFrame and raises TypeError.
 
-        ON FAILURE: (unexpected pass) the type check now precedes quantile;
-        drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         with pytest.raises(TypeError, match="Unexpected object"):
             AggPlot.clip_data([1.0, 2.0, 3.0], True)

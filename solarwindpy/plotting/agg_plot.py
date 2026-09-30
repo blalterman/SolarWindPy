@@ -109,9 +109,7 @@ class AggPlot(base.Base):
             Data to clip. A DataFrame is clipped column by column.
         clip : bool or str
             A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails. The one-tail branches
-            call ``clip_lower`` and ``clip_upper``, which pandas removed, so they
-            raise ``AttributeError``.
+            tail only; any other value clips both tails.
 
         Returns
         -------
@@ -123,12 +121,6 @@ class AggPlot(base.Base):
         TypeError
             If ``data`` is neither a Series nor a DataFrame.
         """
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
         if isinstance(data, pd.Series):
             ax = 0
         elif isinstance(data, pd.DataFrame):
@@ -136,10 +128,16 @@ class AggPlot(base.Base):
         else:
             raise TypeError("Unexpected object %s" % type(data))
 
+        q0 = 0.0001
+        q1 = 0.9999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+
         if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo, axis=ax)
+            data = data.clip(lower=lo, axis=ax)
         elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up, axis=ax)
+            data = data.clip(upper=up, axis=ax)
         else:
             data = data.clip(lo, up, axis=ax)
         return data
