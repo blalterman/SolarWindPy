@@ -300,7 +300,10 @@ class AggPlot(base.Base):
         # Ensure all bins are represented in the data. (20190605)
         for k, v in self.categoricals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+            # Name the bins so a 1-D result keeps its axis name, e.g. "x".
+            agg = agg.reindex(
+                index=v.rename(k), level=k if agg.index.nlevels > 1 else None
+            )
 
         return agg
 
@@ -328,30 +331,44 @@ class AggPlot(base.Base):
 
         return agg
 
+    def _joint_bin_mask(self, kept):
+        r"""Boolean ``pd.Series`` marking each observation whose joint bin is kept.
+
+        Parameters
+        ----------
+        kept : pd.Index or pd.MultiIndex
+            Aggregated bins to keep, with one named level per column of ``cut``.
+
+        Returns
+        -------
+        pd.Series
+            True where the observation's bin across every column of ``cut``
+            (e.g. the joint (x, y) bin in 2-D) is in ``kept``.
+        """
+        cut = self.cut
+        observed = []
+        selected = []
+        for k, v in cut.items():
+            # Compare category codes: the Categoricals fail with some pandas numpy
+            # ufuncs (20200611), and both sides are coded by the same categories.
+            categories = v.cat.categories
+            observed.append(v.cat.codes.to_numpy())
+            selected.append(categories.get_indexer(kept.get_level_values(k)))
+
+        observed = pd.MultiIndex.from_arrays(observed)
+        selected = pd.MultiIndex.from_arrays(selected)
+        return pd.Series(observed.isin(selected), index=cut.index)
+
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
 
-        The series shares the same index as the stored data. To align with a different
-        index you may need to adjust the returned series.
+        A measurement is plotted when its joint bin (e.g. its (x, y) bin in 2-D)
+        survives aggregation. The series shares the same index as the stored
+        data. To align with a different index you may need to adjust the
+        returned series.
         """
         agg = self.agg().dropna()
-        cut = self.cut
-
-        tk = pd.Series(True, index=cut.index)
-        for k, v in cut.items():
-            idx = agg.index.get_level_values(k)
-            # Use the codes directly because the categoricals are
-            # failing with some Pandas numpy ufunc use. (20200611)
-            # Also need to ensure codes are consistent between the
-            # two objects. (20201111)
-            cat = v.unique()
-            codes = cat.codes
-            mapper = pd.Series(codes, index=cat)
-            mapped_idx = idx.map(mapper)
-            mapped_v = v.map(mapper)
-
-            tk_ax = mapped_v.isin(mapped_idx)
-            tk = tk & tk_ax
+        tk = self._joint_bin_mask(agg.index)
 
         self.logger.info(
             f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
@@ -362,16 +379,14 @@ class AggPlot(base.Base):
     def get_subset_above_threshold(self, threshold, fcn="count"):
         r"""Get the subset of data above a given threshold using `fcn` to.
 
-        aggregate. If `axnorm` set, this is used.
+        aggregate. If `axnorm` set, this is used. A row is kept when its joint
+        bin (e.g. its (x, y) bin in 2-D) meets `threshold`.
         """
         agg = self.agg(fcn=fcn)
         tk = agg >= threshold
         tk = tk.loc[tk]
 
-        tk_h2 = pd.Series(True, index=self.data.index)
-        for k, v in self.cut.items():
-            tk_ax = pd.IntervalIndex(v).isin(tk.index.get_level_values(k).unique())
-            tk_h2 = tk_h2 & tk_ax
+        tk_h2 = self._joint_bin_mask(tk.index)
 
         subset = self.data.loc[tk_h2].copy(deep=True)
         for k, log in self.log._asdict().items():

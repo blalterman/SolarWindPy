@@ -556,18 +556,6 @@ class TestConstructCdf:
         with pytest.raises(ValueError, match="Only able to convert data to a cdf"):
             Hist1D(x, y, nbins=EDGES).construct_cdf(only_plotted=False)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=(
-            "Hist1D.agg() returns an index named None (AggPlot._agg_reindexer "
-            "reindexes to the unnamed categorical), so "
-            "AggPlot.get_plotted_data_boolean_series' get_level_values('x') "
-            "raises; expected 'Requested level (x) does not match index name "
-            "(None)'; remove this marker when Hist1D.agg() keeps its 'x' index "
-            "name"
-        ),
-    )
     def test_default_cdf_with_every_bin_plotted_is_the_whole_binned_sample(self, xy):
         """With every bin populated, the default cdf equals the unfiltered one.
 

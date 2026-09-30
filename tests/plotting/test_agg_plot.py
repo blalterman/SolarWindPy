@@ -390,22 +390,6 @@ def _selected_by_axis_alone(x, y, keep_bin):
     return keep_x & keep_y
 
 
-MARGINAL_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot.{method} builds its mask one axis "
-    "at a time (x-bin among kept x-bins AND y-bin among kept y-bins), so in 2-D "
-    "a point whose own (x, y) bin was dropped is still selected; remove this "
-    "marker when the mask tests the joint (x, y) bin."
-)
-
-ONE_D_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot._agg_reindexer replaces the 1-D "
-    "agg index with the unnamed categorical, so AggPlot.{method} raises "
-    "KeyError: 'Requested level (x) does not match index name (None)' for "
-    "every Hist1D (Hist1D.construct_cdf(only_plotted=True) too); remove this "
-    "marker when the 1-D agg index keeps the name x."
-)
-
-
 class TestSelection:
     """Masks and subsets that map aggregated bins back to observations."""
 
@@ -442,16 +426,10 @@ class TestSelection:
         assert mask.index.equals(h.data.index)
         assert mask[_count_of_own_bin(x, y) >= self.CLIM].all()
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=SelectedPointInDroppedBin,
-        reason=MARGINAL_REASON.format(method="get_plotted_data_boolean_series"),
-    )
     def test_plotted_mask_excludes_points_in_bins_dropped_by_clim(self, xyz):
         """With clim (12, None), no point in a bin of < 12 points is plotted.
 
-        ON FAILURE: (unexpected pass) the mask now tests the joint bin; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, y, _ = xyz
         h = Hist2D(x, y, nbins=[X_EDGES, Y_EDGES])
@@ -475,16 +453,10 @@ class TestSelection:
         expected = pd.DataFrame({"x": x, "y": y, "z": z})[dense]
         pd.testing.assert_frame_equal(subset.loc[expected.index], expected)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=SelectedPointInDroppedBin,
-        reason=MARGINAL_REASON.format(method="get_subset_above_threshold"),
-    )
     def test_subset_above_threshold_excludes_rows_in_sparse_bins(self, xyz):
         """No row whose bin count is < 14 is in the subset.
 
-        ON FAILURE: (unexpected pass) the mask now tests the joint bin; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, y, z = xyz
         h = Hist2D(x, y, z, nbins=[X_EDGES, Y_EDGES])
@@ -493,17 +465,11 @@ class TestSelection:
         if mask.to_numpy()[sparse].any():
             raise SelectedPointInDroppedBin(f"{mask.to_numpy()[sparse].sum()} rows")
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=ONE_D_REASON.format(method="get_plotted_data_boolean_series"),
-    )
     def test_1d_plotted_mask_follows_clim(self, xyz):
         """In 1-D a point is plotted iff its x bin holds >= 52 points.
 
         np.histogram counts over X_EDGES straddle 52 for this fixture (asserted).
-        ON FAILURE: (unexpected pass) the 1-D agg index is named; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, _, _ = xyz
         counts, _ = np.histogram(x, bins=X_EDGES)
@@ -514,16 +480,10 @@ class TestSelection:
         mask = h.get_plotted_data_boolean_series()
         np.testing.assert_array_equal(mask.to_numpy(), expected)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=ONE_D_REASON.format(method="get_subset_above_threshold"),
-    )
     def test_1d_subset_above_threshold_keeps_rows_in_dense_bins(self, xyz):
         """In 1-D the subset is the rows whose x bin holds >= 52 points.
 
-        ON FAILURE: (unexpected pass) the 1-D agg index is named; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, _, _ = xyz
         counts, _ = np.histogram(x, bins=X_EDGES)
