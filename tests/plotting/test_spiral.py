@@ -1,827 +1,1033 @@
 #!/usr/bin/env python
-"""Tests for solarwindpy.plotting.spiral module.
+"""Tests for the adaptive (spiral) mesh in ``solarwindpy.plotting.spiral``.
 
-This module provides comprehensive test coverage for the spiral mesh plotting and
-binning utilities, including numba-accelerated functions.
+A spiral mesh starts from a rectangular grid and splits every cell holding more
+than ``min_per_bin`` samples into four quadrants at its midpoint, repeating until
+no cell is over-full. Cells are half-open, ``[x0, x1) x [y0, y1)``.
+
+Every expectation is derived from ``ROWS``, a table chosen by hand, either by a
+worked example written next to it or by ``_refine`` and ``_tally``, a
+plain-Python quadtree and counter that share no code with the package. The grid
+is 2 x-bins by 3 y-bins with unequal widths, so a transpose or a width error
+changes the answer, and one cell splits twice, so a single refinement step is
+not enough. What is asserted about a plot is the data handed to matplotlib
+(rectangle coordinates, collection arrays, face alphas, contour segments).
 """
 
-import pytest
 import logging
-import pandas as pd
-import numpy as np
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-from collections import namedtuple
 
+import numpy as np
+import pandas as pd
+import pytest
 import matplotlib
 
-matplotlib.use("Agg")  # Use non-interactive backend
-from matplotlib import pyplot as plt
-from matplotlib.collections import PatchCollection
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.collections import PatchCollection  # noqa: E402
+from matplotlib.colorbar import Colorbar  # noqa: E402
+from matplotlib.colors import Normalize  # noqa: E402
+from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
+from scipy.ndimage import gaussian_filter  # noqa: E402
 
-import solarwindpy.plotting.spiral as spiral_module
-from solarwindpy.plotting.spiral import (
-    get_counts_per_bin,
-    calculate_bin_number_with_numba,
+from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
-    InitialSpiralEdges,
-    SpiralMeshBinID,
-    SpiralFilterThresholds,
+    calculate_bin_number_with_numba,
+    get_counts_per_bin,
 )
 
+# ---------------------------------------------------------------------------
+# Chosen input. No sample lies on a cell edge (the edge convention has its own
+# test), and no two samples coincide (coincident samples never stop splitting).
+# ---------------------------------------------------------------------------
 
-class TestSpiralModuleStructure:
-    """Test spiral module structure and imports."""
+XEDGES = (0.0, 2.0, 6.0)  # widths 2, 4
+YEDGES = (0.0, 1.0, 2.0, 4.0)  # widths 1, 1, 2
 
-    def test_module_imports(self):
-        """Test that all required imports are accessible."""
-        # Test basic imports
-        assert hasattr(spiral_module, "base")
-        assert hasattr(spiral_module, "labels_module")
-        assert hasattr(spiral_module, "plt")
-        assert hasattr(spiral_module, "np")
-        assert hasattr(spiral_module, "pd")
+# x, y, z
+ROWS = [
+    (1.0, 0.5, 1.0),  # p0: [0,2)x[0,1)
+    (5.0, 1.5, 3.0),  # p1: [2,6)x[1,2)
+    (2.5, 2.2, 2.0),  # p2: [2,6)x[2,4) -> [2,4)x[2,3) -> [2,3)x[2,2.5)
+    (3.5, 2.7, 5.0),  # p3: [2,6)x[2,4) -> [2,4)x[2,3) -> [3,4)x[2.5,3)
+    (5.0, 3.5, 9.0),  # p4: [2,6)x[2,4) -> [4,6)x[3,4)
+    (0.5, 3.0, 4.0),  # p5: [0,2)x[2,4)
+]
+X = pd.Series([r[0] for r in ROWS])
+Y = pd.Series([r[1] for r in ROWS])
+Z = pd.Series([r[2] for r in ROWS])
 
-    def test_numba_functions_available(self):
-        """Test that numba-accelerated functions are accessible."""
-        assert hasattr(spiral_module, "get_counts_per_bin")
-        assert hasattr(spiral_module, "calculate_bin_number_with_numba")
-        assert callable(spiral_module.get_counts_per_bin)
-        assert callable(spiral_module.calculate_bin_number_with_numba)
+# The initial cells, x-major: row i * ny + j is x-bin i, y-bin j.
+INITIAL = [
+    (0.0, 2.0, 0.0, 1.0),
+    (0.0, 2.0, 1.0, 2.0),
+    (0.0, 2.0, 2.0, 4.0),
+    (2.0, 6.0, 0.0, 1.0),
+    (2.0, 6.0, 1.0, 2.0),
+    (2.0, 6.0, 2.0, 4.0),
+]
 
-    def test_classes_available(self):
-        """Test that spiral classes are accessible."""
-        assert hasattr(spiral_module, "SpiralMesh")
-        assert hasattr(spiral_module, "SpiralPlot2D")
-        assert callable(spiral_module.SpiralMesh)
-        assert callable(spiral_module.SpiralPlot2D)
+# Worked by hand for min_per_bin=1. [2,6)x[2,4) holds p2, p3, p4 and splits at
+# (4, 3); its quadrant [2,4)x[2,3) holds p2, p3 and splits at (3, 2.5).
+MESH_MIN1 = {
+    (0.0, 2.0, 0.0, 1.0),
+    (0.0, 2.0, 1.0, 2.0),
+    (0.0, 2.0, 2.0, 4.0),
+    (2.0, 6.0, 0.0, 1.0),
+    (2.0, 6.0, 1.0, 2.0),
+    (4.0, 6.0, 2.0, 3.0),
+    (4.0, 6.0, 3.0, 4.0),
+    (2.0, 4.0, 3.0, 4.0),
+    (2.0, 3.0, 2.0, 2.5),
+    (3.0, 4.0, 2.0, 2.5),
+    (3.0, 4.0, 2.5, 3.0),
+    (2.0, 3.0, 2.5, 3.0),
+}
 
-    def test_namedtuple_definitions(self):
-        """Test that named tuples are properly defined."""
-        assert hasattr(spiral_module, "InitialSpiralEdges")
-        assert hasattr(spiral_module, "SpiralMeshBinID")
-        assert hasattr(spiral_module, "SpiralFilterThresholds")
+# Worked by hand for min_per_bin=2: only [2,6)x[2,4) (3 samples) splits, and
+# [2,4)x[2,3) keeps p2 and p3 together (2 is not more than 2).
+MESH_MIN2 = set(INITIAL[:5]) | {
+    (2.0, 4.0, 2.0, 3.0),
+    (4.0, 6.0, 2.0, 3.0),
+    (4.0, 6.0, 3.0, 4.0),
+    (2.0, 4.0, 3.0, 4.0),
+}
 
-        # Test that they are indeed named tuples
-        assert issubclass(InitialSpiralEdges, tuple)
-        assert issubclass(SpiralMeshBinID, tuple)
-        assert issubclass(SpiralFilterThresholds, tuple)
+FILL = -9999  # the documented out-of-mesh bin number
 
-
-class TestNamedTuples:
-    """Test named tuple structures and functionality."""
-
-    def test_initial_spiral_edges_structure(self):
-        """Test InitialSpiralEdges named tuple."""
-        # Test creation
-        x_edges = np.array([0, 1, 2, 3])
-        y_edges = np.array([0, 1, 2])
-        edges = InitialSpiralEdges(x_edges, y_edges)
-
-        assert edges.x is x_edges
-        assert edges.y is y_edges
-        assert len(edges) == 2
-
-    def test_spiral_mesh_bin_id_structure(self):
-        """Test SpiralMeshBinID named tuple."""
-        bin_ids = np.array([0, 1, 2, 1, 0])
-        fill_value = -9999
-        visited = np.array([1, 1, 1])
-
-        bin_id = SpiralMeshBinID(bin_ids, fill_value, visited)
-
-        assert np.array_equal(bin_id.id, bin_ids)
-        assert bin_id.fill == fill_value
-        assert np.array_equal(bin_id.visited, visited)
-        assert len(bin_id) == 3
-
-    def test_spiral_filter_thresholds_structure(self):
-        """Test SpiralFilterThresholds named tuple with defaults."""
-        # Test with defaults
-        thresholds = SpiralFilterThresholds(density=0.5)
-        assert thresholds.density == 0.5
-        assert thresholds.size is False  # Default value
-
-        # Test without defaults
-        thresholds2 = SpiralFilterThresholds(density=0.3, size=0.9)
-        assert thresholds2.density == 0.3
-        assert thresholds2.size == 0.9
-
-    def test_namedtuple_immutability(self):
-        """Test that named tuples are immutable."""
-        edges = InitialSpiralEdges([1, 2, 3], [4, 5, 6])
-
-        with pytest.raises(AttributeError):
-            edges.x = [7, 8, 9]
+# Tolerance for values built from a handful of exactly representable numbers
+# (areas, means, quantiles, powers of ten): only rounding separates package
+# and reference.
+REL = 1e-12
 
 
-class TestNumbaFunctions:
-    """Test numba-accelerated functions."""
+def _inside(cell, x, y):
+    x0, x1, y0, y1 = cell
+    return x0 <= x < x1 and y0 <= y < y1
 
-    def setup_method(self):
-        """Set up test data for numba functions."""
-        # Create simple test bins: 2x2 grid
-        self.bins = np.array(
-            [
-                [0, 1, 0, 1],  # Lower-left bin
-                [1, 2, 0, 1],  # Lower-right bin
-                [0, 1, 1, 2],  # Upper-left bin
-                [1, 2, 1, 2],  # Upper-right bin
-            ],
-            dtype=np.float64,
-        )
 
-        # Test points
-        self.x = np.array([0.5, 1.5, 0.5, 1.5, 0.1])
-        self.y = np.array([0.5, 0.5, 1.5, 1.5, 0.1])
+def _grid_cells(xedges, yedges):
+    return [
+        (xedges[i], xedges[i + 1], yedges[j], yedges[j + 1])
+        for i in range(len(xedges) - 1)
+        for j in range(len(yedges) - 1)
+    ]
 
-    def test_get_counts_per_bin_basic(self):
-        """Test basic functionality of get_counts_per_bin."""
-        counts = get_counts_per_bin(self.bins, self.x, self.y)
 
-        assert isinstance(counts, np.ndarray)
-        assert counts.dtype == np.int64
-        assert len(counts) == len(self.bins)
+def _refine(xedges, yedges, points, min_per_bin):
+    """Leaves of a quadtree that splits any cell holding > min_per_bin points."""
+    leaves = set()
+    todo = _grid_cells(xedges, yedges)
+    while todo:
+        cell = todo.pop()
+        if sum(_inside(cell, x, y) for x, y in points) > min_per_bin:
+            x0, x1, y0, y1 = cell
+            xh, yh = (x0 + x1) / 2, (y0 + y1) / 2
+            todo += [
+                (x0, xh, y0, yh),
+                (xh, x1, y0, yh),
+                (xh, x1, yh, y1),
+                (x0, xh, yh, y1),
+            ]
+        else:
+            leaves.add(cell)
+    return leaves
 
-        # Should have one point in each of the 4 bins, plus one more in bin 0
-        expected = np.array([2, 1, 1, 1])  # Two points in first bin
-        assert np.array_equal(counts, expected)
 
-    def test_get_counts_per_bin_empty_bins(self):
-        """Test get_counts_per_bin with empty bins."""
-        # Points outside all bins
-        x_out = np.array([5, 6])
-        y_out = np.array([5, 6])
+def _tally(cells, rows):
+    """z values of ``rows`` inside each of ``cells``, in the order of ``cells``."""
+    return [[z for x, y, z in rows if _inside(tuple(c), x, y)] for c in cells]
 
-        counts = get_counts_per_bin(self.bins, x_out, y_out)
 
-        assert isinstance(counts, np.ndarray)
-        assert len(counts) == len(self.bins)
-        assert np.all(counts == 0)
+def _cells(mesh):
+    return [tuple(float(v) for v in row) for row in mesh]
 
-    def test_get_counts_per_bin_boundary_points(self):
-        """Test boundary point handling in get_counts_per_bin."""
-        # Points exactly on boundaries (should be included in left/bottom bin)
-        x_boundary = np.array([1.0, 0.0])
-        y_boundary = np.array([0.0, 1.0])
 
-        counts = get_counts_per_bin(self.bins, x_boundary, y_boundary)
+def _points(rows=ROWS):
+    return [(x, y) for x, y, _ in rows]
 
-        # Point at (1,0) should be in lower-left bin (x>=0 & x<1 is false, x>=1 & x<2 is true)
-        # Point at (0,1) should be in upper-left bin
-        expected = np.array([0, 1, 1, 0])
-        assert np.array_equal(counts, expected)
 
-    def test_calculate_bin_number_with_numba_basic(self):
-        """Test basic functionality of calculate_bin_number_with_numba."""
-        zbin, fill, bin_visited = calculate_bin_number_with_numba(
-            self.bins, self.x, self.y
-        )
+def _plot(min_per_bin, z=Z, log=False, rows=None):
+    """SpiralPlot2D on ROWS with the chosen edges; ``log`` stores 10**x, 10**y.
 
-        assert isinstance(zbin, np.ndarray)
-        assert isinstance(fill, (int, np.integer))
-        assert isinstance(bin_visited, np.ndarray)
+    SpiralPlot2D raises the top edges (6 -> 6.06, 4 -> 4.04), so the cells
+    that reach a top edge, and their split points, shift slightly. No sample
+    lies near a split point, so which samples share a cell is unchanged, and
+    cells below are named by the hand-worked edges they came from.
+    """
+    if rows is None:
+        x, y = X, Y
+    else:
+        x = pd.Series([r[0] for r in rows])
+        y = pd.Series([r[1] for r in rows])
+        z = None if z is None else pd.Series([r[2] for r in rows])
+    if log:
+        x, y = 10.0**x, 10.0**y
+    splot = SpiralPlot2D(
+        x,
+        y,
+        z,
+        logx=log,
+        logy=log,
+        initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+    )
+    splot.initialize_mesh(min_per_bin=min_per_bin)
+    splot.build_grouped()
+    return splot
 
-        assert len(zbin) == len(self.x)
-        assert zbin.dtype == np.int64
-        assert fill == -9999
 
-        # Check that points are assigned to correct bins
-        expected_bins = np.array([0, 1, 2, 3, 0])  # Last point also in bin 0
-        assert np.array_equal(zbin, expected_bins)
+def _expected_agg(splot, fcn, rows=ROWS):
+    """``fcn`` of the z values in each mesh cell of ``splot``, NaN if empty."""
+    return np.array(
+        [fcn(zs) if zs else np.nan for zs in _tally(splot.mesh.mesh, rows)],
+        dtype=float,
+    )
 
-    def test_calculate_bin_number_with_numba_outside_points(self):
-        """Test calculate_bin_number_with_numba with points outside mesh."""
-        # Add points outside the mesh
-        x_with_outside = np.append(self.x, [5, -1])
-        y_with_outside = np.append(self.y, [5, -1])
 
-        zbin, fill, bin_visited = calculate_bin_number_with_numba(
-            self.bins, x_with_outside, y_with_outside
-        )
+def _rectangles(collection):
+    out = []
+    for path in collection.get_paths():
+        v = path.vertices
+        out.append((v[:, 0].min(), v[:, 0].max(), v[:, 1].min(), v[:, 1].max()))
+    return np.array(out)
 
-        # Points outside mesh should have fill value
-        assert zbin[-2] == fill
-        assert zbin[-1] == fill
 
-        # Other points should still be assigned correctly
-        assert zbin[0] == 0  # First point in bin 0
+def _occupied_centers(splot, fcn=np.mean):
+    """Centres and values of the occupied cells, in linear data space."""
+    values = _expected_agg(splot, fcn)
+    mesh = splot.mesh.mesh
+    x = 0.5 * (mesh[:, 0] + mesh[:, 1])
+    y = 0.5 * (mesh[:, 2] + mesh[:, 3])
+    if splot.log.x:
+        x = 10.0**x
+    if splot.log.y:
+        y = 10.0**y
+    ok = np.isfinite(values)
+    return x[ok], y[ok], values[ok]
 
-    def test_numba_function_performance(self):
-        """Test that numba functions handle reasonably large datasets."""
-        # Create larger dataset
-        n_points = 10000
-        large_x = np.random.uniform(0, 2, n_points)
-        large_y = np.random.uniform(0, 2, n_points)
 
-        # Should not raise memory errors or take excessive time
-        counts = get_counts_per_bin(self.bins, large_x, large_y)
-        assert len(counts) == len(self.bins)
-        assert counts.sum() <= n_points  # Some points might be outside
+def _regular_grid(x, y, resolution):
+    return np.meshgrid(
+        np.linspace(x.min(), x.max(), resolution),
+        np.linspace(y.min(), y.max(), resolution),
+    )
 
-        zbin, fill, bin_visited = calculate_bin_number_with_numba(
-            self.bins, large_x, large_y
-        )
-        assert len(zbin) == n_points
+
+def _assert_same_segments(qset, ref):
+    assert len(qset.allsegs) == len(ref.allsegs)
+    for got, want in zip(qset.allsegs, ref.allsegs):
+        assert len(got) == len(want)
+        for g, w in zip(got, want):
+            # Same arrays through the same scipy and matplotlib routines.
+            np.testing.assert_allclose(g, w, rtol=1e-9, atol=0)
+
+
+def _segments_differ(a, b):
+    try:
+        _assert_same_segments(a, b)
+    except AssertionError:
+        return True
+    return False
+
+
+@pytest.fixture(autouse=True)
+def _quiet_and_close():
+    logging.disable(logging.WARNING)
+    yield
+    logging.disable(logging.NOTSET)
+    plt.close("all")
+
+
+def test_fixture_separates_orientation_widths_and_depth():
+    """ROWS exercises a non-square grid, unequal widths, and a two-level split.
+
+    The quadtree reference also reproduces both hand-worked meshes, so a
+    reference wrong in the same way as the package still fails.
+
+    ON FAILURE: the fixture no longer separates x from y, uniform from non-uniform widths, or one refinement step from two; fix the fixture.
+    """
+    assert len(XEDGES) != len(YEDGES)
+    assert len({b - a for a, b in zip(XEDGES, XEDGES[1:])}) > 1
+    assert len({b - a for a, b in zip(YEDGES, YEDGES[1:])}) > 1
+    assert _grid_cells(XEDGES, YEDGES) == INITIAL
+    assert _refine(XEDGES, YEDGES, _points(), 1) == MESH_MIN1
+    assert _refine(XEDGES, YEDGES, _points(), 2) == MESH_MIN2
+    assert MESH_MIN1 != MESH_MIN2
+    # p2 and p3 share a cell at min_per_bin=2 but not at 1.
+    shared = [c for c in MESH_MIN2 if _inside(c, 2.5, 2.2) and _inside(c, 3.5, 2.7)]
+    assert shared == [(2.0, 4.0, 2.0, 3.0)]
+
+
+class TestCountsAndBinNumbers:
+    """The numba kernels count and locate samples in half-open cells."""
+
+    def test_counts_per_bin_match_a_hand_count(self):
+        """``get_counts_per_bin`` counts ROWS per initial cell: 1, 0, 1, 0, 1, 3.
+
+        ON FAILURE: the code is wrong.
+        """
+        counts = get_counts_per_bin(np.array(INITIAL), X.values, Y.values)
+        assert counts.tolist() == [1, 0, 1, 0, 1, 3]
+        assert counts.tolist() == [len(z) for z in _tally(INITIAL, ROWS)]
+
+    def test_cells_are_closed_below_and_open_above(self):
+        """A sample on a shared edge belongs to the cell above or right of it.
+
+        (2, 1) sits on the corner shared by four cells and belongs to
+        [2,6)x[1,2); (6, 4) sits on the outer top-right corner and belongs to
+        no cell.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = np.array(INITIAL)
+        x = np.array([2.0, 6.0, 0.0])
+        y = np.array([1.0, 4.0, 2.0])
+        counts = get_counts_per_bin(mesh, x, y)
+        assert counts.tolist() == [0, 0, 1, 0, 1, 0]
+        zbin, fill, _ = calculate_bin_number_with_numba(mesh, x, y)
+        assert zbin.tolist() == [4, fill, 2]
+
+    def test_bin_number_is_the_index_of_the_containing_cell(self):
+        """Each sample gets the row of the mesh cell containing it; others get -9999.
+
+        Samples outside the grid and NaN samples get the fill value, and every
+        cell is visited exactly once.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = np.array(INITIAL)
+        x = np.append(X.values, [-1.0, 7.0, np.nan])
+        y = np.append(Y.values, [0.5, 0.5, 0.5])
+        zbin, fill, visited = calculate_bin_number_with_numba(mesh, x, y)
+        assert fill == FILL
+        assert zbin.tolist() == [0, 4, 5, 5, 5, 2, FILL, FILL, FILL]
+        assert visited.tolist() == [1] * len(INITIAL)
 
 
 class TestSpiralMesh:
-    """Test SpiralMesh class functionality."""
+    """Refinement of the initial grid into the adaptive mesh."""
 
-    def setup_method(self):
-        """Set up test data for SpiralMesh tests."""
-        self.x_data = pd.Series(np.random.uniform(0, 10, 100))
-        self.y_data = pd.Series(np.random.uniform(0, 10, 100))
-        self.x_edges = np.linspace(0, 10, 6)  # 5 bins
-        self.y_edges = np.linspace(0, 10, 6)  # 5 bins
-        self.min_per_bin = 5
-
-    def test_spiral_mesh_initialization(self):
-        """Test SpiralMesh initialization."""
-        mesh = SpiralMesh(
-            self.x_data,
-            self.y_data,
-            self.x_edges,
-            self.y_edges,
-            min_per_bin=self.min_per_bin,
+    def _mesh(self, min_per_bin, rows=ROWS):
+        x = pd.Series([r[0] for r in rows])
+        y = pd.Series([r[1] for r in rows])
+        return SpiralMesh(
+            x, y, np.array(XEDGES), np.array(YEDGES), min_per_bin=min_per_bin
         )
 
-        assert mesh is not None
-        assert hasattr(mesh, "data")
-        assert hasattr(mesh, "initial_edges")
-        assert hasattr(mesh, "min_per_bin")
-        assert hasattr(mesh, "cell_filter_thresholds")
+    def test_initial_cells_are_ordered_x_major(self):
+        """Row ``i * ny + j`` of the initial mesh is x-bin i and y-bin j.
 
-    def test_spiral_mesh_properties(self):
-        """Test SpiralMesh property access."""
-        mesh = SpiralMesh(
-            self.x_data,
-            self.y_data,
-            self.x_edges,
-            self.y_edges,
-            min_per_bin=self.min_per_bin,
-        )
+        On this 2 x 3 grid row 1 is [0,2)x[1,2); a y-major layout would give
+        [2,6)x[0,1).
 
-        # Test property access
-        assert isinstance(mesh.data, pd.DataFrame)
-        assert isinstance(mesh.initial_edges, InitialSpiralEdges)
-        assert isinstance(mesh.min_per_bin, int)
-        assert isinstance(mesh.cell_filter_thresholds, SpiralFilterThresholds)
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(1)
+        assert _cells(mesh.initialize_bins()) == INITIAL
+        assert _cells(mesh.initial_mesh) == INITIAL
 
-        # Test data structure
-        assert "x" in mesh.data.columns
-        assert "y" in mesh.data.columns
-        assert len(mesh.data) == len(self.x_data)
+    def test_one_step_splits_overfull_cells_into_quadrants(self):
+        """One step replaces each cell over ``min_per_bin`` by its four quadrants.
 
-    def test_spiral_mesh_set_methods(self):
-        """Test SpiralMesh setter methods."""
-        mesh = SpiralMesh(
-            self.x_data, self.y_data, self.x_edges, self.y_edges, min_per_bin=10
-        )
+        At min_per_bin=1 only [2,6)x[2,4) (3 samples) splits, at its midpoint
+        (4, 3); its row in the input becomes NaN and the others are untouched.
 
-        # Test set_min_per_bin
-        mesh.set_min_per_bin(20)
-        assert mesh.min_per_bin == 20
+        ON FAILURE: the code is wrong.
+        """
+        bins = np.array(INITIAL)
+        new, n = SpiralMesh.process_one_spiral_step(bins, X.values, Y.values, 1)
+        assert n == 1
+        assert set(_cells(new)) == {
+            (2.0, 4.0, 2.0, 3.0),
+            (4.0, 6.0, 2.0, 3.0),
+            (4.0, 6.0, 3.0, 4.0),
+            (2.0, 4.0, 3.0, 4.0),
+        }
+        assert np.isnan(bins[5]).all()
+        assert _cells(bins[:5]) == INITIAL[:5]
 
-        # Test set_cell_filter_thresholds
-        mesh.set_cell_filter_thresholds(density=0.5, size=0.9)
-        assert mesh.cell_filter_thresholds.density == 0.5
-        assert mesh.cell_filter_thresholds.size == 0.9
+    def test_a_cell_at_exactly_min_per_bin_is_not_split(self):
+        """A cell splits only when it holds strictly more than ``min_per_bin``.
 
-        # Test set_initial_edges
-        new_x_edges = np.linspace(0, 5, 4)
-        new_y_edges = np.linspace(0, 5, 4)
-        mesh.set_initial_edges(new_x_edges, new_y_edges)
-        assert np.array_equal(mesh.initial_edges.x, new_x_edges)
-        assert np.array_equal(mesh.initial_edges.y, new_y_edges)
+        [2,6)x[2,4) holds 3 samples, so min_per_bin=3 splits nothing.
 
-    def test_spiral_mesh_initialize_bins(self):
-        """Test spiral mesh bin initialization."""
-        mesh = SpiralMesh(
-            self.x_data,
-            self.y_data,
-            self.x_edges,
-            self.y_edges,
-            min_per_bin=self.min_per_bin,
-        )
+        ON FAILURE: the code is wrong.
+        """
+        bins = np.array(INITIAL)
+        new, n = SpiralMesh.process_one_spiral_step(bins, X.values, Y.values, 3)
+        assert new is None and n == 0
+        assert _cells(bins) == INITIAL
 
-        initial_mesh = mesh.initialize_bins()
+    @pytest.mark.parametrize(
+        "min_per_bin, hand", [(1, MESH_MIN1), (2, MESH_MIN2), (3, set(INITIAL))]
+    )
+    def test_generated_mesh_matches_the_hand_worked_mesh(self, min_per_bin, hand):
+        """``generate_mesh`` yields the hand-worked leaves, each exactly once.
 
-        assert isinstance(initial_mesh, np.ndarray)
-        assert initial_mesh.shape[1] == 4  # x0, x1, y0, y1
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(min_per_bin)
+        mesh.generate_mesh()
+        cells = _cells(mesh.mesh)
+        assert len(cells) == len(set(cells))
+        assert set(cells) == hand
 
-        # Should have (nx-1) * (ny-1) bins
-        expected_n_bins = (len(self.x_edges) - 1) * (len(self.y_edges) - 1)
-        assert initial_mesh.shape[0] == expected_n_bins
+    @pytest.mark.parametrize("min_per_bin", [1, 2])
+    def test_generated_mesh_tiles_the_grid_without_overfull_cells(self, min_per_bin):
+        """The leaves cover the initial grid's area and none holds > min_per_bin.
 
-        # All values should be finite
-        assert np.isfinite(initial_mesh).all()
+        Identity: the areas sum to (6 - 0) * (4 - 0) = 24.
 
-    def test_spiral_mesh_cell_filter_invalid_kwargs(self):
-        """Test that invalid kwargs raise errors."""
-        mesh = SpiralMesh(
-            self.x_data,
-            self.y_data,
-            self.x_edges,
-            self.y_edges,
-            min_per_bin=self.min_per_bin,
-        )
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(min_per_bin)
+        mesh.generate_mesh()
+        m = mesh.mesh
+        area = ((m[:, 1] - m[:, 0]) * (m[:, 3] - m[:, 2])).sum()
+        assert area == pytest.approx(24.0, rel=REL, abs=0)
+        assert max(len(z) for z in _tally(m, ROWS)) <= min_per_bin
 
+    def test_samples_outside_the_grid_do_not_drive_refinement(self):
+        """Samples outside the initial grid leave the mesh unchanged.
+
+        Three extra samples at x=10 would split any cell they entered.
+
+        ON FAILURE: the code is wrong.
+        """
+        outside = [(10.0, 1.5, 0.0), (10.5, 1.5, 0.0), (11.0, 1.5, 0.0)]
+        mesh = self._mesh(1, ROWS + outside)
+        mesh.generate_mesh()
+        assert set(_cells(mesh.mesh)) == MESH_MIN1
+
+    def test_bin_ids_locate_every_sample_in_its_leaf(self):
+        """``place_spectra_in_mesh`` numbers each sample by the leaf containing it.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(1)
+        bin_id = mesh.place_spectra_in_mesh()
+        assert bin_id is mesh.bin_id
+        assert bin_id.fill == FILL
+        for (x, y, _), i in zip(ROWS, bin_id.id):
+            assert _inside(tuple(mesh.mesh[i]), x, y)
+        assert len(set(bin_id.id)) == len(ROWS)  # min_per_bin=1: one per leaf
+
+    def test_categorical_holds_one_category_per_occupied_leaf(self):
+        """``cat`` equals the bin ids, with the occupied leaves as categories.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(2)
+        mesh.place_spectra_in_mesh()
+        mesh.build_cat()
+        assert list(mesh.cat) == list(mesh.bin_id.id)
+        assert set(mesh.cat.categories) == set(mesh.bin_id.id)
+        assert len(mesh.cat.categories) == 5  # p2, p3 share a leaf
+
+    def test_default_cell_filter_keeps_every_cell(self):
+        """With no thresholds set, ``cell_filter`` selects every cell.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(1)
+        mesh.place_spectra_in_mesh()
+        assert mesh.cell_filter.tolist() == [True] * len(MESH_MIN1)
+
+    @pytest.mark.parametrize(
+        "thresholds, kept",
+        [
+            # 12 areas: 0.5 x4, 2 x5, 4 x3. The 0.9 quantile is 4, and only
+            # cells strictly below it are kept: the three area-4 cells go.
+            ({"size": 0.9}, lambda c, n: (c[1] - c[0]) * (c[3] - c[2]) < 4),
+            # Densities: 0 x6, 0.25 x2, 0.5 x2, 2 x2. The 0.5 quantile is 0,
+            # so exactly the occupied cells are kept.
+            ({"density": 0.5}, lambda c, n: n > 0),
+            # The 0.75 quantile is 0.5: only the two occupied 0.5-area cells.
+            ({"density": 0.75}, lambda c, n: n > 0 and (c[1] - c[0]) == 1),
+            # Both filters must pass.
+            (
+                {"density": 0.5, "size": 0.9},
+                lambda c, n: n > 0 and (c[1] - c[0]) * (c[3] - c[2]) < 4,
+            ),
+        ],
+        ids=["size", "density-median", "density-upper", "both"],
+    )
+    def test_cell_filter_selects_by_area_and_density_quantiles(self, thresholds, kept):
+        """``size`` keeps cells below an area quantile, ``density`` above a density one.
+
+        Worked by hand for the min_per_bin=1 mesh; see the parameter comments.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(1)
+        mesh.place_spectra_in_mesh()
+        mesh.set_cell_filter_thresholds(**thresholds)
+        counts = [len(z) for z in _tally(mesh.mesh, ROWS)]
+        expected = [kept(c, n) for c, n in zip(_cells(mesh.mesh), counts)]
+        assert mesh.cell_filter.tolist() == expected
+        assert 0 < sum(expected) < len(expected)
+
+    def test_unknown_filter_threshold_is_rejected(self):
+        """``set_cell_filter_thresholds`` rejects names other than density and size.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = self._mesh(1)
         with pytest.raises(KeyError, match="Unexpected kwarg"):
-            mesh.set_cell_filter_thresholds(invalid_param=0.5)
+            mesh.set_cell_filter_thresholds(area=0.5)
 
 
-class TestSpiralPlot2D:
-    """Test SpiralPlot2D class functionality."""
+class TestInitialBins:
+    """SpiralPlot2D's data transform and initial edges."""
 
-    def setup_method(self):
-        """Set up test data for SpiralPlot2D tests."""
-        self.x_data = pd.Series(np.random.uniform(1, 100, 50))  # Positive for log
-        self.y_data = pd.Series(np.random.uniform(1, 100, 50))  # Positive for log
-        self.z_data = pd.Series(np.random.uniform(0, 10, 50))
+    def test_integer_bins_are_quantile_edges(self):
+        """An integer n gives the n + 1 quantiles of the data as edges.
 
-    def test_spiral_plot_2d_initialization(self):
-        """Test SpiralPlot2D initialization."""
-        splot = SpiralPlot2D(self.x_data, self.y_data)
+        Data 0..8 with n=4 have quantiles 0, 2, 4, 6, 8; the top edge is then
+        raised above 8 so the largest sample lies inside a cell.
 
-        assert splot is not None
-        assert hasattr(splot, "data")
-        assert hasattr(splot, "initial_bins")
-        assert hasattr(splot, "clim")
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series(np.arange(9.0))
+        splot = SpiralPlot2D(x, x[::-1].reset_index(drop=True), initial_bins=4)
+        for axis in ("x", "y"):
+            edges = splot.initial_bins[axis]
+            assert edges[:-1].tolist() == [0.0, 2.0, 4.0, 6.0]
+            assert edges[-1] > 8.0
 
-    def test_spiral_plot_2d_with_z_data(self):
-        """Test SpiralPlot2D initialization with z data."""
-        splot = SpiralPlot2D(self.x_data, self.y_data, self.z_data)
+    def test_bins_may_differ_per_axis(self):
+        """A pair of integers sets the number of bins along x and y separately.
 
-        assert "z" in splot.data.columns
-        assert len(splot.data) == len(self.x_data)
+        ON FAILURE: the code is wrong.
+        """
+        splot = SpiralPlot2D(X, Y, initial_bins=(4, 2))
+        assert len(splot.initial_bins["x"]) == 5
+        assert len(splot.initial_bins["y"]) == 3
 
-    def test_spiral_plot_2d_log_scaling(self):
-        """Test SpiralPlot2D with logarithmic scaling."""
-        splot = SpiralPlot2D(self.x_data, self.y_data, logx=True, logy=True)
+    def test_infinite_samples_do_not_move_quantile_edges(self):
+        """Infinite samples are left out when the quantile edges are computed.
 
-        # With log scaling, data should be log-transformed
-        original_data_range = self.x_data.max() - self.x_data.min()
-        plot_data_range = splot.data["x"].max() - splot.data["x"].min()
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series(np.append(np.arange(9.0), np.inf))
+        y = pd.Series(np.append(np.arange(9.0), -np.inf))
+        splot = SpiralPlot2D(x, y, initial_bins=4)
+        assert splot.initial_bins["x"][:-1].tolist() == [0.0, 2.0, 4.0, 6.0]
+        assert splot.initial_bins["y"][:-1].tolist() == [0.0, 2.0, 4.0, 6.0]
 
-        # Log-transformed range should be smaller than original
-        assert plot_data_range < original_data_range
+    def test_explicit_edges_keep_interior_edges_and_contain_every_sample(self):
+        """Given edges are used as-is except the top one, which exceeds every sample.
 
-    def test_spiral_plot_2d_initial_bins_calculation(self):
-        """Test initial bins calculation."""
-        splot = SpiralPlot2D(self.x_data, self.y_data, initial_bins=5)
+        ON FAILURE: the code is wrong.
+        """
+        rows = ROWS + [(6.0, 4.0, 0.0)]  # on the given top-right corner
+        splot = _plot(1, rows=rows)
+        xe, ye = splot.initial_bins["x"], splot.initial_bins["y"]
+        assert xe[:-1].tolist() == list(XEDGES[:-1])
+        assert ye[:-1].tolist() == list(YEDGES[:-1])
+        assert xe[-1] > 6.0 and ye[-1] > 4.0
+        # ... so the corner sample is counted.
+        assert np.nansum(_expected_agg(splot, len, rows)) == len(rows)
 
-        bins = splot.initial_bins
-        assert isinstance(bins, dict)
-        assert "x" in bins
-        assert "y" in bins
+    @pytest.mark.parametrize(
+        "bins, error",
+        [((3, 3, 3), ValueError), ([list(XEDGES), list(YEDGES)], TypeError)],
+        ids=["three-axes", "list-edges"],
+    )
+    def test_malformed_bins_are_rejected(self, bins, error):
+        """Bins other than an int, or one int or ndarray per axis, raise.
 
-        # Each should have 6 edges for 5 bins
-        assert len(bins["x"]) == 6
-        assert len(bins["y"]) == 6
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(error):
+            SpiralPlot2D(X, Y, initial_bins=bins)
 
-    def test_spiral_plot_2d_clim_setting(self):
-        """Test color limit setting."""
-        splot = SpiralPlot2D(self.x_data, self.y_data, self.z_data)
+    def test_log_axes_store_log10_of_the_magnitude(self):
+        """With ``logx``/``logy`` the stored coordinates are log10(|value|).
 
-        # Test setting color limits
-        splot.set_clim(lower=1, upper=9)
-        assert splot.clim.lower == 1
-        assert splot.clim.upper == 9
+        -100, 10, 1000 become 2, 1, 3.
 
-        # Test with None values
-        splot.set_clim(lower=None, upper=10)
-        assert splot.clim.lower is None
-        assert splot.clim.upper == 10
+        ON FAILURE: the code is wrong.
+        """
+        v = pd.Series([-100.0, 10.0, 1000.0])
+        splot = SpiralPlot2D(v, v, logx=True, logy=True, initial_bins=1)
+        for axis in ("x", "y"):
+            assert splot.data[axis].tolist() == pytest.approx(
+                [2.0, 1.0, 3.0], rel=REL, abs=0
+            )
 
-    @patch("matplotlib.pyplot.subplots")
-    def test_spiral_plot_2d_initialization_mesh(self, mock_subplots):
-        """Test mesh initialization in SpiralPlot2D."""
-        splot = SpiralPlot2D(self.x_data, self.y_data, initial_bins=3)
+    def test_all_nan_data_is_rejected(self):
+        """A plot whose every sample has a NaN raises ValueError.
 
-        # Initialize mesh with small min_per_bin for testing
-        splot.initialize_mesh(min_per_bin=2)
-
-        assert hasattr(splot, "_mesh")
-        assert isinstance(splot._mesh, SpiralMesh)
-        assert hasattr(splot._mesh, "mesh")
+        ON FAILURE: the code is wrong.
+        """
+        nan = pd.Series([np.nan, np.nan])
+        with pytest.raises(ValueError, match="exclusively NaNs"):
+            SpiralPlot2D(nan, nan)
 
 
-class TestSpiralIntegration:
-    """Test integration between spiral components."""
+class TestAggregation:
+    """``SpiralPlot2D.agg`` reduces z per mesh cell."""
 
-    def setup_method(self):
-        """Set up test data for integration tests."""
-        # Create structured test data
-        np.random.seed(42)  # For reproducible tests
-        self.x_data = pd.Series(np.random.uniform(0, 10, 100))
-        self.y_data = pd.Series(np.random.uniform(0, 10, 100))
-        self.z_data = pd.Series(np.random.uniform(0, 5, 100))
+    def test_plot_mesh_is_the_refinement_of_its_initial_bins(self):
+        """The plot's mesh is the quadtree refinement of its (extended) edges.
 
-    def test_spiral_mesh_full_workflow(self):
-        """Test complete spiral mesh workflow."""
-        x_edges = np.linspace(0, 10, 6)
-        y_edges = np.linspace(0, 10, 6)
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        b = splot.initial_bins
+        cells = _cells(splot.mesh.mesh)
+        assert len(cells) == len(set(cells))
+        assert set(cells) == _refine(b["x"], b["y"], _points(), 1)
 
-        mesh = SpiralMesh(self.x_data, self.y_data, x_edges, y_edges, min_per_bin=3)
+    def test_without_z_each_cell_holds_its_sample_count(self):
+        """With no z, ``agg`` counts samples per cell, NaN for empty cells.
 
-        # Initialize and generate mesh
-        initial_bins = mesh.initialize_bins()
-        assert initial_bins is not None
+        At min_per_bin=2 the occupied cells hold 1, 1, 1, 1 and 2 samples.
 
-        # The generate_mesh method is complex and involves iterative refinement
-        # For testing, we'll just verify the basic structure exists
-        assert hasattr(mesh, "generate_mesh")
-        assert callable(mesh.generate_mesh)
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2, z=None)
+        agg = splot.agg()
+        assert agg.index.tolist() == list(range(splot.mesh.mesh.shape[0]))
+        np.testing.assert_array_equal(agg.values, _expected_agg(splot, len))
+        assert sorted(agg.dropna().tolist()) == [1, 1, 1, 1, 2]
 
-    def test_numba_functions_integration(self):
-        """Test integration between numba functions."""
-        # Create simple mesh
-        bins = np.array(
-            [
-                [0, 5, 0, 5],
-                [5, 10, 0, 5],
-                [0, 5, 5, 10],
-                [5, 10, 5, 10],
-            ],
-            dtype=np.float64,
+    def test_with_z_each_cell_holds_the_mean(self):
+        """With varying z, ``agg`` averages z per cell.
+
+        At min_per_bin=3 nothing splits and the top-right cell holds z = 2, 5, 9:
+        mean 16/3, which a median (5) would not give.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(3)
+        agg = splot.agg()
+        np.testing.assert_allclose(
+            agg.values, _expected_agg(splot, np.mean), rtol=REL, atol=0
+        )
+        assert agg.tolist() == pytest.approx(
+            [1.0, np.nan, 4.0, np.nan, 3.0, 16 / 3], rel=REL, abs=0, nan_ok=True
         )
 
-        x = self.x_data.values
-        y = self.y_data.values
+    def test_explicit_function_is_applied(self):
+        """``agg(fcn)`` applies ``fcn`` per cell: the shared cell's max is 5.
 
-        # Test that both functions work together
-        counts = get_counts_per_bin(bins, x, y)
-        zbin, fill, visited = calculate_bin_number_with_numba(bins, x, y)
-
-        # Counts should match the assigned bins
-        manual_counts = np.bincount(zbin[zbin != fill], minlength=len(bins))
-        assert np.array_equal(counts, manual_counts)
-
-
-class TestSpiralErrorHandling:
-    """Test error handling and edge cases."""
-
-    def test_empty_data_handling(self):
-        """Test handling of empty data."""
-        empty_x = pd.Series([], dtype=float)
-        empty_y = pd.Series([], dtype=float)
-        edges = np.array([0, 1, 2])
-
-        # Should not crash with empty data
-        mesh = SpiralMesh(empty_x, empty_y, edges, edges, min_per_bin=1)
-        assert len(mesh.data) == 0
-
-    def test_invalid_bin_parameters(self):
-        """Test invalid bin parameter handling."""
-        x_data = pd.Series([1, 2, 3])
-        y_data = pd.Series([1, 2, 3])
-
-        # Invalid min_per_bin type
-        with pytest.raises((TypeError, ValueError)):
-            SpiralMesh(x_data, y_data, [0, 1], [0, 1], min_per_bin="invalid")
-
-    def test_mismatched_data_lengths(self):
-        """Test handling of mismatched x, y data lengths."""
-        x_data = pd.Series([1, 2, 3])
-        y_data = pd.Series([1, 2])  # Different length
-        edges = np.array([0, 1, 2])
-
-        # pandas concat fills missing values with NaN
-        mesh = SpiralMesh(x_data, y_data, edges, edges, min_per_bin=1)
-        # Data preserves the longer length but has NaN values
-        assert len(mesh.data) == 3
-        assert mesh.data.isnull().any().any()  # Should have NaN values
-
-    def test_numba_function_edge_cases(self):
-        """Test numba functions with edge case inputs."""
-        # Single bin
-        single_bin = np.array([[0, 1, 0, 1]], dtype=np.float64)
-        x = np.array([0.5])
-        y = np.array([0.5])
-
-        counts = get_counts_per_bin(single_bin, x, y)
-        assert len(counts) == 1
-        assert counts[0] == 1
-
-        zbin, fill, visited = calculate_bin_number_with_numba(single_bin, x, y)
-        assert len(zbin) == 1
-        assert zbin[0] == 0  # Should be assigned to bin 0
-
-
-class TestSpiralPerformance:
-    """Test performance characteristics of spiral components."""
-
-    def test_numba_compilation(self):
-        """Test that numba functions compile successfully."""
-        # Small test to trigger JIT compilation
-        bins = np.array([[0, 1, 0, 1]], dtype=np.float64)
-        x = np.array([0.5])
-        y = np.array([0.5])
-
-        # First call triggers compilation
-        counts1 = get_counts_per_bin(bins, x, y)
-
-        # Second call should use compiled version
-        counts2 = get_counts_per_bin(bins, x, y)
-
-        assert np.array_equal(counts1, counts2)
-
-    def test_large_dataset_handling(self):
-        """Test handling of reasonably large datasets."""
-        # Create larger dataset (but not too large for CI)
-        n_points = 5000
-        x_large = pd.Series(np.random.uniform(0, 10, n_points))
-        y_large = pd.Series(np.random.uniform(0, 10, n_points))
-        edges = np.linspace(0, 10, 11)  # 10 bins
-
-        mesh = SpiralMesh(x_large, y_large, edges, edges, min_per_bin=10)
-
-        # Should handle large datasets without memory issues
-        initial_bins = mesh.initialize_bins()
-        assert initial_bins.shape[0] == 100  # 10x10 grid
-        assert len(mesh.data) == n_points
-
-
-class TestSpiralDocumentation:
-    """Test documentation and docstrings."""
-
-    def test_module_docstring(self):
-        """Test that module has docstring."""
-        assert spiral_module.__doc__ is not None
-        assert len(spiral_module.__doc__.strip()) > 0
-
-    def test_function_docstrings(self):
-        """Test that functions have docstrings."""
-        # Note: numba functions may not preserve docstrings
-        # Just test that they are callable
-        assert callable(get_counts_per_bin)
-        assert callable(calculate_bin_number_with_numba)
-
-    def test_class_docstrings(self):
-        """Test that classes have docstrings."""
-        # SpiralMesh may not have docstrings, just test it exists and is callable
-        assert callable(SpiralMesh)
-
-        # SpiralPlot2D should have docstring
-        assert SpiralPlot2D.__doc__ is not None
-        assert len(SpiralPlot2D.__doc__.strip()) > 0
-
-
-class TestSpiralPlot2DContours:
-    """Test SpiralPlot2D.plot_contours() method with interpolation options."""
-
-    @pytest.fixture
-    def spiral_plot_instance(self):
-        """Minimal SpiralPlot2D with initialized mesh."""
-        np.random.seed(42)
-        x = pd.Series(np.random.uniform(1, 100, 500))
-        y = pd.Series(np.random.uniform(1, 100, 500))
-        z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
-        splot = SpiralPlot2D(x, y, z, initial_bins=5)
-        splot.initialize_mesh(min_per_bin=10)
-        splot.build_grouped()
-        return splot
-
-    @pytest.fixture
-    def spiral_plot_with_nans(self, spiral_plot_instance):
-        """SpiralPlot2D with NaN values in z-data."""
-        # Add NaN values to every 10th data point
-        data = spiral_plot_instance.data.copy()
-        data.loc[data.index[::10], "z"] = np.nan
-        spiral_plot_instance._data = data
-        # Rebuild grouped data to include NaNs
-        spiral_plot_instance.build_grouped()
-        return spiral_plot_instance
-
-    def test_returns_correct_types(self, spiral_plot_instance):
-        """Test that plot_contours returns correct types (API contract)."""
-        fig, ax = plt.subplots()
-        result = spiral_plot_instance.plot_contours(ax=ax)
-        plt.close()
-
-        assert len(result) == 4, "Should return 4-tuple"
-        ret_ax, lbls, cbar_or_mappable, qset = result
-
-        # ax should be Axes
-        assert isinstance(ret_ax, matplotlib.axes.Axes), "First element should be Axes"
-
-        # lbls can be list of Text objects or None (if label_levels=False or no levels)
-        if lbls is not None:
-            assert isinstance(lbls, list), "Labels should be a list"
-            if len(lbls) > 0:
-                assert all(
-                    isinstance(lbl, matplotlib.text.Text) for lbl in lbls
-                ), "All labels should be Text objects"
-
-        # cbar_or_mappable should be Colorbar when cbar=True
-        assert isinstance(
-            cbar_or_mappable, matplotlib.colorbar.Colorbar
-        ), "Should return Colorbar when cbar=True"
-
-        # qset should be a contour set
-        assert hasattr(qset, "levels"), "qset should have levels attribute"
-        assert hasattr(qset, "allsegs"), "qset should have allsegs attribute"
-
-    def test_default_method_is_rbf(self, spiral_plot_instance):
-        """Test that default method is 'rbf'."""
-        fig, ax = plt.subplots()
-
-        # Mock _interpolate_with_rbf to verify it's called
-        with patch.object(
-            spiral_plot_instance,
-            "_interpolate_with_rbf",
-            wraps=spiral_plot_instance._interpolate_with_rbf,
-        ) as mock_rbf:
-            ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(ax=ax)
-            mock_rbf.assert_called_once()
-        plt.close()
-
-        # Should also produce valid contours
-        assert len(qset.levels) > 0, "Should produce contour levels"
-        assert qset.allsegs is not None, "Should have contour segments"
-
-    def test_rbf_respects_neighbors_parameter(self, spiral_plot_instance):
-        """Test that RBF neighbors parameter is passed to interpolator."""
-        fig, ax = plt.subplots()
-
-        # Verify rbf_neighbors is passed through to _interpolate_with_rbf
-        with patch.object(
-            spiral_plot_instance,
-            "_interpolate_with_rbf",
-            wraps=spiral_plot_instance._interpolate_with_rbf,
-        ) as mock_rbf:
-            spiral_plot_instance.plot_contours(
-                ax=ax, method="rbf", rbf_neighbors=77, cbar=False, label_levels=False
-            )
-            mock_rbf.assert_called_once()
-            # Verify the neighbors parameter was passed correctly
-            call_kwargs = mock_rbf.call_args.kwargs
-            assert (
-                call_kwargs["neighbors"] == 77
-            ), f"Expected neighbors=77, got neighbors={call_kwargs['neighbors']}"
-        plt.close()
-
-    def test_grid_respects_gaussian_filter_std(self, spiral_plot_instance):
-        """Test that Gaussian filter std parameter is passed to filter."""
-        from solarwindpy.plotting.tools import nan_gaussian_filter
-
-        fig, ax = plt.subplots()
-
-        # Verify nan_gaussian_filter is called with the correct sigma
-        # Patch where it's defined since spiral.py imports it locally
-        with patch(
-            "solarwindpy.plotting.tools.nan_gaussian_filter",
-            wraps=nan_gaussian_filter,
-        ) as mock_filter:
-            _, _, _, qset = spiral_plot_instance.plot_contours(
-                ax=ax,
-                method="grid",
-                gaussian_filter_std=2.5,
-                nan_aware_filter=True,
-                cbar=False,
-                label_levels=False,
-            )
-            mock_filter.assert_called_once()
-            # Verify sigma parameter was passed correctly
-            assert (
-                mock_filter.call_args.kwargs["sigma"] == 2.5
-            ), f"Expected sigma=2.5, got sigma={mock_filter.call_args.kwargs.get('sigma')}"
-        plt.close()
-
-        # Also verify valid output
-        assert len(qset.levels) > 0, "Should produce contour levels"
-
-    def test_tricontour_method_works(self, spiral_plot_instance):
-        """Test that tricontour method produces valid output."""
-        import matplotlib.tri
-
-        fig, ax = plt.subplots()
-
-        ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(
-            ax=ax, method="tricontour"
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        np.testing.assert_array_equal(
+            splot.agg("max").values, _expected_agg(splot, max)
         )
-        plt.close()
+        assert 5.0 in splot.agg("max").tolist()
 
-        # Should produce valid contours (TriContourSet)
-        assert len(qset.levels) > 0, "Tricontour should produce levels"
-        assert qset.allsegs is not None, "Tricontour should have segments"
+    @pytest.mark.parametrize(
+        "lower, upper, keep",
+        [(2, None, lambda n: n >= 2), (None, 1, lambda n: n <= 1)],
+        ids=["lower", "upper"],
+    )
+    def test_clim_masks_cells_by_sample_count(self, lower, upper, keep):
+        """``set_clim`` limits cells by their number of samples, not their z.
 
-        # Verify tricontour was used (not regular contour)
-        # ax.tricontour returns TriContourSet, ax.contour returns QuadContourSet
-        assert isinstance(
-            qset, matplotlib.tri.TriContourSet
-        ), "tricontour should return TriContourSet, not QuadContourSet"
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        splot.set_clim(lower, upper)
+        counts = [len(z) for z in _tally(splot.mesh.mesh, ROWS)]
+        means = _expected_agg(splot, np.mean)
+        expected = [m if n and keep(n) else np.nan for m, n in zip(means, counts)]
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
 
-    def test_handles_nan_with_rbf(self, spiral_plot_with_nans):
-        """Test that RBF method handles NaN values correctly."""
-        fig, ax = plt.subplots()
+    def test_cell_filter_masks_aggregated_cells(self):
+        """Cells rejected by the mesh's ``cell_filter`` aggregate to NaN.
 
-        # Verify RBF method is actually called with NaN data
-        with patch.object(
-            spiral_plot_with_nans,
-            "_interpolate_with_rbf",
-            wraps=spiral_plot_with_nans._interpolate_with_rbf,
-        ) as mock_rbf:
-            result = spiral_plot_with_nans.plot_contours(
-                ax=ax, method="rbf", cbar=False, label_levels=False
-            )
-            mock_rbf.assert_called_once()
-        plt.close()
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        splot.mesh.set_cell_filter_thresholds(density=0.75)
+        keep = splot.mesh.cell_filter
+        means = _expected_agg(splot, np.mean)
+        assert 0 < keep.sum() < np.isfinite(means).sum()
+        expected = np.where(keep, means, np.nan)
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
 
-        # Verify valid output types
-        ret_ax, lbls, mappable, qset = result
-        assert isinstance(ret_ax, matplotlib.axes.Axes)
-        assert isinstance(qset, matplotlib.contour.QuadContourSet)
-        assert len(qset.levels) > 0, "Should produce contour levels despite NaN input"
 
-    def test_handles_nan_with_grid(self, spiral_plot_with_nans):
-        """Test that grid method handles NaN values correctly."""
-        fig, ax = plt.subplots()
+class TestMakePlot:
+    """``make_plot`` draws one rectangle per mesh cell coloured by ``agg``."""
 
-        # Verify grid method is actually called with NaN data
-        with patch.object(
-            spiral_plot_with_nans,
-            "_interpolate_to_grid",
-            wraps=spiral_plot_with_nans._interpolate_to_grid,
-        ) as mock_grid:
-            result = spiral_plot_with_nans.plot_contours(
-                ax=ax,
-                method="grid",
-                nan_aware_filter=True,
-                cbar=False,
-                label_levels=False,
-            )
-            mock_grid.assert_called_once()
-        plt.close()
+    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    def test_rectangles_are_the_mesh_cells_coloured_by_agg(self, log):
+        """Each patch spans its cell (10**edges on log axes) and carries its value.
 
-        # Verify valid output types
-        ret_ax, lbls, mappable, qset = result
-        assert isinstance(ret_ax, matplotlib.axes.Axes)
-        assert isinstance(qset, matplotlib.contour.QuadContourSet)
-        assert len(qset.levels) > 0, "Should produce contour levels despite NaN input"
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2, log=log)
+        _, ax = plt.subplots()
+        ax, coll = splot.make_plot(ax=ax, cbar=False)
+        assert isinstance(coll, PatchCollection)
+        expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
+        np.testing.assert_allclose(_rectangles(coll), expected, rtol=REL, atol=0)
+        values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
+        np.testing.assert_allclose(
+            values, _expected_agg(splot, np.mean), rtol=REL, atol=0
+        )
+        scale = "log" if log else "linear"
+        assert (ax.get_xscale(), ax.get_yscale()) == (scale, scale)
 
-    def test_invalid_method_raises_valueerror(self, spiral_plot_instance):
-        """Test that invalid method raises ValueError."""
-        fig, ax = plt.subplots()
+    def test_log_rectangles_include_a_hand_worked_cell(self):
+        """On log axes cell [0,2)x[0,1) is drawn from (1, 1) to (100, 10).
 
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2, log=True)
+        _, coll = splot.make_plot(cbar=False)
+        rects = _rectangles(coll).tolist()
+        assert any(
+            r == pytest.approx([1.0, 100.0, 1.0, 10.0], rel=REL, abs=0) for r in rects
+        )
+
+    def test_colorbar_is_returned_for_the_collection(self):
+        """With ``cbar=True`` the second return is a Colorbar of the collection.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        _, ax = plt.subplots()
+        _, cbar = splot.make_plot(ax=ax)
+        assert isinstance(cbar, Colorbar)
+        assert isinstance(cbar.mappable, PatchCollection)
+        assert cbar.mappable in ax.collections
+
+    def test_unexpected_keyword_is_rejected(self):
+        """Keywords other than cmap and norm raise ValueError.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        with pytest.raises(ValueError, match="Unexpected kwargs"):
+            splot.make_plot(cbar=False, linewidth=2)
+
+    def test_limit_color_norm_clips_to_the_1st_and_99th_percentiles(self):
+        """``limit_color_norm`` sets unset norm limits to z's 1st and 99th percentiles.
+
+        z sorted is 1, 2, 3, 4, 5, 9; linear interpolation gives
+        1 + 0.05 * 1 = 1.05 and 5 + 0.95 * 4 = 8.8. A limit already set is kept.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        norm = Normalize()
+        splot.make_plot(cbar=False, norm=norm, limit_color_norm=True)
+        assert norm.vmin == pytest.approx(1.05, rel=REL, abs=0)
+        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)
+        assert norm.clip
+        fixed = Normalize(vmin=0.0)
+        splot.make_plot(cbar=False, norm=fixed, limit_color_norm=True)
+        assert fixed.vmin == 0.0
+        assert fixed.vmax == pytest.approx(8.8, rel=REL, abs=0)
+
+    def test_alpha_fcn_makes_small_values_opaque(self):
+        """``alpha_fcn`` sets face alpha to (1 - scaled value)**0.25, 0 when empty.
+
+        Per-cell maxima are 1, 3, 4, 5, 9 (source of 0.25: the exponent
+        ``make_plot`` logs as "Scaling alpha filter as alpha**0.25"). The cell
+        with 5, midway between 1 and 9, gets 0.5**0.25; the cell with 1 is
+        opaque; the cell with 9 and the empty cells are transparent.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        _, coll = splot.make_plot(cbar=False, alpha_fcn="max")
+        vmax = _expected_agg(splot, max)
+        scaled = (vmax - np.nanmin(vmax)) / (np.nanmax(vmax) - np.nanmin(vmax))
+        expected = np.nan_to_num((1 - scaled) ** 0.25, nan=0.0)
+        alpha = coll.get_facecolors()[:, 3]
+        np.testing.assert_allclose(alpha, expected, rtol=REL, atol=1e-15)
+        by_value = dict(zip(vmax.tolist(), alpha.tolist()))
+        assert by_value[5.0] == pytest.approx(0.5**0.25, rel=REL, abs=0)
+        assert by_value[1.0] == pytest.approx(1.0, rel=REL, abs=0)
+        assert by_value[9.0] == 0.0
+
+
+class TestPlotContours:
+    """``plot_contours`` contours the occupied cells' values at their centres."""
+
+    LEVELS = [2.0, 4.0, 6.0]
+    RES = 20
+
+    def _contour(self, splot, **kwargs):
+        _, ax = plt.subplots()
+        kwargs.setdefault("cbar", False)
+        kwargs.setdefault("label_levels", False)
+        kwargs.setdefault("grid_resolution", self.RES)
+        return splot.plot_contours(ax=ax, levels=self.LEVELS, **kwargs)
+
+    def _reference(self, XX, YY, ZZ, filled=False):
+        _, ax = plt.subplots()
+        fcn = ax.contourf if filled else ax.contour
+        return fcn(XX, YY, np.ma.masked_invalid(ZZ), self.LEVELS)
+
+    def test_centres_include_a_hand_worked_cell(self):
+        """Cell [0,2)x[0,1) enters the contour input at (1, 0.5) with z = 1.
+
+        ON FAILURE: the fixture no longer places p0 alone in [0,2)x[0,1); fix the fixture.
+        """
+        x, y, z = _occupied_centers(_plot(1))
+        assert (1.0, 0.5, 1.0) in zip(x.tolist(), y.tolist(), z.tolist())
+        assert len(z) == len(ROWS)
+
+    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    def test_tricontour_triangulates_the_occupied_centres(self, log):
+        """``method="tricontour"`` contours exactly the occupied cells' centres.
+
+        Empty cells are excluded; on log axes centres are 10**(mid-edge).
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1, log=log)
+        _, _, _, qset = self._contour(splot, method="tricontour")
+        x, y, z = _occupied_centers(splot)
+        _, ax = plt.subplots()
+        _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
+        assert list(qset.levels) == self.LEVELS
+
+    def test_grid_without_smoothing_is_griddata_on_the_centres(self):
+        """``method="grid"`` with no smoothing contours ``griddata`` of the centres.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, _, _, qset = self._contour(
+            splot, method="grid", interpolation="linear", gaussian_filter_std=0
+        )
+        x, y, z = _occupied_centers(splot)
+        XX, YY = _regular_grid(x, y, self.RES)
+        ZZ = griddata((x, y), z, (XX, YY), method="linear")
+        _assert_same_segments(qset, self._reference(XX, YY, ZZ))
+
+    def test_grid_smoothing_without_nan_awareness_zero_fills(self):
+        """``nan_aware_filter=False`` smooths ``griddata`` with NaNs set to 0.
+
+        The reference with another sigma differs, so sigma is shown to reach
+        the filter.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, _, _, qset = self._contour(
+            splot,
+            method="grid",
+            interpolation="linear",
+            gaussian_filter_std=1.5,
+            nan_aware_filter=False,
+        )
+        x, y, z = _occupied_centers(splot)
+        XX, YY = _regular_grid(x, y, self.RES)
+        ZZ = np.nan_to_num(griddata((x, y), z, (XX, YY), method="linear"), nan=0)
+        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
+        assert _segments_differ(qset, self._reference(XX, YY, gaussian_filter(ZZ, 3)))
+
+    def test_nan_aware_smoothing_of_a_complete_grid_is_a_gaussian_filter(self):
+        """With no NaNs, the NaN-aware filter is a plain Gaussian filter.
+
+        Nearest-neighbour interpolation leaves no NaN, so normalised
+        convolution reduces to ``scipy.ndimage.gaussian_filter``.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, _, _, qset = self._contour(
+            splot,
+            method="grid",
+            interpolation="nearest",
+            gaussian_filter_std=1.5,
+            nan_aware_filter=True,
+        )
+        x, y, z = _occupied_centers(splot)
+        XX, YY = _regular_grid(x, y, self.RES)
+        ZZ = griddata((x, y), z, (XX, YY), method="nearest")
+        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
+
+    def test_rbf_uses_the_given_interpolator_parameters(self):
+        """``method="rbf"`` contours an RBFInterpolator built with the caller's settings.
+
+        The reference with another smoothing differs, so the parameters are
+        shown to reach the interpolator.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        params = {"neighbors": 5, "smoothing": 0.5, "kernel": "cubic"}
+        _, _, _, qset = self._contour(
+            splot,
+            method="rbf",
+            rbf_neighbors=params["neighbors"],
+            rbf_smoothing=params["smoothing"],
+            rbf_kernel=params["kernel"],
+        )
+        x, y, z = _occupied_centers(splot)
+        XX, YY = _regular_grid(x, y, self.RES)
+        pts = np.column_stack([XX.ravel(), YY.ravel()])
+
+        def ref(**kw):
+            rbf = RBFInterpolator(np.column_stack([x, y]), z, **kw)
+            return self._reference(XX, YY, rbf(pts).reshape(XX.shape))
+
+        _assert_same_segments(qset, ref(**params))
+        assert _segments_differ(qset, ref(**{**params, "smoothing": 5.0}))
+
+    def test_default_method_is_rbf(self):
+        """With no ``method``, the contours are the default RBF interpolation.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, _, _, default = self._contour(splot)
+        _, _, _, rbf = self._contour(splot, method="rbf")
+        _, _, _, grid = self._contour(splot, method="grid")
+        _assert_same_segments(default, rbf)
+        assert _segments_differ(default, grid)
+
+    def test_use_contourf_fills_the_same_field(self):
+        """``use_contourf=True`` draws filled contours of the same field.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, _, _, qset = self._contour(
+            splot,
+            method="grid",
+            interpolation="linear",
+            gaussian_filter_std=0,
+            use_contourf=True,
+        )
+        assert qset.filled
+        x, y, z = _occupied_centers(splot)
+        XX, YY = _regular_grid(x, y, self.RES)
+        ZZ = griddata((x, y), z, (XX, YY), method="linear")
+        _assert_same_segments(qset, self._reference(XX, YY, ZZ, filled=True))
+
+    def test_colorbar_and_contour_set_are_returned(self):
+        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` the set.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        ax, _, cbar, qset = self._contour(splot, cbar=True)
+        assert isinstance(cbar, Colorbar) and cbar.mappable is qset
+        _, _, mappable, qset = self._contour(splot, cbar=False)
+        assert mappable is qset
+
+    @pytest.mark.parametrize("skip_max", [True, False])
+    def test_top_level_is_labelled_only_when_not_skipped(self, skip_max):
+        """Labels mark the given levels; ``skip_max_clbl`` leaves the top one bare.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        _, lbls, _, _ = self._contour(
+            splot, method="tricontour", label_levels=True, skip_max_clbl=skip_max
+        )
+        labelled = {float(t.get_text()) for t in lbls}
+        assert labelled == set(self.LEVELS[:-1] if skip_max else self.LEVELS)
+        _, none, _, _ = self._contour(splot, method="tricontour", label_levels=False)
+        assert none is None
+
+    def test_unknown_method_is_rejected(self):
+        """A method other than rbf, grid or tricontour raises ValueError.
+
+        ON FAILURE: the code is wrong.
+        """
         with pytest.raises(ValueError, match="Invalid method"):
-            spiral_plot_instance.plot_contours(ax=ax, method="invalid_method")
-        plt.close()
-
-    def test_cbar_false_returns_qset(self, spiral_plot_instance):
-        """Test that cbar=False returns qset instead of colorbar."""
-        fig, ax = plt.subplots()
-
-        ax, lbls, mappable, qset = spiral_plot_instance.plot_contours(ax=ax, cbar=False)
-        plt.close()
-
-        # When cbar=False, third element should be the same as qset
-        assert mappable is qset, "With cbar=False, should return qset as third element"
-        # Verify it's a ContourSet, not a Colorbar
-        assert isinstance(
-            mappable, matplotlib.contour.ContourSet
-        ), "mappable should be ContourSet when cbar=False"
-        assert not isinstance(
-            mappable, matplotlib.colorbar.Colorbar
-        ), "mappable should not be Colorbar when cbar=False"
-
-    def test_contourf_option(self, spiral_plot_instance):
-        """Test that use_contourf=True produces filled contours."""
-        fig, ax = plt.subplots()
-
-        ax, lbls, cbar, qset = spiral_plot_instance.plot_contours(
-            ax=ax, use_contourf=True, cbar=False, label_levels=False
-        )
-        plt.close()
-
-        # Verify return type is correct
-        assert isinstance(qset, matplotlib.contour.QuadContourSet)
-        # Verify filled contours were produced
-        # Filled contours (contourf) produce filled=True on the QuadContourSet
-        assert qset.filled, "use_contourf=True should produce filled contours"
-        assert len(qset.levels) > 0, "Should have contour levels"
-
-    def test_all_three_methods_produce_output(self, spiral_plot_instance):
-        """Test that all three methods produce valid comparable output."""
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
-        results = []
-        for ax, method in zip(axes, ["rbf", "grid", "tricontour"]):
-            result = spiral_plot_instance.plot_contours(
-                ax=ax, method=method, cbar=False, label_levels=False
-            )
-            results.append(result)
-        plt.close()
-
-        # All should produce valid output
-        for i, (ax, lbls, mappable, qset) in enumerate(results):
-            method = ["rbf", "grid", "tricontour"][i]
-            assert ax is not None, f"{method} should return ax"
-            assert qset is not None, f"{method} should return qset"
-            assert len(qset.levels) > 0, f"{method} should produce contour levels"
+            self._contour(_plot(1), method="spline")
 
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+# ---------------------------------------------------------------------------
+# Defects in solarwindpy/plotting/spiral.py, outside this unit's paths.
+# ---------------------------------------------------------------------------
+
+
+class TopEdgeNotAboveData(AssertionError):
+    """The top initial edge does not lie above the largest sample."""
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason=(
+        "spiral.py SpiralMesh.build_cat calls "
+        "Categorical.remove_categories(fill, inplace=True), removed in pandas 2, "
+        "so any sample outside the mesh (e.g. log10(0) = -inf) raises "
+        "\"got an unexpected keyword argument 'inplace'\"; remove this marker when "
+        "build_cat assigns cat = cat.remove_categories(fill)"
+    ),
+)
+@pytest.mark.parametrize(
+    "outside, log",
+    [((-1.0, 0.5, 100.0), False), ((-np.inf, 0.5, 100.0), True)],
+    ids=["left-of-grid", "log-of-zero"],
+)
+def test_samples_outside_the_mesh_are_excluded_from_the_aggregation(outside, log):
+    """A sample outside the mesh is dropped from ``agg``, not an error.
+
+    Source of the contract: ``calculate_bin_number`` logs that out-of-mesh
+    samples "will be replaced by NaNs and excluded from the aggregation." In
+    the log case the sample's x is 0, whose log10 is -inf.
+
+    ON FAILURE: (unexpected pass) the build_cat fix has landed; drop the xfail marker.
+    """
+    splot = _plot(1, z=None, log=log, rows=ROWS + [outside])
+    if log:
+        assert splot.data["x"].min() == -np.inf  # the zero reached the mesh
+    np.testing.assert_array_equal(splot.agg().values, _expected_agg(splot, len))
+    assert np.nansum(splot.agg().values) == len(ROWS)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=ValueError,
+    reason=(
+        "spiral.py SpiralMesh.cell_filter passes bin ids including the -9999 "
+        "fill to np.bincount, which raises \"'list' argument must have no "
+        'negative elements" when any sample is outside the mesh; remove this '
+        "marker when the density count drops fill ids"
+    ),
+)
+def test_density_filter_ignores_samples_outside_the_mesh():
+    """The density filter counts only samples inside the mesh.
+
+    With one extra sample outside the grid, density=0.5 still keeps exactly the
+    occupied cells (hand-worked in TestSpiralMesh).
+
+    ON FAILURE: (unexpected pass) the cell_filter fix has landed; drop the xfail marker.
+    """
+    rows = ROWS + [(-1.0, 0.5, 0.0)]
+    x = pd.Series([r[0] for r in rows])
+    y = pd.Series([r[1] for r in rows])
+    mesh = SpiralMesh(x, y, np.array(XEDGES), np.array(YEDGES), min_per_bin=1)
+    mesh.place_spectra_in_mesh()
+    mesh.set_cell_filter_thresholds(density=0.5)
+    occupied = [len(z) > 0 for z in _tally(mesh.mesh, ROWS)]
+    assert mesh.cell_filter.tolist() == occupied
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TopEdgeNotAboveData,
+    reason=(
+        "spiral.py SpiralPlot2D.calc_initial_bins writes the raised top edge "
+        "into the caller's array, so an integer array truncates 10.1 back to "
+        "10 and the sample at 10 lies outside every cell; remove this marker "
+        "when calc_initial_bins works on a float copy of the edges"
+    ),
+)
+def test_integer_edges_are_raised_above_the_largest_sample():
+    """Integer edge arrays get a top edge above the data, as float edges do.
+
+    ON FAILURE: (unexpected pass) the calc_initial_bins fix has landed; drop the xfail marker.
+    """
+    x = pd.Series([1.0, 10.0])
+    splot = SpiralPlot2D(x, x, initial_bins=(np.array([0, 5, 10]), np.array([0, 10])))
+    for axis in ("x", "y"):
+        if not splot.initial_bins[axis][-1] > 10.0:
+            raise TopEdgeNotAboveData(f"{axis}: {splot.initial_bins[axis]}")
