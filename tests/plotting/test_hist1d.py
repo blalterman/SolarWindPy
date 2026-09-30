@@ -256,6 +256,41 @@ class TestDensity:
             raise _DensityNotNormalised(f"integral over log10(x) = {over_log}")
 
 
+class TestPeakNormalization:
+    def test_t_draws_counts_divided_by_their_maximum(self):
+        """After ``set_axnorm("t")`` the drawn values are counts / max(counts).
+
+        Edges [0, 1, 2, 4] hold 1, 3 and 2 samples by construction, so the
+        drawn values are 1/3, 3/3 and 2/3 and the peak is exactly 1.
+
+        ON FAILURE: the code is wrong, unless the author reverses the ruling
+        that "t" divides by the maximum.
+        """
+        x = pd.Series([0.5, 1.25, 1.5, 1.75, 3.0, 3.5])
+        counts = np.array([1.0, 3.0, 2.0])  # chosen input, counted by hand
+        hist = Hist1D(x, nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+
+        hist.set_axnorm("t")
+        _, ax = plt.subplots()
+        hist.make_plot(ax)
+
+        _, line_y = _line_xy(ax.lines[0])
+        # Tolerance: one division per bin.
+        np.testing.assert_allclose(line_y, counts / counts.max(), rtol=1e-12, atol=0)
+        assert line_y.max() == 1.0
+
+    @pytest.mark.parametrize("bad", ["c", "r", "x"])
+    def test_unrecognized_axnorm_is_rejected(self, bad):
+        """``set_axnorm`` rejects any key other than "d", "t" or None.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist1D(pd.Series([0.5, 1.5, 3.0]), nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+
+        with pytest.raises(AssertionError, match="Unrecognized axnorm"):
+            hist.set_axnorm(bad)
+
+
 class TestMakePlot:
     def test_logx_line_is_drawn_at_geometric_bin_centers(self):
         """Under logx the line's x-values are sqrt(left * right) in linear x.

@@ -120,7 +120,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
          c     Column normalize
          d     Density normalize
          r     Row normalize
-         t     Total normalize
+         t     Divide by the maximum (peak equals 1)
          cd    PDFs in each column
          rd    PDFs in each row
         ===== ============================================================="""
@@ -158,7 +158,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         elif axnorm == "r":
             agg = agg.divide(agg.groupby(level="y").max(), level="y")
         elif axnorm == "t":
-            agg = agg.divide(agg.max())
+            agg = self._divide_by_max(agg)
         elif axnorm == "d":
             N = agg.sum().sum()
             # Widths are in the binned variable, log10 on a log axis.

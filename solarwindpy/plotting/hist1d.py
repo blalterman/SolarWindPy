@@ -47,8 +47,8 @@ class Hist1D(AggPlot):
         logx : bool, optional
             If ``True``, compute bins in logarithmic space.
         axnorm : {"t", "d", None}, optional
-            Normalisation applied to the histogram. ``"t"`` uses total
-            counts and ``"d"`` yields a density.
+            Normalisation applied to the histogram. ``"t"`` divides by the
+            maximum (peak equals 1) and ``"d"`` yields a density.
         clip_data : bool, optional
             Remove extreme values at the 0.001 and 0.999 percentiles before
             binning or aggregation.
@@ -107,11 +107,11 @@ class Hist1D(AggPlot):
          key                           description
         ===== =============================================================
          d     Density normalize
-         t     Total normalize
+         t     Divide by the maximum (peak equals 1)
         ===== ============================================================="""
         if new is not None:
             new = new.lower()[0]
-            assert new == "d"
+            assert new in ("d", "t"), f"Unrecognized axnorm `{new}`"
 
         ylbl = self.labels.y
         if isinstance(ylbl, labels_module.Count):
@@ -168,7 +168,7 @@ class Hist1D(AggPlot):
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":
-            agg = agg.divide(agg.max())
+            agg = self._divide_by_max(agg)
 
         else:
             raise ValueError("Unrecognized axnorm: %s" % axnorm)
