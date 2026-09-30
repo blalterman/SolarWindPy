@@ -43,7 +43,7 @@ file that another PR touches.
 | #456 | P456.2 | parametrize the `set_log` test over x and y |
 | #456 | P456.7 | review pass on `tests/plotting/test_base.py` against TEST_PATTERNS; findings go to the author and none are applied without the author |
 | #460 | P460.5 | `CLAUDE.md` lists `lint-imports` in its Commands block, and the CI sentence names it |
-| #460 | P460.1 | delete `solarwindpy/scripts/` (an empty package nothing imports); no layer comment is needed once it and `reproducibility` are gone |
+| #448 | P460.1 | delete `solarwindpy/scripts/` (an empty package nothing imports; the phase-4 OWNS line gives it to #448); no layer comment on #460 is needed once it and `reproducibility` are gone |
 | #466 | P466.3 | reword the "which governs" sentence in `.claude/commands/swp/test/audit.md:12` |
 | #466 | P466.1, P466.2 | retire ast-grep rules swp-test-001, 002, 005, 006 and 007 in `tools/dev/ast_grep/test-patterns.yml` |
 | #466 | P466.6 | `.claude/docs/TEST_PATTERNS.md` says plain `git commit` and names `.claude/hooks/project-env.sh` as the reason the env no longer matters |
@@ -266,7 +266,7 @@ test: replace circular-import tests with an import-linter contract
 
 Strict xfails: 0.
 
-- P460.1 [minor] pyproject.toml: `reproducibility` and `scripts` are not in `layers`. disposition: fix-before-merge (PR #460). The author deletes both instead of commenting: `solarwindpy/scripts/` goes on #460, and `reproducibility` goes on #448 (P448.5).
+- P460.1 [minor] pyproject.toml: `reproducibility` and `scripts` are not in `layers`. disposition: fix-before-merge (PR #448). The author deletes both instead of commenting. Both go on #448, whose phase-4 OWNS line covers `solarwindpy/scripts/` and `reproducibility.py` (P448.5).
 - P460.2 [worth a look] pyproject.toml: confirm the lateral import bans. disposition: reject (author: keep the siblings independent; the rule stays).
 - P460.3 [worth a look] general: add a subprocess import test per submodule. disposition: follow-on (new row: test-quality). Tracker row 12 covers the public import test.
 - P460.4 [unstated] pyproject.toml: set `exclude_type_checking_imports`. disposition: reject (moot: no `TYPE_CHECKING` in the package).
@@ -380,9 +380,10 @@ Strict xfails: 0.
   comments land in row 8, because `orbits.py` belongs to #450.
 - **Moyal removal (#447 and #455).** #447 edits `test_moyal.py` and #455 edits `moyal.py`,
   so the removal waits for both to merge and lands as the first commit after.
-- **`reproducibility` and `scripts` deletion (#448 and #460).** `solarwindpy/__init__.py`
-  imports `reproducibility` and belongs to #448, so that deletion goes on #448;
-  `scripts/` touches no PR's files and goes on #460 with the layer contract.
+- **`reproducibility` and `scripts` deletion (#448).** The phase-4 OWNS line gives #448
+  `solarwindpy/__init__.py`, `reproducibility.py` and `scripts/`, so both deletions go there,
+  with the `docs/source/api_reference.rst` entry (in no PR) removed in the same commit so the
+  strict docs build stays green.
 - **`verscharen2016.py` (#448 and #453).** #448 edits the file and fixes none of #453's three
   defects. Whoever fixes them drops #453's markers in the same change; `get_cmap` is row 6.
 - **`set_threshold` (#448).** The library fix is blocked by `test_extrema_calculator.py`,
