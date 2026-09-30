@@ -247,25 +247,12 @@ def test_stability_results_align_with_the_measurement_index():
     assert labels == ["MM", "Stable", "OFI"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason=(
-        "verscharen2016.StabilityCondition._calc_is_unstable calls "
-        "is_unstable.mask(instability_thresholds.isnull(), inplace=True) on a bool "
-        "frame; under pandas 3 any NaN threshold (beta_par < c) raises "
-        "TypeError: Invalid value 'nan' for dtype 'bool'; remove this marker when "
-        "StabilityCondition in solarwindpy/instabilities/verscharen2016.py handles "
-        "NaN thresholds (mask on an upcast frame, then cast is_unstable back to "
-        "bool; owned by source-misc, not part of PR #448)"
-    ),
-)
 def test_isotropic_plasma_below_the_fmw_fit_domain_is_stable():
     """At beta_par = 0.1 < c_FMW = 0.543 (Table 1, 1e-3) an isotropic plasma is stable.
 
     The FM/W threshold is undefined there; R_p = 1 exceeds no other threshold.
 
-    ON FAILURE: (unexpected pass) the NaN-mask fix has landed; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityCondition(-3, pd.Series([0.1]), pd.Series([1.0]))
     assert sc.instability_thresholds["FMW"].isna().all()
@@ -451,17 +438,6 @@ class LegendTableMismatch(AssertionError):
     """A table-legend handle sits in a row or column that does not describe it."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=LegendTableMismatch,
-    reason=(
-        "verscharen2016.StabilityContours._add_table_legend lists each column's "
-        "handles as MM, AIC, FMW, OFI while the row labels read AIC, FMW, MM, OFI, "
-        "so the AIC row shows the MM curve, FMW shows AIC and MM shows FMW; remove "
-        "this marker when the handle order in "
-        "solarwindpy/instabilities/verscharen2016.py is fixed (owned by source-misc)"
-    ),
-)
 def test_table_legend_rows_and_columns_describe_their_curves():
     """Each legend handle sits in the row of its instability and column of its gamma.
 
