@@ -649,39 +649,20 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
         plt.close(figure)
 
 
-class NonFiniteCoordinate(AssertionError):
-    """Raised only for the divide-by-zero overlay defect below.
-
-    ``pytest.mark.xfail`` has no ``match=``; it narrows solely by exception
-    type, so ``raises=AssertionError`` would absorb every other assertion this
-    test can fail, including the ``no_download`` guard. A dedicated subclass is
-    what makes the marker specific.
-    """
+def _value_axis_labels(axes):
+    """Return the colour bar's major tick labels on the SSN (x) axis."""
+    return [label.get_text() for label in axes.xaxis.get_ticklabels()]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=NonFiniteCoordinate,
-    reason=(
-        "plot_on_colorbar scales by s1 = np.round(ssn.max(), -2) "
-        "(in sidc.py), which is 0 for any window peaking below SSN 50, so "
-        "y = (y / s1) * dy + y0 divides by zero and every plotted coordinate "
-        "is inf. No exception is raised; the overlay silently disappears and "
-        "the tick labels read (0, 0, 0). Reported rather than fixed: the "
-        "right rounding for a low-activity colour bar is the author's call. "
-        "raises is pinned to NonFiniteCoordinate so this marker cannot absorb "
-        "an unrelated failure; delete the marker once the rounding is fixed."
-    ),
-)
 def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index):
-    """A window that never exceeds SSN 50 still plots finite coordinates.
+    """A window that never exceeds SSN 50 plots finite coordinates on a 0-100 scale.
 
-    A plotted coordinate has to be finite to render at all, so this is a
-    requirement rather than a preference, whatever scale the colour bar
-    chooses.
+    A plotted coordinate has to be finite to render at all. The scale top is
+    the peak rounded up to the next 100 and never below 100, so a flat SSN of
+    30 gives a top of 100 and ticks 0, 50, 100. On a fresh axes the x limits
+    are (0, 1), so SSN 30 plots at 30 / 100 = 0.3.
 
-    ON FAILURE (that is, if this unexpectedly passes): the rounding was fixed
-    and this xfail should be removed.
+    ON FAILURE: the code is wrong.
     """
     frame = pd.DataFrame(
         {"ssn": np.full(len(seeded_index), 30.0), "std": 5.0, "n_obs": 25},
@@ -697,12 +678,41 @@ def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index)
         )
         for line in axes.lines:
             coords = np.asarray(line.get_data()[0], dtype=float)
-            # Raised, not asserted: the xfail above narrows on this exact type,
-            # which a bare `assert` cannot express.
-            if not np.isfinite(coords).all():
-                raise NonFiniteCoordinate(
-                    f"non-finite plotted coordinate: "
-                    f"{coords[~np.isfinite(coords)][:3]}"
-                )
+            assert np.isfinite(coords).all()
+            # Hand-computed: 30 / 100 of the fresh axes' unit span.
+            np.testing.assert_allclose(coords, 0.3, rtol=1e-12, atol=0)
+        # Hand-computed: top = 100, so ticks read 0, 100 / 2, 100.
+        assert _value_axis_labels(axes) == ["0", "50", "100"]
+    finally:
+        plt.close(figure)
+
+
+def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(fake_home, seeded_index):
+    """A peak of 140 gets a scale top of 200, so the line stays inside the scale.
+
+    Rounding to the nearest 100 would give 100 and draw the peak beyond the
+    colour bar. Rounded up, the top is 200 and the ticks read 0, 100, 200. On
+    a fresh axes the x limits are (0, 1), so SSN 140 plots at 140 / 200 = 0.7
+    and SSN 20 at 20 / 200 = 0.1, both inside [0, 1].
+
+    ON FAILURE: the code is wrong.
+    """
+    ssn = np.full(len(seeded_index), 20.0)
+    ssn[len(ssn) // 2] = 140.0
+    frame = pd.DataFrame({"ssn": ssn, "std": 5.0, "n_obs": 25}, index=seeded_index)
+    seed_cache(fake_home, "m13", frame)
+    indicator = SIDC("m13")
+
+    figure, axes = plt.subplots()
+    try:
+        indicator.plot_on_colorbar(
+            axes, seeded_index[0], seeded_index[-1], vertical_cbar=True
+        )
+        for line in axes.lines:
+            coords = np.asarray(line.get_data()[0], dtype=float)
+            # Hand-computed: 140 / 200 and 20 / 200 of the unit span.
+            assert coords.max() == pytest.approx(0.7, rel=1e-12, abs=0)
+            assert coords.min() == pytest.approx(0.1, rel=1e-12, abs=0)
+        assert _value_axis_labels(axes) == ["0", "100", "200"]
     finally:
         plt.close(figure)

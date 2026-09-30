@@ -569,13 +569,13 @@ class IndicatorExtrema(Base):
     ############################################################
     # Tools for selecting data within some dt of cycle extrema #
     ############################################################
-    def calculate_extrema_bands(self, dt="365d"):
+    def calculate_extrema_bands(self, dt="365D"):
         r"""Return time windows around indicator extrema.
 
         Parameters
         ----------
         dt : str or pandas.Timedelta, optional
-            Half-width of the window around each extremum. Defaults to ``"365d"``.
+            Half-width of the window around each extremum. Defaults to ``"365D"``.
 
         Returns
         -------
