@@ -12,7 +12,7 @@ the branches. The author's rulings in the review doc give 16 edits before merge 
 branches plus one review pass; everything else is a follow-on, a rejection with its reason,
 or one of two questions still open.
 
-author_approved: no
+author_approved: yes
 
 **How to approve.** Change the line above to `author_approved: yes`. To change an outcome
 first, edit the `disposition:` value on that point, then flip the line. Only the points
