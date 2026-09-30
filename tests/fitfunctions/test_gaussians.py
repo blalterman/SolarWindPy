@@ -147,14 +147,6 @@ class FailedFitReturnedNone(AssertionError):
     """make_fit(return_exception=True) returned None for a fit that failed."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=FailedFitReturnedNone,
-    reason="solarwindpy/fitfunctions/gaussians.py Gaussian.make_fit and "
-    "GaussianNormalized.make_fit call super().make_fit() and drop its return "
-    "value; expected the InsufficientDataError FitFunction.make_fit returns; "
-    "remove this marker when both overrides return super().make_fit(...)",
-)
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
 def test_make_fit_returns_exception_for_insufficient_data(cls):
     """Two points cannot fit three parameters, and the exception comes back.
@@ -162,8 +154,7 @@ def test_make_fit_returns_exception_for_insufficient_data(cls):
     FitFunction.make_fit(return_exception=True) returns the exception instead
     of raising it; a subclass override must pass it on.
 
-    ON FAILURE: (unexpected pass) the Gaussian overrides now return
-    super().make_fit(...); drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     x = np.linspace(0.0, 1.0, 2)
     obj = cls(x, np.ones_like(x))

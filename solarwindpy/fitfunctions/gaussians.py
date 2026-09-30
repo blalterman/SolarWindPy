@@ -55,11 +55,12 @@ class Gaussian(FitFunction):
 
     def make_fit(self, *args, **kwargs):
         r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        super().make_fit(*args, **kwargs)
+        result = super().make_fit(*args, **kwargs)
         try:
             self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
         except AttributeError:  # Fit failed
             pass
+        return result
 
 
 class GaussianNormalized(FitFunction):
@@ -114,11 +115,12 @@ class GaussianNormalized(FitFunction):
 
     def make_fit(self, *args, **kwargs):
         r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        super().make_fit(*args, **kwargs)
+        result = super().make_fit(*args, **kwargs)
         try:
             self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
         except AttributeError:  # Fit failed
             pass
+        return result
 
 
 class GaussianLn(FitFunction):
