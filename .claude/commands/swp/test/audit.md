@@ -9,9 +9,9 @@ description: Audit test quality patterns using validated SolarWindPy conventions
 Proactive test quality audit using patterns validated during the spiral plot contours test audit.
 Detects anti-patterns BEFORE they cause test failures.
 
-**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`, which governs where this
-audit disagrees with it: its Fakes section does not endorse the `wraps=` mocks that
-swp-test-002 recommends and swp-test-005 tracks as good.
+**Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`. Where this audit and
+TEST_PATTERNS.md disagree, TEST_PATTERNS.md governs. For example, its Fakes section does
+not endorse the `wraps=` mocks that swp-test-002 recommends and swp-test-005 tracks as good.
 **ast-grep Rules:** `tools/dev/ast_grep/test-patterns.yml`
 
 **Default Scope:** `tests/`
