@@ -1,319 +1,130 @@
 Usage Guide
 ===========
 
+This page walks through a first session: build a plasma from a DataFrame, read
+a species' quantities, fit a function, and save a plot. Every example on this
+page runs as a doctest (``pytest --doctest-glob='*.rst' docs/source``).
+
 .. contents::
    :local:
-   :depth: 2
+   :depth: 1
 
-Overview
---------
+Build a Plasma
+--------------
 
-SolarWindPy provides a comprehensive framework for analyzing solar wind plasma
-and magnetic field data. The package is organized around several key concepts:
+SolarWindPy holds measurements in one pandas DataFrame whose columns are a
+three-level MultiIndex named ``M``, ``C``, ``S``:
 
-- **Plasma**: Central container for multi-species plasma data
-- **Ion**: Individual ion species with moments and properties
-- **MultiIndex DataFrames**: Hierarchical data structure for scientific
-  measurements
-- **Physics Conventions**: Consistent units and calculations throughout
+- ``M``, the measurement: ``n`` (number density, cm\ :sup:`-3`), ``v``
+  (velocity, km/s), ``w`` (thermal speed, km/s), ``b`` (magnetic field, nT).
+- ``C``, the component: ``x``, ``y``, ``z`` for vectors, ``par`` and ``per``
+  for thermal speeds, empty for scalars.
+- ``S``, the species: ``p1`` (protons), ``a`` (alphas), empty for the
+  magnetic field.
 
-Quick Start
+>>> import pandas as pd
+>>> import solarwindpy as swp
+>>> epoch = pd.date_range("2023-01-01", periods=3, freq="1h")
+>>> columns = pd.MultiIndex.from_tuples(
+...     [
+...         ("n", "", "p1"), ("n", "", "a"),
+...         ("v", "x", "p1"), ("v", "x", "a"),
+...         ("v", "y", "p1"), ("v", "y", "a"),
+...         ("v", "z", "p1"), ("v", "z", "a"),
+...         ("w", "par", "p1"), ("w", "par", "a"),
+...         ("w", "per", "p1"), ("w", "per", "a"),
+...         ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+...     ],
+...     names=["M", "C", "S"],
+... )
+>>> data = pd.DataFrame(
+...     [
+...         [5.0, 0.25, 400, 380, 10, 5, -20, -15, 30, 15, 25, 12, 3.5, -1.2, 0.8],
+...         [8.0, 0.40, 450, 420, 15, 8, -25, -18, 35, 18, 28, 14, 4.1, -1.5, 1.2],
+...         [6.5, 0.30, 420, 400, 12, 6, -22, -16, 32, 16, 26, 13, 3.8, -1.3, 0.9],
+...     ],
+...     index=epoch,
+...     columns=columns,
+... )
+>>> plasma = swp.Plasma(data, "p1", "a")
+>>> plasma.species
+('a', 'p1')
+
+Read a Species' Quantities
+--------------------------
+
+Each species is an attribute of the plasma. Its density is a Series indexed
+by time:
+
+>>> plasma.p1.n
+2023-01-01 00:00:00    5.0
+2023-01-01 01:00:00    8.0
+2023-01-01 02:00:00    6.5
+Freq: h, Name: n, dtype: float64
+
+Vectors carry their magnitude. The first proton speed is
+:math:`\sqrt{400^2 + 10^2 + 20^2} \approx 400.62` km/s, and the first field
+magnitude is :math:`\sqrt{3.5^2 + 1.2^2 + 0.8^2} \approx 3.79` nT:
+
+>>> plasma.p1.v.mag.round(2).tolist()
+[400.62, 450.94, 420.75]
+>>> plasma.b.mag.round(2).tolist()
+[3.79, 4.53, 4.12]
+
+The plasma combines species and field. Proton beta is
+:math:`\beta = 2 \mu_0 p / B^2`, with thermal pressure :math:`p = n m w^2 / 2`
+under the :math:`m w^2 = 2 k_B T` convention:
+
+>>> plasma.beta("p1")["par"].round(2).tolist()
+[0.66, 1.0, 0.83]
+
+Fit a Function
+--------------
+
+Every fit function takes observed ``x`` and ``y`` arrays. Fitting a Gaussian
+to a noise-free Gaussian recovers the parameters that generated it:
+
+>>> import numpy as np
+>>> from solarwindpy.fitfunctions import Gaussian
+>>> x = np.linspace(300, 600, 61)
+>>> y = 50 * np.exp(-0.5 * ((x - 420) / 40) ** 2)
+>>> fit = Gaussian(x, y)
+>>> fit.make_fit()
+>>> {name: round(float(value), 3) for name, value in fit.popt.items()}
+{'mu': 420.0, 'sigma': 40.0, 'A': 50.0}
+
+``solarwindpy.fitfunctions.available()`` prints every fit function with its
+formula:
+
+>>> import solarwindpy.fitfunctions as ff
+>>> ff.available()  # doctest: +ELLIPSIS
+Fit function...Gaussian...
+
+Save a Plot
 -----------
 
-Import the core components:
-
-.. code-block:: python
-
-   import solarwindpy as swp
-   import numpy as np
-   import pandas as pd
-
-Basic Plasma Analysis
----------------------
-
-Create a plasma object with proton data:
-
-.. code-block:: python
-
-   # Create sample data
-   epoch = pd.date_range('2023-01-01', periods=100, freq='1min')
-
-   # Proton density, velocity, temperature
-   n_p = np.random.normal(5.0, 1.0, 100)  # cm^-3
-   v_p = np.random.normal(400, 50, (100, 3))  # km/s
-   T_p = np.random.normal(1e5, 2e4, 100)  # K
-
-   # Create MultiIndex DataFrame with proper structure
-   columns = pd.MultiIndex.from_tuples([
-       ('n', '', 'p1'),    # Proton density
-       ('v', 'x', 'p1'),   # Proton velocity x
-       ('v', 'y', 'p1'),   # Proton velocity y
-       ('v', 'z', 'p1'),   # Proton velocity z
-       ('w', 'par', 'p1'), # Parallel thermal speed
-       ('w', 'per', 'p1'), # Perpendicular thermal speed
-       ('b', 'x', ''),     # Magnetic field x
-       ('b', 'y', ''),     # Magnetic field y
-       ('b', 'z', ''),     # Magnetic field z
-   ], names=['M', 'C', 'S'])
-
-   # Calculate thermal speeds from temperature using mw² = 2kT convention
-   from solarwindpy.core.units_constants import Constants
-   const = Constants()
-   k_B = const.kb  # Boltzmann constant [J/K]
-   m_p = const.m['p1']  # Proton mass [kg]
-
-   # Thermal speed: w = sqrt(2kT/m)
-   w_thermal = np.sqrt(2 * k_B * T_p / m_p) / 1000  # Convert to km/s
-
-   # Sample magnetic field data
-   b_field = np.random.normal([5, -2, 3], [1, 1, 1], (100, 3))  # nT
-
-   data = pd.DataFrame({
-       ('n', '', 'p1'): n_p,
-       ('v', 'x', 'p1'): v_p[:, 0],
-       ('v', 'y', 'p1'): v_p[:, 1],
-       ('v', 'z', 'p1'): v_p[:, 2],
-       ('w', 'par', 'p1'): w_thermal,
-       ('w', 'per', 'p1'): w_thermal,
-       ('b', 'x', ''): b_field[:, 0],
-       ('b', 'y', ''): b_field[:, 1],
-       ('b', 'z', ''): b_field[:, 2],
-   }, index=epoch, columns=columns)
-
-   # Create plasma object
-   plasma = swp.Plasma(data, 'p1')
-
-Working with MultiIndex DataFrames
------------------------------------
-
-SolarWindPy uses a three-level MultiIndex structure. The MultiIndex levels are:
-
-    M: Measurement (n, v, w, b, etc.)
-    C: Component (x, y, z for vectors, empty for scalars)
-    S: Species (p1, p2, a, etc.)
-
-
-Accessing Data
---------------
-
-Data can be accessed from specialized methods or from underlying containers.
-
-.. code-block:: python
-
-   # Access measurements from plasma methods - RECOMMENDED
-   ndens = plasma.n('p1')
-
-   # Access specific measurements from underlying data
-   ndens = plasma.data.xs('n', level='M').xs('p1', level='S')
-
-   # Access measurements from ions
-   ndens = plasma.ions.p1.n('p1')
-
-   # Access measurements from ion data
-   ndens = plasma.ions.p1.data.xs('n', level='M')
-   vpx = plasma.data.xs('v', level='M').xs('x', level='C').xs('p1', level='S')
-
-
-Physics Calculations
---------------------
-
-The Plasma class is structured to intelligently combine observations from across ions
-
-.. code-block:: python
-
-   # Access the density for protons and alphas
-   n = plasma.number_density('p1,a')
-   # Caclculate the total proton + alpha density, using the shortcut method
-   n  = plasma.n('a+p1')
-
-   # Access the proton and alpha velocities
-   v = plasma.velocity('a,p1')
-   # Calculate the center of mass velocity with the shortcut method
-   v = plasma.v('a+p1')
-
-   # Access the magnetic field data
-   b = plasma.bfield
-   b = plasma.b # shortcut
-
-   # Access the proton and alpha thermal speeds
-   w = plasma.thermal_speed('a,p1')
-   # The total thermal speed is physically ambiguous
-   w = plasma.w('a+p1')
-
-   # Thermal pressures
-   pth = plasma.pth('a,p1')
-   # Access the total pressure
-   pth = plasma.pth('a+p1')
-
-   # Proton plasma beta
-   beta = plasma.beta('p1')
-   # Total beta
-   beta = plasma.beta('p1+a')
-   # Both betas
-   beta = plasma.beta('a,p1')
-
-
-Data Visualization
-------------------
-
-Use the plotting module for scientific visualizations. The MultiIndex structure maps
-directly to plot labels and paths.
-
-.. code-block:: python
-
-   import matplotlib.pyplot as plt
-   from solarwindpy.plotting.labels import TeXlabels
-
-   # Create time series plot of proton density
-   fig, ax = plt.subplots()
-   ndens = plasma.n('a+p1')
-   ax.plot(ndens.index, ndens.values)
-   ax.set_ylabel(TeXlabel(('n', '', 'p1+a'))) # Density is a scalar
-   ax.set_title('Total Proton + Alpha Density Time Series')
-   plt.show()
-
-   # Scatter plot with proper labels
-   fig, ax = plt.subplots()
-   vx = plasma.v('p1').xs('x', axis=1, level='C')
-   wpar = plasma.w('p1').xs('par', axis=1, level='C')
-   ax.scatter(vx, wpar)
-
-   # Create labels - note how MultiIndex maps directly to plot labels
-   xlbl = TeXlabel(('v', 'x', 'p1'))
-   ylbl = TeXlabel(('w', 'par', 'p1'))
-   ax.set_xlabel(xlbl)
-   ax.set_ylabel(ylbl)
-
-   plt.show()
-
-The labels include units automatically:
-
-.. code-block:: pycon
-
-   >>> xlbl = TeXlabel(('v', 'x', 'p1'))
-   >>> print(xlbl)
-   r'v_{x;p_1} \; \left[\mathrm{km \, s^{-1}}\right]'
-   >>> ylbl = TeXlabel(('w', 'par', 'p1'))
-   >>> print(ylbl)
-   r'w_{\parallel;p_1} \; \left[\mathrm{km \, s^{-1}}\right]'
-
-TeXlabels have built-in path methods for defining figure paths:
-
-.. code-block:: pycon
-
-   >>> xlbl.path
-   Path('v_x_p1')
-   >>> ylbl.path
-   Path('w_par_p1')
-
-TeXlabels can generate normalized quantities and are unit-aware:
-
-.. code-block:: pycon
-
-   >>> ratio_label = TeXlabel(('v', 'x', 'p1'), ('w', 'par', 'p1'))
-   >>> print(ratio_label)
-   r'v_{x;p_1} / w_{\parallel;p_1} \; \left[\#\right]'
-
-Create a 2D histogram using SolarWindPy aggregation tools:
-
-.. code-block:: python
-
-   # Create a 2D histogram of the data
-   from solarwindpy.plotting import Hist2D
-
-   beta = plasma.beta('p1').xs('par', axis=1, level='S')
-   h2d = Hist2D(vx, beta, nbins=(50, 50), logy=True) # calculate log-scaled y-bins
-   h2d.set_labels(x=xlbl, y=TeXlabel('beta', 'par', 'p1'))
-   h2d.make_plot()
-
-SolarWindPy plotting tools have built-in path management that includes axis
-scales and plot normalizations:
-
-.. code-block:: pycon
-
-   >>> h2d.path
-   Path('Hist2D/v_x_p1/beta_par_p1/linX-logY/count')
-
-The path updates when you change normalization:
-
-.. code-block:: pycon
-
-   >>> h2d.set_axnorm('c')  # Make the plot column-normalized
-   >>> h2d.path
-   Path('Hist2D/v_x_p1/beta_par_p1/linX-logY/Cnorm')
-
-Show all available labels:
-
-.. code-block:: pycon
-
-   >>> import solarwindpy.plotting.labels as labels
-   >>> labels.available()
-
-
-Error Handling and Missing Data
--------------------------------
-
-SolarWindPy follows scientific best practices:
-
-.. code-block:: python
-
-   # Missing data represented as NaN
-   data_without_gaps = plasma.data.dropna()
-
-   # Check for physical constraints manually
-   # Density should be positive
-   assert (plasma.n('p1') > 0).all(), 'Density must be positive'
-
-   # Thermal speeds should be positive
-   thermal_data = plasma.data.xs('w', level='M')
-   assert (thermal_data > 0).all().all(), 'Thermal speeds must be positive'
-
-
-Non-Linear Fitting
-------------------
-
-For more complex analyses:
-
-.. code-block:: python
-
-   # Fit functions for statistical analysis
-   from solarwindpy.fitfunctions import Gaussian
-
-   # Get thermal speed data
-   w_par = plasma.w('p1').xs('par', level='C')
-
-   # Histogram data
-   from solarwindpy.plotting import Hist1D
-   h1d = Hist1D(w_par, nbins=50)
-   h1d.set_labels(x=TeXlabel(('w', 'par', 'p1')))
-
-   # Get aggregated data
-   agg = h1d.agg()
-
-   # Aggregated index is an IntervalIndex, but was previously monkey patched to address
-   # a pandas pretty printing bug.
-   x_data = pd.IntervalIndex(agg.index).mid
-   y_data = agg.values
-
-   fit = Gaussian(x_data, y_data)
-   fit.make_fit()
-
-   # Plot the resulting fit
-   fit.plotter.set_labels(x=TeXlabel(('w', 'par', 'p1')))
-   fit.plotter.plot_raw_used_fit_resid()
-
-
-Best Practices
---------------
-
-1. **Units**: All internal calculations use SI units
-2. **Time**: Use pandas DatetimeIndex for temporal data
-3. **Missing Data**: Represent gaps as NaN, not fill values
-4. **Built-In Aggregation**: Use plasma methods to aggregate quantities where applicable
+A fit carries a plotter that draws the observations and the fitted curve. The
+``Agg`` backend renders without a display. The figure is written to a
+temporary directory:
+
+>>> import tempfile
+>>> from pathlib import Path
+>>> import matplotlib
+>>> matplotlib.use("Agg")
+>>> import matplotlib.pyplot as plt
+>>> ax = fit.plotter.plot_raw_used_fit()
+>>> with tempfile.TemporaryDirectory() as tmp:
+...     path = Path(tmp) / "gaussian_fit.png"
+...     ax.figure.savefig(path)
+...     print(path.exists())
+True
+>>> plt.close(ax.figure)
+
+``solarwindpy.plotting.labels.available()`` prints every measurement,
+component, and species that the plot labels know.
 
 Next Steps
 ----------
 
-- See the :doc:`tutorial` for detailed examples
-- Browse the :doc:`api_reference` for complete function documentation
-- Check out specific modules for specialized functionality
+- The :doc:`tutorial` covers more of the library.
+- The :doc:`api_reference` documents every public class and function.
