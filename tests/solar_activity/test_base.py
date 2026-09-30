@@ -257,44 +257,18 @@ def test_ctime_of_an_empty_cache_is_the_unix_epoch(cache_root):
     assert loader.ctime == pd.Timestamp("1970-01-01")
 
 
-class AgeUnreadable(AssertionError):
-    """Raised only for the unreadable ``DataLoader.age`` below.
-
-    ``pytest.mark.xfail`` narrows by exception type alone; the library raises
-    a bare AttributeError, which would also absorb unrelated attribute bugs.
-    """
-
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=AgeUnreadable,
-    reason=(
-        "In solar_activity/base.py, DataLoader.get_data_age stores the age on "
-        "self._data_age but the public DataLoader.age property reads "
-        "self._age, which nothing sets, so `age` always raises AttributeError "
-        "\"... has no attribute '_age'\". Remove this marker when base.py "
-        "stores and reads the age under one name."
-    ),
-)
 def test_age_is_the_time_since_the_cache_was_written(cache_root):
     """``age`` = now - ctime, for a cache written five days ago.
 
     Identity: ctime is midnight five days back, so the age is at least five
     days and less than six.
 
-    ON FAILURE: (unexpected pass) base.py now stores and reads the age under
-    one name; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     written = today() - pd.Timedelta(days=5)
     (cache_root / f"{written.strftime(TODAY_STR_FORMAT)}.csv").write_text("t\n")
     loader = CacheLoader("daily", "unused", cache_root)
-    try:
-        age = loader.age
-    except AttributeError as err:
-        if "'_age'" in str(err):
-            raise AgeUnreadable(str(err)) from err
-        raise
-    assert pd.Timedelta(days=5) <= age < pd.Timedelta(days=6)
+    assert pd.Timedelta(days=5) <= loader.age < pd.Timedelta(days=6)
 
 
 def test_load_data_downloads_into_todays_slot_when_the_cache_is_stale(cache_root):
