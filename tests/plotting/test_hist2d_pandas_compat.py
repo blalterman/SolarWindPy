@@ -12,22 +12,6 @@ import pytest
 from solarwindpy.plotting.hist2d import Hist2D
 
 
-# UNTESTED, DELIBERATELY -- AWAITING A DECISION, NOT FORGOTTEN.
-#
-# Density normalization (axnorm "d") on a log-scaled axis. `_axis_normalizer`
-# divides by `10 ** dx`, where dx is a bin's width in log10 space. That is
-# neither the bin's width in linear space (10**right - 10**left) nor its width
-# in log space (dx), so the result integrates to 1 under neither measure --
-# measured 38.2 and 0.0159 respectively on decade bins.
-#
-# There is no test here because writing one means choosing which of the two a
-# solar-wind density plot is meant to be, and that is the author's call, not
-# the test suite's. Both candidate fixes are one-line changes at
-# hist2d.py:191-194; once one is chosen, the corresponding integral belongs
-# here as an ordinary assertion alongside the linear-axis cases below, which
-# are unaffected and are checked normally.
-
-
 class TestHist2DPandasCompatibility:
     """Test pandas 2.3.1+ compatibility for Hist2D axis normalization."""
 
@@ -549,3 +533,54 @@ class TestNormalizationBounds:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+# A hand-built grid for density on log axes. Edges are in the binned variable,
+# log10 of the data on a log axis. Unequal widths make a width error visible.
+X_EDGES = np.array([0.0, 1.0, 3.0])  # widths 1, 2
+Y_EDGES = np.array([0.0, 2.0, 3.0])  # widths 2, 1
+# counts[i, j]: y-bin i, x-bin j; N = 10.
+DENSITY_COUNTS = np.array([[1, 2], [3, 4]])
+# count / (N * dx * dy), by hand: 1/(10*1*2), 2/(10*2*2); 3/(10*1*1), 4/(10*2*1).
+DENSITY_BY_HAND = np.array([[0.05, 0.05], [0.3, 0.2]])
+
+
+class DensityNotNormalised(AssertionError):
+    """A density's cell areas on the plotted axes do not sum to 1."""
+
+
+class TestLogAxisDensity:
+    """Density ("d") on log axes is normalised over log10 of each log axis."""
+
+    @pytest.mark.parametrize("logx, logy", [(True, False), (False, True), (True, True)])
+    def test_density_sums_to_one_over_log10_cell_areas(self, logx, logy):
+        """Cell values times (log10 x, y) cell areas sum to 1 on each log axis.
+
+        The author ruled that a log-axis density is normalised over log10 of
+        that axis: areas on the log axis sum to 1.
+
+        ON FAILURE: the code is wrong, unless the author reverses that ruling.
+        """
+        xc = 0.5 * (X_EDGES[:-1] + X_EDGES[1:])
+        yc = 0.5 * (Y_EDGES[:-1] + Y_EDGES[1:])
+        xs, ys = [], []
+        for i in range(2):
+            for j in range(2):
+                xs.extend([xc[j]] * DENSITY_COUNTS[i, j])
+                ys.extend([yc[i]] * DENSITY_COUNTS[i, j])
+        x = pd.Series(xs, dtype=float)
+        y = pd.Series(ys, dtype=float)
+        if logx:
+            x = 10.0**x
+        if logy:
+            y = 10.0**y
+
+        hist = Hist2D(x, y, logx=logx, logy=logy, axnorm="d", nbins=[X_EDGES, Y_EDGES])
+        density = hist.agg().unstack("x").values
+
+        # Tolerance: a handful of float divisions.
+        np.testing.assert_allclose(density, DENSITY_BY_HAND, rtol=1e-12, atol=0)
+        areas = np.outer(np.diff(Y_EDGES), np.diff(X_EDGES))
+        total = (density * areas).sum()
+        if not np.isclose(total, 1.0, rtol=1e-12, atol=0):
+            raise DensityNotNormalised(f"sum over cell areas = {total}")

@@ -149,6 +149,10 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
+
+        On a log axis the densities ("d", "cd", "rd") are normalised over
+        ``log10`` of that axis: the bins are log-space intervals, so cell areas
+        on the log axes sum to 1.
         """
 
         axnorm = self.axnorm
@@ -162,37 +166,24 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             agg = agg.divide(agg.max())
         elif axnorm == "d":
             N = agg.sum().sum()
-            x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
-            y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
-            dx = pd.Series(
-                x.length, index=x
-            )  # dx = pd.Series(x.right - x.left, index=x)
-            dy = pd.Series(
-                y.length, index=y
-            )  # dy = pd.Series(y.right - y.left, index=y)
-
-            if self.log.x:
-                dx = 10.0**dx
-            if self.log.y:
-                dy = 10.0**dy
-
+            # Widths are in the binned variable, log10 on a log axis.
+            dx = self._bin_widths(agg.index.get_level_values("x").unique())
+            dy = self._bin_widths(agg.index.get_level_values("y").unique())
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
         elif axnorm == "cd":
             N = agg.groupby(level="x").sum()
-            dy = pd.IntervalIndex(
-                agg.index.get_level_values("y").unique()
-            ).sort_values()
-            dy = pd.Series(dy.length, index=dy).sort_index()
+            dy = self._bin_widths(
+                pd.IntervalIndex(agg.index.get_level_values("y").unique()).sort_values()
+            )
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="x").divide(dy, level="y")
 
         elif axnorm == "rd":
             N = agg.groupby(level="y").sum()
-            dx = pd.IntervalIndex(
-                agg.index.get_level_values("x").unique()
-            ).sort_values()
-            dx = pd.Series(dx.length, index=dx).sort_index()
+            dx = self._bin_widths(
+                pd.IntervalIndex(agg.index.get_level_values("x").unique()).sort_values()
+            )
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
 

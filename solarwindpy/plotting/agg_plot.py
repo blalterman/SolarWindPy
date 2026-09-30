@@ -142,6 +142,27 @@ class AggPlot(base.Base):
             data = data.clip(lo, up, axis=ax)
         return data
 
+    @staticmethod
+    def _bin_widths(bins):
+        r"""Width of each bin in the binned variable.
+
+        On a log axis the binned variable is ``log10`` of the data, so the
+        widths are log10 widths and a density normalised by them integrates
+        to 1 over the log axis.
+
+        Parameters
+        ----------
+        bins : array-like of pd.Interval
+            The bins, e.g. an ``IntervalIndex`` or a categorical index of
+            intervals.
+
+        Returns
+        -------
+        pd.Series
+            Each bin's width, indexed by ``bins``.
+        """
+        return pd.Series(pd.IntervalIndex(bins).length, index=bins)
+
     def set_clim(self, lower=None, upper=None):
         """Set the minimum (lower) and maximum (upper) allowed number of.
 
