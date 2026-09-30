@@ -21,7 +21,6 @@ import pandas as pd
 import matplotlib as mpl
 
 from collections import namedtuple
-from matplotlib import pyplot as plt
 
 _inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
 _param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
@@ -267,7 +266,7 @@ class StabilityCondition(object):
     def cmap(self):
         """A linearly segmented colormap for the (in)stability condition."""
 
-        return plt.cm.get_cmap("Paired", len(self.stability_map))
+        return mpl.colormaps["Paired"].resampled(len(self.stability_map))
 
     @property
     # TODO: rename to `color_norm` for consistancy w/ plotting code.

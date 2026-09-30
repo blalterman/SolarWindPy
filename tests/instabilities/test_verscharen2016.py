@@ -24,7 +24,6 @@ import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 from matplotlib.colors import to_hex  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
-from packaging.version import Version  # noqa: E402
 
 from solarwindpy.instabilities import verscharen2016 as v16  # noqa: E402
 
@@ -290,25 +289,14 @@ def test_color_norm_centres_each_stability_bin():
         assert float(sc.norm(k)) == pytest.approx(expected, rel=1e-12, abs=0)
 
 
-@pytest.mark.xfail(
-    Version(matplotlib.__version__) >= Version("3.11"),
-    strict=True,
-    raises=AttributeError,
-    reason=(
-        "verscharen2016.StabilityCondition.cmap calls plt.cm.get_cmap, removed in "
-        "matplotlib 3.11 (pyproject allows matplotlib>=3.5); AttributeError: module "
-        "'matplotlib.cm' has no attribute 'get_cmap'; remove this marker when cmap "
-        "uses matplotlib.colormaps in solarwindpy/instabilities/verscharen2016.py "
-        "(owned by source-misc)"
-    ),
-)
+@pytest.mark.filterwarnings("error::matplotlib.MatplotlibDeprecationWarning")
 def test_colorbar_has_one_colour_and_one_labelled_tick_per_stability_bin():
     """cmap has one colour per bin; cbar_kwargs ticks each bin and labels it by name.
 
-    Under matplotlib < 3.11 this runs as a plain test; an XPASS(strict) under
-    matplotlib >= 3.11 means the get_cmap fix has landed.
+    Matplotlib deprecation warnings are raised as errors, so a colormap lookup
+    through an API removed in a later matplotlib fails here before the removal.
 
-    ON FAILURE: the code is wrong, or (unexpected pass) drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
     keys = sorted(sc.stability_map)
