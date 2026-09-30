@@ -159,6 +159,24 @@ class AggPlot(base.Base):
         """
         return pd.Series(pd.IntervalIndex(bins).length, index=bins)
 
+    @staticmethod
+    def _divide_by_max(agg):
+        r"""Divide ``agg`` by its maximum, so the peak equals 1.
+
+        This is the ``"t"`` axis normalization shared by the histograms.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            Aggregated values, one per bin.
+
+        Returns
+        -------
+        pd.Series
+            ``agg / agg.max()``.
+        """
+        return agg.divide(agg.max())
+
     def set_clim(self, lower=None, upper=None):
         """Set the minimum (lower) and maximum (upper) allowed number of.
 

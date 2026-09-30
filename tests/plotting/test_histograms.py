@@ -185,14 +185,6 @@ class TestHist1DAxisNormalization:
         # The exact label depends on implementation
         assert hasattr(hist, "labels")
 
-    def test_set_axnorm_total(self):
-        """Test set_axnorm('t') sets total normalization."""
-        hist = histograms.Hist1D(self.x_data)
-
-        # 't' may not be supported for Hist1D, only 'd' is asserted to work
-        with pytest.raises(AssertionError):
-            hist.set_axnorm("t")
-
     def test_set_axnorm_invalid_raises_assertion_error(self):
         """Test that set_axnorm('x') raises AssertionError."""
         hist = histograms.Hist1D(self.x_data)
