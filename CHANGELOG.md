@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `m` and `s`, e.g. `base=10` for a base-10 log-normal. The default is unchanged.
 - `Hist1D.set_axnorm("t")` (and `Hist1D(axnorm="t")`) divides the histogram by its
   maximum, so the peak equals 1, as `Hist2D` does. It previously raised `AssertionError`.
+- `CITATION.cff` gives the Zenodo concept DOI and the author's ORCID in Citation File
+  Format, so GitHub and Zenodo can read the citation.
 
 ### Fixed
 

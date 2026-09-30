@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use SolarWindPy, please cite it using the Zenodo concept DOI below."
+title: SolarWindPy
+type: software
+authors:
+  - family-names: Alterman
+    given-names: B. L.
+    orcid: "https://orcid.org/0000-0001-6673-3432"
+doi: 10.5281/zenodo.17042839
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17042839
+    description: Zenodo concept DOI, which identifies all SolarWindPy releases.
+repository-code: "https://github.com/blalterman/SolarWindPy"
+license: BSD-3-Clause
