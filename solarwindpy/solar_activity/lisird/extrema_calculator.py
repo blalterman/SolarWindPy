@@ -163,8 +163,8 @@ class ExtremaCalculator(object):
 
         rolled = index
         if window is not None:
-            rolled = index.rolling("%sd" % window).mean()
-            rolled.index = rolled.index - pd.to_timedelta("%sd" % (window / 2.0))
+            rolled = index.rolling("%sD" % window).mean()
+            rolled.index = rolled.index - pd.to_timedelta("%sD" % (window / 2.0))
 
         self._raw = index
         self._data = rolled
@@ -359,7 +359,7 @@ class ExtremaCalculator(object):
         elif name == "viored":
             minima = minima.iloc[1:-1]
 
-        minimum_seperation = pd.to_timedelta("1000d")
+        minimum_seperation = pd.to_timedelta("1000D")
         tk_max = maxima.index.to_series().diff() > minimum_seperation
         tk_min = minima.index.to_series().diff() > minimum_seperation
 

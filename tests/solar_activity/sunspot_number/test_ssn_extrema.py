@@ -467,7 +467,7 @@ def test_extrema_bands_require_calculation_first(extrema):
         extrema.extrema_bands
 
 
-@pytest.mark.parametrize("dt", ["365d", "180d", "2d"])
+@pytest.mark.parametrize("dt", ["365D", "180D", "2D"])
 def test_extrema_bands_are_centred_on_the_extrema(extrema, dt):
     """Each band is [extremum - dt, extremum + dt].
 
@@ -496,8 +496,8 @@ def test_extrema_bands_accept_asymmetric_widths(extrema):
     ON FAILURE: the asymmetric branch of calculate_extrema_bands is swapping
     or ignoring one of its two widths. The code is wrong.
     """
-    left_width = pd.Timedelta("30d")
-    right_width = pd.Timedelta("400d")
+    left_width = pd.Timedelta("30D")
+    right_width = pd.Timedelta("400D")
     bands = extrema.calculate_extrema_bands(dt=[left_width, right_width])
 
     for number, row in extrema.data.iterrows():
@@ -513,7 +513,7 @@ def test_extrema_bands_reject_more_than_two_widths(extrema):
     ON FAILURE: extra widths are silently dropped. The code is wrong.
     """
     with pytest.raises(ValueError, match="1 or 2 dt options"):
-        extrema.calculate_extrema_bands(dt=["1d", "2d", "3d"])
+        extrema.calculate_extrema_bands(dt=["1D", "2D", "3D"])
 
 
 def test_cut_about_extrema_bands_round_trips_the_extrema(extrema):
@@ -527,7 +527,7 @@ def test_cut_about_extrema_bands_round_trips_the_extrema(extrema):
     ON FAILURE: bands and labels have come out of correspondence, so extrema
     would be attributed to the wrong cycle. The code is wrong.
     """
-    extrema.calculate_extrema_bands(dt="365d")
+    extrema.calculate_extrema_bands(dt="365D")
 
     stacked = extrema.data.stack()
     epoch = pd.DatetimeIndex(stacked.values)
@@ -543,7 +543,7 @@ def test_cut_about_extrema_bands_restricted_to_one_kind(extrema):
     ON FAILURE: the kind selector is ignored, so a caller asking about minima
     also receives maxima. The code is wrong.
     """
-    extrema.calculate_extrema_bands(dt="200d")
+    extrema.calculate_extrema_bands(dt="200D")
 
     minima = extrema.data.loc[:LAST_CLOSED_CYCLE, "Min"]
     maxima = extrema.data.loc[:LAST_CLOSED_CYCLE, "Max"]
