@@ -145,10 +145,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     def _axis_normalizer(self, agg):
         r"""Takes care of row, column, total, and density normaliation.
 
-        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
-        as actual method with `self` passed so we have access to `self.log` for density
-        normalization.
-
         On a log axis the densities ("d", "cd", "rd") are normalised over
         ``log10`` of that axis: the bins are log-space intervals, so cell areas
         on the log axes sum to 1.
@@ -202,22 +198,16 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         return agg
 
-    def _normalized_agg(self, **kwargs):
-        r"""Aggregate and normalize by ``axnorm``, every bin present, no ``alim``.
-
-        ``kwargs`` are passed to ``AggPlot.agg``.
-        """
-        agg = super().agg(**kwargs)
-        agg = self._axis_normalizer(agg)
-        return self._agg_reindexer(agg)
-
     def agg(self, **kwargs):
         r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
 
         Every bin is present in the result; bins outside ``alim`` are NaN.
         ``kwargs`` are passed to ``AggPlot.agg``.
         """
-        return self._apply_alim(self._normalized_agg(**kwargs))
+        agg = super().agg(**kwargs)
+        agg = self._axis_normalizer(agg)
+        agg = self._agg_reindexer(agg)
+        return self._apply_alim(agg)
 
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(

@@ -414,8 +414,7 @@ class TestCallableAxisNormalization:
     "divide each column by its sum" means -- not from what the code does.
 
     ``set_axnorm`` rejects anything but the documented strings, so these cases
-    are reached by setting the private attribute, the way an `OrbitHist2D`-style
-    caller would have to.
+    are reached by setting the private attribute.
     """
 
     def setup_method(self):

@@ -366,7 +366,7 @@ class PlotWithZdata(Base):
             (NaN and inf excluded) each time the plot aggregates. The
             quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
             or ``"r"`` they are taken over the whole grid, not per column or
-            row, and an orbit plot pools all of its legs.
+            row.
 
         Raises
         ------

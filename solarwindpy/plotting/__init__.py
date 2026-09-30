@@ -17,7 +17,6 @@ __all__ = [
     "histograms",
     "scatter",
     "spiral",
-    "orbits",
     "tools",
     "subplots",
     "save",
@@ -29,7 +28,6 @@ from . import (  # noqa: E402 - imports after style application is intentional
     histograms,
     scatter,
     spiral,
-    orbits,
     tools,
 )
 

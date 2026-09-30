@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     so density contours default to log colour bands.
   - `OrbitHist2D` applies `alim` to the "Both" leg too, once over all legs (the Both
     leg itself is still disabled).
+- `solarwindpy.plotting.orbits` removed (unused); last available at commit e790d95f.
 
 ### Fixed
 

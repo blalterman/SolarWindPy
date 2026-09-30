@@ -293,36 +293,6 @@ class AggPlot(base.Base):
         cut = pd.DataFrame.from_dict(cut, orient="columns")
         self._cut = cut
 
-    def _agg_runner(self, cut, tko, gb, fcn, **kwargs):
-        r"""Refactored out the aggregation.
-
-        This enables compatibility with :py:class:`OrbitPlot` aggregation of
-        different orbit legs (Inbound, Outbound, and Both).
-        """
-        self.logger.debug(f"aggregating {tko} data along {cut.columns.values}")
-
-        if fcn is None:
-            other = self.data.loc[cut.index, tko]
-            if other.dropna().unique().size == 1:
-                fcn = "count"
-            else:
-                fcn = "mean"
-
-        agg = gb.agg(fcn, **kwargs)  # .loc[:, tko]
-
-        c0, c1 = self.clim
-        if c0 is not None or c1 is not None:
-            cnt = gb.agg("count")  # .loc[:, tko]
-            tk = pd.Series(True, index=agg.index)
-            if c0 is not None:
-                tk = tk & (cnt >= c0)
-            if c1 is not None:
-                tk = tk & (cnt <= c1)
-
-            agg = agg.where(tk)
-
-        return agg
-
     def _agg_reindexer(self, agg):
         # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError
         # with mixed Categoricals and NaNs. (20200229)
@@ -356,7 +326,25 @@ class AggPlot(base.Base):
 
         gb = self.grouped
 
-        agg = self._agg_runner(cut, tko, gb, fcn, **kwargs)
+        if fcn is None:
+            other = self.data.loc[cut.index, tko]
+            if other.dropna().unique().size == 1:
+                fcn = "count"
+            else:
+                fcn = "mean"
+
+        agg = gb.agg(fcn, **kwargs)  # .loc[:, tko]
+
+        c0, c1 = self.clim
+        if c0 is not None or c1 is not None:
+            cnt = gb.agg("count")  # .loc[:, tko]
+            tk = pd.Series(True, index=agg.index)
+            if c0 is not None:
+                tk = tk & (cnt >= c0)
+            if c1 is not None:
+                tk = tk & (cnt <= c1)
+
+            agg = agg.where(tk)
 
         return agg
 
