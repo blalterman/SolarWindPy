@@ -275,7 +275,8 @@ class TestOrbitHist1D:
         strict=True,
         raises=TypeError,
         reason=(
-            "OrbitHist1D.agg (orbits.py:80) hands the (x, Orbit)-indexed "
+            "OrbitHist1D.agg (swp-defect:orbits-hist1d-agg-multiindex-norm) "
+            "hands the (x, Orbit)-indexed "
             "aggregate to Hist1D._axis_normalizer, which builds "
             "pd.IntervalIndex from a MultiIndex; TypeError 'is not an "
             "interval'. Remove this marker when OrbitHist1D.agg normalises "
@@ -382,7 +383,8 @@ class TestOrbitHist2DAggregation:
         strict=True,
         raises=LegNormalizationMismatch,
         reason=(
-            "OrbitHist2D.agg (orbits.py:184-205) normalises twice: Hist2D.agg "
+            "OrbitHist2D.agg (swp-defect:orbits-hist2d-agg-double-norm) "
+            "normalises twice: Hist2D.agg "
             "already applies _axis_normalizer across both legs, then the "
             "per-leg transform applies it again, dividing by the bin widths "
             "twice. Exact only for uniform bins; e.g. 'd' gives 0.5 where "
@@ -468,7 +470,9 @@ class TestOrbitHist2DPlots:
                     strict=True,
                     raises=IndexError,
                     reason=(
-                        "make_one_plot (orbits.py:333) indexes kind.lower()[0] "
+                        "OrbitHist2D.make_one_plot "
+                        "(swp-defect:orbits-make-one-plot-empty-kind) "
+                        "indexes kind.lower()[0] "
                         "outside its try, so '' raises IndexError instead of "
                         "\"Unrecognized kind ''\". Remove this marker when the "
                         "empty string is rejected with ValueError."
@@ -506,7 +510,8 @@ class TestOrbitHist2DPlots:
         strict=True,
         raises=TypeError,
         reason=(
-            "OrbitHist2D._put_agg_on_ax (orbits.py:295) calls "
+            "OrbitHist2D._put_agg_on_ax "
+            "(swp-defect:orbits-make-cbar-positional-ax) calls "
             "self._make_cbar(pc, ax, ...) but Hist2D._make_cbar takes ax only "
             "as a keyword; TypeError 'takes 2 positional arguments but 3 were "
             "given'. Remove this marker when the call passes ax=ax."
@@ -607,7 +612,8 @@ class TestOrbitHist2DProjection:
         strict=True,
         raises=KeyError,
         reason=(
-            "OrbitHist2D.project_1d (orbits.py:244) looks up "
+            "OrbitHist2D.project_1d (swp-defect:orbits-project-1d-log-z) "
+            "looks up "
             "self.log._asdict()['z'] when z is set, but LogAxes has only x and "
             "y; KeyError 'z'. Hist2D.project_1d guards this with "
             "`other == 'y'`. Remove this marker when OrbitHist2D.project_1d "
