@@ -154,10 +154,6 @@ class Hist1D(AggPlot):
     def _axis_normalizer(self, agg):
         r"""Takes care of row, column, total, and density normaliation.
 
-        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
-        as actual method with `self` passed so we have access to `self.log` for density
-        normalization.
-
         Under ``logx`` the density is normalised over ``log10(x)``: the bins are
         log-space intervals, so bar areas on the log axis sum to 1.
         """

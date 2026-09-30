@@ -230,3 +230,66 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
             raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
     finally:
         plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# alim: hand-built points whose z is known, x and y distinct per point so the
+# offsets identify which points were drawn. The last z is +inf: a quantile
+# limit must ignore it when computing thresholds.
+# ---------------------------------------------------------------------------
+
+ALIM_Z = np.array([5.0, 1.0, 8.0, 3.0, 9.0, 2.0, 7.0, 4.0, 6.0, 0.0, np.inf])
+ALIM_X = np.arange(ALIM_Z.size, dtype=float)
+ALIM_Y = 10.0 * ALIM_X + 1.0
+
+
+def _assert_drawn(ax, cbar, keep):
+    keep = np.r_[keep, np.zeros(ALIM_Z.size - keep.size, dtype=bool)]
+    coll = ax.collections[0]
+    np.testing.assert_array_equal(coll.get_offsets(), np.c_[ALIM_X[keep], ALIM_Y[keep]])
+    np.testing.assert_array_equal(coll.get_array(), ALIM_Z[keep])
+    assert (cbar.mappable.norm.vmin, cbar.mappable.norm.vmax) == (
+        ALIM_Z[keep].min(),
+        ALIM_Z[keep].max(),
+    )
+    assert ax.get_xlim() == (ALIM_X[keep].min(), ALIM_X[keep].max())
+
+
+@pytest.mark.parametrize(
+    "lower, upper",
+    [(3.0, 7.0), (3.0, None), (None, 7.0)],
+    ids=["both", "lower", "upper"],
+)
+def test_value_alim_draws_only_points_with_z_inside_the_limits(ax, lower, upper):
+    """``set_alim(lo, hi)`` draws a point iff lo <= z <= hi; bounds inclusive.
+
+    Masked points are absent from the offsets, the colour array, the colour
+    scale and the axis limits. Only the finite points are used here.
+    ON FAILURE: the code is wrong.
+    """
+    z = ALIM_Z[:-1]
+    sc = Scatter(ALIM_X[:-1], ALIM_Y[:-1], z)
+    sc.set_alim(lower, upper)
+    _, cbar = sc.make_plot(ax=ax)
+    keep = np.ones(z.size, dtype=bool)
+    if lower is not None:
+        keep &= z >= lower
+    if upper is not None:
+        keep &= z <= upper
+    _assert_drawn(ax, cbar, keep)
+
+
+def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
+    """``kind="quantile"`` masks z outside np.quantile of the finite z.
+
+    The +inf z is excluded from the quantile computation and, being above the
+    upper threshold, is not drawn.
+    ON FAILURE: the code is wrong.
+    """
+    sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
+    sc.set_alim(0.2, 0.8, kind="quantile")
+    _, cbar = sc.make_plot(ax=ax)
+    lo, hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], [0.2, 0.8])
+    keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
+    assert 2 < keep.sum() < ALIM_Z.size - 2
+    _assert_drawn(ax, cbar, keep)

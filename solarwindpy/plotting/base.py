@@ -352,7 +352,8 @@ class PlotWithZdata(Base):
         Unlike ``clim``, which limits the number of points in a bin, ``alim``
         limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
         any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
-        inclusive and None leaves that side open.
+        inclusive and None leaves that side open. A ``Scatter`` applies
+        ``alim`` to the z of each point and does not draw the points outside.
 
         Parameters
         ----------
@@ -365,14 +366,14 @@ class PlotWithZdata(Base):
             (NaN and inf excluded) each time the plot aggregates. The
             quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
             or ``"r"`` they are taken over the whole grid, not per column or
-            row, and an orbit plot pools all of its legs.
+            row.
 
         Raises
         ------
         ValueError
-            If ``kind`` is not ``"value"`` or ``"quantile"``, or, for
-            ``"quantile"``, if a limit is outside [0, 1] or ``lower`` is not
-            less than ``upper``.
+            If ``kind`` is not ``"value"`` or ``"quantile"``, if ``lower`` is
+            not less than ``upper``, or, for ``"quantile"``, if a limit is
+            outside [0, 1].
         """
         if kind not in ("value", "quantile"):
             raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
@@ -384,10 +385,10 @@ class PlotWithZdata(Base):
                     raise ValueError(
                         f"quantile alim {name}={q} must be between 0 and 1"
                     )
-            if lower is not None and upper is not None and not lower < upper:
-                raise ValueError(
-                    f"quantile alim lower={lower} must be less than upper={upper}"
-                )
+        if lower is not None and upper is not None and not lower < upper:
+            raise ValueError(
+                f"{kind} alim lower={lower} must be less than upper={upper}"
+            )
         self._alim = (lower, upper)
         self._alim_kind = kind
 
@@ -397,7 +398,8 @@ class PlotWithZdata(Base):
         Parameters
         ----------
         agg : pd.Series
-            The final aggregated values, one per bin or cell. With
+            The final aggregated values, one per bin or cell, or for a
+            ``Scatter`` the z of each plotted point. With
             ``alim_kind == "quantile"`` the thresholds are quantiles of all
             of its finite entries.
 
