@@ -43,6 +43,9 @@ def get_all_indices():
             "CaK": CaK.data.drop("milliseconds", axis=1),
         },
         axis=1,
+        # The sources sample on different dates (SSN is monthly), so the
+        # union of their indices must be sorted to stay chronological.
+        sort=True,
     ).sort_index(axis=1)
 
     return sa
