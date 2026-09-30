@@ -837,6 +837,23 @@ class TestLimitColorNorm:
         known_hist.make_plot(limit_color_norm=True, cbar=False)
         plt.close("all")
 
+    def test_contour_overlay_limits_colours_without_a_normalisation(self, known_hist):
+        """`plot_hist_with_contours(limit_color_norm=True)` works with no axnorm.
+
+        It draws, and the colour limits are the 1%/99% quantiles of the 14
+        occupied counts of ``KNOWN_COUNTS``: 1 and 5 + 0.87 * (6 - 5) = 5.87,
+        worked in `test_count_colour_limits_are_quantiles_of_the_plotted_counts`.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _, _, _ = known_hist.plot_hist_with_contours(
+            limit_color_norm=True, cbar=False
+        )
+        norm = _quadmesh(ax).norm
+        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
+        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
+        plt.close("all")
+
 
 class TestAggregationLimits:
     """`set_alim` and `set_clim` filter the grid after and before aggregating."""

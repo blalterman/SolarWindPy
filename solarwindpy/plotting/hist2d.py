@@ -246,19 +246,30 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         Parameters
         ----------
-        norm : matplotlib.colors.Normalize
+        norm : matplotlib.colors.Normalize or None
             The colour normalisation to limit. Limits already set are kept.
+            If None, a linear :class:`matplotlib.colors.Normalize` is built,
+            the norm ``pcolormesh`` would otherwise use.
         values : array-like
             The aggregated values handed to matplotlib. NaN, infinite and
             masked entries are ignored.
+
+        Returns
+        -------
+        matplotlib.colors.Normalize or None
+            The limited norm. Column- and row-normalised plots are already
+            bounded, so for them ``norm`` is returned unchanged.
         """
         if self.axnorm in ("c", "r"):
             # Don't limit us to (1%, 99%) interval.
-            return None
+            return norm
+
+        if norm is None:
+            norm = mpl.colors.Normalize()
 
         values = np.ma.masked_invalid(values).compressed()
         if values.size == 0:
-            return None
+            return norm
 
         v0, v1 = np.quantile(values, [0.01, 0.99])
         if norm.vmin is None:
@@ -266,6 +277,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         if norm.vmax is None:
             norm.vmax = v1
         norm.clip = True
+        return norm
 
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
@@ -385,11 +397,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         norm = kwargs.pop("norm", default_norm)
 
         if limit_color_norm:
-            if norm is None:
-                # `pcolormesh` would use a linear `Normalize` anyway; build it
-                # here so there is a norm to limit.
-                norm = mpl.colors.Normalize()
-            self._limit_color_norm(norm, agg)
+            norm = self._limit_color_norm(norm, agg)
 
         C = np.ma.masked_invalid(agg.values)
         XX, YY = np.meshgrid(x, y)
@@ -524,7 +532,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         # --- 1. Plot pcolormesh background ---
         C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
         if limit_color_norm:
-            self._limit_color_norm(norm, C_edges)
+            norm = self._limit_color_norm(norm, C_edges)
 
         XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
         pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)

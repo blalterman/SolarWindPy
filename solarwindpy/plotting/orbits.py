@@ -329,7 +329,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
 
         if limit_color_norm:
-            self._limit_color_norm(norm, agg)
+            norm = self._limit_color_norm(norm, agg)
 
         C = np.ma.masked_invalid(agg.values)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
