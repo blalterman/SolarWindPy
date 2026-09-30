@@ -1,371 +1,339 @@
-#!/usr/bin/env python
-"""Test solar_activity plotting helpers.
+"""Plotting a solar activity indicator: ``solar_activity.plots``.
 
-This module tests the plotting classes in solar_activity.plots:
-- IndicatorPlot: Base class for plotting solar activity indicators
-- SSNPlot: Specialized plotter for sunspot number data
+The indicator is a real ``SIDC`` monthly-smoothed sunspot series. Only the
+network is faked: SILSO's URL base is pointed at a local directory holding a
+file in SILSO's ``;``-separated format, and the cache home is moved under
+``tmp_path``. The series is chosen so each value is known by hand: the SSN
+of month ``i`` after January 2000 is ``50 + i``.
 
-The tests focus on data slicing, matplotlib integration, and axis formatting
-while mocking external dependencies and matplotlib components.
+No plotter can be constructed today (see ``UNCONSTRUCTIBLE``), so every
+plotter test is a strict xfail that states the correct behaviour.
 """
 
-import pytest
-import pandas as pd
-import numpy as np
+import re
+from pathlib import Path
+
 import matplotlib
-from unittest.mock import Mock, patch, MagicMock, call
-from datetime import datetime, timedelta
 
-# Import normally - we'll mock in individual tests
-from solarwindpy.solar_activity.plots import IndicatorPlot, SSNPlot
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import pytest  # noqa: E402
+
+from solarwindpy.plotting import labels  # noqa: E402
+from solarwindpy.solar_activity.plots import IndicatorPlot, SSNPlot  # noqa: E402
+from solarwindpy.solar_activity.sunspot_number.sidc import SIDC, SIDC_ID  # noqa: E402
+
+MONTHS = pd.date_range("2000-01-01", "2009-12-01", freq="MS")
+SSN = 50.0 + np.arange(MONTHS.size)  # month i after 2000-01 has SSN 50 + i
+STD = 2.0
 
 
-class ConcreteIndicatorPlot(IndicatorPlot):
-    """Concrete implementation of IndicatorPlot for testing."""
+def silso_m13():
+    """The chosen series as SILSO writes it (year; month; frac; ssn; std; n; def)."""
+    return "".join(
+        f"{t.year};{t.month:02d};{t.year + (t.month - 0.5) / 12:.3f};"
+        f"{s:6.1f};{STD:5.1f};  100;1\n"
+        for t, s in zip(MONTHS, SSN)
+    )
 
-    def __init__(self, indicator, ykey, plasma_index=None):
-        """Override init to avoid the label initialization issue."""
-        self.set_data(indicator, ykey, plasma_index)
-        self.set_log(x=False, y=False)
-        # Create a simple label structure instead of complex label system
-        from collections import namedtuple
 
-        AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
-        self._labels = AxesLabels(x="Year", y="y")
+@pytest.fixture
+def sidc(tmp_path, monkeypatch):
+    """A real ``SIDC("m13")`` downloaded from a local SILSO file.
+
+    ``DataLoader`` reads the cache date from an 8-digit run anywhere in the
+    cache's absolute path, so a ``tmp_path`` that holds one would be misread.
+    """
+    if re.search(r"\d{8}", str(tmp_path)):
+        pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
+    home = tmp_path / "home"
+    home.mkdir()
+    remote = tmp_path / "remote"
+    remote.mkdir()
+    (remote / "snmstotcsv.php").write_text(silso_m13())
+
+    base = remote.as_uri() + "/"
+    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
+    monkeypatch.setattr(SIDC_ID, "_url_base", property(lambda self: base))
+    return SIDC("m13")
+
+
+@pytest.fixture(autouse=True)
+def close_figures():
+    yield
+    plt.close("all")
+
+
+class StdPlot(IndicatorPlot):
+    """The generic plotter, on the ``std`` column, with the base axis format."""
 
     def _format_axis(self, ax):
-        """Implement the abstract method with basic functionality."""
-        # Call parent implementation
-        super()._format_axis(ax)
-        return ax
-
-
-class MockActivityIndicator:
-    """Mock ActivityIndicator for testing plotting functionality."""
-
-    def __init__(self, data=None, id_key="test"):
-        if data is None:
-            # Create synthetic time series data
-            start_date = datetime(2020, 1, 1)
-            dates = [start_date + timedelta(days=i) for i in range(100)]
-            self.data = pd.DataFrame(
-                {
-                    "test_value": np.random.uniform(10, 50, 100),
-                    "ssn": np.random.uniform(0, 150, 100),
-                },
-                index=pd.DatetimeIndex(dates),
-            )
-        else:
-            self.data = data
-
-        # Mock ID object
-        self.id = Mock()
-        self.id.key = id_key
-
-
-class TestIndicatorPlot:
-    """Test the IndicatorPlot base class."""
-
-    def test_init_basic(self):
-        """Test basic IndicatorPlot initialization."""
-        indicator = MockActivityIndicator()
-        plot = ConcreteIndicatorPlot(indicator, "test_value")
-
-        # Check that data is set correctly
-        assert plot.indicator is indicator
-        assert plot.ykey == "test_value"
-        assert plot.plasma_index is None
-
-    def test_init_with_plasma_index(self):
-        """Test IndicatorPlot initialization with plasma index."""
-        indicator = MockActivityIndicator()
-        # Create a plasma index that overlaps with indicator data
-        plasma_idx = pd.date_range("2020-01-15", periods=20, freq="D")
-
-        plot = ConcreteIndicatorPlot(indicator, "test_value", plasma_index=plasma_idx)
-
-        assert plot.indicator is indicator
-        assert plot.ykey == "test_value"
-        pd.testing.assert_index_equal(plot.plasma_index, plasma_idx)
-
-    def test_plot_data_no_plasma_index(self):
-        """Test plot_data property without plasma index restriction."""
-        # Create test data
-        dates = pd.date_range("2020-01-01", periods=50, freq="D")
-        data = pd.DataFrame({"value": np.arange(50)}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        plot = ConcreteIndicatorPlot(indicator, "value")
-
-        # Should return all data for the specified column
-        expected = data["value"]
-        pd.testing.assert_series_equal(plot.plot_data, expected)
-
-    def test_plot_data_with_plasma_index(self):
-        """Test plot_data property with plasma index restriction."""
-        # Create test data spanning 50 days
-        dates = pd.date_range("2020-01-01", periods=50, freq="D")
-        data = pd.DataFrame({"value": np.arange(50)}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        # Plasma index starts from day 10
-        plasma_idx = pd.date_range("2020-01-10", periods=20, freq="D")
-        plot = ConcreteIndicatorPlot(indicator, "value", plasma_index=plasma_idx)
-
-        # Should return data from plasma_idx.min() onwards
-        expected = data.loc[plasma_idx.min() :, "value"]
-        pd.testing.assert_series_equal(plot.plot_data, expected)
-
-    def test_set_data(self):
-        """Test set_data method."""
-        # Initial setup
-        indicator1 = MockActivityIndicator()
-        plot = ConcreteIndicatorPlot(indicator1, "test_value")
-
-        # Set new data
-        indicator2 = MockActivityIndicator()
-        plasma_idx = pd.date_range("2020-01-15", periods=10, freq="D")
-        plot.set_data(indicator2, "new_column", plasma_idx)
-
-        assert plot.indicator is indicator2
-        assert plot.ykey == "new_column"
-        pd.testing.assert_index_equal(plot.plasma_index, plasma_idx)
-
-    @patch("solarwindpy.solar_activity.plots.subplots")
-    @patch("solarwindpy.solar_activity.plots.mdates.date2num")
-    def test_make_plot_no_ax(self, mock_date2num, mock_subplots):
-        """Test make_plot method when no axes is provided."""
-        # Setup mocks
-        mock_fig = Mock()
-        mock_ax = Mock()
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        mock_date2num.return_value = np.array([1, 2, 3, 4, 5])
-
-        # Create test data
-        dates = pd.date_range("2020-01-01", periods=5, freq="D")
-        data = pd.DataFrame({"value": [10, 20, 30, 40, 50]}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        plot = ConcreteIndicatorPlot(indicator, "value")
-        plot.make_plot()
-
-        # Verify subplots was called
-        mock_subplots.assert_called_once()
-
-        # Verify date conversion
-        mock_date2num.assert_called_once()
-
-        # Verify plot was called with correct data
-        mock_ax.plot.assert_called_once()
-        call_args = mock_ax.plot.call_args
-        x_data, y_data = call_args[0]
-
-        # Check that numeric x values are used
-        np.testing.assert_array_equal(x_data, np.array([1, 2, 3, 4, 5]))
-        # Check that y values match our test data
-        np.testing.assert_array_equal(y_data.values, np.array([10, 20, 30, 40, 50]))
-
-    @patch("solarwindpy.solar_activity.plots.mdates.date2num")
-    def test_make_plot_with_ax(self, mock_date2num):
-        """Test make_plot method with provided axes."""
-        mock_date2num.return_value = np.array([1, 2, 3])
-        mock_ax = Mock()
-
-        # Create test data
-        dates = pd.date_range("2020-01-01", periods=3, freq="D")
-        data = pd.DataFrame({"value": [100, 200, 300]}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        plot = ConcreteIndicatorPlot(indicator, "value")
-        plot.make_plot(ax=mock_ax)
-
-        # Verify plot was called on the provided axes
-        mock_ax.plot.assert_called_once()
-
-    def test_format_axis_abstract_method(self):
-        """Test that _format_axis is properly defined as abstract."""
-        indicator = MockActivityIndicator()
-
-        # IndicatorPlot has _format_axis as @abstractmethod
-        # but Python allows instantiation anyway in this implementation
-        # Test that the method exists but is abstract
-        plot = ConcreteIndicatorPlot(indicator, "test_value")
-
-        # The method exists but should be overridden in concrete classes
-        assert hasattr(plot, "_format_axis")
-        assert callable(plot._format_axis)
-
-        # Test concrete implementation works
-        mock_ax = Mock()
-
-        # This should work and apply basic formatting
-        result = plot._format_axis(mock_ax)
-
-        # Basic formatting should be applied
-        assert mock_ax.xaxis.set_major_formatter.called
-        assert mock_ax.xaxis.set_major_locator.called
-        assert mock_ax.set_xlabel.called
-        assert mock_ax.set_ylabel.called
-        assert result is mock_ax
-
-
-class TestSSNPlot:
-    """Test the SSNPlot specialized class."""
-
-    def test_ssn_ykey_property(self):
-        """Test that SSNPlot uses 'ssn' as ykey - focus on what's testable."""
-        # Rather than testing full initialization, test the key property
-        # This follows the acceptance criteria pattern
-        assert hasattr(SSNPlot, "__init__")
-
-        # Check that the class inherits from IndicatorPlot
-        assert issubclass(SSNPlot, IndicatorPlot)
-
-        # Test that ykey would be set to "ssn" by examining the source
-        import inspect
-
-        source = inspect.getsource(SSNPlot.__init__)
-        assert '"ssn"' in source
-
-    def test_format_axis_ylim_setting(self):
-        """Test that _format_axis sets y-axis limits for SSN data."""
-        # Create a mock plot that bypasses initialization issues
-        mock_plot = Mock(spec=SSNPlot)
-        mock_ax = Mock()
-
-        # Call the actual _format_axis method
-        SSNPlot._format_axis(mock_plot, mock_ax)
-
-        # Should call set_ylim with SSN-specific range
-        mock_ax.set_ylim.assert_called_with(0, 200)
-
-    @patch("solarwindpy.solar_activity.plots.mdates")
-    def test_ssn_plot_data_structure(self, mock_mdates):
-        """Test SSN plot data handling patterns."""
-        # Test the plot_data property behavior by examining parent class
-        # Create test data structure that SSNPlot would use
-        dates = pd.date_range("2020-01-01", periods=100, freq="D")
-        data = pd.DataFrame({"ssn": np.random.uniform(0, 200, 100)}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        # Test data slicing pattern used by IndicatorPlot.plot_data
-        ykey = "ssn"  # This is what SSNPlot sets
-        plasma_idx = pd.date_range("2020-01-20", periods=30, freq="D")
-
-        # Simulate plot_data logic from IndicatorPlot
-        pidx = plasma_idx.min() if plasma_idx is not None else None
-        expected = data.loc[pidx:, ykey]
-
-        # Verify the data slicing works as expected for SSN
-        assert len(expected) > 0
-        assert expected.name == "ssn"
-        assert expected.index.min() >= plasma_idx.min()
-
-
-class TestPlottingIntegration:
-    """Test integration scenarios for plotting classes."""
-
-    def test_empty_data_handling(self):
-        """Test plotting with empty or minimal data."""
-        # Create minimal data
-        dates = pd.date_range("2020-01-01", periods=1, freq="D")
-        data = pd.DataFrame({"value": [42]}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        plot = ConcreteIndicatorPlot(indicator, "value")
-
-        # Should not raise an error
-        plot_data = plot.plot_data
-        assert len(plot_data) == 1
-        assert plot_data.iloc[0] == 42
-
-    def test_missing_column_handling(self):
-        """Test behavior when requested column doesn't exist."""
-        indicator = MockActivityIndicator()
-        plot = ConcreteIndicatorPlot(indicator, "nonexistent_column")
-
-        # Should raise KeyError when accessing plot_data
-        with pytest.raises(KeyError):
-            _ = plot.plot_data
-
-    @patch("solarwindpy.solar_activity.plots.mdates.date2num")
-    def test_log_scale_formatting(self, mock_date2num):
-        """Test log scale setting in axis formatting."""
-        mock_date2num.return_value = np.array([1, 2, 3])
-        indicator = MockActivityIndicator()
-
-        plot = ConcreteIndicatorPlot(indicator, "test_value")
-
-        # Test with log scaling enabled
-        plot.set_log(x=True, y=True)
-
-        mock_ax = Mock()
-        plot._format_axis(mock_ax)
-
-        # Should set log scales
-        mock_ax.set_xscale.assert_called_with("log")
-        mock_ax.set_yscale.assert_called_with("log")
-
-    def test_data_type_consistency(self):
-        """Test that plot data maintains proper data types."""
-        # Create data with mixed types
-        dates = pd.date_range("2020-01-01", periods=10, freq="D")
-        data = pd.DataFrame(
-            {
-                "float_col": np.random.random(10),
-                "int_col": np.arange(10, dtype=int),
-                "ssn": np.random.uniform(0, 200, 10),
-            },
-            index=dates,
-        )
-        indicator = MockActivityIndicator(data)
-
-        # Test float column
-        plot_float = ConcreteIndicatorPlot(indicator, "float_col")
-        float_data = plot_float.plot_data
-        assert float_data.dtype == np.float64
-
-        # Test int column
-        plot_int = ConcreteIndicatorPlot(indicator, "int_col")
-        int_data = plot_int.plot_data
-        assert np.issubdtype(int_data.dtype, np.integer)
-
-        # Test SSN column - use simulated approach
-        # Rather than instantiate SSNPlot directly, test the data type consistency
-        # by examining the SSN data directly
-        ssn_data = indicator.data["ssn"]
-        assert np.issubdtype(ssn_data.dtype, np.floating)
-
-
-# Additional edge case tests
-class TestEdgeCases:
-    """Test edge cases and error conditions."""
-
-    def test_malformed_plasma_index(self):
-        """Test behavior with malformed plasma index."""
-        indicator = MockActivityIndicator()
-
-        # Non-datetime index should still work but may cause issues in plot_data
-        bad_index = pd.Index([1, 2, 3])
-        plot = ConcreteIndicatorPlot(indicator, "test_value", plasma_index=bad_index)
-
-        # The plot should initialize without error
-        assert plot.plasma_index is bad_index
-
-        # But accessing plot_data with incompatible index types may cause issues
-        # This depends on pandas behavior with mixed index types
-
-    def test_future_plasma_index(self):
-        """Test plasma index that extends beyond indicator data."""
-        # Indicator data ends in Jan 2020
-        dates = pd.date_range("2020-01-01", periods=10, freq="D")
-        data = pd.DataFrame({"value": np.arange(10)}, index=dates)
-        indicator = MockActivityIndicator(data)
-
-        # Plasma index starts in Feb 2020 (beyond data range)
-        plasma_idx = pd.date_range("2020-02-01", periods=5, freq="D")
-        plot = ConcreteIndicatorPlot(indicator, "value", plasma_index=plasma_idx)
-
-        # Should return empty Series since plasma_idx.min() is beyond data range
-        result = plot.plot_data
-        assert len(result) == 0
+        return super()._format_axis(ax)
+
+
+def days_since_1970(index):
+    """Matplotlib's default date number: days since 1970-01-01 (mpl >= 3.3)."""
+    return ((index - pd.Timestamp("1970-01-01")) / pd.Timedelta(days=1)).to_numpy()
+
+
+class IndicatorPlotUnconstructible(AssertionError):
+    """Raised only for the missing ``labels.special.DateTime`` below.
+
+    ``pytest.mark.xfail`` narrows by exception type alone; the library raises
+    a bare AttributeError, which would also absorb unrelated attribute bugs.
+    """
+
+
+def construct(cls, *args, **kwargs):
+    """Build a plotter, naming the known constructor defect if it is hit."""
+    try:
+        return cls(*args, **kwargs)
+    except AttributeError as err:
+        if "has no attribute 'DateTime'" in str(err):
+            raise IndicatorPlotUnconstructible(str(err)) from err
+        raise
+
+
+# Every plotter test builds a plotter, so every one is blocked by this defect.
+# Each still states the correct behaviour: with the fix applied they all pass.
+UNCONSTRUCTIBLE = pytest.mark.xfail(
+    strict=True,
+    raises=IndicatorPlotUnconstructible,
+    reason=(
+        "IndicatorPlot.__init__ in solar_activity/plots.py builds its x "
+        "label from labels.special.DateTime, but that class now lives in "
+        "labels.datetime.DateTime, so constructing any "
+        'IndicatorPlot or SSNPlot raises AttributeError "module '
+        "'solarwindpy.plotting.labels.special' has no attribute 'DateTime'\". "
+        "Remove this marker when plots.py uses labels.datetime.DateTime."
+    ),
+)
+
+
+# ---------------------------------------------------------------------------
+# What is plotted
+# ---------------------------------------------------------------------------
+
+
+def test_the_fixture_series_is_the_one_chosen(sidc):
+    """The SIDC built from the local file carries exactly the chosen SSN.
+
+    ON FAILURE: the fixture no longer separates one month's SSN from the
+    next; fix the fixture.
+    """
+    ssn = sidc.data["ssn"]
+    assert ssn.index.equals(MONTHS.as_unit(ssn.index.unit))
+    # rel=1e-12: values pass through a CSV round trip unchanged.
+    assert ssn.to_numpy() == pytest.approx(SSN, rel=1e-12, abs=0)
+
+
+@UNCONSTRUCTIBLE
+def test_ssn_plot_shows_the_whole_ssn_series(sidc):
+    """With no plasma index, an SSN plot shows every month of ``ssn``.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plot = construct(SSNPlot, sidc)
+    assert plot.ykey == "ssn"
+    assert plot.indicator is sidc
+    assert plot.plasma_index is None
+    # rel=1e-12: values pass through a CSV round trip unchanged.
+    assert plot.plot_data.to_numpy() == pytest.approx(SSN, rel=1e-12, abs=0)
+
+
+@UNCONSTRUCTIBLE
+def test_plasma_index_trims_to_data_from_its_earliest_time(sidc):
+    """A plasma index keeps the indicator from its earliest epoch onward.
+
+    Chosen input: an unsorted index whose earliest time, 2005-01-15, is not
+    its first element. The first month on or after it is 2005-02-01, month
+    61, so SSN 111, and 59 months remain.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plasma = pd.DatetimeIndex(["2007-03-01", "2005-01-15", "2008-06-01"])
+    data = construct(SSNPlot, sidc, plasma_index=plasma).plot_data
+
+    assert data.index[0] == pd.Timestamp("2005-02-01")
+    assert data.iloc[0] == 111.0
+    assert data.size == MONTHS.size - 61
+
+
+@UNCONSTRUCTIBLE
+def test_plasma_index_after_the_series_leaves_nothing_to_plot(sidc):
+    """A plasma index that starts after the last month selects no data.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plasma = pd.DatetimeIndex(["2015-01-01"])
+    assert construct(SSNPlot, sidc, plasma_index=plasma).plot_data.empty
+
+
+@UNCONSTRUCTIBLE
+def test_an_absent_column_is_reported_by_name(sidc):
+    """Plotting a column the indicator lacks raises a KeyError naming it.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    with pytest.raises(KeyError, match="no_such_column"):
+        construct(StdPlot, sidc, "no_such_column").plot_data
+
+
+@UNCONSTRUCTIBLE
+def test_make_plot_draws_the_series_against_date_numbers(sidc):
+    """``make_plot`` draws one line: x in days since 1970, y the column.
+
+    Independent route: the x vertices are recomputed from the month dates,
+    not from matplotlib's converter.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    fig, ax = plt.subplots()
+    construct(StdPlot, sidc, "ssn").make_plot(ax)
+
+    assert len(ax.lines) == 1
+    x, y = ax.lines[0].get_data()
+    # rel=1e-12: whole and half day numbers are exact in float64.
+    assert np.asarray(x) == pytest.approx(days_since_1970(MONTHS), rel=1e-12, abs=0)
+    assert np.asarray(y) == pytest.approx(SSN, rel=1e-12, abs=0)
+
+
+@UNCONSTRUCTIBLE
+def test_make_plot_without_axes_draws_on_a_new_figure(sidc):
+    """With no axes given, ``make_plot`` draws on a figure of its own.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plt.close("all")
+    construct(SSNPlot, sidc).make_plot()
+
+    assert len(plt.get_fignums()) == 1
+    (ax,) = plt.gcf().axes
+    assert len(ax.lines) == 1
+
+
+# ---------------------------------------------------------------------------
+# Axis formatting
+# ---------------------------------------------------------------------------
+
+
+@UNCONSTRUCTIBLE
+def test_axes_are_labelled_with_time_and_the_indicator(sidc):
+    """The x label is the year label and the y label is this series' SSN label.
+
+    The expected strings come from the label objects themselves, so this
+    checks which label is used, not its wording.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    fig, ax = plt.subplots()
+    construct(SSNPlot, sidc).make_plot(ax)
+
+    assert ax.get_xlabel() == str(labels.datetime.DateTime("Year"))
+    assert ax.get_ylabel() == str(labels.special.SSN("m13"))
+
+
+@UNCONSTRUCTIBLE
+def test_date_ticks_are_labelled_by_year(sidc):
+    """Major x ticks name the year of the date they mark.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    fig, ax = plt.subplots()
+    construct(SSNPlot, sidc).make_plot(ax)
+
+    formatter = ax.xaxis.get_major_formatter()
+    june_2005 = days_since_1970(pd.DatetimeIndex(["2005-06-01"]))[0]
+    assert formatter(june_2005) == "2005"
+
+
+@UNCONSTRUCTIBLE
+def test_ssn_axis_spans_zero_to_two_hundred(sidc):
+    """The SSN plot fixes its y range to 0-200 whatever the data span.
+
+    Chosen input: the series peaks at SSN 169, below the upper limit.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong, unless the author changed the SSN range.
+    """
+    fig, ax = plt.subplots()
+    construct(SSNPlot, sidc).make_plot(ax)
+    assert ax.get_ylim() == (0.0, 200.0)
+
+
+@UNCONSTRUCTIBLE
+@pytest.mark.parametrize("logx, logy", [(True, False), (False, True)])
+def test_log_flags_set_the_matching_axis_scale(sidc, logx, logy):
+    """``set_log`` puts exactly the flagged axes on a log scale.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plot = construct(StdPlot, sidc, "std")
+    plot.set_log(x=logx, y=logy)
+    fig, ax = plt.subplots()
+    plot.make_plot(ax)
+
+    assert ax.get_xscale() == ("log" if logx else "linear")
+    assert ax.get_yscale() == ("log" if logy else "linear")
+
+
+# ---------------------------------------------------------------------------
+# Save path
+# ---------------------------------------------------------------------------
+
+
+@UNCONSTRUCTIBLE
+def test_auto_path_is_built_from_class_labels_and_scales(sidc):
+    """The automatic path is class / x label / y label / axis scales.
+
+    The label components come from the label objects' own ``path``.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plot = construct(SSNPlot, sidc)
+    expected = Path("SSNPlot", plot.labels.x.path, plot.labels.y.path, "linX-linY")
+    assert plot.path == expected
+
+    plot.set_log(y=True)
+    plot.set_path("auto")
+    assert plot.path == expected.with_name("linX-logY")
+
+
+@UNCONSTRUCTIBLE
+def test_explicit_path_is_used_with_or_without_scales(sidc):
+    """An explicit path is kept, with the scale suffix only when asked.
+
+    ON FAILURE: (unexpected pass) plots.py now builds its x label from
+    labels.datetime.DateTime; drop the xfail marker. Once it is gone: the
+    code is wrong.
+    """
+    plot = construct(SSNPlot, sidc)
+    plot.set_path("figures/ssn")
+    assert plot.path == Path("figures", "ssn", "linX-linY")
+
+    plot.set_path("figures/ssn", add_scale=False)
+    assert plot.path == Path("figures", "ssn")
