@@ -573,7 +573,11 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
         return self._mesh
 
     def agg(self, fcn=None):
-        r"""Aggregate the z-values into their bins."""
+        r"""Aggregate the z-values into their cells.
+
+        ``clim``, the mesh's ``cell_filter`` and ``alim`` are applied in that
+        order; a cell removed by any of them is NaN.
+        """
         self.logger.debug("aggregating z-data")
 
         if fcn is None:
@@ -608,7 +612,7 @@ agg    : {agg.shape}
 filter : {cell_filter.shape}""")
         agg = agg.where(cell_filter, axis=0)
 
-        return agg
+        return self._apply_alim(agg)
 
     def build_grouped(self):
         r"""Group the z-values by mesh cell and store the result in ``grouped``.
@@ -734,7 +738,6 @@ data : {z.size}
         self,
         ax=None,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
         alpha_fcn=None,
@@ -748,10 +751,6 @@ data : {z.size}
             If None, create one.
         cbar : bool
             If True, draw a colorbar.
-        limit_color_norm : bool
-            If True, unset limits of ``norm`` default to the 1st and 99th
-            percentiles of the plotted cell values. With no ``norm``, a linear
-            one is built and limited.
         cbar_kwargs : dict, optional
             Passed to the colorbar.
         fcn : str, optional
@@ -824,9 +823,6 @@ data : {z.size}
         norm = kwargs.pop("norm", None)
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
-
-        if limit_color_norm:
-            norm = self._limit_color_norm(norm, C)
 
         collection.set_alpha(None)
         collection.set_cmap(cmap)

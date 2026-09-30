@@ -25,7 +25,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PatchCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
-from matplotlib.colors import Normalize  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
@@ -651,6 +650,45 @@ class TestAggregation:
         expected = np.where(keep, means, np.nan)
         np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
 
+    def test_alim_masks_cells_whose_value_is_outside_the_range(self):
+        """After ``set_alim(3, 4)`` a cell keeps its mean iff 3 <= mean <= 4.
+
+        At min_per_bin=2 the occupied cells hold means 1, 4, 3, 3.5 and 9
+        (p0; p5; p1; p2 and p3; p4), so 3, 3.5 and 4 survive: both bounds are
+        inclusive and both sides mask something.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        splot.set_alim(3.0, 4.0)
+        means = _expected_agg(splot, np.mean)
+        expected = np.where((means >= 3.0) & (means <= 4.0), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert sorted(splot.agg().dropna().tolist()) == [3.0, 3.5, 4.0]
+        assert splot.alim == (3.0, 4.0)
+
+    def test_quantile_alim_masks_cells_outside_the_quantiles_of_the_means(self):
+        """``set_alim(0.25, 0.75, kind="quantile")`` keeps means from 3 to 4.
+
+        The occupied cells' means sorted are 1, 3, 3.5, 4, 9 (worked in
+        ``test_alim_masks_cells_whose_value_is_outside_the_range``); empty
+        cells are NaN and excluded. The 25% and 75% quantiles fall at
+        positions 1 and 3: 3 and 4.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        means = _expected_agg(splot, np.mean)
+        lo, hi = np.nanquantile(means, [0.25, 0.75])
+        assert (lo, hi) == pytest.approx((3.0, 4.0), rel=REL, abs=0)  # hand-computed
+
+        splot.set_alim(0.25, 0.75, kind="quantile")
+        expected = np.where((means >= lo) & (means <= hi), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert splot.alim_kind == "quantile"
+
 
 class TestMakePlot:
     """``make_plot`` draws one rectangle per mesh cell coloured by ``agg``."""
@@ -707,48 +745,29 @@ class TestMakePlot:
         with pytest.raises(ValueError, match="Unexpected kwargs"):
             splot.make_plot(cbar=False, linewidth=2)
 
-    def test_limit_color_norm_clips_to_the_1st_and_99th_percentiles(self):
-        """``limit_color_norm`` limits unset norm limits to the plotted cell values.
+    def test_quantile_alim_limits_the_drawn_cells_to_the_bulk(self):
+        """With 1%/99% quantile ``alim``, the extreme cells are not coloured.
 
-        With min_per_bin=2 the occupied cells of MESH_MIN2 hold p0 (1), p5 (4),
-        p1 (3), p2 and p3 (mean 3.5), and p4 (9); empty cells are NaN and not
-        drawn. Sorted: 1, 3, 3.5, 4, 9. Linear interpolation puts the 1%
-        quantile at position 0.04, 1 + 0.04 * (3 - 1) = 1.08, and the 99%
-        quantile at 3.96, 4 + 0.96 * (9 - 4) = 8.8. A limit already set is kept.
+        With min_per_bin=2 the occupied cells hold p0 (1), p5 (4), p1 (3), p2
+        and p3 (mean 3.5), and p4 (9); empty cells are NaN. Sorted: 1, 3,
+        3.5, 4, 9. Linear interpolation puts the 1% quantile at position 0.04,
+        1 + 0.04 * (3 - 1) = 1.08, and the 99% quantile at 3.96,
+        4 + 0.96 * (9 - 4) = 8.8, so the cells holding 1 and 9 are masked.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        drawn = [1.0, 4.0, 3.0, np.mean([2.0, 5.0]), 9.0]  # the chosen input's cells
-        expected = np.quantile(drawn, [0.01, 0.99])
-        norm = Normalize()
-        splot.make_plot(cbar=False, norm=norm, limit_color_norm=True)
-        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=REL)
-        assert norm.clip
-        fixed = Normalize(vmin=0.0)
-        splot.make_plot(cbar=False, norm=fixed, limit_color_norm=True)
-        assert fixed.vmin == 0.0
-        assert fixed.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        plt.close("all")
+        means = _expected_agg(splot, np.mean)
+        lo, hi = np.nanquantile(means, [0.01, 0.99])
+        assert (lo, hi) == pytest.approx((1.08, 8.8), rel=REL, abs=0)  # hand-computed
 
-    def test_limit_color_norm_without_a_norm_limits_colours(self):
-        """``limit_color_norm=True`` with no ``norm`` builds and limits a linear one.
-
-        The limits are the 1% and 99% quantiles of the plotted cell values,
-        1.08 and 8.8, worked in
-        ``test_limit_color_norm_clips_to_the_1st_and_99th_percentiles``.
-
-        ON FAILURE: the code is wrong; the flag is silently ignored.
-        """
-        splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, limit_color_norm=True)
-        norm = coll.norm
-        assert type(norm) is Normalize
-        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        assert norm.clip
+        splot.set_alim(0.01, 0.99, kind="quantile")
+        _, coll = splot.make_plot(cbar=False)
+        values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
+        expected = np.where((means >= lo) & (means <= hi), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(values, expected, rtol=REL, atol=0)
+        assert sorted(values[np.isfinite(values)]) == [3.0, 3.5, 4.0]
         plt.close("all")
 
     def test_alpha_fcn_makes_small_values_opaque(self):

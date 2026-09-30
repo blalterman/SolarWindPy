@@ -12,6 +12,8 @@ values in the ``QuadMesh``, the coordinates of its cells, the vertices of the
 edge lines. Those are the numbers the science depends on; the rendering is not.
 """
 
+import inspect
+
 import pytest
 import numpy as np
 import pandas as pd
@@ -765,93 +767,151 @@ class TestMakePlot:
         plt.close("all")
 
 
-class TestLimitColorNorm:
-    """`limit_color_norm` clips the colour range to the bulk of the plotted values."""
+class TestQuantileAlimInPlots:
+    """Quantile ``alim`` limits a plot to the bulk of its values."""
 
-    def test_clips_to_quantiles_of_the_z_data(self):
-        """The limits are quantiles of the binned z: inside the data range and ordered.
+    # Of the 14 occupied bins of KNOWN_COUNTS, sorted 1,1,1,2,2,2,2,3,3,4,4,5,5,6,
+    # the 1% quantile sits at position 0.13 (value 1) and the 99% quantile at
+    # 12.87, 5 + 0.87 * (6 - 5) = 5.87: only the single 6 lies outside.
 
-        The exact quantiles are asserted by
-        `test_count_colour_limits_are_quantiles_of_the_plotted_counts` below,
-        so only the bounding property is asserted here.
+    @staticmethod
+    def _expected_grid():
+        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's bins
+        lo, hi = np.quantile(occupied, [0.01, 0.99])
+        assert (lo, hi) == pytest.approx((1.0, 5.87), rel=1e-12, abs=0)  # by hand
+        kept = (KNOWN_COUNTS >= lo) & (KNOWN_COUNTS <= hi)
+        return np.where(kept, KNOWN_COUNTS, np.nan)
 
-        ON FAILURE: the code is wrong; a colour limit outside the data range is
-        meaningless.
-        """
-        rng = np.random.default_rng(18)
-        x, y = _points_from_counts(np.full_like(KNOWN_COUNTS, 4), XEDGES, YEDGES)
-        z = pd.Series(rng.uniform(0.0, 10.0, x.size), name="z")
-        h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES])
-
-        norm = matplotlib.colors.Normalize()
-        h._limit_color_norm(norm, h.agg())
-
-        assert z.min() <= norm.vmin < norm.vmax <= z.max()
-        assert norm.clip is True
-
-    def test_is_a_no_op_for_bounded_normalisations(self):
-        """Column/row normalised data already spans [0, 1] and is left alone.
-
-        The code says so in as many words: "Don't limit us to (1%, 99%)
-        interval."
-
-        ON FAILURE: the code is wrong -- clipping an already-bounded scale
-        would hide the column maxima that define it.
-        """
-        rng = np.random.default_rng(19)
-        x, y = _points_from_counts(np.full_like(KNOWN_COUNTS, 4), XEDGES, YEDGES)
-        z = pd.Series(rng.uniform(0.0, 10.0, x.size), name="z")
-
-        for axnorm in ("c", "r"):
-            h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES], axnorm=axnorm)
-            norm = matplotlib.colors.Normalize()
-            h._limit_color_norm(norm, h.agg())
-            assert norm.vmin is None
-            assert norm.vmax is None
-            assert norm.clip is False
-
-    def test_count_colour_limits_are_quantiles_of_the_plotted_counts(self, known_hist):
-        """A count histogram's colour limits are the 1%/99% quantiles of its counts.
-
-        The plotted values are the 14 occupied bins of ``KNOWN_COUNTS``; empty
-        bins are not drawn. Sorted: 1,1,1,2,2,2,2,3,3,4,4,5,5,6. Linear
-        interpolation puts the 1% quantile at position 0.13 (value 1) and the
-        99% quantile at 12.87, 5 + 0.87 * (6 - 5) = 5.87.
+    def test_make_plot_meshes_only_counts_inside_the_quantiles(self, known_hist):
+        """With 1%/99% quantile ``alim``, the mesh holds every count but the 6.
 
         ON FAILURE: the code is wrong.
         """
-        ax, _ = known_hist.make_plot(limit_color_norm=True, cbar=False)
-        norm = _quadmesh(ax).norm
-        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's drawn bins
-        expected = np.quantile(occupied, [0.01, 0.99])
-        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
-        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=1e-12)
-        plt.close("all")
-
-    def test_limit_color_norm_works_without_a_normalisation(self, known_hist):
-        """`limit_color_norm=True` is documented for any Hist2D, axnorm or not.
-
-        ON FAILURE: the code is wrong.
-        """
-        known_hist.make_plot(limit_color_norm=True, cbar=False)
-        plt.close("all")
-
-    def test_contour_overlay_limits_colours_without_a_normalisation(self, known_hist):
-        """`plot_hist_with_contours(limit_color_norm=True)` works with no axnorm.
-
-        It draws, and the colour limits are the 1%/99% quantiles of the 14
-        occupied counts of ``KNOWN_COUNTS``: 1 and 5 + 0.87 * (6 - 5) = 5.87,
-        worked in `test_count_colour_limits_are_quantiles_of_the_plotted_counts`.
-
-        ON FAILURE: the code is wrong.
-        """
-        ax, _, _, _ = known_hist.plot_hist_with_contours(
-            limit_color_norm=True, cbar=False
+        known_hist.set_alim(0.01, 0.99, kind="quantile")
+        ax, _ = known_hist.make_plot(cbar=False)
+        values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
+        np.testing.assert_array_equal(
+            values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
         )
-        norm = _quadmesh(ax).norm
-        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
+        plt.close("all")
+
+    def test_contour_overlay_meshes_only_counts_inside_the_quantiles(self, known_hist):
+        """`plot_hist_with_contours` draws the same quantile-limited mesh.
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_alim(0.01, 0.99, kind="quantile")
+        ax, _, _, _ = known_hist.plot_hist_with_contours(cbar=False)
+        values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
+        np.testing.assert_array_equal(
+            values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
+        )
+        plt.close("all")
+
+
+def _norm_of(method, axnorm):
+    """The colour norm ``method`` hands matplotlib for ``axnorm``, no ``norm`` given."""
+    x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
+    h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm=axnorm)
+    if method == "make_plot":
+        ax, _ = h.make_plot(cbar=False)
+        return _quadmesh(ax).norm
+    if method == "plot_hist_with_contours":
+        ax, _, qset, _ = h.plot_hist_with_contours(cbar=False)
+        assert qset.norm is _quadmesh(ax).norm
+        return qset.norm
+    _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+    return qset.norm
+
+
+class TestDefaultNorm:
+    """Without ``norm``, the three 2D plots colour each ``axnorm`` the same way."""
+
+    METHODS = ["make_plot", "plot_hist_with_contours", "plot_contours"]
+
+    @pytest.mark.parametrize("method", METHODS)
+    @pytest.mark.parametrize("axnorm", ["c", "r"])
+    def test_row_and_column_norms_get_ten_bands_on_the_unit_interval(
+        self, method, axnorm
+    ):
+        """Row/column-normalised values lie in [0, 1]: ten equal bands.
+
+        ON FAILURE: the code is wrong.
+        """
+        norm = _norm_of(method, axnorm)
+        assert isinstance(norm, matplotlib.colors.BoundaryNorm)
+        np.testing.assert_array_equal(norm.boundaries, np.linspace(0, 1, 11))
+        plt.close("all")
+
+    @pytest.mark.parametrize("method", METHODS)
+    @pytest.mark.parametrize("axnorm", ["d", "cd", "rd"])
+    def test_densities_get_a_log_norm(self, method, axnorm):
+        """Densities span decades, so every plot colours them on a log scale.
+
+        ON FAILURE: the code is wrong, unless the author has chosen a linear
+        default for densities again.
+        """
+        assert isinstance(_norm_of(method, axnorm), matplotlib.colors.LogNorm)
+        plt.close("all")
+
+    def test_default_density_contour_levels_suit_a_log_norm(self):
+        """Density contours keep their default levels, all positive, under LogNorm.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
+        h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm="d")
+        _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+        # The defaults written in `_get_contour_levels` for axnorm "d".
+        expected = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+        np.testing.assert_array_equal(qset.levels, expected)
+        assert np.all(np.asarray(qset.levels) > 0)
+        plt.close("all")
+
+
+class TestPlotSignatures:
+    """The 2D plots keep their positional order; ``levels`` is a named parameter."""
+
+    @pytest.mark.parametrize(
+        "method, leading",
+        [
+            ("make_plot", ["ax", "cbar", "cbar_kwargs", "fcn", "alpha_fcn"]),
+            (
+                "plot_hist_with_contours",
+                ["ax", "cbar", "cbar_kwargs", "fcn", "levels", "label_levels"],
+            ),
+            (
+                "plot_contours",
+                ["ax", "label_levels", "cbar", "cbar_kwargs", "fcn", "plot_edges"],
+            ),
+        ],
+    )
+    def test_positional_parameters_are_in_the_documented_order(self, method, leading):
+        """The leading parameters are the order given in CHANGELOG.md.
+
+        ON FAILURE: the code is wrong, unless the author has reordered the
+        signature; then update CHANGELOG.md and this list together.
+        """
+        params = list(inspect.signature(getattr(Hist2D, method)).parameters)
+        stop = 1 + len(leading)
+        assert params[1:stop] == leading
+
+    def test_plot_contours_levels_is_a_named_parameter_that_sets_the_levels(
+        self, known_hist
+    ):
+        """``levels`` is the last named parameter of plot_contours and sets the levels.
+
+        ON FAILURE: the code is wrong.
+        """
+        params = inspect.signature(Hist2D.plot_contours).parameters
+        names = [n for n, p in params.items() if p.kind is p.POSITIONAL_OR_KEYWORD]
+        assert names[-1] == "levels"
+        assert params["levels"].default is None
+        levels = [1.5, 2.5, 4.5]  # chosen inside the 1..6 counts of KNOWN_COUNTS
+        _, _, _, qset = known_hist.plot_contours(
+            levels=levels, cbar=False, label_levels=False
+        )
+        np.testing.assert_array_equal(qset.levels, levels)
         plt.close("all")
 
 
@@ -936,6 +996,84 @@ class TestAggregationLimits:
             by_value.unstack("x").fillna(False).values.astype(bool),
             np.nan_to_num(z_means, nan=0.0) >= 3.0,
         )
+
+    def test_quantile_alim_keeps_bins_between_the_quantiles_of_the_counts(
+        self, known_hist
+    ):
+        """`set_alim(0.25, 0.75, kind="quantile")` keeps counts between 2 and 4.
+
+        The quantiles are of the 14 occupied bins of ``KNOWN_COUNTS``; empty
+        bins are NaN and excluded. Sorted: 1,1,1,2,2,2,2,3,3,4,4,5,5,6. The
+        25% quantile sits at position 3.25, between two 2s, and the 75%
+        quantile at 9.75, between two 4s, so both bounds land on data values
+        and the inclusive comparison is exercised.
+
+        ON FAILURE: the code is wrong.
+        """
+        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's bins
+        lo, hi = np.quantile(occupied, [0.25, 0.75])
+        assert (lo, hi) == (2.0, 4.0)  # hand-computed, see docstring
+
+        known_hist.set_alim(0.25, 0.75, kind="quantile")
+        grid = known_hist.agg().unstack("x").values
+
+        kept = (KNOWN_COUNTS >= lo) & (KNOWN_COUNTS <= hi)
+        np.testing.assert_array_equal(~np.isnan(grid), kept)
+        np.testing.assert_array_equal(grid[kept], KNOWN_COUNTS[kept])
+
+    def test_quantile_alim_ignores_infinite_values(self):
+        """Quantiles are of the finite values; an infinite bin is outside them.
+
+        One point per bin of the 4 x 5 grid, z = 1..19 and one inf. With the
+        upper quantile 1.0 the threshold is 19, the largest finite value, so
+        every finite bin survives and the inf bin is masked. Were inf pooled,
+        the threshold would be inf or NaN.
+
+        ON FAILURE: the code is wrong.
+        """
+        ones = np.ones_like(KNOWN_COUNTS)
+        x, y = _points_from_counts(ones, XEDGES, YEDGES)
+        z = np.arange(1.0, ones.size + 1.0)
+        z[-1] = np.inf
+        h = Hist2D(x, y, pd.Series(z, name="z"), nbins=[XEDGES, YEDGES])
+
+        h.set_alim(None, 1.0, kind="quantile")
+        agg = h.agg()
+
+        assert agg.max() == 19.0  # the largest finite z, by construction
+        assert agg.notna().sum() == ones.size - 1
+
+    @pytest.mark.parametrize(
+        "limits, kind, match",
+        [
+            ((0.1, 0.9), "percentile", "must be 'value' or 'quantile'"),
+            ((-0.1, None), "quantile", "lower=-0.1 must be between 0 and 1"),
+            ((None, 1.5), "quantile", "upper=1.5 must be between 0 and 1"),
+            ((0.8, 0.2), "quantile", "must be less than upper"),
+            ((0.5, 0.5), "quantile", "must be less than upper"),
+        ],
+        ids=["kind", "below-0", "above-1", "reversed", "equal"],
+    )
+    def test_invalid_alim_is_rejected(self, known_hist, limits, kind, match):
+        """An unknown kind, a quantile outside [0, 1], or lower >= upper is refused.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=match):
+            known_hist.set_alim(*limits, kind=kind)
+
+    def test_alim_is_the_limit_pair_and_alim_kind_how_to_read_it(self, known_hist):
+        """`alim` is the `(lower, upper)` pair and `alim_kind` defaults to "value".
+
+        ON FAILURE: the code is wrong.
+        """
+        assert known_hist.alim == (None, None)
+        assert known_hist.alim_kind == "value"
+        known_hist.set_alim(0.1, 0.9, kind="quantile")
+        assert known_hist.alim == (0.1, 0.9)
+        assert known_hist.alim_kind == "quantile"
+        known_hist.set_alim(2.0, None)
+        assert (known_hist.alim, known_hist.alim_kind) == ((2.0, None), "value")
 
 
 class TestGetBorder:

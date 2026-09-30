@@ -9,8 +9,8 @@ implement specific visualizations.
 import logging
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
 
+from numbers import Number
 from pathlib import Path
 from collections import namedtuple
 from collections.abc import Mapping
@@ -333,6 +333,101 @@ class CbarMaker(ABC):
 class PlotWithZdata(Base):
     r"""Base for plots of x, y data with an optional z value per point."""
 
+    _alim = (None, None)
+    _alim_kind = "value"
+
+    @property
+    def alim(self):
+        r"""``(lower, upper)`` limits on the aggregated value; see ``set_alim``."""
+        return self._alim
+
+    @property
+    def alim_kind(self):
+        r"""``"value"`` or ``"quantile"``: how ``alim`` is read; see ``set_alim``."""
+        return self._alim_kind
+
+    def set_alim(self, lower=None, upper=None, kind="value"):
+        r"""Set the minimum (lower) and maximum (upper) allowed aggregated value.
+
+        Unlike ``clim``, which limits the number of points in a bin, ``alim``
+        limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
+        any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
+        inclusive and None leaves that side open.
+
+        Parameters
+        ----------
+        lower, upper : float or None
+            The limits.
+        kind : {"value", "quantile"}
+            ``"value"``: the limits are aggregated values. ``"quantile"``: the
+            limits are quantiles in [0, 1] of the final aggregated values,
+            computed with :func:`numpy.nanquantile` over the finite values
+            (NaN and inf excluded) each time the plot aggregates. The
+            quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
+            or ``"r"`` they are taken over the whole grid, not per column or
+            row, and an orbit plot pools all of its legs.
+
+        Raises
+        ------
+        ValueError
+            If ``kind`` is not ``"value"`` or ``"quantile"``, or, for
+            ``"quantile"``, if a limit is outside [0, 1] or ``lower`` is not
+            less than ``upper``.
+        """
+        if kind not in ("value", "quantile"):
+            raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        if kind == "quantile":
+            for name, q in (("lower", lower), ("upper", upper)):
+                if q is not None and not 0 <= q <= 1:
+                    raise ValueError(
+                        f"quantile alim {name}={q} must be between 0 and 1"
+                    )
+            if lower is not None and upper is not None and not lower < upper:
+                raise ValueError(
+                    f"quantile alim lower={lower} must be less than upper={upper}"
+                )
+        self._alim = (lower, upper)
+        self._alim_kind = kind
+
+    def _apply_alim(self, agg):
+        r"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            The final aggregated values, one per bin or cell. With
+            ``alim_kind == "quantile"`` the thresholds are quantiles of all
+            of its finite entries.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` with every entry outside ``alim`` replaced by NaN.
+        """
+        lower, upper = self.alim
+        if lower is None and upper is None:
+            return agg
+
+        if self.alim_kind == "quantile":
+            values = agg.to_numpy(dtype=float)
+            values = values[np.isfinite(values)]
+            if values.size == 0:
+                return agg
+            if lower is not None:
+                lower = np.nanquantile(values, lower)
+            if upper is not None:
+                upper = np.nanquantile(values, upper)
+
+        keep = pd.Series(True, index=agg.index)
+        if lower is not None:
+            keep = keep & (agg >= lower)
+        if upper is not None:
+            keep = keep & (agg <= upper)
+
+        return agg.where(keep)
+
     def set_data(self, x, y, z=None, clip_data=False):
         r"""Store x, y and z as columns of one DataFrame, dropping rows with NaN.
 
@@ -364,45 +459,6 @@ class PlotWithZdata(Base):
             )
         self._data = data
         self._clip = bool(clip_data)
-
-    def _limit_color_norm(self, norm, values):
-        r"""Limit ``norm`` to the 1st and 99th percentiles of the plotted values.
-
-        Parameters
-        ----------
-        norm : matplotlib.colors.Normalize or None
-            The colour normalisation to limit. Limits already set are kept.
-            If None, a linear :class:`matplotlib.colors.Normalize` is built,
-            the norm matplotlib would otherwise use.
-        values : array-like
-            The values handed to matplotlib to colour. NaN, infinite and
-            masked entries are ignored.
-
-        Returns
-        -------
-        matplotlib.colors.Normalize or None
-            The limited norm, with ``clip`` set. Column- and row-normalised
-            plots (``axnorm`` of ``"c"`` or ``"r"``) are already bounded, so
-            for them ``norm`` is returned unchanged.
-        """
-        if getattr(self, "axnorm", None) in ("c", "r"):
-            # Don't limit us to (1%, 99%) interval.
-            return norm
-
-        if norm is None:
-            norm = mpl.colors.Normalize()
-
-        values = np.ma.masked_invalid(values).compressed()
-        if values.size == 0:
-            return norm
-
-        v0, v1 = np.quantile(values, [0.01, 0.99])
-        if norm.vmin is None:
-            norm.vmin = v0
-        if norm.vmax is None:
-            norm.vmax = v1
-        norm.clip = True
-        return norm
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.
