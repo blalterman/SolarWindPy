@@ -5,7 +5,7 @@ The submodule provides classes for downloading and working with data hosted at
 `LASP <http://lasp.colorado.edu/lisird/>`_.
 """
 
-import urllib
+import urllib.request
 import json
 import numpy as np
 import pandas as pd

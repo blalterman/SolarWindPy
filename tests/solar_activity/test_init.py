@@ -9,14 +9,12 @@ CSV), and the home directory that holds the cache is moved under
 every expected value is read off the payloads below.
 """
 
-import importlib
 import json
 import os
 import re
 import subprocess
 import sys
 import textwrap
-import urllib
 from pathlib import Path
 
 import matplotlib
@@ -84,25 +82,7 @@ def write_remote(remote):
 
 
 @pytest.fixture
-def urllib_request_loaded():
-    """Load ``urllib.request`` for one test, then restore ``sys.modules``.
-
-    LISIRD downloads need ``urllib.request`` but ``lisird.py`` never imports
-    it (recorded by ``test_lisird_download_works_in_a_fresh_interpreter``).
-    Loading it here, and unloading it afterwards if it was not loaded
-    before, confines that workaround to the tests that request it.
-    """
-    was_loaded = "urllib.request" in sys.modules
-    importlib.import_module("urllib.request")
-    yield
-    if not was_loaded:
-        sys.modules.pop("urllib.request", None)
-        if hasattr(urllib, "request"):
-            delattr(urllib, "request")
-
-
-@pytest.fixture
-def local_upstream(tmp_path, monkeypatch, urllib_request_loaded):
+def local_upstream(tmp_path, monkeypatch):
     """Move the cache home under ``tmp_path`` and serve the payloads locally.
 
     ``DataLoader`` reads the cache date from an 8-digit run anywhere in the
@@ -228,17 +208,9 @@ def test_ssn_is_the_sunspot_number_module():
     assert sa.ssn is sa.sunspot_number
 
 
-class UrllibRequestNotImported(AssertionError):
-    """Raised only for the missing ``urllib.request`` import below.
-
-    ``pytest.mark.xfail`` narrows by exception type alone, so a dedicated
-    subclass keeps the marker from absorbing any other failure.
-    """
-
-
-# Runs in a fresh interpreter: in-process, whether ``urllib.request`` is
-# already imported depends on which tests ran first (this module imports it
-# at the top so the other tests exercise the download path at all).
+# Runs in a fresh interpreter: in-process, ``urllib.request`` is already
+# imported by whatever ran first, which would hide a missing import in
+# lisird.py.
 FRESH_DOWNLOAD = textwrap.dedent("""
     import sys
     from solarwindpy.solar_activity.lisird.lisird import LISIRD, LISIRD_ID
@@ -247,25 +219,12 @@ FRESH_DOWNLOAD = textwrap.dedent("""
     """)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=UrllibRequestNotImported,
-    reason=(
-        "solar_activity/lisird/lisird.py does `import urllib` and then calls "
-        "urllib.request.urlopen in LISIRDLoader.download_data; `import "
-        "urllib` does not import the `request` submodule, so in a fresh "
-        "interpreter every LISIRD download (and so get_all_indices) raises "
-        "AttributeError \"module 'urllib' has no attribute 'request'\". "
-        "Remove this marker when lisird.py imports urllib.request."
-    ),
-)
 def test_lisird_download_works_in_a_fresh_interpreter(local_upstream):
     """A LISIRD download succeeds in a new Python process.
 
     Read off the CaK payload: emdx is 0.08, 0.09, 0.10.
 
-    ON FAILURE: (unexpected pass) lisird.py now imports urllib.request; drop
-    the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     # Import the same solarwindpy this suite is testing, not whichever copy
     # the environment has installed.
@@ -286,7 +245,5 @@ def test_lisird_download_works_in_a_fresh_interpreter(local_upstream):
         text=True,
         timeout=120,
     )
-    if "module 'urllib' has no attribute 'request'" in result.stderr:
-        raise UrllibRequestNotImported(result.stderr.strip().splitlines()[-1])
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == "[0.08, 0.09, 0.1]"
