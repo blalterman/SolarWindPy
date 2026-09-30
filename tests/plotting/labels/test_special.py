@@ -548,3 +548,31 @@ class TestLabelIntegration:
         vsw = labels_special.Vsw()
         math_fcn = labels_special.MathFcn("log", vsw)
         assert "V_\\mathrm{SW}" in math_fcn.tex
+
+
+# Each class that wraps another label, built with the given ``other_label``.
+_WRAPS_OTHER_LABEL = {
+    "Probability": lambda other: labels_special.Probability(other, "> 5"),
+    "CountOther": lambda other: labels_special.CountOther(other, "> 5"),
+    "MathFcn": lambda other: labels_special.MathFcn("log", other),
+    "AbsoluteValue": lambda other: labels_special.AbsoluteValue(other),
+}
+
+
+@pytest.mark.parametrize("name", sorted(_WRAPS_OTHER_LABEL))
+def test_plain_string_other_label_raises_type_error_naming_accepted_type(name):
+    """A ``str`` other_label is rejected at construction, not later on ``.tex``.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match=r"other_label must be a .*Base.*got str"):
+        _WRAPS_OTHER_LABEL[name]("n_p")
+
+
+@pytest.mark.parametrize("name", sorted(_WRAPS_OTHER_LABEL))
+def test_label_object_other_label_is_stored(name, basic_texlabel):
+    """A label object is accepted and stored unchanged.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert _WRAPS_OTHER_LABEL[name](basic_texlabel).other_label is basic_texlabel

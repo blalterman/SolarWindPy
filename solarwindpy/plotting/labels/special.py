@@ -8,6 +8,39 @@ from abc import abstractmethod
 from . import base
 
 
+def _check_other_label(other):
+    r"""Return ``other`` if it is a label object, else raise.
+
+    Shared by every label that wraps another label (``Probability``,
+    ``CountOther``, ``MathFcn``, ``AbsoluteValue``). They read ``tex``,
+    ``units`` and ``path`` from ``other``, so a plain string would only fail
+    later with an ``AttributeError``.
+
+    Parameters
+    ----------
+    other : solarwindpy.plotting.labels.base.Base
+        The wrapped label.
+
+    Returns
+    -------
+    solarwindpy.plotting.labels.base.Base
+        ``other``, unchanged.
+
+    Raises
+    ------
+    TypeError
+        If ``other`` is not a :class:`~solarwindpy.plotting.labels.base.Base`.
+        Wrap a raw TeX string in ``ManualLabel`` first.
+    """
+    if not isinstance(other, base.Base):
+        raise TypeError(
+            "other_label must be a solarwindpy.plotting.labels.base.Base "
+            "(e.g. TeXlabel or ManualLabel), "
+            f"got {type(other).__name__}: {other!r}"
+        )
+    return other
+
+
 class ArbitraryLabel(base.Base):
     """Abstract base class for custom labels."""
 
@@ -298,8 +331,7 @@ class Probability(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label of the quantity being compared."""
-        assert isinstance(other, (str, base.Base))
-        self._other_label = other
+        self._other_label = _check_other_label(other)
 
     def set_comparison(self, new):
         r"""Store the comparison as a string; None becomes ``""``."""
@@ -402,8 +434,7 @@ class CountOther(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label of the quantity being compared."""
-        assert isinstance(other, (str, base.Base))
-        self._other_label = other
+        self._other_label = _check_other_label(other)
 
     def set_comparison(self, new):
         r"""Store the comparison as a string; None becomes ``""``."""
@@ -515,8 +546,7 @@ class MathFcn(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label the function is applied to."""
-        assert isinstance(other, (str, base.Base))
-        self._other_label = other
+        self._other_label = _check_other_label(other)
 
     def set_function(self, new):
         r"""Store the function name as a string; None becomes ``""``."""
@@ -567,7 +597,7 @@ class AbsoluteValue(ArbitraryLabel):
 
         Parameters
         ----------
-        other_label : solarwindpy.plotting.labels.base.Base or str
+        other_label : solarwindpy.plotting.labels.base.Base
             The label to wrap with absolute value bars.
         new_line_for_units : bool, default False
             If True, place units on a new line.
@@ -623,8 +653,7 @@ class AbsoluteValue(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label the function is applied to."""
-        assert isinstance(other, (str, base.Base))
-        self._other_label = other
+        self._other_label = _check_other_label(other)
 
     def _build_tex(self):
         return rf"\left|{self.other_label.tex}\right|"
