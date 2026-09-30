@@ -10,8 +10,7 @@ Proactive test quality audit using patterns validated during the spiral plot con
 Detects anti-patterns BEFORE they cause test failures.
 
 **Reference Documentation:** `.claude/docs/TEST_PATTERNS.md`. Where this audit and
-TEST_PATTERNS.md disagree, TEST_PATTERNS.md governs. For example, its Fakes section does
-not endorse the `wraps=` mocks that swp-test-002 recommends and swp-test-005 tracks as good.
+TEST_PATTERNS.md disagree, TEST_PATTERNS.md governs.
 **ast-grep Rules:** `tools/dev/ast_grep/test-patterns.yml`
 
 **Default Scope:** `tests/`
@@ -21,19 +20,14 @@ not endorse the `wraps=` mocks that swp-test-002 recommends and swp-test-005 tra
 
 | ID | Pattern | Severity | Count (baseline) |
 |----|---------|----------|------------------|
-| swp-test-001 | `assert X is not None` (trivial) | warning | 74 |
-| swp-test-002 | `patch.object` without `wraps=` | warning | 76 |
 | swp-test-003 | Assert without error message | info | - |
 | swp-test-004 | `plt.subplots()` (verify cleanup) | info | 59 |
-| swp-test-006 | `len(x) > 0` without type check | info | - |
 | swp-test-009 | `isinstance(X, object)` (disguised trivial) | warning | 0 |
 
 ### Good Patterns to Track (Adoption Metrics)
 
 | ID | Pattern | Goal | Count (baseline) |
 |----|---------|------|------------------|
-| swp-test-005 | `patch.object` WITH `wraps=` | Increase | 4 |
-| swp-test-007 | `isinstance` assertions | Increase | - |
 | swp-test-008 | `pytest.raises` with `match=` | Increase | - |
 
 ### Detection Methods
@@ -43,37 +37,7 @@ not endorse the `wraps=` mocks that swp-test-002 recommends and swp-test-005 tra
 Use these MCP tools for structural pattern matching:
 
 ```python
-# 1. Trivial assertions (swp-test-001)
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="assert $X is not None",
-    language="python",
-    max_results=50
-)
-
-# 2. Weak mocks without wraps (swp-test-002)
-mcp__ast-grep__find_code_by_rule(
-    project_folder="/path/to/SolarWindPy",
-    yaml="""
-id: mock-without-wraps
-language: python
-rule:
-  pattern: patch.object($INSTANCE, $METHOD)
-  not:
-    has:
-      pattern: wraps=$_
-""",
-    max_results=50
-)
-
-# 3. Good mock pattern - track adoption (swp-test-005)
-mcp__ast-grep__find_code(
-    project_folder="/path/to/SolarWindPy",
-    pattern="patch.object($I, $M, wraps=$W)",
-    language="python"
-)
-
-# 4. plt.subplots calls to verify cleanup (swp-test-004)
+# 1. plt.subplots calls to verify cleanup (swp-test-004)
 mcp__ast-grep__find_code(
     project_folder="/path/to/SolarWindPy",
     pattern="plt.subplots()",
@@ -81,7 +45,7 @@ mcp__ast-grep__find_code(
     max_results=30
 )
 
-# 5. Disguised trivial assertion (swp-test-009)
+# 2. Disguised trivial assertion (swp-test-009)
 # isinstance(X, object) is equivalent to X is not None
 mcp__ast-grep__find_code(
     project_folder="/path/to/SolarWindPy",
@@ -98,21 +62,15 @@ mcp__ast-grep__find_code(
 sg scan --rule tools/dev/ast_grep/test-patterns.yml tests/
 
 # Run specific rule (--filter has no effect with --rule, so filter the output)
-sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-002
+sg scan --rule tools/dev/ast_grep/test-patterns.yml --report-style short tests/ | grep swp-test-009
 
 # Quick pattern search
-sg run -p "assert \$X is not None" -l python tests/
+sg run -p "isinstance(\$OBJ, object)" -l python tests/
 ```
 
 **FALLBACK: grep (always available)**
 
 ```bash
-# Trivial assertions
-grep -rn "assert .* is not None" tests/
-
-# Mock without wraps (approximate)
-grep -rn "patch.object" tests/ | grep -v "wraps="
-
 # plt.subplots
 grep -rn "plt.subplots()" tests/
 ```
@@ -123,7 +81,7 @@ grep -rn "plt.subplots()" tests/
 Execute MCP tools for each anti-pattern category.
 
 **Step 2: Count good patterns**
-Track adoption of recommended patterns (wraps=, isinstance, pytest.raises with match).
+Track adoption of recommended patterns (pytest.raises with match).
 
 **Step 3: Generate report**
 Compile findings into actionable table format.
@@ -142,13 +100,12 @@ Point to TEST_PATTERNS.md sections for remediation guidance.
 ### Anti-Pattern Summary
 | Rule | Description | Count | Trend |
 |------|-------------|-------|-------|
-| swp-test-001 | Trivial None assertions | X | ↑/↓/= |
-| swp-test-002 | Mock without wraps | X | ↑/↓/= |
+| swp-test-009 | Disguised trivial assertion | X | ↑/↓/= |
 
 ### Good Pattern Adoption
 | Rule | Description | Count | Target |
 |------|-------------|-------|--------|
-| swp-test-005 | Mock with wraps | X | Increase |
+| swp-test-008 | pytest.raises with match | X | Increase |
 
 ### Top Issues by File
 | File | Issues | Primary Problem |
