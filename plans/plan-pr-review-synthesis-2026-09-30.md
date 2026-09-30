@@ -397,3 +397,53 @@ Strict xfails: 0.
 - **Points that contradict TEST_PATTERNS.** P456.1 (drop ON FAILURE lines), P456.4 (weaken
   exact limits), P457.4 (speculative tolerance loosening) and P447.3 (question the
   noise-free tolerance) are rejected under the standard.
+
+---
+
+## Empirical Findings (2026-09-30 trial run)
+
+### End-state metrics
+
+- Points: 115 estimated in the lead, 116 carrying a `disposition:` line after the author's rulings.
+- PRs: 24 of 24 merged; the last merge commit is `c3f2ce92`, and its tree matched the combined-check tree `faaccce1` byte for byte.
+- Strict xfail markers: 67 recorded at merge, 0 after the follow-on batch (tracker rows 6, 7, 8: 18 fix units in five lanes).
+- Follow-ons beyond the plan, author-directed: plotting defects through shared methods (row 16), percentile `alim` on `PlotWithZdata` with `limit_color_norm` retired (row 21), the pandas `"D"` day unit, the public import test (row 12), `scripts/archived/` retired (row 18), explicit concat sort (row 22).
+- `master` at `e790d95f`: 2826 passed, 0 failed, 0 xfailed; strict docs build 0 warnings; `lint-imports` 2 kept; CI on pushed `master` (`8afd0a62`) green including Documentation.
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| Fix-before-merge points (16 edits on 10 branches, plus the `test_base.py` review pass) | RESOLVED -- applied on the PR branches before merge |
+| Row 6 points (P454.5 scipy floor, P458.8 psutil and stale cite) | RESOLVED -- floor landed in `b570a1c5`; psutil dropped in `4f1b7524` |
+| Row 7 point (P467.2 `scripts/archived/`) | RESOLVED -- retired in `64a66c71` |
+| Row 8 points on recorded defects (P447.5, P450.1, P450.2, P459.1, P462.1, P462.6) | RESOLVED -- every strict marker retired by the follow-on batch |
+| P447.1 Moyal (first commit after merge) | RESOLVED -- Moyal removed in `fc15027d` |
+| P450.3 `set_axnorm("t")` on Hist1D (author: yes) | DEFERRED -- not built; `set_axnorm` still asserts `"d"`; needs a tracker row |
+| P450.6 `TypeError` for a str `other_label` (author: yes) | DEFERRED -- not built; needs a tracker row |
+| P459.2 `normal_parameters` both bases (author: `base=` argument) | DEFERRED -- not built; needs a tracker row |
+| P459.2 `swap_protons` check that never fires | DEFERRED -- tracker row 15 |
+| P451.3 spiral `generate_mesh` hang and top-edge formula | DEFERRED -- tracker row 14 (hang is issue #470) |
+| P469.4 `CITATION.cff` with ORCID | DEFERRED -- tracker row 13 |
+| 21 points marked `follow-on (new row: test-quality)` | DEFERRED -- tracker row 19 |
+| Library slug comments for every recorded defect (F1 follow-on) | SUPERSEDED -- every recorded defect is fixed, so no comment has a defect to point at |
+| Points touching `limit_color_norm` | SUPERSEDED -- row 21 retired the flag in favour of `set_alim(..., kind="quantile")` |
+
+### Deviations from plan
+
+- The author reviewed the dispositions in a Claude Doc with one card tab per fix and per decision; the session transcribed each ruling into this file.
+- Author rulings added scope before merge: deleting `reproducibility.py` and `solarwindpy/scripts/`, duplicate label entries, retiring six ast-grep rules, and the `TEST_PATTERNS.md` commit advice.
+- The session merged the 24 PRs on the author's instruction; the plan reserved merging for the author.
+- Row 21 redesigned outlier handling after this plan: `limit_color_norm` is gone and `alim` gained a percentile form, so the plan's colour-limit points are superseded rather than done as written.
+- Three author-approved follow-ons (P450.3, P450.6, P459.2 `base=`) were never given tracker rows and did not run; they are carried forward above.
+
+### Commits
+
+- `1dcf1e63` docs(plans): PR review synthesis for #446-#469
+- `df5cb91b` docs(plans): record author rulings in PR review synthesis
+- `66c9d21a` docs(plans): put the scripts deletion on #448, which owns it
+- `d180fc4e` docs(plans): record final author answers in PR review synthesis
+- `91574dbc` docs(plans): author approves the PR review synthesis
+- `4f739494` docs(plans): name the PR review synthesis as a plan
+
+## Spent-Mark: executed, findings recorded
