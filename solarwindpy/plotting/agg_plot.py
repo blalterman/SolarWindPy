@@ -8,7 +8,7 @@ common functionality used by :mod:`solarwindpy` histogram plots.
 import numpy as np
 import pandas as pd
 
-from numbers import Number
+from numbers import Integral, Number
 from abc import abstractproperty, abstractmethod
 
 try:
@@ -176,6 +176,13 @@ class AggPlot(base.Base):
 
         precision: int or None
             Decimal places to which bin edges are rounded. If None, 5.
+
+        Notes
+        -----
+        Edges from an integer ``nbins`` follow :func:`numpy.histogram`: the
+        outer edges are rounded outward so they enclose every sample, and each
+        bin is closed on the left, the last bin also on the right. Other
+        ``nbins`` give right-closed bins, ``(a, b]``.
         """
         data = self.data
         bins = {}
@@ -209,6 +216,9 @@ class AggPlot(base.Base):
             if isinstance(b, str):
                 b = b.lower()
 
+            # Edges from an integer bin count follow `np.histogram`'s convention.
+            from_count = isinstance(b, Integral) and not isinstance(b, bool)
+
             if isinstance(b, str) and b == "knuth":
                 try:
                     assert knuth_bin_width
@@ -233,10 +243,21 @@ class AggPlot(base.Base):
             except TypeError:
                 assert not b.isna().any()
 
-            b = b.round(precision)
+            closed = "right"
+            if from_count:
+                # Round the outer edges outward so they enclose every sample.
+                scale = 10.0**precision
+                lo = np.floor(b[0] * scale) / scale
+                hi = np.ceil(b[-1] * scale) / scale
+                b = b.round(precision)
+                b[0] = lo if lo <= d.min() else lo - 1 / scale
+                b[-1] = hi if hi >= d.max() else hi + 1 / scale
+                closed = "left"
+            else:
+                b = b.round(precision)
 
             zipped = zip(b[:-1], b[1:])
-            i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
+            i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
 
             bins[k] = b
             intervals[k] = pd.CategoricalIndex(i)
@@ -259,6 +280,9 @@ class AggPlot(base.Base):
                 d = self.clip_data(d, self.clip)
 
             c = pd.cut(d, i)
+            if i.closed == "left":
+                # As in `np.histogram`, the last bin also holds its right edge.
+                c[d == i[-1].right] = i[-1]
             cut[k] = c
 
         cut = pd.DataFrame.from_dict(cut, orient="columns")

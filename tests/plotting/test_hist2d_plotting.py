@@ -415,6 +415,9 @@ class TestBinContract:
     def test_integer_nbins_matches_numpy_histogram_bin_edges(self, nbins):
         """Edges equal `np.histogram_bin_edges`, rounded to the stored precision.
 
+        Interior edges round to nearest; the outer edges round outward (floor,
+        ceil) so they enclose every sample, per numpy.histogram's convention.
+
         ON FAILURE: the code is wrong, unless the docstring's promise to use
         `np.histogram_bin_edges` was deliberately withdrawn.
         """
@@ -425,7 +428,10 @@ class TestBinContract:
         h = Hist2D(x, y, nbins=nbins)
 
         for name, data in (("x", x), ("y", y)):
-            expected = np.histogram_bin_edges(data.values, nbins).round(5)
+            numpy_edges = np.histogram_bin_edges(data.values, nbins)
+            expected = numpy_edges.round(5)
+            expected[0] = np.floor(numpy_edges[0] * 1e5) / 1e5
+            expected[-1] = np.ceil(numpy_edges[-1] * 1e5) / 1e5
             np.testing.assert_allclose(h.edges[name].values, expected)
             assert h.edges[name].size == nbins + 1
 
@@ -456,22 +462,11 @@ class TestBinContract:
             edges = h.edges[name].values
             assert np.all(np.diff(edges) > 0), f"{name} edges are not increasing"
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "Auto-computed edges are rounded to `precision` (default 5) after "
-            "np.histogram_bin_edges has set them to the data extrema, so both "
-            "outer edges can move *inside* the data range and orphan the "
-            "extreme observations. Replaces nothing -- this path had no test. "
-            "Remove the xfail when the outer edges are rounded outwards."
-        ),
-    )
     @pytest.mark.parametrize("nbins", [4, 17])
     def test_edges_span_the_data(self, nbins):
         """Every observation falls inside the outer edges.
 
-        ON FAILURE (i.e. an unexpected pass): the rounding has been made
-        outward-only; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         rng = np.random.default_rng(13)
         x = pd.Series(rng.normal(size=300))
@@ -482,23 +477,10 @@ class TestBinContract:
             assert edges[0] <= data.min()
             assert data.max() <= edges[-1]
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "Auto-binned data loses its extreme observations. The bins are "
-            "right-closed, so the leftmost edge -- which np.histogram_bin_edges "
-            "sets to exactly data.min() -- belongs to no bin; numpy avoids the "
-            "mirror-image problem by closing its last bin on both ends. "
-            "Precision rounding of the outer edges compounds it. Replaces "
-            "nothing -- this path had no test. Remove the xfail when the outer "
-            "bins are closed on both ends."
-        ),
-    )
     def test_auto_bins_retain_every_observation(self):
         """A histogram partitions its data: the counts must sum to N.
 
-        ON FAILURE (i.e. an unexpected pass): the outer bins now hold their
-        endpoints; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         rng = np.random.default_rng(13)
         x = pd.Series(rng.normal(size=300))

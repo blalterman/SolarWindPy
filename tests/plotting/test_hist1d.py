@@ -7,8 +7,9 @@ boolean mask) on the same input, and the bins are deliberately unequal in
 width so that an error in a bin width, a bin center, or a bin assignment
 cannot cancel out.
 
-Hist1D bins are right-closed, ``(a, b]``, where ``numpy.histogram`` bins are
-left-closed ``[a, b)``. The two agree whenever no sample sits exactly on an
+Hist1D bins from explicit edges are right-closed, ``(a, b]``, where
+``numpy.histogram`` bins are left-closed ``[a, b)``; bins from an integer
+``nbins`` follow numpy. The two agree whenever no sample sits exactly on an
 edge, which holds with probability one for the continuous random samples used
 here.
 """
@@ -142,19 +143,6 @@ class TestCounts:
         assert agg.size == 3
         np.testing.assert_array_equal(agg.fillna(0).values, [2, 0, 1 + 1 + 1])
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_CountsDisagreeWithNumpy,
-        reason=(
-            "AggPlot.calc_bins_intervals (agg_plot.py) derives integer-nbins "
-            "edges from the data range, rounds them to 5 decimals (which can "
-            "pull either outer edge inside the data) and closes intervals on "
-            "the right (which excludes a sample on the first edge), so "
-            "make_cut's pd.cut drops the extreme samples; this input counts "
-            "398 of 400; remove this marker when the outer edges enclose "
-            "every sample (both the rounding and the left end must change)"
-        ),
-    )
     def test_integer_nbins_counts_equal_numpy_histogram(self, xy):
         """With ``nbins`` an integer, counts equal numpy.histogram's and sum to N.
 
