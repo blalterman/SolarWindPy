@@ -71,7 +71,6 @@ dependencies:
 - platformdirs
 - pluggy
 - pre-commit
-- psutil
 - py-cpuinfo
 - pybtex
 - pybtex-docutils

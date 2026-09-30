@@ -128,7 +128,6 @@ dev = [
     "flake8-docstrings>=1.7",
     "pydocstyle>=6.3",
     "tables>=3.9",  # PyTables for HDF5 testing
-    "psutil>=5.9.0",
     "import-linter>=2.6",  # lint-imports; 2.6 adds the acyclic_siblings contract
     # Code analysis tools (ast-grep via MCP server, not Python package)
     "pre-commit>=3.5",  # Git hook framework
