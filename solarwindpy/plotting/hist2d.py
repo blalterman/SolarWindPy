@@ -226,6 +226,30 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         )
         return super()._make_cbar(mappable, ticks=ticks, **kwargs)
 
+    @staticmethod
+    def _default_norm(axnorm):
+        r"""The colour normalisation a plot uses when the caller passes no ``norm``.
+
+        Parameters
+        ----------
+        axnorm : str or None
+            The histogram's ``axnorm``.
+
+        Returns
+        -------
+        matplotlib.colors.Normalize or None
+            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
+            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
+            ``"cd"``, ``"rd"``) span decades, so they get a clipped
+            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
+            choice to matplotlib.
+        """
+        if axnorm in ("c", "r"):
+            return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+        if axnorm in ("d", "cd", "rd"):
+            return mpl.colors.LogNorm(clip=True)
+        return None
+
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
 
@@ -303,8 +327,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If not None, the function used to aggregate the data for setting alpha
             value.
         kwargs:
-            Passed to `ax.pcolormesh`.
-            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+            Passed to `ax.pcolormesh`. `norm` defaults to ten colour bands on
+            [0, 1] for row or column normalized data and to a `LogNorm` for
+            densities ("d", "cd", "rd").
 
         Returns
         -------
@@ -329,15 +354,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
-        axnorm = self.axnorm
-        default_norm = None
-        if axnorm in ("c", "r"):
-            default_norm = mpl.colors.BoundaryNorm(
-                np.linspace(0, 1, 11), 256, clip=True
-            )
-        elif axnorm in ("d", "cd", "rd"):
-            default_norm = mpl.colors.LogNorm(clip=True)
-        norm = kwargs.pop("norm", default_norm)
+        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
 
         C = np.ma.masked_invalid(agg.values)
         XX, YY = np.meshgrid(x, y)
@@ -434,7 +451,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If True and gaussian_filter_std > 0, use NaN-aware filtering via
             normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
         kwargs :
-            Passed to `ax.pcolormesh`.
+            Passed to `ax.pcolormesh`. `norm` defaults as in `make_plot` and
+            is shared by the mesh and the contours.
 
         Returns
         -------
@@ -451,16 +469,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         if contour_kwargs is None:
             contour_kwargs = {}
 
-        # Determine normalization
-        axnorm = self.axnorm
-        default_norm = None
-        if axnorm in ("c", "r"):
-            default_norm = mpl.colors.BoundaryNorm(
-                np.linspace(0, 1, 11), 256, clip=True
-            )
-        elif axnorm in ("d", "cd", "rd"):
-            default_norm = mpl.colors.LogNorm(clip=True)
-        norm = kwargs.pop("norm", default_norm)
+        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
 
         # Get cmap from kwargs (shared between pcolormesh and contour)
         cmap = kwargs.pop("cmap", None)
@@ -731,6 +740,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
         nan_aware_filter=False,
+        levels=None,
         **kwargs,
     ):
         """Make a contour plot on `ax` using `ax.contour`.
@@ -756,8 +766,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         skip_max_clbl: bool
             If True, don't label the maximum contour. Primarily used when the maximum
             contour is, effectively, a point.
-        maximum_color:
-            The color for the maximum of the PDF.
         use_contourf: bool
             If True, use `ax.contourf`. Else use `ax.contour`.
         gaussian_filter_std: int
@@ -768,20 +776,18 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         nan_aware_filter: bool
             If True and gaussian_filter_std > 0, use NaN-aware filtering via
             normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+        levels: array-like, int, None
+            Contour levels. If None, the default for the ``axnorm``, or
+            matplotlib's choice when there is none.
         kwargs:
-            Passed to :meth:`matplotlib.axes.Axes.pcolormesh`.
-            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.
+            Passed to :meth:`matplotlib.axes.Axes.contour` or
+            :meth:`matplotlib.axes.Axes.contourf`. `norm` defaults to ten
+            colour bands on [0, 1] for row or column normalized data and to a
+            `LogNorm` for densities ("d", "cd", "rd"); otherwise, with at
+            least two levels, to a `BoundaryNorm` on the levels.
         """
-        levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop(
-            "norm",
-            (
-                mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-                if self.axnorm in ("c", "r")
-                else None
-            ),
-        )
+        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop(
             "linestyles",
             [

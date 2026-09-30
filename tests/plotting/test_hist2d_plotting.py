@@ -12,6 +12,8 @@ values in the ``QuadMesh``, the coordinates of its cells, the vertices of the
 edge lines. Those are the numbers the science depends on; the rendering is not.
 """
 
+import inspect
+
 import pytest
 import numpy as np
 import pandas as pd
@@ -804,6 +806,112 @@ class TestQuantileAlimInPlots:
         np.testing.assert_array_equal(
             values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
         )
+        plt.close("all")
+
+
+def _norm_of(method, axnorm):
+    """The colour norm ``method`` hands matplotlib for ``axnorm``, no ``norm`` given."""
+    x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
+    h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm=axnorm)
+    if method == "make_plot":
+        ax, _ = h.make_plot(cbar=False)
+        return _quadmesh(ax).norm
+    if method == "plot_hist_with_contours":
+        ax, _, qset, _ = h.plot_hist_with_contours(cbar=False)
+        assert qset.norm is _quadmesh(ax).norm
+        return qset.norm
+    _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+    return qset.norm
+
+
+class TestDefaultNorm:
+    """Without ``norm``, the three 2D plots colour each ``axnorm`` the same way."""
+
+    METHODS = ["make_plot", "plot_hist_with_contours", "plot_contours"]
+
+    @pytest.mark.parametrize("method", METHODS)
+    @pytest.mark.parametrize("axnorm", ["c", "r"])
+    def test_row_and_column_norms_get_ten_bands_on_the_unit_interval(
+        self, method, axnorm
+    ):
+        """Row/column-normalised values lie in [0, 1]: ten equal bands.
+
+        ON FAILURE: the code is wrong.
+        """
+        norm = _norm_of(method, axnorm)
+        assert isinstance(norm, matplotlib.colors.BoundaryNorm)
+        np.testing.assert_array_equal(norm.boundaries, np.linspace(0, 1, 11))
+        plt.close("all")
+
+    @pytest.mark.parametrize("method", METHODS)
+    @pytest.mark.parametrize("axnorm", ["d", "cd", "rd"])
+    def test_densities_get_a_log_norm(self, method, axnorm):
+        """Densities span decades, so every plot colours them on a log scale.
+
+        ON FAILURE: the code is wrong, unless the author has chosen a linear
+        default for densities again.
+        """
+        assert isinstance(_norm_of(method, axnorm), matplotlib.colors.LogNorm)
+        plt.close("all")
+
+    def test_default_density_contour_levels_suit_a_log_norm(self):
+        """Density contours keep their default levels, all positive, under LogNorm.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
+        h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm="d")
+        _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+        # The defaults written in `_get_contour_levels` for axnorm "d".
+        expected = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
+        np.testing.assert_array_equal(qset.levels, expected)
+        assert np.all(np.asarray(qset.levels) > 0)
+        plt.close("all")
+
+
+class TestPlotSignatures:
+    """The 2D plots keep their positional order; ``levels`` is a named parameter."""
+
+    @pytest.mark.parametrize(
+        "method, leading",
+        [
+            ("make_plot", ["ax", "cbar", "cbar_kwargs", "fcn", "alpha_fcn"]),
+            (
+                "plot_hist_with_contours",
+                ["ax", "cbar", "cbar_kwargs", "fcn", "levels", "label_levels"],
+            ),
+            (
+                "plot_contours",
+                ["ax", "label_levels", "cbar", "cbar_kwargs", "fcn", "plot_edges"],
+            ),
+        ],
+    )
+    def test_positional_parameters_are_in_the_documented_order(self, method, leading):
+        """The leading parameters are the order given in CHANGELOG.md.
+
+        ON FAILURE: the code is wrong, unless the author has reordered the
+        signature; then update CHANGELOG.md and this list together.
+        """
+        params = list(inspect.signature(getattr(Hist2D, method)).parameters)
+        stop = 1 + len(leading)
+        assert params[1:stop] == leading
+
+    def test_plot_contours_levels_is_a_named_parameter_that_sets_the_levels(
+        self, known_hist
+    ):
+        """``levels`` is the last named parameter of plot_contours and sets the levels.
+
+        ON FAILURE: the code is wrong.
+        """
+        params = inspect.signature(Hist2D.plot_contours).parameters
+        names = [n for n, p in params.items() if p.kind is p.POSITIONAL_OR_KEYWORD]
+        assert names[-1] == "levels"
+        assert params["levels"].default is None
+        levels = [1.5, 2.5, 4.5]  # chosen inside the 1..6 counts of KNOWN_COUNTS
+        _, _, _, qset = known_hist.plot_contours(
+            levels=levels, cbar=False, label_levels=False
+        )
+        np.testing.assert_array_equal(qset.levels, levels)
         plt.close("all")
 
 
