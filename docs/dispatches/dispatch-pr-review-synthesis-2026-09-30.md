@@ -284,3 +284,79 @@ If the dispatch was abandoned without execution: skip steps 1, 1a and 2, and opt
 `## Abandoned (YYYY-MM-DD)` with a one-line reason. An abandoned unit's plan keeps its
 `NOT-YET`, which is the correct reading — the work stopped rather than finished, and no marker
 claims otherwise.
+
+---
+
+## Empirical Findings (2026-09-30 trial run)
+
+### End-state metrics
+
+- PRs in scope: 24 predicted, 24 merged (#446-#469, merge commits, each pinned to its verified head with `--match-head-commit`).
+- Review points: about 110 estimated at planning, 116 extracted. No reviewer marked any point blocking; about 20 were false on checking (E501 is ignored in `setup.cfg`; black passes).
+- Pre-merge fixes: 21 commits on 10 PR branches (#446, #448, #450, #452, #453, #456, #460, #466, #468, #469), all fast-forward pushes, no force-push.
+- Final combined check on `origin/master` 91574dbc: 2624 passed, 0 failed, 12 skipped, 67 xfailed, 0 xpassed; rst doctests 1 passed; strict docs build 0 warnings; `lint-imports` 2 kept, 0 broken; black and flake8 clean; both merge orders give tree faaccce1.
+- Merged `master` tree after the 24 GitHub merges: faaccce1, identical to the combined-check tree.
+
+### Governing Property
+
+served -- every point in the 24 reviews carries one recorded disposition in `plans/pr-review-synthesis-2026-09-30.md` (24 PR sections, 0 `disposition: tbd|none|?` matches, `author_approved: yes` at 91574dbc), and the approved fixes landed before merge.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| Synthesis file covers every PR | PASS | `grep -cE '^### PR #4(4[6-9]\|5[0-9]\|6[0-9])$'` returned 24 at 91574dbc |
+| No point lacks a disposition | PASS | `grep -ciE 'disposition: *(tbd\|none\|\?)'` returned 0; positive control: the same file holds 116 `disposition:` lines |
+| Author approved the plan | PASS | `grep -c '^author_approved: yes$'` returned 1 at 91574dbc |
+| Every fixed PR has green CI | PASS (bounded) | `gh pr checks` on the 10 fixed PRs: every `fail` line (20 of them) traced by `gh run view` to the `Documentation` workflow, which the author excluded from this AC; all other checks pass |
+| Combined check re-run | PASS | integration subagent's final line `RESULT: all green`, run twice: base 76877f84 and base 91574dbc |
+| Plan artifact updated | PASS | Next actions tracker read at rev 40: step 3 Done, step 4 Done, step 5 Done, steps 6-8 Ready |
+
+### Deviations from plan
+
+- AC 4 bounded by the author: the `Documentation / build` check failed on every PR and on `master` since 0742fd6a, because each PR cleared only its own area's nitpicky warnings; the combined check carries the docs build.
+- The author reviewed dispositions in a Claude Doc (one card tab per fix and decision) rather than by editing the synthesis file; the session transcribed each ruling into the file.
+- Scope added during review, all author-directed: delete `solarwindpy/reproducibility.py` and `solarwindpy/scripts/` (both on #448, whose phase-4 OWNS line covers them; first assigned to #460 and moved), delete duplicate `ab`/`carr`/`cos_theta` labels (#450), retire ast-grep rules 001/002/005/006/007 and later 009 (#466), `TEST_PATTERNS.md` commit advice (#466), fill four `test_base.py` gaps (#456), CITATION reference and BibTeX (#469). The author's rule "skip code that is only maintenance with no effect" turned F6 (`composite.py` guard) and 7 follow-ons into rejects.
+- The dispatch reserved merging for the author; the author instructed the session to merge.
+- The author had the session push `master` (tracker step 3) before merging; the combined check was re-run on the new base because `b570a1c5` raised dependency floors in `pyproject.toml`, which #460 also edits.
+- A stale 0-byte `.git/index.lock` from 2026-09-29 21:58, held by no process (`lsof` empty), blocked a commit; the session removed it.
+- Combined-check merges ran with `core.hooksPath=/dev/null` on throwaway scratch branches, disclosed to the author; every real commit ran its hooks.
+- Moyal removal (author ruling Q1) is recorded as the first follow-on after merge, because #447 and #455 edit its test and module and a pre-merge deletion would be a modify/delete conflict.
+
+### Commits
+
+On `master`:
+
+- `1dcf1e63` docs(plans): PR review synthesis for #446-#469
+- `df5cb91b` docs(plans): record author rulings in PR review synthesis
+- `66c9d21a` docs(plans): put the scripts deletion on #448, which owns it
+- `d180fc4e` docs(plans): record final author answers in PR review synthesis
+- `91574dbc` docs(plans): author approves the PR review synthesis
+
+On the PR branches, merged with them:
+
+- `e4394f0f` test(plotting): cite orbits defects by slug and function, not line number (#446)
+- `5a40fee3` docs(solar_activity): set_threshold docstring states current behaviour (#448)
+- `801d58ba` chore: remove unused reproducibility module and empty scripts package (#448)
+- `00d50efe` docs(solar_activity): name functools.partial as a literal in set_threshold (#448)
+- `13628f68` test(plotting): Spent-When header covers the whole defects file (#450)
+- `090d6c13` fix(plotting): drop duplicate ab, carr, cos_theta measurement labels (#450)
+- `c08ae295` test(core): test_gse fails when two different GSE vectors compare equal (#452)
+- `2912e385` test(instabilities): caller's log scale survives plotting (#453)
+- `415c6943` test(plotting): set_log asserts both x and y axes (#456)
+- `7d644f59` test(plotting): name the source of the set_log and set_labels defaults (#456)
+- `f13d4ed1` test(plotting): give the norm-label fixture check its own test (#456)
+- `3c3452fb` test(plotting): pin save paths with hand-derived literals (#456)
+- `ec36416c` test(plotting): reach axis formatting and colorbars through public plots (#456)
+- `76d9dd62` docs: CLAUDE.md lists lint-imports in commands and CI (#460)
+- `d346e777` docs(tests): state plainly that TEST_PATTERNS.md governs the audit (#466)
+- `6d0579fa` chore(ast-grep): retire test-pattern rules that contradict TEST_PATTERNS (#466)
+- `03a2863c` docs(tests): commit with plain git commit in TEST_PATTERNS (#466)
+- `310b1415` chore(ast-grep): retire swp-test-009, which recommends isinstance checks (#466)
+- `ec52ae56` chore(docs): drop the obsolete api cleanup and end README with a newline (#468)
+- `fd395e23` docs: link pyproject.toml from the README on GitHub (#469)
+- `c5cdecf3` docs: CITATION gives the reference and BibTeX (#469)
+
+Merges: the 24 PR merge commits ending at `c3f2ce92` (Merge pull request #469).
+
+## Spent-Mark: executed, findings recorded
