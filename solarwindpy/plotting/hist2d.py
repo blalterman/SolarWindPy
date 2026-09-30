@@ -373,6 +373,10 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         norm = kwargs.pop("norm", default_norm)
 
         if limit_color_norm:
+            if norm is None:
+                # `pcolormesh` would use a linear `Normalize` anyway; build it
+                # here so there is a norm to limit.
+                norm = mpl.colors.Normalize()
             self._limit_color_norm(norm)
 
         C = np.ma.masked_invalid(agg.values)
@@ -661,8 +665,9 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         x = edge.index.get_level_values("x").mid
         y = edge.index.get_level_values("y").mid
 
-        if sg_kwargs is None:
-            sg_kwargs = dict()
+        # Copy so that popping `window_length` and `polyorder` neither mutates
+        # the caller's dict nor starves the next edge drawn from it.
+        sg_kwargs = dict() if sg_kwargs is None else dict(sg_kwargs)
 
         if smooth:
             wlength = sg_kwargs.pop("window_length", int(np.floor(y.shape[0] / 10)))
@@ -1132,9 +1137,13 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         """
         x = self.data.x
         y = self.data.y
-        above_contour = pd.Series(np.nan, self.data.index)
+        # Object dtype, because the values written below are `pd.Interval`s.
+        above_contour = pd.Series(np.nan, self.data.index, dtype=object)
         for k, v in self.agg().unstack("x").items():
             tk = v >= level
+            if not tk.any():
+                # Nothing in this column reaches `level`; its points stay NaN.
+                continue
             left, right = k.left, k.right
             bottom, top = v[tk].index.min().left, v[tk].index.max().right
             above_contour_at_x = (left < x) & (x <= right) & (bottom < y) & (y <= top)
