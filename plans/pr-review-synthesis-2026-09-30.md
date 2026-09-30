@@ -8,8 +8,9 @@ Supersedes: none
 The `claude-review` action left one comment on each of the 24 phase-4 PRs, and this file
 splits those comments into 115 points and gives each point one disposition. No reviewer
 marked anything as blocking, and about 20 points turned out to be wrong when checked against
-the branches. Twelve cheap edits on 11 branches are proposed before merge; everything else
-is a follow-on, a rejection with its reason, or a question for the author.
+the branches. The author's rulings in the review doc give 16 edits before merge on 10
+branches plus one review pass; everything else is a follow-on, a rejection with its reason,
+or one of two questions still open.
 
 author_approved: no
 
@@ -32,39 +33,53 @@ file that another PR touches.
 
 | PR | Point | Edit |
 |---|---|---|
-| #446 | P446.2 | xfail reasons cite function names instead of `orbits.py` line numbers, because #450's docstrings shift every cited line |
-| #448 | P448.1 | `set_threshold` docstring describes what the code does now: only a plain function is called, other callables are stored uncalled (this PR's own xfail). The `callable()` fix itself is a follow-on, since it needs `test_extrema_calculator.py`, which #448 does not own |
+| #446 | P446.2 | each xfail reason carries a grep slug (`swp-defect:<slug>`) plus the function name, with no `orbits.py` line numbers; #450's docstrings shift every cited line |
+| #448 | P448.1 | `set_threshold` docstring describes what the code does now: only a plain function is called. The `callable()` fix is row 8, with `test_extrema_calculator.py` |
+| #448 | P448.5 | delete `solarwindpy/reproducibility.py`, its import and `__all__` entry in `solarwindpy/__init__.py`, and its section in `docs/source/api_reference.rst` |
 | #450 | P450.5 | the Spent-When header of `tests/test_source_plotting_defects.py` names an event that fits every test in the file |
+| #450 | P458.7 | delete the `ab`, `carr` and `cos_theta` entries from `_trans_measurement` in `plotting/labels/base.py`; the `_templates` copies stay (#450 owns the file) |
 | #452 | P452.1 | `test_gse` also asserts inequality against a perturbed Vector, so it can fail |
 | #453 | P453.4 | the test pre-sets a log scale and asserts it survives; if it does not, narrow the docstring instead and report (no new xfail without the author) |
-| #455 | P455.1 | `composite.py:149` keeps the coarse-scan best gap when the fine scan returns `None` (a defensive guard; the x0 scan method stays the author's) |
 | #456 | P456.2 | parametrize the `set_log` test over x and y |
-| #460 | P460.5 | the `CLAUDE.md` line on what CI runs adds `lint-imports` |
-| #460 | P460.1 | a `pyproject.toml` comment on why `reproducibility` and `scripts` sit outside `layers` |
+| #456 | P456.7 | review pass on `tests/plotting/test_base.py` against TEST_PATTERNS; findings go to the author and none are applied without the author |
+| #460 | P460.5 | `CLAUDE.md` lists `lint-imports` in its Commands block, and the CI sentence names it |
+| #460 | P460.1 | delete `solarwindpy/scripts/` (an empty package nothing imports); no layer comment is needed once it and `reproducibility` are gone |
 | #466 | P466.3 | reword the "which governs" sentence in `.claude/commands/swp/test/audit.md:12` |
+| #466 | P466.1, P466.2 | retire ast-grep rules swp-test-001, 002, 005, 006 and 007 in `tools/dev/ast_grep/test-patterns.yml` |
+| #466 | P466.6 | `.claude/docs/TEST_PATTERNS.md` says plain `git commit` and names `.claude/hooks/project-env.sh` as the reason the env no longer matters |
 | #468 | P468.1, P468.2 | drop the `$(SOURCEDIR)/api` removal in `docs/Makefile` and `docs/make.bat`; add the trailing newline to `docs/README.md` |
 | #469 | P469.1 | `README.rst:55` links `pyproject.toml` on GitHub master, because the README also renders on PyPI |
+| #469 | P469.4 | `CITATION.rst` gets the reference "Alterman, B. L. SolarWindPy. Zenodo. doi:10.5281/zenodo.17042839" and a BibTeX block |
+
+Skipped under the author's rule 1 (code that is only a maintenance burden with no effect is
+not added): P455.1.
 
 ## Author decisions
 
-1. P447.1: Is `Moyal.function` meant to be proportional to `scipy.stats.moyal.pdf`, or is its current form a deliberate variant?
-2. P454.4: Should the kinetic energy flux case use the unrounded 267.63 µW m⁻² with a tighter tolerance, or keep TEST_PATTERNS' 267.6?
-3. P455.3: Should `GaussianPlusHeavySide` get a `scan_x0` switch to skip the roughly 3√n extra fits?
-4. P459.2: Is the base-10 lognormal in `normal_parameters` the intended formula?
-5. P463.2: Should `usage.rst` say which thermal speed beta uses and that `mw²=2kT` is SolarWindPy's convention, and in what words?
-6. P450.4: Should `Scatter` clip values to 0.0001 and 0.9999, or drop them?
-7. P450.3: Should `Hist1D.set_axnorm` accept `"t"`?
-8. P450.6: Should a `str` passed as `other_label` raise `TypeError`, and if not, what should it render as?
-9. P458.7: Which of the duplicate `ab`, `carr` and `cos_theta` entries in `labels.available()` stays?
-10. P460.2: Are imports between `fitfunctions`, `instabilities` and `solar_activity`, and between `core` and `tools`, meant to be forbidden?
-11. P466.1 and P466.2: Should the ast-grep rules swp-test-001, 002, 005, 006 and 007 be retired or inverted to match TEST_PATTERNS?
-12. P466.6: TEST_PATTERNS tells agents to commit with `conda run -n solarwindpy git commit`, which the harness refuses. Should it say plain `git commit`?
-13. P454.5: Raise the floor to `scipy>=1.15` so the `CODATA_TRUNCATED` tier can go?
-14. P469.2: Should `installation.rst` state a minimum Python version?
-15. P469.4: How do you want to be cited in `CITATION.rst` (tracker row 13)?
-16. P451.3: What is the fix for the `generate_mesh` hang (#470, tracker row 14), and is the `max(0.01, 1.01*top)` top edge intended?
-17. P456.7: Do you want a second review pass on `tests/plotting/test_base.py`, which the reviewer did not read?
-18. P457.6: Should the strict xfails get GitHub tracking issues cited in their reasons?
+The author answered these in the review doc. Two are still open.
+
+1. P447.1, Moyal form: remove Moyal from the package, as the first commit after merge.
+2. P454.4, energy flux value: open, no answer yet. If none comes, 267.6 stays.
+3. P455.3, `scan_x0` switch: left to Claude; no switch, because the scan is what fits x0.
+4. P459.2, base-10 lognormal: support both bases through a `base=` argument (row 8).
+5. P463.2, beta wording: no change; `usage.rst` already defines the m w² = 2kT convention.
+6. P450.4, scatter clipping: clipping stays, as the code and docstring already say.
+7. P450.3, `set_axnorm("t")`: accept it (row 8).
+8. P450.6, `str` `other_label`: raise `TypeError` at creation (row 8).
+9. P458.7, duplicate labels: keep `_templates`, delete the `_trans_measurement` entries (before merge on #450).
+10. P460.2, sibling imports: keep them independent; the rule stays.
+11. P466.1 and P466.2, ast-grep rules: retire the five rules (before merge on #466).
+12. P466.6, commit instruction: plain `git commit` (before merge on #466).
+13. P454.5, scipy floor: remove the looser tier after the scipy floor push (row 6).
+14. P469.2, Python floor: state none; keep pointing at `pyproject.toml`.
+15. P469.4, citation: "Alterman, B. L." with BibTeX on #469; `CITATION.cff` with ORCID as a follow-on. Open: the ORCID iD.
+16. P451.3, spiral hang and top edge: deferred to row 14; #470 tracks the hang, and a GitHub issue is to be opened for the top-edge formula.
+17. P456.7, second review of `test_base.py`: yes, before merge on #456.
+18. P457.6, GitHub issues per xfail: open, no answer yet. If none comes, no issues are opened.
+
+Also from the review doc: delete `solarwindpy/reproducibility` and `solarwindpy/scripts`
+(the author's reply on P460.1), and skip code that only adds maintenance with no effect
+(the author's rule 1).
 
 ## Per-PR points
 
@@ -79,8 +94,8 @@ twice; `make_one_plot("")` IndexError; `_put_agg_on_ax` passes `ax` positionally
 `OrbitHist2D.project_1d` KeyError 'z'.
 
 - P446.1 [minor] test_orbits.py: notes the narrow `raises=LegNormalizationMismatch`. disposition: reject (no change asked).
-- P446.2 [minor] test_orbits.py: cite function names instead of line numbers in xfail reasons. disposition: fix-before-merge (PR #446). #450 shifts every cited line in `orbits.py`.
-- P446.3 [minor] test_orbits.py: wrap the kind in `re.escape` inside `match=`. disposition: follow-on (new row: test-quality). The kinds are fixed literals today.
+- P446.2 [minor] test_orbits.py: cite something sturdier than line numbers in xfail reasons. disposition: fix-before-merge (PR #446). Author changed it to a grep slug plus the function name; the matching library comments and a slug-coverage test go to row 8.
+- P446.3 [minor] test_orbits.py: wrap the kind in `re.escape` inside `match=`. disposition: reject (author rule 1: code that is only a maintenance burden with no effect). The kinds are fixed literals.
 - P446.4 [minor] test_orbits.py: `test_both_leg_is_disabled` pins private behaviour. disposition: reject (false: the test goes through the public call and asserts the public error).
 - P446.5 [minor] test_orbits.py: tests depend on internals `cut`, `edges`, `orbit`. disposition: reject (false: these names carry no underscore and are public under TEST_PATTERNS).
 
@@ -91,7 +106,7 @@ Strict xfails (4): `make_fit` re-raises AssertionError; `Gaussian` and `Gaussian
 drop `super().make_fit()`'s return; `Moyal.function` not proportional to the Moyal pdf;
 failed Gaussian fits missing from `bad_fits`.
 
-- P447.1 [suggestion] test_moyal.py:145: the Moyal xfail rests on an unconfirmed defect. disposition: author. Whether the form is deliberate is a physics call.
+- P447.1 [suggestion] test_moyal.py:145: the Moyal xfail rests on an unconfirmed defect. disposition: follow-on (first commit after merge). The author removes Moyal: delete `moyal.py`, its export, `test_moyal.py` with this marker, and doc mentions. Not pre-merge, because #447 edits `test_moyal.py` and #455 edits `moyal.py`, so deleting either on the other's branch is a modify/delete conflict.
 - P447.2 [minor] test_moyal.py:173: the pdf ratio may underflow if the range widens. disposition: reject (no change asked; the range is safe today).
 - P447.3 [minor] test_moyal.py:138: `rel=1e-6` may flicker. disposition: reject (TEST_PATTERNS sets `rel=1e-6` for noise-free fits, reason on the line).
 - P447.4 [minor] general: confirm fixed seeds. disposition: follow-on (new row: test-quality). The untouched `test_trend_fits_advanced.py:64` uses unseeded `np.random.normal`.
@@ -107,14 +122,15 @@ Strict xfails (3, one shared marker): `set_threshold` calls only a `FunctionType
 - P448.2 [suggestion] extrema_calculator.py, sidc.py: lines over 88 columns. disposition: reject (false: `setup.cfg` ignores E501 and black passes).
 - P448.3 [suggestion] tests/test_source_misc_defects.py: move the SIDC docstring test to `tests/solar_activity/`. disposition: follow-on (new row: test-quality).
 - P448.4 [minor] tests/test_source_misc_defects.py: turn import-time constants into a fixture. disposition: reject (the constants are immutable; TEST_PATTERNS requires function scope only for mutating fixtures).
+- P448.5 [author] solarwindpy/reproducibility.py: delete the module, which the author does not want to maintain. disposition: fix-before-merge (PR #448). #448 owns `solarwindpy/__init__.py`, which imports it; `api_reference.rst` is in no PR and no test on any branch uses the module.
 
 ### PR #449
 fix(core): clear core nitpicky docs warnings and commented-out code
 
 Strict xfails: 0.
 
-- P449.1 [minor] plasma.py `velocity`: single backticks around `pd.Series`. disposition: follow-on (new row: test-quality). No `default_role` is set, so this is consistency only.
-- P449.2 [minor] alfvenic_turbulence.py: note why the References list is flush left. disposition: follow-on (new row: test-quality).
+- P449.1 [minor] plasma.py `velocity`: single backticks around `pd.Series`. disposition: reject (author rule 1: code that is only a maintenance burden with no effect). No `default_role` is set, so the docs render the same.
+- P449.2 [minor] alfvenic_turbulence.py: note why the References list is flush left. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P449.3 [minor] plasma.py:1272, 1333: fix the `pydnamic` typo. disposition: follow-on (new row: test-quality).
 - P449.4 [minor] plans/sphinx-warnings-analysis.md:72: update a reference to a deleted class. disposition: reject (historical plan note).
 
@@ -125,10 +141,10 @@ Strict xfails: 0; four defects fixed in place.
 
 - P450.1 [suggestion] agg_plot.py: `clip_data` still calls the removed `clip_lower`/`clip_upper`. disposition: follow-on (row 8). #459 holds strict markers on it; the docstring half is already done.
 - P450.2 [suggestion] spiral.py: land the `build_cat` fix. disposition: follow-on (row 8). #451 holds a strict marker on it; fixing it here fails #451 as XPASS(strict).
-- P450.3 [suggestion] hist1d.py:115: should `set_axnorm` accept `"t"`. disposition: author.
-- P450.4 [suggestion] scatter.py: clipping at 0.0001/0.9999 versus removal. disposition: author. Methodology.
+- P450.3 [suggestion] hist1d.py:115: should `set_axnorm` accept `"t"`. disposition: follow-on (row 8). The author answered yes.
+- P450.4 [suggestion] scatter.py: clipping at 0.0001/0.9999 versus removal. disposition: reject (author: clipping stays; the code and #450's docstring already agree).
 - P450.5 [minor] tests/test_source_plotting_defects.py:1: the Spent-When header does not fit the file. disposition: fix-before-merge (PR #450).
-- P450.6 [suggestion] labels/special.py: raise `TypeError` for a `str` `other_label`. disposition: author. Label behaviour and wording.
+- P450.6 [suggestion] labels/special.py: raise `TypeError` for a `str` `other_label`. disposition: follow-on (row 8). The author answered yes, at creation.
 - P450.7 [suggestion] labels: check `__ge__` and remove or rename `__geq__`/`__leq__`. disposition: follow-on (new row: test-quality).
 
 ### PR #451
@@ -139,7 +155,7 @@ to `np.bincount`; `calc_initial_bins` writes into the caller's int array.
 
 - P451.1 [minor] test_spiral.py:1004: fixing `build_cat` may reroute the `cell_filter` xfail. disposition: reject (false: `cell_filter` never calls `build_cat`).
 - P451.2 [minor] test_spiral.py:1002-1030: lines too long. disposition: reject (false: E501 is ignored and black passes).
-- P451.3 [suggestion] spiral.py: file issues for the `generate_mesh` hang and the top-edge formula. disposition: author. Tracker row 14, #470.
+- P451.3 [suggestion] spiral.py: file issues for the `generate_mesh` hang and the top-edge formula. disposition: follow-on (row 14). The author defers both and does not need them fixed; #470 tracks the hang, and a GitHub issue is to be opened for the top-edge formula.
 - P451.4 [n/a] general: praises dropping call-count checks. disposition: reject (no change asked).
 
 ### PR #452
@@ -149,7 +165,7 @@ Strict xfails: 0.
 
 - P452.1 [minor] test_quantities.py:383-391: `test_gse` compares a Vector with itself. disposition: fix-before-merge (PR #452). A perturbed copy gives the test the power to fail.
 - P452.2 [consider] test_ions.py: compare Ions built from different frames. disposition: follow-on (new row: test-quality).
-- P452.3 [minor] test_quantities.py:81: stray blank line. disposition: follow-on (new row: test-quality).
+- P452.3 [minor] test_quantities.py:81: stray blank line. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P452.4 [minor] general: the ON FAILURE convention is correct. disposition: reject (no change asked).
 - P452.5 [minor] general: unused imports are fine. disposition: reject (no change asked).
 
@@ -172,20 +188,20 @@ test(core): rebuild units_constants tests against CODATA, SI, and IAU
 
 Strict xfails: 0.
 
-- P454.1 [minor] test_units_constants.py: comment that building `Constants()` at import turns a broken constructor into a collection error. disposition: follow-on (new row: test-quality).
+- P454.1 [minor] test_units_constants.py: comment that building `Constants()` at import turns a broken constructor into a collection error. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P454.2 [minor] test_units_constants.py: `particle()` maps species by first letter. disposition: reject (false: the example `"he"` raises KeyError; failure is already loud).
 - P454.3 [minor] test_units_constants.py: add a separate electron charge test. disposition: reject (the parametrized test already covers it).
-- P454.4 [minor] test_units_constants.py: use unrounded 267.63 with a tighter tolerance. disposition: author. A physics value.
-- P454.5 [minor] general: raise the floor to `scipy>=1.15`. disposition: author. A dependency floor, and `pyproject.toml` belongs to #460.
+- P454.4 [minor] test_units_constants.py: use unrounded 267.63 with a tighter tolerance. disposition: author (open: no answer yet; if none comes, 267.6 stays).
+- P454.5 [minor] general: raise the floor to `scipy>=1.15`. disposition: follow-on (row 6). Local commit b570a1c5 already sets scipy 1.16; the author confirmed removing the `CODATA_TRUNCATED` tier after it is pushed.
 
 ### PR #455
 fix+docs(fitfunctions): GaussianPlusHeavySide fits x0; zero nitpicky warnings; own-path defects
 
 Strict xfails: 0; retires the `GaussianPlusHeavySide` doctest xfail.
 
-- P455.1 [suggestion] composite.py:149: the fine-scan result is not guarded against `None`. disposition: fix-before-merge (PR #455). Keep the coarse-scan best; the method stays the author's.
+- P455.1 [suggestion] composite.py:149: the fine-scan result is not guarded against `None`. disposition: reject (author rule 1: the fine range includes the coarse winner, which already succeeded, so the guard can never run).
 - P455.2 [suggestion] composite.py:122: `list(self.p0)` does not handle `None`. disposition: reject (false: `p0` never returns `None`).
-- P455.3 [suggestion] composite.py: add a `scan_x0` opt-out for the extra fits. disposition: author. Methodology; the Notes already state the cost.
+- P455.3 [suggestion] composite.py: add a `scan_x0` opt-out for the extra fits. disposition: reject (the author left it to Claude: the scan is what fits x0, and nothing calls this model inside `TrendFit` today).
 - P455.4 [suggestion] composite.py: a gap midpoint outside the caller's x0 bounds could make the refit raise. disposition: follow-on (new row: test-quality).
 - P455.5 [suggestion] tests/test_source_fitfunctions_defects.py: add single-x, user `p0` and noisy-step cases. disposition: follow-on (new row: test-quality).
 - P455.6 [minor] general: check nothing links the deleted architecture doc. disposition: reject (checked: only historical plan and dispatch text mentions it).
@@ -201,7 +217,7 @@ Strict xfails (1): `Scatter.make_plot` writes `cbar_kwargs['ax']` into the calle
 - P456.4 [suggestion] test_scatter.py:180-181: replace exact limits with a bound. disposition: reject (contradicts TEST_PATTERNS: weakens an assertion).
 - P456.5 [minor] test_scatter.py:128: create the figure inside the `try`. disposition: reject (nothing can fail in between, and the test needs a separate figure).
 - P456.6 [suggestion] test_scatter.py: keep the cbar test after the fix. disposition: reject (no change asked; the xfail protocol already does this).
-- P456.7 [general] test_base.py: the reviewer did not read it. disposition: author.
+- P456.7 [general] test_base.py: the reviewer did not read it. disposition: fix-before-merge (PR #456). The author wants a review pass before merge; findings go to the author and none are applied without the author.
 
 ### PR #457
 test(plotting): add Hist1D contract tests against numpy.histogram
@@ -211,11 +227,11 @@ neither axis; smoothed counts truncated to integers; `plot_window` with `transpo
 TypeError; `construct_cdf` KeyError on the unnamed index.
 
 - P457.1 [minor] test_hist1d.py:143: write `3` instead of `1 + 1 + 1`. disposition: reject (the sum shows the hand count, as TEST_PATTERNS wants).
-- P457.2 [minor] test_hist1d.py:584: move the module-level test into a class. disposition: follow-on (new row: test-quality).
+- P457.2 [minor] test_hist1d.py:584: move the module-level test into a class. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P457.3 [minor] fixture seed: no change asked. disposition: reject (no change asked).
 - P457.4 [minor] test_hist1d.py:546: loosen `rtol` if it flakes. disposition: reject (contradicts TEST_PATTERNS: speculative loosening of a reasoned tolerance).
 - P457.5 [minor] test_hist1d.py:34-44: comment the AssertionError subclasses. disposition: reject (each already has a docstring).
-- P457.6 [unstated] general: open tracking issues for the 5 xfails. disposition: author.
+- P457.6 [unstated] general: open tracking issues for the 5 xfails. disposition: author (open: no answer yet; if none comes, no issues are opened and row 8 retires the markers directly).
 
 ### PR #458
 test(plotting): rebuild plotting-misc on the label/mathtext contract
@@ -226,9 +242,9 @@ Strict xfails: 0.
 - P458.2 [minor] test_integration.py: coverage is per axis, not the cross product. disposition: follow-on (new row: test-quality).
 - P458.3 [minor] test_integration.py:64: `_unescaped_dollar_count` miscounts `\\$`. disposition: follow-on (new row: test-quality).
 - P458.4 [minor] test_integration.py: completeness matches class names only. disposition: reject (the ON FAILURE text covers it).
-- P458.5 [minor] test_integration.py: move `import contextlib, io` to the top. disposition: follow-on (new row: test-quality).
+- P458.5 [minor] test_integration.py: move `import contextlib, io` to the top. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P458.6 [minor] test_integration.py: the regex depends on the `available()` layout. disposition: follow-on (new row: test-quality). Needs a library accessor.
-- P458.7 [unstated] labels: duplicate `ab`, `carr`, `cos_theta` entries. disposition: author. Label definitions.
+- P458.7 [unstated] labels: duplicate `ab`, `carr`, `cos_theta` entries. disposition: fix-before-merge (PR #450). The author keeps the `_templates` copies and deletes the `_trans_measurement` entries; #450 owns `labels/base.py`, and #458's tests name none of the three keys.
 - P458.8 [unstated] pyproject.toml, solarwindpy.yml, tests/fitfunctions/conftest.py:14: drop `psutil` and fix a stale cite. disposition: follow-on (row 6).
 
 ### PR #459
@@ -240,7 +256,7 @@ Strict xfails (13): marginal 2-D mask (2); 1-D unnamed index KeyError (2); `clip
 call.
 
 - P459.1 [suggestion] general: file issues and fix `clip_lower` and the Hist1D KeyError. disposition: follow-on (row 8). Defects recorded by strict markers on this branch and #457.
-- P459.2 [suggestion] tools: `normal_parameters` docstring mismatch and a `swap_protons` check that never fires. disposition: author. The base-10 lognormal is a formula choice.
+- P459.2 [suggestion] tools: `normal_parameters` docstring mismatch and a `swap_protons` check that never fires. disposition: follow-on (row 8). The author wants both bases: `base=np.e`, scaling m and s by ln(base), both formulas in the docstring, and a sampled test per base.
 - P459.3 [suggestion] general: confirm xfail reasons are specific. disposition: reject (already done: typed `raises=` and a retiring clause on each).
 - P459.4 [suggestion] general: confirm CI. disposition: reject (no change asked; CI is read after fixes under the AC 4 bound).
 - P459.5 [suggestion] tests/plotting/test_tools.py: split out the `solarwindpy.tools` tests. disposition: follow-on (new row: test-quality).
@@ -250,11 +266,11 @@ test: replace circular-import tests with an import-linter contract
 
 Strict xfails: 0.
 
-- P460.1 [minor] pyproject.toml: `reproducibility` and `scripts` are not in `layers`. disposition: fix-before-merge (PR #460). A comment only.
-- P460.2 [worth a look] pyproject.toml: confirm the lateral import bans. disposition: author. The layering rule.
+- P460.1 [minor] pyproject.toml: `reproducibility` and `scripts` are not in `layers`. disposition: fix-before-merge (PR #460). The author deletes both instead of commenting: `solarwindpy/scripts/` goes on #460, and `reproducibility` goes on #448 (P448.5).
+- P460.2 [worth a look] pyproject.toml: confirm the lateral import bans. disposition: reject (author: keep the siblings independent; the rule stays).
 - P460.3 [worth a look] general: add a subprocess import test per submodule. disposition: follow-on (new row: test-quality). Tracker row 12 covers the public import test.
 - P460.4 [unstated] pyproject.toml: set `exclude_type_checking_imports`. disposition: reject (moot: no `TYPE_CHECKING` in the package).
-- P460.5 [unstated] CLAUDE.md:49: the CI line omits `lint-imports`. disposition: fix-before-merge (PR #460).
+- P460.5 [unstated] CLAUDE.md:49: the CI line omits `lint-imports`. disposition: fix-before-merge (PR #460). It goes into the Commands block and the CI sentence; a wider `/doctor prompt-audit` review of `CLAUDE.md` is a new follow-on row.
 - P460.6 [unstated] workflow: whitespace-only change. disposition: reject (harmless).
 
 ### PR #461
@@ -286,7 +302,7 @@ docs(usage): rewrite usage.rst as a first session that runs
 Strict xfails: 0; removes the whole-page xfail in `docs/source/conftest.py`.
 
 - P463.1 [suggestion] usage.rst:63: `Freq: h` depends on the pandas version. disposition: reject (pandas is pinned `>=3,<4`).
-- P463.2 [suggestion] usage.rst:74-78: state the thermal speed and `mw²=2kT` convention. disposition: author. Physics wording.
+- P463.2 [suggestion] usage.rst:74-78: state the thermal speed and `mw²=2kT` convention. disposition: reject (already satisfied: the beta sentence defines the m w² = 2kT convention, which the author says is all that is needed).
 - P463.3 [suggestion] usage.rst:100-101: the ellipsis check is weak. disposition: follow-on (new row: test-quality).
 - P463.4 [suggestion] usage.rst:113: note `matplotlib.use("Agg")` must come first. disposition: follow-on (new row: test-quality).
 - P463.5 [info] README: the species comment is wrong. disposition: reject (no change asked here; #469 fixes it).
@@ -311,12 +327,12 @@ docs(tests): repoint TEST_PATTERNS citations; make ast-grep test rules loadable
 
 Strict xfails: 0.
 
-- P466.1 [minor] tools/dev/ast_grep/test-patterns.yml: rules 002 and 005 recommend `wraps=`, against the header. disposition: author. Retire or invert, one decision with P466.2.
-- P466.2 [minor] tools/dev/ast_grep/test-patterns.yml: rules 001, 006, 007 recommend `isinstance`. disposition: author. Same decision as P466.1.
+- P466.1 [minor] tools/dev/ast_grep/test-patterns.yml: rules 002 and 005 recommend `wraps=`, against the header. disposition: fix-before-merge (PR #466). The author retires the rules.
+- P466.2 [minor] tools/dev/ast_grep/test-patterns.yml: rules 001, 006, 007 recommend `isinstance`. disposition: fix-before-merge (PR #466). Retired with P466.1.
 - P466.3 [minor] .claude/commands/swp/test/audit.md:12: reword the "which governs" sentence. disposition: fix-before-merge (PR #466).
 - P466.4 [minor] tools/dev/ast_grep/test-patterns.yml: `--filter` may do nothing with `--rule`. disposition: reject (no change asked; unverified).
 - P466.5 [minor] .claude/docs/DEVELOPMENT.md: watch the branch wording. disposition: reject (the kept text is not shown false).
-- P466.6 [follow-up] .claude/docs/TEST_PATTERNS.md: fix the stale `conda run ... git commit` advice. disposition: author. TEST_PATTERNS is the governing standard.
+- P466.6 [follow-up] .claude/docs/TEST_PATTERNS.md: fix the stale `conda run ... git commit` advice. disposition: fix-before-merge (PR #466). Plain `git commit`, naming `project-env.sh`; no other PR touches the file.
 
 ### PR #467
 chore(scripts): retire six one-off scripts whose use is over
@@ -341,9 +357,9 @@ docs: point install docs at pyproject.toml and fill CITATION
 Strict xfails: 0.
 
 - P469.1 [suggestion] README.rst:55: link `pyproject.toml` on GitHub. disposition: fix-before-merge (PR #469). The README renders on PyPI.
-- P469.2 [suggestion] installation.rst: state a minimum Python version. disposition: author. Stating no floor was deliberate.
+- P469.2 [suggestion] installation.rst: state a minimum Python version. disposition: reject (author: state none; keep pointing at `pyproject.toml`).
 - P469.3 [note] installation.rst:86: the `Requirements`_ reference works. disposition: reject (no change asked).
-- P469.4 [note] CITATION.rst: no BibTeX entry, creator name unsettled. disposition: author. Tracker row 13.
+- P469.4 [note] CITATION.rst: no BibTeX entry, creator name unsettled. disposition: fix-before-merge (PR #469). Reference and BibTeX as "Alterman, B. L."; a `CITATION.cff` with the ORCID is a new follow-on row, waiting on the author's ORCID iD.
 
 ## Cross-PR
 
@@ -360,7 +376,13 @@ Strict xfails: 0.
 - **`SpiralMesh.build_cat` (#450 and #451).** #450's reviewer asks for the fix; #451 holds
   the strict marker. The fix lands after #451 merges and drops the marker in the same change.
 - **`orbits.py` line numbers (#446 and #450).** #450's docstrings shift every line #446's
-  reasons cite; P446.2 switches them to function names.
+  reasons cite; P446.2 switches them to grep slugs plus function names. The matching library
+  comments land in row 8, because `orbits.py` belongs to #450.
+- **Moyal removal (#447 and #455).** #447 edits `test_moyal.py` and #455 edits `moyal.py`,
+  so the removal waits for both to merge and lands as the first commit after.
+- **`reproducibility` and `scripts` deletion (#448 and #460).** `solarwindpy/__init__.py`
+  imports `reproducibility` and belongs to #448, so that deletion goes on #448;
+  `scripts/` touches no PR's files and goes on #460 with the layer contract.
 - **`verscharen2016.py` (#448 and #453).** #448 edits the file and fixes none of #453's three
   defects. Whoever fixes them drops #453's markers in the same change; `get_cmap` is row 6.
 - **`set_threshold` (#448).** The library fix is blocked by `test_extrema_calculator.py`,
