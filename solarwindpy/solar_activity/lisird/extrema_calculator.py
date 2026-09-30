@@ -255,7 +255,7 @@ class ExtremaCalculator(object):
         Known defect: only :class:`types.FunctionType` is called. Other
         callables, including :func:`numpy.nanmedian` (and so the ``None``
         fallback for an untabulated :attr:`name`) and
-        :class:`functools.partial` objects, are stored uncalled, and
+        ``functools.partial`` objects, are stored uncalled, and
         :meth:`find_threshold_crossings` then raises :class:`TypeError`.
         ``tests/test_source_misc_defects.py`` records this with a strict
         ``xfail``.
