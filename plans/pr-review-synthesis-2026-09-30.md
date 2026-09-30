@@ -59,7 +59,7 @@ not added): P455.1.
 The author answered these in the review doc. Two are still open.
 
 1. P447.1, Moyal form: remove Moyal from the package, as the first commit after merge.
-2. P454.4, energy flux value: open, no answer yet. If none comes, 267.6 stays.
+2. P454.4, energy flux value: the author has no preference, so 267.6 stays.
 3. P455.3, `scan_x0` switch: left to Claude; no switch, because the scan is what fits x0.
 4. P459.2, base-10 lognormal: support both bases through a `base=` argument (row 8).
 5. P463.2, beta wording: no change; `usage.rst` already defines the m w² = 2kT convention.
@@ -72,10 +72,10 @@ The author answered these in the review doc. Two are still open.
 12. P466.6, commit instruction: plain `git commit` (before merge on #466).
 13. P454.5, scipy floor: remove the looser tier after the scipy floor push (row 6).
 14. P469.2, Python floor: state none; keep pointing at `pyproject.toml`.
-15. P469.4, citation: "Alterman, B. L." with BibTeX on #469; `CITATION.cff` with ORCID as a follow-on. Open: the ORCID iD.
-16. P451.3, spiral hang and top edge: deferred to row 14; #470 tracks the hang, and a GitHub issue is to be opened for the top-edge formula.
+15. P469.4, citation: "Alterman, B. L." with BibTeX on #469; `CITATION.cff` with ORCID as a follow-on. ORCID iD 0000-0001-6673-3432.
+16. P451.3, spiral hang and top edge: deferred to row 14; #470 tracks the hang, and the top-edge formula gets no GitHub issue (author); it is recorded under row 14.
 17. P456.7, second review of `test_base.py`: yes, before merge on #456.
-18. P457.6, GitHub issues per xfail: open, no answer yet. If none comes, no issues are opened.
+18. P457.6, GitHub issues per xfail: no. The defects are resolved inside this work plan (row 8).
 
 Also from the review doc: delete `solarwindpy/reproducibility` and `solarwindpy/scripts`
 (the author's reply on P460.1), and skip code that only adds maintenance with no effect
@@ -122,7 +122,7 @@ Strict xfails (3, one shared marker): `set_threshold` calls only a `FunctionType
 - P448.2 [suggestion] extrema_calculator.py, sidc.py: lines over 88 columns. disposition: reject (false: `setup.cfg` ignores E501 and black passes).
 - P448.3 [suggestion] tests/test_source_misc_defects.py: move the SIDC docstring test to `tests/solar_activity/`. disposition: follow-on (new row: test-quality).
 - P448.4 [minor] tests/test_source_misc_defects.py: turn import-time constants into a fixture. disposition: reject (the constants are immutable; TEST_PATTERNS requires function scope only for mutating fixtures).
-- P448.5 [author] solarwindpy/reproducibility.py: delete the module, which the author does not want to maintain. disposition: fix-before-merge (PR #448). #448 owns `solarwindpy/__init__.py`, which imports it; `api_reference.rst` is in no PR and no test on any branch uses the module.
+- P448.5 [author] solarwindpy/reproducibility.py: delete the module, which the author does not want to maintain. disposition: fix-before-merge (PR #448), confirmed by the author. #448 owns `solarwindpy/__init__.py`, which imports it; `api_reference.rst` is in no PR and no test on any branch uses the module.
 
 ### PR #449
 fix(core): clear core nitpicky docs warnings and commented-out code
@@ -155,7 +155,7 @@ to `np.bincount`; `calc_initial_bins` writes into the caller's int array.
 
 - P451.1 [minor] test_spiral.py:1004: fixing `build_cat` may reroute the `cell_filter` xfail. disposition: reject (false: `cell_filter` never calls `build_cat`).
 - P451.2 [minor] test_spiral.py:1002-1030: lines too long. disposition: reject (false: E501 is ignored and black passes).
-- P451.3 [suggestion] spiral.py: file issues for the `generate_mesh` hang and the top-edge formula. disposition: follow-on (row 14). The author defers both and does not need them fixed; #470 tracks the hang, and a GitHub issue is to be opened for the top-edge formula.
+- P451.3 [suggestion] spiral.py: file issues for the `generate_mesh` hang and the top-edge formula. disposition: follow-on (row 14). The author defers both and does not need them fixed; #470 tracks the hang, and the top-edge formula gets no GitHub issue (author); it is recorded under row 14.
 - P451.4 [n/a] general: praises dropping call-count checks. disposition: reject (no change asked).
 
 ### PR #452
@@ -191,7 +191,7 @@ Strict xfails: 0.
 - P454.1 [minor] test_units_constants.py: comment that building `Constants()` at import turns a broken constructor into a collection error. disposition: reject (author rule 1: code that is only a maintenance burden with no effect).
 - P454.2 [minor] test_units_constants.py: `particle()` maps species by first letter. disposition: reject (false: the example `"he"` raises KeyError; failure is already loud).
 - P454.3 [minor] test_units_constants.py: add a separate electron charge test. disposition: reject (the parametrized test already covers it).
-- P454.4 [minor] test_units_constants.py: use unrounded 267.63 with a tighter tolerance. disposition: author (open: no answer yet; if none comes, 267.6 stays).
+- P454.4 [minor] test_units_constants.py: use unrounded 267.63 with a tighter tolerance. disposition: reject (the author has no preference; 267.6 is the TEST_PATTERNS example and stays).
 - P454.5 [minor] general: raise the floor to `scipy>=1.15`. disposition: follow-on (row 6). Local commit b570a1c5 already sets scipy 1.16; the author confirmed removing the `CODATA_TRUNCATED` tier after it is pushed.
 
 ### PR #455
@@ -231,7 +231,7 @@ TypeError; `construct_cdf` KeyError on the unnamed index.
 - P457.3 [minor] fixture seed: no change asked. disposition: reject (no change asked).
 - P457.4 [minor] test_hist1d.py:546: loosen `rtol` if it flakes. disposition: reject (contradicts TEST_PATTERNS: speculative loosening of a reasoned tolerance).
 - P457.5 [minor] test_hist1d.py:34-44: comment the AssertionError subclasses. disposition: reject (each already has a docstring).
-- P457.6 [unstated] general: open tracking issues for the 5 xfails. disposition: author (open: no answer yet; if none comes, no issues are opened and row 8 retires the markers directly).
+- P457.6 [unstated] general: open tracking issues for the 5 xfails. disposition: reject (author: no issues; the defects are resolved inside this work plan, row 8 retires the markers directly).
 
 ### PR #458
 test(plotting): rebuild plotting-misc on the label/mathtext contract
@@ -359,7 +359,7 @@ Strict xfails: 0.
 - P469.1 [suggestion] README.rst:55: link `pyproject.toml` on GitHub. disposition: fix-before-merge (PR #469). The README renders on PyPI.
 - P469.2 [suggestion] installation.rst: state a minimum Python version. disposition: reject (author: state none; keep pointing at `pyproject.toml`).
 - P469.3 [note] installation.rst:86: the `Requirements`_ reference works. disposition: reject (no change asked).
-- P469.4 [note] CITATION.rst: no BibTeX entry, creator name unsettled. disposition: fix-before-merge (PR #469). Reference and BibTeX as "Alterman, B. L."; a `CITATION.cff` with the ORCID is a new follow-on row, waiting on the author's ORCID iD.
+- P469.4 [note] CITATION.rst: no BibTeX entry, creator name unsettled. disposition: fix-before-merge (PR #469). Reference and BibTeX as "Alterman, B. L."; a `CITATION.cff` with ORCID iD 0000-0001-6673-3432 is a new follow-on row.
 
 ## Cross-PR
 
