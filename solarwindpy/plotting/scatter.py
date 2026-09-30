@@ -74,8 +74,8 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         collection = ax.scatter(x="x", y="y", c=zkey, data=data, **kwargs)
 
         if cbar and zkey is not None:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
+            # Copy, so adding "ax" below never writes into the caller's dict.
+            cbar_kwargs = dict() if cbar_kwargs is None else dict(cbar_kwargs)
 
             if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
                 cbar_kwargs["ax"] = ax

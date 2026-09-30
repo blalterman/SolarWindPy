@@ -211,19 +211,10 @@ class CbarKwargsMutated(AssertionError):
     """A second plot's colorbar went to the axes of an earlier plot."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=CbarKwargsMutated,
-    reason="scatter.py Scatter.make_plot writes cbar_kwargs['ax'] = ax into "
-    "the caller's dict, so reusing that dict sends a later colorbar to the "
-    "first axes' figure; remove this marker when make_plot copies "
-    "cbar_kwargs before adding 'ax'",
-)
 def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
     """One ``cbar_kwargs`` dict reused for two plots: each gets its colorbar.
 
-    ON FAILURE: (unexpected pass) make_plot no longer mutates cbar_kwargs;
-    drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     kwargs = {"shrink": 0.5}
     _, ax1 = plt.subplots()
