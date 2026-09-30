@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """Tests for the plot scaffolding in ``solarwindpy.plotting.base``.
 
-``Base`` and its mixins exist to be subclassed, so the tests subclass them the
-way the package's own plots do: ``LinePlot`` and ``LimPlot`` below implement
-the abstract methods with a few lines each and call the inherited hooks
-(``_format_axis``, ``_make_cbar``) exactly as ``Scatter`` and ``Hist1D`` do.
-Every assertion is on public state (``data``, ``labels``, ``log``, ``path``,
-``clip``) or on the real matplotlib ``Axes`` and ``Colorbar`` the hooks
-produced on the Agg backend. Expected values come from the hand-typed ``ROWS``
+``Base`` and its mixins exist to be subclassed. The public state they manage
+(``data``, ``labels``, ``log``, ``path``, ``clip``) is tested on ``LinePlot``,
+a minimal ``PlotWithZdata`` subclass. Axis formatting and colorbars are tested
+through the package's own ``Hist1D`` and ``Scatter``, asserting on the real
+matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Two behaviours have no
+public path, the colorbar's missing ``ax``/``cax`` error and
+``DataLimFormatter``, so ``LinePlot`` and ``LimPlot`` call those hooks. Expected values come from the hand-typed ``ROWS``
 table or the ``_expected_path`` helper, which rebuilds the documented path
 layout (class, x, y, z, scale) from ``pathlib`` alone.
 """
@@ -33,7 +33,9 @@ from solarwindpy.plotting.base import (  # noqa: E402
     PlotWithZdata,
     RangeLimits,
 )
+from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.labels import TeXlabel  # noqa: E402
+from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Chosen input: index, x, y, z. Row 11 has NaN x, row 13 NaN y, row 14 NaN z,
@@ -58,6 +60,10 @@ X = pd.Series([r[1] for r in ROWS], index=INDEX)
 Y = pd.Series([r[2] for r in ROWS], index=INDEX)
 Z = pd.Series([r[3] for r in ROWS], index=INDEX)
 
+# Positive values spanning three decades, for Hist1D(logx=True), which bins
+# log10(x) and so needs x > 0.
+DECADES = pd.Series([1.0, 10.0, 100.0, 1000.0])
+
 # Label objects for the path tests: a plain x label and a column-normalized z
 # label, whose path ends in "norm" and so takes set_path's norm branch.
 PLAIN_XLABEL = TeXlabel(("v", "x", "p1"))
@@ -79,20 +85,16 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
 
 
 class LinePlot(PlotWithZdata, CbarMaker):
-    """Minimal concrete plot: points coloured by z, then the shared hooks."""
+    """Minimal concrete plot: points coloured by z, passed to the cbar hook."""
 
     def __init__(self, x, y, z=None, clip_data=False):
         super().__init__()
         self.set_data(x, y, z, clip_data)
 
-    def make_plot(self, ax, transpose_axes=False, cbar_kwargs=None):
+    def make_plot(self, ax, cbar_kwargs):
         d = self.data
         coll = ax.scatter(d["x"], d["y"], c=d["z"])
-        self._format_axis(ax, transpose_axes=transpose_axes)
-        cbar = None
-        if cbar_kwargs is not None:
-            cbar = self._make_cbar(coll, **cbar_kwargs)
-        return coll, cbar
+        return coll, self._make_cbar(coll, **cbar_kwargs)
 
 
 class LimPlot(DataLimFormatter, PlotWithZdata):
@@ -365,19 +367,21 @@ def test_explicit_path_is_used_as_given_plus_optional_scale(add_scale, expected)
 
 
 # ---------------------------------------------------------------------------
-# _format_axis, _make_cbar, DataLimFormatter, on real Axes
+# Axis formatting and colorbars, through Hist1D and Scatter on real Axes
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("transpose", [False, True])
-def test_format_axis_applies_labels_scales_grid_and_ticks(ax, transpose):
+def test_hist1d_axes_carry_labels_scales_grid_and_ticks(ax, transpose):
     """Labels and log scales land on their axes, swapped when transposed.
+
+    ``Hist1D(logx=True)`` gives log x and linear y; ``make_plot`` formats the
+    axes through ``Base``, so grid lines are on and ticks point in and out.
 
     ON FAILURE: the code is wrong.
     """
-    plot = LinePlot(X, Y, Z)
+    plot = Hist1D(DECADES, logx=True, nbins=3)
     plot.set_labels(x="Vx", y="Np")
-    plot.set_log(x=True, y=False)
     plot.make_plot(ax, transpose_axes=transpose)
 
     xl, yl, xs, ys = ("Vx", "Np", "log", "linear")
@@ -391,74 +395,81 @@ def test_format_axis_applies_labels_scales_grid_and_ticks(ax, transpose):
         assert {t.get_tickdir() for t in ticks} == {"inout"}
 
 
-def test_format_axis_leaves_a_none_label_blank(ax):
+def test_hist1d_leaves_a_none_label_blank(ax):
     """A ``None`` label is not written, so the axis label stays empty.
 
     ON FAILURE: the code is wrong.
     """
-    plot = LinePlot(X, Y)
+    plot = Hist1D(DECADES, logx=True, nbins=3)
     plot.set_labels(x=None, y="Np")
     plot.make_plot(ax)
     assert (ax.get_xlabel(), ax.get_ylabel()) == ("", "Np")
 
 
-def test_make_cbar_draws_a_colorbar_for_the_mappable_labelled_z(ax):
-    """The colorbar maps the plotted collection and carries ``labels.z``.
+def test_scatter_colorbar_maps_the_plotted_collection_labelled_z(ax):
+    """The colorbar maps the scatter collection and carries ``labels.z``.
 
     ON FAILURE: the code is wrong.
     """
-    plot = LinePlot(X, Y, Z)
+    plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    coll, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
+    _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
     assert isinstance(cbar, Colorbar)
-    assert cbar.mappable is coll
+    assert cbar.mappable is ax.collections[0]
     assert cbar.ax.get_ylabel() == "T"
     assert cbar.ax.figure is ax.figure
 
 
-def test_make_cbar_draws_into_a_given_cax_with_a_given_label(ax):
+def test_scatter_colorbar_draws_into_a_given_cax_with_a_given_label(ax):
     """``cax`` receives the colorbar; ``label`` overrides ``labels.z``.
 
     ON FAILURE: the code is wrong.
     """
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
-    plot = LinePlot(X, Y, Z)
+    plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
     _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
     assert cbar.ax is cax
     assert cax.get_ylabel() == "custom"
 
 
-def test_make_cbar_accepts_a_list_of_axes(ax):
+def test_scatter_colorbar_accepts_a_list_of_axes(ax):
     """``ax`` may be a sequence of axes; the colorbar joins their figure.
 
     ON FAILURE: the code is wrong.
     """
-    _, cbar = LinePlot(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
+    _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
     assert cbar.ax.figure is ax.figure
     assert len(ax.figure.axes) == 2
 
 
-@pytest.mark.parametrize(
-    "which, match",
-    [("both", "Can't pass ax and cax"), ("neither", "You must pass `ax` or `cax`")],
-)
-def test_make_cbar_needs_exactly_one_of_ax_and_cax(ax, which, match):
-    """Both or neither of ``ax``/``cax`` raises ``ValueError``.
+def test_scatter_colorbar_given_both_ax_and_cax_raises_value_error(ax):
+    """Passing both ``ax`` and ``cax`` for the colorbar raises ``ValueError``.
 
     ON FAILURE: the code is wrong.
     """
-    kwargs = {}
-    if which == "both":
-        kwargs = {"ax": ax, "cax": ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))}
-    with pytest.raises(ValueError, match=match):
-        LinePlot(X, Y, Z).make_plot(ax, cbar_kwargs=kwargs)
+    kwargs = {"ax": ax, "cax": ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))}
+    with pytest.raises(ValueError, match="Can't pass ax and cax"):
+        Scatter(X, Y, Z).make_plot(ax, cbar_kwargs=kwargs)
+
+
+def test_cbar_maker_given_neither_ax_nor_cax_raises_value_error(ax):
+    """With neither ``ax`` nor ``cax`` the colorbar hook raises ``ValueError``.
+
+    No public path reaches this: ``Scatter``, ``Hist2D`` and ``SpiralPlot2D``
+    fill in ``ax`` when neither is given, so ``LinePlot`` calls the hook.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(ValueError, match="You must pass `ax` or `cax`"):
+        LinePlot(X, Y, Z).make_plot(ax, cbar_kwargs={})
 
 
 def test_data_lim_formatter_pins_limits_to_the_data_extent(ax):
     """Axis limits are the min and max of the kept data, with no margin.
 
-    Also formats the axis through ``Base`` (labels are applied).
+    Also formats the axis through ``Base`` (labels are applied). No package
+    class uses ``DataLimFormatter``, so ``LimPlot`` calls its hook.
 
     ON FAILURE: the code is wrong.
     """
