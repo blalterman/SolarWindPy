@@ -7,7 +7,9 @@ implement specific visualizations.
 """
 
 import logging
+import numpy as np
 import pandas as pd
+import matplotlib as mpl
 
 from pathlib import Path
 from collections import namedtuple
@@ -362,6 +364,45 @@ class PlotWithZdata(Base):
             )
         self._data = data
         self._clip = bool(clip_data)
+
+    def _limit_color_norm(self, norm, values):
+        r"""Limit ``norm`` to the 1st and 99th percentiles of the plotted values.
+
+        Parameters
+        ----------
+        norm : matplotlib.colors.Normalize or None
+            The colour normalisation to limit. Limits already set are kept.
+            If None, a linear :class:`matplotlib.colors.Normalize` is built,
+            the norm matplotlib would otherwise use.
+        values : array-like
+            The values handed to matplotlib to colour. NaN, infinite and
+            masked entries are ignored.
+
+        Returns
+        -------
+        matplotlib.colors.Normalize or None
+            The limited norm, with ``clip`` set. Column- and row-normalised
+            plots (``axnorm`` of ``"c"`` or ``"r"``) are already bounded, so
+            for them ``norm`` is returned unchanged.
+        """
+        if getattr(self, "axnorm", None) in ("c", "r"):
+            # Don't limit us to (1%, 99%) interval.
+            return norm
+
+        if norm is None:
+            norm = mpl.colors.Normalize()
+
+        values = np.ma.masked_invalid(values).compressed()
+        if values.size == 0:
+            return norm
+
+        v0, v1 = np.quantile(values, [0.01, 0.99])
+        if norm.vmin is None:
+            norm.vmin = v0
+        if norm.vmax is None:
+            norm.vmax = v1
+        norm.clip = True
+        return norm
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.
