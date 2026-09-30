@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.base.TeXlabel
+=========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.base
+
+.. autoclass:: TeXlabel

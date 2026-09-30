@@ -1,0 +1,554 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=5d14453b" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_modules</span>
+            </li>
+          
+        
+          
+            <li class="breadcrumb-item">
+              <span>Solarwindpy</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.fitfunctions</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for solarwindpy.fitfunctions</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">"""Fit parametric models to observations with robust least squares.</span>
+
+<span class="sd">Each fit function is a subclass of</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFunction` and is importable as</span>
+<span class="sd">``solarwindpy.fitfunctions.&lt;Name&gt;``. :func:`available` prints every one with</span>
+<span class="sd">its module and LaTeX formula.</span>
+
+<span class="sd">Using a fit function</span>
+<span class="sd">--------------------</span>
+<span class="sd">Construct it from the observations, then call ``make_fit``:</span>
+
+<span class="sd">&gt;&gt;&gt; import numpy as np</span>
+<span class="sd">&gt;&gt;&gt; from solarwindpy.fitfunctions import Line</span>
+<span class="sd">&gt;&gt;&gt; x = np.arange(10.0)</span>
+<span class="sd">&gt;&gt;&gt; fit = Line(x, 2.0 * x + 1.0)</span>
+<span class="sd">&gt;&gt;&gt; fit.make_fit()</span>
+<span class="sd">&gt;&gt;&gt; print(f"m={fit.popt['m']:.2f}, b={fit.popt['b']:.2f}")</span>
+<span class="sd">m=2.00, b=1.00</span>
+
+<span class="sd">Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations</span>
+<span class="sd">enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,</span>
+<span class="sd">``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few</span>
+<span class="sd">subclasses add their own, such as the ``guess_x0`` initial step position of</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.composite.GaussianTimesHeavySide`.</span>
+
+<span class="sd">How a fit runs</span>
+<span class="sd">--------------</span>
+<span class="sd">:meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit` is a template</span>
+<span class="sd">method shared by every subclass. It checks that there are at least as many</span>
+<span class="sd">observations as parameters, runs :func:`scipy.optimize.least_squares`,</span>
+<span class="sd">computes the optimized parameters, their covariance and</span>
+<span class="sd">:math:`\chi^2_\nu`, then builds the LaTeX annotation</span>
+<span class="sd">(:class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`) and the plotter</span>
+<span class="sd">(:class:`~solarwindpy.fitfunctions.plots.FFPlot`).</span>
+
+<span class="sd">- The default loss is ``"huber"`` with ``f_scale=0.1``, method ``"trf"``;</span>
+<span class="sd">  ``loss``, ``f_scale``, ``method``, ``bounds``, ``p0`` and other</span>
+<span class="sd">  :func:`~scipy.optimize.least_squares` keywords pass through ``make_fit``.</span>
+<span class="sd">- ``weights`` are treated as :func:`scipy.optimize.curve_fit` treats</span>
+<span class="sd">  ``sigma``: a 1-D array holds per-point uncertainties, a 2-D array a</span>
+<span class="sd">  covariance matrix. ``absolute_sigma=True`` raises ``NotImplementedError``.</span>
+<span class="sd">- The covariance is the pseudo-inverse of :math:`J^T J` from the final</span>
+<span class="sd">  Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square</span>
+<span class="sd">  root of its diagonal.</span>
+<span class="sd">- With ``return_exception=True``, a failed fit returns the exception instead</span>
+<span class="sd">  of raising it, for loops over many fits.</span>
+
+<span class="sd">Failures are reported with</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFunctionError` and its subclasses</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.InsufficientDataError`,</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFailedError` and</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.InvalidParameterError`.</span>
+
+<span class="sd">Writing a fit function</span>
+<span class="sd">----------------------</span>
+<span class="sd">A subclass implements three abstract properties: ``function`` (the model,</span>
+<span class="sd">whose arguments after ``x`` are the fit parameters, in order), ``p0`` (the</span>
+<span class="sd">initial guess, in the same order) and ``TeX_function`` (the model in LaTeX).</span>
+<span class="sd">The metaclass :class:`~solarwindpy.fitfunctions.core.FitFunctionMeta` combines</span>
+<span class="sd">:class:`abc.ABCMeta` with NumPy-style docstring inheritance, so a subclass</span>
+<span class="sd">method without a docstring, or with only some sections, inherits the missing</span>
+<span class="sd">sections from :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.trend_fits.TrendFit` fits one fit function</span>
+<span class="sd">in each bin of 2-D aggregated data and a second to the trend of the results.</span>
+<span class="sd">"""</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"FitFunction"</span><span class="p">,</span>
+    <span class="s2">"TrendFit"</span><span class="p">,</span>
+    <span class="s2">"available"</span><span class="p">,</span>
+    <span class="c1"># Fit functions</span>
+    <span class="s2">"Exponential"</span><span class="p">,</span>
+    <span class="s2">"ExponentialCDF"</span><span class="p">,</span>
+    <span class="s2">"ExponentialPlusC"</span><span class="p">,</span>
+    <span class="s2">"Gaussian"</span><span class="p">,</span>
+    <span class="s2">"GaussianLn"</span><span class="p">,</span>
+    <span class="s2">"GaussianNormalized"</span><span class="p">,</span>
+    <span class="s2">"GaussianPlusHeavySide"</span><span class="p">,</span>
+    <span class="s2">"GaussianTimesHeavySide"</span><span class="p">,</span>
+    <span class="s2">"GaussianTimesHeavySidePlusHeavySide"</span><span class="p">,</span>
+    <span class="s2">"HeavySide"</span><span class="p">,</span>
+    <span class="s2">"HingeAtPoint"</span><span class="p">,</span>
+    <span class="s2">"HingeMax"</span><span class="p">,</span>
+    <span class="s2">"HingeMin"</span><span class="p">,</span>
+    <span class="s2">"HingeSaturation"</span><span class="p">,</span>
+    <span class="s2">"Line"</span><span class="p">,</span>
+    <span class="s2">"LineXintercept"</span><span class="p">,</span>
+    <span class="s2">"Moyal"</span><span class="p">,</span>
+    <span class="s2">"PowerLaw"</span><span class="p">,</span>
+    <span class="s2">"PowerLawOffCenter"</span><span class="p">,</span>
+    <span class="s2">"PowerLawPlusC"</span><span class="p">,</span>
+    <span class="s2">"Saturation"</span><span class="p">,</span>
+    <span class="s2">"TwoLine"</span><span class="p">,</span>
+    <span class="c1"># Exceptions</span>
+    <span class="s2">"FitFunctionError"</span><span class="p">,</span>
+    <span class="s2">"InsufficientDataError"</span><span class="p">,</span>
+    <span class="s2">"FitFailedError"</span><span class="p">,</span>
+    <span class="s2">"InvalidParameterError"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isabstract</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussians</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">exponentials</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_laws</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">moyal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hinge</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">heaviside</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">trend_fits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">composite</span>
+
+<span class="n">FitFunction</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunction</span>
+<span class="n">TrendFit</span> <span class="o">=</span> <span class="n">trend_fits</span><span class="o">.</span><span class="n">TrendFit</span>
+
+<span class="n">Exponential</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">Exponential</span>
+<span class="n">ExponentialCDF</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">ExponentialCDF</span>
+<span class="n">ExponentialPlusC</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">ExponentialPlusC</span>
+<span class="n">Gaussian</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">Gaussian</span>
+<span class="n">GaussianLn</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">GaussianLn</span>
+<span class="n">GaussianNormalized</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">GaussianNormalized</span>
+<span class="n">GaussianPlusHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianPlusHeavySide</span>
+<span class="n">GaussianTimesHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianTimesHeavySide</span>
+<span class="n">GaussianTimesHeavySidePlusHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianTimesHeavySidePlusHeavySide</span>
+<span class="n">HeavySide</span> <span class="o">=</span> <span class="n">heaviside</span><span class="o">.</span><span class="n">HeavySide</span>
+<span class="n">HingeAtPoint</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeAtPoint</span>
+<span class="n">HingeMax</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeMax</span>
+<span class="n">HingeMin</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeMin</span>
+<span class="n">HingeSaturation</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeSaturation</span>
+<span class="n">Line</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">Line</span>
+<span class="n">LineXintercept</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">LineXintercept</span>
+<span class="n">Moyal</span> <span class="o">=</span> <span class="n">moyal</span><span class="o">.</span><span class="n">Moyal</span>
+<span class="n">PowerLaw</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLaw</span>
+<span class="n">PowerLawOffCenter</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLawOffCenter</span>
+<span class="n">PowerLawPlusC</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLawPlusC</span>
+<span class="n">Saturation</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">Saturation</span>
+<span class="n">TwoLine</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">TwoLine</span>
+
+<span class="c1"># Exception classes for better error handling</span>
+<span class="n">FitFunctionError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunctionError</span>
+<span class="n">InsufficientDataError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">InsufficientDataError</span>
+<span class="n">FitFailedError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFailedError</span>
+<span class="n">InvalidParameterError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">InvalidParameterError</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fit_function_classes</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Return every concrete FitFunction subclass defined in this package.</span>
+
+<span class="sd">    Classes are found by walking the subclass tree, so a new fit function is</span>
+<span class="sd">    listed as soon as its module is imported above. Subclasses defined outside</span>
+<span class="sd">    ``solarwindpy.fitfunctions`` (for example in tests) are excluded.</span>
+<span class="sd">    """</span>
+    <span class="n">found</span><span class="p">,</span> <span class="n">stack</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="p">[</span><span class="n">core</span><span class="o">.</span><span class="n">FitFunction</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sub</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="bp">cls</span>
+            <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">found</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isabstract</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="n">_NEEDS_INSTANCE</span> <span class="o">=</span> <span class="s2">"(formula needs a fitted instance)"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_class_formula</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return ``cls``'s LaTeX formula without fitting data.</span>
+
+<span class="sd">    ``TeX_function`` is usually a property whose value does not depend on the</span>
+<span class="sd">    instance. A formula that does, or one that is not a string, is reported as</span>
+<span class="sd">    ``_NEEDS_INSTANCE`` so a single class cannot break the whole listing.</span>
+<span class="sd">    """</span>
+    <span class="n">tex</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">TeX_function</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="n">tex</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tex</span><span class="p">,</span> <span class="nb">property</span><span class="p">)</span> <span class="k">else</span> <span class="n">tex</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_NEEDS_INSTANCE</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tex</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_NEEDS_INSTANCE</span>
+    <span class="k">return</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tex</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="available">
+<a class="viewcode-back" href="../../_autosummary/solarwindpy.fitfunctions.available.html#solarwindpy.fitfunctions.available">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">available</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Print every available fit function, its module and its LaTeX formula.</span>
+
+<span class="sd">    The formula is read from each class's ``TeX_function`` without fitting any</span>
+<span class="sd">    data. Formulas that span several lines are joined with ``"; "``.</span>
+<span class="sd">    """</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">_class_formula</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">_fit_function_classes</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Fit function"</span><span class="p">,</span> <span class="s2">"Module"</span><span class="p">,</span> <span class="s2">"LaTeX"</span><span class="p">)</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span> <span class="o">+</span> <span class="p">[</span><span class="n">header</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fmt</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">widths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">widths</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">fmt</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">fmt</span><span class="p">((</span><span class="s2">"-"</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="n">widths</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="mi">5</span><span class="p">))]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span> <span class="o">+</span> <span class="p">[</span><span class="n">fmt</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

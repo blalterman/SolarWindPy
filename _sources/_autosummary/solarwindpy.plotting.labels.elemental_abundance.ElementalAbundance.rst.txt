@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.elemental\_abundance.ElementalAbundance
+===================================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.elemental_abundance
+
+.. autoclass:: ElementalAbundance

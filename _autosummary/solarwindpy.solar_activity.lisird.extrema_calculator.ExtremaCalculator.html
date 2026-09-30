@@ -1,0 +1,636 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.solar_activity.lisird.lisird" href="solarwindpy.solar_activity.lisird.lisird.html" />
+    <link rel="prev" title="solarwindpy.solar_activity.lisird.extrema_calculator" href="solarwindpy.solar_activity.lisird.extrema_calculator.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.get_all_indices.html">solarwindpy.solar_activity.get_all_indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.icme.html">solarwindpy.solar_activity.icme</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solarwindpy-solar-activity-lisird-extrema-calculator-extremacalculator">
+<h1>solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator<a class="headerlink" href="#solarwindpy-solar-activity-lisird-extrema-calculator-extremacalculator" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ExtremaCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Determine extrema in an activity index time series.</p>
+<p>The calculator smooths the input series with a rolling mean and finds
+local minima and maxima based on a threshold value.</p>
+<dl class="field-list">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Activity index after the rolling mean, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">raw</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Activity index as passed in, before smoothing.</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">threshold</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Threshold separating maxima from minima, one value per time in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>.</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extrema</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;Max&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Min&quot;</span></code> labels indexed by the time of each extremum.</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">formatted_extrema</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Extrema formatted as a solar-cycle table.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create the calculator.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>name</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Identifier for the activity index.</p>
+</dd>
+<dt><strong>activity_index</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Raw activity measurements.</p>
+</dd>
+<dt><strong>threshold</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a>, optional</span></dt><dd><p>If a scalar, it is used directly to classify maxima and minima.
+If a callable, it is invoked with <code class="docutils literal notranslate"><span class="pre">activity_index</span></code> to compute the
+threshold. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, the value is looked up from an internal
+table or computed with <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a>.</p>
+</dd>
+<dt><strong>window</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Window length in days for the rolling mean.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="Link to this definition"></a></dt>
+<dd><p>Activity index after the rolling mean, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw" title="Link to this definition"></a></dt>
+<dd><p>Activity index as passed in, before smoothing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="Link to this definition"></a></dt>
+<dd><p>Activity index name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.window">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">window</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.window" title="Link to this definition"></a></dt>
+<dd><p>Rolling-mean window in days, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for no smoothing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">threshold</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold" title="Link to this definition"></a></dt>
+<dd><p>Threshold separating maxima from minima, one value per time in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema_finders">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extrema_finders</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema_finders" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extrema</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">&quot;Max&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Min&quot;</span></code> labels indexed by the time of each extremum.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">threshold_crossings</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings" title="Link to this definition"></a></dt>
+<dd><p>Values of <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> at the times it crosses <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_in_extrema_finding_intervals</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals" title="Link to this definition"></a></dt>
+<dd><p>Interval between threshold crossings that holds each time in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">formatted_extrema</span></span><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema" title="Link to this definition"></a></dt>
+<dd><p>Extrema formatted as a solar-cycle table.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></dt><dd><p>Data frame with <code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> columns indexed by cycle:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==========</span> <span class="o">============</span> <span class="o">============</span>
+ <span class="n">Interval</span>      <span class="n">Min</span>          <span class="n">Max</span>
+<span class="o">==========</span> <span class="o">============</span> <span class="o">============</span>
+ <span class="o">-</span><span class="mi">1</span>         <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>   <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>
+  <span class="mi">0</span>         <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>   <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>
+  <span class="mi">1</span>         <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>   <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>
+  <span class="o">...</span>
+  <span class="n">N</span>         <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>   <span class="o">&lt;</span><span class="n">DateTime</span><span class="o">&gt;</span>
+<span class="o">==========</span> <span class="o">============</span> <span class="o">============</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name" title="Link to this definition"></a></dt>
+<dd><p>Set the activity index name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>For CaK quantities whose threshold has not been determined.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">
+<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data" title="Link to this definition"></a></dt>
+<dd><p>Store the raw index and its rolling mean.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>index</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Activity index with a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a>. CaK quantities
+are truncated to start on 1977-01-01.</p>
+</dd>
+<dt><strong>window</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>Rolling-mean window in days. The smoothed series is shifted back by
+half a window so each mean is centered on its window. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+skips smoothing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">
+<span class="sig-name descname"><span class="pre">set_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.set_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold" title="Link to this definition"></a></dt>
+<dd><p>Set the threshold that separates maxima from minima.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>threshold</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>A number is used as is. A plain Python function
+(<a class="reference external" href="https://docs.python.org/3/library/types.html#types.FunctionType" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.FunctionType</span></code></a>, e.g. a <code class="docutils literal notranslate"><span class="pre">def</span></code> or <code class="docutils literal notranslate"><span class="pre">lambda</span></code>) is
+called with <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> and its result used. <code class="docutils literal notranslate"><span class="pre">None</span></code> selects the
+value tabulated for <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>; when <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is not
+tabulated it selects <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a>, which is then
+handled as a callable.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Known defect: only <a class="reference external" href="https://docs.python.org/3/library/types.html#types.FunctionType" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.FunctionType</span></code></a> is called. Other
+callables, including <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a> (and so the <code class="docutils literal notranslate"><span class="pre">None</span></code>
+fallback for an untabulated <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>) and
+<code class="docutils literal notranslate"><span class="pre">functools.partial</span></code> objects, are stored uncalled, and
+<a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find_threshold_crossings()</span></code></a> then raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">tests/test_source_misc_defects.py</span></code> records this with a strict
+<code class="docutils literal notranslate"><span class="pre">xfail</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">
+<span class="sig-name descname"><span class="pre">find_threshold_crossings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_threshold_crossings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings" title="Link to this definition"></a></dt>
+<dd><p>Find the times at which <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> crosses <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></dt><dd><p>Values of <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> at each crossing, also stored as
+<a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold_crossings</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">
+<span class="sig-name descname"><span class="pre">cut_data_into_extrema_finding_intervals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.cut_data_into_extrema_finding_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals" title="Link to this definition"></a></dt>
+<dd><p>Assign each time in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> to an interval between crossings.</p>
+<p>The bin edges are the times in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold_crossings</span></code></a>, extended to
+the first and last times of <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></dt><dd><p>Interval for each time in <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, also stored as
+<a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data_in_extrema_finding_intervals"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data_in_extrema_finding_intervals</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">format_extrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extrema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.format_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema" title="Link to this definition"></a></dt>
+<dd><p>Arrange extrema as a cycle table.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>extrema</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;Max&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Min&quot;</span></code> labels indexed by time.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> times indexed by <code class="docutils literal notranslate"><span class="pre">cycle</span></code>. Minima are numbered
+from 0; when the first maximum precedes the first minimum, maxima
+are numbered from -1 so each maximum shares a row with the
+minimum that precedes it.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">
+<span class="sig-name descname"><span class="pre">find_extrema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.find_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema" title="Link to this definition"></a></dt>
+<dd><p>Find, validate, and tabulate the extrema.</p>
+<p>Sets <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.extrema"><code class="xref py py-attr docutils literal notranslate"><span class="pre">extrema</span></code></a> and <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.formatted_extrema"><code class="xref py py-attr docutils literal notranslate"><span class="pre">formatted_extrema</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crossings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/lisird/extrema_calculator.html#ExtremaCalculator.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot" title="Link to this definition"></a></dt>
+<dd><p>Plot the smoothed index and its threshold.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>crossings</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, mark <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.threshold_crossings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold_crossings</span></code></a>.</p>
+</dd>
+<dt><strong>extrema</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, mark the maxima and minima.</p>
+</dd>
+<dt><strong>ranges</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, color each extrema-finding interval.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.solar_activity.lisird.extrema_calculator.html" class="btn btn-neutral float-left" title="solarwindpy.solar_activity.lisird.extrema_calculator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.solar_activity.lisird.lisird.html" class="btn btn-neutral float-right" title="solarwindpy.solar_activity.lisird.lisird" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

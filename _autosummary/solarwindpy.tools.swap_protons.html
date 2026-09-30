@@ -7,22 +7,18 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.tools.swap_protons &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.tools.swap_protons &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -90,12 +86,12 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.tools.html">solarwindpy.tools</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.tools.html#functions">Functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.tools.normal_parameters.html">solarwindpy.tools.normal_parameters</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.tools.swap_protons</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.tools.html#examples">Examples</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -319,30 +315,33 @@
 <dt class="sig sig-object py" id="solarwindpy.tools.swap_protons">
 <span class="sig-name descname"><span class="pre">swap_protons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/tools.html#swap_protons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.tools.swap_protons" title="Link to this definition"></a></dt>
 <dd><p>Swap beam and core proton labels when the beam density dominates.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><em>pandas.DataFrame</em></a>) – Data containing proton information. Proton species are stored in the
-<code class="docutils literal notranslate"><span class="pre">S</span></code> level of the column index.</p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><em>logging.Logger</em></a><em>, </em><em>optional</em>) – Logger used to report indices of swapped protons. If <code class="docutils literal notranslate"><span class="pre">None</span></code> a simple
-logger is created.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Data containing proton information. Proton species are stored in the
+<code class="docutils literal notranslate"><span class="pre">S</span></code> level of the column index.</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging.Logger</span></code></a>, optional</span></dt><dd><p>Logger used to report indices of swapped protons. If <code class="docutils literal notranslate"><span class="pre">None</span></code> a simple
+logger is created.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>new_data</strong> (<em>pandas.DataFrame</em>) – Copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> with <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code> columns swapped where the beam
-density exceeds the core density.</p></li>
-<li><p><strong>swap</strong> (<em>pandas.Series</em>) – Boolean mask indicating where swaps occurred.</p></li>
-</ul>
-</p>
+<dd class="field-even"><dl>
+<dt><strong>new_data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> with <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code> columns swapped where the beam
+density exceeds the core density.</p>
+</dd>
+<dt><strong>swap</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Boolean mask indicating where swaps occurred.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;p2&#39;</span><span class="p">)</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s1">'n'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'n'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="s1">'p2'</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">'M'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'S'</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>  <span class="c1"># p1 &lt; p2 in first row</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">new_df</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">swap_protons</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># First row should be swapped</span>

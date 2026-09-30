@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.labels.datetime &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.labels.datetime &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -313,7 +309,8 @@
              
   <h1>Source code for solarwindpy.plotting.labels.datetime</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Special labels not handled by :py:class:`TeXlabel`.&quot;&quot;&quot;</span>
+<span class="sa">r</span><span class="sd">"""Labels for times, time intervals, and frequencies."""</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.tseries.frequencies</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_offset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
@@ -321,14 +318,14 @@
 
 
 <div class="viewcode-block" id="Timedelta">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Timedelta.html#solarwindpy.plotting.labels.datetime.Timedelta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Timedelta</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Label for a time interval.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Label for a time interval."""</span>
 
 <div class="viewcode-block" id="Timedelta.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Timedelta.html#solarwindpy.plotting.labels.datetime.Timedelta.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -336,7 +333,7 @@
 <span class="sd">            Value convertible via :func:`pandas.tseries.frequencies.to_offset`.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
@@ -347,41 +344,43 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>  <span class="c1"># noqa: W605</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Label with units, as a TeX math string."""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">"$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$"</span>  <span class="c1"># noqa: W605</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_with_description</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-    <span class="c1">#     @property</span>
-    <span class="c1">#     def dt(self):</span>
-    <span class="c1">#         return self._dt</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Pandas offset, or the raw value if it could not be converted."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\Delta t&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the label."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\Delta t"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``dt-&lt;freqstr&gt;``, or ``dt-UNK`` without a valid offset."""</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dt-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">freqstr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dt-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">freqstr</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;dt-UNK&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"dt-UNK"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the offset's multiple and unit, or unknown units."""</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> \; \mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="k">return</span> <span class="sa">r</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> \; \mathrm{</span><span class="si">%s</span><span class="s2">}"</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># noqa: W605</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">_inU</span><span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">_inU</span><span class="p">[</span><span class="s2">"unknown"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Timedelta.set_offset">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Timedelta.set_offset">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Timedelta.html#solarwindpy.plotting.labels.datetime.Timedelta.set_offset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store ``new`` converted with ``to_offset``, or unchanged if that fails."""</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -393,22 +392,22 @@
 
 
 <div class="viewcode-block" id="DateTime">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.DateTime.html#solarwindpy.plotting.labels.datetime.DateTime">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DateTime</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic datetime label.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Generic datetime label."""</span>
 
 <div class="viewcode-block" id="DateTime.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.DateTime.html#solarwindpy.plotting.labels.datetime.DateTime.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        kind : str</span>
-<span class="sd">            Text used to build the label, e.g. ``&quot;Year&quot;`` or ``&quot;Month&quot;``.</span>
+<span class="sd">            Text used to build the label, e.g. ``"Year"`` or ``"Month"``.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_kind</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
@@ -419,50 +418,55 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Label as a TeX math string; it has no units."""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"$</span><span class="si">%s</span><span class="s2">$"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_with_description</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Text of the label, e.g. ``Year``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the label."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\mathrm{</span><span class="si">%s</span><span class="s2">}"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="sa">r</span><span class="s2">" \; "</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path, ``kind`` lower-cased with spaces replaced by ``-``."""</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">))</span>
 
 <div class="viewcode-block" id="DateTime.set_kind">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.DateTime.set_kind">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.DateTime.html#solarwindpy.plotting.labels.datetime.DateTime.set_kind">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the text of the label."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span> <span class="o">=</span> <span class="n">new</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="Epoch">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Epoch.html#solarwindpy.plotting.labels.datetime.Epoch">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Epoch</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create epoch analysis labels, e.g. ``Hour of Day``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Create epoch analysis labels, e.g. ``Hour of Day``."""</span>
 
 <div class="viewcode-block" id="Epoch.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">of_thing</span><span class="p">,</span> <span class="n">space</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Epoch.html#solarwindpy.plotting.labels.datetime.Epoch.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">of_thing</span><span class="p">,</span> <span class="n">space</span><span class="o">=</span><span class="sa">r</span><span class="s2">"\,"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Instantiate the label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        kind : str</span>
-<span class="sd">            The smaller time unit, e.g. ``&quot;Hour&quot;``.</span>
+<span class="sd">            The smaller time unit, e.g. ``"Hour"``.</span>
 <span class="sd">        of_thing : str</span>
-<span class="sd">            The larger time unit, e.g. ``&quot;Day&quot;``.</span>
-<span class="sd">        space : str, default ``&quot;,&quot;``</span>
+<span class="sd">            The larger time unit, e.g. ``"Day"``.</span>
+<span class="sd">        space : str, default ``"\,"``</span>
 <span class="sd">            TeX spacing command placed between words.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_smaller</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_larger</span><span class="p">(</span><span class="n">of_thing</span><span class="p">)</span>
@@ -475,23 +479,28 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">larger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Larger time unit, title-cased."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_larger</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smaller</span><span class="si">}</span><span class="s2">-of-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">larger</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``&lt;smaller&gt;-of-&lt;larger&gt;``."""</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smaller</span><span class="si">}</span><span class="s2">-of-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">larger</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">smaller</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Smaller time unit, title-cased."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smaller</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX spacing command placed between words."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_space</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the label."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\mathrm{</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">}"</span> <span class="o">%</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smaller</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span>
@@ -500,26 +509,36 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Label as a TeX math string; it has no units."""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"$</span><span class="si">%s</span><span class="s2">$"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_with_description</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Epoch.set_larger">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_larger">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Epoch.html#solarwindpy.plotting.labels.datetime.Epoch.set_larger">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_larger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the larger time unit, title-cased."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_larger</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Epoch.set_smaller">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_smaller">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Epoch.html#solarwindpy.plotting.labels.datetime.Epoch.set_smaller">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_smaller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the smaller time unit, title-cased."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_smaller</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Epoch.set_space">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Epoch.set_space">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Epoch.html#solarwindpy.plotting.labels.datetime.Epoch.set_space">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\,&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\;&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\:&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized Space </span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the spacing between words.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``new`` is not a space or one of the TeX spaces ``\,``, ``\;``, ``\:``.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">new</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"\,"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"\;"</span><span class="p">,</span> <span class="sa">r</span><span class="s2">"\:"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unrecognized Space </span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_space</span> <span class="o">=</span> <span class="n">new</span></div>
 </div>
@@ -527,14 +546,14 @@
 
 
 <div class="viewcode-block" id="Frequency">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Frequency.html#solarwindpy.plotting.labels.datetime.Frequency">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Frequency</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frequency of another quantity.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Frequency of another quantity."""</span>
 
 <div class="viewcode-block" id="Frequency.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Frequency.html#solarwindpy.plotting.labels.datetime.Frequency.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -542,7 +561,7 @@
 <span class="sd">            The time interval for frequency calculation.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_other</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
@@ -550,28 +569,33 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">"$</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2"> \; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">]$"</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_with_description</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">other</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``Timedelta`` label whose inverse this frequency is."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_other</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{Frequency}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the label."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\mathrm</span><span class="si">{Frequency}</span><span class="s2">"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">)^</span><span class="si">{</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the inverse of the other label's units."""</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">)^</span><span class="si">{</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path, set by ``build_label``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
 
 <div class="viewcode-block" id="Frequency.set_other">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.set_other">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Frequency.html#solarwindpy.plotting.labels.datetime.Frequency.set_other">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store ``other``, wrapping it in a ``Timedelta`` if it is not one."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">):</span>
             <span class="n">other</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
@@ -580,35 +604,36 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span>
-        <span class="k">if</span> <span class="s2">&quot;??&quot;</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
-            <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;UNK&quot;</span>
+        <span class="k">if</span> <span class="s2">"??"</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s2">"UNK"</span>
 
-        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;frequency_of_</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"frequency_of_</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path</span>
 
 <div class="viewcode-block" id="Frequency.build_label">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.Frequency.build_label">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.Frequency.html#solarwindpy.plotting.labels.datetime.Frequency.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Rebuild ``path`` from the units."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_path</span><span class="p">()</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="January1st">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.January1st.html#solarwindpy.plotting.labels.datetime.January1st">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">January1st</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Label for the first day of the year.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Label for the first day of the year."""</span>
 
 <div class="viewcode-block" id="January1st.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.datetime.html#solarwindpy.plotting.labels.datetime.January1st.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.datetime.January1st.html#solarwindpy.plotting.labels.datetime.January1st.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the label.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
 
@@ -618,16 +643,19 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Label as a TeX math string; it has no units."""</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"$</span><span class="si">%s</span><span class="s2">$"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_with_description</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{January 1^</span><span class="si">{st}</span><span class="s2"> of Year}&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot; \; &quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the label."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\mathrm{January 1^</span><span class="si">{st}</span><span class="s2"> of Year}"</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="sa">r</span><span class="s2">" \; "</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;January-1st-of-Year&quot;</span><span class="p">)</span></div>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``January-1st-of-Year``."""</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"January-1st-of-Year"</span><span class="p">)</span></div>
 
 </pre></div>
 

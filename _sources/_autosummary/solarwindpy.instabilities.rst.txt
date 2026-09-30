@@ -1,0 +1,39 @@
+﻿solarwindpy.instabilities
+=========================
+
+.. automodule:: solarwindpy.instabilities
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Submodules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   beta_ani
+   verscharen2016
+
+

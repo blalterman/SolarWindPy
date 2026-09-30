@@ -1,8 +1,12 @@
-﻿solarwindpy.solar\_activity.plots
+solarwindpy.solar\_activity.plots
 =================================
 
 .. automodule:: solarwindpy.solar_activity.plots
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

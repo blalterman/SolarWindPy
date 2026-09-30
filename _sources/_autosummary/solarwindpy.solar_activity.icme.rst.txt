@@ -1,0 +1,38 @@
+solarwindpy.solar\_activity.icme
+================================
+
+.. automodule:: solarwindpy.solar_activity.icme
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Submodules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   icmecat
+
+

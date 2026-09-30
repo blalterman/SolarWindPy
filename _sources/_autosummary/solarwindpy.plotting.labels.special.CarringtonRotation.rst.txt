@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.CarringtonRotation
+======================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: CarringtonRotation

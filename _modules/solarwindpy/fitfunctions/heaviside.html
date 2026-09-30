@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.heaviside &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.heaviside &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -306,11 +302,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.fitfunctions.heaviside</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Heaviside step function fit.</span>
+<span></span><span class="sa">r</span><span class="sd">"""Heaviside step function fit.</span>
 
 <span class="sd">This module provides a fit function for a Heaviside (step) function,</span>
 <span class="sd">commonly used for modeling abrupt transitions in data.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -320,9 +316,9 @@
 
 
 <div class="viewcode-block" id="HeavySide">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.heaviside.html#solarwindpy.fitfunctions.heaviside.HeavySide">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.heaviside.HeavySide.html#solarwindpy.fitfunctions.heaviside.HeavySide">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HeavySide</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Heaviside step function for modeling abrupt transitions.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Heaviside step function for modeling abrupt transitions.</span>
 
 <span class="sd">    The model is a step function with transition at x0:</span>
 
@@ -371,7 +367,7 @@
 <span class="sd">    &gt;&gt;&gt; y = np.where(x &lt; 5, 5, 2)  # Step down at x=5</span>
 <span class="sd">    &gt;&gt;&gt; fit = HeavySide(x, y, guess_x0=5, guess_y0=2, guess_y1=3)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Step at x={fit.popt[&#39;x0&#39;]:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Step at x={fit.popt['x0']:.2f}")</span>
 <span class="sd">    Step at x=5.00</span>
 
 <span class="sd">    Notes</span>
@@ -380,10 +376,10 @@
 <span class="sd">    the data distribution. For best results with noisy or complex</span>
 <span class="sd">    data, providing manual guesses or passing p0 directly to</span>
 <span class="sd">    make_fit() is recommended.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="HeavySide.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.heaviside.html#solarwindpy.fitfunctions.heaviside.HeavySide.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.heaviside.HeavySide.html#solarwindpy.fitfunctions.heaviside.HeavySide.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -401,16 +397,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The Heaviside step function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The Heaviside step function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x0, y0, y1)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">heavy_side</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate Heaviside step function.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate Heaviside step function.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -427,7 +423,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">heaviside</span><span class="p">(</span><span class="n">x0</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">y0</span> <span class="o">+</span> <span class="n">y1</span><span class="p">))</span> <span class="o">+</span> <span class="n">y0</span>
             <span class="k">return</span> <span class="n">out</span>
 
@@ -435,7 +431,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from:</span>
 <span class="sd">        - User-provided guesses if available</span>
@@ -450,7 +446,7 @@
 <span class="sd">        ------</span>
 <span class="sd">        AssertionError</span>
 <span class="sd">            If insufficient data for estimation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
@@ -480,18 +476,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the Heaviside function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x) = y_1 \cdot H(x_0 - x) + y_0&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;x &lt; x_0: f(x) = y_0 + y_1&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;x &gt; x_0: f(x) = y_0&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x) = y_1 \cdot H(x_0 - x) + y_0"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"x &lt; x_0: f(x) = y_0 + y_1"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"x &gt; x_0: f(x) = y_0"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>

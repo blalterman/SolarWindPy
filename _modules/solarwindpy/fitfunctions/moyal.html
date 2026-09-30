@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.moyal &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.moyal &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -307,41 +303,39 @@
              
   <h1>Source code for solarwindpy.fitfunctions.moyal</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Moyal distribution fit function for asymmetric peak fitting.</span>
+<span class="sa">r</span><span class="sd">"""Moyal distribution fit function for asymmetric peak fitting.</span>
 
 <span class="sd">The Moyal distribution is commonly used in particle physics and solar wind</span>
 <span class="sd">analysis for modeling energy loss distributions and asymmetric velocity</span>
 <span class="sd">distributions.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span>
 
 
 <div class="viewcode-block" id="Moyal">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.moyal.html#solarwindpy.fitfunctions.moyal.Moyal">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.moyal.Moyal.html#solarwindpy.fitfunctions.moyal.Moyal">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Moyal</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Moyal distribution for fitting asymmetric peaks.</span>
+<span class="w">    </span><span class="sd">"""Moyal distribution for fitting asymmetric peaks.</span>
 
 <span class="sd">    The Moyal distribution is the convolution of a Landau distribution</span>
 <span class="sd">    with a Gaussian, commonly used in particle physics for energy loss</span>
 <span class="sd">    distributions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Moyal.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.moyal.html#solarwindpy.fitfunctions.moyal.Moyal.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.moyal.Moyal.html#solarwindpy.fitfunctions.moyal.Moyal.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Docstring inherited from FitFunction</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-    <span class="c1">#         self._sigma = float(sigma)</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">moyal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
             <span class="n">center</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">mu</span>
-            <span class="c1">#             sigma = self.sigma</span>
             <span class="n">ms_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">center</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
             <span class="n">arg0</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ms_sq</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">ms_sq</span><span class="p">))</span>
             <span class="n">arg1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">arg0</span><span class="p">)</span>
@@ -355,19 +349,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the initial guess for the Gaussian parameters.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate the initial guess for the Gaussian parameters.</span>
 
 <span class="sd">        Return</span>
 <span class="sd">        ------</span>
 <span class="sd">        p0 : list</span>
 <span class="sd">            The initial guesses as [mu, sigma, A].</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
         <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="c1">#         std = self.sigma</span>
 
         <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
@@ -376,15 +369,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;LaTeX representation of the Moyal function.</span>
+<span class="w">        </span><span class="sd">"""LaTeX representation of the Moyal function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            LaTeX string for the Moyal distribution formula.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Moyal distribution approximation used in this implementation</span>
-        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;f(x) = A \cdot \exp\left[\frac</span><span class="si">{1}{2}</span><span class="s2">\left(\left(\frac{x-\mu}{\sigma}\right)^2 - \exp\left(\left(\frac{x-\mu}{\sigma}\right)^2\right)\right)\right]&quot;</span>
+        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"f(x) = A \cdot \exp\left[\frac</span><span class="si">{1}{2}</span><span class="s2">\left(\left(\frac{x-\mu}{\sigma}\right)^2 - \exp\left(\left(\frac{x-\mu}{\sigma}\right)^2\right)\right)\right]"</span>
         <span class="k">return</span> <span class="n">TeX</span></div>
 
 </pre></div>

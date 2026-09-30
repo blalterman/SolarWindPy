@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.Probability
+===============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: Probability

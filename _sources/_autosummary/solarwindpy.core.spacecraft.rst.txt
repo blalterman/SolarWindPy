@@ -1,8 +1,12 @@
-﻿solarwindpy.core.spacecraft
+solarwindpy.core.spacecraft
 ===========================
 
 .. automodule:: solarwindpy.core.spacecraft
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

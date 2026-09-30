@@ -7,27 +7,23 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.solar_activity.lisird &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.solar_activity.lisird &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.instabilities.verscharen2016" href="solarwindpy.instabilities.verscharen2016.html" />
-    <link rel="prev" title="solarwindpy.solar_activity.sunspot_number" href="solarwindpy.solar_activity.sunspot_number.html" />
+    <link rel="next" title="solarwindpy.solar_activity.lisird.extrema_calculator" href="solarwindpy.solar_activity.lisird.extrema_calculator.html" />
+    <link rel="prev" title="solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError" href="solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError.html" />
    
   <style>
     .sidebar-custom-info {
@@ -86,14 +82,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.solar_activity.lisird</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.get_all_indices.html">solarwindpy.solar_activity.get_all_indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.icme.html">solarwindpy.solar_activity.icme</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.solar_activity.lisird</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -311,16 +313,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-solar-activity-lisird">
-<h1>solarwindpy.solar_activity.lisird<a class="headerlink" href="#solarwindpy-solar-activity-lisird" title="Link to this heading"></a></h1>
+  <section id="module-solarwindpy.solar_activity.lisird">
+<span id="solarwindpy-solar-activity-lisird"></span><h1>solarwindpy.solar_activity.lisird<a class="headerlink" href="#module-solarwindpy.solar_activity.lisird" title="Link to this heading"></a></h1>
+<p>Solar activity indices from the LASP Interactive Solar Irradiance Data Center.</p>
+<p class="rubric">Submodules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.extrema_calculator.html#module-solarwindpy.solar_activity.lisird.extrema_calculator" title="solarwindpy.solar_activity.lisird.extrema_calculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extrema_calculator</span></code></a></p></td>
+<td><p>Tools for calculating extrema in LISIRD activity indices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.lisird.html#module-solarwindpy.solar_activity.lisird.lisird" title="solarwindpy.solar_activity.lisird.lisird"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lisird</span></code></a></p></td>
+<td><p>Interfaces for the LASP Interactive Solar Irradiance Data Center (LISIRD).</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.solar_activity.sunspot_number.html" class="btn btn-neutral float-left" title="solarwindpy.solar_activity.sunspot_number" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.instabilities.verscharen2016.html" class="btn btn-neutral float-right" title="solarwindpy.instabilities.verscharen2016" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError.html" class="btn btn-neutral float-left" title="solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.solar_activity.lisird.extrema_calculator.html" class="btn btn-neutral float-right" title="solarwindpy.solar_activity.lisird.extrema_calculator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

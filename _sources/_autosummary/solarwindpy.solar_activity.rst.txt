@@ -1,0 +1,49 @@
+﻿solarwindpy.solar\_activity
+===========================
+
+.. automodule:: solarwindpy.solar_activity
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      get_all_indices
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Submodules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   base
+   icme
+   lisird
+   plots
+   sunspot_number
+
+

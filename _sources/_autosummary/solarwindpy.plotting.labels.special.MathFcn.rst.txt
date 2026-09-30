@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.MathFcn
+===========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: MathFcn

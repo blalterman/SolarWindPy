@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.lisird.extrema\_calculator.ExtremaCalculator
+========================================================================
+
+.. currentmodule:: solarwindpy.solar_activity.lisird.extrema_calculator
+
+.. autoclass:: ExtremaCalculator

@@ -1,0 +1,39 @@
+solarwindpy.solar\_activity.sunspot\_number.sidc
+================================================
+
+.. automodule:: solarwindpy.solar_activity.sunspot_number.sidc
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      SIDC
+      SIDCLoader
+      SIDC_ID
+      SSNExtrema
+   
+   
+
+   
+   
+   
+
+
+

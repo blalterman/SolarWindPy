@@ -1,8 +1,12 @@
-﻿solarwindpy.core.tensor
+solarwindpy.core.tensor
 =======================
 
 .. automodule:: solarwindpy.core.tensor
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

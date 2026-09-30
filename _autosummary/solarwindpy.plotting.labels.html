@@ -7,28 +7,22 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.plotting.labels.available_labels" href="solarwindpy.plotting.labels.available_labels.html" />
+    <link rel="next" title="solarwindpy.plotting.labels.available" href="solarwindpy.plotting.labels.available.html" />
     <link rel="prev" title="solarwindpy.plotting.histograms" href="solarwindpy.plotting.histograms.html" />
    
   <style>
@@ -86,21 +80,26 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.plotting.labels</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.available_labels.html">solarwindpy.plotting.labels.available_labels</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.plotting.html">solarwindpy.plotting</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.agg_plot.html">solarwindpy.plotting.agg_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.base.html">solarwindpy.plotting.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist1d.html">solarwindpy.plotting.hist1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist2d.html">solarwindpy.plotting.hist2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.plotting.labels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -318,291 +317,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-plotting-labels">
-<h1>solarwindpy.plotting.labels<a class="headerlink" href="#solarwindpy-plotting-labels" title="Link to this heading"></a></h1>
+  <section id="module-solarwindpy.plotting.labels">
+<span id="solarwindpy-plotting-labels"></span><h1>solarwindpy.plotting.labels<a class="headerlink" href="#module-solarwindpy.plotting.labels" title="Link to this heading"></a></h1>
 <p>Tools for creating physical quantity plot labels.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.available_labels.html#solarwindpy.plotting.labels.available_labels" title="solarwindpy.plotting.labels.available_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_labels</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.available.html#solarwindpy.plotting.labels.available" title="solarwindpy.plotting.labels.available"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available</span></code></a>()</p></td>
 <td><p>Print all available measurement, component and species labels.</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeXlabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
-<p>Create a LaTeX label from measurement, component and species information.</p>
-<p>The object can be used directly in plotting routines. String
-representation returns the formatted label with units.</p>
-<p class="rubric">Notes</p>
-<p>Comparison operators and hashing use <code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> of the object so two
-labels representing the same quantity compare equal.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_line_for_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Instantiate the label.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mcs0</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">(&quot;M&quot;,</span> <span class="pre">&quot;C&quot;,</span> <span class="pre">&quot;S&quot;)</span></code> where <code class="docutils literal notranslate"><span class="pre">m</span></code> is the measurement, <code class="docutils literal notranslate"><span class="pre">c</span></code> the
-component and <code class="docutils literal notranslate"><span class="pre">s</span></code> the species. Empty strings are allowed for
-components or species.</p></li>
-<li><p><strong>mcs1</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Denominator for fraction style labels. Units are compared and set
-to dimensionless when equal.</p></li>
-<li><p><strong>axnorm</strong> (<em>{&quot;c&quot;</em><em>, </em><em>&quot;r&quot;</em><em>, </em><em>&quot;t&quot;</em><em>, </em><em>&quot;d&quot;}</em><em>, </em><em>optional</em>) – Axis normalization used when building colorbar labels.</p></li>
-<li><p><strong>new_line_for_units</strong> (bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> a newline separates label and units.</p></li>
-<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Human-readable description displayed above the mathematical label.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Construct the complete label.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span></dt>
-<dd><p>Optional human-readable description shown above the label.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">make_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.make_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Basic substitution of any species within a species string if the.</p>
-<p>species has a substitution in the ion_species dictionary.</p>
-<p class="rubric">Notes</p>
-<p>This equation might only work because <span class="math notranslate nohighlight">\(a\rightarrow\alpha\)</span> is
-the only actual translation made and, based on lexsort order, would be
-the first group. This function may need to be updated for more complex
-patterns, e.g., if we translate something like
-<span class="math notranslate nohighlight">\(\mathrm{He}^{2+}\rightarrow\text{He}^{2+}\)</span>.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs0</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcs1</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_line_for_units</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Set the description string.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em>) – Human-readable description. None disables the description.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_mcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcs0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcs1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_mcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_new_line_for_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/base.html#TeXlabel.set_new_line_for_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Vsw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Vsw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
-<p>Solar wind speed.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Vsw.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Initialize the logger.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span></dt>
-<dd><p>Optional human-readable description shown above the label.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Set the description string.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em>) – Human-readable description. None disables the description.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Count"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></p>
-<p>Count histogram label.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Count.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Initialize the logger.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Count.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span></dt>
-<dd><p>Optional human-readable description shown above the label.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_axnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#Count.set_axnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Set the description string.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em>) – Human-readable description. None disables the description.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tex</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_units</span></span></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">species_translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Replace species codes in a string with their LaTeX equivalents.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – String potentially containing species codes.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(new_string,</span> <span class="pre">count)</span></code> from <a class="reference external" href="https://docs.python.org/3/library/re.html#re.subn" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.subn()</span></code></a>.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a></p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Only substitutions defined in <code class="docutils literal notranslate"><span class="pre">_trans_species</span></code> are performed. The
-implementation relies on the simple mapping used in this module and may
-need to be revisited for more complex patterns.</p>
-</dd></dl>
-
+<p class="rubric">Submodules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.base.html#module-solarwindpy.plotting.labels.base" title="solarwindpy.plotting.labels.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a></p></td>
+<td><p>Tools for creating physical quantity plot labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.chemistry.html#module-solarwindpy.plotting.labels.chemistry" title="solarwindpy.plotting.labels.chemistry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chemistry</span></code></a></p></td>
+<td><p>Common chemistry labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.composition.html#module-solarwindpy.plotting.labels.composition" title="solarwindpy.plotting.labels.composition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">composition</span></code></a></p></td>
+<td><p>Labels for heavy ion charge states and charge-state ratios.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.datetime.html#module-solarwindpy.plotting.labels.datetime" title="solarwindpy.plotting.labels.datetime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code></a></p></td>
+<td><p>Labels for times, time intervals, and frequencies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.elemental_abundance.html#module-solarwindpy.plotting.labels.elemental_abundance" title="solarwindpy.plotting.labels.elemental_abundance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">elemental_abundance</span></code></a></p></td>
+<td><p>Labels for elemental abundance ratios.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.labels.special.html#module-solarwindpy.plotting.labels.special" title="solarwindpy.plotting.labels.special"><code class="xref py py-obj docutils literal notranslate"><span class="pre">special</span></code></a></p></td>
+<td><p>Labels that <a class="reference internal" href="solarwindpy.plotting.labels.base.TeXlabel.html#solarwindpy.plotting.labels.base.TeXlabel" title="solarwindpy.plotting.labels.base.TeXlabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TeXlabel</span></code></a> does not build.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
@@ -610,7 +358,7 @@ need to be revisited for more complex patterns.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="solarwindpy.plotting.histograms.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.histograms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.plotting.labels.available_labels.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.labels.available_labels" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.plotting.labels.available.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.labels.available" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

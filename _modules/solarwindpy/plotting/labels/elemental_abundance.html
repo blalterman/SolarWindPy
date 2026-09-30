@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.labels.elemental_abundance &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.labels.elemental_abundance &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -312,22 +308,24 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.plotting.labels.elemental_abundance</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ElementalAbundance&quot;</span><span class="p">]</span>
+<span></span><span class="sa">r</span><span class="sd">"""Labels for elemental abundance ratios."""</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ElementalAbundance"</span><span class="p">]</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
 
-<span class="n">known_species</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">_trans_species</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,)</span>
+<span class="n">known_species</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">_trans_species</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="s2">"X"</span><span class="p">,)</span>
 
 
 <div class="viewcode-block" id="ElementalAbundance">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ElementalAbundance</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ratio of elemental abundances.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Ratio of elemental abundances."""</span>
 
 <div class="viewcode-block" id="ElementalAbundance.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">species</span><span class="p">,</span>
@@ -336,7 +334,7 @@
         <span class="n">photospheric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the abundance label.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the abundance label.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -350,7 +348,7 @@
 <span class="sd">            If True, label indicates ratio to photospheric value.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_species</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">reference_species</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pct_unit</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pct_unit</span><span class="p">)</span>
@@ -360,56 +358,64 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Numerator element symbol, title-cased."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">photospheric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""If True, the ratio is normalized to its photospheric value."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_photospheric</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">reference_species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Denominator element symbol, title-cased."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reference_species</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of percent units if ``pct_unit``, otherwise count units."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pct_unit</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\%&quot;</span>
+            <span class="k">return</span> <span class="sa">r</span><span class="s2">"\%"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\#&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="k">return</span> <span class="sa">r</span><span class="s2">"\#"</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the ratio, over its photospheric value if ``photospheric``."""</span>
         <span class="n">num</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">_trans_species</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
         <span class="n">den</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">_trans_species</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_species</span><span class="p">)</span>
-        <span class="n">ratio</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mathrm{</span><span class="si">%s</span><span class="s2">}/\mathrm{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">den</span><span class="p">)</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"\mathrm{</span><span class="si">%s</span><span class="s2">}/\mathrm{</span><span class="si">%s</span><span class="s2">}"</span> <span class="o">%</span> <span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">den</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photospheric</span><span class="p">:</span>
-            <span class="n">tex</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="sa">r</span><span class="s2">&quot;\mathrm</span><span class="si">{photo}</span><span class="s2">&quot;</span>  <span class="c1"># noqa: W605</span>
+            <span class="n">tex</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">_"</span> <span class="sa">r</span><span class="s2">"\mathrm</span><span class="si">{photo}</span><span class="s2">"</span>  <span class="c1"># noqa: W605</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tex</span> <span class="o">=</span> <span class="n">ratio</span>
         <span class="k">return</span> <span class="n">tex</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">-OV-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_species</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``&lt;species&gt;-OV-&lt;reference&gt;``, suffixed when photospheric."""</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">-OV-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_species</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photospheric</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;_photospheric-ratio&quot;</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s2">"_photospheric-ratio"</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pct_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""If True, the units are percent."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pct_unit</span>
 
 <div class="viewcode-block" id="ElementalAbundance.set_species">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.elemental_abundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.set_species">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.html#solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance.set_species">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">reference_species</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store both element symbols, title-cased; an unrecognized one logs a warning."""</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
         <span class="n">reference_species</span> <span class="o">=</span> <span class="n">reference_species</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">species</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_species</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species (</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">) is not recognized&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Species (</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">) is not recognized"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">reference_species</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_species</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Reference species (</span><span class="si">{</span><span class="n">reference_species</span><span class="si">}</span><span class="s2">) is not recognized&quot;</span>
+                <span class="sa">f</span><span class="s2">"Reference species (</span><span class="si">{</span><span class="n">reference_species</span><span class="si">}</span><span class="s2">) is not recognized"</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>

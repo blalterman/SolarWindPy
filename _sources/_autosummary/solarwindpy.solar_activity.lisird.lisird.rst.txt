@@ -1,0 +1,39 @@
+solarwindpy.solar\_activity.lisird.lisird
+=========================================
+
+.. automodule:: solarwindpy.solar_activity.lisird.lisird
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      LISIRD
+      LISIRDExtrema
+      LISIRDLoader
+      LISIRD_ID
+   
+   
+
+   
+   
+   
+
+
+

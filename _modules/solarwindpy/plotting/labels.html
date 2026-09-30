@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -307,15 +303,16 @@
              
   <h1>Source code for solarwindpy.plotting.labels</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Tools for creating physical quantity plot labels.&quot;&quot;&quot;</span>
+<span class="sa">r</span><span class="sd">"""Tools for creating physical quantity plot labels."""</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;TeXlabel&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Vsw&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Count&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;base&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;special&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;available_TeXlabel_measurements&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;species_translation&quot;</span><span class="p">,</span>
+    <span class="s2">"TeXlabel"</span><span class="p">,</span>
+    <span class="s2">"Vsw"</span><span class="p">,</span>
+    <span class="s2">"Count"</span><span class="p">,</span>
+    <span class="s2">"base"</span><span class="p">,</span>
+    <span class="s2">"special"</span><span class="p">,</span>
+    <span class="s2">"available"</span><span class="p">,</span>
+    <span class="s2">"species_translation"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isclass</span>
@@ -338,7 +335,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_clean_str_list_for_printing</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format a list of strings as grouped, sorted text.</span>
+<span class="w">    </span><span class="sd">"""Format a list of strings as grouped, sorted text.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -349,23 +346,23 @@
 <span class="sd">    -------</span>
 <span class="sd">    str</span>
 <span class="sd">        Multiline string grouping entries by their first character.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">upper</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()])</span>
     <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">upper</span><span class="p">]</span>
 
-    <span class="n">gb</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]})</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
-    <span class="n">agg</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
-    <span class="n">agg</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Upper&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span>
+    <span class="n">gb</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"d"</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s2">"g"</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]})</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+    <span class="n">agg</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
+    <span class="n">agg</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Upper"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span>
     <span class="n">agg</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
+    <span class="n">agg</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">agg</span>
 
 
-<div class="viewcode-block" id="available_labels">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.labels.available_labels.html#solarwindpy.plotting.labels.available_labels">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">available_labels</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print all available measurement, component and species labels.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="available">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.labels.available.html#solarwindpy.plotting.labels.available">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">available</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Print all available measurement, component and species labels."""</span>
 
     <span class="n">m</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">_trans_measurement</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">_templates</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
     <span class="n">c</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">_trans_component</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -383,34 +380,29 @@
 
     <span class="n">m</span> <span class="o">=</span> <span class="n">_clean_str_list_for_printing</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">_clean_str_list_for_printing</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-    <span class="c1">#     s = _clean_str_list_for_printing(s)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
     <span class="n">a</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;TeXlabel knows</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">r</span><span class="s2">"""TeXlabel knows</span>
 
-<span class="sd">Measurements</span>
-<span class="sd">------------</span>
-<span class="sd">{m}</span>
+<span class="s2">Measurements</span>
+<span class="s2">------------</span>
+<span class="si">{m}</span>
 
-<span class="sd">Components</span>
-<span class="sd">----------</span>
-<span class="sd">{c}</span>
+<span class="s2">Components</span>
+<span class="s2">----------</span>
+<span class="si">{c}</span>
 
-<span class="sd">Species</span>
-<span class="sd">-------</span>
-<span class="sd">{s}</span>
+<span class="s2">Species</span>
+<span class="s2">-------</span>
+<span class="si">{s}</span>
 
-<span class="sd">Special</span>
-<span class="sd">-------</span>
-<span class="sd">{a}</span>
-<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span>
-        <span class="p">)</span>
-    <span class="p">)</span></div>
+<span class="s2">Special</span>
+<span class="s2">-------</span>
+<span class="si">{a}</span>
+<span class="s2">"""</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">))</span></div>
 
 </pre></div>
 

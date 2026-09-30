@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.icme.icmecat.ICMECATDownloadError
+=============================================================
+
+.. currentmodule:: solarwindpy.solar_activity.icme.icmecat
+
+.. autoexception:: ICMECATDownloadError

@@ -1,8 +1,12 @@
-﻿solarwindpy.core.vector
+solarwindpy.core.vector
 =======================
 
 .. automodule:: solarwindpy.core.vector
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

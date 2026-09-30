@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.datetime.Timedelta
+==============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.datetime
+
+.. autoclass:: Timedelta

@@ -1,8 +1,12 @@
-﻿solarwindpy.core.base
+solarwindpy.core.base
 =====================
 
 .. automodule:: solarwindpy.core.base
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

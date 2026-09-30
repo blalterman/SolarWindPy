@@ -7,22 +7,18 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.solar_activity.base.DataLoader &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.solar_activity.base.DataLoader &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -86,21 +82,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.ActivityIndicator.html">solarwindpy.solar_activity.base.ActivityIndicator</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.Base.html">solarwindpy.solar_activity.base.Base</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.solar_activity.base.DataLoader</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.ID.html">solarwindpy.solar_activity.base.ID</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.IndicatorExtrema.html">solarwindpy.solar_activity.base.IndicatorExtrema</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.get_all_indices.html">solarwindpy.solar_activity.get_all_indices</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.icme.html">solarwindpy.solar_activity.icme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -322,83 +317,101 @@
 <h1>solarwindpy.solar_activity.base.DataLoader<a class="headerlink" href="#solarwindpy-solar-activity-base-dataloader" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">DataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.base.Base.html#solarwindpy.solar_activity.base.Base" title="solarwindpy.solar_activity.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Download, cache, and load a solar activity data set.</p>
+<p>Data are cached under <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.data_path" title="solarwindpy.solar_activity.base.DataLoader.data_path"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data_path</span></code></a> in a file named for the date of
+download, and downloaded again when that date is before today.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize a data loader.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Unique data identifier, typically from something like
-<code class="xref py py-class docutils literal notranslate"><span class="pre">SIDC_ID</span></code>.</p></li>
-<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Full download URL for the data source.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>key</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Unique data identifier, typically from something like
+<a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID" title="solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID"><code class="xref py py-class docutils literal notranslate"><span class="pre">SIDC_ID</span></code></a>.</p>
+</dd>
+<dt><strong>url</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Full download URL for the data source.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.data_path">
-<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.data_path" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data_path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.data_path" title="Link to this definition"></a></dt>
+<dd><p>Root of the local data cache, <code class="docutils literal notranslate"><span class="pre">~/solarwindpy/data</span></code>.</p>
+<p>Subclasses extend this path with their source and key.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.convert_nans">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.convert_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.convert_nans" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">convert_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.convert_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.convert_nans" title="Link to this definition"></a></dt>
+<dd><p>Replace the source’s missing-value sentinel with NaN.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.download_data">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.download_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.download_data" title="Link to this definition"></a></dt>
+<dd><p>Download the data and write them to the cache.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.load_data">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.load_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.load_data" title="Link to this definition"></a></dt>
+<dd><p>Load today’s cached data into <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.data" title="solarwindpy.solar_activity.base.DataLoader.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, downloading if stale.</p>
+<p>Subclasses call this and may add to the loaded data.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.logger">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.logger" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.logger" title="Link to this definition"></a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">logging.Logger</span></code> attached to the instance.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.data">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.data" title="Link to this definition"></a></dt>
+<dd><p>Loaded data, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> indexed by time.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.key">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.key" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.key" title="Link to this definition"></a></dt>
+<dd><p>Data identifier.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.url">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">url</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.url" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">url</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.url" title="Link to this definition"></a></dt>
+<dd><p>Download URL.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.ctime">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ctime</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.ctime" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ctime</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.ctime" title="Link to this definition"></a></dt>
+<dd><p>Date of the cached data, from its file name.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.age">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">age</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.age" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">age</span></span><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.age" title="Link to this definition"></a></dt>
+<dd><p>Time since <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.ctime" title="solarwindpy.solar_activity.base.DataLoader.ctime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ctime</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.set_key">
 <span class="sig-name descname"><span class="pre">set_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.set_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.set_key" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.key" title="solarwindpy.solar_activity.base.DataLoader.key"><code class="xref py py-attr docutils literal notranslate"><span class="pre">key</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.set_url">
 <span class="sig-name descname"><span class="pre">set_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.set_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.set_url" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.url" title="solarwindpy.solar_activity.base.DataLoader.url"><code class="xref py py-attr docutils literal notranslate"><span class="pre">url</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.get_data_ctime">
@@ -406,11 +419,11 @@
 <dd><p>Determine when the current data set was created.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Creation time inferred from the file name, or <code class="docutils literal notranslate"><span class="pre">1970-01-01</span></code> if no
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Timestamp</span></code></a></dt><dd><p>Creation time inferred from the file name, or <code class="docutils literal notranslate"><span class="pre">1970-01-01</span></code> if no
 prior data are found.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.6)">pandas.Timestamp</a></p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -418,7 +431,8 @@ prior data are found.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.get_data_age">
 <span class="sig-name descname"><span class="pre">get_data_age</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/base.html#DataLoader.get_data_age"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.base.DataLoader.get_data_age" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Compute the time elapsed since <a class="reference internal" href="#solarwindpy.solar_activity.base.DataLoader.ctime" title="solarwindpy.solar_activity.base.DataLoader.ctime"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ctime</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.base.DataLoader.maybe_update_stale_data">

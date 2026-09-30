@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.composite.GaussianTimesHeavySide
+=========================================================
+
+.. currentmodule:: solarwindpy.fitfunctions.composite
+
+.. autoclass:: GaussianTimesHeavySide

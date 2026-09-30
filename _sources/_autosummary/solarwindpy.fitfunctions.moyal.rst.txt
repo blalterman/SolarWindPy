@@ -1,8 +1,12 @@
-﻿solarwindpy.fitfunctions.moyal
+solarwindpy.fitfunctions.moyal
 ==============================
 
 .. automodule:: solarwindpy.fitfunctions.moyal
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

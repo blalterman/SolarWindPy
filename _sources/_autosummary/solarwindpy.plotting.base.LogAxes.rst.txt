@@ -1,0 +1,6 @@
+solarwindpy.plotting.base.LogAxes
+=================================
+
+.. currentmodule:: solarwindpy.plotting.base
+
+.. autoclass:: LogAxes

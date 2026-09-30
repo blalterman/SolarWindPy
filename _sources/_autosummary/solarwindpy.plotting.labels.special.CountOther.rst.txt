@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.CountOther
+==============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: CountOther

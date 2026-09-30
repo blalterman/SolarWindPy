@@ -61,7 +61,7 @@ For contributors, install the additional development tools:
 
 .. code-block:: bash
 
-   pip install -r requirements-dev.txt
+   pip install -e ".[dev]"
 
 Conda Environment Setup
 ------------------------

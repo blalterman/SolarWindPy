@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.datetime.Epoch
+==========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.datetime
+
+.. autoclass:: Epoch

@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.composite &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.composite &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -306,7 +302,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.fitfunctions.composite</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Composite fit functions combining Gaussians with Heaviside step functions.</span>
+<span></span><span class="sa">r</span><span class="sd">"""Composite fit functions combining Gaussians with Heaviside step functions.</span>
 
 <span class="sd">This module provides fit functions that combine Gaussian distributions with</span>
 <span class="sd">Heaviside step functions for modeling distributions with sharp transitions</span>
@@ -320,19 +316,19 @@
 <span class="sd">    Gaussian truncated at a threshold (zero below x0).</span>
 <span class="sd">GaussianTimesHeavySidePlusHeavySide</span>
 <span class="sd">    Gaussian for x &gt;= x0 with constant plateau for x &lt; x0.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFailedError</span><span class="p">,</span> <span class="n">FitFunction</span><span class="p">,</span> <span class="n">InsufficientDataError</span>
 
 
 <div class="viewcode-block" id="GaussianPlusHeavySide">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.html#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GaussianPlusHeavySide</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian plus Heaviside step function for offset peak modeling.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Gaussian plus Heaviside step function for offset peak modeling.</span>
 
 <span class="sd">    Models a Gaussian peak with a step function that adds an offset</span>
 <span class="sd">    below a threshold:</span>
@@ -377,28 +373,107 @@
 <span class="sd">    &gt;&gt;&gt; y = 4*np.exp(-0.5*((x-5)/1)**2) + 3*np.heaviside(2-x, 0.5) + 1</span>
 <span class="sd">    &gt;&gt;&gt; fit = GaussianPlusHeavySide(x, y)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;mu={fit.popt[&#39;mu&#39;]:.2f}, x0={fit.popt[&#39;x0&#39;]:.2f}&quot;)</span>
-<span class="sd">    mu=5.00, x0=2.00</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; print(f"mu={fit.popt['mu']:.2f}")</span>
+<span class="sd">    mu=5.00</span>
+<span class="sd">    &gt;&gt;&gt; # x0 is resolved to the gap between the samples either side of the step</span>
+<span class="sd">    &gt;&gt;&gt; bool(x[x &lt; 2].max() &lt; fit.popt['x0'] &lt; x[x &gt; 2].min())</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The model is only evaluated at the samples, so the fit quality changes</span>
+<span class="sd">    only when ``x0`` crosses a sample and every ``x0`` between the same two</span>
+<span class="sd">    neighbouring samples fits equally well. A gradient-based optimizer</span>
+<span class="sd">    therefore cannot move ``x0``. :meth:`make_fit` instead holds ``x0`` at</span>
+<span class="sd">    the midpoint of a gap between neighbouring unique samples, fits the</span>
+<span class="sd">    other five parameters, and keeps the gap with the lowest cost. It</span>
+<span class="sd">    searches about :math:`\sqrt{n}` evenly spaced gaps of the :math:`n`</span>
+<span class="sd">    available, then every gap within one coarse step of the best, so a fit</span>
+<span class="sd">    costs about :math:`3\sqrt{n}` least-squares runs. The search finds the</span>
+<span class="sd">    best gap when the cost falls toward the true step at the scale of the</span>
+<span class="sd">    coarse spacing; a step small against the noise or the Gaussian can defeat</span>
+<span class="sd">    it. The fitted ``x0`` is a gap midpoint: it is known only to within the</span>
+<span class="sd">    gap, and its reported uncertainty (``psigma``) is not meaningful.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="GaussianPlusHeavySide.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.html#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="GaussianPlusHeavySide.make_fit">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.html#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.make_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_exception</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Fit the model, choosing ``x0`` by scanning the gaps between samples.</span>
+
+<span class="sd">        Each candidate ``x0`` is the midpoint of a gap between neighbouring</span>
+<span class="sd">        unique ``x`` samples used in the fit. For each, the remaining</span>
+<span class="sd">        parameters are fitted with ``x0`` fixed (its gradient is zero there).</span>
+<span class="sd">        Candidates are searched coarse to fine, as the class Notes describe,</span>
+<span class="sd">        and the one with the lowest cost is refit through</span>
+<span class="sd">        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`. A ``p0``</span>
+<span class="sd">        passed by the caller supplies the starting values of the other</span>
+<span class="sd">        parameters; its ``x0`` is replaced.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        return_exception : bool, default False</span>
+<span class="sd">            As in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Passed to every fit, as in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None or Exception</span>
+<span class="sd">            As in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
+<span class="sd">        """</span>
+        <span class="n">user_p0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"p0"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="k">if</span> <span class="n">user_p0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">user_p0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">InsufficientDataError</span><span class="p">):</span>
+            <span class="c1"># The base class reports insufficient or unusable data.</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">scan_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"absolute_sigma"</span><span class="p">}</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">gaps</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">lowest_cost</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">"""Index into ``gaps`` of the lowest-cost candidate, or None."""</span>
+            <span class="n">best</span><span class="p">,</span> <span class="n">best_cost</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">res</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_least_squares</span><span class="p">(</span>
+                        <span class="n">p0</span><span class="o">=</span><span class="p">[</span><span class="n">gaps</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="o">**</span><span class="n">scan_kwargs</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">FitFailedError</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">cost</span> <span class="o">&lt;</span> <span class="n">best_cost</span><span class="p">:</span>
+                    <span class="n">best</span><span class="p">,</span> <span class="n">best_cost</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">cost</span>
+            <span class="k">return</span> <span class="n">best</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gaps</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">lowest_cost</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gaps</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">step</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fine</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">best</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">best</span> <span class="o">+</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gaps</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">gaps</span><span class="p">[</span><span class="n">lowest_cost</span><span class="p">(</span><span class="n">fine</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The Gaussian plus Heaviside function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The Gaussian plus Heaviside function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x0, y0, y1, mu, sigma, A)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">gaussian_heavy_side</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate Gaussian plus Heaviside model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate Gaussian plus Heaviside model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -421,7 +496,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
                 <span class="n">arg</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
@@ -438,7 +513,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from:</span>
 <span class="sd">        - Weighted mean and std for Gaussian parameters</span>
@@ -459,7 +534,7 @@
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -470,13 +545,13 @@
             <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">&quot;zero-size array to reduction operation maximum &quot;</span>
-                <span class="s2">&quot;which has no identity&quot;</span>
+                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
+                <span class="s2">"which has no identity"</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;There is no maximum of a zero-size array. &quot;</span>
-                    <span class="s2">&quot;Please check input data.&quot;</span>
+                    <span class="s2">"There is no maximum of a zero-size array. "</span>
+                    <span class="s2">"Please check input data."</span>
                 <span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">raise</span>
@@ -494,17 +569,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} +&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;\left(y_1 \cdot H(x_0 - x) + y_0\right)&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} +"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"\left(y_1 \cdot H(x_0 - x) + y_0\right)"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -512,9 +587,9 @@
 
 
 <div class="viewcode-block" id="GaussianTimesHeavySide">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySide">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianTimesHeavySide.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySide">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GaussianTimesHeavySide</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian multiplied by Heaviside for truncated distribution modeling.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Gaussian multiplied by Heaviside for truncated distribution modeling.</span>
 
 <span class="sd">    Models a Gaussian that is truncated (zeroed) below a threshold:</span>
 
@@ -557,17 +632,17 @@
 <span class="sd">    &gt;&gt;&gt; y = 4*np.exp(-0.5*((x-5)/1)**2) * np.heaviside(x-3, 1.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit = GaussianTimesHeavySide(x, y, guess_x0=3.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;x0={fit.popt[&#39;x0&#39;]:.2f}, mu={fit.popt[&#39;mu&#39;]:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"x0={fit.popt['x0']:.2f}, mu={fit.popt['mu']:.2f}")</span>
 <span class="sd">    x0=3.00, mu=5.00</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="GaussianTimesHeavySide.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySide.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianTimesHeavySide.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySide.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">guess_x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">guess_x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;guess_x0 is required for GaussianTimesHeavySide. &quot;</span>
-                <span class="s2">&quot;Provide an initial estimate for the transition x-coordinate.&quot;</span>
+                <span class="s2">"guess_x0 is required for GaussianTimesHeavySide. "</span>
+                <span class="s2">"Provide an initial estimate for the transition x-coordinate."</span>
             <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_guess_x0</span> <span class="o">=</span> <span class="n">guess_x0</span></div>
@@ -575,21 +650,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">guess_x0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initial guess for transition x-coordinate used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for transition x-coordinate used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_x0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The Gaussian times Heaviside function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The Gaussian times Heaviside function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x0, mu, sigma, A)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">gaussian_heavy_side</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate Gaussian times Heaviside model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate Gaussian times Heaviside model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -608,7 +683,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
                 <span class="n">arg</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
@@ -621,7 +696,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from:</span>
 <span class="sd">        - ``guess_x0`` for x0</span>
@@ -641,7 +716,7 @@
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -656,13 +731,13 @@
             <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">&quot;zero-size array to reduction operation maximum &quot;</span>
-                <span class="s2">&quot;which has no identity&quot;</span>
+                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
+                <span class="s2">"which has no identity"</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;There is no maximum of a zero-size array. &quot;</span>
-                    <span class="s2">&quot;Please check input data.&quot;</span>
+                    <span class="s2">"There is no maximum of a zero-size array. "</span>
+                    <span class="s2">"Please check input data."</span>
                 <span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">raise</span>
@@ -672,24 +747,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            LaTeX string describing the function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">r</span><span class="s2">&quot;f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} \times H(x - x_0)&quot;</span>
+            <span class="sa">r</span><span class="s2">"f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} \times H(x - x_0)"</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
 
 
 
 <div class="viewcode-block" id="GaussianTimesHeavySidePlusHeavySide">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GaussianTimesHeavySidePlusHeavySide</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian times Heaviside plus Heaviside for plateau-to-peak modeling.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Gaussian times Heaviside plus Heaviside for plateau-to-peak modeling.</span>
 
 <span class="sd">    Models a distribution that transitions from a constant plateau to a</span>
 <span class="sd">    Gaussian peak:</span>
@@ -740,17 +815,17 @@
 <span class="sd">    &gt;&gt;&gt; y = 4*np.exp(-0.5*((x-5)/1)**2)*np.heaviside(x-3, 0.5) + 2*np.heaviside(3-x, 0.5)</span>
 <span class="sd">    &gt;&gt;&gt; fit = GaussianTimesHeavySidePlusHeavySide(x, y, guess_x0=3.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;x0={fit.popt[&#39;x0&#39;]:.2f}, y1={fit.popt[&#39;y1&#39;]:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"x0={fit.popt['x0']:.2f}, y1={fit.popt['y1']:.2f}")</span>
 <span class="sd">    x0=3.00, y1=2.00</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="GaussianTimesHeavySidePlusHeavySide.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.composite.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">guess_x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">guess_x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;guess_x0 is required for GaussianTimesHeavySidePlusHeavySide. &quot;</span>
-                <span class="s2">&quot;Provide an initial estimate for the transition x-coordinate.&quot;</span>
+                <span class="s2">"guess_x0 is required for GaussianTimesHeavySidePlusHeavySide. "</span>
+                <span class="s2">"Provide an initial estimate for the transition x-coordinate."</span>
             <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_guess_x0</span> <span class="o">=</span> <span class="n">guess_x0</span></div>
@@ -758,21 +833,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">guess_x0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initial guess for transition x-coordinate used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for transition x-coordinate used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_x0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The Gaussian times Heaviside plus Heaviside function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The Gaussian times Heaviside plus Heaviside function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x0, y1, mu, sigma, A)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">gaussian_heavy_side</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate Gaussian times Heaviside plus Heaviside model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate Gaussian times Heaviside plus Heaviside model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -793,7 +868,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
                 <span class="n">arg</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
@@ -812,7 +887,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from:</span>
 <span class="sd">        - ``guess_x0`` for x0</span>
@@ -833,7 +908,7 @@
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -852,13 +927,13 @@
             <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">&quot;zero-size array to reduction operation maximum &quot;</span>
-                <span class="s2">&quot;which has no identity&quot;</span>
+                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
+                <span class="s2">"which has no identity"</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;There is no maximum of a zero-size array. &quot;</span>
-                    <span class="s2">&quot;Please check input data.&quot;</span>
+                    <span class="s2">"There is no maximum of a zero-size array. "</span>
+                    <span class="s2">"Please check input data."</span>
                 <span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">raise</span>
@@ -868,17 +943,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} \times H(x - x_0) + &quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;y_1 \cdot H(x_0 - x)&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=A \cdot e^{-\frac</span><span class="si">{1}{2}</span><span class="s2"> (\frac{x-\mu}{\sigma})^2} \times H(x - x_0) + "</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"y_1 \cdot H(x_0 - x)"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>

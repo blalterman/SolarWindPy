@@ -7,29 +7,23 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.tex_info &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.tex_info &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="solarwindpy.fitfunctions.tex_info.TeXinfo" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html" />
-    <link rel="prev" title="solarwindpy.fitfunctions.plots.LogAxes" href="solarwindpy.fitfunctions.plots.LogAxes.html" />
+    <link rel="prev" title="solarwindpy.fitfunctions.power_laws.PowerLawPlusC" href="solarwindpy.fitfunctions.power_laws.PowerLawPlusC.html" />
    
   <style>
     .sidebar-custom-info {
@@ -87,16 +81,22 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions.tex_info</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html">solarwindpy.fitfunctions.tex_info.TeXinfo</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.html">solarwindpy.fitfunctions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#using-a-fit-function">Using a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#how-a-fit-runs">How a fit runs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#writing-a-fit-function">Writing a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.composite.html">solarwindpy.fitfunctions.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html">solarwindpy.fitfunctions.heaviside</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions.tex_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
 </ul>
 </li>
 </ul>
@@ -104,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -321,220 +322,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-fitfunctions-tex-info">
-<h1>solarwindpy.fitfunctions.tex_info<a class="headerlink" href="#solarwindpy-fitfunctions-tex-info" title="Link to this heading"></a></h1>
+  <section id="module-solarwindpy.fitfunctions.tex_info">
+<span id="solarwindpy-fitfunctions-tex-info"></span><h1>solarwindpy.fitfunctions.tex_info<a class="headerlink" href="#module-solarwindpy.fitfunctions.tex_info" title="Link to this heading"></a></h1>
+<p>Helpers for formatting fit results in LaTeX.</p>
+<p>The <a class="reference internal" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html#solarwindpy.fitfunctions.tex_info.TeXinfo" title="solarwindpy.fitfunctions.tex_info.TeXinfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TeXinfo</span></code></a> class collects optimized parameters and statistics
+from a <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> and produces
+ready-to-plot annotation strings for Matplotlib.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html#solarwindpy.fitfunctions.tex_info.TeXinfo" title="solarwindpy.fitfunctions.tex_info.TeXinfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TeXinfo</span></code></a>(popt, psigma, TeX_function, ...[, ...])</p></td>
-<td><p></p></td>
+<td><p>Fit results formatted as a LaTeX annotation.</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeXinfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chisq_dof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>A container for printing <code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code> info on a figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>popt</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Optimized fit parameters and their uncertainties.</p></li>
-<li><p><strong>psigma</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Optimized fit parameters and their uncertainties.</p></li>
-<li><p><strong>TeX_function</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – TeX-formatted function for printing</p></li>
-<li><p><strong>chisq_dof</strong> (<em>scalar</em><em>, </em><em>None</em>) – If not None, chisq per degree of freedom for the fit.</p></li>
-<li><p><strong>rsq</strong> (<em>scalar</em><em>, </em><em>None</em>) – If not None, <span class="math notranslate nohighlight">\(R^2\)</span> coefficient of determination for the fit.</p></li>
-<li><p><strong>initial_guess_info</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>None</em>) – If not None, a dict with keys corresponding to function arg names
-and values that are (p0, fit_bounds) for that fit parameter.</p></li>
-<li><p><strong>npts</strong> (<em>scalar</em><em>, </em><em>None</em>) – If not None, the number of data points in the fit. If not None,
-cast to int.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_guess_info</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chisq_dof</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">npts</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">popt</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">psigma</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rsq</span></span></dt>
-<dd><p><span class="math notranslate nohighlight">\(R^2\)</span> coefficient of determination.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_argnames</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_popt</span></span></dt>
-<dd><p>Create a dictionary with <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">v)</span></code> pairs corresponding to parameter values.</p>
-<p><code class="docutils literal notranslate"><span class="pre">(self.argnames,</span> <span class="pre">:math:`p_{\mathrm{opt}}</span> <span class="pre">\pm</span> <span class="pre">\sigma_p`)</span></code> with the
-appropriate uncertainty.</p>
-<p>See <code class="docutils literal notranslate"><span class="pre">set_TeX_trans_argnames</span></code> to translate the argnames for TeX.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_relative_error</span></span></dt>
-<dd><p>Create a dictionary with (k, v) pairs corresponding to relative errors.</p>
-<p>(self.argnames, psigma/popt).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">annotate_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.annotate_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Add the <cite>TeX_info</cite> annotation to ax.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>mpl.Axes.axis_subplot</em>)</p></li>
-<li><p><strong>bbox</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – dict(color=”wheat”, alpha=0.75)</p></li>
-<li><p><strong>xloc</strong> (<em>scalar</em>) – 0.05, 0.9</p></li>
-<li><p><strong>yloc</strong> (<em>scalar</em>) – 0.05, 0.9</p></li>
-<li><p><strong>ha</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – ha - horizontalalignment (defaults “left”)
-va - verticalalignment (default “right”)</p></li>
-<li><p><strong>va</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – ha - horizontalalignment (defaults “left”)
-va - verticalalignment (default “right”)</p></li>
-<li><p><strong>transform</strong> – ax.transAxes</p></li>
-<li><p><strong>kwargs</strong> – Others passed to <cite>ax.text</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">build_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.build_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Generate a TeX-formatted string with the desired info.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>TeX_popt</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – <code class="xref py py-meth docutils literal notranslate"><span class="pre">FitFunction.TeX_popt()</span></code> dictionary, which contains
-keys identifying the parameter and values their value.</p></li>
-<li><p><strong>TeX_function</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <code class="xref py py-meth docutils literal notranslate"><span class="pre">FitFunction.TeX_function()</span></code> contents giving the functional
-form in TeX.</p></li>
-<li><p><strong>chisq_dof</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, include chisq/dof in the info. It is printed to 2 decimal
-places.</p></li>
-<li><p><strong>relative_error</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print out relative error as <span class="math notranslate nohighlight">\(\Delta(x)/x\)</span> for all
-fit parameters x.</p></li>
-<li><p><strong>rsq</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, include <span class="math notranslate nohighlight">\(R^2\)</span> coefficient of determination.</p></li>
-<li><p><strong>npts</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, include the number of points in the fit.</p></li>
-<li><p><strong>convert_pow_10</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, use 10^{X} format. Otherwise, use eX format.
-Note that <cite>simplify_info_for_paper</cite> must be disabled.</p></li>
-<li><p><strong>strip_uncertaintites</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, strip fit uncertainties from reported parameters.</p></li>
-<li><p><strong>simplify_info_for_paper</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, simplify the printout to only print the quantities
-to their uncertainty in standard decimal (not expoential)
-notation.
-This option overrides <cite>convert_pow_10</cite>.</p></li>
-<li><p><strong>add_initial_guess</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True and <a class="reference internal" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html#solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info" title="solarwindpy.fitfunctions.tex_info.TeXinfo.initial_guess_info"><code class="xref py py-meth docutils literal notranslate"><span class="pre">initial_guess_info()</span></code></a> is not None, add
-<cite>(p0, fit_bounds)</cite> table to info.</p></li>
-<li><p><strong>additional_info</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>iterable</em><em> of </em><em>strings</em>) – Additional info added to the fit info annotation box.</p></li>
-<li><p><strong>annotate_fcn</strong> (<em>FunctionType</em>) – Function that manipulates the final TeX_info str before returning.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_initial_guess_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_initial_guess_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_npts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_npts"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_popt_psigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_popt_psigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_TeX_argnames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_argnames"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Define the mapping to format LaTeX function argnames.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_TeX_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TeX_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_TeX_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_chisq_dof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_chisq_dof"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_rsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.set_rsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">val_uncert_2_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/tex_info.html#TeXinfo.val_uncert_2_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convert a value, uncertainty pair to a string.</p>
-<p>Where the value is reported to the first non-zero digit of the uncertainty.</p>
-<p>Require that <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">&gt;</span> <span class="pre">uncertainty</span></code>.</p>
-<p class="rubric">Examples</p>
-<p>The generated string uses <span class="math notranslate nohighlight">\(\pm\)</span> to denote the uncertainty.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tex</span> <span class="o">=</span> <span class="n">TeXinfo</span><span class="p">({},</span> <span class="p">{},</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="mf">3.1415</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="mf">0.01</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tex</span><span class="o">.</span><span class="n">val_uncert_2_string</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-<span class="go">&#39;3.14e+00 \\pm 1e-02&#39;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.fitfunctions.plots.LogAxes.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.plots.LogAxes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.fitfunctions.power_laws.PowerLawPlusC.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.power_laws.PowerLawPlusC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="solarwindpy.fitfunctions.tex_info.TeXinfo.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.tex_info.TeXinfo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

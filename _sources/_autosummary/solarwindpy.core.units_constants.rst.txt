@@ -1,8 +1,12 @@
-﻿solarwindpy.core.units\_constants
+solarwindpy.core.units\_constants
 =================================
 
 .. automodule:: solarwindpy.core.units_constants
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

@@ -1,8 +1,12 @@
-﻿solarwindpy.core.alfvenic\_turbulence
+solarwindpy.core.alfvenic\_turbulence
 =====================================
 
 .. automodule:: solarwindpy.core.alfvenic_turbulence
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

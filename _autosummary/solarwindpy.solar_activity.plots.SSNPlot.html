@@ -7,22 +7,18 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.solar_activity.plots.SSNPlot &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.solar_activity.plots.SSNPlot &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -86,18 +82,20 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.plots.IndicatorPlot.html">solarwindpy.solar_activity.plots.IndicatorPlot</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.solar_activity.plots.SSNPlot</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.get_all_indices.html">solarwindpy.solar_activity.get_all_indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.icme.html">solarwindpy.solar_activity.icme</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -319,101 +317,157 @@
 <h1>solarwindpy.solar_activity.plots.SSNPlot<a class="headerlink" href="#solarwindpy-solar-activity-plots-ssnplot" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SSNPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/plots.html#SSNPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">SSNPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/plots.html#SSNPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.solar_activity.plots.IndicatorPlot.html#solarwindpy.solar_activity.plots.IndicatorPlot" title="solarwindpy.solar_activity.plots.IndicatorPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">IndicatorPlot</span></code></a></p>
 <p>Plotter specialised for sunspot number.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/plots.html#SSNPlot.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Plot the <code class="docutils literal notranslate"><span class="pre">ssn</span></code> column of <code class="docutils literal notranslate"><span class="pre">indicator</span></code>, labeled by its key.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>indicator</strong><span class="classifier"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.sidc.SIDC.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC" title="solarwindpy.solar_activity.sunspot_number.sidc.SIDC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.solar_activity.sunspot_number.sidc.SIDC</span></code></a></span></dt><dd><p>Sunspot-number indicator.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>Passed to <a class="reference internal" href="solarwindpy.solar_activity.plots.IndicatorPlot.html#solarwindpy.solar_activity.plots.IndicatorPlot" title="solarwindpy.solar_activity.plots.IndicatorPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">IndicatorPlot</span></code></a>, e.g. <code class="docutils literal notranslate"><span class="pre">plasma_index</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.clip">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.clip" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.clip" title="Link to this definition"></a></dt>
+<dd><p>Clipping option stored by <code class="docutils literal notranslate"><span class="pre">set_data</span></code>.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.data">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.data" title="Link to this definition"></a></dt>
+<dd><p>Data stored by <code class="docutils literal notranslate"><span class="pre">set_data</span></code>.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.indicator">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">indicator</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.indicator" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">indicator</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.indicator" title="Link to this definition"></a></dt>
+<dd><p>The activity indicator being plotted.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.labels">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.labels" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.labels" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">AxesLabels</span></code> namedtuple holding the x, y and z labels.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.log">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.log" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">LogAxes</span></code> namedtuple of booleans: True where an axis is logarithmic.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.logger">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.logger" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger named <code class="docutils literal notranslate"><span class="pre">&lt;module&gt;.&lt;class</span> <span class="pre">name&gt;</span></code>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.make_plot">
 <span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.make_plot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Plot <a class="reference internal" href="#solarwindpy.solar_activity.plots.SSNPlot.plot_data" title="solarwindpy.solar_activity.plots.SSNPlot.plot_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plot_data</span></code></a> against time.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, optional</span></dt><dd><p>Axes to draw on. A new figure is created if None.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.path">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.path" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.path" title="Link to this definition"></a></dt>
 <dd><p>Path for saving figure.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.plasma_index">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plasma_index</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plasma_index" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">plasma_index</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plasma_index" title="Link to this definition"></a></dt>
+<dd><p>Times of the plasma data, or <code class="docutils literal notranslate"><span class="pre">None</span></code> to plot the whole record.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.plot_data">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plot_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">plot_data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.plot_data" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">indicator.data[ykey]</span></code> from the start of <a class="reference internal" href="#solarwindpy.solar_activity.plots.SSNPlot.plasma_index" title="solarwindpy.solar_activity.plots.SSNPlot.plasma_index"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plasma_index</span></code></a> onward.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_data">
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indicator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ykey</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plasma_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set <a class="reference internal" href="#solarwindpy.solar_activity.plots.SSNPlot.indicator" title="solarwindpy.solar_activity.plots.SSNPlot.indicator"><code class="xref py py-attr docutils literal notranslate"><span class="pre">indicator</span></code></a>, <a class="reference internal" href="#solarwindpy.solar_activity.plots.SSNPlot.ykey" title="solarwindpy.solar_activity.plots.SSNPlot.ykey"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ykey</span></code></a>, and <a class="reference internal" href="#solarwindpy.solar_activity.plots.SSNPlot.plasma_index" title="solarwindpy.solar_activity.plots.SSNPlot.plasma_index"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plasma_index</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_labels">
 <span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_labels" title="Link to this definition"></a></dt>
-<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
-<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+<dd><p>Set or update the x, y, or z labels.</p>
+<p>Any label not passed keeps its current value in <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x, y, z</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference internal" href="solarwindpy.plotting.labels.base.TeXlabel.html#solarwindpy.plotting.labels.base.TeXlabel" title="solarwindpy.plotting.labels.base.TeXlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.labels.base.TeXlabel</span></code></a>, optional</span></dt><dd><p>New axis labels.</p>
+</dd>
+<dt><strong>auto_update_path</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True (default), rebuild the save path from the new labels.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_log">
 <span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set which axes use a logarithmic scale.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.set_path">
 <span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.set_path" title="Link to this definition"></a></dt>
-<dd><p>Build the plot save path.</p>
-<dl class="field-list simple">
+<dd><p>Set the path figures are saved under.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – If str and == “auto”, then build path from <cite>self.labels</cite>. Otherwise,
-assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p></li>
-<li><p><strong>add_scale</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add information about the axis scales to the end of the path.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a></span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> builds the path from the axis labels.</p>
+</dd>
+<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, append the axis scales to the path.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.plots.SSNPlot.ykey">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ykey</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.ykey" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ykey</span></span><a class="headerlink" href="#solarwindpy.solar_activity.plots.SSNPlot.ykey" title="Link to this definition"></a></dt>
+<dd><p>Column of <code class="docutils literal notranslate"><span class="pre">indicator.data</span></code> that is plotted.</p>
+</dd></dl>
 
 </dd></dl>
 

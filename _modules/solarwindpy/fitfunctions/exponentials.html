@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -307,13 +303,13 @@
              
   <h1>Source code for solarwindpy.fitfunctions.exponentials</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fit functions for exponential models.</span>
+<span class="sa">r</span><span class="sd">"""Fit functions for exponential models.</span>
 
 <span class="sd">Classes in this module implement exponential decay and related forms</span>
 <span class="sd">using the :class:`~solarwindpy.fitfunctions.core.FitFunction` API.</span>
-<span class="sd">They provide reasonable starting parameters and formatted LaTeX output</span>
-<span class="sd">for visualization.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Each defines the model, an initial guess, and its LaTeX form.</span>
+<span class="sd">"""</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
@@ -322,25 +318,33 @@
 
 
 <div class="viewcode-block" id="Exponential">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.Exponential">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Exponential</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Exponential decay :math:`f(x) = A e^{-c x}`.</span>
+
+<span class="sd">    Parameters are ``c`` (rate) and ``A`` (amplitude at ``x = 0``).</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="Exponential.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.Exponential.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit ``A * exp(-c x)`` to the data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fit ``A * exp(-c x)`` to the data."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`A e^{-c x}` as ``f(x, c, A)``."""</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">exp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">"""Evaluate ``A * exp(-c * x)``."""</span>
             <span class="k">return</span> <span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">exp</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return initial guesses ``[c, A]`` for the fit.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return initial guesses ``[c, A]`` for the fit."""</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -353,31 +357,40 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;f(x)=A \cdot e^{-cx}&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX form of the model."""</span>
+        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"f(x)=A \cdot e^{-cx}"</span>
         <span class="k">return</span> <span class="n">TeX</span></div>
 
 
 
 <div class="viewcode-block" id="ExponentialPlusC">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExponentialPlusC</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Exponential decay plus a constant, :math:`f(x) = A e^{-c x} + d`.</span>
+
+<span class="sd">    Parameters are ``c`` (rate), ``A`` (amplitude) and ``d`` (offset).</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="ExponentialPlusC.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit ``A * exp(-c x) + d`` to the data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fit ``A * exp(-c x) + d`` to the data."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`A e^{-c x} + d` as ``f(x, c, A, d)``."""</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">expc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">"""Evaluate ``A * exp(-c * x) + d``."""</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">x</span><span class="p">)))</span> <span class="o">+</span> <span class="n">d</span>
 
         <span class="k">return</span> <span class="n">expc</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return initial guesses ``[c, A, d]`` for the fit.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return initial guesses ``[c, A, d]`` for the fit."""</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -391,43 +404,62 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;f(x)=A \cdot e^{-cx} + d&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX form of the model."""</span>
+        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"f(x)=A \cdot e^{-cx} + d"</span>
         <span class="k">return</span> <span class="n">TeX</span></div>
 
 
 
 <div class="viewcode-block" id="ExponentialCDF">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExponentialCDF</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Exponential CDF shape :math:`f(x) = y_0 (1 - e^{-c x})`.</span>
+
+<span class="sd">    Only the rate ``c`` is fitted. The amplitude :attr:`y0` (written ``A``</span>
+<span class="sd">    in :attr:`TeX_function`) is fixed by the caller with :meth:`set_y0`,</span>
+<span class="sd">    which must be called before :meth:`make_fit`; otherwise the fit</span>
+<span class="sd">    raises ``AttributeError``.</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="ExponentialCDF.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit an exponential cumulative distribution function.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fit an exponential cumulative distribution function."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`y_0 (1 - e^{-c x})` as ``f(x, c)``."""</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">exp_cdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">"""Evaluate ``y0 * (1 - exp(-c * x))`` with the instance's ``y0``."""</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">x</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="n">exp_cdf</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">y0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Amplitude of the CDF.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Amplitude of the CDF."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span>
 
 <div class="viewcode-block" id="ExponentialCDF.set_y0">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_y0">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_y0">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_y0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the fixed amplitude :attr:`y0`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new : numbers.Number</span>
+<span class="sd">            Amplitude the fitted CDF approaches as ``x`` grows.</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="n">new</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return initial guess ``[c]`` for the fit.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return initial guess ``[c]`` for the fit."""</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -439,20 +471,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;f(x)=A \left(1 - e^{-cx}\right)&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX form of the model, writing :attr:`y0` as ``A``."""</span>
+        <span class="n">TeX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"f(x)=A \left(1 - e^{-cx}\right)"</span>
         <span class="k">return</span> <span class="n">TeX</span>
 
 <div class="viewcode-block" id="ExponentialCDF.set_TeX_info">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.exponentials.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_TeX_info">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.set_TeX_info">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Include ``A`` value in the TeX annotation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Include ``A`` value in the TeX annotation."""</span>
 
         <span class="c1"># HACK: assumes integer A</span>
         <span class="c1">#       If not integer, will need to format float or exp.</span>
-        <span class="n">additional_info</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;additional_info&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">additional_info</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"additional_info"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_info</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">additional_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">additional_info</span><span class="p">]</span>
-        <span class="n">info_A</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$A = </span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span>
+        <span class="n">info_A</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"$A = </span><span class="si">%s</span><span class="s2">$"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span>
         <span class="n">additional_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">info_A</span><span class="p">]</span> <span class="o">+</span> <span class="n">additional_info</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">ExponentialCDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_TeX_info</span><span class="p">(</span>

@@ -1,8 +1,12 @@
-﻿solarwindpy.fitfunctions.core
+solarwindpy.fitfunctions.core
 =============================
 
 .. automodule:: solarwindpy.fitfunctions.core
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

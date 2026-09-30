@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.ManualLabel
+===============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: ManualLabel

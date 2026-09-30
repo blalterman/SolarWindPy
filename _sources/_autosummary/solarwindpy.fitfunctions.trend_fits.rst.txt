@@ -1,8 +1,12 @@
-﻿solarwindpy.fitfunctions.trend\_fits
+solarwindpy.fitfunctions.trend\_fits
 ====================================
 
 .. automodule:: solarwindpy.fitfunctions.trend_fits
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

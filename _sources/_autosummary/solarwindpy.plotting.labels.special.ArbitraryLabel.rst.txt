@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.ArbitraryLabel
+==================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: ArbitraryLabel

@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.datetime.Frequency
+==============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.datetime
+
+.. autoclass:: Frequency

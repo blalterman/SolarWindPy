@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -306,11 +302,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.fitfunctions.hinge</h1><div class="highlight"><pre>
-<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hinge (piecewise linear) fit functions.</span>
+<span></span><span class="sa">r</span><span class="sd">"""Hinge (piecewise linear) fit functions.</span>
 
 <span class="sd">This module provides fit functions for piecewise linear models with a</span>
 <span class="sd">hinge point, commonly used for modeling saturation behavior.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -320,15 +316,14 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span>
 
-
 <span class="c1"># Named tuple for x-intercepts used by HingeAtPoint</span>
-<span class="n">XIntercepts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;XIntercepts&quot;</span><span class="p">,</span> <span class="s2">&quot;x1,x2&quot;</span><span class="p">)</span>
+<span class="n">XIntercepts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"XIntercepts"</span><span class="p">,</span> <span class="s2">"x1,x2"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="HingeSaturation">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeSaturation">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HingeSaturation</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function with hinge point for saturation modeling.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point for saturation modeling.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point (xh, yh):</span>
 
@@ -372,12 +367,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.where(x &lt; 5, 2*x, 10)  # Saturation at y=10 for x&gt;=5</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeSaturation(x, y, guess_xh=5, guess_yh=10)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Hinge at ({fit.popt[&#39;xh&#39;]:.2f}, {fit.popt[&#39;yh&#39;]:.2f})&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")</span>
 <span class="sd">    Hinge at (5.00, 10.00)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="HingeSaturation.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeSaturation.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -392,21 +387,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">saturation_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Guess for saturation transition (xh, yh) used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Guess for saturation transition (xh, yh) used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saturation_guess</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The hinge saturation function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge saturation function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, xh, yh, x1, m2)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">hinge_saturation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">m2</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate hinge saturation model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge saturation model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -425,7 +420,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">m1</span> <span class="o">=</span> <span class="n">yh</span> <span class="o">/</span> <span class="p">(</span><span class="n">xh</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">x2</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-15</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
 
@@ -439,7 +434,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from:</span>
 <span class="sd">        - ``saturation_guess`` for (xh, yh)</span>
@@ -455,7 +450,7 @@
 <span class="sd">        ------</span>
 <span class="sd">        AssertionError</span>
 <span class="sd">            If insufficient data for estimation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation_guess</span>
@@ -491,19 +486,19 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=\min(y_1, \, y_2)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;y_i = m_i(x-x_i)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;m_1 = \frac</span><span class="si">{y_h}</span><span class="s2">{x_h - x_1}&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;x_2 = x_h - \frac</span><span class="si">{y_h}{m_2}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=\min(y_1, \, y_2)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"y_i = m_i(x-x_i)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"m_1 = \frac</span><span class="si">{y_h}</span><span class="s2">{x_h - x_1}"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"x_2 = x_h - \frac</span><span class="si">{y_h}{m_2}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -511,9 +506,9 @@
 
 
 <div class="viewcode-block" id="TwoLine">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.TwoLine">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TwoLine</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function with two intersecting lines using minimum.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with two intersecting lines using minimum.</span>
 
 <span class="sd">    The model consists of two linear segments:</span>
 
@@ -567,12 +562,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))  # Two lines intersecting at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = TwoLine(x, y, guess_xs=5.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Intersection at ({fit.xs:.2f}, {fit.s:.2f})&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Intersection at ({fit.xs:.2f}, {fit.s:.2f})")</span>
 <span class="sd">    Intersection at (5.00, 10.00)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="TwoLine.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.TwoLine.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -586,21 +581,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">guess_xs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initial guess for saturation x-coordinate used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for saturation x-coordinate used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_xs</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The two-line minimum function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The two-line minimum function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x1, x2, m1, m2)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">twoline</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate two-line minimum model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate two-line minimum model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -619,7 +614,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">l1</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">l2</span> <span class="o">=</span> <span class="n">m2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">)</span>
@@ -629,56 +624,56 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;x-coordinate of the intersection (saturation) point.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""x-coordinate of the intersection (saturation) point.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            x_s = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span>
-        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
-        <span class="n">m2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">]</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
+        <span class="n">m2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]</span>
         <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">m2</span> <span class="o">*</span> <span class="n">x2</span><span class="p">)</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span>
         <span class="k">return</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">s</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;y-coordinate of the intersection (saturation) point.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""y-coordinate of the intersection (saturation) point.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            s = m_1 (x_s - x_1)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span>
         <span class="k">return</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Angle between the two lines in radians.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Angle between the two lines in radians.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            \theta = \arctan(m_1) - \arctan(m_2)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
-        <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]</span>
+<span class="sd">        """</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
+        <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from the data by estimating slopes</span>
 <span class="sd">        and intercepts in regions separated by ``guess_xs``.</span>
@@ -698,7 +693,7 @@
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        Uses hardcoded xs=425 as the default separation point, which is</span>
 <span class="sd">        appropriate for solar wind speed analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
@@ -725,17 +720,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x) \, =\min\left(y_1, \, y_2\right)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;y_i = m_i(x - x_i)&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x) \, =\min\left(y_1, \, y_2\right)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"y_i = m_i(x - x_i)"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -743,9 +738,9 @@
 
 
 <div class="viewcode-block" id="Saturation">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.Saturation">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Saturation</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function reparameterized for saturation analysis.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function reparameterized for saturation analysis.</span>
 
 <span class="sd">    This is an alternative parameterization of :class:`TwoLine` where the</span>
 <span class="sd">    saturation point coordinates and the angle between lines are used</span>
@@ -805,12 +800,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))</span>
 <span class="sd">    &gt;&gt;&gt; fit = Saturation(x, y, guess_xs=5.0, guess_s=10.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Saturation at ({fit.popt[&#39;xs&#39;]:.2f}, {fit.popt[&#39;s&#39;]:.2f})&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Saturation at ({fit.popt['xs']:.2f}, {fit.popt['s']:.2f})")</span>
 <span class="sd">    Saturation at (5.00, 10.00)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Saturation.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.Saturation.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -825,21 +820,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">saturation_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Guess for saturation transition (xs, s) used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Guess for saturation transition (xs, s) used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saturation_guess</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The saturation function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The saturation function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, x1, xs, s, theta)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">saturation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate saturation model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate saturation model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -858,7 +853,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">m1</span> <span class="o">=</span> <span class="n">s</span> <span class="o">/</span> <span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">m2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
             <span class="n">x2</span> <span class="o">=</span> <span class="n">xs</span> <span class="o">-</span> <span class="p">(</span><span class="n">s</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
@@ -872,54 +867,54 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">m1</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Slope of the rising line.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Slope of the rising line.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            m_1 = \frac{s}{x_s - x_1}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span>
-        <span class="n">xs</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;xs&quot;</span><span class="p">]</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"s"</span><span class="p">]</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"xs"</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">s</span> <span class="o">/</span> <span class="p">(</span><span class="n">xs</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">m2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Slope of the plateau line.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Slope of the plateau line.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            m_2 = \tan(\arctan(m_1) - \theta)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"theta"</span><span class="p">]</span>
         <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m1</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">x2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;x-intercept of the plateau line.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""x-intercept of the plateau line.</span>
 
 <span class="sd">        Calculated as:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            x_2 = x_s - \frac{s}{m_2}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span>
-        <span class="n">xs</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;xs&quot;</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"s"</span><span class="p">]</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"xs"</span><span class="p">]</span>
         <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span>
         <span class="k">return</span> <span class="n">xs</span> <span class="o">-</span> <span class="p">(</span><span class="n">s</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess is derived from the data by estimating slopes</span>
 <span class="sd">        and intercepts in regions separated by the saturation guess.</span>
@@ -939,7 +934,7 @@
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        Uses hardcoded xs=425 as the default separation point, which is</span>
 <span class="sd">        appropriate for solar wind speed analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
@@ -970,20 +965,20 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f \, \left(x, x_1, x_s, s, \theta\right)=\min\left(y_1, \, y_2\right)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;y_i = m_i(x - x_i)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;x_s = \frac{m_2 x_2 - m_1 x_1}{m_2 - m_1}&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;s = m_i (x_s - x_i)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;\theta = \arctan\left(\frac{m_1 - m_2}{1 + m_1 m_2}\right)&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f \, \left(x, x_1, x_s, s, \theta\right)=\min\left(y_1, \, y_2\right)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"y_i = m_i(x - x_i)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"x_s = \frac{m_2 x_2 - m_1 x_1}{m_2 - m_1}"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"s = m_i (x_s - x_i)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"\theta = \arctan\left(\frac{m_1 - m_2}{1 + m_1 m_2}\right)"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -991,9 +986,9 @@
 
 
 <div class="viewcode-block" id="HingeMin">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeMin">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HingeMin</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function with hinge point using minimum.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point using minimum.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point:</span>
 
@@ -1047,12 +1042,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -2*(x-10))  # Two lines meeting at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeMin(x, y, guess_h=5.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Hinge at x={fit.popt[&#39;h&#39;]:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Hinge at x={fit.popt['h']:.2f}")</span>
 <span class="sd">    Hinge at x=5.00</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="HingeMin.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeMin.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -1066,21 +1061,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">guess_h</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initial guess for hinge x-coordinate used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for hinge x-coordinate used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The hinge minimum function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge minimum function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, m1, x1, x2, h)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">hinge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate hinge minimum model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge minimum model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -1099,7 +1094,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
             <span class="n">l1</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">l2</span> <span class="o">=</span> <span class="n">m2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
@@ -1110,32 +1105,32 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">m2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Slope of the second line.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Slope of the second line.</span>
 
 <span class="sd">        Derived from the constraint that both lines pass through the hinge:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            m_2 = m_1 \frac{h - x_1}{h - x_2}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span>
-        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"h"</span><span class="p">]</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Angle between the two lines in radians.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Angle between the two lines in radians.</span>
 
 <span class="sd">        Calculated using arctan2 for proper quadrant handling:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            \theta = \arctan2(m_1 - m_2, 1 + m_1 m_2)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
+<span class="sd">        """</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
         <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span>
         <span class="n">top</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">)</span>
@@ -1143,7 +1138,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess estimates slopes and intercepts from the data</span>
 <span class="sd">        in regions separated by the hinge guess.</span>
@@ -1162,7 +1157,7 @@
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        Default guess_h=400 is appropriate for solar wind speed analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
@@ -1194,17 +1189,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=\min(m_1(x-x_1), \, m_2(x-x_2))&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;m_2 = m_1 \frac{h - x_1}{h - x_2}&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=\min(m_1(x-x_1), \, m_2(x-x_2))"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"m_2 = m_1 \frac{h - x_1}{h - x_2}"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -1212,9 +1207,9 @@
 
 
 <div class="viewcode-block" id="HingeMax">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeMax">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HingeMax</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function with hinge point using maximum.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point using maximum.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point:</span>
 
@@ -1271,12 +1266,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.maximum(-2*(x-0), 2*(x-10))  # V-shape with vertex at (5, -10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeMax(x, y, guess_h=5.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Hinge at x={fit.popt[&#39;h&#39;]:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Hinge at x={fit.popt['h']:.2f}")</span>
 <span class="sd">    Hinge at x=5.00</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="HingeMax.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeMax.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -1290,21 +1285,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">guess_h</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initial guess for hinge x-coordinate used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for hinge x-coordinate used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The hinge maximum function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge maximum function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, m1, x1, x2, h)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">hinge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate hinge maximum model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge maximum model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -1323,7 +1318,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
             <span class="n">l1</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">l2</span> <span class="o">=</span> <span class="n">m2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
@@ -1334,32 +1329,32 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">m2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Slope of the second line.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Slope of the second line.</span>
 
 <span class="sd">        Derived from the constraint that both lines pass through the hinge:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            m_2 = m_1 \frac{h - x_1}{h - x_2}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span>
-        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"h"</span><span class="p">]</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Angle between the two lines in radians.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Angle between the two lines in radians.</span>
 
 <span class="sd">        Calculated using arctan2 for proper quadrant handling:</span>
 
 <span class="sd">        .. math::</span>
 
 <span class="sd">            \theta = \arctan2(m_1 - m_2, 1 + m_1 m_2)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
+<span class="sd">        """</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
         <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span>
         <span class="n">top</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">)</span>
@@ -1367,7 +1362,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess estimates slopes and intercepts from the data</span>
 <span class="sd">        in regions separated by the hinge guess.</span>
@@ -1386,7 +1381,7 @@
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        Default guess_h=400 is appropriate for solar wind speed analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
@@ -1418,17 +1413,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=\max(m_1(x-x_1), \, m_2(x-x_2))&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;m_2 = m_1 \frac{h - x_1}{h - x_2}&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=\max(m_1(x-x_1), \, m_2(x-x_2))"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"m_2 = m_1 \frac{h - x_1}{h - x_2}"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>
@@ -1436,9 +1431,9 @@
 
 
 <div class="viewcode-block" id="HingeAtPoint">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeAtPoint">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HingeAtPoint</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Piecewise linear function passing through a specified hinge point.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function passing through a specified hinge point.</span>
 
 <span class="sd">    The model consists of two linear segments that both pass through the</span>
 <span class="sd">    hinge point :math:`(x_h, y_h)`:</span>
@@ -1486,12 +1481,12 @@
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))  # Hinge at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeAtPoint(x, y, guess_xh=5.0, guess_yh=10.0)</span>
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
-<span class="sd">    &gt;&gt;&gt; print(f&quot;Hinge at ({fit.popt[&#39;xh&#39;]:.2f}, {fit.popt[&#39;yh&#39;]:.2f})&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")</span>
 <span class="sd">    Hinge at (5.00, 10.00)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="HingeAtPoint.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.fitfunctions.hinge.html#solarwindpy.fitfunctions.hinge.HingeAtPoint.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xobs</span><span class="p">,</span>
@@ -1506,21 +1501,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hinge_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Guess for hinge point (xh, yh) used in p0 calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Guess for hinge point (xh, yh) used in p0 calculation."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hinge_guess</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The hinge-at-point function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge-at-point function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, xh, yh, m1, m2)``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">hinge_at_point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate hinge-at-point model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge-at-point model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -1539,7 +1534,7 @@
 <span class="sd">            -------</span>
 <span class="sd">            numpy.ndarray</span>
 <span class="sd">                Model values at x.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">            """</span>
             <span class="n">x1</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m1</span><span class="p">)</span>
             <span class="n">x2</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
 
@@ -1553,25 +1548,25 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">x_intercepts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XIntercepts</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;x-intercepts of the two lines.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""x-intercepts of the two lines.</span>
 
 <span class="sd">        Returns a named tuple with:</span>
 
 <span class="sd">        - x1 = xh - yh / m1</span>
 <span class="sd">        - x2 = xh - yh / m2</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">xh</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;xh&quot;</span><span class="p">]</span>
-        <span class="n">yh</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;yh&quot;</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span>
-        <span class="n">m2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]</span>
+        <span class="n">xh</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"xh"</span><span class="p">]</span>
+        <span class="n">yh</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"yh"</span><span class="p">]</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
+        <span class="n">m2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m1</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">XIntercepts</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate initial parameter guess.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
 <span class="sd">        The initial guess uses the hinge_guess for (xh, yh) and estimates</span>
 <span class="sd">        slopes from the data in regions separated by the hinge guess.</span>
@@ -1591,7 +1586,7 @@
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        Default guess_xh=400 and guess_yh=0.5 are appropriate for solar</span>
 <span class="sd">        wind speed analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
 
         <span class="n">xh</span><span class="p">,</span> <span class="n">yh_guess</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hinge_guess</span>
@@ -1623,18 +1618,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;LaTeX representation of the model.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX representation of the model.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Multi-line LaTeX string describing the piecewise function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tex</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<span class="sd">        """</span>
+        <span class="n">tex</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="sa">r</span><span class="s2">&quot;f(x)=\min(y_1, \, y_2)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;y_i = m_i(x-x_i)&quot;</span><span class="p">,</span>
-                <span class="sa">r</span><span class="s2">&quot;x_i = x_h - \frac</span><span class="si">{y_h}{m_i}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"f(x)=\min(y_1, \, y_2)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"y_i = m_i(x-x_i)"</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">"x_i = x_h - \frac</span><span class="si">{y_h}{m_i}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">tex</span></div>

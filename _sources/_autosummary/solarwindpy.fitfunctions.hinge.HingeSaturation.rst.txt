@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.HingeSaturation
+==============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: HingeSaturation

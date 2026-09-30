@@ -1,0 +1,6 @@
+solarwindpy.core.abundances.ReferenceAbundances
+===============================================
+
+.. currentmodule:: solarwindpy.core.abundances
+
+.. autoclass:: ReferenceAbundances

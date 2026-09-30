@@ -1,0 +1,6 @@
+solarwindpy.plotting.base.DataLimFormatter
+==========================================
+
+.. currentmodule:: solarwindpy.plotting.base
+
+.. autoclass:: DataLimFormatter

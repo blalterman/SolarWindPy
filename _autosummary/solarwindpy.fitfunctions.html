@@ -1,0 +1,489 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>solarwindpy.fitfunctions &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="solarwindpy.fitfunctions.available" href="solarwindpy.fitfunctions.available.html" />
+    <link rel="prev" title="solarwindpy.plotting.tools.use_style" href="solarwindpy.plotting.tools.use_style.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-a-fit-function">Using a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-a-fit-runs">How a fit runs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing-a-fit-function">Writing a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.composite.html">solarwindpy.fitfunctions.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html">solarwindpy.fitfunctions.heaviside</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="../index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+          
+            <li class="breadcrumb-item">
+              <span>_autosummary</span>
+            </li>
+          
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>solarwindpy.fitfunctions</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="../index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-solarwindpy.fitfunctions">
+<span id="solarwindpy-fitfunctions"></span><h1>solarwindpy.fitfunctions<a class="headerlink" href="#module-solarwindpy.fitfunctions" title="Link to this heading"></a></h1>
+<p>Fit parametric models to observations with robust least squares.</p>
+<p>Each fit function is a subclass of
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> and is importable as
+<code class="docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions.&lt;Name&gt;</span></code>. <a class="reference internal" href="solarwindpy.fitfunctions.available.html#solarwindpy.fitfunctions.available" title="solarwindpy.fitfunctions.available"><code class="xref py py-func docutils literal notranslate"><span class="pre">available()</span></code></a> prints every one with
+its module and LaTeX formula.</p>
+<section id="using-a-fit-function">
+<h2>Using a fit function<a class="headerlink" href="#using-a-fit-function" title="Link to this heading"></a></h2>
+<p>Construct it from the observations, then call <code class="docutils literal notranslate"><span class="pre">make_fit</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"m=</span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">'m'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">'b'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">m=2.00, b=1.00</span>
+</pre></div>
+</div>
+<p>Every subclass takes <code class="docutils literal notranslate"><span class="pre">(xobs,</span> <span class="pre">yobs,</span> <span class="pre">**kwargs)</span></code>. The keyword arguments of
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a> select which observations
+enter the fit (<code class="docutils literal notranslate"><span class="pre">xmin</span></code>, <code class="docutils literal notranslate"><span class="pre">xmax</span></code>, <code class="docutils literal notranslate"><span class="pre">xoutside</span></code>, <code class="docutils literal notranslate"><span class="pre">ymin</span></code>, <code class="docutils literal notranslate"><span class="pre">ymax</span></code>,
+<code class="docutils literal notranslate"><span class="pre">youtside</span></code>, <code class="docutils literal notranslate"><span class="pre">wmin</span></code>, <code class="docutils literal notranslate"><span class="pre">wmax</span></code>) and supply 1-sigma <code class="docutils literal notranslate"><span class="pre">weights</span></code>. A few
+subclasses add their own, such as the <code class="docutils literal notranslate"><span class="pre">guess_x0</span></code> initial step position of
+<a class="reference internal" href="solarwindpy.fitfunctions.composite.GaussianTimesHeavySide.html#solarwindpy.fitfunctions.composite.GaussianTimesHeavySide" title="solarwindpy.fitfunctions.composite.GaussianTimesHeavySide"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianTimesHeavySide</span></code></a>.</p>
+</section>
+<section id="how-a-fit-runs">
+<h2>How a fit runs<a class="headerlink" href="#how-a-fit-runs" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a> is a template
+method shared by every subclass. It checks that there are at least as many
+observations as parameters, runs <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html#scipy.optimize.least_squares" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.least_squares()</span></code></a>,
+computes the optimized parameters, their covariance and
+<span class="math notranslate nohighlight">\(\chi^2_\nu\)</span>, then builds the LaTeX annotation
+(<a class="reference internal" href="solarwindpy.fitfunctions.tex_info.TeXinfo.html#solarwindpy.fitfunctions.tex_info.TeXinfo" title="solarwindpy.fitfunctions.tex_info.TeXinfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TeXinfo</span></code></a>) and the plotter
+(<a class="reference internal" href="solarwindpy.fitfunctions.plots.FFPlot.html#solarwindpy.fitfunctions.plots.FFPlot" title="solarwindpy.fitfunctions.plots.FFPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">FFPlot</span></code></a>).</p>
+<ul class="simple">
+<li><p>The default loss is <code class="docutils literal notranslate"><span class="pre">&quot;huber&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">f_scale=0.1</span></code>, method <code class="docutils literal notranslate"><span class="pre">&quot;trf&quot;</span></code>;
+<code class="docutils literal notranslate"><span class="pre">loss</span></code>, <code class="docutils literal notranslate"><span class="pre">f_scale</span></code>, <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, <code class="docutils literal notranslate"><span class="pre">p0</span></code> and other
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html#scipy.optimize.least_squares" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">least_squares()</span></code></a> keywords pass through <code class="docutils literal notranslate"><span class="pre">make_fit</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weights</span></code> are treated as <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html#scipy.optimize.curve_fit" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit()</span></code></a> treats
+<code class="docutils literal notranslate"><span class="pre">sigma</span></code>: a 1-D array holds per-point uncertainties, a 2-D array a
+covariance matrix. <code class="docutils literal notranslate"><span class="pre">absolute_sigma=True</span></code> raises <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>.</p></li>
+<li><p>The covariance is the pseudo-inverse of <span class="math notranslate nohighlight">\(J^T J\)</span> from the final
+Jacobian, scaled by the robust <span class="math notranslate nohighlight">\(\chi^2_\nu\)</span>; <code class="docutils literal notranslate"><span class="pre">psigma</span></code> is the square
+root of its diagonal.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">return_exception=True</span></code>, a failed fit returns the exception instead
+of raising it, for loops over many fits.</p></li>
+</ul>
+<p>Failures are reported with
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionError.html#solarwindpy.fitfunctions.core.FitFunctionError" title="solarwindpy.fitfunctions.core.FitFunctionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunctionError</span></code></a> and its subclasses
+<a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html#solarwindpy.fitfunctions.core.InsufficientDataError" title="solarwindpy.fitfunctions.core.InsufficientDataError"><code class="xref py py-class docutils literal notranslate"><span class="pre">InsufficientDataError</span></code></a>,
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFailedError.html#solarwindpy.fitfunctions.core.FitFailedError" title="solarwindpy.fitfunctions.core.FitFailedError"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFailedError</span></code></a> and
+<a class="reference internal" href="solarwindpy.fitfunctions.core.InvalidParameterError.html#solarwindpy.fitfunctions.core.InvalidParameterError" title="solarwindpy.fitfunctions.core.InvalidParameterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidParameterError</span></code></a>.</p>
+</section>
+<section id="writing-a-fit-function">
+<h2>Writing a fit function<a class="headerlink" href="#writing-a-fit-function" title="Link to this heading"></a></h2>
+<p>A subclass implements three abstract properties: <code class="docutils literal notranslate"><span class="pre">function</span></code> (the model,
+whose arguments after <code class="docutils literal notranslate"><span class="pre">x</span></code> are the fit parameters, in order), <code class="docutils literal notranslate"><span class="pre">p0</span></code> (the
+initial guess, in the same order) and <code class="docutils literal notranslate"><span class="pre">TeX_function</span></code> (the model in LaTeX).
+The metaclass <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionMeta.html#solarwindpy.fitfunctions.core.FitFunctionMeta" title="solarwindpy.fitfunctions.core.FitFunctionMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunctionMeta</span></code></a> combines
+<a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a> with NumPy-style docstring inheritance, so a subclass
+method without a docstring, or with only some sections, inherits the missing
+sections from <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a>.
+<a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.TrendFit.html#solarwindpy.fitfunctions.trend_fits.TrendFit" title="solarwindpy.fitfunctions.trend_fits.TrendFit"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrendFit</span></code></a> fits one fit function
+in each bin of 2-D aggregated data and a second to the trend of the results.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.available.html#solarwindpy.fitfunctions.available" title="solarwindpy.fitfunctions.available"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available</span></code></a>()</p></td>
+<td><p>Print every available fit function, its module and its LaTeX formula.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<p class="rubric">Submodules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.composite.html#module-solarwindpy.fitfunctions.composite" title="solarwindpy.fitfunctions.composite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">composite</span></code></a></p></td>
+<td><p>Composite fit functions combining Gaussians with Heaviside step functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.core.html#module-solarwindpy.fitfunctions.core" title="solarwindpy.fitfunctions.core"><code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code></a></p></td>
+<td><p>Base classes used to implement specific fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html#module-solarwindpy.fitfunctions.exponentials" title="solarwindpy.fitfunctions.exponentials"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exponentials</span></code></a></p></td>
+<td><p>Fit functions for exponential models.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html#module-solarwindpy.fitfunctions.gaussians" title="solarwindpy.fitfunctions.gaussians"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gaussians</span></code></a></p></td>
+<td><p>Gaussian-based fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html#module-solarwindpy.fitfunctions.heaviside" title="solarwindpy.fitfunctions.heaviside"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heaviside</span></code></a></p></td>
+<td><p>Heaviside step function fit.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html#module-solarwindpy.fitfunctions.hinge" title="solarwindpy.fitfunctions.hinge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hinge</span></code></a></p></td>
+<td><p>Hinge (piecewise linear) fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.lines.html#module-solarwindpy.fitfunctions.lines" title="solarwindpy.fitfunctions.lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lines</span></code></a></p></td>
+<td><p>Simple linear fit functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html#module-solarwindpy.fitfunctions.moyal" title="solarwindpy.fitfunctions.moyal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moyal</span></code></a></p></td>
+<td><p>Moyal distribution fit function for asymmetric peak fitting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.plots.html#module-solarwindpy.fitfunctions.plots" title="solarwindpy.fitfunctions.plots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plots</span></code></a></p></td>
+<td><p>Plotting utilities for <a class="reference internal" href="#module-solarwindpy.fitfunctions" title="solarwindpy.fitfunctions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solarwindpy.fitfunctions</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html#module-solarwindpy.fitfunctions.power_laws" title="solarwindpy.fitfunctions.power_laws"><code class="xref py py-obj docutils literal notranslate"><span class="pre">power_laws</span></code></a></p></td>
+<td><p>Power-law fit functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html#module-solarwindpy.fitfunctions.tex_info" title="solarwindpy.fitfunctions.tex_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tex_info</span></code></a></p></td>
+<td><p>Helpers for formatting fit results in LaTeX.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html#module-solarwindpy.fitfunctions.trend_fits" title="solarwindpy.fitfunctions.trend_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trend_fits</span></code></a></p></td>
+<td><p><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html#module-solarwindpy.fitfunctions.trend_fits" title="solarwindpy.fitfunctions.trend_fits"><code class="xref py py-mod docutils literal notranslate"><span class="pre">trend_fits</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solarwindpy.plotting.tools.use_style.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.tools.use_style" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.fitfunctions.available.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.available" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

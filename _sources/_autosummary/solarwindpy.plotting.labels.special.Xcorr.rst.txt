@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.Xcorr
+=========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: Xcorr

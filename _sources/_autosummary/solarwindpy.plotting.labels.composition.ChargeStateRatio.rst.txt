@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.composition.ChargeStateRatio
+========================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.composition
+
+.. autoclass:: ChargeStateRatio

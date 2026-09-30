@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.datetime.January1st
+===============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.datetime
+
+.. autoclass:: January1st

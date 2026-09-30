@@ -7,24 +7,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.Hist1D &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.Hist1D &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -99,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -320,38 +317,50 @@
 <h1>solarwindpy.Hist1D<a class="headerlink" href="#solarwindpy-hist1d" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hist1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AggPlot</span></code></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Hist1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.agg_plot.AggPlot.html#solarwindpy.plotting.agg_plot.AggPlot" title="solarwindpy.plotting.agg_plot.AggPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">AggPlot</span></code></a></p>
 <p>Create 1D plot of <cite>x</cite>, optionally aggregating <cite>y</cite> in bins of <cite>x</cite>.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">_gb_axes,</span> <span class="pre">path</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">set_path,</span> <span class="pre">set_data,</span> <span class="pre">agg,</span> <span class="pre">_format_axis,</span> <span class="pre">make_plot</span></span></dt>
-<dd></dd></dl>
-
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>_gb_axes, path</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>set_path, set_data, agg, _format_axis, make_plot</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D.__init__" title="Link to this definition"></a></dt>
 <dd><p>Create a one-dimensional histogram.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><em>pandas.Series</em></a>) – Data from which to create bins.</p></li>
-<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><em>pandas.Series</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Values to aggregate in bins of <code class="docutils literal notranslate"><span class="pre">x</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, counts of
-<code class="docutils literal notranslate"><span class="pre">x</span></code> are used.</p></li>
-<li><p><strong>logx</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, compute bins in logarithmic space.</p></li>
-<li><p><strong>axnorm</strong> (<em>{&quot;t&quot;</em><em>, </em><em>&quot;d&quot;</em><em>, </em><em>None}</em><em>, </em><em>optional</em>) – Normalisation applied to the histogram. <code class="docutils literal notranslate"><span class="pre">&quot;t&quot;</span></code> uses total
-counts and <code class="docutils literal notranslate"><span class="pre">&quot;d&quot;</span></code> yields a density.</p></li>
-<li><p><strong>clip_data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Remove extreme values at the 0.001 and 0.999 percentiles before
-binning or aggregation.</p></li>
-<li><p><strong>nbins</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – Binning strategy passed to <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.histogram_bin_edges()</span></code></a> or
-<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html#pandas.cut" title="(in pandas v3.0.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.cut()</span></code></a> depending on the input type.</p></li>
-<li><p><strong>bin_precision</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Precision for decimal bin edges.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></span></dt><dd><p>Data from which to create bins.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a>, optional</span></dt><dd><p>Values to aggregate in bins of <code class="docutils literal notranslate"><span class="pre">x</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, counts of
+<code class="docutils literal notranslate"><span class="pre">x</span></code> are used.</p>
+</dd>
+<dt><strong>logx</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, compute bins in logarithmic space.</p>
+</dd>
+<dt><strong>axnorm</strong><span class="classifier">{“t”, “d”, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a>}, optional</span></dt><dd><p>Normalisation applied to the histogram. <code class="docutils literal notranslate"><span class="pre">&quot;t&quot;</span></code> uses total
+counts and <code class="docutils literal notranslate"><span class="pre">&quot;d&quot;</span></code> yields a density.</p>
+</dd>
+<dt><strong>clip_data</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>Remove extreme values at the 0.001 and 0.999 percentiles before
+binning or aggregation.</p>
+</dd>
+<dt><strong>nbins</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a>, optional</span></dt><dd><p>Binning strategy passed to <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.histogram_bin_edges()</span></code></a> or
+<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html#pandas.cut" title="(in pandas v3.0.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.cut()</span></code></a> depending on the input type.</p>
+</dd>
+<dt><strong>bin_precision</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Precision for decimal bin edges.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -360,13 +369,15 @@ binning or aggregation.</p></li>
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.set_path">
 <span class="sig-name descname"><span class="pre">set_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D.set_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D.set_path" title="Link to this definition"></a></dt>
 <dd><p>Build the plot save path.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – If str and == “auto”, then build path from <cite>self.labels</cite>. Otherwise,
-assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p></li>
-<li><p><strong>add_scale</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, add information about the axis scales to the end of the path.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
+use <code class="docutils literal notranslate"><span class="pre">Path(new)</span></code>.</p>
+</dd>
+<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -374,7 +385,8 @@ assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.set_data">
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D.set_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Store the data to plot. Implemented by each subclass.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.set_axnorm">
@@ -401,18 +413,17 @@ assume parameter specifies the desired path and use <cite>Path(new)</cite>.</p><
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.construct_cdf">
 <span class="sig-name descname"><span class="pre">construct_cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_plotted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D.construct_cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D.construct_cdf" title="Link to this definition"></a></dt>
 <dd><p>Convert the obsered measuremets.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p><strong>cdf</strong> – “x” column is the value of the measuremnt.
+<dd class="field-odd"><dl>
+<dt>cdf: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>“x” column is the value of the measuremnt.
 “position” column is the normalized position in the cdf.
 To plot the cdf:</p>
 <blockquote>
 <div><p>cdf.plot(x=”x”, y=”cdf”)</p>
 </div></blockquote>
-</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -430,8 +441,24 @@ values.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.set_labels">
 <span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/hist1d.html#Hist1D.set_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.Hist1D.set_labels" title="Link to this definition"></a></dt>
-<dd><p>Set or update x, y, or z labels. Any label not specified in kwargs.</p>
-<p>is propagated from <cite>self.labels.&lt;x, y, or z&gt;</cite>.</p>
+<dd><p>Set or update the x, y, or z labels.</p>
+<p>Any label not passed keeps its current value in <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x, y, z</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference internal" href="solarwindpy.plotting.labels.base.TeXlabel.html#solarwindpy.plotting.labels.base.TeXlabel" title="solarwindpy.plotting.labels.base.TeXlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.labels.base.TeXlabel</span></code></a>, optional</span></dt><dd><p>New axis labels.</p>
+</dd>
+<dt><strong>auto_update_path</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True (default), rebuild the save path from the new labels.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -440,24 +467,32 @@ values.</p>
 <dd><p>Make a plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> (<em>None</em><em>, </em><em>mpl.axis.Axis</em>) – If <cite>None</cite>, create a subplot axis.</p></li>
-<li><p><strong>fcn</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>aggregative function</em><em>, or </em><em>2-tuple</em>) – Passed directly to <cite>{self.__class__.__name__}.agg</cite>. If
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ax: None, mpl.axis.Axis</strong></dt><dd><p>If <cite>None</cite>, create a subplot axis.</p>
+</dd>
+<dt><strong>fcn: None, str, aggregative function, or 2-tuple</strong></dt><dd><p>Passed directly to <cite>{self.__class__.__name__}.agg</cite>. If
 None, use the default aggregation function. If str or a
 single aggregative function, use it. If a 2-tuple is passed,
 then the first element aggregates and the second element
-calculates an uncertainty.</p></li>
-<li><p><strong>transpose_axes</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, plot independent values on y-axis and dependent
+calculates an uncertainty.</p>
+</dd>
+<dt><strong>transpose_axes: bool</strong></dt><dd><p>If True, plot independent values on y-axis and dependent
 values on x-axis. Primary use case is plotting 1D projection
-of 2D plot adjascent to 2D axis.</p></li>
-<li><p><strong>gaussian_filter_std</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – If &gt; 0, apply <cite>scipy.ndimage.gaussian_filter</cite> to the z-values using the
-standard deviation specified by <cite>gaussian_filter_std</cite>.</p></li>
-<li><p><strong>gaussian_filter_kwargs</strong> (<em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – If not None and gaussian_filter_std &gt; 0, passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code></p></li>
-<li><p><strong>plot_window</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Requires two functions passed to <cite>fcn</cite>. Instead of error bars, plots the uncertainty
-window as a semi-transparent band.</p></li>
-<li><p><strong>plot_window_edges</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, plot solid lines at the window boundaries.</p></li>
-<li><p><strong>kwargs</strong> – Passed directly to <cite>ax.plot</cite>.</p></li>
-</ul>
+of 2D plot adjascent to 2D axis.</p>
+</dd>
+<dt><strong>gaussian_filter_std: int</strong></dt><dd><p>If &gt; 0, apply <cite>scipy.ndimage.gaussian_filter</cite> to the z-values using the
+standard deviation specified by <cite>gaussian_filter_std</cite>.</p>
+</dd>
+<dt><strong>gaussian_filter_kwargs: None, dict</strong></dt><dd><p>If not None and gaussian_filter_std &gt; 0, passed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html#scipy.ndimage.gaussian_filter" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter()</span></code></a></p>
+</dd>
+<dt><strong>plot_window: bool</strong></dt><dd><p>Requires two functions passed to <cite>fcn</cite>. Instead of error bars, plots the uncertainty
+window as a semi-transparent band.</p>
+</dd>
+<dt><strong>plot_window_edges: bool</strong></dt><dd><p>If True, plot solid lines at the window boundaries.</p>
+</dd>
+<dt><strong>kwargs:</strong></dt><dd><p>Passed directly to <cite>ax.plot</cite>.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -468,42 +503,45 @@ window as a semi-transparent band.</p></li>
 <dd><p>Take data within y-ranges across x-values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ranges_by_x</strong> (<em>iterable</em>) – An iterable with keys used to get the left and right bounds for the data
-and values used to get the top and bottom bounds for the data.</p></li>
-<li><p><strong>get_x_bounds</strong> (<em>function</em>) – First argument is one key of <cite>ranges_by_x</cite> and returns <cite>left, right</cite>.
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ranges_by_x: iterable</strong></dt><dd><p>An iterable with keys used to get the left and right bounds for the data
+and values used to get the top and bottom bounds for the data.</p>
+</dd>
+<dt><strong>get_x_bounds: function</strong></dt><dd><p>First argument is one key of <cite>ranges_by_x</cite> and returns <cite>left, right</cite>.
 Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
 to whether or not the keys are <span class="math notranslate nohighlight">\(log(x)\)</span> or <span class="math notranslate nohighlight">\(x\)</span> in a manner
-that matches data stored in Hist2D.</p></li>
-<li><p><strong>get_y_bounds</strong> (<em>functions</em>) – Takes on value of <cite>ranges_by_x</cite> and returns <cite>top, bottom</cite>. Second argument
+that matches data stored in Hist2D.</p>
+</dd>
+<dt><strong>get_y_bounds: functions</strong></dt><dd><p>Takes on value of <cite>ranges_by_x</cite> and returns <cite>top, bottom</cite>. Second argument
 Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
 to whether or not the keys are <span class="math notranslate nohighlight">\(log(y)\)</span> or <span class="math notranslate nohighlight">\(y\)</span> in a manner
-that matches data stored in Hist2D.</p></li>
-</ul>
+that matches data stored in Hist2D.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>taken</strong> – Array of indices for selecting data in interval.</p>
+<dd class="field-even"><dl class="simple">
+<dt>taken: <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></a> 1D</dt><dd><p>Array of indices for selecting data in interval.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray 1D</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.agg_axes">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">agg_axes</span></span><a class="headerlink" href="#solarwindpy.Hist1D.agg_axes" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">agg_axes</span></span><a class="headerlink" href="#solarwindpy.Hist1D.agg_axes" title="Link to this definition"></a></dt>
 <dd><p>The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.alim">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.Hist1D.alim" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.Hist1D.alim" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.axnorm">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.Hist1D.axnorm" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">axnorm</span></span><a class="headerlink" href="#solarwindpy.Hist1D.axnorm" title="Link to this definition"></a></dt>
 <dd><p>Data normalization in plot.</p>
 <p>Not <cite>mpl.colors.Normalize</cite> instance. That is passed as a <cite>kwarg</cite> to
 <cite>make_plot</cite>.</p>
@@ -521,44 +559,72 @@ If str and nbins != “knuth”, use <cite>np.histogram(data, bins=nbins)</cite>
 to calculate bins.
 If array-like, treat as bins.</p>
 </dd>
-<dt>precision: int or None</dt><dd><p>Precision at which to store intervals. If None, default to 3.</p>
+<dt>precision: int or None</dt><dd><p>Decimal places to which bin edges are rounded. If None, 5.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.categoricals">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">categoricals</span></span><a class="headerlink" href="#solarwindpy.Hist1D.categoricals" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">categoricals</span></span><a class="headerlink" href="#solarwindpy.Hist1D.categoricals" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.clim">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#solarwindpy.Hist1D.clim" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">clim</span></span><a class="headerlink" href="#solarwindpy.Hist1D.clim" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.clip">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.Hist1D.clip" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">clip</span></span><a class="headerlink" href="#solarwindpy.Hist1D.clip" title="Link to this definition"></a></dt>
+<dd><p>Clipping option stored by <code class="docutils literal notranslate"><span class="pre">set_data</span></code>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.clip_data">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.Hist1D.clip_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">clip_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.Hist1D.clip_data" title="Link to this definition"></a></dt>
+<dd><p>Clip data to its 0.01st and 99.99th percentiles.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Data to clip. A DataFrame is clipped column by column.</p>
+</dd>
+<dt><strong>clip</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A string starting with <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> selects the lower or upper
+tail only; any other value clips both tails. The one-tail branches
+call <code class="docutils literal notranslate"><span class="pre">clip_lower</span></code> and <code class="docutils literal notranslate"><span class="pre">clip_upper</span></code>, which pandas removed, so they
+raise <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>The clipped data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither a Series nor a DataFrame.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.cut">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cut</span></span><a class="headerlink" href="#solarwindpy.Hist1D.cut" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cut</span></span><a class="headerlink" href="#solarwindpy.Hist1D.cut" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.data">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.Hist1D.data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.Hist1D.data" title="Link to this definition"></a></dt>
+<dd><p>Data stored by <code class="docutils literal notranslate"><span class="pre">set_data</span></code>.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.edges">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#solarwindpy.Hist1D.edges" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#solarwindpy.Hist1D.edges" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -578,35 +644,38 @@ index you may need to adjust the returned series.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.grouped">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grouped</span></span><a class="headerlink" href="#solarwindpy.Hist1D.grouped" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">grouped</span></span><a class="headerlink" href="#solarwindpy.Hist1D.grouped" title="Link to this definition"></a></dt>
 <dd><p><cite>joint.groupby</cite> with appropriate axes passes.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.intervals">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intervals</span></span><a class="headerlink" href="#solarwindpy.Hist1D.intervals" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">intervals</span></span><a class="headerlink" href="#solarwindpy.Hist1D.intervals" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.joint">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#solarwindpy.Hist1D.joint" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">joint</span></span><a class="headerlink" href="#solarwindpy.Hist1D.joint" title="Link to this definition"></a></dt>
 <dd><p>Combines the categorical and continuous data for <cite>Groupby</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.labels">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.Hist1D.labels" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#solarwindpy.Hist1D.labels" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">AxesLabels</span></code> namedtuple holding the x, y and z labels.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.log">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.Hist1D.log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#solarwindpy.Hist1D.log" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">LogAxes</span></code> namedtuple of booleans: True where an axis is logarithmic.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.logger">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.Hist1D.logger" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.Hist1D.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger named <code class="docutils literal notranslate"><span class="pre">&lt;module&gt;.&lt;class</span> <span class="pre">name&gt;</span></code>.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.make_cut">
@@ -616,7 +685,7 @@ index you may need to adjust the returned series.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.path">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.Hist1D.path" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.Hist1D.path" title="Link to this definition"></a></dt>
 <dd><p>Path for saving figure.</p>
 </dd></dl>
 
@@ -638,7 +707,16 @@ index you may need to adjust the returned series.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.Hist1D.set_log">
 <span class="sig-name descname"><span class="pre">set_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.Hist1D.set_log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set which axes use a logarithmic scale.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

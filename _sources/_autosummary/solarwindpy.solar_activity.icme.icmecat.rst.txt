@@ -1,0 +1,43 @@
+solarwindpy.solar\_activity.icme.icmecat
+========================================
+
+.. automodule:: solarwindpy.solar_activity.icme.icmecat
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      ICMECAT
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      ICMECATDownloadError
+   
+   
+
+
+

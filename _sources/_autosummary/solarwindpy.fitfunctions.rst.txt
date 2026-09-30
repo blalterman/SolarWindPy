@@ -1,0 +1,56 @@
+﻿solarwindpy.fitfunctions
+========================
+
+.. automodule:: solarwindpy.fitfunctions
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      available
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Submodules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   composite
+   core
+   exponentials
+   gaussians
+   heaviside
+   hinge
+   lines
+   moyal
+   plots
+   power_laws
+   tex_info
+   trend_fits
+
+

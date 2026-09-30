@@ -1,0 +1,6 @@
+solarwindpy.plotting.hist2d.Hist2D
+==================================
+
+.. currentmodule:: solarwindpy.plotting.hist2d
+
+.. autoclass:: Hist2D

@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.HingeAtPoint
+===========================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: HingeAtPoint

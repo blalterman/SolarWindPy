@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.get\_all\_indices
+=============================================
+
+.. currentmodule:: solarwindpy.solar_activity
+
+.. autofunction:: get_all_indices

@@ -1,8 +1,12 @@
-﻿solarwindpy.instabilities.verscharen2016
+solarwindpy.instabilities.verscharen2016
 ========================================
 
 .. automodule:: solarwindpy.instabilities.verscharen2016
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

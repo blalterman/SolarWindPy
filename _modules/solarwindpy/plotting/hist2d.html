@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -307,8 +303,7 @@
              
   <h1>Source code for solarwindpy.plotting.hist2d</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Two-dimensional histogram and heatmap plotting utilities.&quot;&quot;&quot;</span>
-
+<span class="sa">r</span><span class="sd">"""Two-dimensional histogram and heatmap plotting utilities."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -331,58 +326,39 @@
 
 
 <div class="viewcode-block" id="Hist2D">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Hist2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">,</span> <span class="n">AggPlot</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a 2D histogram with an optional z-value using an equal number.</span>
-
-<span class="sd">    of bins along the x and y axis.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""2D histogram of (x, y), optionally aggregating a z-value in each bin.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x, y: pd.Series</span>
-<span class="sd">        x and y data to aggregate</span>
-<span class="sd">    z: None, pd.Series</span>
-<span class="sd">        If not None, the z-value to aggregate.</span>
-<span class="sd">    axnorm: str</span>
-<span class="sd">        Normalize the histogram.</span>
-<span class="sd">            key  normalization</span>
-<span class="sd">            ---  -------------</span>
-<span class="sd">            c    column</span>
-<span class="sd">            r    row</span>
-<span class="sd">            t    total</span>
-<span class="sd">            d    density</span>
-<span class="sd">    logx, logy: bool</span>
-<span class="sd">        If True, log10 scale the axis.</span>
+<span class="sd">    x, y : pd.Series</span>
+<span class="sd">        x and y data to bin.</span>
+<span class="sd">    z : pd.Series, optional</span>
+<span class="sd">        If not None, the value to aggregate in each bin. If None, each bin</span>
+<span class="sd">        counts its points.</span>
+<span class="sd">    axnorm : str, optional</span>
+<span class="sd">        Normalization of the aggregated values; see ``set_axnorm`` for the keys.</span>
+<span class="sd">    logx, logy : bool</span>
+<span class="sd">        If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.</span>
+<span class="sd">    clip_data : bool</span>
+<span class="sd">        If True, clip x and y to their 0.01st and 99.99th percentiles</span>
+<span class="sd">        (``AggPlot.clip_data``) when assigning points to bins; the bin edges</span>
+<span class="sd">        are computed from the unclipped data.</span>
+<span class="sd">    nbins : int or str or tuple</span>
+<span class="sd">        Bin specification passed to ``calc_bins_intervals``.</span>
+<span class="sd">    bin_precision : int, optional</span>
+<span class="sd">        Decimal places to which bin edges are rounded. If None, 5.</span>
 
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    data:</span>
-<span class="sd">    bins:</span>
-<span class="sd">    cut:</span>
-<span class="sd">    axnorm:</span>
-<span class="sd">    log&lt;x,y&gt;:</span>
-<span class="sd">    &lt;x,y,z&gt;label:</span>
-<span class="sd">    path: None, Path</span>
-
-<span class="sd">    Methods</span>
-<span class="sd">    -------</span>
-<span class="sd">    calc_bins:</span>
-<span class="sd">        calculate the x, y bins.</span>
-<span class="sd">    make_cut:</span>
-<span class="sd">        Utilize the calculated bins to convert (x, y) into pd.Categoral</span>
-<span class="sd">        or pd.Interval values used in aggregation.</span>
-<span class="sd">    set_[x,y,z]label:</span>
-<span class="sd">        Set the x, y, or z label.</span>
-<span class="sd">    agg:</span>
-<span class="sd">        Aggregate the data in the bins.</span>
-<span class="sd">        If z-value is None, count the number of points in each bin.</span>
-<span class="sd">        If z-value is not None, calculate the mean for each bin.</span>
-<span class="sd">    make_plot:</span>
-<span class="sd">        Make a 2D plot of the data with an optional color bar.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``calc_bins_intervals`` computes the bins, ``make_cut`` assigns each point</span>
+<span class="sd">    to a bin, ``agg`` aggregates and normalizes, and ``make_plot`` draws the</span>
+<span class="sd">    result with an optional colorbar.</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="Hist2D.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x</span><span class="p">,</span>
@@ -395,11 +371,12 @@
         <span class="n">nbins</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
         <span class="n">bin_precision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data, labels and normalization, then bin the data."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_log</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span>
-            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">axnorm</span><span class="p">)</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;z&quot;</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">axnorm</span><span class="p">)</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"z"</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="n">axnorm</span><span class="p">)</span>
@@ -411,7 +388,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_gb_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
@@ -422,9 +399,10 @@
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
 <div class="viewcode-block" id="Hist2D.set_labels">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"z"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">z</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="p">)</span>
@@ -437,21 +415,22 @@
 
 
 <div class="viewcode-block" id="Hist2D.set_data">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data, taking ``log10(abs())`` of each axis flagged in ``self.log``."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="Hist2D.set_axnorm">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_axnorm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The method by which the gridded data is normalized.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The method by which the gridded data is normalized.</span>
 
 <span class="sd">        ===== =============================================================</span>
 <span class="sd">         key                           description</span>
@@ -462,17 +441,17 @@
 <span class="sd">         t     Total normalize</span>
 <span class="sd">         cd    PDFs in each column</span>
 <span class="sd">         rd    PDFs in each row</span>
-<span class="sd">        ===== =============================================================&quot;&quot;&quot;</span>
+<span class="sd">        ===== ============================================================="""</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="k">assert</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="s2">&quot;c&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;r&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;t&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;d&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;cd&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;rd&quot;</span><span class="p">,</span>
-            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Unrecgonized axnorm `</span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">`&quot;</span>
+                <span class="s2">"c"</span><span class="p">,</span>
+                <span class="s2">"r"</span><span class="p">,</span>
+                <span class="s2">"t"</span><span class="p">,</span>
+                <span class="s2">"d"</span><span class="p">,</span>
+                <span class="s2">"cd"</span><span class="p">,</span>
+                <span class="s2">"rd"</span><span class="p">,</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">"Unrecgonized axnorm `</span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">`"</span>
 
         <span class="n">zlbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zlbl</span><span class="p">,</span> <span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
@@ -483,26 +462,26 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_axis_normalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Takes care of row, column, total, and density normaliation.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Takes care of row, column, total, and density normaliation.</span>
 
 <span class="sd">        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but</span>
 <span class="sd">        as actual method with `self` passed so we have access to `self.log` for density</span>
 <span class="sd">        normalization.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
         <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"c"</span><span class="p">:</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"r"</span><span class="p">:</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"t"</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"d"</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
                 <span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span>
             <span class="p">)</span>  <span class="c1"># dx = pd.Series(x.right - x.left, index=x)</span>
@@ -515,47 +494,50 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
                 <span class="n">dy</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">dy</span>
 
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;cd&quot;</span><span class="p">:</span>
-            <span class="c1">#             raise NotImplementedError(&quot;Need to verify data alignment, especially `dx` values and index&quot;)</span>
-            <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"cd"</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">dy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span>
-                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
             <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
             <span class="n">dy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dy</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-            <span class="c1"># Divide by total in each column and each row&#39;s width</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+            <span class="c1"># Divide by total in each column and each row's width</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;rd&quot;</span><span class="p">:</span>
-            <span class="c1">#             raise NotImplementedError(&quot;Need to verify data alignment, especially `dx` values and index&quot;)</span>
-            <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"rd"</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span>
-                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
             <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dx</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-            <span class="c1"># Divide by total in each column and each row&#39;s width</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+            <span class="c1"># Divide by total in each column and each row's width</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axnorm</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axnorm</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">):</span>
             <span class="c1"># TODO: This is an undocumented feature. I do not know if it is</span>
             <span class="c1">#       tested nor how it interacts with colorbar labels, etc.</span>
             <span class="c1">#       We need to investigate this issue (20250804).</span>
             <span class="n">kind</span><span class="p">,</span> <span class="n">fcn</span> <span class="o">=</span> <span class="n">axnorm</span>
-            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span>
-                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
-                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"c"</span><span class="p">:</span>
+                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"r"</span><span class="p">:</span>
+                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized axnorm with function (</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fcn</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unrecognized axnorm with function (</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fcn</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized axnorm (</span><span class="si">{</span><span class="n">axnorm</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unrecognized axnorm (</span><span class="si">{</span><span class="n">axnorm</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">agg</span>
 
 <div class="viewcode-block" id="Hist2D.agg">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.</span>
+
+<span class="sd">        Every bin is present in the result; bins outside ``alim`` are NaN.</span>
+<span class="sd">        ``kwargs`` are passed to ``AggPlot.agg``.</span>
+<span class="sd">        """</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agg_reindexer</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
@@ -575,17 +557,17 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_cbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">ticks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;ticks&quot;</span><span class="p">,</span>
-            <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"ticks"</span><span class="p">,</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">):</span>
-            <span class="c1"># Don&#39;t limit us to (1%, 99%) interval.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
+            <span class="c1"># Don't limit us to (1%, 99%) interval.</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
         <span class="n">v0</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.01</span><span class="p">]</span>
         <span class="n">v1</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.99</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -595,7 +577,7 @@
         <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prep_agg_for_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mask_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare aggregated data and coordinates for plotting.</span>
+<span class="w">        </span><span class="sd">"""Prepare aggregated data and coordinates for plotting.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -616,23 +598,23 @@
 <span class="sd">            X coordinates (edges or centers based on use_edges).</span>
 <span class="sd">        y : np.ndarray</span>
 <span class="sd">            Y coordinates (edges or centers based on use_edges).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">use_edges</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span>
             <span class="n">expected_offset</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># edges have n+1 points for n bins</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
             <span class="n">expected_offset</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># centers have n points for n bins</span>
 
         <span class="c1"># HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)</span>
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">expected_offset</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">expected_offset</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">])</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
@@ -643,11 +625,11 @@
         <span class="k">return</span> <span class="n">C</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_nan_gaussian_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""</span>
         <span class="k">return</span> <span class="n">nan_gaussian_filter</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Hist2D.make_plot">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -658,7 +640,7 @@
         <span class="n">alpha_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make a 2D plot on `ax` using `ax.pcolormesh`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Make a 2D plot on `ax` using `ax.pcolormesh`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -687,16 +669,16 @@
 <span class="sd">        cbar_or_mappable: colorbar.Colorbar, mpl.collections.QuadMesh</span>
 <span class="sd">            If `cbar` is True, return the colorbar. Otherwise, return the `Quadmesh` used</span>
 <span class="sd">            to create the colorbar.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="sd">        """</span>
+        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span>
 
         <span class="c1"># HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)</span>
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -705,13 +687,13 @@
 
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
         <span class="n">default_norm</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">,</span> <span class="s2">&quot;rd&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">):</span>
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
@@ -725,8 +707,8 @@
             <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
             <span class="c1"># Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
@@ -737,15 +719,15 @@
         <span class="n">color_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg_axes</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">alpha_fcn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">color_plot</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Make sure you verify alpha actually set. I don&#39;t yet trust this.&quot;</span>
+                <span class="s2">"Make sure you verify alpha actually set. I don't yet trust this."</span>
             <span class="p">)</span>
             <span class="n">alpha_agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">alpha_fcn</span><span class="p">)</span>
-            <span class="n">alpha_agg</span> <span class="o">=</span> <span class="n">alpha_agg</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+            <span class="n">alpha_agg</span> <span class="o">=</span> <span class="n">alpha_agg</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
             <span class="n">alpha_agg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">alpha_agg</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
             <span class="c1"># Feature scale then invert so smallest STD</span>
             <span class="c1"># is most opaque.</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()(</span><span class="n">alpha_agg</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Scaling alpha filter as alpha**0.25&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Scaling alpha filter as alpha**0.25"</span><span class="p">)</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">**</span><span class="mf">0.25</span>
 
             <span class="c1"># Set masked values to zero. Otherwise, masked</span>
@@ -758,13 +740,13 @@
             <span class="n">pc</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">alpha_fcn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Ignoring `alpha_fcn` because plotting counts&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Ignoring `alpha_fcn` because plotting counts"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cbar_or_mappable</span></div>
 
 
 <div class="viewcode-block" id="Hist2D.plot_hist_with_contours">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.plot_hist_with_contours">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_hist_with_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_hist_with_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -784,7 +766,7 @@
         <span class="n">nan_aware_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a 2D pcolormesh plot with contour overlay.</span>
+<span class="w">        </span><span class="sd">"""Make a 2D pcolormesh plot with contour overlay.</span>
 
 <span class="sd">        Combines `make_plot` (pcolormesh background) with `plot_contours`</span>
 <span class="sd">        (contour/contourf overlay) in a single call.</span>
@@ -812,7 +794,7 @@
 <span class="sd">        clabel_kwargs : dict, None</span>
 <span class="sd">            Kwargs passed to `ax.clabel`.</span>
 <span class="sd">        skip_max_clbl : bool</span>
-<span class="sd">            If True, don&#39;t label the maximum contour level.</span>
+<span class="sd">            If True, don't label the maximum contour level.</span>
 <span class="sd">        gaussian_filter_std : int</span>
 <span class="sd">            If &gt; 0, apply Gaussian filter to contour data.</span>
 <span class="sd">        gaussian_filter_kwargs : dict, None</span>
@@ -831,7 +813,7 @@
 <span class="sd">            The contour set from the overlay.</span>
 <span class="sd">        lbls : list or None</span>
 <span class="sd">            Contour labels if label_levels is True.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
@@ -841,19 +823,19 @@
         <span class="c1"># Determine normalization</span>
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
         <span class="n">default_norm</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">,</span> <span class="s2">&quot;rd&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">):</span>
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
 
         <span class="c1"># Get cmap from kwargs (shared between pcolormesh and contour)</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># --- 1. Plot pcolormesh background ---</span>
         <span class="n">C_edges</span><span class="p">,</span> <span class="n">x_edges</span><span class="p">,</span> <span class="n">y_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prep_agg_for_plot</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -895,15 +877,15 @@
 
         <span class="c1"># Default linestyles for contour</span>
         <span class="n">linestyles</span> <span class="o">=</span> <span class="n">contour_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;linestyles&quot;</span><span class="p">,</span>
+            <span class="s2">"linestyles"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
             <span class="p">],</span>
         <span class="p">)</span>
@@ -923,13 +905,15 @@
             <span class="k">if</span> <span class="n">clabel_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">clabel_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline_spacing&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-            <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fmt&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline_spacing"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"fmt"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">)</span>
 
             <span class="k">class</span><span class="w"> </span><span class="nc">nf</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">                </span><span class="sa">r</span><span class="sd">"""Float whose repr drops trailing zeros, for contour labels."""</span>
+
                 <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">clabel_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,</span> <span class="n">levels</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">skip_max_clbl</span> <span class="k">else</span> <span class="n">levels</span><span class="p">)</span>
@@ -950,8 +934,8 @@
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="p">:</span>
+                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
             <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
 
         <span class="c1"># --- 5. Format axis ---</span>
@@ -961,20 +945,20 @@
 
 
 <div class="viewcode-block" id="Hist2D.get_border">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.get_border">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.get_border">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_border</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the top and bottom edges of the plot.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Get the top and bottom edges of the plot.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        border: namedtuple</span>
-<span class="sd">            Contains &quot;top&quot; and &quot;bottom&quot; fields, each with a :py:class:`pd.Series`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            Contains "top" and "bottom" fields, each a :class:`pandas.Series`.</span>
+<span class="sd">        """</span>
 
-        <span class="n">Border</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Border&quot;</span><span class="p">,</span> <span class="s2">&quot;top,bottom&quot;</span><span class="p">)</span>
+        <span class="n">Border</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"Border"</span><span class="p">,</span> <span class="s2">"top,bottom"</span><span class="p">)</span>
         <span class="n">top</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">yt</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">last_valid_index</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">yt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">z</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">yt</span><span class="p">]</span>
@@ -988,7 +972,7 @@
         <span class="n">top</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">):</span>
-            <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"y"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">]</span>
 
         <span class="n">border</span> <span class="o">=</span> <span class="n">Border</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">border</span></div>
@@ -1004,15 +988,15 @@
         <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">mid</span>
 
         <span class="k">if</span> <span class="n">sg_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sg_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">smooth</span><span class="p">:</span>
-            <span class="n">wlength</span> <span class="o">=</span> <span class="n">sg_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;window_length&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)))</span>
-            <span class="n">polyorder</span> <span class="o">=</span> <span class="n">sg_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;polyorder&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">wlength</span> <span class="o">=</span> <span class="n">sg_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"window_length"</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)))</span>
+            <span class="n">polyorder</span> <span class="o">=</span> <span class="n">sg_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"polyorder"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">wlength</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">wlength</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -1037,16 +1021,15 @@
         <span class="k">if</span> <span class="n">y1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">y1</span><span class="p">)</span>
 
-        <span class="c1">#         if (~tk).any():</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Hist2D.plot_edges">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.plot_edges">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_edges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sg_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overplot the edges.</span>
+<span class="w">        </span><span class="sd">"""Overplot the edges.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1063,12 +1046,12 @@
 <span class="sd">            take 1-window_length.</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Passed to `ax.plot`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_border</span><span class="p">()</span>
 
-        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;cyan&quot;</span><span class="p">)</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"color"</span><span class="p">,</span> <span class="s2">"cyan"</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"label"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">etop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_one_edge</span><span class="p">(</span>
             <span class="n">ax</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="n">sg_kwargs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
@@ -1083,21 +1066,21 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">pass</span>
 
-        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"t"</span><span class="p">):</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"d"</span><span class="p">):</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3e-5</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">3e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1.7e-3</span><span class="p">,</span> <span class="mf">2.3e-3</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"r"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">]):</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cd&quot;</span><span class="p">,</span> <span class="s2">&quot;rd&quot;</span><span class="p">]):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">]):</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unrecognized axis normalization </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="si">}</span><span class="s2"> for default levels.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unrecognized axis normalization </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="si">}</span><span class="s2"> for default levels."</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">levels</span>
@@ -1111,13 +1094,13 @@
             <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
         <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
 <div class="viewcode-block" id="Hist2D.plot_contours">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1136,7 +1119,7 @@
         <span class="n">nan_aware_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a contour plot on `ax` using `ax.contour`.</span>
+<span class="w">        </span><span class="sd">"""Make a contour plot on `ax` using `ax.contour`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1160,7 +1143,7 @@
 <span class="sd">        clabel_kwargs: None, dict</span>
 <span class="sd">            If not None, dictionary of kwargs passed to `ax.clabel`.</span>
 <span class="sd">        skip_max_clbl: bool</span>
-<span class="sd">            If True, don&#39;t label the maximum contour. Primarily used when the maximum</span>
+<span class="sd">            If True, don't label the maximum contour. Primarily used when the maximum</span>
 <span class="sd">            contour is, effectively, a point.</span>
 <span class="sd">        maximum_color:</span>
 <span class="sd">            The color for the maximum of the PDF.</span>
@@ -1170,34 +1153,34 @@
 <span class="sd">            If &gt; 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the</span>
 <span class="sd">            standard deviation specified by `gaussian_filter_std`.</span>
 <span class="sd">        gaussian_filter_kwargs: None, dict</span>
-<span class="sd">            If not None and gaussian_filter_std &gt; 0, passed to :py:meth:`scipy.ndimage.gaussian_filter`</span>
+<span class="sd">            If not None and gaussian_filter_std &gt; 0, passed to :func:`scipy.ndimage.gaussian_filter`</span>
 <span class="sd">        nan_aware_filter: bool</span>
 <span class="sd">            If True and gaussian_filter_std &gt; 0, use NaN-aware filtering via</span>
 <span class="sd">            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.</span>
 <span class="sd">        kwargs:</span>
-<span class="sd">            Passed to :py:meth:`ax.pcolormesh`.</span>
+<span class="sd">            Passed to :meth:`matplotlib.axes.Axes.pcolormesh`.</span>
 <span class="sd">            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"levels"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;norm&quot;</span><span class="p">,</span>
+            <span class="s2">"norm"</span><span class="p">,</span>
             <span class="p">(</span>
                 <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
         <span class="p">)</span>
         <span class="n">linestyles</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;linestyles&quot;</span><span class="p">,</span>
+            <span class="s2">"linestyles"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
             <span class="p">],</span>
         <span class="p">)</span>
@@ -1213,19 +1196,19 @@
             <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
         <span class="p">)</span>
 
-        <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline_spacing&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fmt&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline_spacing"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"fmt"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">)</span>
 
-        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
+        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span><span class="o">.</span><span class="n">mid</span>
 
         <span class="c1"># HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)</span>
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categoricals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">])</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
@@ -1253,9 +1236,11 @@
         <span class="k">class</span><span class="w"> </span><span class="nc">nf</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
             <span class="c1"># Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html</span>
             <span class="c1"># Define a class that forces representation of float to look a certain way</span>
-            <span class="c1"># This remove trailing zero so &#39;1.0&#39; becomes &#39;1&#39;</span>
+            <span class="c1"># This remove trailing zero so '1.0' becomes '1'</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Float whose repr drops trailing zeros, for contour labels."""</span>
+
             <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span>
 
         <span class="n">levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_contour_levels</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
 
@@ -1276,7 +1261,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,</span> <span class="n">levels</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">skip_max_clbl</span> <span class="k">else</span> <span class="n">levels</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="c1"># None can&#39;t be subscripted.</span>
+            <span class="c1"># None can't be subscripted.</span>
             <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,)</span>
 
         <span class="n">lbls</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1305,37 +1290,38 @@
 
 
 <div class="viewcode-block" id="Hist2D.project_1d">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.project_1d">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.project_1d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">project_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">only_plotted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a `Hist1D` from the data stored in this `His2D`.</span>
+<span class="w">        </span><span class="sd">"""Make a ``Hist1D`` from the data stored in this ``Hist2D``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        axis: str</span>
-<span class="sd">            &quot;x&quot; or &quot;y&quot;, specifying the axis to project into 1D.</span>
+<span class="sd">            "x" or "y", specifying the axis to project into 1D.</span>
 <span class="sd">        only_plotted: bool</span>
 <span class="sd">            If True, only pass data that appears in the {self.__class__.__name__} plot</span>
-<span class="sd">            to the :py:class:`Hist1D`.</span>
+<span class="sd">            to the :class:`~solarwindpy.plotting.hist1d.Hist1D`.</span>
 <span class="sd">        project_counts: bool</span>
-<span class="sd">            If True, only send the variable plotted along `axis` to :py:class:`Hist1D`.</span>
+<span class="sd">            If True, only send the variable plotted along `axis` to</span>
+<span class="sd">            :class:`~solarwindpy.plotting.hist1d.Hist1D`.</span>
 <span class="sd">            Otherwise, send both axes (but not z-values).</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        h1: :py:class:`Hist1D`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        h1: solarwindpy.plotting.hist1d.Hist1D</span>
+<span class="sd">        """</span>
         <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># Either all 1 or 1 and NaN.</span>
-            <span class="n">other</span> <span class="o">=</span> <span class="s2">&quot;z&quot;</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="s2">"z"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">possible_axes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">}</span>
+            <span class="n">possible_axes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">}</span>
             <span class="n">possible_axes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
             <span class="n">other</span> <span class="o">=</span> <span class="n">possible_axes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
@@ -1347,7 +1333,7 @@
 
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">other</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">project_counts</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">logy</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Defined b/c project_counts option.</span>
-        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">other</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">other</span> <span class="o">==</span> <span class="s2">"y"</span><span class="p">):</span>
             <span class="c1"># Only select y-values plotted.</span>
             <span class="n">logy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()[</span><span class="n">other</span><span class="p">]</span>
             <span class="n">yedges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">other</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -1379,15 +1365,37 @@
 
 
 <div class="viewcode-block" id="Hist2D.make_joint_h2_h1_plot">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.make_joint_h2_h1_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.make_joint_h2_h1_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_joint_h2_h1_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kwargs_1d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-        <span class="n">height_ratios</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;height_ratios&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
-        <span class="n">width_ratios</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;width_ratios&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
-        <span class="n">hspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hspace&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">wspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;wspace&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Draw this histogram with its x and y projections on the margins.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        project_counts : bool</span>
+<span class="sd">            Passed to ``project_1d`` for both margins.</span>
+<span class="sd">        kwargs_1d : dict, optional</span>
+<span class="sd">            Passed to ``Hist1D.make_plot`` for both margins.</span>
+<span class="sd">        fig_axes : None</span>
+<span class="sd">            Accepted and ignored.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            ``figsize``, ``height_ratios``, ``width_ratios``, ``hspace``,</span>
+<span class="sd">            ``wspace`` and ``cbar_kwargs`` lay out the figure; the rest is</span>
+<span class="sd">            passed to ``make_plot``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        hax, xax, yax : Axes</span>
+<span class="sd">            The 2D histogram axis and the x and y projection axes.</span>
+<span class="sd">        cbar : Colorbar</span>
+<span class="sd">            The colorbar of the 2D histogram.</span>
+<span class="sd">        """</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"figsize"</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">height_ratios</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"height_ratios"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+        <span class="n">width_ratios</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"width_ratios"</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+        <span class="n">hspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"hspace"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">wspace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"wspace"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
         <span class="n">gs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span>
@@ -1404,9 +1412,9 @@
         <span class="n">yax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">hax</span><span class="p">)</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
-        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cbar_kwargs&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
-        <span class="n">cax</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cax&quot;</span><span class="p">,</span> <span class="n">cax</span><span class="p">)</span>
-        <span class="n">orientation</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;orientation&quot;</span><span class="p">,</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
+        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cbar_kwargs"</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">cax</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cax"</span><span class="p">,</span> <span class="n">cax</span><span class="p">)</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"orientation"</span><span class="p">,</span> <span class="s2">"horizontal"</span><span class="p">)</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">hax</span><span class="p">,</span>
             <span class="n">cbar_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">),</span>
@@ -1416,31 +1424,31 @@
         <span class="k">if</span> <span class="n">kwargs_1d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kwargs_1d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">project_1d</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="n">project_counts</span><span class="p">)</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_1d</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="n">project_counts</span><span class="p">)</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">xax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_1d</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project_1d</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="n">project_counts</span><span class="p">)</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_1d</span><span class="p">(</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="n">project_counts</span><span class="p">)</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">yax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_1d</span><span class="p">,</span> <span class="n">transpose_axes</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
 
         <span class="n">xax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
         <span class="c1"># Mimic `ax.label_outer` for `yax`.</span>
-        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">yax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">yax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s2">"both"</span><span class="p">):</span>
             <span class="n">label</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">yax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">get_offset_text</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">yax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">yax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
         <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
             <span class="n">hax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span>
                 <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span>
-                    <span class="n">nbins</span><span class="o">=</span><span class="n">hax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_ticklocs</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span>
+                    <span class="n">nbins</span><span class="o">=</span><span class="n">hax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_ticklocs</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">"upper"</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
             <span class="n">hax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span>
                 <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span>
-                    <span class="n">nbins</span><span class="o">=</span><span class="n">hax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_ticklocs</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span>
+                    <span class="n">nbins</span><span class="o">=</span><span class="n">hax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_ticklocs</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">"upper"</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -1448,9 +1456,9 @@
 
 
 <div class="viewcode-block" id="Hist2D.id_data_above_contour">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.id_data_above_contour">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.id_data_above_contour">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">id_data_above_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gets data above the `level`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Gets data above the `level`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1465,11 +1473,11 @@
 <span class="sd">            which the observation falls. `NaN` are observations that are below</span>
 <span class="sd">            `level`. This object is purposely the same length as the data stored by</span>
 <span class="sd">            Hist2D and can be used in groupby operations.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y</span>
         <span class="n">above_contour</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">tk</span> <span class="o">=</span> <span class="n">v</span> <span class="o">&gt;=</span> <span class="n">level</span>
             <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">right</span>
             <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">right</span>
@@ -1484,14 +1492,14 @@
 
 
 <div class="viewcode-block" id="Hist2D.take_data_in_yrange_across_x">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.hist2d.html#solarwindpy.Hist2D.take_data_in_yrange_across_x">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.take_data_in_yrange_across_x">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">take_data_in_yrange_across_x</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ranges_by_x</span><span class="p">,</span>
         <span class="n">get_x_bounds</span><span class="p">,</span>
         <span class="n">get_y_bounds</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Take data within y-ranges across x-values.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Take data within y-ranges across x-values.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1515,18 +1523,18 @@
 <span class="sd">        -------</span>
 <span class="sd">        taken: np.ndarray 1D</span>
 <span class="sd">            Array of indices for selecting data in interval.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
-        <span class="n">available_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">available_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span>
         <span class="k">if</span> <span class="n">ranges_by_x</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">available_x</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
             <span class="n">drop</span> <span class="o">=</span> <span class="n">ranges_by_x</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="n">available_x</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">drop</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">available_x</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Need a way to drop values in selector that aren&#39;t available.&quot;</span>
+                    <span class="s2">"Need a way to drop values in selector that aren't available."</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Dropping </span><span class="si">{</span><span class="n">drop</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> intervals from available for selecting.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Dropping </span><span class="si">{</span><span class="n">drop</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> intervals from available for selecting."</span>
                 <span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>

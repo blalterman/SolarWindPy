@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.instabilities.beta_ani &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.instabilities.beta_ani &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -306,9 +302,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.instabilities.beta_ani</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Convenience plotting helpers for anisotropy versus beta.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Convenience plotting helpers for anisotropy versus beta."""</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BetaRPlot&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"BetaRPlot"</span><span class="p">]</span>
 
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..plotting.histograms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hist2D</span>
@@ -316,9 +312,9 @@
 
 
 <div class="viewcode-block" id="BetaRPlot">
-<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.instabilities.beta_ani.BetaRPlot.html#solarwindpy.instabilities.beta_ani.BetaRPlot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BetaRPlot</span><span class="p">(</span><span class="n">Hist2D</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a beta--anisotropy histogram.</span>
+<span class="w">    </span><span class="sd">"""Generate a beta--anisotropy histogram.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -334,14 +330,14 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; br = BetaRPlot(beta, ani, &quot;p&quot;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; br = BetaRPlot(beta, ani, "p")  # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; ax, cbar = br.make_plot()  # doctest: +SKIP</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="BetaRPlot.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.instabilities.beta_ani.BetaRPlot.html#solarwindpy.instabilities.beta_ani.BetaRPlot.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ani</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the histogram plot.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the histogram plot.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -352,31 +348,32 @@
 <span class="sd">        species : str</span>
 <span class="sd">            Label used to generate axis titles.</span>
 <span class="sd">        **kwargs</span>
-<span class="sd">            Additional options forwarded to :class:`Hist2D`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            Additional options forwarded to</span>
+<span class="sd">            :class:`~solarwindpy.plotting.hist2d.Hist2D`.</span>
+<span class="sd">        """</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">ani</span>
 
-        <span class="n">logx</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logx&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">logy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logy&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">logx</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"logx"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"logy"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">BetaRPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span>
-            <span class="n">x</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">TeXlabel</span><span class="p">((</span><span class="s2">&quot;beta&quot;</span><span class="p">,</span> <span class="s2">&quot;par&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_bimax&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))),</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">TeXlabel</span><span class="p">((</span><span class="s2">"beta"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="n">species</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_bimax"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))),</span>
             <span class="n">y</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">TeXlabel</span><span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span> <span class="k">if</span> <span class="s2">&quot;+&quot;</span> <span class="ow">in</span> <span class="n">species</span> <span class="k">else</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_bimax&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                <span class="p">(</span><span class="s2">"R"</span><span class="p">,</span> <span class="s2">"P"</span> <span class="k">if</span> <span class="s2">"+"</span> <span class="ow">in</span> <span class="n">species</span> <span class="k">else</span> <span class="s2">"T"</span><span class="p">,</span> <span class="n">species</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_bimax"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
             <span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="s2">"auto"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BetaRPlot.make_plot">
-<a class="viewcode-back" href="../../../api/solarwindpy.instabilities.beta_ani.html#solarwindpy.instabilities.beta_ani.BetaRPlot.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.instabilities.beta_ani.BetaRPlot.html#solarwindpy.instabilities.beta_ani.BetaRPlot.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the histogram.</span>
+<span class="w">        </span><span class="sd">"""Plot the histogram.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -389,8 +386,8 @@
 <span class="sd">            Axis containing the plot.</span>
 <span class="sd">        matplotlib.colorbar.Colorbar</span>
 <span class="sd">            Colorbar associated with the plot.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="s2">&quot;Greens_r&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="s2">"Greens_r"</span><span class="p">)</span>
         <span class="n">ax</span><span class="p">,</span> <span class="n">cbar</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BetaRPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cbar</span></div>

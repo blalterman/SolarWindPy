@@ -1,0 +1,6 @@
+solarwindpy.plotting.base.AxesLabels
+====================================
+
+.. currentmodule:: solarwindpy.plotting.base
+
+.. autoclass:: AxesLabels

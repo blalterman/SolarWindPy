@@ -1,8 +1,12 @@
-﻿solarwindpy.solar\_activity.base
+solarwindpy.solar\_activity.base
 ================================
 
 .. automodule:: solarwindpy.solar_activity.base
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

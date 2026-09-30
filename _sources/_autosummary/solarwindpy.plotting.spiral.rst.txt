@@ -1,8 +1,12 @@
-﻿solarwindpy.plotting.spiral
+solarwindpy.plotting.spiral
 ===========================
 
 .. automodule:: solarwindpy.plotting.spiral
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

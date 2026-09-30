@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.labels.composition &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.labels.composition &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -312,33 +308,35 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.plotting.labels.composition</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ion&quot;</span><span class="p">,</span> <span class="s2">&quot;ChargeStateRatio&quot;</span><span class="p">]</span>
+<span></span><span class="sa">r</span><span class="sd">"""Labels for heavy ion charge states and charge-state ratios."""</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Ion"</span><span class="p">,</span> <span class="s2">"ChargeStateRatio"</span><span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
 
-<span class="n">known_species</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;Ne&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">)</span>
+<span class="n">known_species</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"C"</span><span class="p">,</span> <span class="s2">"Fe"</span><span class="p">,</span> <span class="s2">"He"</span><span class="p">,</span> <span class="s2">"Mg"</span><span class="p">,</span> <span class="s2">"Ne"</span><span class="p">,</span> <span class="s2">"N"</span><span class="p">,</span> <span class="s2">"O"</span><span class="p">,</span> <span class="s2">"Si"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Ion">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.Ion.html#solarwindpy.plotting.labels.composition.Ion">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Ion</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represent a single ion.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Represent a single ion."""</span>
 
 <div class="viewcode-block" id="Ion.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.Ion.html#solarwindpy.plotting.labels.composition.Ion.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the ion.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the ion.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        species : str</span>
-<span class="sd">            The element symbol, e.g. ``&quot;He&quot;``, ``&quot;O&quot;``, ``&quot;Fe&quot;``.</span>
+<span class="sd">            The element symbol, e.g. ``"He"``, ``"O"``, ``"Fe"``.</span>
 <span class="sd">        charge : int or str</span>
-<span class="sd">            The ion charge state, e.g. ``6``, ``&quot;7&quot;``, ``&quot;i&quot;``.</span>
+<span class="sd">            The ion charge state, e.g. ``6``, ``"7"``, ``"i"``.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_species_charge</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">charge</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
@@ -346,32 +344,46 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Element symbol, title-cased."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Charge state as passed, e.g. ``6`` or ``"i"``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charge</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;{</span><span class="si">%s</span><span class="s2">}^{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the ion, ``{species}^{charge}``."""</span>
+        <span class="k">return</span> <span class="s2">"{</span><span class="si">%s</span><span class="s2">}^{</span><span class="si">%s</span><span class="s2">}"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;\#&quot;</span>  <span class="c1"># noqa: W605</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the count units."""</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s2">"\#"</span>  <span class="c1"># noqa: W605</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``&lt;species&gt;_&lt;charge&gt;``, with ``+`` as ``p`` and ``-`` as ``m``."""</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;p&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;m&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="sa">f</span><span class="s2">"""</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"+"</span><span class="p">,</span><span class="w"> </span><span class="s2">"p"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span><span class="w"> </span><span class="s2">"m"</span><span class="p">)</span><span class="si">}</span><span class="s2">"""</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Ion.set_species_charge">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.Ion.set_species_charge">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.Ion.html#solarwindpy.plotting.labels.composition.Ion.set_species_charge">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_species_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">charge</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the species and charge.</span>
+
+<span class="sd">        An unrecognized species logs a warning.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``charge`` is neither an integer nor ``"i"`` or ``"j"``.</span>
+<span class="sd">        """</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">species</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_species</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown species (</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown species (</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="n">invalid_charge</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
@@ -379,8 +391,8 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="n">invalid_charge</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="n">invalid_charge</span> <span class="ow">and</span> <span class="n">charge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid charge (</span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">invalid_charge</span> <span class="ow">and</span> <span class="n">charge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"i"</span><span class="p">,</span> <span class="s2">"j"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid charge (</span><span class="si">{</span><span class="n">charge</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_charge</span> <span class="o">=</span> <span class="n">charge</span></div>
@@ -389,14 +401,14 @@
 
 
 <div class="viewcode-block" id="ChargeStateRatio">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.ChargeStateRatio.html#solarwindpy.plotting.labels.composition.ChargeStateRatio">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChargeStateRatio</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ratio of two ion abundances.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Ratio of two ion abundances."""</span>
 
 <div class="viewcode-block" id="ChargeStateRatio.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.ChargeStateRatio.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ionA</span><span class="p">,</span> <span class="n">ionB</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the charge-state ratio.</span>
+<span class="w">        </span><span class="sd">"""Instantiate the charge-state ratio.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -406,7 +418,7 @@
 <span class="sd">            The denominator ion. If tuple, passed to Ion constructor.</span>
 <span class="sd">        description : str or None, optional</span>
 <span class="sd">            Human-readable description displayed above the mathematical label.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_ions</span><span class="p">(</span><span class="n">ionA</span><span class="p">,</span> <span class="n">ionB</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">description</span><span class="p">)</span></div>
@@ -414,34 +426,40 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ionA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Numerator ``Ion``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ionA</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ionB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Denominator ``Ion``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ionB</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionA</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">-OV-</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionB</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Save path ``&lt;ionA path&gt;-OV-&lt;ionB path&gt;``."""</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionA</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">-OV-</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionB</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ionA</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ionB</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""TeX of the ratio."""</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ionA</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ionB</span><span class="o">.</span><span class="n">tex</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Count units when both ions share units, otherwise their ratio."""</span>
         <span class="n">uA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionA</span><span class="o">.</span><span class="n">units</span>
         <span class="n">uB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionB</span><span class="o">.</span><span class="n">units</span>
 
-        <span class="n">units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\#&quot;</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"\#"</span>
         <span class="k">if</span> <span class="n">uA</span> <span class="o">!=</span> <span class="n">uB</span><span class="p">:</span>
-            <span class="n">units</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">uA</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">uB</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">uA</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">uB</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="k">return</span> <span class="n">units</span>
 
 <div class="viewcode-block" id="ChargeStateRatio.set_ions">
-<a class="viewcode-back" href="../../../../api/solarwindpy.plotting.labels.composition.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.set_ions">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.composition.ChargeStateRatio.html#solarwindpy.plotting.labels.composition.ChargeStateRatio.set_ions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_ions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ionA</span><span class="p">,</span> <span class="n">ionB</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store both ions, building an ``Ion`` from each tuple."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ionA</span><span class="p">,</span> <span class="n">Ion</span><span class="p">):</span>
             <span class="n">ionA</span> <span class="o">=</span> <span class="n">Ion</span><span class="p">(</span><span class="o">*</span><span class="n">ionA</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ionB</span><span class="p">,</span> <span class="n">Ion</span><span class="p">):</span>

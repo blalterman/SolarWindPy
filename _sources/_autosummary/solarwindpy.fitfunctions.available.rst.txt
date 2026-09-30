@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.available
+==================================
+
+.. currentmodule:: solarwindpy.fitfunctions
+
+.. autofunction:: available

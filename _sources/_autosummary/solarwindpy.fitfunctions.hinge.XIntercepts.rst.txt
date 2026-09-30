@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.XIntercepts
+==========================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: XIntercepts

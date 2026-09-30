@@ -1,0 +1,42 @@
+solarwindpy.fitfunctions.hinge
+==============================
+
+.. automodule:: solarwindpy.fitfunctions.hinge
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      HingeAtPoint
+      HingeMax
+      HingeMin
+      HingeSaturation
+      Saturation
+      TwoLine
+      XIntercepts
+   
+   
+
+   
+   
+   
+
+
+

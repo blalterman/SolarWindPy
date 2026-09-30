@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.heaviside.HeavySide
+============================================
+
+.. currentmodule:: solarwindpy.fitfunctions.heaviside
+
+.. autoclass:: HeavySide

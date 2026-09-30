@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.composition.Ion
+===========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.composition
+
+.. autoclass:: Ion

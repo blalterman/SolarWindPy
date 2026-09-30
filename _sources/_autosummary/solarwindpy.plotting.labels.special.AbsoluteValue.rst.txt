@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.AbsoluteValue
+=================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: AbsoluteValue

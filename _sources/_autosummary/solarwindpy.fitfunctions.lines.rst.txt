@@ -1,8 +1,12 @@
-﻿solarwindpy.fitfunctions.lines
+solarwindpy.fitfunctions.lines
 ==============================
 
 .. automodule:: solarwindpy.fitfunctions.lines
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

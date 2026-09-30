@@ -1,0 +1,6 @@
+solarwindpy.plotting.base.PlotWithZdata
+=======================================
+
+.. currentmodule:: solarwindpy.plotting.base
+
+.. autoclass:: PlotWithZdata

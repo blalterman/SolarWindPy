@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.base.Base
+=====================================
+
+.. currentmodule:: solarwindpy.plotting.labels.base
+
+.. autoclass:: Base

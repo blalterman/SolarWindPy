@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.datetime.DateTime
+=============================================
+
+.. currentmodule:: solarwindpy.plotting.labels.datetime
+
+.. autoclass:: DateTime

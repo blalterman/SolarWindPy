@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../_static/favicon.ico">
-
+  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -301,7 +297,7 @@
              
   <h1>Source code for solarwindpy.tools</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sd">&quot;&quot;&quot;Utility functions for manipulating solar wind data.</span>
+<span class="sd">"""Utility functions for manipulating solar wind data.</span>
 
 <span class="sd">This module contains helper functions that are not yet organized into</span>
 <span class="sd">their own submodules. The functions are primarily used for handling</span>
@@ -321,13 +317,13 @@
 <span class="sd">&gt;&gt;&gt; import pandas as pd  # doctest: +SKIP</span>
 <span class="sd">&gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
 <span class="sd">&gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP</span>
-<span class="sd">...     (&#39;n&#39;, &#39;&#39;, &#39;p1&#39;), (&#39;n&#39;, &#39;&#39;, &#39;p2&#39;)</span>
-<span class="sd">... ], names=[&#39;M&#39;, &#39;C&#39;, &#39;S&#39;])</span>
+<span class="sd">...     ('n', '', 'p1'), ('n', '', 'p2')</span>
+<span class="sd">... ], names=['M', 'C', 'S'])</span>
 <span class="sd">&gt;&gt;&gt; df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)  # doctest: +SKIP</span>
 <span class="sd">&gt;&gt;&gt; new_df, mask = swap_protons(df)  # doctest: +SKIP</span>
-<span class="sd">&gt;&gt;&gt; &#39;swapped_protons&#39; in new_df.columns.get_level_values(&#39;M&#39;)  # doctest: +SKIP</span>
+<span class="sd">&gt;&gt;&gt; 'swapped_protons' in new_df.columns.get_level_values('M')  # doctest: +SKIP</span>
 <span class="sd">True</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -335,9 +331,9 @@
 
 
 <div class="viewcode-block" id="swap_protons">
-<a class="viewcode-back" href="../../api/solarwindpy.tools.html#solarwindpy.tools.swap_protons">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/solarwindpy.tools.swap_protons.html#solarwindpy.tools.swap_protons">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">swap_protons</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Swap beam and core proton labels when the beam density dominates.</span>
+<span class="w">    </span><span class="sd">"""Swap beam and core proton labels when the beam density dominates.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -361,46 +357,46 @@
 <span class="sd">    &gt;&gt;&gt; import pandas as pd  # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP</span>
-<span class="sd">    ...     (&#39;n&#39;, &#39;&#39;, &#39;p1&#39;), (&#39;n&#39;, &#39;&#39;, &#39;p2&#39;)</span>
-<span class="sd">    ... ], names=[&#39;M&#39;, &#39;C&#39;, &#39;S&#39;])</span>
+<span class="sd">    ...     ('n', '', 'p1'), ('n', '', 'p2')</span>
+<span class="sd">    ... ], names=['M', 'C', 'S'])</span>
 <span class="sd">    &gt;&gt;&gt; df = pd.DataFrame([[2, 1], [1, 2]], columns=columns)  # p1 &lt; p2 in first row  # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; new_df, mask = swap_protons(df)  # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; mask.iloc[0]  # First row should be swapped  # doctest: +SKIP</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">p1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
-    <span class="n">p2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"p1"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"p2"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
 
     <span class="n">n1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">n</span>
     <span class="n">n2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">n</span>
 
     <span class="n">swap</span> <span class="o">=</span> <span class="n">n2</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.0</span>
-    <span class="n">swapped</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;swapped_protons&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">swapped</span> <span class="o">=</span> <span class="n">swap</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="s2">"swapped_protons"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
 
-    <span class="n">p1_into_p2</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
-    <span class="n">p2_into_p1</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="n">p1_into_p2</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
+    <span class="n">p2_into_p1</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 
     <span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">p2_into_p1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">p2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">swap</span><span class="p">,</span> <span class="n">p1_into_p2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">new_protons</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">])</span>
-        <span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">"p1"</span><span class="p">,</span> <span class="s2">"p2"</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"S"</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="n">new_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">),</span> <span class="n">new_protons</span><span class="p">,</span> <span class="n">swapped</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">"p1"</span><span class="p">,</span> <span class="s2">"p2"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">),</span> <span class="n">new_protons</span><span class="p">,</span> <span class="n">swapped</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">chk</span> <span class="o">=</span> <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span>
-        <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">chk</span> <span class="o">=</span> <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p2"</span><span class="p">)]</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span>
+        <span class="n">new_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p2"</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="p">(</span><span class="n">chk</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;main.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"main.</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="n">hdlr</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
         <span class="n">hdlr</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 
@@ -409,18 +405,18 @@
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">)</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="n">swap</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">swap</span><span class="o">.</span><span class="n">sum</span><span class="p">()},</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;stats&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span>
+        <span class="p">{</span><span class="s2">"mean"</span><span class="p">:</span> <span class="n">swap</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"count"</span><span class="p">:</span> <span class="n">swap</span><span class="o">.</span><span class="n">sum</span><span class="p">()},</span> <span class="n">name</span><span class="o">=</span><span class="s2">"stats"</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span>
     <span class="p">)</span>  <span class="c1"># `dtype=object` lets the count print as an int.</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Swap proton labels when n2/n1 &gt; 1</span><span class="se">\n</span><span class="s2">stats</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Swap proton labels when n2/n1 &gt; 1</span><span class="se">\n</span><span class="s2">stats</span><span class="se">\n</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">swap</span></div>
 
 
 
 <div class="viewcode-block" id="normal_parameters">
-<a class="viewcode-back" href="../../api/solarwindpy.tools.html#solarwindpy.tools.normal_parameters">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/solarwindpy.tools.normal_parameters.html#solarwindpy.tools.normal_parameters">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normal_parameters</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert log-normal parameters to normal distribution parameters.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Convert log-normal parameters to normal distribution parameters.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -453,13 +449,13 @@
 <span class="sd">    &gt;&gt;&gt; mu, sigma = normal_parameters(m, s)</span>
 <span class="sd">    &gt;&gt;&gt; mu &gt; 1.0  # Normal mean should be &gt; 1</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="p">((</span><span class="n">s</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">m</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
 
-    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="n">mu</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">}</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mu"</span><span class="p">:</span> <span class="n">mu</span><span class="p">,</span> <span class="s2">"sigma"</span><span class="p">:</span> <span class="n">sigma</span><span class="p">}</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>

@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.Distance2Sun
+================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: Distance2Sun

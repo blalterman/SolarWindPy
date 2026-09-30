@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.base.MCS
+====================================
+
+.. currentmodule:: solarwindpy.plotting.labels.base
+
+.. autoclass:: MCS

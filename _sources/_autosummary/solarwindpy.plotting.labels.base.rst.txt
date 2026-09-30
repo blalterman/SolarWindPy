@@ -1,0 +1,38 @@
+solarwindpy.plotting.labels.base
+================================
+
+.. automodule:: solarwindpy.plotting.labels.base
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      Base
+      MCS
+      TeXlabel
+   
+   
+
+   
+   
+   
+
+
+

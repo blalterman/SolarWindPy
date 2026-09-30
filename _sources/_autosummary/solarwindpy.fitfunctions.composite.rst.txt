@@ -1,0 +1,38 @@
+solarwindpy.fitfunctions.composite
+==================================
+
+.. automodule:: solarwindpy.fitfunctions.composite
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      GaussianPlusHeavySide
+      GaussianTimesHeavySide
+      GaussianTimesHeavySidePlusHeavySide
+   
+   
+
+   
+   
+   
+
+
+

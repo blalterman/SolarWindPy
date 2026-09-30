@@ -7,22 +7,18 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -85,33 +81,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitBounds.html">solarwindpy.fitfunctions.core.FitBounds</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html">solarwindpy.fitfunctions.core.FitFunction</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionMeta.html">solarwindpy.fitfunctions.core.FitFunctionMeta</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InitialGuessInfo.html">solarwindpy.fitfunctions.core.InitialGuessInfo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.Observations.html">solarwindpy.fitfunctions.core.Observations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.UsedRawObs.html">solarwindpy.fitfunctions.core.UsedRawObs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFailedError.html">solarwindpy.fitfunctions.core.FitFailedError</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunctionError.html">solarwindpy.fitfunctions.core.FitFunctionError</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html">solarwindpy.fitfunctions.core.InsufficientDataError</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.InvalidParameterError.html">solarwindpy.fitfunctions.core.InvalidParameterError</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.html">solarwindpy.fitfunctions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#using-a-fit-function">Using a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#how-a-fit-runs">How a fit runs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#writing-a-fit-function">Writing a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.composite.html">solarwindpy.fitfunctions.composite</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html">solarwindpy.fitfunctions.heaviside</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -333,7 +326,7 @@
 <h1>solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom<a class="headerlink" href="#solarwindpy-fitfunctions-core-chisqperdegreeoffreedom" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChisqPerDegreeOfFreedom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robust</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ChisqPerDegreeOfFreedom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robust</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom.count">

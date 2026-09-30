@@ -1,8 +1,12 @@
-﻿solarwindpy.plotting.labels
+solarwindpy.plotting.labels
 ===========================
 
 .. automodule:: solarwindpy.plotting.labels
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    
@@ -15,7 +19,7 @@
    .. autosummary::
       :toctree:
    
-      available_labels
+      available
    
    
 
@@ -27,5 +31,20 @@
    
    
 
+
+
+.. rubric:: Submodules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+
+   base
+   chemistry
+   composition
+   datetime
+   elemental_abundance
+   special
 
 

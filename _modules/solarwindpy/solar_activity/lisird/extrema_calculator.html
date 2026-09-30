@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../../_static/favicon.ico">
-
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -312,9 +308,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for solarwindpy.solar_activity.lisird.extrema_calculator</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Tools for calculating extrema in LISIRD activity indices.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Tools for calculating extrema in LISIRD activity indices."""</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ExtremaCalculator&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ExtremaCalculator"</span><span class="p">]</span>
 
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -325,9 +321,9 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtremaCalculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Determine extrema in an activity index time series.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Determine extrema in an activity index time series.</span>
 
 <span class="sd">    The calculator smooths the input series with a rolling mean and finds</span>
 <span class="sd">    local minima and maxima based on a threshold value.</span>
@@ -341,7 +337,7 @@
 <span class="sd">    threshold : pandas.Series</span>
 <span class="sd">        Threshold used to classify maxima and minima.</span>
 <span class="sd">    extrema : pandas.Series</span>
-<span class="sd">        Series with ``&quot;Max&quot;`` or ``&quot;Min&quot;`` labels at the extrema times.</span>
+<span class="sd">        Series with ``"Max"`` or ``"Min"`` labels at the extrema times.</span>
 <span class="sd">    formatted_extrema : pandas.DataFrame</span>
 <span class="sd">        Data frame formatted as a solar cycle table with ``Min`` and ``Max``</span>
 <span class="sd">        columns::</span>
@@ -355,12 +351,12 @@
 <span class="sd">              ...</span>
 <span class="sd">              N         &lt;DateTime&gt;   &lt;DateTime&gt;</span>
 <span class="sd">            ========== ============ ============</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.__init__">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">activity_index</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create the calculator.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Create the calculator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -375,7 +371,7 @@
 <span class="sd">            table or computed with :func:`numpy.nanmedian`.</span>
 <span class="sd">        window : int, optional</span>
 <span class="sd">            Window length in days for the rolling mean.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">activity_index</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_threshold</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
@@ -385,23 +381,27 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Activity index after the rolling mean, :class:`pandas.Series`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Activity index as passed in, before smoothing."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity index name.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Activity index name."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Rolling-mean window in days, or ``None`` for no smoothing."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Threshold separating maxima from minima, one value per time in :attr:`data`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span>
 
     <span class="nd">@property</span>
@@ -410,19 +410,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``"Max"`` or ``"Min"`` labels indexed by the time of each extremum."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extrema</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">threshold_crossings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Values of :attr:`data` at the times it crosses :attr:`threshold`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_threshold_crossings</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data_in_extrema_finding_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Interval between threshold crossings that holds each time in :attr:`data`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_in_extrema_finding_intervals</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">formatted_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extrema formatted as a solar-cycle table.</span>
+<span class="w">        </span><span class="sd">"""Extrema formatted as a solar-cycle table.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -438,32 +441,50 @@
 <span class="sd">                  ...</span>
 <span class="sd">                  N         &lt;DateTime&gt;   &lt;DateTime&gt;</span>
 <span class="sd">                ========== ============ ============</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formatted_extrema</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.set_name">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;delk2&quot;</span><span class="p">,</span> <span class="s2">&quot;delwb&quot;</span><span class="p">,</span> <span class="s2">&quot;k2vk3&quot;</span><span class="p">,</span> <span class="s2">&quot;viored&quot;</span><span class="p">,</span> <span class="s2">&quot;delk1&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the activity index name.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            For CaK quantities whose threshold has not been determined.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"delk2"</span><span class="p">,</span> <span class="s2">"delwb"</span><span class="p">,</span> <span class="s2">"k2vk3"</span><span class="p">,</span> <span class="s2">"viored"</span><span class="p">,</span> <span class="s2">"delk1"</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Unable to determine threshold. You need to check this one.&quot;</span>
+                <span class="s2">"Unable to determine threshold. You need to check this one."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExtremaCalculator.set_data">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the raw index and its rolling mean.</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;delk1&quot;</span><span class="p">,</span> <span class="s2">&quot;delk2&quot;</span><span class="p">,</span> <span class="s2">&quot;delwb&quot;</span><span class="p">,</span> <span class="s2">&quot;emdx&quot;</span><span class="p">,</span> <span class="s2">&quot;k2vk3&quot;</span><span class="p">,</span> <span class="s2">&quot;k3&quot;</span><span class="p">,</span> <span class="s2">&quot;viored&quot;</span><span class="p">):</span>
-            <span class="c1"># We don&#39;t trust CaK before then.</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;1977-01-01&quot;</span><span class="p">:]</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        index : pandas.Series</span>
+<span class="sd">            Activity index with a :class:`pandas.DatetimeIndex`. CaK quantities</span>
+<span class="sd">            are truncated to start on 1977-01-01.</span>
+<span class="sd">        window : int or None</span>
+<span class="sd">            Rolling-mean window in days. The smoothed series is shifted back by</span>
+<span class="sd">            half a window so each mean is centered on its window. ``None``</span>
+<span class="sd">            skips smoothing.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"delk1"</span><span class="p">,</span> <span class="s2">"delk2"</span><span class="p">,</span> <span class="s2">"delwb"</span><span class="p">,</span> <span class="s2">"emdx"</span><span class="p">,</span> <span class="s2">"k2vk3"</span><span class="p">,</span> <span class="s2">"k3"</span><span class="p">,</span> <span class="s2">"viored"</span><span class="p">):</span>
+            <span class="c1"># We don't trust CaK before then.</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"1977-01-01"</span><span class="p">:]</span>
 
         <span class="n">rolled</span> <span class="o">=</span> <span class="n">index</span>
         <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rolled</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">d&quot;</span> <span class="o">%</span> <span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="n">rolled</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">rolled</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">d&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">window</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
+            <span class="n">rolled</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">d"</span> <span class="o">%</span> <span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">rolled</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">rolled</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">d"</span> <span class="o">%</span> <span class="p">(</span><span class="n">window</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_raw</span> <span class="o">=</span> <span class="n">index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">rolled</span>
@@ -471,86 +492,110 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set year ticks, the legend, and axis labels on ``ax``."""</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
         <span class="n">left</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">-01-01&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">left</span><span class="p">))</span><span class="o">.</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="s2">"</span><span class="si">{}</span><span class="s2">-01-01"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span><span class="n">left</span><span class="p">))</span><span class="o">.</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span>
             <span class="n">left</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">left</span><span class="p">),</span>
-            <span class="n">right</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">&quot;2020-01-02&quot;</span><span class="p">)),</span>
+            <span class="n">right</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s2">"2020-01-02"</span><span class="p">)),</span>
         <span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">"%Y"</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">YearLocator</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">autofmt_xdate</span><span class="p">()</span>
 
         <span class="n">hdl</span><span class="p">,</span> <span class="n">lbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
         <span class="n">hdl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">hdl</span><span class="p">)</span>
         <span class="n">lbl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lbl</span><span class="p">)</span>
-        <span class="n">tk</span> <span class="o">=</span> <span class="n">lbl</span> <span class="o">!=</span> <span class="s2">&quot;indicator&quot;</span>
+        <span class="n">tk</span> <span class="o">=</span> <span class="n">lbl</span> <span class="o">!=</span> <span class="s2">"indicator"</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">hdl</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">lbl</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Year&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Plot the smoothed index :attr:`data` on ``ax``."""</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rolled&quot;</span><span class="p">)</span>
-
-    <span class="c1">#         x = mpl.dates.date2num(self.raw.index)</span>
-    <span class="c1">#         y = self.raw.values</span>
-    <span class="c1">#         ax.plot(x, y, color=&quot;C2&quot;, label=&quot;Raw&quot;)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C0"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Rolled"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Plot :attr:`threshold` on ``ax``, labeled with its value."""</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C1"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.5f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_extrema_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Plot each extrema-finding interval on ``ax`` in alternating colors."""</span>
         <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-            <span class="p">{</span><span class="s2">&quot;cut&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_in_extrema_finding_intervals</span><span class="p">,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">"cut"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_in_extrema_finding_intervals</span><span class="p">,</span> <span class="s2">"indicator"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">},</span>
             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">gb</span> <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cut&quot;</span><span class="p">)</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"cut"</span><span class="p">)</span>
 
         <span class="n">ngroup</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">gb</span><span class="p">:</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;darkorange&quot;</span> <span class="k">if</span> <span class="n">ngroup</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;fuchsia&quot;</span>
-            <span class="n">v</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">"darkorange"</span> <span class="k">if</span> <span class="n">ngroup</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"fuchsia"</span>
+            <span class="n">v</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
             <span class="n">ngroup</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_threshold_crossings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Mark :attr:`threshold_crossings` on ``ax``."""</span>
         <span class="n">crossings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_crossings</span>
-        <span class="n">crossings</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Changes&quot;</span><span class="p">)</span>
+        <span class="n">crossings</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"cyan"</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"P"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Changes"</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
-        <span class="n">maxima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Max&quot;</span><span class="p">]</span>
-        <span class="n">minima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Min&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Mark the maxima and minima in :attr:`extrema` on ``ax``."""</span>
+        <span class="n">maxima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">"Max"</span><span class="p">]</span>
+        <span class="n">minima</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">"Min"</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">ex</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;limegreen&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Max&quot;</span><span class="p">,</span> <span class="s2">&quot;Min&quot;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">ex</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span><span class="p">),</span> <span class="p">(</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"limegreen"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"Max"</span><span class="p">,</span> <span class="s2">"Min"</span><span class="p">)):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">ex</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">lbl</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">lbl</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"*"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.set_threshold">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.set_threshold">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the threshold that separates maxima from minima.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : float, callable, or None</span>
+<span class="sd">            A number is used as is. A plain Python function</span>
+<span class="sd">            (:class:`types.FunctionType`, e.g. a ``def`` or ``lambda``) is</span>
+<span class="sd">            called with :attr:`data` and its result used. ``None`` selects the</span>
+<span class="sd">            value tabulated for :attr:`name`; when :attr:`name` is not</span>
+<span class="sd">            tabulated it selects :func:`numpy.nanmedian`, which is then</span>
+<span class="sd">            handled as a callable.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Known defect: only :class:`types.FunctionType` is called. Other</span>
+<span class="sd">        callables, including :func:`numpy.nanmedian` (and so the ``None``</span>
+<span class="sd">        fallback for an untabulated :attr:`name`) and</span>
+<span class="sd">        ``functools.partial`` objects, are stored uncalled, and</span>
+<span class="sd">        :meth:`find_threshold_crossings` then raises :class:`TypeError`.</span>
+<span class="sd">        ``tests/test_source_misc_defects.py`` records this with a strict</span>
+<span class="sd">        ``xfail``.</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionType</span>
 
         <span class="n">automatic</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;LymanAlpha&quot;</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
-            <span class="s2">&quot;delk1&quot;</span><span class="p">:</span> <span class="mf">0.62</span><span class="p">,</span>
-            <span class="s2">&quot;emdx&quot;</span><span class="p">:</span> <span class="mf">0.091</span><span class="p">,</span>
-            <span class="s2">&quot;f107&quot;</span><span class="p">:</span> <span class="mf">110.0</span><span class="p">,</span>
-            <span class="s2">&quot;k3&quot;</span><span class="p">:</span> <span class="mf">0.066</span><span class="p">,</span>
-            <span class="s2">&quot;mg_index&quot;</span><span class="p">:</span> <span class="mf">0.27</span><span class="p">,</span>
-            <span class="s2">&quot;sd_70&quot;</span><span class="p">:</span> <span class="mf">13.0</span><span class="p">,</span>
-            <span class="s2">&quot;sl_70&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>  <span class="c1"># Actually log10(sl_70)</span>
-            <span class="s2">&quot;viored&quot;</span><span class="p">:</span> <span class="mf">1.29</span><span class="p">,</span>
+            <span class="s2">"LymanAlpha"</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
+            <span class="s2">"delk1"</span><span class="p">:</span> <span class="mf">0.62</span><span class="p">,</span>
+            <span class="s2">"emdx"</span><span class="p">:</span> <span class="mf">0.091</span><span class="p">,</span>
+            <span class="s2">"f107"</span><span class="p">:</span> <span class="mf">110.0</span><span class="p">,</span>
+            <span class="s2">"k3"</span><span class="p">:</span> <span class="mf">0.066</span><span class="p">,</span>
+            <span class="s2">"mg_index"</span><span class="p">:</span> <span class="mf">0.27</span><span class="p">,</span>
+            <span class="s2">"sd_70"</span><span class="p">:</span> <span class="mf">13.0</span><span class="p">,</span>
+            <span class="s2">"sl_70"</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>  <span class="c1"># Actually log10(sl_70)</span>
+            <span class="s2">"viored"</span><span class="p">:</span> <span class="mf">1.29</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -568,8 +613,27 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_extrema</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;cut&quot;</span><span class="p">:</span> <span class="n">cut</span><span class="p">,</span> <span class="s2">&quot;indicator&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">gb</span> <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cut&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Find one extremum in each interval between threshold crossings.</span>
+
+<span class="sd">        An interval whose data lie above the threshold contributes its</span>
+<span class="sd">        maximum; one whose data lie below contributes its minimum.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold : pandas.Series</span>
+<span class="sd">            Threshold, which must take a single value.</span>
+<span class="sd">        cut : pandas.Series</span>
+<span class="sd">            Interval label for each time in ``data``.</span>
+<span class="sd">        data : pandas.Series</span>
+<span class="sd">            Activity index.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        maxima, minima : pandas.Series</span>
+<span class="sd">            ``"Max"`` and ``"Min"`` labels indexed by the time of each extremum.</span>
+<span class="sd">        """</span>
+        <span class="n">joint</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">"cut"</span><span class="p">:</span> <span class="n">cut</span><span class="p">,</span> <span class="s2">"indicator"</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">joint</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"cut"</span><span class="p">)</span>
 
         <span class="n">thresh</span> <span class="o">=</span> <span class="n">threshold</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">thresh</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
@@ -596,33 +660,41 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">minima</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">vclean</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
 
-        <span class="n">maxima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;Max&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">maxima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="n">minima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">minima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">maxima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"Max"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">maxima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">minima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"Min"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">minima</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Drop spurious extrema.</span>
+
+<span class="sd">        Indices with known spurious extrema at the ends of their records have</span>
+<span class="sd">        those entries removed by name. Then any maximum (or minimum) that</span>
+<span class="sd">        follows the preceding one by 1000 days or less is dropped.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        maxima, minima : pandas.Series</span>
+<span class="sd">            The retained extrema.</span>
+<span class="sd">        """</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;LymanAlpha&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"LymanAlpha"</span><span class="p">:</span>
             <span class="n">maxima</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;delk1&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"delk1"</span><span class="p">:</span>
             <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="c1">#         elif name == &quot;emdx&quot;:</span>
-        <span class="c1">#             minima = minima.iloc[2:]</span>
-        <span class="c1">#             maxima = maxima.iloc[:-1]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;f107&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"f107"</span><span class="p">:</span>
             <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">maxima</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;mg_index&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"mg_index"</span><span class="p">:</span>
             <span class="n">maxima</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;sd_70&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"sd_70"</span><span class="p">:</span>
             <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;sl_70&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"sl_70"</span><span class="p">:</span>
             <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;viored&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"viored"</span><span class="p">:</span>
             <span class="n">minima</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">minimum_seperation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">&quot;1000d&quot;</span><span class="p">)</span>
+        <span class="n">minimum_seperation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">"1000d"</span><span class="p">)</span>
         <span class="n">tk_max</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">minimum_seperation</span>
         <span class="n">tk_min</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">minimum_seperation</span>
 
@@ -635,8 +707,16 @@
         <span class="k">return</span> <span class="n">maxima</span><span class="p">,</span> <span class="n">minima</span>
 
 <div class="viewcode-block" id="ExtremaCalculator.find_threshold_crossings">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_threshold_crossings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Find the times at which :attr:`data` crosses :attr:`threshold`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.Series</span>
+<span class="sd">            Values of :attr:`data` at each crossing, also stored as</span>
+<span class="sd">            :attr:`threshold_crossings`.</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
 
@@ -653,8 +733,19 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.cut_data_into_extrema_finding_intervals">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.cut_data_into_extrema_finding_intervals">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">cut_data_into_extrema_finding_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Assign each time in :attr:`data` to an interval between crossings.</span>
+
+<span class="sd">        The bin edges are the times in :attr:`threshold_crossings`, extended to</span>
+<span class="sd">        the first and last times of :attr:`raw`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.Series</span>
+<span class="sd">            Interval for each time in :attr:`data`, also stored as</span>
+<span class="sd">            :attr:`data_in_extrema_finding_intervals`.</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span>
         <span class="n">crossings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_crossings</span>
@@ -674,11 +765,26 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.format_extrema">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.format_extrema">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_extrema</span><span class="p">(</span><span class="n">extrema</span><span class="p">):</span>
-        <span class="n">minima</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Min&quot;</span><span class="p">]</span>
-        <span class="n">maxima</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">&quot;Max&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Arrange extrema as a cycle table.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        extrema : pandas.Series</span>
+<span class="sd">            ``"Max"`` or ``"Min"`` labels indexed by time.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.DataFrame</span>
+<span class="sd">            ``Min`` and ``Max`` times indexed by ``cycle``. Minima are numbered</span>
+<span class="sd">            from 0; when the first maximum precedes the first minimum, maxima</span>
+<span class="sd">            are numbered from -1 so each maximum shares a row with the</span>
+<span class="sd">            minimum that precedes it.</span>
+<span class="sd">        """</span>
+        <span class="n">minima</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">"Min"</span><span class="p">]</span>
+        <span class="n">maxima</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">extrema</span> <span class="o">==</span> <span class="s2">"Max"</span><span class="p">]</span>
 
         <span class="n">min0</span> <span class="o">=</span> <span class="n">minima</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">max0</span> <span class="o">=</span> <span class="n">maxima</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -690,16 +796,19 @@
             <span class="n">minima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">minima</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minima</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
             <span class="n">maxima</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">maxima</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">maxima</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
 
-        <span class="n">formatted</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;Min&quot;</span><span class="p">:</span> <span class="n">minima</span><span class="p">,</span> <span class="s2">&quot;Max&quot;</span><span class="p">:</span> <span class="n">maxima</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">])</span>
-        <span class="n">formatted</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;cycle&quot;</span>
+        <span class="n">formatted</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">"Min"</span><span class="p">:</span> <span class="n">minima</span><span class="p">,</span> <span class="s2">"Max"</span><span class="p">:</span> <span class="n">maxima</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">])</span>
+        <span class="n">formatted</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"cycle"</span>
 
         <span class="k">return</span> <span class="n">formatted</span></div>
 
 
 <div class="viewcode-block" id="ExtremaCalculator.find_extrema">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_extrema">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># raw = self.raw</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Find, validate, and tabulate the extrema.</span>
+
+<span class="sd">        Sets :attr:`extrema` and :attr:`formatted_extrema`.</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_data_into_extrema_finding_intervals</span><span class="p">()</span>
@@ -714,8 +823,23 @@
 
 
 <div class="viewcode-block" id="ExtremaCalculator.make_plot">
-<a class="viewcode-back" href="../../../../api/solarwindpy.solar_activity.lisird.extrema_calculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crossings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extrema</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Plot the smoothed index and its threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        crossings : bool, optional</span>
+<span class="sd">            If True, mark :attr:`threshold_crossings`.</span>
+<span class="sd">        extrema : bool, optional</span>
+<span class="sd">            If True, mark the maxima and minima.</span>
+<span class="sd">        ranges : bool, optional</span>
+<span class="sd">            If True, color each extrema-finding interval.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.axes.Axes</span>
+<span class="sd">        """</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">(</span><span class="n">scale_width</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_data</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>

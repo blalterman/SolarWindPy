@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.Power
+=========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: Power

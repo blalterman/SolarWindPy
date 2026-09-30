@@ -1,8 +1,12 @@
-﻿solarwindpy.instabilities.beta\_ani
+solarwindpy.instabilities.beta\_ani
 ===================================
 
 .. automodule:: solarwindpy.instabilities.beta_ani
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

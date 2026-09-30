@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.TwoLine
+======================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: TwoLine

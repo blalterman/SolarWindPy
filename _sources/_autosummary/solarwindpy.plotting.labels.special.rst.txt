@@ -1,0 +1,49 @@
+solarwindpy.plotting.labels.special
+===================================
+
+.. automodule:: solarwindpy.plotting.labels.special
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      AbsoluteValue
+      ArbitraryLabel
+      CarringtonRotation
+      ComparisonLable
+      Count
+      CountOther
+      Distance2Sun
+      ManualLabel
+      MathFcn
+      Power
+      Probability
+      SSN
+      Vsw
+      Xcorr
+   
+   
+
+   
+   
+   
+
+
+

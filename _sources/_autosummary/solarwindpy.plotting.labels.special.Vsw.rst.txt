@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.Vsw
+=======================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: Vsw

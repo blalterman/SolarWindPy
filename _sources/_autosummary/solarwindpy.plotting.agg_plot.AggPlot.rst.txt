@@ -1,0 +1,6 @@
+solarwindpy.plotting.agg\_plot.AggPlot
+======================================
+
+.. currentmodule:: solarwindpy.plotting.agg_plot
+
+.. autoclass:: AggPlot

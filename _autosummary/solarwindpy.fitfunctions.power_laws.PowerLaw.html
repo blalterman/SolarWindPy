@@ -7,24 +7,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.fitfunctions.power_laws.PowerLaw &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../_static/favicon.ico">
-
+  <title>solarwindpy.fitfunctions.power_laws.PowerLaw &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -87,25 +83,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.fitfunctions.power_laws.PowerLaw</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.html">solarwindpy.fitfunctions.power_laws.PowerLawOffCenter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.PowerLawPlusC.html">solarwindpy.fitfunctions.power_laws.PowerLawPlusC</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.fitfunctions.html">solarwindpy.fitfunctions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#using-a-fit-function">Using a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#how-a-fit-runs">How a fit runs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.html#writing-a-fit-function">Writing a fit function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.composite.html">solarwindpy.fitfunctions.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.core.html">solarwindpy.fitfunctions.core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html">solarwindpy.fitfunctions.heaviside</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.moyal.html">solarwindpy.fitfunctions.moyal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.trend_fits.html">solarwindpy.fitfunctions.trend_fits</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
 </ul>
@@ -327,30 +328,39 @@
 <h1>solarwindpy.fitfunctions.power_laws.PowerLaw<a class="headerlink" href="#solarwindpy-fitfunctions-power-laws-powerlaw" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PowerLaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/power_laws.html#PowerLaw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">PowerLaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/power_laws.html#PowerLaw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
-<p>Assuming that you don’t want special formatting, call order is:</p>
-<blockquote>
-<div><p>fit_function = FitFunction(function, TeX_string)
-fit_function.make_fit()</p>
-</div></blockquote>
-<p>Instances are callable. If the fit fails, calling the instance will return
-an array of NaNs the same shape as the x-values.</p>
+<p>Power law <span class="math notranslate nohighlight">\(f(x) = A x^b\)</span>.</p>
+<p>Parameters are <code class="docutils literal notranslate"><span class="pre">A</span></code> (amplitude) and <code class="docutils literal notranslate"><span class="pre">b</span></code> (exponent).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/power_laws.html#PowerLaw.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize fit function with observed data.</p>
-<dl class="field-list simple">
+<dd><p>Initialize a power-law fit to the observations.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xobs</strong> (<em>array-like</em>) – Observed x values (independent variable).
-Shape must match yobs.</p></li>
-<li><p><strong>yobs</strong> (<em>array-like</em>) – Observed y values (dependent variable).
-Shape must match xobs.</p></li>
-<li><p><strong>**kwargs</strong> – The description is missing.</p></li>
-</ul>
+<dd class="field-odd"><dl>
+<dt><strong>xobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed x values (independent variable).
+Shape must match yobs.</p>
+</dd>
+<dt><strong>yobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed y values (dependent variable).
+Shape must match xobs.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
 </dd>
 </dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.make_fit" title="solarwindpy.fitfunctions.power_laws.PowerLaw.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.popt" title="solarwindpy.fitfunctions.power_laws.PowerLaw.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.rsq" title="solarwindpy.fitfunctions.power_laws.PowerLaw.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+</dd>
+</dl>
+</div>
 <p class="rubric">Notes</p>
 <p>The fitting procedure uses scipy.optimize.least_squares
 with robust loss functions (Huber by default) to handle
@@ -365,51 +375,37 @@ through the docstring-inheritance metaclass.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitted mu: </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fitted mu: </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">'mu'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.make_fit" title="solarwindpy.fitfunctions.power_laws.PowerLaw.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
-</dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.popt" title="solarwindpy.fitfunctions.power_laws.PowerLaw.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
-</dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.rsq" title="solarwindpy.fitfunctions.power_laws.PowerLaw.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
-</dd>
-</dl>
 </div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.function">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.function" title="Link to this definition"></a></dt>
-<dd><p>Get the function that`curve_fit` fits.</p>
-<p>The function is set at instantiation. It doesn’t make sense to change
-it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
-kwarg.</p>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.function" title="Link to this definition"></a></dt>
+<dd><p>The model <span class="math notranslate nohighlight">\(A x^b\)</span> as <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">A,</span> <span class="pre">b)</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.p0">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.p0" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.p0" title="Link to this definition"></a></dt>
 <dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[A,</span> <span class="pre">b]</span></code> for the fit.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_function">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_function" title="Link to this definition"></a></dt>
-<dd><p>Function written in LaTeX.</p>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_function" title="Link to this definition"></a></dt>
+<dd><p>LaTeX form of the model.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_info">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TeX_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_info" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.TeX_info" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.argnames">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">argnames</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.argnames" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">argnames</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.argnames" title="Link to this definition"></a></dt>
 <dd><p>The names of the actual function arguments pulled by getfullargspec.</p>
 </dd></dl>
 
@@ -425,51 +421,61 @@ kwarg.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.chisq_dof">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chisq_dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.chisq_dof" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">chisq_dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.chisq_dof" title="Link to this definition"></a></dt>
 <dd><p>Chisq per degree of freedom <span class="math notranslate nohighlight">\(\chi^2_\nu\)</span>.</p>
 <p>If None, not calculated by <cite>make_fit_old</cite>. If <cite>np.nan</cite>, fit failed.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.combined_popt_psigma">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">combined_popt_psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.combined_popt_psigma" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">combined_popt_psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.combined_popt_psigma" title="Link to this definition"></a></dt>
 <dd><p>Return optimized parameters and uncertainties as a DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame with columns ‘popt’ and ‘psigma’, indexed by parameter names.
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>DataFrame with columns ‘popt’ and ‘psigma’, indexed by parameter names.
 Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.dof">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.dof" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.dof" title="Link to this definition"></a></dt>
 <dd><p>Degrees of freedom in the fit.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.fit_bounds">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit_bounds</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.fit_bounds" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_bounds</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.fit_bounds" title="Link to this definition"></a></dt>
 <dd><p>Bounds used when running the fit.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.fit_result">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit_result</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.fit_result" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_result</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.fit_result" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.initial_guess_info">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.initial_guess_info" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.initial_guess_info" title="Link to this definition"></a></dt>
+<dd><p>Initial guess and bounds for each parameter, or None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None when no initial
+guess was made (<code class="docutils literal notranslate"><span class="pre">p0</span></code> is None) or no fit has set the bounds.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.logger">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.logger" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.logger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -480,94 +486,109 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 treats weights as in <cite>curve_fit</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>return_exception</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return exceptions from fitting routine, instead of raising.
+<dd class="field-odd"><dl class="simple">
+<dt><strong>return_exception: bool</strong></dt><dd><p>If True, return exceptions from fitting routine, instead of raising.
 This is useful when looping through many fits and wanting to
-identify failed fits after the fact.</p></li>
-<li><p><strong>**kwargs</strong> – The description is missing.</p></li>
-</ul>
+identify failed fits after the fact.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.nobs">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nobs</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.nobs" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nobs</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.nobs" title="Link to this definition"></a></dt>
 <dd><p>The total number of observations used in the fit.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.observations">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.observations" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.observations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.pcov">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pcov</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.pcov" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pcov</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.pcov" title="Link to this definition"></a></dt>
 <dd><p>Returns a copy so that the matrix isn’t accidentally edited.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.plotter">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plotter</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.plotter" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">plotter</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.plotter" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.popt">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.popt" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.popt" title="Link to this definition"></a></dt>
 <dd><p>Optimized fit parameters.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.psigma">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.psigma" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.psigma" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.residuals">
 <span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.residuals" title="Link to this definition"></a></dt>
 <dd><p>Calculate fit residuals.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pct</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, return percentage residuals.</p></li>
-<li><p><strong>use_all</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, calculate residuals for all input data including
+<dd class="field-odd"><dl>
+<dt><strong>pct</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, return percentage residuals.</p>
+</dd>
+<dt><strong>use_all</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, calculate residuals for all input data including
 points excluded by constraints (xmin, xmax, etc.) passed
 during initialization.
-If False (default), calculate only for points used in fit.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Residuals as observed - fitted.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
+If False (default), calculate only for points used in fit.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create FitFunction with constraints</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for fitted region only</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r_fit</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for all original data</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">use_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Percentage residuals</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r_pct</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Residuals as observed - fitted.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>Addresses TODO: “calculate with all values…including those
 excluded by set_extrema” (though set_extrema doesn’t exist -
 constraints are passed in __init__).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create FitFunction with constraints</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for fitted region only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_fit</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">r_fit</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="p">((</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Residuals for all original data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">use_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_all</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Percentage residuals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r_pct</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.rsq">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.rsq" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.rsq" title="Link to this definition"></a></dt>
 <dd><p>Coefficient of determination.</p>
 <p>Source: &lt;en.wikipedia.org/wiki/Coefficient_of_determination#Definitions&gt;</p>
 </dd></dl>
@@ -581,28 +602,41 @@ constraints are passed in __init__).</p>
 <p>If logy, then make selection of <cite>wmin</cite> and <cite>wmax</cite> based on <span class="math notranslate nohighlight">\(w/(y \ln(10))\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xobs_raw</strong> – The description is missing.</p></li>
-<li><p><strong>yobs_raw</strong> – The description is missing.</p></li>
-<li><p><strong>weights_raw</strong> – The description is missing.</p></li>
-<li><p><strong>xmin</strong> – The description is missing.</p></li>
-<li><p><strong>xmax</strong> – The description is missing.</p></li>
-<li><p><strong>xoutside</strong> – The description is missing.</p></li>
-<li><p><strong>ymin</strong> – The description is missing.</p></li>
-<li><p><strong>ymax</strong> – The description is missing.</p></li>
-<li><p><strong>youtside</strong> – The description is missing.</p></li>
-<li><p><strong>wmin</strong> – The description is missing.</p></li>
-<li><p><strong>wmax</strong> – The description is missing.</p></li>
-<li><p><strong>logx</strong> – The description is missing.</p></li>
-<li><p><strong>logy</strong> – The description is missing.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xobs_raw</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>yobs_raw</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>weights_raw</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>xmin</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>xmax</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>xoutside</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>ymin</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>ymax</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>youtside</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>wmin</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>wmax</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>logx</strong></dt><dd><p>The description is missing.</p>
+</dd>
+<dt><strong>logy</strong></dt><dd><p>The description is missing.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLaw.sufficient_data">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.sufficient_data" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLaw.sufficient_data" title="Link to this definition"></a></dt>
 <dd><p>Ensure that we can fit the data before doing any computations.</p>
 </dd></dl>
 

@@ -6,22 +6,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gfddd86231 documentation</title>
-  <link rel="icon" type="image/x-icon" href="../../../_static/favicon.ico">
-
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g53e458caa documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
-      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
 
   
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bace0c48"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=520fb7de"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -307,7 +303,7 @@
              
   <h1>Source code for solarwindpy.plotting.spiral</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sa">r</span><span class="sd">&quot;&quot;&quot;Spiral mesh plots and associated binning utilities.&quot;&quot;&quot;</span>
+<span class="sa">r</span><span class="sd">"""Spiral mesh plots and associated binning utilities."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
@@ -325,17 +321,31 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">labels</span> <span class="k">as</span> <span class="n">labels_module</span>
 
-<span class="n">InitialSpiralEdges</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;InitialSpiralEdges&quot;</span><span class="p">,</span> <span class="s2">&quot;x,y&quot;</span><span class="p">)</span>
-<span class="n">SpiralMeshBinID</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;SpiralMeshBinID&quot;</span><span class="p">,</span> <span class="s2">&quot;id,fill,visited&quot;</span><span class="p">)</span>
+<span class="n">InitialSpiralEdges</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"InitialSpiralEdges"</span><span class="p">,</span> <span class="s2">"x,y"</span><span class="p">)</span>
+<span class="n">SpiralMeshBinID</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"SpiralMeshBinID"</span><span class="p">,</span> <span class="s2">"id,fill,visited"</span><span class="p">)</span>
 <span class="n">SpiralFilterThresholds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
-    <span class="s2">&quot;SpiralFilterThresholds&quot;</span><span class="p">,</span> <span class="s2">&quot;density,size&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">(</span><span class="kc">False</span><span class="p">,)</span>
+    <span class="s2">"SpiralFilterThresholds"</span><span class="p">,</span> <span class="s2">"density,size"</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">(</span><span class="kc">False</span><span class="p">,)</span>
 <span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_counts_per_bin">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.get_counts_per_bin">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.get_counts_per_bin.html#solarwindpy.plotting.spiral.get_counts_per_bin">[docs]</a>
 <span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_counts_per_bin</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Count the points in each rectangular bin.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bins : np.ndarray</span>
+<span class="sd">        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.</span>
+<span class="sd">    x, y : np.ndarray</span>
+<span class="sd">        Point coordinates.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        Number of points with ``x0 &lt;= x &lt; x1`` and ``y0 &lt;= y &lt; y1`` in each bin.</span>
+<span class="sd">    """</span>
     <span class="n">nbins</span> <span class="o">=</span> <span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">cell_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">nbins</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 
@@ -353,9 +363,27 @@
 
 
 <div class="viewcode-block" id="calculate_bin_number_with_numba">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba">[docs]</a>
 <span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bin_number_with_numba</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Assign each point the index of the mesh cell that contains it.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mesh : np.ndarray</span>
+<span class="sd">        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.</span>
+<span class="sd">    x, y : np.ndarray</span>
+<span class="sd">        Point coordinates.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    zbin : np.ndarray</span>
+<span class="sd">        Cell index of each point, or ``fill`` for points in no cell.</span>
+<span class="sd">    fill : int</span>
+<span class="sd">        The fill value, -9999.</span>
+<span class="sd">    bin_visited : np.ndarray</span>
+<span class="sd">        Number of times each cell was processed.</span>
+<span class="sd">    """</span>
     <span class="n">fill</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
     <span class="n">zbin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 
@@ -377,11 +405,28 @@
 
 
 <div class="viewcode-block" id="SpiralMesh">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpiralMesh</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Adaptive rectangular mesh that splits crowded cells into quarters.</span>
+
+<span class="sd">    Starting from the grid of initial edges, every cell holding more than</span>
+<span class="sd">    ``min_per_bin`` points is split into four equal cells until none does.</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="SpiralMesh.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">initial_xedges</span><span class="p">,</span> <span class="n">initial_yedges</span><span class="p">,</span> <span class="n">min_per_bin</span><span class="o">=</span><span class="mi">250</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data, the initial edges and the split threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x, y : pd.Series</span>
+<span class="sd">            Point coordinates.</span>
+<span class="sd">        initial_xedges, initial_yedges : np.ndarray</span>
+<span class="sd">            Edges of the initial grid.</span>
+<span class="sd">        min_per_bin : int</span>
+<span class="sd">            A cell holding more points than this is split.</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_min_per_bin</span><span class="p">(</span><span class="n">min_per_bin</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_edges</span><span class="p">(</span><span class="n">initial_xedges</span><span class="p">,</span> <span class="n">initial_yedges</span><span class="p">)</span>
@@ -390,46 +435,52 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bin_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``SpiralMeshBinID`` of (cell index per point, fill value, visit counts)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:class:`pd.Categorical` version of `bin_id`, with fill bin removed.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``bin_id.id`` as a :class:`pandas.Categorical`, with the fill value removed."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cat</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""DataFrame with columns ``x`` and ``y``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">initial_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``InitialSpiralEdges`` namedtuple of the initial x and y edges."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_edges</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mesh</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">min_per_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""A cell holding more points than this is split."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_per_bin</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_filter_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``SpiralFilterThresholds`` of the density and size quantiles."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_filter_thresholds</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean :py:class:`Series` identifying properly filled mesh cells.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Boolean array identifying properly filled mesh cells.</span>
 
-<span class="sd">        Series selects mesh cells that meet density and area criteria specified</span>
-<span class="sd">        by :py:meth:`mesh_cell_filter_thresholds`.</span>
+<span class="sd">        Selects mesh cells that meet the density and area criteria in</span>
+<span class="sd">        ``cell_filter_thresholds``.</span>
 
 <span class="sd">        Notes</span>
-<span class="sd">        ----</span>
+<span class="sd">        -----</span>
 <span class="sd">        Neither `density` nor `size` convert log-scale edges into linear scale.</span>
 <span class="sd">        Doing so would overweight the area of mesh cells at larger values on a</span>
 <span class="sd">        given axis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_filter_thresholds</span><span class="o">.</span><span class="n">density</span>
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_filter_thresholds</span><span class="o">.</span><span class="n">size</span>
 
@@ -456,9 +507,9 @@
         <span class="k">return</span> <span class="n">tk</span>
 
 <div class="viewcode-block" id="SpiralMesh.set_cell_filter_thresholds">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_cell_filter_thresholds">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.set_cell_filter_thresholds">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_cell_filter_thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set or update the :py:meth:`mesh_cell_filter_thresholds`.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set or update ``cell_filter_thresholds``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -468,14 +519,14 @@
 <span class="sd">            sufficient fill factor.</span>
 <span class="sd">        size: scalar</span>
 <span class="sd">            The size quantile below which we want to select bins, e.g.</span>
-<span class="sd">            below the 0.99 quantile. This ensures that the bin isn&#39;t so large</span>
+<span class="sd">            below the 0.99 quantile. This ensures that the bin isn't so large</span>
 <span class="sd">            that it will appear as an outlier.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">density</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;density&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"density"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"size"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unexpected kwarg</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extra</span><span class="p">))</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">"</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">"Unexpected kwarg</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extra</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cell_filter_thresholds</span> <span class="o">=</span> <span class="n">SpiralFilterThresholds</span><span class="p">(</span>
             <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span>
@@ -483,27 +534,37 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.set_initial_edges">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_initial_edges">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.set_initial_edges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_initial_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xedges</span><span class="p">,</span> <span class="n">yedges</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the initial x and y edges."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_edges</span> <span class="o">=</span> <span class="n">InitialSpiralEdges</span><span class="p">(</span><span class="n">xedges</span><span class="p">,</span> <span class="n">yedges</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.set_data">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store ``x`` and ``y`` as the columns of one DataFrame."""</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">"x"</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="n">y</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># SpiralMeshData(x, y)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.set_min_per_bin">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.set_min_per_bin">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.set_min_per_bin">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_min_per_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the split threshold as an int."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_min_per_bin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.initialize_bins">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.initialize_bins">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.initialize_bins">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Build the initial grid of cells from the initial edges.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Shape (nx * ny, 4) array of ``[x0, x1, y0, y1]`` cell edges.</span>
+<span class="sd">        """</span>
         <span class="c1"># Leaves initial edges altered when we change maximum edge.</span>
         <span class="n">xbins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_edges</span><span class="o">.</span><span class="n">x</span>
         <span class="n">ybins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_edges</span><span class="o">.</span><span class="n">y</span>
@@ -519,10 +580,10 @@
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">)):</span>
-                <span class="c1"># NOTE: i*ny+j means go to i&#39;th row, which has</span>
+                <span class="c1"># NOTE: i*ny+j means go to i'th row, which has</span>
                 <span class="c1">#       nrow * number of bins passed. Then go</span>
-                <span class="c1">#       to j&#39;th bin because we have to traverse</span>
-                <span class="c1">#       to the j&#39;th y-bin too.</span>
+                <span class="c1">#       to j'th bin because we have to traverse</span>
+                <span class="c1">#       to the j'th y-bin too.</span>
                 <span class="n">mesh</span><span class="p">[(</span><span class="n">i</span> <span class="o">*</span> <span class="n">ny</span><span class="p">)</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">]</span>
 
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
@@ -532,9 +593,20 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.process_one_spiral_step">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.process_one_spiral_step">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.process_one_spiral_step">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">process_one_spiral_step</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">min_per_bin</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Split every cell holding more than ``min_per_bin`` points into quarters.</span>
+
+<span class="sd">        The rows of ``bins`` that were split are set to NaN in place.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        new_cells : np.ndarray or None</span>
+<span class="sd">            Shape (4 * n, 4) array of the new cells, or None if none were split.</span>
+<span class="sd">        n : int</span>
+<span class="sd">            Number of cells split.</span>
+<span class="sd">        """</span>
         <span class="n">cell_count</span> <span class="o">=</span> <span class="n">get_counts_per_bin</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="n">bins_to_replace</span> <span class="o">=</span> <span class="n">cell_count</span> <span class="o">&gt;</span> <span class="n">min_per_bin</span>
@@ -546,6 +618,7 @@
         <span class="n">xhyh</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">bins</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> <span class="n">bins</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">split_this_cell</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Return the four quarters of cell ``idx`` as edge lists."""</span>
             <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
             <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span> <span class="o">=</span> <span class="n">xhyh</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
@@ -575,41 +648,41 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_visualize_logged_stats</span><span class="p">(</span><span class="n">stats_str</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
-        <span class="n">stats</span> <span class="o">=</span> <span class="p">[[</span><span class="n">y</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">stats_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)]</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="p">[[</span><span class="n">y</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"  "</span><span class="p">)</span> <span class="k">if</span> <span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">stats_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)]</span>
         <span class="n">stats</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Remove column underline row</span>
         <span class="n">stats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Step"</span><span class="p">)</span>
         <span class="n">n_replaced</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-        <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
+        <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">"s"</span>
         <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
             <span class="n">dt</span> <span class="o">/=</span> <span class="mi">60</span>
-            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">"m"</span>
         <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
             <span class="n">dt</span> <span class="o">/=</span> <span class="mi">60</span>
-            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">&quot;H&quot;</span>
+            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">"H"</span>
         <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
             <span class="n">dt</span> <span class="o">/=</span> <span class="mi">24</span>
-            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span>
+            <span class="n">dt_unit</span> <span class="o">=</span> <span class="s2">"D"</span>
 
-        <span class="n">dt_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Elapsed [</span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">]&quot;</span>
-        <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">dt_key</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span> <span class="s2">&quot;N Divisions&quot;</span><span class="p">:</span> <span class="n">n_replaced</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">dt_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Elapsed [</span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">]"</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">dt_key</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span> <span class="s2">"N Divisions"</span><span class="p">:</span> <span class="n">n_replaced</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">tax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">index</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Elapsed [</span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">]&quot;</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Elapsed [</span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">]"</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
-        <span class="n">k</span> <span class="o">=</span> <span class="s2">&quot;N Divisions&quot;</span>
-        <span class="n">tax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="s2">"N Divisions"</span>
+        <span class="n">tax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">"C1"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
         <span class="n">tax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Step Number&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Step Number"</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">dt_key</span><span class="p">)</span>
-        <span class="n">tax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;N Divisions&quot;</span><span class="p">)</span>
+        <span class="n">tax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"N Divisions"</span><span class="p">)</span>
 
         <span class="n">h0</span><span class="p">,</span> <span class="n">l0</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
         <span class="n">h1</span><span class="p">,</span> <span class="n">l1</span> <span class="o">=</span> <span class="n">tax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
@@ -617,20 +690,25 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
             <span class="n">h0</span> <span class="o">+</span> <span class="n">h1</span><span class="p">,</span>
             <span class="n">l0</span> <span class="o">+</span> <span class="n">l1</span><span class="p">,</span>
-            <span class="n">title</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;$\Delta t = </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="w"> </span><span class="n">dt_key</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> \, </span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">rf</span><span class="s2">"$\Delta t = </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="w"> </span><span class="n">dt_key</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> \, </span><span class="si">{</span><span class="n">dt_unit</span><span class="si">}</span><span class="s2">$"</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
-        <span class="n">tax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span>
+        <span class="n">tax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">tax</span><span class="p">,</span> <span class="n">stats</span>
 
 <div class="viewcode-block" id="SpiralMesh.generate_mesh">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.generate_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.generate_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;__main__&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Split cells repeatedly until none holds more than ``min_per_bin`` points.</span>
+
+<span class="sd">        Only finite points inside the initial grid are used. The result is</span>
+<span class="sd">        stored in ``mesh``.</span>
+<span class="sd">        """</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"__main__"</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generating </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Generating </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span>
@@ -662,11 +740,9 @@
         <span class="n">list_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_bins</span><span class="p">]</span>
         <span class="n">active_bins</span> <span class="o">=</span> <span class="n">initial_bins</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd"> Step      N      Elapsed Time</span>
-<span class="sd">======  =======  ==============&quot;&quot;&quot;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2"> Step      N      Elapsed Time</span>
+<span class="s2">======  =======  =============="""</span><span class="p">)</span>
         <span class="n">step_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">nbins_to_replace</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -674,7 +750,7 @@
                 <span class="n">active_bins</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">min_per_bin</span>
             <span class="p">)</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">nbins_to_replace</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="p">(</span><span class="n">now</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">step_start</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">step</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">nbins_to_replace</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="p">(</span><span class="n">now</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">step_start</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">list_of_bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">active_bins</span><span class="p">)</span>
             <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">step_start</span> <span class="o">=</span> <span class="n">now</span>
@@ -685,25 +761,38 @@
         <span class="n">final_bins</span> <span class="o">=</span> <span class="n">final_bins</span><span class="p">[</span><span class="n">valid_bins</span><span class="p">]</span>
 
         <span class="n">stop</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Completed </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elasped time </span><span class="si">{</span><span class="n">stop</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Split bin threshold </span><span class="si">{</span><span class="n">min_per_bin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Completed </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Elasped time </span><span class="si">{</span><span class="n">stop</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Split bin threshold </span><span class="si">{</span><span class="n">min_per_bin</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">final_bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> bins for </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> spectra (~</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">final_bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> spectra per bin)</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Generated </span><span class="si">{</span><span class="n">final_bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> bins for </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> spectra (~</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">final_bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> spectra per bin)</span><span class="se">\n</span><span class="s2">"</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_mesh</span> <span class="o">=</span> <span class="n">final_bins</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.calculate_bin_number">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.calculate_bin_number">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.calculate_bin_number">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bin_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Assign each point to its mesh cell and store the result in ``bin_id``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        SpiralMeshBinID</span>
+<span class="sd">            Cell index per point (fill value outside the mesh), the fill value,</span>
+<span class="sd">            and the visit count of each cell.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the cell counts do not cover every mesh cell.</span>
+<span class="sd">        """</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Calculating </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> bin_number at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Calculating </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> bin_number at </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span>
         <span class="n">nbins</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -711,13 +800,13 @@
         <span class="n">zbin</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">bin_visited</span> <span class="o">=</span> <span class="n">calculate_bin_number_with_numba</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="n">stop</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elapsed time </span><span class="si">{</span><span class="n">stop</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Elapsed time </span><span class="si">{</span><span class="n">stop</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">zbin</span> <span class="o">==</span> <span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;`zbin` contains </span><span class="si">{</span><span class="p">(</span><span class="n">zbin</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">zbin</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%) fill values that are outside of mesh.</span>
+                <span class="sa">f</span><span class="s2">"""`zbin` contains </span><span class="si">{</span><span class="p">(</span><span class="n">zbin</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">zbin</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">fill</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%) fill values that are outside of mesh.</span>
 <span class="s2">They will be replaced by NaNs and excluded from the aggregation.</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
             <span class="p">)</span>
 
         <span class="c1"># Set fill bin to zero</span>
@@ -725,20 +814,18 @@
         <span class="c1"># `minlength=nbins` forces us to include empty bins at the end of the array.</span>
         <span class="n">bin_frequency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">zbin</span><span class="p">[</span><span class="o">~</span><span class="n">is_fill</span><span class="p">],</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nbins</span><span class="p">)</span>
         <span class="n">n_empty</span> <span class="o">=</span> <span class="p">(</span><span class="n">bin_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Largest bin population is </span><span class="si">{</span><span class="n">bin_frequency</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""Largest bin population is </span><span class="si">{</span><span class="n">bin_frequency</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span>
 <span class="si">{</span><span class="n">n_empty</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">nbins</span><span class="si">}</span><span class="s2"> bins (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n_empty</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">nbins</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%) are empty</span>
-<span class="s2">&quot;&quot;&quot;</span>
-        <span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">bin_visited</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="o">~</span><span class="n">bin_visited</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> bins went unvisited.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="o">~</span><span class="n">bin_visited</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> bins went unvisited."</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">bin_visited</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="p">(</span><span class="n">bin_visited</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> bins visted more than once.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="p">(</span><span class="n">bin_visited</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> bins visted more than once."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nbins</span> <span class="o">-</span> <span class="n">bin_frequency</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nbins</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bin_frequency</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have an associated z-value&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nbins</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bin_frequency</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have an associated z-value"</span>
             <span class="p">)</span>
 
         <span class="n">bin_id</span> <span class="o">=</span> <span class="n">SpiralMeshBinID</span><span class="p">(</span><span class="n">zbin</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">bin_visited</span><span class="p">)</span>
@@ -747,16 +834,18 @@
 
 
 <div class="viewcode-block" id="SpiralMesh.place_spectra_in_mesh">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.place_spectra_in_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.place_spectra_in_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">place_spectra_in_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Generate the mesh, then assign each point to a cell; return ``bin_id``."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generate_mesh</span><span class="p">()</span>
         <span class="n">bin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_bin_number</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">bin_id</span></div>
 
 
 <div class="viewcode-block" id="SpiralMesh.build_cat">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralMesh.build_cat">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh.build_cat">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_cat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store ``cat``, the cell indices as a Categorical without the fill value."""</span>
         <span class="n">bin_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">id</span>
         <span class="n">fill</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">fill</span>
 
@@ -772,63 +861,82 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpiralPlot2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;2D spiral plotting with adaptive mesh refinement.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""2D spiral plotting with adaptive mesh refinement.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    splot = SpiralPlot2D(...)</span>
 <span class="sd">    splot.initialize_mesh()</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.__init__">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">initial_bins</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">clip_data</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data and labels, then compute the initial bin edges.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x, y : pd.Series</span>
+<span class="sd">            Point coordinates.</span>
+<span class="sd">        z : pd.Series, optional</span>
+<span class="sd">            Value to aggregate in each cell. If None, cells count points.</span>
+<span class="sd">        logx, logy : bool</span>
+<span class="sd">            If True, use ``log10(abs())`` of that coordinate.</span>
+<span class="sd">        initial_bins : int or tuple</span>
+<span class="sd">            Initial bins per axis; see ``calc_initial_bins``.</span>
+<span class="sd">        clip_data : bool</span>
+<span class="sd">            Stored as ``clip``.</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_log</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">()</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">()</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"z"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_initial_bins</span><span class="p">(</span><span class="n">initial_bins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``RangeLimits`` of the minimum and maximum counts per cell."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clim</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">initial_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Dict of the initial x and y bin edges."""</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_bins</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">grouped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""z-values grouped by mesh cell, set by ``build_grouped``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grouped</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The ``SpiralMesh``, set by ``initialize_mesh``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mesh</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.agg">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Aggregate the z-values into their bins.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;aggregating z-data&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Aggregate the z-values into their bins."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"aggregating z-data"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">&quot;count&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"count"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>
+                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"mean"</span>
 
         <span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">)</span>
 
         <span class="n">c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clim</span>
         <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cnt</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span>
             <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -844,39 +952,57 @@
 
         <span class="n">cell_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">cell_filter</span>
         <span class="k">if</span> <span class="n">agg</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">cell_filter</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Unable to algin `agg` and `cell_filter.</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""Unable to algin `agg` and `cell_filter.</span>
 <span class="s2">agg    : </span><span class="si">{</span><span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span>
-<span class="s2">filter : </span><span class="si">{</span><span class="n">cell_filter</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">filter : </span><span class="si">{</span><span class="n">cell_filter</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"""</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cell_filter</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">agg</span></div>
 
 
 <div class="viewcode-block" id="SpiralPlot2D.build_grouped">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.build_grouped">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.build_grouped">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_grouped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Group the z-values by mesh cell and store the result in ``grouped``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the mesh categories and the data differ in length.</span>
+<span class="sd">        """</span>
         <span class="n">cat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">cat</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">z</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;`cat` must have same size as data&#39;s first dimesion</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""`cat` must have same size as data's first dimesion</span>
 <span class="s2">cat  : </span><span class="si">{</span><span class="n">cat</span><span class="o">.</span><span class="n">size</span><span class="si">}</span>
 <span class="s2">data : </span><span class="si">{</span><span class="n">z</span><span class="o">.</span><span class="n">size</span><span class="si">}</span>
-<span class="s2">&quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
 
         <span class="n">gb</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grouped</span> <span class="o">=</span> <span class="n">gb</span></div>
 
 
 <div class="viewcode-block" id="SpiralPlot2D.calc_initial_bins">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.calc_initial_bins">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.calc_initial_bins">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calc_initial_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Compute the initial bin edges for x and y.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nbins : int or tuple</span>
+<span class="sd">            An int gives that many bins per axis at equally spaced quantiles of</span>
+<span class="sd">            the finite data; a pair gives one int or edge array per axis. The</span>
+<span class="sd">            last edge is raised to the larger of 0.01 and 1.01 times the</span>
+<span class="sd">            largest edge so the maximum lies inside the grid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            ``(("x", edges), ("y", edges))``.</span>
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">)</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nbins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -888,16 +1014,16 @@
             <span class="n">nbins</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">nbins</span><span class="p">)}</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized `nbins`</span><span class="se">\n</span><span class="s2">type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">nbins</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2"> bins:</span><span class="si">{</span><span class="n">nbins</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Unrecognized `nbins`</span><span class="se">\n</span><span class="s2">type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">nbins</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2"> bins:</span><span class="si">{</span><span class="n">nbins</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">nbins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Numpy and Astropy don&#39;t like NaNs when calculating bins.</span>
+            <span class="c1"># Numpy and Astropy don't like NaNs when calculating bins.</span>
             <span class="c1"># Infinities in bins (typically from log10(0)) also create problems.</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Only want in integer or np.ndarrays for initial edges&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Only want in integer or np.ndarrays for initial edges"</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="c1"># Lets calculate the following quantiles.</span>
@@ -919,13 +1045,17 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.initialize_mesh">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.initialize_mesh">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.initialize_mesh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Build the ``SpiralMesh`` and assign every point to a cell.</span>
 
-        <span class="n">xbins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_bins</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
-        <span class="n">ybins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_bins</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="sd">        ``kwargs`` are passed to ``SpiralMesh``, e.g. ``min_per_bin``.</span>
+<span class="sd">        """</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span>
+
+        <span class="n">xbins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_bins</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span>
+        <span class="n">ybins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_bins</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span>
 
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">SpiralMesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xbins</span><span class="p">,</span> <span class="n">ybins</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># Attach mesh before anything else.</span>
@@ -937,30 +1067,32 @@
 
 
 <div class="viewcode-block" id="SpiralPlot2D.set_clim">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the min (lower) and max (upper) counts per bin.</span>
+<span class="w">        </span><span class="sd">"""Set the min (lower) and max (upper) counts per bin.</span>
 
-<span class="sd">        This limit is applied after the :py:meth:`groupby.agg` is run.&quot;&quot;&quot;</span>
+<span class="sd">        This limit is applied after the groupby aggregation in ``agg``.</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clim</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">RangeLimits</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpiralPlot2D.set_data">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data, taking ``log10(abs())`` of each axis flagged in ``log``."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
-        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
         <span class="n">v0</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.01</span><span class="p">]</span>
         <span class="n">v1</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.99</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -970,7 +1102,7 @@
         <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.make_plot">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -981,6 +1113,38 @@
         <span class="n">alpha_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Draw each mesh cell as a rectangle colored by its aggregated z-value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : Axes, optional</span>
+<span class="sd">            If None, create one.</span>
+<span class="sd">        cbar : bool</span>
+<span class="sd">            If True, draw a colorbar.</span>
+<span class="sd">        limit_color_norm : bool</span>
+<span class="sd">            If True and ``norm`` is given, unset limits of ``norm`` default to</span>
+<span class="sd">            the 1st and 99th percentiles of z.</span>
+<span class="sd">        cbar_kwargs : dict, optional</span>
+<span class="sd">            Passed to the colorbar.</span>
+<span class="sd">        fcn : str, optional</span>
+<span class="sd">            Aggregation function passed to ``agg``.</span>
+<span class="sd">        alpha_fcn : str, optional</span>
+<span class="sd">            If given, cells are made more transparent the larger this</span>
+<span class="sd">            aggregation of z is.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Only ``cmap`` and ``norm`` are accepted.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax : Axes</span>
+<span class="sd">        cbar_or_mappable : Colorbar or matplotlib.collections.PatchCollection</span>
+<span class="sd">            The colorbar if ``cbar``, otherwise the patch collection.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any other keyword is passed.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
@@ -990,7 +1154,7 @@
         <span class="k">assert</span> <span class="n">C</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned.&quot;&quot;&quot;</span>
+                <span class="sa">f</span><span class="s2">"""</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned."""</span>
             <span class="p">)</span>
 
         <span class="n">xmesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
@@ -1001,14 +1165,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
             <span class="n">ymesh</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">ymesh</span>
 
-        <span class="c1"># (x,y) of bin&#39;s lower left corner.</span>
+        <span class="c1"># (x,y) of bin's lower left corner.</span>
         <span class="n">xy</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xmesh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ymesh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">xmesh</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xmesh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="n">ymesh</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ymesh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
 
         <span class="n">start1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Making patches&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start </span><span class="si">{</span><span class="n">start1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Making patches"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Start </span><span class="si">{</span><span class="n">start1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">mpl</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">this_xy</span><span class="p">,</span> <span class="n">this_dx</span><span class="p">,</span> <span class="n">this_dy</span><span class="p">)</span>
@@ -1016,11 +1180,11 @@
         <span class="p">]</span>
 
         <span class="n">stop1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stop </span><span class="si">{</span><span class="n">stop1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elapsed </span><span class="si">{</span><span class="n">stop1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stop </span><span class="si">{</span><span class="n">stop1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Elapsed </span><span class="si">{</span><span class="n">stop1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># TODO: `match_original=False` if calculate alpha for each patch.</span>
-        <span class="n">edgecolors</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
+        <span class="n">edgecolors</span> <span class="o">=</span> <span class="s2">"none"</span>
         <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">collection</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PatchCollection</span><span class="p">(</span>
             <span class="n">patches</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="n">edgecolors</span>
@@ -1028,10 +1192,10 @@
 
         <span class="n">collection</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
 
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unexpected kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">limit_color_norm</span> <span class="ow">and</span> <span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
@@ -1058,8 +1222,8 @@
             <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
             <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">cbar</span>
@@ -1072,7 +1236,7 @@
             <span class="c1"># is most opaque.</span>
             <span class="n">alpha_agg</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()(</span><span class="n">alpha_agg</span><span class="p">)</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_agg</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Scaling alpha filter as alpha**0.25&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Scaling alpha filter as alpha**0.25"</span><span class="p">)</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">**</span><span class="mf">0.25</span>
 
             <span class="c1"># Set masked values to zero. Otherwise, masked</span>
@@ -1097,13 +1261,13 @@
             <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;cax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;ax&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
 
         <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_interpolate_to_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interpolate scattered data to a regular grid.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_interpolate_to_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Interpolate scattered data to a regular grid.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1113,7 +1277,7 @@
 <span class="sd">            Values at data points.</span>
 <span class="sd">        resolution : int</span>
 <span class="sd">            Number of grid points along each axis.</span>
-<span class="sd">        method : {&quot;linear&quot;, &quot;cubic&quot;, &quot;nearest&quot;}</span>
+<span class="sd">        method : {"linear", "cubic", "nearest"}</span>
 <span class="sd">            Interpolation method passed to :func:`scipy.interpolate.griddata`.</span>
 
 <span class="sd">        Returns</span>
@@ -1122,7 +1286,7 @@
 <span class="sd">            2D meshgrid arrays.</span>
 <span class="sd">        ZZ : np.ndarray</span>
 <span class="sd">            Interpolated values on the grid.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">griddata</span>
 
         <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">resolution</span><span class="p">)</span>
@@ -1139,9 +1303,9 @@
         <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">neighbors</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">smoothing</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;thin_plate_spline&quot;</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="s2">"thin_plate_spline"</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interpolate scattered data using sparse RBF.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Interpolate scattered data using sparse RBF.</span>
 
 <span class="sd">        Uses :class:`scipy.interpolate.RBFInterpolator` with the ``neighbors``</span>
 <span class="sd">        parameter for efficient O(N·k) computation instead of O(N²).</span>
@@ -1160,8 +1324,8 @@
 <span class="sd">        smoothing : float</span>
 <span class="sd">            Smoothing parameter. Higher values produce smoother surfaces.</span>
 <span class="sd">        kernel : str</span>
-<span class="sd">            RBF kernel type. Options include &quot;thin_plate_spline&quot;, &quot;cubic&quot;,</span>
-<span class="sd">            &quot;quintic&quot;, &quot;multiquadric&quot;, &quot;inverse_multiquadric&quot;, &quot;gaussian&quot;.</span>
+<span class="sd">            RBF kernel type. Options include "thin_plate_spline", "cubic",</span>
+<span class="sd">            "quintic", "multiquadric", "inverse_multiquadric", "gaussian".</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1169,7 +1333,7 @@
 <span class="sd">            2D meshgrid arrays.</span>
 <span class="sd">        ZZ : np.ndarray</span>
 <span class="sd">            Interpolated values on the grid.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">RBFInterpolator</span>
 
         <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
@@ -1186,19 +1350,19 @@
         <span class="k">return</span> <span class="n">XX</span><span class="p">,</span> <span class="n">YY</span><span class="p">,</span> <span class="n">ZZ</span>
 
 <div class="viewcode-block" id="SpiralPlot2D.plot_contours">
-<a class="viewcode-back" href="../../../api/solarwindpy.plotting.spiral.html#solarwindpy.plotting.spiral.SpiralPlot2D.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">"rbf"</span><span class="p">,</span>
         <span class="c1"># RBF method params (default method)</span>
         <span class="n">rbf_neighbors</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">rbf_smoothing</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">rbf_kernel</span><span class="o">=</span><span class="s2">&quot;thin_plate_spline&quot;</span><span class="p">,</span>
+        <span class="n">rbf_kernel</span><span class="o">=</span><span class="s2">"thin_plate_spline"</span><span class="p">,</span>
         <span class="c1"># Grid method params</span>
         <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">gaussian_filter_std</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-        <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">,</span>
         <span class="n">nan_aware_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="c1"># Common params</span>
         <span class="n">label_levels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1210,21 +1374,21 @@
         <span class="n">use_contourf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Make a contour plot from adaptive mesh data with optional smoothing.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Make a contour plot from adaptive mesh data with optional smoothing.</span>
 
 <span class="sd">        Supports three interpolation methods for generating contours from the</span>
 <span class="sd">        irregular adaptive mesh:</span>
 
-<span class="sd">        - ``&quot;rbf&quot;``: Sparse RBF interpolation (default, fastest with built-in smoothing)</span>
-<span class="sd">        - ``&quot;grid&quot;``: Grid interpolation + Gaussian smoothing (matches Hist2D API)</span>
-<span class="sd">        - ``&quot;tricontour&quot;``: Direct triangulated contours (no smoothing, for debugging)</span>
+<span class="sd">        - ``"rbf"``: Sparse RBF interpolation (default, fastest with built-in smoothing)</span>
+<span class="sd">        - ``"grid"``: Grid interpolation + Gaussian smoothing (matches Hist2D API)</span>
+<span class="sd">        - ``"tricontour"``: Direct triangulated contours (no smoothing, for debugging)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ax : mpl.axes.Axes, None</span>
 <span class="sd">            If None, create an Axes instance from ``plt.subplots``.</span>
-<span class="sd">        method : {&quot;rbf&quot;, &quot;grid&quot;, &quot;tricontour&quot;}</span>
-<span class="sd">            Interpolation method. Default is ``&quot;rbf&quot;`` (fastest with smoothing).</span>
+<span class="sd">        method : {"rbf", "grid", "tricontour"}</span>
+<span class="sd">            Interpolation method. Default is ``"rbf"`` (fastest with smoothing).</span>
 
 <span class="sd">        RBF Method Parameters</span>
 <span class="sd">        ---------------------</span>
@@ -1235,8 +1399,8 @@
 <span class="sd">            RBF smoothing parameter. Higher values produce smoother surfaces.</span>
 <span class="sd">            Default is 1.0.</span>
 <span class="sd">        rbf_kernel : str</span>
-<span class="sd">            RBF kernel type. Options: &quot;thin_plate_spline&quot;, &quot;cubic&quot;, &quot;quintic&quot;,</span>
-<span class="sd">            &quot;multiquadric&quot;, &quot;inverse_multiquadric&quot;, &quot;gaussian&quot;.</span>
+<span class="sd">            RBF kernel type. Options: "thin_plate_spline", "cubic", "quintic",</span>
+<span class="sd">            "multiquadric", "inverse_multiquadric", "gaussian".</span>
 
 <span class="sd">        Grid Method Parameters</span>
 <span class="sd">        ----------------------</span>
@@ -1245,8 +1409,8 @@
 <span class="sd">        gaussian_filter_std : float</span>
 <span class="sd">            Standard deviation for Gaussian smoothing. Default is 1.5.</span>
 <span class="sd">            Set to 0 to disable smoothing.</span>
-<span class="sd">        interpolation : {&quot;linear&quot;, &quot;cubic&quot;, &quot;nearest&quot;}</span>
-<span class="sd">            Interpolation method for griddata. Default is &quot;cubic&quot;.</span>
+<span class="sd">        interpolation : {"linear", "cubic", "nearest"}</span>
+<span class="sd">            Interpolation method for griddata. Default is "cubic".</span>
 <span class="sd">        nan_aware_filter : bool</span>
 <span class="sd">            If True, use NaN-aware Gaussian filtering. Default is True.</span>
 
@@ -1263,7 +1427,7 @@
 <span class="sd">        clabel_kwargs : dict, None</span>
 <span class="sd">            Keyword arguments passed to ``ax.clabel``.</span>
 <span class="sd">        skip_max_clbl : bool</span>
-<span class="sd">            If True, don&#39;t label the maximum contour level. Default is True.</span>
+<span class="sd">            If True, don't label the maximum contour level. Default is True.</span>
 <span class="sd">        use_contourf : bool</span>
 <span class="sd">            If True, use filled contours. Default is False.</span>
 <span class="sd">        **kwargs</span>
@@ -1283,42 +1447,53 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.plotting.spiral import SpiralPlot2D</span>
+<span class="sd">        &gt;&gt;&gt; rng = np.random.default_rng(42)</span>
+<span class="sd">        &gt;&gt;&gt; x = pd.Series(rng.uniform(1, 100, 500))</span>
+<span class="sd">        &gt;&gt;&gt; y = pd.Series(rng.uniform(1, 100, 500))</span>
+<span class="sd">        &gt;&gt;&gt; z = pd.Series(np.sin(x / 10) * np.cos(y / 10))</span>
+<span class="sd">        &gt;&gt;&gt; splot = SpiralPlot2D(x, y, z, initial_bins=5)</span>
+<span class="sd">        &gt;&gt;&gt; splot.initialize_mesh(min_per_bin=10)</span>
+<span class="sd">        &gt;&gt;&gt; splot.build_grouped()</span>
+
 <span class="sd">        &gt;&gt;&gt; # Default: sparse RBF (fastest)</span>
 <span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours()</span>
 
 <span class="sd">        &gt;&gt;&gt; # Grid interpolation with Gaussian smoothing</span>
 <span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours(</span>
-<span class="sd">        ...     method=&#39;grid&#39;,</span>
+<span class="sd">        ...     method='grid',</span>
 <span class="sd">        ...     grid_resolution=100,</span>
 <span class="sd">        ...     gaussian_filter_std=2.0</span>
 <span class="sd">        ... )</span>
 
 <span class="sd">        &gt;&gt;&gt; # Debug: see raw triangulation</span>
-<span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours(method=&#39;tricontour&#39;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours(method='tricontour')</span>
+<span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">nan_gaussian_filter</span>
 
         <span class="c1"># Validate method</span>
-        <span class="n">valid_methods</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="s2">&quot;tricontour&quot;</span><span class="p">)</span>
+        <span class="n">valid_methods</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"rbf"</span><span class="p">,</span> <span class="s2">"grid"</span><span class="p">,</span> <span class="s2">"tricontour"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_methods</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Invalid method &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;. Must be one of </span><span class="si">{</span><span class="n">valid_methods</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Invalid method '</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">'. Must be one of </span><span class="si">{</span><span class="n">valid_methods</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
 
         <span class="c1"># Pop contour-specific kwargs</span>
-        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cmap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"levels"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">linestyles</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">&quot;linestyles&quot;</span><span class="p">,</span>
+            <span class="s2">"linestyles"</span><span class="p">,</span>
             <span class="p">[</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-                <span class="s2">&quot;--&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="s2">"--"</span><span class="p">,</span>
+                <span class="s2">":"</span><span class="p">,</span>
+                <span class="s2">"-"</span><span class="p">,</span>
                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
             <span class="p">],</span>
         <span class="p">)</span>
@@ -1335,16 +1510,16 @@
             <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
         <span class="p">)</span>
 
-        <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inline_spacing&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fmt&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline_spacing"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"fmt"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Get aggregated data and mesh cell centers</span>
         <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
         <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have &quot;</span>
-                <span class="s2">&quot;a z-value. The z-values and mesh are not properly aligned.&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> mesh cells do not have "</span>
+                <span class="s2">"a z-value. The z-values and mesh are not properly aligned."</span>
             <span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">mesh</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1362,7 +1537,7 @@
         <span class="n">C</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">tk_finite</span><span class="p">]</span>
 
         <span class="c1"># Select contour function based on method</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;tricontour&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"tricontour"</span><span class="p">:</span>
             <span class="c1"># Direct triangulated contour (no smoothing)</span>
             <span class="n">contour_fcn</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tricontourf</span> <span class="k">if</span> <span class="n">use_contourf</span> <span class="k">else</span> <span class="n">ax</span><span class="o">.</span><span class="n">tricontour</span>
             <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1375,7 +1550,7 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Interpolate to regular grid (rbf or grid method)</span>
-            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;rbf&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"rbf"</span><span class="p">:</span>
                 <span class="n">XX</span><span class="p">,</span> <span class="n">YY</span><span class="p">,</span> <span class="n">ZZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_with_rbf</span><span class="p">(</span>
                     <span class="n">x</span><span class="p">,</span>
                     <span class="n">y</span><span class="p">,</span>
@@ -1385,7 +1560,7 @@
                     <span class="n">smoothing</span><span class="o">=</span><span class="n">rbf_smoothing</span><span class="p">,</span>
                     <span class="n">kernel</span><span class="o">=</span><span class="n">rbf_kernel</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># method == &quot;grid&quot;</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># method == "grid"</span>
                 <span class="n">XX</span><span class="p">,</span> <span class="n">YY</span><span class="p">,</span> <span class="n">ZZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_to_grid</span><span class="p">(</span>
                     <span class="n">x</span><span class="p">,</span>
                     <span class="n">y</span><span class="p">,</span>
@@ -1424,11 +1599,11 @@
             <span class="n">label_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,)</span>
 
         <span class="k">class</span><span class="w"> </span><span class="nc">_NumericFormatter</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Format float without trailing zeros for contour labels.&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">"""Format float without trailing zeros for contour labels."""</span>
 
             <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="c1"># Use float&#39;s repr to avoid recursion (str(self) calls __repr__)</span>
-                <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="c1"># Use float's repr to avoid recursion (str(self) calls __repr__)</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
 
         <span class="n">lbls</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">label_levels</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">qset</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

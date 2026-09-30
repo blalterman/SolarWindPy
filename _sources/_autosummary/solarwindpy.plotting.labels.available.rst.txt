@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.available
+=====================================
+
+.. currentmodule:: solarwindpy.plotting.labels
+
+.. autofunction:: available

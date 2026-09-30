@@ -1,8 +1,12 @@
-﻿solarwindpy.fitfunctions.exponentials
+solarwindpy.fitfunctions.exponentials
 =====================================
 
 .. automodule:: solarwindpy.fitfunctions.exponentials
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

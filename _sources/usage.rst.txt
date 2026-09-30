@@ -247,7 +247,7 @@ Show all available labels:
 .. code-block:: pycon
 
    >>> import solarwindpy.plotting.labels as labels
-   >>> labels.available_labels()
+   >>> labels.available()
 
 
 Error Handling and Missing Data

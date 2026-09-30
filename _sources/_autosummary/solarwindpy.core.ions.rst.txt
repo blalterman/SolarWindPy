@@ -1,8 +1,12 @@
-﻿solarwindpy.core.ions
+solarwindpy.core.ions
 =====================
 
 .. automodule:: solarwindpy.core.ions
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    

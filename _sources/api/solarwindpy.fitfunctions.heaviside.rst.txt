@@ -1,8 +1,0 @@
-solarwindpy.fitfunctions.heaviside module
-=========================================
-
-.. automodule:: solarwindpy.fitfunctions.heaviside
-   :members:
-   :show-inheritance:
-   :undoc-members:
-   :no-index:

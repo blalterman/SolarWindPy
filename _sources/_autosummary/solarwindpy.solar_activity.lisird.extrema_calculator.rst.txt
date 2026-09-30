@@ -1,0 +1,36 @@
+solarwindpy.solar\_activity.lisird.extrema\_calculator
+======================================================
+
+.. automodule:: solarwindpy.solar_activity.lisird.extrema_calculator
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: class.rst
+   
+      ExtremaCalculator
+   
+   
+
+   
+   
+   
+
+
+

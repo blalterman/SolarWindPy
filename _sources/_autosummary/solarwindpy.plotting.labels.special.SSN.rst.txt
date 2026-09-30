@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.special.SSN
+=======================================
+
+.. currentmodule:: solarwindpy.plotting.labels.special
+
+.. autoclass:: SSN

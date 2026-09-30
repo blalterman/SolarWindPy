@@ -1,0 +1,6 @@
+solarwindpy.plotting.base.RangeLimits
+=====================================
+
+.. currentmodule:: solarwindpy.plotting.base
+
+.. autoclass:: RangeLimits

@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.HingeMax
+=======================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: HingeMax

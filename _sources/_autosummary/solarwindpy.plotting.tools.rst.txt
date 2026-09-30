@@ -1,8 +1,12 @@
-﻿solarwindpy.plotting.tools
+solarwindpy.plotting.tools
 ==========================
 
 .. automodule:: solarwindpy.plotting.tools
-   :no-index:
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
 
    
    
