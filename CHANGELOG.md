@@ -18,6 +18,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   remains the conda development environment.
 - The in-repository conda recipe (`recipe/`) is removed. The conda-forge feedstock,
   `conda-forge/solarwindpy-feedstock`, is the only recipe.
+- Plot value limits (`alim`) are reworked:
+  - `limit_color_norm` is removed from `Hist2D.make_plot`, `plot_hist_with_contours`
+    and `plot_contours`, `SpiralPlot2D.make_plot`, and the `OrbitHist2D` plots. To
+    limit a plot to the bulk of its values use `set_alim(lower, upper,
+    kind="quantile")`, e.g. `set_alim(0.01, 0.99, kind="quantile")`, which masks bins
+    outside those quantiles instead of clipping the colour scale. Passing
+    `limit_color_norm=` now fails in matplotlib (`AttributeError`) or with
+    `ValueError` in `SpiralPlot2D`; `Hist2D.plot_contours` only warns that the keyword
+    was unused.
+  - Removing `limit_color_norm` moves every later positional parameter of those
+    methods one slot left, e.g. `make_plot(ax, cbar, cbar_kwargs, fcn, alpha_fcn)` and
+    `plot_contours(ax, label_levels, cbar, cbar_kwargs, fcn, ...)`. Pass them by
+    keyword to be safe. `plot_contours` takes `levels` as a named last parameter.
+  - `Hist1D` and `OrbitHist1D` no longer have `alim` or `set_alim`; they never applied
+    it. `SpiralPlot2D` gains `alim`.
+  - `Hist2D.plot_contours` colours densities (`axnorm` of `"d"`, `"cd"`, `"rd"`) with
+    a log norm by default, as `make_plot` and `plot_hist_with_contours` already did,
+    so density contours default to log colour bands.
+  - `OrbitHist2D` applies `alim` to the "Both" leg too, once over all legs (the Both
+    leg itself is still disabled).
 
 ### Fixed
 
