@@ -381,14 +381,20 @@ class TestQuantitySubclassEquality(TestCase):
         self.assertNotEqual(b, w)
 
     def test_gse(self):
-        """Two Vectors built from the spacecraft GSE position are equal.
+        """Vectors from one GSE position are equal; a shifted one is not.
+
+        The shifted position is displaced by 1.0 along GSE x.
 
         ON FAILURE: the code is wrong.
         """
         gse0 = vector.Vector(self.gse)
         gse1 = vector.Vector(self.gse)
+        shifted = self.gse.copy()
+        shifted["x"] = shifted["x"] + 1.0
+        gse2 = vector.Vector(shifted)
         self.assertEqual(gse0, gse0)
         self.assertEqual(gse0, gse1)
+        self.assertNotEqual(gse0, gse2)
 
     def test_b_gse(self):
         """A BField never equals a Vector, here the GSE position.
