@@ -730,16 +730,6 @@ data : {z.size}
             data.loc[:, "y"] = np.log10(np.abs(data.loc[:, "y"]))
         self._data = data
 
-    def _limit_color_norm(self, norm):
-        pct = self.data.loc[:, "z"].quantile([0.01, 0.99])
-        v0 = pct.loc[0.01]
-        v1 = pct.loc[0.99]
-        if norm.vmin is None:
-            norm.vmin = v0
-        if norm.vmax is None:
-            norm.vmax = v1
-        norm.clip = True
-
     def make_plot(
         self,
         ax=None,
@@ -759,8 +749,9 @@ data : {z.size}
         cbar : bool
             If True, draw a colorbar.
         limit_color_norm : bool
-            If True and ``norm`` is given, unset limits of ``norm`` default to
-            the 1st and 99th percentiles of z.
+            If True, unset limits of ``norm`` default to the 1st and 99th
+            percentiles of the plotted cell values. With no ``norm``, a linear
+            one is built and limited.
         cbar_kwargs : dict, optional
             Passed to the colorbar.
         fcn : str, optional
@@ -834,8 +825,8 @@ data : {z.size}
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
 
-        if limit_color_norm and norm is not None:
-            self._limit_color_norm(norm)
+        if limit_color_norm:
+            norm = self._limit_color_norm(norm, C)
 
         collection.set_alpha(None)
         collection.set_cmap(cmap)

@@ -232,44 +232,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         )
         return super()._make_cbar(mappable, ticks=ticks, **kwargs)
 
-    def _limit_color_norm(self, norm, values):
-        r"""Limit ``norm`` to the 1st and 99th percentiles of the plotted values.
-
-        Parameters
-        ----------
-        norm : matplotlib.colors.Normalize or None
-            The colour normalisation to limit. Limits already set are kept.
-            If None, a linear :class:`matplotlib.colors.Normalize` is built,
-            the norm ``pcolormesh`` would otherwise use.
-        values : array-like
-            The aggregated values handed to matplotlib. NaN, infinite and
-            masked entries are ignored.
-
-        Returns
-        -------
-        matplotlib.colors.Normalize or None
-            The limited norm. Column- and row-normalised plots are already
-            bounded, so for them ``norm`` is returned unchanged.
-        """
-        if self.axnorm in ("c", "r"):
-            # Don't limit us to (1%, 99%) interval.
-            return norm
-
-        if norm is None:
-            norm = mpl.colors.Normalize()
-
-        values = np.ma.masked_invalid(values).compressed()
-        if values.size == 0:
-            return norm
-
-        v0, v1 = np.quantile(values, [0.01, 0.99])
-        if norm.vmin is None:
-            norm.vmin = v0
-        if norm.vmax is None:
-            norm.vmax = v1
-        norm.clip = True
-        return norm
-
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
 
@@ -802,7 +764,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cbar: bool
             If True, create color bar with `labels.z`.
         limit_color_norm: bool
-            If True, limit the color range to 0.001 and 0.999 percentile range
+            If True, limit the color range to the 1st and 99th percentiles
             of the z-value, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.

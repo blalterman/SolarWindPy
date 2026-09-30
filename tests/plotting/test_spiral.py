@@ -708,23 +708,48 @@ class TestMakePlot:
             splot.make_plot(cbar=False, linewidth=2)
 
     def test_limit_color_norm_clips_to_the_1st_and_99th_percentiles(self):
-        """``limit_color_norm`` sets unset norm limits to z's 1st and 99th percentiles.
+        """``limit_color_norm`` limits unset norm limits to the plotted cell values.
 
-        z sorted is 1, 2, 3, 4, 5, 9; linear interpolation gives
-        1 + 0.05 * 1 = 1.05 and 5 + 0.95 * 4 = 8.8. A limit already set is kept.
+        With min_per_bin=2 the occupied cells of MESH_MIN2 hold p0 (1), p5 (4),
+        p1 (3), p2 and p3 (mean 3.5), and p4 (9); empty cells are NaN and not
+        drawn. Sorted: 1, 3, 3.5, 4, 9. Linear interpolation puts the 1%
+        quantile at position 0.04, 1 + 0.04 * (3 - 1) = 1.08, and the 99%
+        quantile at 3.96, 4 + 0.96 * (9 - 4) = 8.8. A limit already set is kept.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
+        drawn = [1.0, 4.0, 3.0, np.mean([2.0, 5.0]), 9.0]  # the chosen input's cells
+        expected = np.quantile(drawn, [0.01, 0.99])
         norm = Normalize()
         splot.make_plot(cbar=False, norm=norm, limit_color_norm=True)
-        assert norm.vmin == pytest.approx(1.05, rel=REL, abs=0)
-        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)
+        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
+        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
+        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=REL)
         assert norm.clip
         fixed = Normalize(vmin=0.0)
         splot.make_plot(cbar=False, norm=fixed, limit_color_norm=True)
         assert fixed.vmin == 0.0
-        assert fixed.vmax == pytest.approx(8.8, rel=REL, abs=0)
+        assert fixed.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
+        plt.close("all")
+
+    def test_limit_color_norm_without_a_norm_limits_colours(self):
+        """``limit_color_norm=True`` with no ``norm`` builds and limits a linear one.
+
+        The limits are the 1% and 99% quantiles of the plotted cell values,
+        1.08 and 8.8, worked in
+        ``test_limit_color_norm_clips_to_the_1st_and_99th_percentiles``.
+
+        ON FAILURE: the code is wrong; the flag is silently ignored.
+        """
+        splot = _plot(2)
+        _, coll = splot.make_plot(cbar=False, limit_color_norm=True)
+        norm = coll.norm
+        assert type(norm) is Normalize
+        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
+        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
+        assert norm.clip
+        plt.close("all")
 
     def test_alpha_fcn_makes_small_values_opaque(self):
         """``alpha_fcn`` sets face alpha to (1 - scaled value)**0.25, 0 when empty.
