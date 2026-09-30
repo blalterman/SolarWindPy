@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.plotting.tools &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -749,7 +749,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
-<span class="sd">        Filtered array with original NaN locations preserved.</span>
+<span class="sd">        Filtered float array with original NaN locations preserved.</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -777,7 +777,8 @@
 <span class="sd">    &gt;&gt;&gt; bool(np.isfinite(result[0, 1]))  # Neighbor is valid</span>
 <span class="sd">    True</span>
 <span class="sd">    """</span>
-    <span class="n">arr</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># Filter a float copy: an integer input would truncate the smoothed values.</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">nan_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 
     <span class="c1"># Replace NaN with 0 for filtering</span>

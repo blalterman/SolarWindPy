@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -371,6 +371,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">orbit</span><span class="o">.</span><span class="n">path</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_axis_normalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Normalise each orbit leg separately with the histogram's normaliser.</span>
+
+<span class="sd">        Each leg is normalised once, by its own counts and bin widths, so the</span>
+<span class="sd">        legs do not share a normalisation.</span>
+<span class="sd">        """</span>
+        <span class="n">normalize</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrbitPlot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_axis_normalizer</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orbit_key</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">normalize</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
+
+        <span class="n">legs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">leg</span><span class="p">:</span> <span class="n">normalize</span><span class="p">(</span><span class="n">at_leg</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">leg</span><span class="p">,</span> <span class="n">at_leg</span> <span class="ow">in</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">legs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">normalized</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
 <div class="viewcode-block" id="OrbitPlot.set_orbit">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.orbits.OrbitPlot.html#solarwindpy.plotting.orbits.OrbitPlot.set_orbit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_orbit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
@@ -435,6 +453,7 @@
             <span class="n">tko</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg_axes</span>
             <span class="n">gb_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"Orbit"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gb_axes</span><span class="p">))</span>
             <span class="n">agg_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agg_runner</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb_both</span><span class="p">,</span> <span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">agg_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">(</span><span class="n">agg_both</span><span class="p">)</span>
 
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"Orbit"</span><span class="p">)</span>
             <span class="n">agg_both</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">"Both"</span><span class="p">:</span> <span class="n">agg_both</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"Orbit"</span><span class="p">])</span>
@@ -543,7 +562,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.</span>
 
-<span class="sd">        Legs: Inbound, Outbound, and Both."""</span>
+<span class="sd">        Legs: Inbound, Outbound, and Both. `Hist2D.agg` normalises each leg</span>
+<span class="sd">        once, via `OrbitPlot._axis_normalizer`."""</span>
         <span class="n">fcn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"fcn"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">OrbitHist2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -552,6 +572,7 @@
             <span class="n">tko</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg_axes</span>
             <span class="n">gb_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"Orbit"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gb_axes</span><span class="p">))</span>
             <span class="n">agg_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agg_runner</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb_both</span><span class="p">,</span> <span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">agg_both</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">(</span><span class="n">agg_both</span><span class="p">)</span>
 
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"Orbit"</span><span class="p">)</span>
             <span class="n">agg_both</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">({</span><span class="s2">"Both"</span><span class="p">:</span> <span class="n">agg_both</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"Orbit"</span><span class="p">])</span>
@@ -565,9 +586,7 @@
                 <span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="n">grouped</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orbit_key</span><span class="p">)</span>
-        <span class="n">transformed</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">transformed</span></div>
+        <span class="k">return</span> <span class="n">agg</span></div>
 
 
 <div class="viewcode-block" id="OrbitHist2D.project_1d">
@@ -606,8 +625,8 @@
             <span class="n">x</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">x</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">other</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">project_counts</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Only select y-values plotted.</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">other</span> <span class="o">==</span> <span class="s2">"y"</span><span class="p">):</span>
+            <span class="c1"># Only select y-values plotted. `z` has no bins and no log scale.</span>
             <span class="n">logy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()[</span><span class="n">other</span><span class="p">]</span>
             <span class="n">yedges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">other</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">yedges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">yedges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
@@ -660,7 +679,7 @@
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
+            <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
@@ -701,7 +720,7 @@
         <span class="n">trans</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"i"</span><span class="p">:</span> <span class="s2">"Inbound"</span><span class="p">,</span> <span class="s2">"o"</span><span class="p">:</span> <span class="s2">"Outbound"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="s2">"Both"</span><span class="p">}</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="n">trans</span><span class="p">[</span><span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unrecognized kind '</span><span class="si">{}</span><span class="s2">'"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kind</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"Both"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disable_both</span><span class="p">:</span>

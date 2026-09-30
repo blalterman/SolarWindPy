@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -325,7 +325,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
 <span class="n">_inst_type_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="s2">"AIC"</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Intability"</span><span class="p">)</span>
 <span class="n">_param_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Fit Parameter"</span><span class="p">)</span>
@@ -579,7 +578,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A linearly segmented colormap for the (in)stability condition."""</span>
 
-        <span class="k">return</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">"Paired"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stability_map</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">"Paired"</span><span class="p">]</span><span class="o">.</span><span class="n">resampled</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stability_map</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="c1"># TODO: rename to `color_norm` for consistancy w/ plotting code.</span>
@@ -670,8 +669,11 @@
 
         <span class="c1"># If the value is NaN in `instability_thresholds`, the comparison</span>
         <span class="c1"># returns False. We want to propagate it so that we can check the</span>
-        <span class="c1"># other instabilities.</span>
-        <span class="n">is_unstable</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instability_thresholds</span><span class="o">.</span><span class="n">isnull</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># other instabilities. A bool frame cannot hold NaN, so mask an</span>
+        <span class="c1"># upcast float copy (True -&gt; 1.0, False -&gt; 0.0) and cast back below.</span>
+        <span class="n">is_unstable</span> <span class="o">=</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instability_thresholds</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span>
+        <span class="p">)</span>
 
         <span class="c1"># When an instability is NaN, we have to check the other instabilities.</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -681,17 +683,18 @@
             <span class="c1"># the spectra we must actually check against the other</span>
             <span class="c1"># instabilities.</span>
             <span class="n">others</span> <span class="o">=</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">others</span> <span class="o">=</span> <span class="n">others</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">others</span> <span class="o">=</span> <span class="n">others</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">column</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">isnull</span><span class="p">(),</span> <span class="n">others</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
 
-            <span class="n">is_unstable</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+            <span class="c1"># Replace the whole column so it may change dtype to bool.</span>
+            <span class="n">is_unstable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
 
         <span class="k">if</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Did you visit every data point? "</span> <span class="s2">"It looks like you missed </span><span class="si">%s</span><span class="s2">."</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_unstable</span> <span class="o">=</span> <span class="n">is_unstable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_unstable</span> <span class="o">=</span> <span class="n">is_unstable</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_calc_stability_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Identify which instability (if any) each measurement is unstable to.</span>
@@ -892,7 +895,8 @@
         <span class="p">)</span>
 
         <span class="c1"># Create organized list containing all handles for table.</span>
-        <span class="c1"># Extra represent empty space</span>
+        <span class="c1"># Extra represent empty space. Within each column, handles follow</span>
+        <span class="c1"># the row labels below: AIC, FMW, MM, OFI.</span>
         <span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">extra</span><span class="p">,</span>
             <span class="n">extra</span><span class="p">,</span>
@@ -900,19 +904,19 @@
             <span class="n">extra</span><span class="p">,</span>
             <span class="n">extra</span><span class="p">,</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
+            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
+            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
+            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
             <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
         <span class="p">]</span>
 

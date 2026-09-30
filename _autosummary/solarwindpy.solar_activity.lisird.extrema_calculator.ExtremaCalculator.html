@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -479,24 +479,16 @@ skips smoothing.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>threshold</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>A number is used as is. A plain Python function
-(<a class="reference external" href="https://docs.python.org/3/library/types.html#types.FunctionType" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.FunctionType</span></code></a>, e.g. a <code class="docutils literal notranslate"><span class="pre">def</span></code> or <code class="docutils literal notranslate"><span class="pre">lambda</span></code>) is
-called with <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> and its result used. <code class="docutils literal notranslate"><span class="pre">None</span></code> selects the
-value tabulated for <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>; when <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is not
-tabulated it selects <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a>, which is then
-handled as a callable.</p>
+<dt><strong>threshold</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>A number is used as is. Any callable (a <code class="docutils literal notranslate"><span class="pre">def</span></code> or <code class="docutils literal notranslate"><span class="pre">lambda</span></code>, a
+numpy function such as <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a>, or a
+<code class="docutils literal notranslate"><span class="pre">functools.partial</span></code>) is called with <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> and its result
+used. <code class="docutils literal notranslate"><span class="pre">None</span></code> selects the value tabulated for <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>; when
+<a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is not tabulated it selects <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a>,
+so the threshold is the median of <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<p class="rubric">Notes</p>
-<p>Known defect: only <a class="reference external" href="https://docs.python.org/3/library/types.html#types.FunctionType" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.FunctionType</span></code></a> is called. Other
-callables, including <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanmedian.html#numpy.nanmedian" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanmedian()</span></code></a> (and so the <code class="docutils literal notranslate"><span class="pre">None</span></code>
-fallback for an untabulated <a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>) and
-<code class="docutils literal notranslate"><span class="pre">functools.partial</span></code> objects, are stored uncalled, and
-<a class="reference internal" href="#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.find_threshold_crossings"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find_threshold_crossings()</span></code></a> then raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.
-<code class="docutils literal notranslate"><span class="pre">tests/test_source_misc_defects.py</span></code> records this with a strict
-<code class="docutils literal notranslate"><span class="pre">xfail</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">

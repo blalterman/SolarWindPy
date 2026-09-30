@@ -47,7 +47,6 @@
    heaviside
    hinge
    lines
-   moyal
    plots
    power_laws
    tex_info

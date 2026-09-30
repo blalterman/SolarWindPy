@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.solar_activity.lisird.extrema_calculator &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -566,25 +566,14 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        threshold : float, callable, or None</span>
-<span class="sd">            A number is used as is. A plain Python function</span>
-<span class="sd">            (:class:`types.FunctionType`, e.g. a ``def`` or ``lambda``) is</span>
-<span class="sd">            called with :attr:`data` and its result used. ``None`` selects the</span>
-<span class="sd">            value tabulated for :attr:`name`; when :attr:`name` is not</span>
-<span class="sd">            tabulated it selects :func:`numpy.nanmedian`, which is then</span>
-<span class="sd">            handled as a callable.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        Known defect: only :class:`types.FunctionType` is called. Other</span>
-<span class="sd">        callables, including :func:`numpy.nanmedian` (and so the ``None``</span>
-<span class="sd">        fallback for an untabulated :attr:`name`) and</span>
-<span class="sd">        ``functools.partial`` objects, are stored uncalled, and</span>
-<span class="sd">        :meth:`find_threshold_crossings` then raises :class:`TypeError`.</span>
-<span class="sd">        ``tests/test_source_misc_defects.py`` records this with a strict</span>
-<span class="sd">        ``xfail``.</span>
+<span class="sd">            A number is used as is. Any callable (a ``def`` or ``lambda``, a</span>
+<span class="sd">            numpy function such as :func:`numpy.nanmedian`, or a</span>
+<span class="sd">            ``functools.partial``) is called with :attr:`data` and its result</span>
+<span class="sd">            used. ``None`` selects the value tabulated for :attr:`name`; when</span>
+<span class="sd">            :attr:`name` is not tabulated it selects :func:`numpy.nanmedian`,</span>
+<span class="sd">            so the threshold is the median of :attr:`data`.</span>
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionType</span>
 
         <span class="n">automatic</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"LymanAlpha"</span><span class="p">:</span> <span class="mf">4.1</span><span class="p">,</span>
@@ -601,7 +590,7 @@
         <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">threshold</span> <span class="o">=</span> <span class="n">automatic</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">FunctionType</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">threshold</span><span class="p">):</span>
             <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">Number</span><span class="p">):</span>

@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist1d &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.plotting.hist1d &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -479,6 +479,9 @@
 <span class="sd">        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but</span>
 <span class="sd">        as actual method with `self` passed so we have access to `self.log` for density</span>
 <span class="sd">        normalization.</span>
+
+<span class="sd">        Under ``logx`` the density is normalised over ``log10(x)``: the bins are</span>
+<span class="sd">        log-space intervals, so bar areas on the log axis sum to 1.</span>
 <span class="sd">        """</span>
 
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
@@ -486,9 +489,8 @@
             <span class="k">pass</span>
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"d"</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="c1"># Widths are in the binned variable, log10(x) under logx.</span>
             <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
-                <span class="n">dx</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">dx</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"t"</span><span class="p">:</span>
@@ -603,7 +605,10 @@
             <span class="k">if</span> <span class="n">gaussian_filter_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">gaussian_filter_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-            <span class="n">y</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">gaussian_filter_std</span><span class="p">,</span> <span class="o">**</span><span class="n">gaussian_filter_kwargs</span><span class="p">)</span>
+            <span class="c1"># Filter a float copy: integer counts would truncate the smoothed values.</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span> <span class="n">gaussian_filter_std</span><span class="p">,</span> <span class="o">**</span><span class="n">gaussian_filter_kwargs</span>
+            <span class="p">)</span>
 
         <span class="n">drawstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"drawstyle"</span><span class="p">,</span> <span class="s2">"steps-mid"</span><span class="p">)</span>
 
@@ -614,9 +619,17 @@
         <span class="n">window_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"window_kwargs"</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cbook</span><span class="o">.</span><span class="n">normalize_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">plot_window</span><span class="p">:</span>
-            <span class="n">window_plotter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span>
+            <span class="c1"># The window spans the dependent values, which transposing moves to x.</span>
             <span class="k">if</span> <span class="n">transpose_axes</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span>
                 <span class="n">window_plotter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">dy</span><span class="p">)</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+                <span class="n">window_plotter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span>
 
             <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"color"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">ls</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"linestyle"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">)</span>
@@ -629,24 +642,20 @@
             <span class="n">line</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">plot_window_edges</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span>
-                    <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">upper</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span>
                     <span class="n">linestyle</span><span class="o">=</span><span class="n">window_linestyle</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span>
-                    <span class="n">y</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">lower</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span>
                     <span class="n">linestyle</span><span class="o">=</span><span class="n">window_linestyle</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">window_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="n">polycol</span> <span class="o">=</span> <span class="n">window_plotter</span><span class="p">(</span>
-                <span class="n">x</span><span class="p">,</span>
-                <span class="n">y</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span>
-                <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">band</span><span class="p">,</span>
                 <span class="n">color</span><span class="o">=</span><span class="n">window_color</span><span class="p">,</span>
                 <span class="n">linestyle</span><span class="o">=</span><span class="n">window_linestyle</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="n">window_alpha</span><span class="p">,</span>

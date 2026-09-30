@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -497,7 +497,11 @@
             <span class="n">tk_size</span> <span class="o">=</span> <span class="n">dA</span> <span class="o">&lt;</span> <span class="n">size_quantile</span>
             <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tk_size</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">density</span><span class="p">:</span>
-            <span class="n">cnt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># Samples outside the mesh carry the negative fill id, which</span>
+            <span class="c1"># `np.bincount` rejects; they belong to no cell, so drop them.</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="n">ids</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_id</span><span class="o">.</span><span class="n">fill</span><span class="p">]</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">assert</span> <span class="n">cnt</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">tk</span><span class="o">.</span><span class="n">shape</span>
             <span class="n">cell_density</span> <span class="o">=</span> <span class="n">cnt</span> <span class="o">/</span> <span class="n">dA</span>
             <span class="n">density_quantile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">cell_density</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
@@ -853,7 +857,7 @@
         <span class="c1"># which the mesh was traversed.</span>
         <span class="n">cat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">bin_id</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fill</span> <span class="ow">in</span> <span class="n">bin_id</span><span class="p">:</span>
-            <span class="n">cat</span><span class="o">.</span><span class="n">remove_categories</span><span class="p">(</span><span class="n">fill</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">cat</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">remove_categories</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cat</span> <span class="o">=</span> <span class="n">cat</span></div>
 </div>
@@ -1030,6 +1034,10 @@
                 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
                     <span class="n">d</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="p">)</span>  <span class="c1"># Need N + 1 edges to make N bins.</span>
+
+            <span class="c1"># Work on a float copy: raising the top edge must neither write</span>
+            <span class="c1"># into the caller's array nor be truncated by an integer dtype.</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
             <span class="c1"># Extend the right most bin by the larger of 1% or 0.01 (in the case of zero)</span>
             <span class="c1"># So that y &lt; y1 inludes data at real data edge.</span>

@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.plots &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.solar_activity.plots &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -332,7 +332,7 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the indicator and set linear axes with a year x-label."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">indicator</span><span class="p">,</span> <span class="n">ykey</span><span class="p">,</span> <span class="n">plasma_index</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_log</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">AxesLabels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">DateTime</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">AxesLabels</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">DateTime</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span></div>
 
 
     <span class="nd">@abstractmethod</span>

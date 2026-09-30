@@ -57,7 +57,7 @@ Fit Functions Module
 --------------------
 
 Statistical analysis and curve fitting tools for solar wind data. Provides parametric
-fit functions (Gaussian, exponential, power law, Moyal) with automatic parameter
+fit functions (Gaussian, exponential, power law) with automatic parameter
 estimation, plotting utilities, and trend analysis.
 
 .. autosummary::

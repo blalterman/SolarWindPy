@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+gb74660aa4 documentation</title>
+  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7c3d9d68"></script>
+      <script src="../_static/documentation_options.js?v=9c27d734"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -412,9 +412,7 @@
 <dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Data to clip. A DataFrame is clipped column by column.</p>
 </dd>
 <dt><strong>clip</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A string starting with <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> selects the lower or upper
-tail only; any other value clips both tails. The one-tail branches
-call <code class="docutils literal notranslate"><span class="pre">clip_lower</span></code> and <code class="docutils literal notranslate"><span class="pre">clip_upper</span></code>, which pandas removed, so they
-raise <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>.</p>
+tail only; any other value clips both tails.</p>
 </dd>
 </dl>
 </dd>
@@ -463,6 +461,11 @@ If array-like, treat as bins.</p>
 <dt>precision: int or None</dt><dd><p>Decimal places to which bin edges are rounded. If None, 5.</p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>Edges from an integer <code class="docutils literal notranslate"><span class="pre">nbins</span></code> follow <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.histogram.html#numpy.histogram" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.histogram()</span></code></a>: the
+outer edges are rounded outward so they enclose every sample, and each
+bin is closed on the left, the last bin also on the right. Other
+<code class="docutils literal notranslate"><span class="pre">nbins</span></code> give right-closed bins, <code class="docutils literal notranslate"><span class="pre">(a,</span> <span class="pre">b]</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -485,15 +488,18 @@ values.</p>
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series">
 <span class="sig-name descname"><span class="pre">get_plotted_data_boolean_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_plotted_data_boolean_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_plotted_data_boolean_series" title="Link to this definition"></a></dt>
 <dd><p>Return a boolean <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> identifying each plotted measurement.</p>
-<p>The series shares the same index as the stored data. To align with a different
-index you may need to adjust the returned series.</p>
+<p>A measurement is plotted when its joint bin (e.g. its (x, y) bin in 2-D)
+survives aggregation. The series shares the same index as the stored
+data. To align with a different index you may need to adjust the
+returned series.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold">
 <span class="sig-name descname"><span class="pre">get_subset_above_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'count'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.get_subset_above_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.get_subset_above_threshold" title="Link to this definition"></a></dt>
 <dd><p>Get the subset of data above a given threshold using <cite>fcn</cite> to.</p>
-<p>aggregate. If <cite>axnorm</cite> set, this is used.</p>
+<p>aggregate. If <cite>axnorm</cite> set, this is used. A row is kept when its joint
+bin (e.g. its (x, y) bin in 2-D) meets <cite>threshold</cite>.</p>
 </dd></dl>
 
 <dl class="py method">

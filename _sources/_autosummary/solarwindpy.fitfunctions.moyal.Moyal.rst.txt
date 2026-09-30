@@ -1,6 +1,0 @@
-solarwindpy.fitfunctions.moyal.Moyal
-====================================
-
-.. currentmodule:: solarwindpy.fitfunctions.moyal
-
-.. autoclass:: Moyal
