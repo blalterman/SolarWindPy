@@ -27,29 +27,7 @@ _EPOCH = pd.date_range(_T0, _T0 + 3 * _PERIOD, freq="D")
 _PHASE = 2 * np.pi * ((_EPOCH - _T0) / _PERIOD)
 _INDEX = pd.Series(2.0 + np.sin(_PHASE), index=_EPOCH)
 
-# ExtremaCalculator.set_threshold calls a threshold only if it is a
-# types.FunctionType. numpy functions (np.nanmedian, the documented default)
-# and functools.partial are callables that are not, so they are stored
-# uncalled and find_threshold_crossings raises TypeError comparing floats to
-# them. The fix, testing callable(threshold), is blocked:
-# tests/solar_activity/lisird/test_extrema_calculator.py asserts the stored
-# callable in test_set_threshold_callable and test_set_threshold_automatic, and
-# that file is the author's to change.
-_THRESHOLD_NOT_CALLED = pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason=(
-        "extrema_calculator.py set_threshold tests isinstance(threshold, "
-        "FunctionType), so a numpy or partial callable is stored uncalled; "
-        "expected TypeError \"'>' not supported between instances of 'float' "
-        'and ..."; remove this marker when set_threshold tests '
-        "callable(threshold) and test_extrema_calculator.py stops asserting "
-        "the stored callable"
-    ),
-)
 
-
-@_THRESHOLD_NOT_CALLED
 def test_default_threshold_is_the_median_of_an_unlisted_index():
     """An index absent from the built-in table is thresholded at its median.
 
@@ -57,8 +35,7 @@ def test_default_threshold_is_the_median_of_an_unlisted_index():
     ``numpy.nanmedian`` of the series. With ``window=None`` the series is not
     smoothed, so the median of the input is the expected threshold.
 
-    ON FAILURE: (unexpected pass) set_threshold now calls any callable;
-    drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     calc = ExtremaCalculator("unlisted_index", _INDEX, window=None)
     expected = np.nanmedian(_INDEX.to_numpy())  # identity: documented default
@@ -68,7 +45,6 @@ def test_default_threshold_is_the_median_of_an_unlisted_index():
     )
 
 
-@_THRESHOLD_NOT_CALLED
 def test_a_callable_threshold_that_is_not_a_python_function_is_called():
     """Any callable threshold is evaluated on the series, not stored as is.
 
@@ -76,8 +52,7 @@ def test_a_callable_threshold_that_is_not_a_python_function_is_called():
     ``types.FunctionType``; the documented contract is "if a callable, it is
     invoked".
 
-    ON FAILURE: (unexpected pass) set_threshold now calls any callable;
-    drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     q25 = functools.partial(np.nanpercentile, q=25)
     calc = ExtremaCalculator("unlisted_index", _INDEX, threshold=q25, window=None)
@@ -88,7 +63,6 @@ def test_a_callable_threshold_that_is_not_a_python_function_is_called():
     )
 
 
-@_THRESHOLD_NOT_CALLED
 def test_default_threshold_recovers_the_extrema_of_a_sinusoid():
     """With the default threshold, the extrema are the sinusoid's peaks and troughs.
 
@@ -96,8 +70,7 @@ def test_default_threshold_recovers_the_extrema_of_a_sinusoid():
     ``t = 3P/4 + nP``. Daily sampling places each within one day of the
     analytic time.
 
-    ON FAILURE: (unexpected pass) set_threshold now calls any callable;
-    drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     calc = ExtremaCalculator("unlisted_index", _INDEX, window=None)
     extrema = calc.extrema

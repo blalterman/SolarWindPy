@@ -243,25 +243,14 @@ class ExtremaCalculator(object):
         Parameters
         ----------
         threshold : float, callable, or None
-            A number is used as is. A plain Python function
-            (:class:`types.FunctionType`, e.g. a ``def`` or ``lambda``) is
-            called with :attr:`data` and its result used. ``None`` selects the
-            value tabulated for :attr:`name`; when :attr:`name` is not
-            tabulated it selects :func:`numpy.nanmedian`, which is then
-            handled as a callable.
-
-        Notes
-        -----
-        Known defect: only :class:`types.FunctionType` is called. Other
-        callables, including :func:`numpy.nanmedian` (and so the ``None``
-        fallback for an untabulated :attr:`name`) and
-        ``functools.partial`` objects, are stored uncalled, and
-        :meth:`find_threshold_crossings` then raises :class:`TypeError`.
-        ``tests/test_source_misc_defects.py`` records this with a strict
-        ``xfail``.
+            A number is used as is. Any callable (a ``def`` or ``lambda``, a
+            numpy function such as :func:`numpy.nanmedian`, or a
+            ``functools.partial``) is called with :attr:`data` and its result
+            used. ``None`` selects the value tabulated for :attr:`name`; when
+            :attr:`name` is not tabulated it selects :func:`numpy.nanmedian`,
+            so the threshold is the median of :attr:`data`.
         """
         from numbers import Number
-        from types import FunctionType
 
         automatic = {
             "LymanAlpha": 4.1,
@@ -278,7 +267,7 @@ class ExtremaCalculator(object):
         if threshold is None:
             threshold = automatic.get(self.name, np.nanmedian)
 
-        if isinstance(threshold, FunctionType):
+        if callable(threshold):
             threshold = threshold(self.data)
 
         elif isinstance(threshold, Number):

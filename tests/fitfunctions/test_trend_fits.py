@@ -71,22 +71,13 @@ class FailedFitKeptInFfuncs(AssertionError):
     """make_1dfits left a failed 1D fit in ffuncs instead of bad_fits."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=FailedFitKeptInFfuncs,
-    reason="solarwindpy/fitfunctions/gaussians.py Gaussian.make_fit drops "
-    "super().make_fit()'s return value, so make_1dfits sees None for a failed "
-    "fit; expected the 2-point column in bad_fits; remove this marker when "
-    "Gaussian.make_fit returns super().make_fit(...)",
-)
 def test_make_1dfits_moves_bad_fit():
     """A column with fewer points than Gaussian parameters moves to bad_fits.
 
     Three NaNs leave two finite points for a three-parameter Gaussian, so the
     real make_fit returns InsufficientDataError for that column only.
 
-    ON FAILURE: (unexpected pass) Gaussian.make_fit now returns the
-    exception; drop the xfail marker.
+    ON FAILURE: the code is wrong.
     """
     xbins = pd.interval_range(0, 5, periods=5)
     ybins = pd.interval_range(0, 2, periods=2)

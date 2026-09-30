@@ -12,7 +12,6 @@ This module tests the ExtremaCalculator class from solar_activity.lisird.extrema
 import pytest
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from unittest.mock import Mock, patch
 
 from solarwindpy.solar_activity.lisird.extrema_calculator import ExtremaCalculator
@@ -204,8 +203,6 @@ class TestExtremaCalculator:
 
     def test_set_threshold_callable(self, simple_test_data):
         """Test set_threshold with callable threshold."""
-        from types import FunctionType
-
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
         calculator._name = "test_index"
         calculator.set_data(simple_test_data, window=None)
@@ -218,10 +215,10 @@ class TestExtremaCalculator:
         expected_threshold = np.median(simple_test_data)
         assert calculator.threshold.unique()[0] == expected_threshold
 
-        # Test with numpy function (current implementation has bug - doesn't call it)
+        # Test with numpy function, which is not a FunctionType but is called
         calculator.set_threshold(np.median)
-        # Due to bug, np.median is stored as-is, not called
-        assert callable(calculator.threshold.unique()[0])
+        expected_threshold = np.median(simple_test_data)  # np.median, called
+        assert calculator.threshold.unique()[0] == expected_threshold
 
     def test_set_threshold_automatic(self, simple_test_data):
         """Test automatic threshold lookup."""
@@ -243,11 +240,11 @@ class TestExtremaCalculator:
             calculator.set_threshold(None)
             assert calculator.threshold.unique()[0] == expected_threshold
 
-        # Test unknown name falls back to np.nanmedian (but due to bug, function is stored)
+        # Test unknown name falls back to np.nanmedian of the data
         calculator._name = "unknown_index"
         calculator.set_threshold(None)
-        # Due to bug, np.nanmedian function is stored, not its result
-        assert callable(calculator.threshold.unique()[0])
+        expected_threshold = np.nanmedian(simple_test_data)  # documented default
+        assert calculator.threshold.unique()[0] == expected_threshold
 
     def test_find_threshold_crossings(self, simple_test_data):
         """Test find_threshold_crossings detects crossing points."""

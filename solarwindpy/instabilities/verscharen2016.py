@@ -351,8 +351,11 @@ class StabilityCondition(object):
 
         # If the value is NaN in `instability_thresholds`, the comparison
         # returns False. We want to propagate it so that we can check the
-        # other instabilities.
-        is_unstable.mask(self.instability_thresholds.isnull(), inplace=True)
+        # other instabilities. A bool frame cannot hold NaN, so mask an
+        # upcast float copy (True -> 1.0, False -> 0.0) and cast back below.
+        is_unstable = is_unstable.astype(float).mask(
+            self.instability_thresholds.isnull()
+        )
 
         # When an instability is NaN, we have to check the other instabilities.
         for key, column in is_unstable.items():
@@ -362,17 +365,18 @@ class StabilityCondition(object):
             # the spectra we must actually check against the other
             # instabilities.
             others = is_unstable.drop(key, axis=1)
-            others = others.replace(np.nan, False).all(axis=1)
+            others = others.fillna(0.0).astype(bool).all(axis=1)
             column = column.mask(column.isnull(), others).astype(bool)
 
-            is_unstable.loc[:, key] = column
+            # Replace the whole column so it may change dtype to bool.
+            is_unstable[key] = column
 
         if is_unstable.isnull().any().any():
             msg = "Did you visit every data point? " "It looks like you missed %s."
             msg = msg % (not is_unstable.isnull()).sum()
             raise ValueError(msg)
 
-        self._is_unstable = is_unstable
+        self._is_unstable = is_unstable.astype(bool)
 
     def _calc_stability_bin(self):
         r"""Identify which instability (if any) each measurement is unstable to.
@@ -558,7 +562,8 @@ class StabilityContours(object):
         )
 
         # Create organized list containing all handles for table.
-        # Extra represent empty space
+        # Extra represent empty space. Within each column, handles follow
+        # the row labels below: AIC, FMW, MM, OFI.
         legend_handles = [
             extra,
             extra,
@@ -566,19 +571,19 @@ class StabilityContours(object):
             extra,
             extra,
             extra,
-            images.loc[-2, "MM"],
             images.loc[-2, "AIC"],
             images.loc[-2, "FMW"],
+            images.loc[-2, "MM"],
             images.loc[-2, "OFI"],
             extra,
-            images.loc[-3, "MM"],
             images.loc[-3, "AIC"],
             images.loc[-3, "FMW"],
+            images.loc[-3, "MM"],
             images.loc[-3, "OFI"],
             extra,
-            images.loc[-4, "MM"],
             images.loc[-4, "AIC"],
             images.loc[-4, "FMW"],
+            images.loc[-4, "MM"],
             images.loc[-4, "OFI"],
         ]
 
