@@ -15,7 +15,7 @@ from ..plotting import subplots
 from . import core
 from . import gaussians
 
-Popt1DKeys = namedtuple("Popt1Dkeys", "y,w", defaults=(None, None))
+Popt1DKeys = namedtuple("Popt1DKeys", "y,w", defaults=(None, None))
 
 
 class TrendFit(object):
@@ -72,12 +72,12 @@ class TrendFit(object):
 
     @property
     def ffunc1d_class(self):
-        r""":py:class:`FitFunction` to apply in each x-bin."""
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply in each x-bin."""
         return self._ffunc1d_class
 
     @property
     def trendfunc_class(self):
-        r""":py:class:`FitFunction` to apply each `popt`.
+        r""":py:class:`~solarwindpy.fitfunctions.core.FitFunction` to apply each `popt`.
 
         Of the `ffunc1d` along the x-axis.
         """
@@ -85,13 +85,12 @@ class TrendFit(object):
 
     @property
     def ffuncs(self):
-        r"""The 1D :py:class:`FitFunction` applied in each x-bin."""
+        r"""The 1D :py:class:`~solarwindpy.fitfunctions.core.FitFunction` applied in each x-bin."""
         return self._ffuncs
 
     @property
     def popt_1d(self):
         r"""Optimized parameters from 1D fits."""
-        #         return self._popt_1d
         return pd.DataFrame.from_dict(
             self.ffuncs.apply(lambda x: x.popt).to_dict(), orient="index"
         )
@@ -134,15 +133,9 @@ class TrendFit(object):
         except TypeError:
             x = x.values
 
-        #         ylbl = self.labels.y
-        #         zlbl = self.labels.z
-
         ffuncs = {}
         for k, y in agg.items():
             ff1d = self.ffunc1d_class(x, y.values, **kwargs)
-            # These are slices along y traversing the x-axis, so we
-            # rotate labels accordingly.
-            #             ff1d.set_labels(x=ylbl, y=zlbl)
             ffuncs[k] = ff1d
 
         ffuncs = pd.Series(ffuncs)
@@ -171,8 +164,6 @@ class TrendFit(object):
         self._bad_fits = bad_fits
         self.ffuncs.drop(bad_idx, inplace=True)
 
-    #         self.make_popt_frame()
-
     def plot_all_ffuncs(self, legend_title_fmt="%.0f", **kwargs):
         r"""Plot all fit functions.
 
@@ -182,7 +173,8 @@ class TrendFit(object):
             A string template for formatting the legend titles. Use % formatting so we
             can easily instert TeX into `legend_title_fmt` should we desire.
         kwargs:
-            Passed to :py:meth:`ffunc.plot_raw_used_fit`.
+            Passed to each 1D fit's
+            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit`.
         """
         axes = {}
         popt = self.popt_1d
@@ -205,12 +197,6 @@ class TrendFit(object):
         in_trend = y_ok & w_ok
 
         legend_title = r"${}={} \; {}$" + "\n{}"
-
-        #         xlbl = self.labels.x
-        #         try:
-        #             xlbl = xlbl.tex
-        #         except AttributeError:
-        #             pass
 
         for k, ff in self.ffuncs.items():
             hax, rax = ff.plotter.plot_raw_used_fit_resid(**kwargs)
@@ -259,7 +245,6 @@ class TrendFit(object):
             logx=self.trend_logx,
             **kwargs,
         )
-        #         trend.set_labels(**self.labels._asdict())
 
         self._trend_func = trend
 
@@ -348,9 +333,6 @@ class TrendFit(object):
             if wkey is not None:
                 bl[0].set_linestyle(linestyle)
 
-        #         ax.set_xlabel(self.labels.x)
-        #         ax.set_ylabel(self.labels.y)
-
         return plotted
 
     def plot_trend_fit_resid(self, **kwargs):
@@ -401,7 +383,6 @@ class TrendFit(object):
         self.trend_func.plotter.plot_raw_used_fit(
             ax,
             annotate_kwargs=annotate_kwargs,
-            #             color=color,
             fit_kwargs=fit_kwargs,
             **kwargs,
         )

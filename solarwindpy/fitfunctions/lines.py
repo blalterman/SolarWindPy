@@ -33,7 +33,9 @@ class Line(FitFunction):
     def p0(self):
         r"""Calculate the initial guess for the line parameters.
 
-        If this fails, return :py:meth:`curve_fit`'s default value `None`.
+        If the slope cannot be estimated (non-finite or repeated ``x``),
+        return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
+        no initial guess.
 
         Return
         ------
@@ -48,7 +50,7 @@ class Line(FitFunction):
 
         m = dy / dx
         m = np.median(m)
-        b = (m * x) - y
+        b = y - (m * x)
         b = np.median(b)
 
         p0 = [m, b]
@@ -105,7 +107,9 @@ class LineXintercept(FitFunction):
     def p0(self):
         r"""Calculate the initial guess for the line parameters.
 
-        If this fails, return :py:meth:`curve_fit`'s default value `None`.
+        If the slope cannot be estimated (non-finite or repeated ``x``),
+        return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
+        no initial guess.
 
         Return
         ------
@@ -120,7 +124,7 @@ class LineXintercept(FitFunction):
 
         m = dy / dx
         m = np.median(m)
-        b = (m * x) - y
+        b = y - (m * x)
         b = np.median(b)
 
         x0 = -b / m

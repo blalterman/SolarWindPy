@@ -23,13 +23,10 @@ class Moyal(FitFunction):
         # Docstring inherited from FitFunction
         super().__init__(xobs, yobs, **kwargs)
 
-    #         self._sigma = float(sigma)
-
     @property
     def function(self):
         def moyal(x, mu, sigma, A):
             center = x - mu
-            #             sigma = self.sigma
             ms_sq = (center / sigma) ** 2
             arg0 = 0.5 * (ms_sq - np.exp(ms_sq))
             arg1 = np.exp(arg0)
@@ -55,7 +52,6 @@ class Moyal(FitFunction):
         x, y = self.observations.used.x, self.observations.used.y
         mean = (x * y).sum() / y.sum()
         std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
-        #         std = self.sigma
 
         peak = y.max()
 

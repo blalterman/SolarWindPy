@@ -3,8 +3,7 @@ r"""Fit functions for exponential models.
 
 Classes in this module implement exponential decay and related forms
 using the :class:`~solarwindpy.fitfunctions.core.FitFunction` API.
-They provide reasonable starting parameters and formatted LaTeX output
-for visualization.
+Each defines the model, an initial guess, and its LaTeX form.
 """
 
 import numpy as np
@@ -15,13 +14,21 @@ from .core import FitFunction
 
 
 class Exponential(FitFunction):
+    r"""Exponential decay :math:`f(x) = A e^{-c x}`.
+
+    Parameters are ``c`` (rate) and ``A`` (amplitude at ``x = 0``).
+    """
+
     def __init__(self, xobs, yobs, **kwargs):
         """Fit ``A * exp(-c x)`` to the data."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
+        r"""The model :math:`A e^{-c x}` as ``f(x, c, A)``."""
+
         def exp(x, c, A):
+            """Evaluate ``A * exp(-c * x)``."""
             return A * np.exp(-(c * x))
 
         return exp
@@ -41,18 +48,27 @@ class Exponential(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model."""
         TeX = r"f(x)=A \cdot e^{-cx}"
         return TeX
 
 
 class ExponentialPlusC(FitFunction):
+    r"""Exponential decay plus a constant, :math:`f(x) = A e^{-c x} + d`.
+
+    Parameters are ``c`` (rate), ``A`` (amplitude) and ``d`` (offset).
+    """
+
     def __init__(self, xobs, yobs, **kwargs):
         """Fit ``A * exp(-c x) + d`` to the data."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
+        r"""The model :math:`A e^{-c x} + d` as ``f(x, c, A, d)``."""
+
         def expc(x, c, A, d):
+            """Evaluate ``A * exp(-c * x) + d``."""
             return (A * np.exp(-(c * x))) + d
 
         return expc
@@ -73,18 +89,30 @@ class ExponentialPlusC(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model."""
         TeX = r"f(x)=A \cdot e^{-cx} + d"
         return TeX
 
 
 class ExponentialCDF(FitFunction):
+    r"""Exponential CDF shape :math:`f(x) = y_0 (1 - e^{-c x})`.
+
+    Only the rate ``c`` is fitted. The amplitude :attr:`y0` (written ``A``
+    in :attr:`TeX_function`) is fixed by the caller with :meth:`set_y0`,
+    which must be called before :meth:`make_fit`; otherwise the fit
+    raises ``AttributeError``.
+    """
+
     def __init__(self, xobs, yobs, **kwargs):
         """Fit an exponential cumulative distribution function."""
         super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
+        r"""The model :math:`y_0 (1 - e^{-c x})` as ``f(x, c)``."""
+
         def exp_cdf(x, c):
+            """Evaluate ``y0 * (1 - exp(-c * x))`` with the instance's ``y0``."""
             return self.y0 * (1.0 - np.exp(-(c * x)))
 
         return exp_cdf
@@ -95,6 +123,13 @@ class ExponentialCDF(FitFunction):
         return self._y0
 
     def set_y0(self, new):
+        r"""Set the fixed amplitude :attr:`y0`.
+
+        Parameters
+        ----------
+        new : numbers.Number
+            Amplitude the fitted CDF approaches as ``x`` grows.
+        """
         assert isinstance(new, Number)
         self._y0 = new
 
@@ -112,6 +147,7 @@ class ExponentialCDF(FitFunction):
 
     @property
     def TeX_function(self):
+        r"""LaTeX form of the model, writing :attr:`y0` as ``A``."""
         TeX = r"f(x)=A \left(1 - e^{-cx}\right)"
         return TeX
 
