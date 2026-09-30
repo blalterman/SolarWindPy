@@ -28,12 +28,14 @@ class Base(ABC):
         return self._logger
 
     def _init_logger(self):
+        r"""Attach a logger named after the module and class."""
         logger = logging.getLogger(
             name="{}.{}".format(__name__, self.__class__.__name__)
         )
         self._logger = logger
 
     def __str__(self):
+        r"""Return the class name."""
         return self.__class__.__name__
 
 
@@ -46,21 +48,24 @@ class ID(Base):
         Parameters
         ----------
         key : str
-            Key that maps to a URL fragment in :py:attr:`_trans_url`.
+            Key that maps to a URL fragment in the subclass's ``_trans_url``.
         """
         self._init_logger()
         self.set_key(key)
 
     @abstractproperty
     def _url_base(self):
+        r"""Base URL that each key's URL fragment is joined to."""
         pass
 
     @abstractproperty
     def _trans_url(self):
+        r"""Map from key to URL fragment."""
         pass
 
     @property
     def key(self):
+        r"""Key identifying the data product."""
         return self._key
 
     @property
@@ -69,7 +74,13 @@ class ID(Base):
         return self._url
 
     def set_key(self, key):
-        """Set the identifier key and construct the download URL."""
+        """Set the identifier key and construct the download URL.
+
+        Raises
+        ------
+        NotImplementedError
+            If ``key`` is not in ``_trans_url``.
+        """
 
         try:
             url_end = self._trans_url[key]
@@ -87,6 +98,12 @@ class ID(Base):
 
 
 class DataLoader(Base):
+    r"""Download, cache, and load a solar activity data set.
+
+    Data are cached under :attr:`data_path` in a file named for the date of
+    download, and downloaded again when that date is before today.
+    """
+
     def __init__(self, key, url):
         r"""Initialize a data loader.
 
@@ -94,7 +111,7 @@ class DataLoader(Base):
         ----------
         key : str
             Unique data identifier, typically from something like
-            :class:`SIDC_ID`.
+            :class:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID`.
         url : str
             Full download URL for the data source.
         """
@@ -106,19 +123,28 @@ class DataLoader(Base):
 
     @abstractproperty
     def data_path(self):
-        #        return Path(__file__).parent / "data"
+        r"""Root of the local data cache, ``~/solarwindpy/data``.
+
+        Subclasses extend this path with their source and key.
+        """
         return Path.home() / "solarwindpy" / "data"
 
     @abstractstaticmethod
     def convert_nans(data):
+        r"""Replace the source's missing-value sentinel with NaN."""
         pass
 
     @abstractmethod
     def download_data(self):
+        r"""Download the data and write them to the cache."""
         pass
 
     @abstractmethod
     def load_data(self):
+        r"""Load today's cached data into :attr:`data`, downloading if stale.
+
+        Subclasses call this and may add to the loaded data.
+        """
         self.logger.info(f"""Loading {self.key!s} data""")
 
         self.maybe_update_stale_data()
@@ -132,38 +158,47 @@ class DataLoader(Base):
 
     @property
     def logger(self):
+        r"""``logging.Logger`` attached to the instance."""
         return self._logger
 
     @property
     def data(self):
+        r"""Loaded data, :class:`pandas.DataFrame` indexed by time."""
         return self._data
 
     @property
     def key(self):
+        r"""Data identifier."""
         return self._key
 
     @property
     def url(self):
+        r"""Download URL."""
         return self._url
 
     @property
     def ctime(self):
+        r"""Date of the cached data, from its file name."""
         return self._ctime
 
     @property
     def age(self):
+        r"""Time since :attr:`ctime`."""
         return self._age
 
     def _init_logger(self):
+        r"""Attach a logger named after the module and class."""
         logger = logging.getLogger(
             name="{}.{}".format(__name__, self.__class__.__name__)
         )
         self._logger = logger
 
     def set_key(self, key):
+        r"""Set :attr:`key`."""
         self._key = key
 
     def set_url(self, new):
+        r"""Set :attr:`url`."""
         self._url = new
 
     def get_data_ctime(self):
@@ -190,13 +225,6 @@ class DataLoader(Base):
         dates = np.unique(dates)
 
         # BUG: This fails if there are more than two dated data directories.
-        #         if dates.size > 1:
-        #             raise ValueError("Too many dates: %s" % ", ".join(dates.astype(str)))
-        #         elif not dates.size:
-        #             ctime = pd.to_datetime(0)
-        #         else:
-        #             ctime = pd.to_datetime(dates[0])
-
         assert dates.size == 1
         ctime = pd.to_datetime(dates[0])
 
@@ -204,6 +232,7 @@ class DataLoader(Base):
         self._ctime = ctime
 
     def get_data_age(self):
+        r"""Compute the time elapsed since :attr:`ctime`."""
         ctime = self.ctime
         today = pd.to_datetime("today")
         dt = today - ctime
@@ -225,12 +254,16 @@ class DataLoader(Base):
 
 
 class ActivityIndicator(Base):
+    r"""Abstract solar activity indicator: data, their extrema, and normalization."""
+
     @property
     def id(self):
+        r"""The :class:`~solarwindpy.solar_activity.base.ID` identifying the data product."""
         return self._id
 
     @property
     def loader(self):
+        r"""The :class:`~solarwindpy.solar_activity.base.DataLoader` holding the data."""
         return self._loader
 
     @property
@@ -240,10 +273,18 @@ class ActivityIndicator(Base):
 
     @property
     def extrema(self):
+        r"""The :class:`~solarwindpy.solar_activity.base.IndicatorExtrema` of the indicator."""
         return self._extrema
 
     @property
     def norm_by(self):
+        r"""Normalization last applied by :meth:`run_normalization`.
+
+        Raises
+        ------
+        AttributeError
+            If no normalization has been run.
+        """
         try:
             return self._norm_by
         except AttributeError:
@@ -251,9 +292,11 @@ class ActivityIndicator(Base):
 
     @property
     def interpolated(self):
+        r"""Result of the last :meth:`interpolate_data` call."""
         return self._interpolated
 
     def set_id(self, new):
+        r"""Set :attr:`id`, which must be an :class:`~solarwindpy.solar_activity.base.ID`."""
         assert isinstance(new, ID)
         self._id = new
 
@@ -321,10 +364,12 @@ class ActivityIndicator(Base):
 
     @abstractproperty
     def normalized(self):
+        r"""The indicator normalized within each solar cycle."""
         pass
 
     @abstractmethod
     def set_extrema(self):
+        r"""Set :attr:`extrema`."""
         pass
 
     @abstractmethod
@@ -333,7 +378,7 @@ class ActivityIndicator(Base):
 
         Parameters
         ----------
-        norm_by : {{"max", "zscore", "feature-scale"}}
+        norm_by : {"max", "zscore", "feature-scale"}
             Normalization algorithm to apply.
 
         Returns
@@ -344,6 +389,7 @@ class ActivityIndicator(Base):
         pass
 
     def _run_normalization(self, indicator, norm_fcn):
+        r"""Apply ``norm_fcn`` to ``indicator`` separately within each cycle."""
         cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
         joint = pd.concat(
             [indicator, cut], axis=1, keys=["indicator", "cycle"]
@@ -362,27 +408,34 @@ class IndicatorExtrema(Base):
     """Base class for objects describing indicator extrema."""
 
     def __init__(self, *args, **kwargs):
+        r"""Load the extrema and compute the cycle intervals.
+
+        Arguments are passed to :meth:`load_or_set_data`.
+        """
         self._init_logger()
         self.load_or_set_data(*args, **kwargs)
         self.calculate_intervals()
 
     @property
     def data(self):
+        r"""``Min`` and ``Max`` dates of each cycle, :class:`pandas.DataFrame`."""
         return self._data
 
     @property
     def cycle_intervals(self):
-        r""":class:`pd.Interval` for rising and falling edges and full cycle."""
+        r""":class:`pandas.Interval` for rising and falling edges and full cycle."""
         return self._cycle_intervals
 
     @property
     def extrema_bands(self):
         r"""Bands of time (:math:`\Delta t`) about indicator extrema.
 
-        Parameters
-        ----------
-        dt : str or pandas.Timedelta
-            Window half-width used in :meth:`calculate_extrema_bands`.
+        Set by :meth:`calculate_extrema_bands`.
+
+        Raises
+        ------
+        AttributeError
+            If :meth:`calculate_extrema_bands` has not been called.
         """
         try:
             return self._extrema_bands
@@ -391,13 +444,8 @@ class IndicatorExtrema(Base):
 
     @abstractmethod
     def load_or_set_data(self):
+        r"""Set :attr:`data`, the ``Min`` and ``Max`` dates of each cycle."""
         pass
-
-    #         path = Path(__file__).parent / "ssn_extrema.csv"
-    #         data = pd.read_csv(path, header=0, skiprows=15, index_col=0)
-    #         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
-    #         data.columns.names = ["kind"]
-    #         self._data = data
 
     #######################################################################
     # Tools for grouping data by Cycle and Cycle Edge (Rising or Falling) #
@@ -495,12 +543,10 @@ class IndicatorExtrema(Base):
         elif isinstance(kind, str):
             if kind == "Edges":
                 intervals = intervals.loc[:, ["Fall", "Rise"]]
-            #                 kind = ["Rise", "Fall"]
             else:
                 if kind not in available_kind:
                     raise ValueError(f"""Interval `{kind!s}` is unavailable""")
                 intervals = intervals.loc[:, [kind]]
-        #                 kind = [kind]
         elif hasattr(kind, "__iter__"):
             if not np.all([k in available_kind for k in kind]):
                 raise ValueError(f"""Interval `{kind!s}` is unavailable""")
@@ -526,13 +572,13 @@ class IndicatorExtrema(Base):
     def calculate_extrema_bands(self, dt="365d"):
         r"""Return time windows around indicator extrema.
 
-            Parameters
-            ----------
-            dt : str or pandas.Timedelta, optional
-                Half-width of the window around each extremum. Defaults to ``"365d"``.
+        Parameters
+        ----------
+        dt : str or pandas.Timedelta, optional
+            Half-width of the window around each extremum. Defaults to ``"365d"``.
 
-            Returns
-            -------
+        Returns
+        -------
         pandas.DataFrame
             ``Min`` and ``Max`` intervals for each cycle.
         """
@@ -570,7 +616,7 @@ class IndicatorExtrema(Base):
             Times to classify.
         tk_cycles : slice, optional
             Subset of cycles to use when cutting.
-        kind : {{"Min", "Max"}}, optional
+        kind : {"Min", "Max"}, optional
             Restrict the classification to minima or maxima.
 
         Returns
