@@ -169,7 +169,7 @@ class Hist1D(AggPlot):
         elif axnorm == "d":
             n = agg.sum()
             # Widths are in the binned variable, log10(x) under logx.
-            dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
+            dx = self._bin_widths(agg.index)
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":

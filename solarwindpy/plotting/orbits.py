@@ -325,19 +325,18 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             "norm", mpl.colors.Normalize(0, 1) if axnorm in ("c", "r") else None
         )
 
-        if limit_color_norm:
-            self._limit_color_norm(norm)
-
         # Unstacking drops some NaN bins, so we must reindex again.
         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
+
+        if limit_color_norm:
+            norm = self._limit_color_norm(norm, agg)
 
         C = np.ma.masked_invalid(agg.values)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax=ax, **cbar_kwargs)
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
 
         self._format_axis(ax)
 

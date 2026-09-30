@@ -149,6 +149,10 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
+
+        On a log axis the densities ("d", "cd", "rd") are normalised over
+        ``log10`` of that axis: the bins are log-space intervals, so cell areas
+        on the log axes sum to 1.
         """
 
         axnorm = self.axnorm
@@ -162,37 +166,24 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             agg = agg.divide(agg.max())
         elif axnorm == "d":
             N = agg.sum().sum()
-            x = pd.IntervalIndex(agg.index.get_level_values("x").unique())
-            y = pd.IntervalIndex(agg.index.get_level_values("y").unique())
-            dx = pd.Series(
-                x.length, index=x
-            )  # dx = pd.Series(x.right - x.left, index=x)
-            dy = pd.Series(
-                y.length, index=y
-            )  # dy = pd.Series(y.right - y.left, index=y)
-
-            if self.log.x:
-                dx = 10.0**dx
-            if self.log.y:
-                dy = 10.0**dy
-
+            # Widths are in the binned variable, log10 on a log axis.
+            dx = self._bin_widths(agg.index.get_level_values("x").unique())
+            dy = self._bin_widths(agg.index.get_level_values("y").unique())
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
         elif axnorm == "cd":
             N = agg.groupby(level="x").sum()
-            dy = pd.IntervalIndex(
-                agg.index.get_level_values("y").unique()
-            ).sort_values()
-            dy = pd.Series(dy.length, index=dy).sort_index()
+            dy = self._bin_widths(
+                pd.IntervalIndex(agg.index.get_level_values("y").unique()).sort_values()
+            )
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="x").divide(dy, level="y")
 
         elif axnorm == "rd":
             N = agg.groupby(level="y").sum()
-            dx = pd.IntervalIndex(
-                agg.index.get_level_values("x").unique()
-            ).sort_values()
-            dx = pd.Series(dx.length, index=dx).sort_index()
+            dx = self._bin_widths(
+                pd.IntervalIndex(agg.index.get_level_values("x").unique()).sort_values()
+            )
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
 
@@ -241,19 +232,43 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         )
         return super()._make_cbar(mappable, ticks=ticks, **kwargs)
 
-    def _limit_color_norm(self, norm):
+    def _limit_color_norm(self, norm, values):
+        r"""Limit ``norm`` to the 1st and 99th percentiles of the plotted values.
+
+        Parameters
+        ----------
+        norm : matplotlib.colors.Normalize or None
+            The colour normalisation to limit. Limits already set are kept.
+            If None, a linear :class:`matplotlib.colors.Normalize` is built,
+            the norm ``pcolormesh`` would otherwise use.
+        values : array-like
+            The aggregated values handed to matplotlib. NaN, infinite and
+            masked entries are ignored.
+
+        Returns
+        -------
+        matplotlib.colors.Normalize or None
+            The limited norm. Column- and row-normalised plots are already
+            bounded, so for them ``norm`` is returned unchanged.
+        """
         if self.axnorm in ("c", "r"):
             # Don't limit us to (1%, 99%) interval.
-            return None
+            return norm
 
-        pct = self.data.loc[:, "z"].quantile([0.01, 0.99])
-        v0 = pct.loc[0.01]
-        v1 = pct.loc[0.99]
+        if norm is None:
+            norm = mpl.colors.Normalize()
+
+        values = np.ma.masked_invalid(values).compressed()
+        if values.size == 0:
+            return norm
+
+        v0, v1 = np.quantile(values, [0.01, 0.99])
         if norm.vmin is None:
             norm.vmin = v0
         if norm.vmax is None:
             norm.vmax = v1
         norm.clip = True
+        return norm
 
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
@@ -326,8 +341,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cbar: bool
             If True, create color bar with `labels.z`.
         limit_color_norm: bool
-            If True, limit the color range to 0.001 and 0.999 percentile range
-            of the z-value, count or otherwise.
+            If True, limit the color range to the 1st and 99th percentiles of
+            the plotted values, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
         fcn: FunctionType, None
@@ -373,11 +388,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         norm = kwargs.pop("norm", default_norm)
 
         if limit_color_norm:
-            if norm is None:
-                # `pcolormesh` would use a linear `Normalize` anyway; build it
-                # here so there is a norm to limit.
-                norm = mpl.colors.Normalize()
-            self._limit_color_norm(norm)
+            norm = self._limit_color_norm(norm, agg)
 
         C = np.ma.masked_invalid(agg.values)
         XX, YY = np.meshgrid(x, y)
@@ -385,11 +396,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         cbar_or_mappable = pc
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
-
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, **cbar_kwargs)
@@ -456,7 +463,8 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         cbar : bool
             If True, create color bar with `labels.z`.
         limit_color_norm : bool
-            If True, limit the color range to 0.001 and 0.999 percentile range.
+            If True, limit the color range to the 1st and 99th percentiles of
+            the plotted values.
         cbar_kwargs : dict, None
             If not None, kwargs passed to `self._make_cbar`.
         fcn : FunctionType, None
@@ -509,14 +517,14 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             default_norm = mpl.colors.LogNorm(clip=True)
         norm = kwargs.pop("norm", default_norm)
 
-        if limit_color_norm:
-            self._limit_color_norm(norm)
-
         # Get cmap from kwargs (shared between pcolormesh and contour)
         cmap = kwargs.pop("cmap", None)
 
         # --- 1. Plot pcolormesh background ---
         C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
+        if limit_color_norm:
+            norm = self._limit_color_norm(norm, C_edges)
+
         XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
         pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)
 
@@ -610,10 +618,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         # --- 4. Colorbar ---
         cbar_or_mappable = pc
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = {}
-            if "cax" not in cbar_kwargs and "ax" not in cbar_kwargs:
-                cbar_kwargs["ax"] = ax
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
             cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
 
         # --- 5. Format axis ---
@@ -764,10 +769,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             clabel_kwargs = dict()
         if edges_kwargs is None:
             edges_kwargs = dict()
-        if cbar_kwargs is None:
-            cbar_kwargs = dict()
-        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-            cbar_kwargs["ax"] = ax
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
@@ -1076,7 +1078,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         yax = fig.add_subplot(gs[1, 1], sharey=hax)
         cax = fig.add_subplot(gs[3, 0])
 
-        cbar_kwargs = kwargs.pop("cbar_kwargs", dict())
+        cbar_kwargs = self._prepare_cbar_kwargs(kwargs.pop("cbar_kwargs", None))
         cax = cbar_kwargs.pop("cax", cax)
         orientation = cbar_kwargs.pop("orientation", "horizontal")
         _, cbar = self.make_plot(

@@ -766,14 +766,14 @@ class TestMakePlot:
 
 
 class TestLimitColorNorm:
-    """`limit_color_norm` clips the colour range to the bulk of the z-values."""
+    """`limit_color_norm` clips the colour range to the bulk of the plotted values."""
 
     def test_clips_to_quantiles_of_the_z_data(self):
-        """The limits are quantiles of z: inside the data range and ordered.
+        """The limits are quantiles of the binned z: inside the data range and ordered.
 
-        The exact quantiles are a seam -- see
-        `test_limit_color_norm_quantiles_are_undetermined` below -- so only the
-        bounding property is asserted here.
+        The exact quantiles are asserted by
+        `test_count_colour_limits_are_quantiles_of_the_plotted_counts` below,
+        so only the bounding property is asserted here.
 
         ON FAILURE: the code is wrong; a colour limit outside the data range is
         meaningless.
@@ -784,7 +784,7 @@ class TestLimitColorNorm:
         h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES])
 
         norm = matplotlib.colors.Normalize()
-        h._limit_color_norm(norm)
+        h._limit_color_norm(norm, h.agg())
 
         assert z.min() <= norm.vmin < norm.vmax <= z.max()
         assert norm.clip is True
@@ -805,10 +805,29 @@ class TestLimitColorNorm:
         for axnorm in ("c", "r"):
             h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES], axnorm=axnorm)
             norm = matplotlib.colors.Normalize()
-            h._limit_color_norm(norm)
+            h._limit_color_norm(norm, h.agg())
             assert norm.vmin is None
             assert norm.vmax is None
             assert norm.clip is False
+
+    def test_count_colour_limits_are_quantiles_of_the_plotted_counts(self, known_hist):
+        """A count histogram's colour limits are the 1%/99% quantiles of its counts.
+
+        The plotted values are the 14 occupied bins of ``KNOWN_COUNTS``; empty
+        bins are not drawn. Sorted: 1,1,1,2,2,2,2,3,3,4,4,5,5,6. Linear
+        interpolation puts the 1% quantile at position 0.13 (value 1) and the
+        99% quantile at 12.87, 5 + 0.87 * (6 - 5) = 5.87.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _ = known_hist.make_plot(limit_color_norm=True, cbar=False)
+        norm = _quadmesh(ax).norm
+        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's drawn bins
+        expected = np.quantile(occupied, [0.01, 0.99])
+        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
+        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
+        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=1e-12)
+        plt.close("all")
 
     def test_limit_color_norm_works_without_a_normalisation(self, known_hist):
         """`limit_color_norm=True` is documented for any Hist2D, axnorm or not.
@@ -816,6 +835,23 @@ class TestLimitColorNorm:
         ON FAILURE: the code is wrong.
         """
         known_hist.make_plot(limit_color_norm=True, cbar=False)
+        plt.close("all")
+
+    def test_contour_overlay_limits_colours_without_a_normalisation(self, known_hist):
+        """`plot_hist_with_contours(limit_color_norm=True)` works with no axnorm.
+
+        It draws, and the colour limits are the 1%/99% quantiles of the 14
+        occupied counts of ``KNOWN_COUNTS``: 1 and 5 + 0.87 * (6 - 5) = 5.87,
+        worked in `test_count_colour_limits_are_quantiles_of_the_plotted_counts`.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _, _, _ = known_hist.plot_hist_with_contours(
+            limit_color_norm=True, cbar=False
+        )
+        norm = _quadmesh(ax).norm
+        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
+        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
         plt.close("all")
 
 

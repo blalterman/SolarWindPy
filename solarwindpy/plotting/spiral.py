@@ -856,11 +856,7 @@ data : {z.size}
 
         cbar_or_mappable = collection
         if cbar:
-            if cbar_kwargs is None:
-                cbar_kwargs = dict()
-
-            if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-                cbar_kwargs["ax"] = ax
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             cbar = self._make_cbar(collection, norm=norm, **cbar_kwargs)
             cbar_or_mappable = cbar
@@ -895,10 +891,7 @@ data : {z.size}
             clabel_kwargs = dict()
         if edges_kwargs is None:
             edges_kwargs = dict()
-        if cbar_kwargs is None:
-            cbar_kwargs = dict()
-        if "cax" not in cbar_kwargs.keys() and "ax" not in cbar_kwargs.keys():
-            cbar_kwargs["ax"] = ax
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
         return clabel_kwargs, edges_kwargs, cbar_kwargs
 
