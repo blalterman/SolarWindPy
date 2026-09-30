@@ -236,24 +236,13 @@ class TestDensity:
         )
         assert (agg.values * widths).sum() == pytest.approx(1.0, rel=1e-12, abs=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_DensityNotNormalised,
-        reason=(
-            "Hist1D._axis_normalizer (hist1d.py) divides log-space counts by "
-            "10**(log-space bin width), which is neither the log10 width nor "
-            "the linear width, so a logx density integrates to 1 over neither "
-            "variable; remove this marker when the logx density is normalised "
-            "over log10(x) or over x (the author chooses which)"
-        ),
-    )
-    def test_logx_density_integrates_to_one(self):
-        """A logx density integrates to 1 over log10(x) or over x.
+    def test_logx_density_integrates_to_one_over_log10_x(self):
+        """A logx density integrates to 1 over log10(x).
 
-        Either normalisation is a PDF; the test accepts both and rejects any
-        density that is a PDF over neither.
+        The author ruled that a logx density is normalised over log10(x): bar
+        areas on the log axis sum to 1.
 
-        ON FAILURE: the code is wrong.
+        ON FAILURE: the code is wrong, unless the author reverses that ruling.
         """
         rng = np.random.default_rng(7)
         x = pd.Series(10.0 ** rng.uniform(0.0, 2.0, 500))
@@ -262,14 +251,9 @@ class TestDensity:
         agg = Hist1D(x, logx=True, axnorm="d", nbins=log_edges).agg()
 
         over_log = (agg.values * np.diff(log_edges)).sum()
-        over_linear = (agg.values * np.diff(10.0**log_edges)).sum()
         # Tolerance: a handful of float divisions and sums.
-        if not (
-            np.isclose(over_log, 1, rtol=1e-9) or np.isclose(over_linear, 1, rtol=1e-9)
-        ):
-            raise _DensityNotNormalised(
-                f"integral over log10(x) = {over_log}, over x = {over_linear}"
-            )
+        if not np.isclose(over_log, 1, rtol=1e-9, atol=0):
+            raise _DensityNotNormalised(f"integral over log10(x) = {over_log}")
 
 
 class TestMakePlot:

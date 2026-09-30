@@ -158,6 +158,9 @@ class Hist1D(AggPlot):
         Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
+
+        Under ``logx`` the density is normalised over ``log10(x)``: the bins are
+        log-space intervals, so bar areas on the log axis sum to 1.
         """
 
         axnorm = self.axnorm
@@ -165,9 +168,8 @@ class Hist1D(AggPlot):
             pass
         elif axnorm == "d":
             n = agg.sum()
+            # Widths are in the binned variable, log10(x) under logx.
             dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
-            if self.log.x:
-                dx = 10.0**dx
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":
