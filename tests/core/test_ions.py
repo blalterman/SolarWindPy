@@ -1,30 +1,17 @@
 #!/usr/bin/env python
 """Tests for the :class:`Ion` object."""
+
 import numpy as np
 import pandas as pd
-
-# import sys
-# import itertools
-
-# from numbers import Number
-# from pandas import MultiIndex as MI
-
-# import numpy.testing as npt
 import pandas.testing as pdt
 import pytest
 
 from abc import ABC, abstractproperty
-
-# from abc import abstractmethod, abstractstaticmethod, abstractclassmethod
-# from unittest import TestCase
+from unittest import TestCase
 
 from scipy import constants
 from scipy.constants import physical_constants
 
-# try:
-#     import test_base as base
-# except ImportError:
-#     from . import test_base as base
 from . import test_base as base
 
 from solarwindpy import vector
@@ -37,8 +24,6 @@ pd.set_option("mode.chained_assignment", "raise")
 class IonTestBase(ABC):
     @classmethod
     def set_object_testing(cls):
-        # print(cls.__class__, "set_object_testing", flush=True)
-        # print("Data", cls.data, sep="\n")
         data = cls.data.xs(cls().species, axis=1, level="S")
 
         w = data.w
@@ -52,7 +37,6 @@ class IonTestBase(ABC):
         ion = ions.Ion(data, cls().species)
         cls.object_testing = ion
         cls.data = data
-        # print("Done with", cls.__class__, flush=True)
 
     @abstractproperty
     def species(self):
@@ -155,27 +139,11 @@ class IonTestBase(ABC):
         w = self.data.w.xs("scalar", axis=1) * 1e3
         pth = w.pow(2).multiply(0.5 * rho, axis=0)
 
-        #         ln_pth = np.log(pth)
-        #         ln_rho = np.log(rho)
-        #
         gamma = 5.0 / 3.0
         # [S] = eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
         units = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)
         S = pth.multiply(rho.pow(-gamma)) / units
         S.name = "S"
-        #         print(
-        #             "<specific_entropy>",
-        #             "<s>",
-        #             self.species,
-        #             "<test>",
-        #             "<ln_pth>",
-        #             ln_pth,
-        #             "<ln_rho>",
-        #             ln_rho,
-        #             "<lnS>",
-        #             lnS,
-        #             sep="\n",
-        #         )
 
         ot = self.object_testing
         pdt.assert_series_equal(S, ot.specific_entropy)
@@ -218,125 +186,56 @@ class TestIonP2(base.P2Test, IonTestBase, base.SWEData):
     pass
 
 
-class TestIonSpecificsOptions(base.TestData):
+class TestIonSpecificsOptions(TestCase):
+    """Ion construction and equality from the full (M, C, S) plasma frame."""
+
+    species = ("a", "p1", "p2")
+
     @classmethod
     def setUpClass(cls):
-        r"""Override `setUpClass` because this set of tests doesn't rely on
-        `object_testing`."""
-        # print("SWEData.setUpClass", flush=True)
-        super(TestIonSpecificsOptions, cls).setUpClass()
-        # print(cls.data.iloc[:, :7])
-        # print(cls.data.columns.values)
-        cls.data = cls.data.xs("", axis=1, level="N")
-
-    #     def test_init_with_species(self):
-    #         species = "a"
-    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
-    #         ion = ions.Ion(data, species)
-    #         self.assertIsInstance(ion, ions.Ion)
-    #         self.assertEqual(species, ion.species)
-    #         pdt.assert_frame_equal(data, ion.data)
-    #
-    #         species = "p1"
-    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
-    #         ion = ions.Ion(data, species)
-    #         self.assertIsInstance(ion, ions.Ion)
-    #         self.assertEqual(species, ion.species)
-    #         pdt.assert_frame_equal(data, ion.data)
-    #
-    #         species = "p1"
-    #         data = self.data.xs(species, axis=1, level="S", drop_level=False)
-    #         ion = ions.Ion(data, species)
-    #         self.assertIsInstance(ion, ions.Ion)
-    #         self.assertEqual(species, ion.species)
-    #         pdt.assert_frame_equal(data, ion.data)
+        """Load the (M, C, S) plasma fixture; these tests build their own Ions."""
+        cls.data = base.SyntheticData().plasma_data
 
     def test_init_with_species(self):
-        species = "a"
-        data = self.data.xs(species, axis=1, level="S")
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
+        """An Ion built from one species' (M, C) slice keeps that slice and name.
 
-        species = "p1"
-        data = self.data.xs(species, axis=1, level="S")
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
-
-        species = "p2"
-        data = self.data.xs(species, axis=1, level="S")
-        ion = ions.Ion(data, species)
-        self.assertIsInstance(ion, ions.Ion)
-        self.assertEqual(species, ion.species)
-        pdt.assert_frame_equal(data, ion.data)
+        ON FAILURE: the code is wrong.
+        """
+        for species in self.species:
+            with self.subTest(species=species):
+                data = self.data.xs(species, axis=1, level="S")
+                ion = ions.Ion(data, species)
+                self.assertIsInstance(ion, ions.Ion)
+                self.assertEqual(species, ion.species)
+                pdt.assert_frame_equal(data, ion.data)
 
     def test_init_version_comparison(self):
-        species = "a"
-        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species, axis=1, level="S")
-        ion_with_species = ions.Ion(data_with_species, species)
-        ion_without_species = ions.Ion(data_without_species, species)
-        self.assertEqual(ion_with_species, ion_without_species)
+        """An Ion built from (M, C, S) data equals one built from its (M, C) slice.
 
-        species = "p1"
-        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species, axis=1, level="S")
-        ion_with_species = ions.Ion(data_with_species, species)
-        ion_without_species = ions.Ion(data_without_species, species)
-        self.assertEqual(ion_with_species, ion_without_species)
-
-        species = "p2"
-        data_with_species = self.data.xs(species, axis=1, level="S", drop_level=False)
-        data_without_species = self.data.xs(species, axis=1, level="S")
-        ion_with_species = ions.Ion(data_with_species, species)
-        ion_without_species = ions.Ion(data_without_species, species)
-        self.assertEqual(ion_with_species, ion_without_species)
+        ON FAILURE: the code is wrong.
+        """
+        for species in self.species:
+            with self.subTest(species=species):
+                with_s = self.data.xs(species, axis=1, level="S", drop_level=False)
+                without_s = self.data.xs(species, axis=1, level="S")
+                self.assertEqual(
+                    ions.Ion(with_s, species), ions.Ion(without_s, species)
+                )
 
     def test_eq(self):
-        s0 = "a"
-        s1 = "a"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertEqual(i0, i1)
+        """Ions from the same frame are equal iff their species match.
 
-        s0 = "p1"
-        s1 = "p1"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertEqual(i0, i1)
-
-        s0 = "p2"
-        s1 = "p2"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertEqual(i0, i1)
-
-        s0 = "a"
-        s1 = "p1"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
-
-        s0 = "p1"
-        s1 = "a"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
-
-        s0 = "a"
-        s1 = "p2"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
-
-        s0 = "p2"
-        s1 = "p1"
-        i0 = ions.Ion(self.data, s0)
-        i1 = ions.Ion(self.data, s1)
-        self.assertNotEqual(i0, i1)
+        ON FAILURE: the code is wrong.
+        """
+        for s0 in self.species:
+            for s1 in self.species:
+                with self.subTest(s0=s0, s1=s1):
+                    i0 = ions.Ion(self.data, s0)
+                    i1 = ions.Ion(self.data, s1)
+                    if s0 == s1:
+                        self.assertEqual(i0, i1)
+                    else:
+                        self.assertNotEqual(i0, i1)
 
 
 def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():

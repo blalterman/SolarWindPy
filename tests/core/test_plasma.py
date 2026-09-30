@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for the :class:`Plasma` container."""
+
 import pandas as pd
 import numpy as np
 import itertools
@@ -47,8 +48,7 @@ class PlasmaTestBase(ABC):
 
     @property
     def species_combinations(self):
-        r"""The various combinations of the species for use in testing Plasma
-        methods."""
+        r"""Every combination of this plasma's species, for testing methods."""
         from itertools import combinations, chain
 
         stuple = self.stuple
@@ -197,8 +197,7 @@ class PlasmaTestBase(ABC):
 
     @abstractmethod
     def test_chk_species_fail(self):
-        r"""This method must be subclassed to test for species that fail the
-        `_chk_species` tests.
+        r"""Subclass this to test the species that fail `_chk_species`.
 
         The code will look something like:
             for s in bad_species:
@@ -1071,10 +1070,9 @@ class PlasmaTestBase(ABC):
                     ot.lnlambda(combo[1], list(combo))
 
     def test_nuc(self):
-        r"""We calculate the collision frequency for differential flow following
-        Hernandez & Marsch (JGR 1985, doi:10.1029/JA090iA11p11062) Eq.
+        r"""The collision frequency for differential flow follows the paper.
 
-        (18).
+        Hernandez & Marsch (JGR 1985, doi:10.1029/JA090iA11p11062), Eq. (18).
 
         ON FAILURE: the code is wrong, unless the author rejects this transcription.
         The `both_species=False` path is Eq. (18); the default `both_species=True`
@@ -1159,7 +1157,7 @@ class PlasmaTestBase(ABC):
 
         ON FAILURE: the code is wrong.
         """
-        sc_data = base.TestData().spacecraft_data
+        sc_data = base.SyntheticData().spacecraft_data
 
         Wind = pd.concat(
             {"pos": sc_data.xs("gse", axis=1, level="M")},
@@ -1251,7 +1249,7 @@ class PlasmaTestBase(ABC):
         )
         vsw = vcom.pow(2.0).sum(axis=1).pipe(np.sqrt) * 1e3
 
-        sc_data = base.TestData().spacecraft_data
+        sc_data = base.SyntheticData().spacecraft_data
 
         Wind = pd.concat(
             {"pos": sc_data.xs("gse", axis=1, level="M")},
@@ -1273,8 +1271,6 @@ class PlasmaTestBase(ABC):
             sort=True,
         )
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
-        #         Rs = 695.508e6 # [m]
-        #         r_Re = constants.au - (self.data.gse.x * Rs)
         tau_exp_PSP = PSP.distance2sun.multiply(vsw.pow(-1.0), axis=0)
 
         individual_msg = (
@@ -1390,8 +1386,8 @@ class PlasmaTestBase(ABC):
             ot = self.object_testing
             pdt.assert_frame_equal(electrons.data, ot.estimate_electrons().data)
 
-            # For some reason, this check failed (20250722).
-            # self.assertEqual(electrons, ot.estimate_electrons())
+            # Ion equality is exact (DataFrame.equals); for three species the two
+            # summation orders differ by ~1e-16 relative, so compare with tolerance.
 
             # Check that electrons aren't stored in plasma.
             self.assertFalse("e" in ot.species)
@@ -1698,7 +1694,7 @@ class PlasmaTestBase(ABC):
         ON FAILURE: the code is wrong.
         """
         ot = self.object_testing
-        data = base.TestData().combined_data
+        data = base.SyntheticData().combined_data
         drop = data.columns.isin(ot.data.columns)
         aux = data.loc[:, ~drop]
         ot.set_auxiliary_data(aux)
@@ -2107,12 +2103,7 @@ class PlasmaTestBase(ABC):
 #####
 class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2136,12 +2127,7 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2165,12 +2151,7 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2194,12 +2175,7 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2224,12 +2200,7 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2254,12 +2225,7 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.
@@ -2283,12 +2249,7 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
 
 class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
     def test_chk_species_fail(self):
-        r"""
-        The code will look something like:
-            for s in bad_species:
-                with self.assertRaisesRegex(ValueError,
-                                            "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+        r"""Species this plasma does not hold raise "Requested species unavailable".
 
         ON FAILURE: the code is wrong; `_chk_species` accepted a species this
         plasma does not hold.

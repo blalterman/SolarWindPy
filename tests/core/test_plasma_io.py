@@ -3,7 +3,7 @@ from . import test_base
 
 
 def test_save_and_load(tmp_path):
-    data = test_base.TestData().plasma_data
+    data = test_base.SyntheticData().plasma_data
     plas = plasma.Plasma(data, "a", "p1")
     fname = tmp_path / "plasma.h5"
     plas.save(fname)
