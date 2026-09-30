@@ -664,7 +664,7 @@ class NonFiniteCoordinate(AssertionError):
     raises=NonFiniteCoordinate,
     reason=(
         "plot_on_colorbar scales by s1 = np.round(ssn.max(), -2) "
-        "(sidc.py:508), which is 0 for any window peaking below SSN 50, so "
+        "(in sidc.py), which is 0 for any window peaking below SSN 50, so "
         "y = (y / s1) * dy + y0 divides by zero and every plotted coordinate "
         "is inf. No exception is raised; the overlay silently disappears and "
         "the tick labels read (0, 0, 0). Reported rather than fixed: the "
