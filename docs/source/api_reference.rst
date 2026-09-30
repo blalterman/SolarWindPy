@@ -101,17 +101,6 @@ General utility functions and helper tools for data manipulation and analysis.
 
    solarwindpy.tools
 
-Reproducibility Module
-----------------------
-
-Reproducibility utilities for tracking package versions and git state.
-
-.. autosummary::
-   :toctree: _autosummary
-   :recursive:
-
-   solarwindpy.reproducibility
-
 Package
 -------
 

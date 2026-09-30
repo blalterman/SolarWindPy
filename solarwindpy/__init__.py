@@ -20,7 +20,6 @@ from .core import (
 )
 from . import core, plotting, solar_activity, tools, fitfunctions
 from . import instabilities  # noqa: F401
-from . import reproducibility
 
 
 def _configure_pandas() -> None:
@@ -60,7 +59,6 @@ __all__ = [
     "tools",
     "fitfunctions",
     "instabilities",
-    "reproducibility",
 ]
 
 __author__ = "B. L. Alterman <blaltermanphd@gmail.com>"
