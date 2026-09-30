@@ -1051,8 +1051,18 @@ class TestAggregationLimits:
             ((None, 1.5), "quantile", "upper=1.5 must be between 0 and 1"),
             ((0.8, 0.2), "quantile", "must be less than upper"),
             ((0.5, 0.5), "quantile", "must be less than upper"),
+            ((5.0, 2.0), "value", "value alim lower=5.0 must be less than upper"),
+            ((3.0, 3.0), "value", "value alim lower=3.0 must be less than upper"),
         ],
-        ids=["kind", "below-0", "above-1", "reversed", "equal"],
+        ids=[
+            "kind",
+            "below-0",
+            "above-1",
+            "reversed",
+            "equal",
+            "value-reversed",
+            "value-equal",
+        ],
     )
     def test_invalid_alim_is_rejected(self, known_hist, limits, kind, match):
         """An unknown kind, a quantile outside [0, 1], or lower >= upper is refused.

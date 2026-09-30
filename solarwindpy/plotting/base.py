@@ -371,9 +371,9 @@ class PlotWithZdata(Base):
         Raises
         ------
         ValueError
-            If ``kind`` is not ``"value"`` or ``"quantile"``, or, for
-            ``"quantile"``, if a limit is outside [0, 1] or ``lower`` is not
-            less than ``upper``.
+            If ``kind`` is not ``"value"`` or ``"quantile"``, if ``lower`` is
+            not less than ``upper``, or, for ``"quantile"``, if a limit is
+            outside [0, 1].
         """
         if kind not in ("value", "quantile"):
             raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
@@ -385,10 +385,10 @@ class PlotWithZdata(Base):
                     raise ValueError(
                         f"quantile alim {name}={q} must be between 0 and 1"
                     )
-            if lower is not None and upper is not None and not lower < upper:
-                raise ValueError(
-                    f"quantile alim lower={lower} must be less than upper={upper}"
-                )
+        if lower is not None and upper is not None and not lower < upper:
+            raise ValueError(
+                f"{kind} alim lower={lower} must be less than upper={upper}"
+            )
         self._alim = (lower, upper)
         self._alim_kind = kind
 
