@@ -236,7 +236,7 @@ class DataLoader(Base):
         ctime = self.ctime
         today = pd.to_datetime("today")
         dt = today - ctime
-        self._data_age = dt
+        self._age = dt
 
     def maybe_update_stale_data(self):
         r"""Download new data if the existing cache is stale."""

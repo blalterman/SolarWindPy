@@ -253,31 +253,13 @@ def test_ctime_is_the_epoch_when_no_cache_exists(make_loader):
     assert loader.ctime == pd.to_datetime(0)
 
 
-@pytest.mark.xfail(
-    raises=AttributeError,
-    strict=True,
-    reason=(
-        "DataLoader.get_data_age stores the age on self._data_age "
-        "(base.py:210) but DataLoader.age reads self._age (base.py:155), "
-        "which nothing ever sets, so the property always raises. Reported to "
-        "the author rather than fixed: base.py is outside this unit's scope, "
-        "and whether `age` or `get_data_age` is the one to change is the "
-        "author's call. The message is \"'SIDCLoader' object has no attribute "
-        "'_age'\"; pytest.mark.xfail cannot assert on it because the marker "
-        "has no match= (it narrows by exception type alone), and the raising "
-        "line is in production code so the test cannot choose a narrower "
-        "type. raises=AttributeError is therefore the available granularity. "
-        "Delete the marker once the property is fixed."
-    ),
-)
 def test_age_is_the_time_since_the_cache_was_written(make_loader):
     """``age`` reports how stale the cache is.
 
     Identity: age = now - ctime. With an empty cache ctime is the epoch, so
     the age is decades and certainly positive.
 
-    ON FAILURE (that is, if this unexpectedly passes): the property was fixed
-    and this xfail should be removed.
+    ON FAILURE: the code is wrong.
     """
     loader = make_loader("m")
     assert loader.age > pd.Timedelta(0)
