@@ -55,7 +55,7 @@ These change computed values; rerun any analysis that used them.
 - **REMOVED**: `requirements-dev.txt` (replaced by `requirements-dev.lock`)
 - **REMOVED**: `scripts/freeze_requirements.py` (replaced by `pip-compile`)
 - **REMOVED**: `scripts/generate_docs_requirements.py` (replaced by `pip-compile --extra=docs`)
-- **Migration required**: See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](docs/MIGRATION-DEPENDENCY-OVERHAUL.md)
+- **Migration required**: See [the v0.3.0 migration guide](https://github.com/blalterman/SolarWindPy/blob/v0.3.0/docs/MIGRATION-DEPENDENCY-OVERHAUL.md)
 
 **Developer Workflow Changes**:
 ```bash
@@ -88,7 +88,7 @@ pip install -r requirements-dev.lock
   - Tests abstract method enforcement, docstring inheritance, all fitfunction instantiation
   - Includes version constraint validation (docstring-inheritance >=2.2.0,<3.0)
 
-- **Documentation**: Comprehensive migration guide at `docs/MIGRATION-DEPENDENCY-OVERHAUL.md`
+- **Documentation**: Comprehensive [migration guide](https://github.com/blalterman/SolarWindPy/blob/v0.3.0/docs/MIGRATION-DEPENDENCY-OVERHAUL.md) (retired from the tree; kept at the v0.3.0 tag)
   - Breaking changes overview
   - Old vs new developer workflows
   - NumPy 2.0 compatibility matrix
@@ -159,7 +159,7 @@ pip install -r requirements-dev.lock
 
 **Rollback**: Use `pip install solarwindpy==0.2.0` if issues arise
 
-See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](docs/MIGRATION-DEPENDENCY-OVERHAUL.md) for complete migration instructions
+See [the v0.3.0 migration guide](https://github.com/blalterman/SolarWindPy/blob/v0.3.0/docs/MIGRATION-DEPENDENCY-OVERHAUL.md) for complete migration instructions
 
 ## [0.2.0] - 2025-11-12
 

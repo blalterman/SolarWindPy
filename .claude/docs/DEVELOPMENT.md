@@ -70,8 +70,6 @@ pytest -q
 git add pyproject.toml
 ```
 
-**Migration Info**: See [docs/MIGRATION-DEPENDENCY-OVERHAUL.md](../../docs/MIGRATION-DEPENDENCY-OVERHAUL.md)
-
 ## Code Quality Standards
 - **Formatting**: Black for code formatting (88 characters)
 - **Linting**: Flake8 for style checking (88 characters)
