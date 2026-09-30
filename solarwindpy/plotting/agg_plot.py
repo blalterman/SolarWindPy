@@ -8,7 +8,7 @@ common functionality used by :mod:`solarwindpy` histogram plots.
 import numpy as np
 import pandas as pd
 
-from numbers import Number
+from numbers import Integral, Number
 from abc import abstractproperty, abstractmethod
 
 try:
@@ -109,9 +109,7 @@ class AggPlot(base.Base):
             Data to clip. A DataFrame is clipped column by column.
         clip : bool or str
             A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails. The one-tail branches
-            call ``clip_lower`` and ``clip_upper``, which pandas removed, so they
-            raise ``AttributeError``.
+            tail only; any other value clips both tails.
 
         Returns
         -------
@@ -123,12 +121,6 @@ class AggPlot(base.Base):
         TypeError
             If ``data`` is neither a Series nor a DataFrame.
         """
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
         if isinstance(data, pd.Series):
             ax = 0
         elif isinstance(data, pd.DataFrame):
@@ -136,10 +128,16 @@ class AggPlot(base.Base):
         else:
             raise TypeError("Unexpected object %s" % type(data))
 
+        q0 = 0.0001
+        q1 = 0.9999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+
         if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip_lower(lo, axis=ax)
+            data = data.clip(lower=lo, axis=ax)
         elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip_upper(up, axis=ax)
+            data = data.clip(upper=up, axis=ax)
         else:
             data = data.clip(lo, up, axis=ax)
         return data
@@ -176,6 +174,13 @@ class AggPlot(base.Base):
 
         precision: int or None
             Decimal places to which bin edges are rounded. If None, 5.
+
+        Notes
+        -----
+        Edges from an integer ``nbins`` follow :func:`numpy.histogram`: the
+        outer edges are rounded outward so they enclose every sample, and each
+        bin is closed on the left, the last bin also on the right. Other
+        ``nbins`` give right-closed bins, ``(a, b]``.
         """
         data = self.data
         bins = {}
@@ -209,6 +214,9 @@ class AggPlot(base.Base):
             if isinstance(b, str):
                 b = b.lower()
 
+            # Edges from an integer bin count follow `np.histogram`'s convention.
+            from_count = isinstance(b, Integral) and not isinstance(b, bool)
+
             if isinstance(b, str) and b == "knuth":
                 try:
                     assert knuth_bin_width
@@ -233,10 +241,21 @@ class AggPlot(base.Base):
             except TypeError:
                 assert not b.isna().any()
 
-            b = b.round(precision)
+            closed = "right"
+            if from_count:
+                # Round the outer edges outward so they enclose every sample.
+                scale = 10.0**precision
+                lo = np.floor(b[0] * scale) / scale
+                hi = np.ceil(b[-1] * scale) / scale
+                b = b.round(precision)
+                b[0] = lo if lo <= d.min() else lo - 1 / scale
+                b[-1] = hi if hi >= d.max() else hi + 1 / scale
+                closed = "left"
+            else:
+                b = b.round(precision)
 
             zipped = zip(b[:-1], b[1:])
-            i = [pd.Interval(*b0b1, closed="right") for b0b1 in zipped]
+            i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
 
             bins[k] = b
             intervals[k] = pd.CategoricalIndex(i)
@@ -259,6 +278,9 @@ class AggPlot(base.Base):
                 d = self.clip_data(d, self.clip)
 
             c = pd.cut(d, i)
+            if i.closed == "left":
+                # As in `np.histogram`, the last bin also holds its right edge.
+                c[d == i[-1].right] = i[-1]
             cut[k] = c
 
         cut = pd.DataFrame.from_dict(cut, orient="columns")
@@ -300,7 +322,10 @@ class AggPlot(base.Base):
         # Ensure all bins are represented in the data. (20190605)
         for k, v in self.categoricals.items():
             # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-            agg = agg.reindex(index=v, level=k if agg.index.nlevels > 1 else None)
+            # Name the bins so a 1-D result keeps its axis name, e.g. "x".
+            agg = agg.reindex(
+                index=v.rename(k), level=k if agg.index.nlevels > 1 else None
+            )
 
         return agg
 
@@ -328,30 +353,44 @@ class AggPlot(base.Base):
 
         return agg
 
+    def _joint_bin_mask(self, kept):
+        r"""Boolean ``pd.Series`` marking each observation whose joint bin is kept.
+
+        Parameters
+        ----------
+        kept : pd.Index or pd.MultiIndex
+            Aggregated bins to keep, with one named level per column of ``cut``.
+
+        Returns
+        -------
+        pd.Series
+            True where the observation's bin across every column of ``cut``
+            (e.g. the joint (x, y) bin in 2-D) is in ``kept``.
+        """
+        cut = self.cut
+        observed = []
+        selected = []
+        for k, v in cut.items():
+            # Compare category codes: the Categoricals fail with some pandas numpy
+            # ufuncs (20200611), and both sides are coded by the same categories.
+            categories = v.cat.categories
+            observed.append(v.cat.codes.to_numpy())
+            selected.append(categories.get_indexer(kept.get_level_values(k)))
+
+        observed = pd.MultiIndex.from_arrays(observed)
+        selected = pd.MultiIndex.from_arrays(selected)
+        return pd.Series(observed.isin(selected), index=cut.index)
+
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
 
-        The series shares the same index as the stored data. To align with a different
-        index you may need to adjust the returned series.
+        A measurement is plotted when its joint bin (e.g. its (x, y) bin in 2-D)
+        survives aggregation. The series shares the same index as the stored
+        data. To align with a different index you may need to adjust the
+        returned series.
         """
         agg = self.agg().dropna()
-        cut = self.cut
-
-        tk = pd.Series(True, index=cut.index)
-        for k, v in cut.items():
-            idx = agg.index.get_level_values(k)
-            # Use the codes directly because the categoricals are
-            # failing with some Pandas numpy ufunc use. (20200611)
-            # Also need to ensure codes are consistent between the
-            # two objects. (20201111)
-            cat = v.unique()
-            codes = cat.codes
-            mapper = pd.Series(codes, index=cat)
-            mapped_idx = idx.map(mapper)
-            mapped_v = v.map(mapper)
-
-            tk_ax = mapped_v.isin(mapped_idx)
-            tk = tk & tk_ax
+        tk = self._joint_bin_mask(agg.index)
 
         self.logger.info(
             f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
@@ -362,16 +401,14 @@ class AggPlot(base.Base):
     def get_subset_above_threshold(self, threshold, fcn="count"):
         r"""Get the subset of data above a given threshold using `fcn` to.
 
-        aggregate. If `axnorm` set, this is used.
+        aggregate. If `axnorm` set, this is used. A row is kept when its joint
+        bin (e.g. its (x, y) bin in 2-D) meets `threshold`.
         """
         agg = self.agg(fcn=fcn)
         tk = agg >= threshold
         tk = tk.loc[tk]
 
-        tk_h2 = pd.Series(True, index=self.data.index)
-        for k, v in self.cut.items():
-            tk_ax = pd.IntervalIndex(v).isin(tk.index.get_level_values(k).unique())
-            tk_h2 = tk_h2 & tk_ax
+        tk_h2 = self._joint_bin_mask(tk.index)
 
         subset = self.data.loc[tk_h2].copy(deep=True)
         for k, log in self.log._asdict().items():

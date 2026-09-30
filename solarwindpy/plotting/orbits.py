@@ -59,6 +59,24 @@ class OrbitPlot(ABC):
         if orbit is not None:
             self._path = self.path / orbit.path
 
+    def _axis_normalizer(self, agg):
+        r"""Normalise each orbit leg separately with the histogram's normaliser.
+
+        Each leg is normalised once, by its own counts and bin widths, so the
+        legs do not share a normalisation.
+        """
+        normalize = super(OrbitPlot, self)._axis_normalizer
+        key = self._orbit_key
+        if key not in agg.index.names:
+            return normalize(agg)
+
+        legs = {
+            leg: normalize(at_leg.droplevel(key))
+            for leg, at_leg in agg.groupby(level=key, observed=True)
+        }
+        normalized = pd.concat(legs, names=[key])
+        return normalized.reorder_levels(agg.index.names).reindex(agg.index)
+
     def set_orbit(self, new):
         r"""`IntervalIndex` corresponding to the times we want to subset the orbit."""
         if not isinstance(new, pd.IntervalIndex):
@@ -109,6 +127,7 @@ class OrbitHist1D(OrbitPlot, histograms.Hist1D):
             tko = self.agg_axes
             gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
             agg_both = self._agg_runner(cut, tko, gb_both, fcn).copy(deep=True)
+            agg_both = self._axis_normalizer(agg_both)
 
             agg = agg.unstack("Orbit")
             agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
@@ -205,7 +224,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
     def agg(self, **kwargs):
         r"""Wrap Hist1D and Hist2D `agg` so that we can aggergate orbit legs.
 
-        Legs: Inbound, Outbound, and Both."""
+        Legs: Inbound, Outbound, and Both. `Hist2D.agg` normalises each leg
+        once, via `OrbitPlot._axis_normalizer`."""
         fcn = kwargs.pop("fcn", None)
         agg = super(OrbitHist2D, self).agg(fcn=fcn, **kwargs)
 
@@ -214,6 +234,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             tko = self.agg_axes
             gb_both = self.joint.drop("Orbit", axis=1).groupby(list(self._gb_axes))
             agg_both = self._agg_runner(cut, tko, gb_both, fcn).copy(deep=True)
+            agg_both = self._axis_normalizer(agg_both)
 
             agg = agg.unstack("Orbit")
             agg_both = pd.concat({"Both": agg_both}, axis=1, names=["Orbit"])
@@ -227,9 +248,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
                 .sort_index(axis=0)
             )
 
-        grouped = agg.groupby(self._orbit_key)
-        transformed = grouped.transform(self._axis_normalizer)
-        return transformed
+        return agg
 
     def project_1d(self, axis, project_counts=False, **kwargs):
         r"""Make a `Hist1D` from the data stored in this `His2D`.
@@ -265,8 +284,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             x = 10.0**x
 
         y = self.data.loc[:, other] if not project_counts else None
-        if y is not None:
-            # Only select y-values plotted.
+        if y is not None and (other == "y"):
+            # Only select y-values plotted. `z` has no bins and no log scale.
             logy = self.log._asdict()[other]
             yedges = self.edges[other].values
             y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
@@ -318,7 +337,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         if cbar:
             if cbar_kwargs is None:
                 cbar_kwargs = dict()
-            cbar = self._make_cbar(pc, ax, **cbar_kwargs)
+            cbar = self._make_cbar(pc, ax=ax, **cbar_kwargs)
 
         self._format_axis(ax)
 
@@ -357,7 +376,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         trans = {"i": "Inbound", "o": "Outbound", "b": "Both"}
         try:
             kind = trans[kind.lower()[0]]
-        except KeyError:
+        except (KeyError, IndexError):
             raise ValueError("Unrecognized kind '{}'".format(kind))
 
         if kind == "Both" and self._disable_both:

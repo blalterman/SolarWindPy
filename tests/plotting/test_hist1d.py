@@ -7,8 +7,9 @@ boolean mask) on the same input, and the bins are deliberately unequal in
 width so that an error in a bin width, a bin center, or a bin assignment
 cannot cancel out.
 
-Hist1D bins are right-closed, ``(a, b]``, where ``numpy.histogram`` bins are
-left-closed ``[a, b)``. The two agree whenever no sample sits exactly on an
+Hist1D bins from explicit edges are right-closed, ``(a, b]``, where
+``numpy.histogram`` bins are left-closed ``[a, b)``; bins from an integer
+``nbins`` follow numpy. The two agree whenever no sample sits exactly on an
 edge, which holds with probability one for the continuous random samples used
 here.
 """
@@ -142,19 +143,6 @@ class TestCounts:
         assert agg.size == 3
         np.testing.assert_array_equal(agg.fillna(0).values, [2, 0, 1 + 1 + 1])
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_CountsDisagreeWithNumpy,
-        reason=(
-            "AggPlot.calc_bins_intervals (agg_plot.py) derives integer-nbins "
-            "edges from the data range, rounds them to 5 decimals (which can "
-            "pull either outer edge inside the data) and closes intervals on "
-            "the right (which excludes a sample on the first edge), so "
-            "make_cut's pd.cut drops the extreme samples; this input counts "
-            "398 of 400; remove this marker when the outer edges enclose "
-            "every sample (both the rounding and the left end must change)"
-        ),
-    )
     def test_integer_nbins_counts_equal_numpy_histogram(self, xy):
         """With ``nbins`` an integer, counts equal numpy.histogram's and sum to N.
 
@@ -248,24 +236,13 @@ class TestDensity:
         )
         assert (agg.values * widths).sum() == pytest.approx(1.0, rel=1e-12, abs=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_DensityNotNormalised,
-        reason=(
-            "Hist1D._axis_normalizer (hist1d.py) divides log-space counts by "
-            "10**(log-space bin width), which is neither the log10 width nor "
-            "the linear width, so a logx density integrates to 1 over neither "
-            "variable; remove this marker when the logx density is normalised "
-            "over log10(x) or over x (the author chooses which)"
-        ),
-    )
-    def test_logx_density_integrates_to_one(self):
-        """A logx density integrates to 1 over log10(x) or over x.
+    def test_logx_density_integrates_to_one_over_log10_x(self):
+        """A logx density integrates to 1 over log10(x).
 
-        Either normalisation is a PDF; the test accepts both and rejects any
-        density that is a PDF over neither.
+        The author ruled that a logx density is normalised over log10(x): bar
+        areas on the log axis sum to 1.
 
-        ON FAILURE: the code is wrong.
+        ON FAILURE: the code is wrong, unless the author reverses that ruling.
         """
         rng = np.random.default_rng(7)
         x = pd.Series(10.0 ** rng.uniform(0.0, 2.0, 500))
@@ -274,14 +251,9 @@ class TestDensity:
         agg = Hist1D(x, logx=True, axnorm="d", nbins=log_edges).agg()
 
         over_log = (agg.values * np.diff(log_edges)).sum()
-        over_linear = (agg.values * np.diff(10.0**log_edges)).sum()
         # Tolerance: a handful of float divisions and sums.
-        if not (
-            np.isclose(over_log, 1, rtol=1e-9) or np.isclose(over_linear, 1, rtol=1e-9)
-        ):
-            raise _DensityNotNormalised(
-                f"integral over log10(x) = {over_log}, over x = {over_linear}"
-            )
+        if not np.isclose(over_log, 1, rtol=1e-9, atol=0):
+            raise _DensityNotNormalised(f"integral over log10(x) = {over_log}")
 
 
 class TestMakePlot:
@@ -393,16 +365,6 @@ class TestMakePlot:
             _line_xy(ax.lines[0])[1], expected, rtol=1e-12, atol=0
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_SmoothedCountsTruncated,
-        reason=(
-            "Hist1D.make_plot (hist1d.py) passes integer counts to "
-            "scipy.ndimage.gaussian_filter, whose output keeps the input dtype, "
-            "so smoothed counts are truncated to integers; remove this marker "
-            "when make_plot smooths a float copy of the aggregate"
-        ),
-    )
     def test_gaussian_smoothing_of_counts_is_not_truncated(self, xy):
         """Smoothed counts equal scipy's Gaussian filter of the float counts.
 
@@ -470,16 +432,6 @@ class TestMakePlot:
         np.testing.assert_allclose(_line_xy(upper)[1], mean + std, rtol=1e-12, atol=0)
         np.testing.assert_allclose(_line_xy(lower)[1], mean - std, rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "Hist1D.make_plot (hist1d.py) swaps (dx, dy) under transpose_axes, "
-            "so plot_window computes y - dy with dy None; expected "
-            "'unsupported operand type(s) for -: ... NoneType'; remove this "
-            "marker when the transposed window uses the swapped uncertainty"
-        ),
-    )
     def test_transposed_plot_window_spans_x_minus_to_plus_dx(self, xy):
         """Transposed, the band spans value -/+ error horizontally at each center.
 
@@ -556,18 +508,6 @@ class TestConstructCdf:
         with pytest.raises(ValueError, match="Only able to convert data to a cdf"):
             Hist1D(x, y, nbins=EDGES).construct_cdf(only_plotted=False)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=(
-            "Hist1D.agg() returns an index named None (AggPlot._agg_reindexer "
-            "reindexes to the unnamed categorical), so "
-            "AggPlot.get_plotted_data_boolean_series' get_level_values('x') "
-            "raises; expected 'Requested level (x) does not match index name "
-            "(None)'; remove this marker when Hist1D.agg() keeps its 'x' index "
-            "name"
-        ),
-    )
     def test_default_cdf_with_every_bin_plotted_is_the_whole_binned_sample(self, xy):
         """With every bin populated, the default cdf equals the unfiltered one.
 

@@ -7,11 +7,12 @@ come from numpy (``histogram_bin_edges``, ``histogram``, ``histogram2d``,
 ``digitize``, ``quantile``, ``clip``), ``scipy.stats.binned_statistic_2d``,
 ``astropy.stats.knuth_bin_width``, and hand computations.
 
-Auto-computed outer edges sit exactly on the data extrema, and the
-right-closed bins then drop the minimum; that defect is already a strict xfail
-in ``tests/plotting/test_hist2d_plotting.py`` (``test_edges_span_the_data``,
-``test_auto_bins_retain_every_observation``). Tests here that count
-observations therefore use explicit edges that bracket the data.
+Edges from an integer ``nbins`` follow ``numpy.histogram``: the outer edges
+enclose every sample and the bins are closed on the left, the last also on the
+right (``tests/plotting/test_hist2d_plotting.py``, ``test_edges_span_the_data``,
+``test_auto_bins_retain_every_observation``). Explicit edges give right-closed
+bins, so tests here that count observations use explicit edges that bracket
+the data.
 """
 
 import numpy as np
@@ -390,22 +391,6 @@ def _selected_by_axis_alone(x, y, keep_bin):
     return keep_x & keep_y
 
 
-MARGINAL_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot.{method} builds its mask one axis "
-    "at a time (x-bin among kept x-bins AND y-bin among kept y-bins), so in 2-D "
-    "a point whose own (x, y) bin was dropped is still selected; remove this "
-    "marker when the mask tests the joint (x, y) bin."
-)
-
-ONE_D_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot._agg_reindexer replaces the 1-D "
-    "agg index with the unnamed categorical, so AggPlot.{method} raises "
-    "KeyError: 'Requested level (x) does not match index name (None)' for "
-    "every Hist1D (Hist1D.construct_cdf(only_plotted=True) too); remove this "
-    "marker when the 1-D agg index keeps the name x."
-)
-
-
 class TestSelection:
     """Masks and subsets that map aggregated bins back to observations."""
 
@@ -442,16 +427,10 @@ class TestSelection:
         assert mask.index.equals(h.data.index)
         assert mask[_count_of_own_bin(x, y) >= self.CLIM].all()
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=SelectedPointInDroppedBin,
-        reason=MARGINAL_REASON.format(method="get_plotted_data_boolean_series"),
-    )
     def test_plotted_mask_excludes_points_in_bins_dropped_by_clim(self, xyz):
         """With clim (12, None), no point in a bin of < 12 points is plotted.
 
-        ON FAILURE: (unexpected pass) the mask now tests the joint bin; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, y, _ = xyz
         h = Hist2D(x, y, nbins=[X_EDGES, Y_EDGES])
@@ -475,16 +454,10 @@ class TestSelection:
         expected = pd.DataFrame({"x": x, "y": y, "z": z})[dense]
         pd.testing.assert_frame_equal(subset.loc[expected.index], expected)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=SelectedPointInDroppedBin,
-        reason=MARGINAL_REASON.format(method="get_subset_above_threshold"),
-    )
     def test_subset_above_threshold_excludes_rows_in_sparse_bins(self, xyz):
         """No row whose bin count is < 14 is in the subset.
 
-        ON FAILURE: (unexpected pass) the mask now tests the joint bin; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, y, z = xyz
         h = Hist2D(x, y, z, nbins=[X_EDGES, Y_EDGES])
@@ -493,17 +466,11 @@ class TestSelection:
         if mask.to_numpy()[sparse].any():
             raise SelectedPointInDroppedBin(f"{mask.to_numpy()[sparse].sum()} rows")
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=ONE_D_REASON.format(method="get_plotted_data_boolean_series"),
-    )
     def test_1d_plotted_mask_follows_clim(self, xyz):
         """In 1-D a point is plotted iff its x bin holds >= 52 points.
 
         np.histogram counts over X_EDGES straddle 52 for this fixture (asserted).
-        ON FAILURE: (unexpected pass) the 1-D agg index is named; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, _, _ = xyz
         counts, _ = np.histogram(x, bins=X_EDGES)
@@ -514,16 +481,10 @@ class TestSelection:
         mask = h.get_plotted_data_boolean_series()
         np.testing.assert_array_equal(mask.to_numpy(), expected)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=ONE_D_REASON.format(method="get_subset_above_threshold"),
-    )
     def test_1d_subset_above_threshold_keeps_rows_in_dense_bins(self, xyz):
         """In 1-D the subset is the rows whose x bin holds >= 52 points.
 
-        ON FAILURE: (unexpected pass) the 1-D agg index is named; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         x, _, _ = xyz
         counts, _ = np.histogram(x, bins=X_EDGES)
@@ -551,14 +512,6 @@ class TestSelection:
 # ---------------------------------------------------------------------------
 # clip_data
 # ---------------------------------------------------------------------------
-
-ONE_TAIL_REASON = (
-    "solarwindpy/plotting/agg_plot.py AggPlot.clip_data calls "
-    "{kind}.clip_lower / .clip_upper, which pandas removed, so the one-tail "
-    "branches raise AttributeError: '{kind}' object has no attribute "
-    "'clip_lower' (or 'clip_upper'); remove this marker when they use "
-    ".clip(lower=...) / .clip(upper=...)."
-)
 
 SERIES = pd.Series(np.arange(1.0, 11.0))
 FRAME = pd.DataFrame({"a": np.arange(1.0, 6.0), "b": np.arange(10.0, 60.0, 10.0)})
@@ -595,16 +548,10 @@ class TestClipData:
         np.testing.assert_allclose(result, np.clip(FRAME, lo, hi), rtol=1e-12, atol=0)
         assert list(result.columns) == ["a", "b"]
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_series_lower(self):
         """``"l"`` raises only the low tail: 1 becomes 1.0009, 10 stays 10.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(SERIES, "l")
         expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
@@ -613,16 +560,10 @@ class TestClipData:
         assert result.iloc[0] == pytest.approx(1.0009, rel=1e-12, abs=0)
         assert result.iloc[-1] == 10.0
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_series_upper(self):
         """``"u"`` lowers only the high tail: 10 becomes 9.9991, 1 stays 1.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(upper=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(SERIES, "u")
         expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
@@ -631,48 +572,30 @@ class TestClipData:
         assert result.iloc[-1] == pytest.approx(9.9991, rel=1e-12, abs=0)
         assert result.iloc[0] == 1.0
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="DataFrame"),
-    )
     def test_dataframe_lower(self):
         """``"l"`` clips each column's low tail at that column's percentile.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(FRAME, "l")
         lo = np.quantile(FRAME, 1e-4, axis=0)
         # rel 1e-12: float rounding only.
         np.testing.assert_allclose(result, np.clip(FRAME, lo, None), rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="DataFrame"),
-    )
     def test_dataframe_upper(self):
         """``"u"`` clips each column's high tail at that column's percentile.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(upper=...); drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         result = AggPlot.clip_data(FRAME, "u")
         hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
         # rel 1e-12: float rounding only.
         np.testing.assert_allclose(result, np.clip(FRAME, None, hi), rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=ONE_TAIL_REASON.format(kind="Series"),
-    )
     def test_tail_selector_is_case_insensitive(self):
         """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
 
-        ON FAILURE: (unexpected pass) clip_data uses .clip(lower=/upper=...);
-        drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         lower = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
         upper = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
@@ -687,22 +610,10 @@ class TestClipData:
                 AggPlot.clip_data(SERIES, mode), expected, rtol=1e-12, atol=0
             )
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason=(
-            "solarwindpy/plotting/agg_plot.py AggPlot.clip_data calls "
-            "data.quantile before its Series/DataFrame check, so a list raises "
-            "AttributeError: 'list' object has no attribute 'quantile' instead "
-            "of the intended TypeError('Unexpected object ...'); remove this "
-            "marker when the type check comes first."
-        ),
-    )
     def test_rejects_non_pandas_input_with_typeerror(self):
         """A list is neither Series nor DataFrame and raises TypeError.
 
-        ON FAILURE: (unexpected pass) the type check now precedes quantile;
-        drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         with pytest.raises(TypeError, match="Unexpected object"):
             AggPlot.clip_data([1.0, 2.0, 3.0], True)

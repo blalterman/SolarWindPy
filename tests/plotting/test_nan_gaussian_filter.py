@@ -150,22 +150,10 @@ class TestNanGaussianFilter:
         nan_gaussian_filter(arr, sigma=1.0)
         np.testing.assert_array_equal(arr, before)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "solarwindpy/plotting/tools.py nan_gaussian_filter keeps the input "
-            "dtype: gaussian_filter returns integers for an integer array and "
-            "np.divide cannot write float into it (UFuncTypeError: Cannot cast "
-            "ufunc 'divide' output from dtype('float64') to dtype('int64')); "
-            "remove this marker when the input is cast to float first."
-        ),
-    )
     def test_integer_array_is_filtered_like_its_float_copy(self):
         """An integer count grid smooths to the same values as its float copy.
 
-        ON FAILURE: (unexpected pass) the input is now cast to float; drop the
-        xfail marker.
+        ON FAILURE: the code is wrong.
         """
         counts = np.array([[0, 10, 0], [0, 0, 5]])
         result = nan_gaussian_filter(counts, sigma=1.0)

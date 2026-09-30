@@ -158,6 +158,9 @@ class Hist1D(AggPlot):
         Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but
         as actual method with `self` passed so we have access to `self.log` for density
         normalization.
+
+        Under ``logx`` the density is normalised over ``log10(x)``: the bins are
+        log-space intervals, so bar areas on the log axis sum to 1.
         """
 
         axnorm = self.axnorm
@@ -165,9 +168,8 @@ class Hist1D(AggPlot):
             pass
         elif axnorm == "d":
             n = agg.sum()
+            # Widths are in the binned variable, log10(x) under logx.
             dx = pd.Series(pd.IntervalIndex(agg.index).length, index=agg.index)
-            if self.log.x:
-                dx = 10.0**dx
             agg = agg.divide(dx.multiply(n))
 
         elif axnorm == "t":
@@ -274,7 +276,10 @@ class Hist1D(AggPlot):
             if gaussian_filter_kwargs is None:
                 gaussian_filter_kwargs = dict()
 
-            y = gaussian_filter(y, gaussian_filter_std, **gaussian_filter_kwargs)
+            # Filter a float copy: integer counts would truncate the smoothed values.
+            y = gaussian_filter(
+                np.array(y, dtype=float), gaussian_filter_std, **gaussian_filter_kwargs
+            )
 
         drawstyle = kwargs.pop("drawstyle", "steps-mid")
 
@@ -285,9 +290,17 @@ class Hist1D(AggPlot):
         window_kwargs = kwargs.pop("window_kwargs", dict())
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         if plot_window:
-            window_plotter = ax.fill_between
+            # The window spans the dependent values, which transposing moves to x.
             if transpose_axes:
+                lower = (x - dx, y)
+                upper = (x + dx, y)
+                band = (y, x - dx, x + dx)
                 window_plotter = ax.fill_betweenx
+            else:
+                lower = (x, y - dy)
+                upper = (x, y + dy)
+                band = (x, y - dy, y + dy)
+                window_plotter = ax.fill_between
 
             color = kwargs.pop("color", None)
             ls = kwargs.pop("linestyle", "-")
@@ -300,24 +313,20 @@ class Hist1D(AggPlot):
             line = ax.plot(x, y, color=color, linestyle=ls, label=label, **kwargs)
             if plot_window_edges:
                 ax.plot(
-                    x,
-                    y + dy,
+                    *upper,
                     color=window_color,
                     linestyle=window_linestyle,
                     **window_kwargs,
                 )
                 ax.plot(
-                    x,
-                    y - dy,
+                    *lower,
                     color=window_color,
                     linestyle=window_linestyle,
                     **window_kwargs,
                 )
 
             polycol = window_plotter(
-                x,
-                y - dy,
-                y + dy,
+                *band,
                 color=window_color,
                 linestyle=window_linestyle,
                 alpha=window_alpha,
