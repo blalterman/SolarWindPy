@@ -8,48 +8,38 @@ Installation
 Requirements
 ------------
 
-SolarWindPy requires Python 3.11 or later and has the following core
-dependencies:
+``pyproject.toml`` is the single declaration of what SolarWindPy needs:
+``requires-python`` gives the supported Python versions and ``dependencies``
+gives the supported range of each required package. The
+`PyPI page <https://pypi.org/project/solarwindpy/>`_ shows the same metadata for
+each published release. :command:`pip` and :command:`conda` enforce these
+ranges when they install the package, so you do not need to install the
+dependencies yourself.
 
-- NumPy ≥ 1.22
-- Pandas ≥ 1.5
-- SciPy ≥ 1.10
-- Matplotlib ≥ 3.5
-- Astropy ≥ 5.0
+A published release and the development version can declare different ranges.
+Read the ``pyproject.toml`` of the version you install.
 
 Installation from PyPI
 ----------------------
-
-The recommended way to install SolarWindPy is from PyPI using :command:`pip`:
 
 .. code-block:: bash
 
    pip install solarwindpy
 
-This will install the latest stable release along with all required
-dependencies.
+This installs the latest published release and its required dependencies.
 
 Installation from conda-forge
-------------------------------
-
-SolarWindPy is also available through conda-forge:
+-----------------------------
 
 .. code-block:: bash
 
    conda install -c conda-forge solarwindpy
 
-.. note::
-
-   The conda-forge package for v0.1.5 is temporarily unavailable due to
-   CI infrastructure issues (see `issue #8 <https://github.com/conda-forge/solarwindpy-feedstock/issues/8>`_).
-   Install from PyPI to get the latest version. The conda-forge package will be
-   updated once the issue is resolved.
-
 Development Installation
 ------------------------
 
-To work with the latest development version, clone the repository and install
-in development mode:
+To work with the development version, clone the repository and install it in
+editable mode:
 
 .. code-block:: bash
 
@@ -57,22 +47,25 @@ in development mode:
    cd SolarWindPy
    pip install -e .
 
-For contributors, install the additional development tools:
+Contributors can install the testing, documentation, and linting tools
+declared in the ``dev`` extra instead:
 
 .. code-block:: bash
 
    pip install -e ".[dev]"
 
 Conda Environment Setup
-------------------------
+-----------------------
 
-For a complete scientific Python environment, use the provided conda
-environment file:
+The repository's ``solarwindpy.yml`` creates a conda environment with the
+dependencies and development tools, but not SolarWindPy itself. Install the
+package into the environment afterwards:
 
 .. code-block:: bash
 
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
+   pip install -e .
 
 Verification
 ------------
@@ -89,7 +82,9 @@ Troubleshooting
 
 If you encounter installation issues:
 
-1. Ensure you have Python 3.11 or later
+1. Check that your Python version satisfies ``requires-python`` for the
+   version you are installing (see `Requirements`_)
 2. Update pip: ``pip install --upgrade pip``
 3. Consider using a virtual environment
-4. Check the `GitHub Issues <https://github.com/blalterman/SolarWindPy/issues>`_ for known problems
+4. Check the `GitHub Issues <https://github.com/blalterman/SolarWindPy/issues>`_
+   for known problems

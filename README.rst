@@ -43,7 +43,7 @@ After installation, import the package and create a plasma object with sample da
    plasma = swp.Plasma(data, 'p1', 'a')
 
    # Access ion species
-   print(plasma.species)  # ['p1', 'a']
+   print(plasma.species)  # ('a', 'p1')
    print(f"Proton density: {plasma.p1.n.mean():.1f} cm⁻³")
 
 See the documentation for detailed usage examples and API reference.
@@ -51,7 +51,10 @@ See the documentation for detailed usage examples and API reference.
 Installation
 ============
 
-SolarWindPy requires Python 3.11 or later.
+The supported Python versions and dependency ranges are declared in
+`pyproject.toml <https://github.com/blalterman/SolarWindPy/blob/master/pyproject.toml>`_
+(``requires-python`` and ``dependencies``); the PyPI page
+shows them for each published release.
 
 SolarWindPy is available via PyPI and conda-forge:
 
@@ -62,7 +65,7 @@ Install from PyPI:
 
 .. code-block:: bash
 
-   pip install solarwindpy  # Requires Python 3.11+
+   pip install solarwindpy
 
 Or install from conda-forge:
 
@@ -86,7 +89,7 @@ Development
 
    .. code-block:: bash
 
-      conda env create -f solarwindpy.yml  # Python 3.12+
+      conda env create -f solarwindpy.yml
       conda activate solarwindpy
       pip install -e .
 
