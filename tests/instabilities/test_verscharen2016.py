@@ -387,15 +387,19 @@ def test_plot_contours_draws_every_published_threshold_on_log_axes():
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
 
 
-def test_plot_contours_fix_scale_false_leaves_axes_linear():
+def test_plot_contours_fix_scale_false_keeps_caller_scales():
     """fix_scale=False leaves the axes scales as the caller had them.
+
+    The caller's scales are mixed (log x, linear y), so both a reset to linear
+    and a forced log-log would fail.
 
     ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
+    ax.set_xscale("log")
     sc.plot_contours(ax, fix_scale=False)
-    assert (ax.get_xscale(), ax.get_yscale()) == ("linear", "linear")
+    assert (ax.get_xscale(), ax.get_yscale()) == ("log", "linear")
 
 
 @pytest.mark.parametrize("growth_rate", GROWTH_RATES)
