@@ -828,3 +828,60 @@ class TestNormalParameters:
         # rel 1e-10: as above.
         assert mu == pytest.approx(dist.mean(), rel=1e-10, abs=0)
         assert sigma == pytest.approx(dist.std(), rel=1e-10, abs=0)
+
+    @pytest.mark.parametrize("base", [10.0, 2.0])
+    def test_other_base_matches_scipy_lognorm_scaled_by_ln_base(self, base):
+        """A base-b log-normal matches scipy's lognorm(s ln b, scale=b^m).
+
+        For log_b(X) ~ N(m, s), ln X ~ N(m ln b, s ln b).
+
+        ON FAILURE: the code is wrong.
+        """
+        m = pd.Series([0.0, 1.0, -0.5, 0.3])
+        s = pd.Series([0.05, 0.2, 0.4, 0.1])
+        result = normal_parameters(m, s, base=base)
+        dist = stats.lognorm(s=s.values * np.log(base), scale=base**m.values)
+        # rel 1e-10: scipy evaluates equivalent closed forms in another order.
+        np.testing.assert_allclose(result["mu"], dist.mean(), rtol=1e-10, atol=0)
+        np.testing.assert_allclose(result["sigma"], dist.std(), rtol=1e-10, atol=0)
+
+    def test_base_e_is_the_default(self):
+        """``base=np.e`` reproduces the default natural-log result.
+
+        ON FAILURE: the code is wrong.
+        """
+        m = pd.Series([0.0, 1.0, -0.5])
+        s = pd.Series([0.25, 0.5, 1.0])
+        # rel 1e-12: ln(e) is 1 up to rounding.
+        pd.testing.assert_frame_equal(
+            normal_parameters(m, s, base=np.e),
+            normal_parameters(m, s),
+            rtol=1e-12,
+            atol=0,
+        )
+
+    @pytest.mark.parametrize("base", [np.e, 10.0])
+    def test_sample_mean_of_base_b_lognormal_matches_mu(self, base):
+        """Sampled X = b^Z, Z ~ N(m, s), has mean within 4 standard errors of mu.
+
+        Fixed seed; the standard error is sigma / sqrt(N).
+
+        ON FAILURE: the code is wrong.
+        """
+        m, s, n = 0.5, 0.2, 200_000
+        z = np.random.default_rng(20260930).normal(m, s, n)
+        x = base**z
+        mu, sigma = normal_parameters(m, s, base=base)
+        # 4 standard errors: passes for almost any seed, per TEST_PATTERNS.
+        assert abs(x.mean() - mu) < 4.0 * sigma / np.sqrt(n)
+        # sigma itself: sample std within 4 percent (its own error is ~0.3 %).
+        assert x.std() == pytest.approx(sigma, rel=0.04, abs=0)
+
+    @pytest.mark.parametrize("base", [1.0, 0.0, -10.0, np.nan])
+    def test_invalid_base_raises_value_error(self, base):
+        """A base that is not positive, finite, and != 1 is rejected.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match="base"):
+            normal_parameters(0.0, 0.1, base=base)

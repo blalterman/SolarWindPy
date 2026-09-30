@@ -3,8 +3,8 @@
 
 This module contains helper functions that are not yet organized into
 their own submodules. The functions are primarily used for handling
-proton data and for converting log-normal parameters to their normal
-form.
+proton data and for the mean and standard deviation of a log-normal
+variable.
 
 Functions
 ---------
@@ -12,7 +12,7 @@ swap_protons
     Swap beam and core proton labels when the beam density exceeds the
     core density.
 normal_parameters
-    Convert log-normal distribution parameters to normal parameters.
+    Mean and standard deviation of a log-normal variable.
 
 Examples
 --------
@@ -117,41 +117,77 @@ def swap_protons(data, logger=None):
     return new_data, swap
 
 
-def normal_parameters(m, s):
-    r"""Convert log-normal parameters to normal distribution parameters.
+def normal_parameters(m, s, base=np.e):
+    r"""Mean and standard deviation of a log-normal variable.
+
+    Given :math:`\log_b X \sim \mathcal{N}(m, s^2)`, return the mean and the
+    standard deviation of :math:`X` itself.
 
     Parameters
     ----------
-    m : pandas.Series or numpy.ndarray
-        Mean of the log-normal distribution.
-    s : pandas.Series or numpy.ndarray
-        Standard deviation of the log-normal distribution.
+    m : float, pandas.Series or numpy.ndarray
+        Mean of :math:`\log_b X`.
+    s : float, pandas.Series or numpy.ndarray
+        Standard deviation of :math:`\log_b X`.
+    base : float, default ``np.e``
+        Base :math:`b` of the logarithm in which ``m`` and ``s`` are given,
+        e.g. ``10`` for a base-10 log-normal. Must be positive, finite, and
+        not 1.
 
     Returns
     -------
-    pandas.DataFrame
-        Data frame with columns ``mu`` and ``sigma``.
+    pandas.DataFrame or pandas.Series
+        ``mu`` (mean of :math:`X`) and ``sigma`` (standard deviation of
+        :math:`X`): DataFrame columns for Series input, Series entries for
+        scalar input, so ``mu, sigma = normal_parameters(m, s)`` unpacks.
+
+    Raises
+    ------
+    ValueError
+        If ``base`` is not positive, finite, and different from 1.
 
     Notes
     -----
-    The conversion uses
+    Since :math:`\ln X = \ln(b)\,\log_b X`, :math:`\ln X \sim
+    \mathcal{N}(\mu_e, \sigma_e^2)` with :math:`\mu_e = m \ln b` and
+    :math:`\sigma_e = s \ln b`. The log-normal moments are then
+    [1]_ (eq. 8)
 
     .. math::
-       \mu = \exp[m + s^2/2]
+       \mu = \exp[\mu_e + \sigma_e^2/2]
 
     .. math::
-       \sigma = \sqrt{\exp[s^2 + 2m]\,(\exp[s^2] - 1)}
+       \sigma = \sqrt{\exp[2\mu_e + \sigma_e^2]\,(\exp[\sigma_e^2] - 1)}
 
-    These expressions apply to both natural logarithms and base-10 logarithms.
+    and the median is :math:`\exp(\mu_e) = b^m`. The rescaling by
+    :math:`\ln b` is the decibel-to-natural-unit conversion of [1]_ (eq. 9).
+    Base-``b`` parameters must be rescaled, not substituted into these
+    formulas as :math:`b^{m + s^2/2}`.
+
+    References
+    ----------
+    .. [1] Fenton, L. F. (1960). The sum of log-normal probability
+       distributions in scatter transmission systems. IRE Transactions on
+       Communications Systems, 8(1), 57-67. doi:10.1109/TCOM.1960.1097606
 
     Examples
     --------
-    >>> import numpy as np
-    >>> m, s = 1.0, 0.5  # log-normal parameters
+    >>> m, s = 1.0, 0.5  # mean and std of ln(X)
     >>> mu, sigma = normal_parameters(m, s)
-    >>> mu > 1.0  # Normal mean should be > 1
+    >>> bool(mu > np.exp(m))  # the mean exceeds the median e^m
+    True
+    >>> mu10, _ = normal_parameters(0.0, 0.1, base=10)  # log10(X) ~ N(0, 0.1)
+    >>> bool(mu10 > 1.0)
     True
     """
+    base = float(base)
+    if not (np.isfinite(base) and base > 0.0 and base != 1.0):
+        raise ValueError(f"base must be positive, finite, and != 1, got {base}")
+
+    ln_base = np.log(base)
+    m = m * ln_base
+    s = s * ln_base
+
     mu = np.exp(m + ((s**2.0) / 2.0))
     sigma = np.exp(s**2.0 + 2.0 * m)
     sigma *= np.exp(s**2.0) - 1.0
