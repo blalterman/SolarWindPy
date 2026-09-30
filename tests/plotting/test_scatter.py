@@ -181,15 +181,19 @@ def test_axis_limits_hug_the_plotted_points(ax):
     assert ax.get_ylim() == (ys.min(), ys.max())
 
 
-def test_set_log_makes_the_plotted_axis_logarithmic(ax):
-    """``set_log(x=True)`` gives a log x axis and leaves y linear.
+@pytest.mark.parametrize(
+    "axis, expected",
+    [("x", ("log", "linear")), ("y", ("linear", "log"))],
+)
+def test_set_log_makes_the_plotted_axis_logarithmic(ax, axis, expected):
+    """``set_log(<axis>=True)`` makes that axis log and leaves the other linear.
 
     ON FAILURE: the code is wrong.
     """
     sc = Scatter(X, Y)
-    sc.set_log(x=True)
+    sc.set_log(**{axis: True})
     sc.make_plot(ax=ax)
-    assert (ax.get_xscale(), ax.get_yscale()) == ("log", "linear")
+    assert (ax.get_xscale(), ax.get_yscale()) == expected
 
 
 def test_list_inputs_plot_the_same_points_as_series(ax):
