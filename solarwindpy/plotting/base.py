@@ -335,22 +335,62 @@ class PlotWithZdata(Base):
     r"""Base for plots of x, y data with an optional z value per point."""
 
     _alim = (None, None)
+    _alim_kind = "value"
 
     @property
     def alim(self):
         r"""``(lower, upper)`` limits on the aggregated value; see ``set_alim``."""
         return self._alim
 
-    def set_alim(self, lower=None, upper=None):
+    @property
+    def alim_kind(self):
+        r"""``"value"`` or ``"quantile"``: how ``alim`` is read; see ``set_alim``."""
+        return self._alim_kind
+
+    def set_alim(self, lower=None, upper=None, kind="value"):
         r"""Set the minimum (lower) and maximum (upper) allowed aggregated value.
 
         Unlike ``clim``, which limits the number of points in a bin, ``alim``
-        limits the value the bin aggregates to, after any ``axnorm``. Bins
-        outside ``[lower, upper]`` become NaN. None leaves that side open.
+        limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
+        any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
+        inclusive and None leaves that side open.
+
+        Parameters
+        ----------
+        lower, upper : float or None
+            The limits.
+        kind : {"value", "quantile"}
+            ``"value"``: the limits are aggregated values. ``"quantile"``: the
+            limits are quantiles in [0, 1] of the final aggregated values,
+            computed with :func:`numpy.nanquantile` over the finite values
+            (NaN and inf excluded) each time the plot aggregates. The
+            quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
+            or ``"r"`` they are taken over the whole grid, not per column or
+            row, and an orbit plot pools all of its legs.
+
+        Raises
+        ------
+        ValueError
+            If ``kind`` is not ``"value"`` or ``"quantile"``, or, for
+            ``"quantile"``, if a limit is outside [0, 1] or ``lower`` is not
+            less than ``upper``.
         """
+        if kind not in ("value", "quantile"):
+            raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
+        if kind == "quantile":
+            for name, q in (("lower", lower), ("upper", upper)):
+                if q is not None and not 0 <= q <= 1:
+                    raise ValueError(
+                        f"quantile alim {name}={q} must be between 0 and 1"
+                    )
+            if lower is not None and upper is not None and not lower < upper:
+                raise ValueError(
+                    f"quantile alim lower={lower} must be less than upper={upper}"
+                )
         self._alim = (lower, upper)
+        self._alim_kind = kind
 
     def _apply_alim(self, agg):
         r"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.
@@ -358,7 +398,9 @@ class PlotWithZdata(Base):
         Parameters
         ----------
         agg : pd.Series
-            The final aggregated values, one per bin or cell.
+            The final aggregated values, one per bin or cell. With
+            ``alim_kind == "quantile"`` the thresholds are quantiles of all
+            of its finite entries.
 
         Returns
         -------
@@ -368,6 +410,16 @@ class PlotWithZdata(Base):
         lower, upper = self.alim
         if lower is None and upper is None:
             return agg
+
+        if self.alim_kind == "quantile":
+            values = agg.to_numpy(dtype=float)
+            values = values[np.isfinite(values)]
+            if values.size == 0:
+                return agg
+            if lower is not None:
+                lower = np.nanquantile(values, lower)
+            if upper is not None:
+                upper = np.nanquantile(values, upper)
 
         keep = pd.Series(True, index=agg.index)
         if lower is not None:

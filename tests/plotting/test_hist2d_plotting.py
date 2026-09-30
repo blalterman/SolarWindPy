@@ -937,6 +937,84 @@ class TestAggregationLimits:
             np.nan_to_num(z_means, nan=0.0) >= 3.0,
         )
 
+    def test_quantile_alim_keeps_bins_between_the_quantiles_of_the_counts(
+        self, known_hist
+    ):
+        """`set_alim(0.25, 0.75, kind="quantile")` keeps counts between 2 and 4.
+
+        The quantiles are of the 14 occupied bins of ``KNOWN_COUNTS``; empty
+        bins are NaN and excluded. Sorted: 1,1,1,2,2,2,2,3,3,4,4,5,5,6. The
+        25% quantile sits at position 3.25, between two 2s, and the 75%
+        quantile at 9.75, between two 4s, so both bounds land on data values
+        and the inclusive comparison is exercised.
+
+        ON FAILURE: the code is wrong.
+        """
+        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's bins
+        lo, hi = np.quantile(occupied, [0.25, 0.75])
+        assert (lo, hi) == (2.0, 4.0)  # hand-computed, see docstring
+
+        known_hist.set_alim(0.25, 0.75, kind="quantile")
+        grid = known_hist.agg().unstack("x").values
+
+        kept = (KNOWN_COUNTS >= lo) & (KNOWN_COUNTS <= hi)
+        np.testing.assert_array_equal(~np.isnan(grid), kept)
+        np.testing.assert_array_equal(grid[kept], KNOWN_COUNTS[kept])
+
+    def test_quantile_alim_ignores_infinite_values(self):
+        """Quantiles are of the finite values; an infinite bin is outside them.
+
+        One point per bin of the 4 x 5 grid, z = 1..19 and one inf. With the
+        upper quantile 1.0 the threshold is 19, the largest finite value, so
+        every finite bin survives and the inf bin is masked. Were inf pooled,
+        the threshold would be inf or NaN.
+
+        ON FAILURE: the code is wrong.
+        """
+        ones = np.ones_like(KNOWN_COUNTS)
+        x, y = _points_from_counts(ones, XEDGES, YEDGES)
+        z = np.arange(1.0, ones.size + 1.0)
+        z[-1] = np.inf
+        h = Hist2D(x, y, pd.Series(z, name="z"), nbins=[XEDGES, YEDGES])
+
+        h.set_alim(None, 1.0, kind="quantile")
+        agg = h.agg()
+
+        assert agg.max() == 19.0  # the largest finite z, by construction
+        assert agg.notna().sum() == ones.size - 1
+
+    @pytest.mark.parametrize(
+        "limits, kind, match",
+        [
+            ((0.1, 0.9), "percentile", "must be 'value' or 'quantile'"),
+            ((-0.1, None), "quantile", "lower=-0.1 must be between 0 and 1"),
+            ((None, 1.5), "quantile", "upper=1.5 must be between 0 and 1"),
+            ((0.8, 0.2), "quantile", "must be less than upper"),
+            ((0.5, 0.5), "quantile", "must be less than upper"),
+        ],
+        ids=["kind", "below-0", "above-1", "reversed", "equal"],
+    )
+    def test_invalid_alim_is_rejected(self, known_hist, limits, kind, match):
+        """An unknown kind, a quantile outside [0, 1], or lower >= upper is refused.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=match):
+            known_hist.set_alim(*limits, kind=kind)
+
+    def test_alim_is_the_limit_pair_and_alim_kind_how_to_read_it(self, known_hist):
+        """`alim` is the `(lower, upper)` pair and `alim_kind` defaults to "value".
+
+        ON FAILURE: the code is wrong.
+        """
+        assert known_hist.alim == (None, None)
+        assert known_hist.alim_kind == "value"
+        known_hist.set_alim(0.1, 0.9, kind="quantile")
+        assert known_hist.alim == (0.1, 0.9)
+        assert known_hist.alim_kind == "quantile"
+        known_hist.set_alim(2.0, None)
+        assert (known_hist.alim, known_hist.alim_kind) == ((2.0, None), "value")
+
 
 class TestGetBorder:
     """The top and bottom occupied bin in each column."""

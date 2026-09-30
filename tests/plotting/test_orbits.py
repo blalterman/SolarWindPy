@@ -512,6 +512,35 @@ class TestOrbitHist2DPlots:
         assert axes["Inbound"].get_xlim() == (hi, lo)
         assert lo <= XEDGES[0] and XEDGES[-1] <= hi
 
+    def test_quantile_alim_pools_the_legs_into_one_threshold(self):
+        """Quantile ``alim`` takes one pair of thresholds from all legs together.
+
+        The per-cell mean z is Inbound 0.5, 2, 3.5 and Outbound 5, 6, 7.5, 9.
+        Pooled, the 25% and 75% quantiles fall at positions 1.5 and 4.5:
+        2.75 and 6.75, so Inbound keeps 3.5 and Outbound keeps 5 and 6.
+        Quantiles taken per leg would keep Inbound's 2 instead.
+
+        ON FAILURE: the code is wrong.
+        """
+        means = _means("z", "x", "y")
+        lo, hi = np.quantile(list(means.values()), [0.25, 0.75])
+        assert (lo, hi) == pytest.approx((2.75, 6.75), rel=REL, abs=0)  # hand-computed
+
+        h = _hist2d(z=Z)
+        h.set_alim(0.25, 0.75, kind="quantile")
+        axes, _ = h.make_in_out_plot(cbar=False)
+
+        for leg in LEGS:
+            grid = _grid(means, leg)
+            expected = np.where((grid >= lo) & (grid <= hi), grid, np.nan)
+            # rel REL: means of a few exactly representable numbers.
+            np.testing.assert_allclose(
+                _mesh_values(axes[leg]), expected, rtol=REL, atol=0
+            )
+        kept = {leg: np.sort(_mesh_values(axes[leg]).ravel()) for leg in LEGS}
+        assert kept["Inbound"][~np.isnan(kept["Inbound"])].tolist() == [3.5]
+        assert kept["Outbound"][~np.isnan(kept["Outbound"])].tolist() == [5.0, 6.0]
+
 
 class TestOrbitHist2DProjection:
     """``project_1d`` turns an OrbitHist2D into the matching OrbitHist1D."""

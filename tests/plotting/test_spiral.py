@@ -669,6 +669,27 @@ class TestAggregation:
         assert sorted(splot.agg().dropna().tolist()) == [3.0, 3.5, 4.0]
         assert splot.alim == (3.0, 4.0)
 
+    def test_quantile_alim_masks_cells_outside_the_quantiles_of_the_means(self):
+        """``set_alim(0.25, 0.75, kind="quantile")`` keeps means from 3 to 4.
+
+        The occupied cells' means sorted are 1, 3, 3.5, 4, 9 (worked in
+        ``test_alim_masks_cells_whose_value_is_outside_the_range``); empty
+        cells are NaN and excluded. The 25% and 75% quantiles fall at
+        positions 1 and 3: 3 and 4.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        means = _expected_agg(splot, np.mean)
+        lo, hi = np.nanquantile(means, [0.25, 0.75])
+        assert (lo, hi) == pytest.approx((3.0, 4.0), rel=REL, abs=0)  # hand-computed
+
+        splot.set_alim(0.25, 0.75, kind="quantile")
+        expected = np.where((means >= lo) & (means <= hi), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert splot.alim_kind == "quantile"
+
 
 class TestMakePlot:
     """``make_plot`` draws one rectangle per mesh cell coloured by ``agg``."""
