@@ -271,24 +271,12 @@ class TestOrbitHist1D:
         h = OrbitHist1D(ORBIT, X, y=Z, nbins=list(XEDGES))
         assert _table(h.agg()) == pytest.approx(_means("z", "x"), rel=REL, abs=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "OrbitHist1D.agg (swp-defect:orbits-hist1d-agg-multiindex-norm) "
-            "hands the (x, Orbit)-indexed "
-            "aggregate to Hist1D._axis_normalizer, which builds "
-            "pd.IntervalIndex from a MultiIndex; TypeError 'is not an "
-            "interval'. Remove this marker when OrbitHist1D.agg normalises "
-            "each leg separately, as OrbitHist2D.agg does."
-        ),
-    )
     def test_density_is_normalised_per_leg(self):
         """``axnorm="d"`` gives count / (N_leg dx) in each leg.
 
         Hand case: 3 of the 5 Outbound samples fall in (2, 4], width 2: 0.3.
 
-        ON FAILURE: (unexpected pass) OrbitHist1D.agg now normalises per leg; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         expected = {
             (xb, leg): c
@@ -379,24 +367,11 @@ class TestOrbitHist2DAggregation:
         got = _table(_hist2d(axnorm=axnorm).agg())
         assert got == pytest.approx(expected, rel=REL, abs=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=LegNormalizationMismatch,
-        reason=(
-            "OrbitHist2D.agg (swp-defect:orbits-hist2d-agg-double-norm) "
-            "normalises twice: Hist2D.agg "
-            "already applies _axis_normalizer across both legs, then the "
-            "per-leg transform applies it again, dividing by the bin widths "
-            "twice. Exact only for uniform bins; e.g. 'd' gives 0.5 where "
-            "2/(5*1*1)=0.4. Remove this marker when OrbitHist2D.agg "
-            "normalises the raw per-leg aggregate once."
-        ),
-    )
     @pytest.mark.parametrize("axnorm", ["d", "cd", "rd"])
     def test_density_normalisation_is_per_leg(self, axnorm):
         """Density, column-density, and row-density use each leg's own counts and widths.
 
-        ON FAILURE: (unexpected pass) OrbitHist2D.agg now normalises once per leg; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         expected = _expected_norm(axnorm)
         key, hand = HAND_NORM[axnorm]
@@ -464,27 +439,13 @@ class TestOrbitHist2DPlots:
         [
             "z",
             "sideways",
-            pytest.param(
-                "",
-                marks=pytest.mark.xfail(
-                    strict=True,
-                    raises=IndexError,
-                    reason=(
-                        "OrbitHist2D.make_one_plot "
-                        "(swp-defect:orbits-make-one-plot-empty-kind) "
-                        "indexes kind.lower()[0] "
-                        "outside its try, so '' raises IndexError instead of "
-                        "\"Unrecognized kind ''\". Remove this marker when the "
-                        "empty string is rejected with ValueError."
-                    ),
-                ),
-            ),
+            "",
         ],
     )
     def test_unrecognised_kind_is_rejected(self, kind):
         """A kind that names no leg raises ValueError naming it.
 
-        ON FAILURE: the code is wrong; for the '' case, an unexpected pass means empty kinds now raise ValueError, so drop that xfail marker.
+        ON FAILURE: the code is wrong.
         """
         with pytest.raises(ValueError, match=f"Unrecognized kind '{kind}'"):
             _hist2d().make_one_plot(kind, cbar=False)
@@ -506,17 +467,6 @@ class TestOrbitHist2DPlots:
         with pytest.raises(NotImplementedError, match="Disabled"):
             call(_hist2d())
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "OrbitHist2D._put_agg_on_ax "
-            "(swp-defect:orbits-make-cbar-positional-ax) calls "
-            "self._make_cbar(pc, ax, ...) but Hist2D._make_cbar takes ax only "
-            "as a keyword; TypeError 'takes 2 positional arguments but 3 were "
-            "given'. Remove this marker when the call passes ax=ax."
-        ),
-    )
     @pytest.mark.parametrize(
         "call",
         [
@@ -528,7 +478,7 @@ class TestOrbitHist2DPlots:
     def test_colorbar_is_drawn_by_default(self, call):
         """With the default ``cbar=True`` the plot returns a matplotlib Colorbar.
 
-        ON FAILURE: (unexpected pass) _put_agg_on_ax now passes ax by keyword; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         assert isinstance(call(_hist2d()), Colorbar)
 
@@ -608,22 +558,10 @@ class TestOrbitHist2DProjection:
         h1 = _hist2d().project_1d("y", project_counts=True)
         assert _table(h1.agg()) == _counts("y")
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=KeyError,
-        reason=(
-            "OrbitHist2D.project_1d (swp-defect:orbits-project-1d-log-z) "
-            "looks up "
-            "self.log._asdict()['z'] when z is set, but LogAxes has only x and "
-            "y; KeyError 'z'. Hist2D.project_1d guards this with "
-            "`other == 'y'`. Remove this marker when OrbitHist2D.project_1d "
-            "applies the same guard."
-        ),
-    )
     def test_projection_of_z_averages_z_per_leg(self):
         """Projecting a z-weighted histogram onto x averages z in each leg's x bins.
 
-        ON FAILURE: (unexpected pass) OrbitHist2D.project_1d handles z; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         h = OrbitHist2D(ORBIT, X, Y, z=Z, nbins=[list(XEDGES), list(YEDGES)])
         got = _table(h.project_1d("x").agg())
