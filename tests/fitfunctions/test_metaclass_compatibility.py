@@ -135,7 +135,6 @@ class TestAllFitFunctionsInstantiate:
             Gaussian,
             PowerLaw,
             Line,
-            Moyal,
             TrendFit,
         )
 
@@ -144,7 +143,6 @@ class TestAllFitFunctionsInstantiate:
         assert issubclass(Gaussian, FitFunction)
         assert issubclass(PowerLaw, FitFunction)
         assert issubclass(Line, FitFunction)
-        assert issubclass(Moyal, FitFunction)
         # TrendFit is not a FitFunction subclass, just verify it exists
         assert TrendFit is not None
 
@@ -155,14 +153,13 @@ class TestAllFitFunctionsInstantiate:
             Gaussian,
             PowerLaw,
             Line,
-            Moyal,
         )
 
         x = [0, 1, 2, 3, 4]
         y = [1, 2, 3, 4, 5]
 
         # Note: TrendFit excluded as it has different constructor signature
-        fitfunctions = [Exponential, Gaussian, PowerLaw, Line, Moyal]
+        fitfunctions = [Exponential, Gaussian, PowerLaw, Line]
 
         for FitClass in fitfunctions:
             try:

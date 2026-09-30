@@ -86,7 +86,6 @@ __all__ = [
     "HingeSaturation",
     "Line",
     "LineXintercept",
-    "Moyal",
     "PowerLaw",
     "PowerLawOffCenter",
     "PowerLawPlusC",
@@ -106,7 +105,6 @@ from . import lines
 from . import gaussians
 from . import exponentials
 from . import power_laws
-from . import moyal
 
 from . import hinge
 from . import heaviside
@@ -132,7 +130,6 @@ HingeMin = hinge.HingeMin
 HingeSaturation = hinge.HingeSaturation
 Line = lines.Line
 LineXintercept = lines.LineXintercept
-Moyal = moyal.Moyal
 PowerLaw = power_laws.PowerLaw
 PowerLawOffCenter = power_laws.PowerLawOffCenter
 PowerLawPlusC = power_laws.PowerLawPlusC
