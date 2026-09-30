@@ -297,7 +297,12 @@ def test_auto_path_is_class_then_labels_then_scale():
     """``set_path("auto")`` builds class/x/y/z/scale, scale read at call time.
 
     Spaces become hyphens; a missing or ``"None"`` label falls back to the
-    axis name.
+    axis name. The literal path was written by hand from reading
+    ``Base.set_path`` and ``PlotWithZdata.set_path`` in ``base.py``: class
+    name ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
+    ``"None"`` and ``None`` fall back to ``"y"`` and ``"z"``; ``add_scale``
+    defaults to True, giving ``"logX"`` and ``"linY"`` joined by ``"-"`` and
+    appended because ``"z"`` does not end in ``norm``.
 
     ON FAILURE: the code is wrong.
     """
@@ -306,6 +311,7 @@ def test_auto_path_is_class_then_labels_then_scale():
     plot.set_log(x=True)
     plot.set_path("auto")
     assert plot.path == _expected_path("LinePlot", "bulk-speed", "y", "z", True)
+    assert plot.path == Path("LinePlot/bulk-speed/y/z/logX-linY")  # hand-derived
 
 
 def test_norm_label_path_ends_in_norm_and_plain_label_path_does_not():
@@ -340,11 +346,15 @@ def test_auto_path_uses_texlabel_paths_and_puts_scale_before_norm():
     "add_scale, expected",
     [
         (False, Path("figs", "run1")),
-        (True, Path("figs", "run1", _scale(False, True))),
+        (True, Path("figs/run1/linX-logY")),
     ],
 )
 def test_explicit_path_is_used_as_given_plus_optional_scale(add_scale, expected):
     """A path other than "auto" is used verbatim; ``add_scale`` appends scale.
+
+    The expected paths were written by hand from reading ``set_path`` in
+    ``base.py``: a non-"auto" ``new`` becomes ``Path(new)``, and with linear x
+    and log y the scale tag is ``"linX"`` and ``"logY"`` joined by ``"-"``.
 
     ON FAILURE: the code is wrong.
     """
