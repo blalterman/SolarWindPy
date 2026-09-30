@@ -95,10 +95,7 @@ _trans_measurement = {
     "dv": r"\Delta v",
     "qhat": r"\widehat{q}",
     "Qhat": r"\widehat{q}",
-    "ab": r"A",
     "theta": r"\theta",
-    "cos_theta": r"\cos\theta",
-    "carr": r"\mathrm{Carrington}",
 }
 
 _inU = {
