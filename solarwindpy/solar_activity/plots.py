@@ -24,7 +24,7 @@ class IndicatorPlot(base.Base):
         r"""Store the indicator and set linear axes with a year x-label."""
         self.set_data(indicator, ykey, plasma_index)
         self.set_log(x=False, y=False)
-        self._labels = base.AxesLabels(x=labels.special.DateTime("Year"), y="y")
+        self._labels = base.AxesLabels(x=labels.datetime.DateTime("Year"), y="y")
 
     @abstractmethod
     def _format_axis(self, ax):
