@@ -39,6 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `OrbitHist2D` applies `alim` to the "Both" leg too, once over all legs (the Both
     leg itself is still disabled).
 - `solarwindpy.plotting.orbits` removed (unused); last available at commit e790d95f.
+- `Probability`, `CountOther`, `MathFcn` and `AbsoluteValue` in
+  `solarwindpy.plotting.labels.special` raise `TypeError` at construction when
+  `other_label` is a plain `str`. A string was never usable (it failed later with
+  `AttributeError`); wrap raw TeX in `ManualLabel`.
+
+### Added
+
+- `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
+  `m` and `s`, e.g. `base=10` for a base-10 log-normal. The default is unchanged.
 
 ### Fixed
 
