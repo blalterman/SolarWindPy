@@ -765,93 +765,45 @@ class TestMakePlot:
         plt.close("all")
 
 
-class TestLimitColorNorm:
-    """`limit_color_norm` clips the colour range to the bulk of the plotted values."""
+class TestQuantileAlimInPlots:
+    """Quantile ``alim`` limits a plot to the bulk of its values."""
 
-    def test_clips_to_quantiles_of_the_z_data(self):
-        """The limits are quantiles of the binned z: inside the data range and ordered.
+    # Of the 14 occupied bins of KNOWN_COUNTS, sorted 1,1,1,2,2,2,2,3,3,4,4,5,5,6,
+    # the 1% quantile sits at position 0.13 (value 1) and the 99% quantile at
+    # 12.87, 5 + 0.87 * (6 - 5) = 5.87: only the single 6 lies outside.
 
-        The exact quantiles are asserted by
-        `test_count_colour_limits_are_quantiles_of_the_plotted_counts` below,
-        so only the bounding property is asserted here.
+    @staticmethod
+    def _expected_grid():
+        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's bins
+        lo, hi = np.quantile(occupied, [0.01, 0.99])
+        assert (lo, hi) == pytest.approx((1.0, 5.87), rel=1e-12, abs=0)  # by hand
+        kept = (KNOWN_COUNTS >= lo) & (KNOWN_COUNTS <= hi)
+        return np.where(kept, KNOWN_COUNTS, np.nan)
 
-        ON FAILURE: the code is wrong; a colour limit outside the data range is
-        meaningless.
-        """
-        rng = np.random.default_rng(18)
-        x, y = _points_from_counts(np.full_like(KNOWN_COUNTS, 4), XEDGES, YEDGES)
-        z = pd.Series(rng.uniform(0.0, 10.0, x.size), name="z")
-        h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES])
-
-        norm = matplotlib.colors.Normalize()
-        h._limit_color_norm(norm, h.agg())
-
-        assert z.min() <= norm.vmin < norm.vmax <= z.max()
-        assert norm.clip is True
-
-    def test_is_a_no_op_for_bounded_normalisations(self):
-        """Column/row normalised data already spans [0, 1] and is left alone.
-
-        The code says so in as many words: "Don't limit us to (1%, 99%)
-        interval."
-
-        ON FAILURE: the code is wrong -- clipping an already-bounded scale
-        would hide the column maxima that define it.
-        """
-        rng = np.random.default_rng(19)
-        x, y = _points_from_counts(np.full_like(KNOWN_COUNTS, 4), XEDGES, YEDGES)
-        z = pd.Series(rng.uniform(0.0, 10.0, x.size), name="z")
-
-        for axnorm in ("c", "r"):
-            h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES], axnorm=axnorm)
-            norm = matplotlib.colors.Normalize()
-            h._limit_color_norm(norm, h.agg())
-            assert norm.vmin is None
-            assert norm.vmax is None
-            assert norm.clip is False
-
-    def test_count_colour_limits_are_quantiles_of_the_plotted_counts(self, known_hist):
-        """A count histogram's colour limits are the 1%/99% quantiles of its counts.
-
-        The plotted values are the 14 occupied bins of ``KNOWN_COUNTS``; empty
-        bins are not drawn. Sorted: 1,1,1,2,2,2,2,3,3,4,4,5,5,6. Linear
-        interpolation puts the 1% quantile at position 0.13 (value 1) and the
-        99% quantile at 12.87, 5 + 0.87 * (6 - 5) = 5.87.
+    def test_make_plot_meshes_only_counts_inside_the_quantiles(self, known_hist):
+        """With 1%/99% quantile ``alim``, the mesh holds every count but the 6.
 
         ON FAILURE: the code is wrong.
         """
-        ax, _ = known_hist.make_plot(limit_color_norm=True, cbar=False)
-        norm = _quadmesh(ax).norm
-        occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's drawn bins
-        expected = np.quantile(occupied, [0.01, 0.99])
-        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
-        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=1e-12)
-        plt.close("all")
-
-    def test_limit_color_norm_works_without_a_normalisation(self, known_hist):
-        """`limit_color_norm=True` is documented for any Hist2D, axnorm or not.
-
-        ON FAILURE: the code is wrong.
-        """
-        known_hist.make_plot(limit_color_norm=True, cbar=False)
-        plt.close("all")
-
-    def test_contour_overlay_limits_colours_without_a_normalisation(self, known_hist):
-        """`plot_hist_with_contours(limit_color_norm=True)` works with no axnorm.
-
-        It draws, and the colour limits are the 1%/99% quantiles of the 14
-        occupied counts of ``KNOWN_COUNTS``: 1 and 5 + 0.87 * (6 - 5) = 5.87,
-        worked in `test_count_colour_limits_are_quantiles_of_the_plotted_counts`.
-
-        ON FAILURE: the code is wrong.
-        """
-        ax, _, _, _ = known_hist.plot_hist_with_contours(
-            limit_color_norm=True, cbar=False
+        known_hist.set_alim(0.01, 0.99, kind="quantile")
+        ax, _ = known_hist.make_plot(cbar=False)
+        values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
+        np.testing.assert_array_equal(
+            values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
         )
-        norm = _quadmesh(ax).norm
-        assert norm.vmin == pytest.approx(1.0, rel=1e-12, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(5.87, rel=1e-12, abs=0)  # hand-computed
+        plt.close("all")
+
+    def test_contour_overlay_meshes_only_counts_inside_the_quantiles(self, known_hist):
+        """`plot_hist_with_contours` draws the same quantile-limited mesh.
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_alim(0.01, 0.99, kind="quantile")
+        ax, _, _, _ = known_hist.plot_hist_with_contours(cbar=False)
+        values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
+        np.testing.assert_array_equal(
+            values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
+        )
         plt.close("all")
 
 

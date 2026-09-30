@@ -282,7 +282,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         self,
         ax=None,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
         alpha_fcn=None,
@@ -296,9 +295,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If None, create an `Axes` instance from `plt.subplots`.
         cbar: bool
             If True, create color bar with `labels.z`.
-        limit_color_norm: bool
-            If True, limit the color range to the 1st and 99th percentiles of
-            the plotted values, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
         fcn: FunctionType, None
@@ -342,9 +338,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         elif axnorm in ("d", "cd", "rd"):
             default_norm = mpl.colors.LogNorm(clip=True)
         norm = kwargs.pop("norm", default_norm)
-
-        if limit_color_norm:
-            norm = self._limit_color_norm(norm, agg)
 
         C = np.ma.masked_invalid(agg.values)
         XX, YY = np.meshgrid(x, y)
@@ -392,7 +385,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         self,
         ax=None,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
         # Contour-specific parameters
@@ -418,9 +410,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If None, create an `Axes` instance from `plt.subplots`.
         cbar : bool
             If True, create color bar with `labels.z`.
-        limit_color_norm : bool
-            If True, limit the color range to the 1st and 99th percentiles of
-            the plotted values.
         cbar_kwargs : dict, None
             If not None, kwargs passed to `self._make_cbar`.
         fcn : FunctionType, None
@@ -478,8 +467,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
 
         # --- 1. Plot pcolormesh background ---
         C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
-        if limit_color_norm:
-            norm = self._limit_color_norm(norm, C_edges)
 
         XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
         pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)
@@ -734,7 +721,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         ax=None,
         label_levels=True,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
         plot_edges=False,
@@ -757,9 +743,6 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             If True, add labels to contours with `ax.clabel`.
         cbar: bool
             If True, create color bar with `labels.z`.
-        limit_color_norm: bool
-            If True, limit the color range to the 1st and 99th percentiles
-            of the z-value, count or otherwise.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
         fcn: FunctionType, None

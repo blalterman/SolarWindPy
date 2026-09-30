@@ -25,7 +25,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PatchCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
-from matplotlib.colors import Normalize  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
@@ -746,48 +745,29 @@ class TestMakePlot:
         with pytest.raises(ValueError, match="Unexpected kwargs"):
             splot.make_plot(cbar=False, linewidth=2)
 
-    def test_limit_color_norm_clips_to_the_1st_and_99th_percentiles(self):
-        """``limit_color_norm`` limits unset norm limits to the plotted cell values.
+    def test_quantile_alim_limits_the_drawn_cells_to_the_bulk(self):
+        """With 1%/99% quantile ``alim``, the extreme cells are not coloured.
 
-        With min_per_bin=2 the occupied cells of MESH_MIN2 hold p0 (1), p5 (4),
-        p1 (3), p2 and p3 (mean 3.5), and p4 (9); empty cells are NaN and not
-        drawn. Sorted: 1, 3, 3.5, 4, 9. Linear interpolation puts the 1%
-        quantile at position 0.04, 1 + 0.04 * (3 - 1) = 1.08, and the 99%
-        quantile at 3.96, 4 + 0.96 * (9 - 4) = 8.8. A limit already set is kept.
+        With min_per_bin=2 the occupied cells hold p0 (1), p5 (4), p1 (3), p2
+        and p3 (mean 3.5), and p4 (9); empty cells are NaN. Sorted: 1, 3,
+        3.5, 4, 9. Linear interpolation puts the 1% quantile at position 0.04,
+        1 + 0.04 * (3 - 1) = 1.08, and the 99% quantile at 3.96,
+        4 + 0.96 * (9 - 4) = 8.8, so the cells holding 1 and 9 are masked.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        drawn = [1.0, 4.0, 3.0, np.mean([2.0, 5.0]), 9.0]  # the chosen input's cells
-        expected = np.quantile(drawn, [0.01, 0.99])
-        norm = Normalize()
-        splot.make_plot(cbar=False, norm=norm, limit_color_norm=True)
-        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        assert (norm.vmin, norm.vmax) == pytest.approx(tuple(expected), rel=REL)
-        assert norm.clip
-        fixed = Normalize(vmin=0.0)
-        splot.make_plot(cbar=False, norm=fixed, limit_color_norm=True)
-        assert fixed.vmin == 0.0
-        assert fixed.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        plt.close("all")
+        means = _expected_agg(splot, np.mean)
+        lo, hi = np.nanquantile(means, [0.01, 0.99])
+        assert (lo, hi) == pytest.approx((1.08, 8.8), rel=REL, abs=0)  # hand-computed
 
-    def test_limit_color_norm_without_a_norm_limits_colours(self):
-        """``limit_color_norm=True`` with no ``norm`` builds and limits a linear one.
-
-        The limits are the 1% and 99% quantiles of the plotted cell values,
-        1.08 and 8.8, worked in
-        ``test_limit_color_norm_clips_to_the_1st_and_99th_percentiles``.
-
-        ON FAILURE: the code is wrong; the flag is silently ignored.
-        """
-        splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, limit_color_norm=True)
-        norm = coll.norm
-        assert type(norm) is Normalize
-        assert norm.vmin == pytest.approx(1.08, rel=REL, abs=0)  # hand-computed
-        assert norm.vmax == pytest.approx(8.8, rel=REL, abs=0)  # hand-computed
-        assert norm.clip
+        splot.set_alim(0.01, 0.99, kind="quantile")
+        _, coll = splot.make_plot(cbar=False)
+        values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
+        expected = np.where((means >= lo) & (means <= hi), means, np.nan)
+        # rel REL: float rounding only.
+        np.testing.assert_allclose(values, expected, rtol=REL, atol=0)
+        assert sorted(values[np.isfinite(values)]) == [3.0, 3.5, 4.0]
         plt.close("all")
 
     def test_alpha_fcn_makes_small_values_opaque(self):

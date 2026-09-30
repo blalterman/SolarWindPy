@@ -307,7 +307,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
 
         return h1
 
-    def _put_agg_on_ax(self, ax, agg, cbar, limit_color_norm, cbar_kwargs, **kwargs):
+    def _put_agg_on_ax(self, ax, agg, cbar, cbar_kwargs, **kwargs):
         r"""Refactored putting `agg` onto `ax`.
 
         Python was crashing due to the way too many `agg` runs (20190731)."""
@@ -329,9 +329,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         # Unstacking drops some NaN bins, so we must reindex again.
         agg = agg.reindex(index=self.intervals["y"], columns=self.intervals["x"])
 
-        if limit_color_norm:
-            norm = self._limit_color_norm(norm, agg)
-
         C = np.ma.masked_invalid(agg.values)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
@@ -349,7 +346,6 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         ax=None,
         fcn=None,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         **kwargs,
     ):
@@ -388,15 +384,11 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
             fig, ax = tools.subplots()
 
         agg = self.agg(fcn=fcn).xs(kind, axis=0, level="Orbit").unstack("x")
-        cbar = self._put_agg_on_ax(
-            ax, agg, cbar, limit_color_norm, cbar_kwargs, **kwargs
-        )
+        cbar = self._put_agg_on_ax(ax, agg, cbar, cbar_kwargs, **kwargs)
 
         return ax, cbar
 
-    def make_in_out_plot(
-        self, fcn=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs
-    ):
+    def make_in_out_plot(self, fcn=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""Plot "Inbound" and "Outbound" on axes joined at perihelion.
 
         If `ax` is None, create a `mpl.subplots` axis.
@@ -416,12 +408,8 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         aggi = agg.xs("Inbound", axis=0, level="Orbit").unstack("x")
         aggo = agg.xs("Outbound", axis=0, level="Orbit").unstack("x")
 
-        cbari = self._put_agg_on_ax(
-            axes[0], aggi, False, limit_color_norm, cbar_kwargs, **kwargs
-        )
-        cbaro = self._put_agg_on_ax(
-            axes[1], aggo, cbar, limit_color_norm, cbar_kwargs, **kwargs
-        )
+        cbari = self._put_agg_on_ax(axes[0], aggi, False, cbar_kwargs, **kwargs)
+        cbaro = self._put_agg_on_ax(axes[1], aggo, cbar, cbar_kwargs, **kwargs)
 
         self._format_in_out_axes(*axes)
 
@@ -431,9 +419,7 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
 
         return axes, cbars
 
-    def make_in_out_both_plot(
-        self, fcn=None, cbar=True, limit_color_norm=False, cbar_kwargs=None, **kwargs
-    ):
+    def make_in_out_both_plot(self, fcn=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""Plot "Inbound", "Outbound", and "Both" on stacked axes.
 
         If `ax` is None, create a `mpl.subplots` axis.
@@ -466,15 +452,9 @@ class OrbitHist2D(OrbitPlot, histograms.Hist2D):
         cbar = kwargs.pop("cbar", True)
 
         axi, axo, axb = axes
-        cbari = self._put_agg_on_ax(
-            axi, aggi, cbar, limit_color_norm, cbar_kwargs, **kwargs
-        )
-        cbaro = self._put_agg_on_ax(
-            axo, aggo, cbar, limit_color_norm, cbar_kwargs, **kwargs
-        )
-        cbarb = self._put_agg_on_ax(
-            axb, aggb, cbar, limit_color_norm, cbar_kwargs, **kwargs
-        )
+        cbari = self._put_agg_on_ax(axi, aggi, cbar, cbar_kwargs, **kwargs)
+        cbaro = self._put_agg_on_ax(axo, aggo, cbar, cbar_kwargs, **kwargs)
+        cbarb = self._put_agg_on_ax(axb, aggb, cbar, cbar_kwargs, **kwargs)
 
         self._format_in_out_both_axes(axi, axo, axb, cbari, cbaro, cbarb)
 

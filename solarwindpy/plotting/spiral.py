@@ -738,7 +738,6 @@ data : {z.size}
         self,
         ax=None,
         cbar=True,
-        limit_color_norm=False,
         cbar_kwargs=None,
         fcn=None,
         alpha_fcn=None,
@@ -752,10 +751,6 @@ data : {z.size}
             If None, create one.
         cbar : bool
             If True, draw a colorbar.
-        limit_color_norm : bool
-            If True, unset limits of ``norm`` default to the 1st and 99th
-            percentiles of the plotted cell values. With no ``norm``, a linear
-            one is built and limited.
         cbar_kwargs : dict, optional
             Passed to the colorbar.
         fcn : str, optional
@@ -828,9 +823,6 @@ data : {z.size}
         norm = kwargs.pop("norm", None)
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
-
-        if limit_color_norm:
-            norm = self._limit_color_norm(norm, C)
 
         collection.set_alpha(None)
         collection.set_cmap(cmap)
