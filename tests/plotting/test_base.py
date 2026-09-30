@@ -233,6 +233,7 @@ def test_set_log_coerces_to_bool_and_none_keeps_the_current_value():
     ON FAILURE: the code is wrong.
     """
     plot = LinePlot(X, Y)
+    # base.py Base.__init__: LogAxes(x=False), y from the namedtuple default False
     assert plot.log == LogAxes(False, False)
     plot.set_log(x=1, y="yes")
     assert plot.log == LogAxes(True, True)
@@ -265,7 +266,7 @@ def test_set_labels_rejects_unknown_keywords_naming_each():
     with pytest.raises(KeyError, match="Unexpected kwarg") as err:
         plot.set_labels(x="ok", bad1=1, bad2=2)
     assert "bad1" in str(err.value) and "bad2" in str(err.value)
-    assert plot.labels.x == "x"
+    assert plot.labels.x == "x"  # base.py Base.__init__: AxesLabels(x="x", y="y")
 
 
 def test_set_labels_rebuilds_the_path_unless_told_not_to():
