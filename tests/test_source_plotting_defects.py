@@ -1,4 +1,4 @@
-# Spent-When: PERMANENT(the plotting clipping API is removed)
+# Spent-When: PERMANENT(solarwindpy stops shipping its plotting package)
 # Supersedes: none
 """Defects found in ``solarwindpy/plotting`` while documenting it.
 
