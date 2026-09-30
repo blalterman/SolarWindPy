@@ -61,7 +61,7 @@ class AlfvenicTrubulenceTestBase(ABC):
 
         # Have **kwargs pass to rolling(**kwargs) with window, min_periods, and
         # center taken from kwargs.pop("window", 2), etc.
-        test_window = "365d"
+        test_window = "365D"
         test_periods = 1
         module = turb.AlfvenicTurbulence(
             vcom,
