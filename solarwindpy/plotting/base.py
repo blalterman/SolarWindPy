@@ -352,7 +352,8 @@ class PlotWithZdata(Base):
         Unlike ``clim``, which limits the number of points in a bin, ``alim``
         limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
         any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
-        inclusive and None leaves that side open.
+        inclusive and None leaves that side open. A ``Scatter`` applies
+        ``alim`` to the z of each point and does not draw the points outside.
 
         Parameters
         ----------
@@ -397,7 +398,8 @@ class PlotWithZdata(Base):
         Parameters
         ----------
         agg : pd.Series
-            The final aggregated values, one per bin or cell. With
+            The final aggregated values, one per bin or cell, or for a
+            ``Scatter`` the z of each plotted point. With
             ``alim_kind == "quantile"`` the thresholds are quantiles of all
             of its finite entries.
 

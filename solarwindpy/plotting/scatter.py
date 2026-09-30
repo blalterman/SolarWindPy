@@ -29,13 +29,13 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)
 
-    def _format_axis(self, ax, collection):
+    def _format_axis(self, ax, collection, data):
         super()._format_axis(ax)
 
-        x = self.data.loc[:, "x"]
+        x = data.loc[:, "x"]
         minx, maxx = x.min(), x.max()
 
-        y = self.data.loc[:, "y"]
+        y = data.loc[:, "y"]
         miny, maxy = y.min(), y.max()
 
         # `pulled from the end of `ax.pcolormesh`.
@@ -57,7 +57,13 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
         kwargs:
-            Passed to `ax.pcolormesh`.
+            Passed to `ax.scatter`.
+
+        Notes
+        -----
+        Points whose z is outside ``alim`` (see ``set_alim``) are not drawn,
+        do not enter the colour scale, and do not set the axis limits. With
+        ``kind="quantile"`` the thresholds are quantiles of the plotted z.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -65,6 +71,8 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         data = self.data
         if self.clip:
             data = AggPlot.clip_data(data, self.clip)
+
+        data = data.loc[self._apply_alim(data.loc[:, "z"]).notna()]
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"
@@ -79,6 +87,6 @@ class Scatter(base.PlotWithZdata, base.CbarMaker):
         else:
             cbar = None
 
-        self._format_axis(ax, collection)
+        self._format_axis(ax, collection, data)
 
         return ax, cbar
