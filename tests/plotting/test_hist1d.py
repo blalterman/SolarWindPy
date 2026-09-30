@@ -381,16 +381,6 @@ class TestMakePlot:
             _line_xy(ax.lines[0])[1], expected, rtol=1e-12, atol=0
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_SmoothedCountsTruncated,
-        reason=(
-            "Hist1D.make_plot (hist1d.py) passes integer counts to "
-            "scipy.ndimage.gaussian_filter, whose output keeps the input dtype, "
-            "so smoothed counts are truncated to integers; remove this marker "
-            "when make_plot smooths a float copy of the aggregate"
-        ),
-    )
     def test_gaussian_smoothing_of_counts_is_not_truncated(self, xy):
         """Smoothed counts equal scipy's Gaussian filter of the float counts.
 
@@ -458,16 +448,6 @@ class TestMakePlot:
         np.testing.assert_allclose(_line_xy(upper)[1], mean + std, rtol=1e-12, atol=0)
         np.testing.assert_allclose(_line_xy(lower)[1], mean - std, rtol=1e-12, atol=0)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "Hist1D.make_plot (hist1d.py) swaps (dx, dy) under transpose_axes, "
-            "so plot_window computes y - dy with dy None; expected "
-            "'unsupported operand type(s) for -: ... NoneType'; remove this "
-            "marker when the transposed window uses the swapped uncertainty"
-        ),
-    )
     def test_transposed_plot_window_spans_x_minus_to_plus_dx(self, xy):
         """Transposed, the band spans value -/+ error horizontally at each center.
 

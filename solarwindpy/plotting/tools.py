@@ -425,7 +425,7 @@ def nan_gaussian_filter(array, sigma, **kwargs):
     Returns
     -------
     np.ndarray
-        Filtered array with original NaN locations preserved.
+        Filtered float array with original NaN locations preserved.
 
     See Also
     --------
@@ -453,7 +453,8 @@ def nan_gaussian_filter(array, sigma, **kwargs):
     >>> bool(np.isfinite(result[0, 1]))  # Neighbor is valid
     True
     """
-    arr = array.copy()
+    # Filter a float copy: an integer input would truncate the smoothed values.
+    arr = np.array(array, dtype=float)
     nan_mask = np.isnan(arr)
 
     # Replace NaN with 0 for filtering
