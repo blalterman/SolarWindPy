@@ -52,7 +52,8 @@ Installation
 ============
 
 The supported Python versions and dependency ranges are declared in
-``pyproject.toml`` (``requires-python`` and ``dependencies``); the PyPI page
+`pyproject.toml <https://github.com/blalterman/SolarWindPy/blob/master/pyproject.toml>`_
+(``requires-python`` and ``dependencies``); the PyPI page
 shows them for each published release.
 
 SolarWindPy is available via PyPI and conda-forge:
