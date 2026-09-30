@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.orbits &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -667,19 +667,18 @@
             <span class="s2">"norm"</span><span class="p">,</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
-
         <span class="c1"># Unstacking drops some NaN bins, so we must reindex again.</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"y"</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="s2">"x"</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">agg</span><span class="p">)</span>
 
         <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">pc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">XX</span><span class="p">,</span> <span class="n">YY</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
+            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+            <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 

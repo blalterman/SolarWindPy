@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.scatter &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.scatter &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -385,12 +385,7 @@
         <span class="n">collection</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">zkey</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">cbar</span> <span class="ow">and</span> <span class="n">zkey</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Copy, so adding "ax" below never writes into the caller's dict.</span>
-            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
-
+            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="kc">None</span>

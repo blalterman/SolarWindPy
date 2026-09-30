@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1099,16 +1099,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
-        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
-        <span class="n">v0</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.01</span><span class="p">]</span>
-        <span class="n">v1</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.99</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">v0</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">v1</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
-
 <div class="viewcode-block" id="SpiralPlot2D.make_plot">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
@@ -1130,8 +1120,9 @@
 <span class="sd">        cbar : bool</span>
 <span class="sd">            If True, draw a colorbar.</span>
 <span class="sd">        limit_color_norm : bool</span>
-<span class="sd">            If True and ``norm`` is given, unset limits of ``norm`` default to</span>
-<span class="sd">            the 1st and 99th percentiles of z.</span>
+<span class="sd">            If True, unset limits of ``norm`` default to the 1st and 99th</span>
+<span class="sd">            percentiles of the plotted cell values. With no ``norm``, a linear</span>
+<span class="sd">            one is built and limited.</span>
 <span class="sd">        cbar_kwargs : dict, optional</span>
 <span class="sd">            Passed to the colorbar.</span>
 <span class="sd">        fcn : str, optional</span>
@@ -1205,8 +1196,8 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unexpected kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">limit_color_norm</span> <span class="ow">and</span> <span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
 
         <span class="n">collection</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">collection</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
@@ -1227,11 +1218,7 @@
 
         <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">collection</span>
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
             <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">cbar</span>
@@ -1267,10 +1254,7 @@
             <span class="n">clabel_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">edges_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 

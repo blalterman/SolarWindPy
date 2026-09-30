@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -467,6 +467,10 @@
 <span class="sd">        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but</span>
 <span class="sd">        as actual method with `self` passed so we have access to `self.log` for density</span>
 <span class="sd">        normalization.</span>
+
+<span class="sd">        On a log axis the densities ("d", "cd", "rd") are normalised over</span>
+<span class="sd">        ``log10`` of that axis: the bins are log-space intervals, so cell areas</span>
+<span class="sd">        on the log axes sum to 1.</span>
 <span class="sd">        """</span>
 
         <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
@@ -480,37 +484,24 @@
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"d"</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span>
-            <span class="p">)</span>  <span class="c1"># dx = pd.Series(x.right - x.left, index=x)</span>
-            <span class="n">dy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">y</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">y</span>
-            <span class="p">)</span>  <span class="c1"># dy = pd.Series(y.right - y.left, index=y)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
-                <span class="n">dx</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">dx</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-                <span class="n">dy</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">dy</span>
-
+            <span class="c1"># Widths are in the binned variable, log10 on a log axis.</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_widths</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_widths</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"cd"</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="n">dy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span>
-                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
-            <span class="n">dy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dy</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_widths</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="c1"># Divide by total in each column and each row's width</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"rd"</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span>
-                <span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dx</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_widths</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="c1"># Divide by total in each column and each row's width</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
 
@@ -561,20 +552,6 @@
             <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
-            <span class="c1"># Don't limit us to (1%, 99%) interval.</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
-        <span class="n">v0</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.01</span><span class="p">]</span>
-        <span class="n">v1</span> <span class="o">=</span> <span class="n">pct</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mf">0.99</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">v0</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">v1</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prep_agg_for_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mask_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Prepare aggregated data and coordinates for plotting.</span>
@@ -649,8 +626,8 @@
 <span class="sd">        cbar: bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
 <span class="sd">        limit_color_norm: bool</span>
-<span class="sd">            If True, limit the color range to 0.001 and 0.999 percentile range</span>
-<span class="sd">            of the z-value, count or otherwise.</span>
+<span class="sd">            If True, limit the color range to the 1st and 99th percentiles of</span>
+<span class="sd">            the plotted values, count or otherwise.</span>
 <span class="sd">        cbar_kwargs: dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
 <span class="sd">        fcn: FunctionType, None</span>
@@ -696,11 +673,7 @@
         <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">norm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># `pcolormesh` would use a linear `Normalize` anyway; build it</span>
-                <span class="c1"># here so there is a norm to limit.</span>
-                <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">agg</span><span class="p">)</span>
 
         <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">XX</span><span class="p">,</span> <span class="n">YY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -708,11 +681,7 @@
 
         <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">pc</span>
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
             <span class="c1"># Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
@@ -782,7 +751,8 @@
 <span class="sd">        cbar : bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
 <span class="sd">        limit_color_norm : bool</span>
-<span class="sd">            If True, limit the color range to 0.001 and 0.999 percentile range.</span>
+<span class="sd">            If True, limit the color range to the 1st and 99th percentiles of</span>
+<span class="sd">            the plotted values.</span>
 <span class="sd">        cbar_kwargs : dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
 <span class="sd">        fcn : FunctionType, None</span>
@@ -835,14 +805,14 @@
             <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
-
         <span class="c1"># Get cmap from kwargs (shared between pcolormesh and contour)</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># --- 1. Plot pcolormesh background ---</span>
         <span class="n">C_edges</span><span class="p">,</span> <span class="n">x_edges</span><span class="p">,</span> <span class="n">y_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prep_agg_for_plot</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">C_edges</span><span class="p">)</span>
+
         <span class="n">XX_edges</span><span class="p">,</span> <span class="n">YY_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x_edges</span><span class="p">,</span> <span class="n">y_edges</span><span class="p">)</span>
         <span class="n">pc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">XX_edges</span><span class="p">,</span> <span class="n">YY_edges</span><span class="p">,</span> <span class="n">C_edges</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -936,10 +906,7 @@
         <span class="c1"># --- 4. Colorbar ---</span>
         <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">pc</span>
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="p">:</span>
-                <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
             <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="o">**</span><span class="n">cbar_kwargs</span><span class="p">)</span>
 
         <span class="c1"># --- 5. Format axis ---</span>
@@ -1097,10 +1064,7 @@
             <span class="n">clabel_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">edges_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cbar_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">"cax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"ax"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">cbar_kwargs</span><span class="p">[</span><span class="s2">"ax"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
@@ -1135,7 +1099,7 @@
 <span class="sd">        cbar: bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
 <span class="sd">        limit_color_norm: bool</span>
-<span class="sd">            If True, limit the color range to 0.001 and 0.999 percentile range</span>
+<span class="sd">            If True, limit the color range to the 1st and 99th percentiles</span>
 <span class="sd">            of the z-value, count or otherwise.</span>
 <span class="sd">        cbar_kwargs: dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
@@ -1417,7 +1381,7 @@
         <span class="n">yax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">hax</span><span class="p">)</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
-        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cbar_kwargs"</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cbar_kwargs"</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">cax</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cax"</span><span class="p">,</span> <span class="n">cax</span><span class="p">)</span>
         <span class="n">orientation</span> <span class="o">=</span> <span class="n">cbar_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"orientation"</span><span class="p">,</span> <span class="s2">"horizontal"</span><span class="p">)</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">cbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span>

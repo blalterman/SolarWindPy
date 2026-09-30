@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../_static/documentation_options.js?v=456b923b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -423,8 +423,8 @@ result with an optional colorbar.</p>
 </dd>
 <dt><strong>cbar: bool</strong></dt><dd><p>If True, create color bar with <cite>labels.z</cite>.</p>
 </dd>
-<dt><strong>limit_color_norm: bool</strong></dt><dd><p>If True, limit the color range to 0.001 and 0.999 percentile range
-of the z-value, count or otherwise.</p>
+<dt><strong>limit_color_norm: bool</strong></dt><dd><p>If True, limit the color range to the 1st and 99th percentiles of
+the plotted values, count or otherwise.</p>
 </dd>
 <dt><strong>cbar_kwargs: dict, None</strong></dt><dd><p>If not None, kwargs passed to <cite>self._make_cbar</cite>.</p>
 </dd>
@@ -463,7 +463,8 @@ to create the colorbar.</p>
 </dd>
 <dt><strong>cbar</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, create color bar with <cite>labels.z</cite>.</p>
 </dd>
-<dt><strong>limit_color_norm</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, limit the color range to 0.001 and 0.999 percentile range.</p>
+<dt><strong>limit_color_norm</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, limit the color range to the 1st and 99th percentiles of
+the plotted values.</p>
 </dd>
 <dt><strong>cbar_kwargs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>If not None, kwargs passed to <cite>self._make_cbar</cite>.</p>
 </dd>
@@ -557,7 +558,7 @@ take 1-window_length.</p>
 </dd>
 <dt><strong>cbar: bool</strong></dt><dd><p>If True, create color bar with <cite>labels.z</cite>.</p>
 </dd>
-<dt><strong>limit_color_norm: bool</strong></dt><dd><p>If True, limit the color range to 0.001 and 0.999 percentile range
+<dt><strong>limit_color_norm: bool</strong></dt><dd><p>If True, limit the color range to the 1st and 99th percentiles
 of the z-value, count or otherwise.</p>
 </dd>
 <dt><strong>cbar_kwargs: dict, None</strong></dt><dd><p>If not None, kwargs passed to <cite>self._make_cbar</cite>.</p>

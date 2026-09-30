@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+gd674c0242 documentation</title>
+  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9c27d734"></script>
+      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -450,6 +450,27 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">up</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bin_widths</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Width of each bin in the binned variable.</span>
+
+<span class="sd">        On a log axis the binned variable is ``log10`` of the data, so the</span>
+<span class="sd">        widths are log10 widths and a density normalised by them integrates</span>
+<span class="sd">        to 1 over the log axis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bins : array-like of pd.Interval</span>
+<span class="sd">            The bins, e.g. an ``IntervalIndex`` or a categorical index of</span>
+<span class="sd">            intervals.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.Series</span>
+<span class="sd">            Each bin's width, indexed by ``bins``.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AggPlot.set_clim">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.agg_plot.AggPlot.html#solarwindpy.plotting.agg_plot.AggPlot.set_clim">[docs]</a>
